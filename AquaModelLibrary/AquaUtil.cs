@@ -154,7 +154,6 @@ namespace AquaLibrary
                     AlignReader(streamReader, 0x10);
 
                     streamReader.Seek(model.vsetList[vsetIndex].bonePaletteOffset + offset, SeekOrigin.Begin);
-                    MessageBox.Show("VTXL " + vsetIndex + " Okay!");
                     //Bone Palette
                     if (model.vsetList[vsetIndex].bonePaletteCount > 0)
                     {
@@ -166,7 +165,6 @@ namespace AquaLibrary
                     }
 
                     streamReader.Seek(model.vsetList[vsetIndex].edgeVertsOffset + offset, SeekOrigin.Begin);
-                    MessageBox.Show("Bone Palette " + vsetIndex + " Okay!");
                     //Edge Verts
                     if (model.vsetList[vsetIndex].edgeVertsCount > 0)
                     {
@@ -177,12 +175,10 @@ namespace AquaLibrary
                         AlignReader(streamReader, 0x10);
                     }
                     model.vtxlList.Add(vtxl);
-                    MessageBox.Show("Edge Verts " + vsetIndex + " Okay!");
                 }
 
 
                 streamReader.Seek(model.objc.psetOffset + offset, SeekOrigin.Begin);
-                MessageBox.Show("Verts ok");
                 //PSET
                 for (int psetIndex = 0; psetIndex < model.objc.psetCount; psetIndex++)
                 {
@@ -190,7 +186,6 @@ namespace AquaLibrary
                 }
                 //AlignReader(streamReader, 0x10);
 
-                MessageBox.Show("PSET ok");
                 //Read faces
                 for (int psetIndex = 0; psetIndex < model.objc.psetCount; psetIndex++)
                 {
@@ -212,7 +207,6 @@ namespace AquaLibrary
 
                     AlignReader(streamReader, 0x10);
                 }
-                MessageBox.Show("Faces ok");
 
                 streamReader.Seek(model.objc.meshOffset + offset, SeekOrigin.Begin);
                 //MESH
