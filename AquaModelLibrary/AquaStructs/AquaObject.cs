@@ -78,7 +78,6 @@ namespace AquaModelLibrary
             public int size;
             public int unkMeshValue;
             public int largetsVTXL;
-            public int reserve0;
             public int totalStripFaces;
             public int reserve1;
             public int totalVTXLCount;
@@ -211,7 +210,7 @@ namespace AquaModelLibrary
         }
 
         //UNRM Struct - Seemingly links vertices split for various reasons(vertex colors per face, UVs, etc.).
-        public struct UNRM
+        public class UNRM
         {
             public int vertGroupCountCount;  //Amount of vertex group counts (The amount of verts for each group of vertices in the mesh ids and vert ids).
             public int vertGroupCountOffset; //Offset for listing of vertex group counts. 
@@ -220,11 +219,11 @@ namespace AquaModelLibrary
             public int vertIDOffset;
             public double padding0;
             public int padding1;
-            public List<int> unrmVertGroups;
+            public List<int> unrmVertGroups = new List<int>();
             //Align to 0x10
-            public List<List<int>> unrmMeshIds;
+            public List<List<int>> unrmMeshIds = new List<List<int>>();
             //Align to 0x10
-            public List<List<int>> unrmVertIds;
+            public List<List<int>> unrmVertIds = new List<List<int>>();
             //Align to 0x10
         }
 
@@ -238,46 +237,48 @@ namespace AquaModelLibrary
             public int reserve0;
             public int bonePaletteCount; //Vertex groups can't have more than 15 bones
             public int bonePaletteOffset;
-            public int reserve1;
             public int unk0;
             public int unk1;
             public int unk2;
-            public int edgeVertsCount; //Edge verts are what I christened the set of vertex ids seemingly split along where the mesh had to be separated due to bone count limitations.
+            //Edge verts are what I christened the set of vertex ids seemingly split along where the mesh
+                //had to be separated due to bone count limitations.
+            public int edgeVertsCount; 
             public int edgeVertsOffset; 
         }
 
-        public struct VTXE
+        public class VTXE
         {
-            public List<VTXEElement> vertDataTypes;
+            public List<VTXEElement> vertDataTypes = new List<VTXEElement>();
         }
 
         public struct VTXEElement
         {
             public int dataType;
+            public int structVariation; //3 for Vector3, 4 for Vector4, 5 for 4 byte vert color, 2 for Vector2, 7 for 4 byte values
             public int relativeAddress;
             public int reserve0;
         }
 
         //Vertex List
-        public struct VTXL
+        public class VTXL
         {
-            public List<Vector3> vertPositions;
-            public List<Vector4> vertWeights;
-            public List<Vector3> vertNormals;
-            public List<byte[]> vertColors; //4 bytes, BGRA
-            public List<byte[]> vertColor2s; //4 bytes, BGRA?
-            public List<byte[]> vertWeightIndices; //4 bytes
-            public List<Vector2> uv1List;
-            public List<Vector2> uv2List;
-            public List<Vector2> uv3List;
+            public List<Vector3> vertPositions = new List<Vector3>();
+            public List<Vector4> vertWeights = new List<Vector4>();
+            public List<Vector3> vertNormals = new List<Vector3>();
+            public List<byte[]> vertColors = new List<byte[]>(); //4 bytes, BGRA
+            public List<byte[]> vertColor2s = new List<byte[]>(); //4 bytes, BGRA?
+            public List<byte[]> vertWeightIndices = new List<byte[]>(); //4 bytes
+            public List<Vector2> uv1List = new List<Vector2>();
+            public List<Vector2> uv2List = new List<Vector2>();
+            public List<Vector2> uv3List = new List<Vector2>();
 
             //Binormals and tangents for each face are calculated and each face's values for a particular vertex are summed and averaged for the result before being normalized
             //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
-            public List<Vector3> vertTangentList;
-            public List<Vector3> vertBinormalList;
+            public List<Vector3> vertTangentList = new List<Vector3>();
+            public List<Vector3> vertBinormalList =  new List<Vector3>();
 
-            public List<short> bonePalette; //Indices of particular bones are used for weight indices above
-            public List<short> edgeVerts; //No idea if this is used, but I fill it anyways
+            public List<short> bonePalette = new List<short>(); //Indices of particular bones are used for weight indices above
+            public List<short> edgeVerts = new List<short>(); //No idea if this is used, but I fill it anyways
         }
 
         //Contains information about the traingle strip sets
@@ -291,13 +292,13 @@ namespace AquaModelLibrary
             public int reserve0;
         }
 
-        public struct stripData
+        public class stripData
         {
             public int triCount;
             public int reserve0;
             public int reserve1;
             public int reserve2;
-            public List<short> triStrips;
+            public List<short> triStrips = new List<short>();
         }
     }
 }

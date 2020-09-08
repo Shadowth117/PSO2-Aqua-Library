@@ -24,13 +24,14 @@ namespace AquaLibrary
             {
                 ModelSet set = new ModelSet();
                 int type = streamReader.Peek<int>();
-                
-                
+                int offset = 0x20; //Base offset due to NIFL header
+
                 //Deal with deicer's extra header nonsense
                 if (type.Equals(0x707161) || type.Equals(0x707274))
                 {
                     streamReader.Seek(0x60, SeekOrigin.Current);
                     type = streamReader.Peek<int>();
+                    offset += 0x60;
                 }
 
                 //Deal with afp header or aqo. prefixing as needed
@@ -38,10 +39,12 @@ namespace AquaLibrary
                 {
                     set.afp = streamReader.Read<AquaPackage.AFPMain>();
                     type = streamReader.Peek<int>();
+                    offset += 0x40;
                 } else if(type.Equals(0x6F7161) || type.Equals(0x6F7274))
                 {
                     streamReader.Seek(0x4, SeekOrigin.Current);
                     type = streamReader.Peek<int>();
+                    offset += 0x4;
                 }
 
                 if(set.afp.fileCount == 0)
@@ -52,7 +55,7 @@ namespace AquaLibrary
                 //Proceed based on file variant
                 if (type.Equals(0x4C46494E))
                 {
-                    set.models = ReadNIFLModel(streamReader, set.afp.fileCount);
+                    set.models = ReadNIFLModel(streamReader, set.afp.fileCount, offset);
                     aquaModels.Add(set);
                 } else if (type.Equals(0x46425456))
                 {
@@ -65,11 +68,10 @@ namespace AquaLibrary
             }
         }
 
-        public List<AquaObject> ReadNIFLModel(BufferedStreamReader streamReader, int fileCount)
+        public List<AquaObject> ReadNIFLModel(BufferedStreamReader streamReader, int fileCount, int offset)
         {
             List<AquaObject> aquaModels = new List<AquaObject>();
-            
-            for(int modelIndex = 0; modelIndex < fileCount; modelIndex++)
+            for (int modelIndex = 0; modelIndex < fileCount; modelIndex++)
             {
                 AquaObject model = new AquaObject();
 
@@ -82,30 +84,31 @@ namespace AquaLibrary
                 model.nifl = streamReader.Read<AquaCommon.NIFL>();
                 model.rel0 = streamReader.Read<AquaCommon.REL0>();
                 model.objc = streamReader.Read<AquaObject.OBJC>();
-
+                streamReader.Seek(model.objc.vsetOffset + offset, SeekOrigin.Begin);
                 //Read VSETS
                 for(int vsetIndex = 0; vsetIndex < model.objc.vsetCount; vsetIndex++)
                 {
                     model.vsetList.Add(streamReader.Read<AquaObject.VSET>());
                 }
-
                 //Read VTXE+VTXL+BonePalette+MeshEdgeVerts
-                for(int vsetIndex = 0; vsetIndex < model.objc.vsetCount; vsetIndex++)
+                for (int vsetIndex = 0; vsetIndex < model.objc.vsetCount; vsetIndex++)
                 {
+                    streamReader.Seek(model.vsetList[vsetIndex].vtxeOffset + offset, SeekOrigin.Begin);
                     //VTXE
                     AquaObject.VTXE vtxeSet = new AquaObject.VTXE();
+                    vtxeSet.vertDataTypes = new List<AquaObject.VTXEElement>();
                     for (int vtxeIndex = 0; vtxeIndex < model.vsetList[vsetIndex].vertTypesCount; vtxeIndex++)
                     {
-                        AquaObject.VTXEElement vtxe = streamReader.Read<AquaObject.VTXEElement>();
-                        vtxeSet.vertDataTypes.Add(vtxe);
+                        vtxeSet.vertDataTypes.Add(streamReader.Read<AquaObject.VTXEElement>());
                     }
                     model.vtxeList.Add(vtxeSet);
 
+                    streamReader.Seek(model.vsetList[vsetIndex].vtxlOffset + offset, SeekOrigin.Begin);
                     //VTXL
                     AquaObject.VTXL vtxl = new AquaObject.VTXL();
                     for (int vtxlIndex = 0; vtxlIndex < model.vsetList[vsetIndex].vtxlCount; vtxlIndex++)
                     {
-                        for (int vtxeIndex = 0; vtxlIndex < model.vsetList[vtxlIndex].vertTypesCount; vtxlIndex++)
+                        for (int vtxeIndex = 0; vtxeIndex < model.vsetList[vsetIndex].vertTypesCount; vtxeIndex++)
                         {
                             switch (vtxeSet.vertDataTypes[vtxeIndex].dataType)
                             {
@@ -150,6 +153,8 @@ namespace AquaLibrary
                     }
                     AlignReader(streamReader, 0x10);
 
+                    streamReader.Seek(model.vsetList[vsetIndex].bonePaletteOffset + offset, SeekOrigin.Begin);
+                    MessageBox.Show("VTXL " + vsetIndex + " Okay!");
                     //Bone Palette
                     if (model.vsetList[vsetIndex].bonePaletteCount > 0)
                     {
@@ -159,6 +164,9 @@ namespace AquaLibrary
                         }
                         AlignReader(streamReader, 0x10);
                     }
+
+                    streamReader.Seek(model.vsetList[vsetIndex].edgeVertsOffset + offset, SeekOrigin.Begin);
+                    MessageBox.Show("Bone Palette " + vsetIndex + " Okay!");
                     //Edge Verts
                     if (model.vsetList[vsetIndex].edgeVertsCount > 0)
                     {
@@ -169,26 +177,33 @@ namespace AquaLibrary
                         AlignReader(streamReader, 0x10);
                     }
                     model.vtxlList.Add(vtxl);
+                    MessageBox.Show("Edge Verts " + vsetIndex + " Okay!");
                 }
 
+
+                streamReader.Seek(model.objc.psetOffset + offset, SeekOrigin.Begin);
+                MessageBox.Show("Verts ok");
                 //PSET
-                for(int psetIndex = 0; psetIndex < model.objc.psetCount; psetIndex++)
+                for (int psetIndex = 0; psetIndex < model.objc.psetCount; psetIndex++)
                 {
                     model.psetList.Add(streamReader.Read<AquaObject.PSET>());
                 }
-                AlignReader(streamReader, 0x10);
+                //AlignReader(streamReader, 0x10);
 
+                MessageBox.Show("PSET ok");
                 //Read faces
-                for(int psetIndex = 0; psetIndex < model.objc.psetCount; psetIndex++)
+                for (int psetIndex = 0; psetIndex < model.objc.psetCount; psetIndex++)
                 {
+                    streamReader.Seek(model.psetList[psetIndex].faceCountOffset + offset, SeekOrigin.Begin);
                     AquaObject.stripData stripData = new AquaObject.stripData();
                     stripData.triCount = streamReader.Read<int>();
                     stripData.reserve0 = streamReader.Read<int>();
                     stripData.reserve1 = streamReader.Read<int>();
                     stripData.reserve2 = streamReader.Read<int>();
-                    
+
+                    streamReader.Seek(model.psetList[psetIndex].faceOffset + offset, SeekOrigin.Begin);
                     //Read strip vert indices
-                    for(int triId = 0; triId < stripData.triCount; triId++)
+                    for (int triId = 0; triId < stripData.triCount; triId++)
                     {
                         stripData.triStrips.Add(streamReader.Read<short>());
                     }
@@ -197,58 +212,67 @@ namespace AquaLibrary
 
                     AlignReader(streamReader, 0x10);
                 }
+                MessageBox.Show("Faces ok");
 
+                streamReader.Seek(model.objc.meshOffset + offset, SeekOrigin.Begin);
                 //MESH
-                for(int meshIndex = 0; meshIndex < model.objc.meshCount; meshIndex++)
+                for (int meshIndex = 0; meshIndex < model.objc.meshCount; meshIndex++)
                 {
                     model.meshList.Add(streamReader.Read<AquaObject.MESH>());
                 }
 
+                streamReader.Seek(model.objc.mateOffset + offset, SeekOrigin.Begin);
                 //MATE
-                for(int mateIndex = 0; mateIndex < model.objc.mateCount; mateIndex++)
+                for (int mateIndex = 0; mateIndex < model.objc.mateCount; mateIndex++)
                 {
                     model.mateList.Add(streamReader.Read<AquaObject.MATE>());
                 }
-                AlignReader(streamReader, 0x10);
+                //AlignReader(streamReader, 0x10);
 
+                streamReader.Seek(model.objc.rendOffset + offset, SeekOrigin.Begin);
                 //REND
-                for(int rendIndex = 0; rendIndex < model.objc.rendCount; rendIndex++)
+                for (int rendIndex = 0; rendIndex < model.objc.rendCount; rendIndex++)
                 {
                     model.rendList.Add(streamReader.Read<AquaObject.REND>());
                 }
-                AlignReader(streamReader, 010);
+                //AlignReader(streamReader, 010);
 
+                streamReader.Seek(model.objc.shadOffset + offset, SeekOrigin.Begin);
                 //SHAD
-                for(int shadIndex = 0; shadIndex < model.objc.shadCount; shadIndex++)
+                for (int shadIndex = 0; shadIndex < model.objc.shadCount; shadIndex++)
                 {
                     model.shadList.Add(streamReader.Read<AquaObject.SHAD>());
                 }
-                AlignReader(streamReader, 010);
+                //AlignReader(streamReader, 010);
 
+                streamReader.Seek(model.objc.tstaOffset + offset, SeekOrigin.Begin);
                 //TSTA
-                for(int tstaIndex = 0; tstaIndex < model.objc.tstaCount; tstaIndex++)
+                for (int tstaIndex = 0; tstaIndex < model.objc.tstaCount; tstaIndex++)
                 {
                     model.tstaList.Add(streamReader.Read<AquaObject.TSTA>());
                 }
-                AlignReader(streamReader, 010);
+                //AlignReader(streamReader, 010);
 
+                streamReader.Seek(model.objc.tsetOffset + offset, SeekOrigin.Begin);
                 //TSET
                 for (int tsetIndex = 0; tsetIndex < model.objc.tsetCount; tsetIndex++)
                 {
                     model.tsetList.Add(streamReader.Read<AquaObject.TSET>());
                 }
-                AlignReader(streamReader, 010);
+                //AlignReader(streamReader, 010);
 
+                streamReader.Seek(model.objc.texfOffset + offset, SeekOrigin.Begin);
                 //TEXF
-                for(int texfIndex = 0; texfIndex < model.objc.texfCount; texfIndex++)
+                for (int texfIndex = 0; texfIndex < model.objc.texfCount; texfIndex++)
                 {
                     model.texfList.Add(streamReader.Read<AquaObject.TEXF>());
                 }
-                AlignReader(streamReader, 0x10);
+                //AlignReader(streamReader, 0x10);
 
                 //UNRM
                 if (model.objc.unrmOffset > 0)
                 {
+                    streamReader.Seek(model.objc.unrmOffset + offset, SeekOrigin.Begin);
                     model.unrms = new AquaObject.UNRM();
                     model.unrms.vertGroupCountCount = streamReader.Read<int>();
                     model.unrms.vertGroupCountOffset = streamReader.Read<int>();
@@ -324,7 +348,6 @@ namespace AquaLibrary
         {
 
         }
-
 
         private static void AlignReader(BufferedStreamReader streamReader, int align)
         {
