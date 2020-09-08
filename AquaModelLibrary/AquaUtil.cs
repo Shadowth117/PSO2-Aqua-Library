@@ -10,8 +10,9 @@ namespace AquaLibrary
 {
     public class AquaUtil
     {
-        private List<ModelSet> aquaModels = new List<ModelSet>();
-        struct ModelSet
+        public List<ModelSet> aquaModels = new List<ModelSet>();
+        public List<AquaNode> aquaBones = new List<AquaNode>();
+        public struct ModelSet
         {
             public AquaPackage.AFPMain afp;
             public List<AquaObject> models;
@@ -316,17 +317,7 @@ namespace AquaLibrary
                 }
 
                 //NOF0
-                model.nof0 = new AquaCommon.NOF0();
-                model.nof0.magic = streamReader.Read<int>();
-                model.nof0.NOF0Size = streamReader.Read<int>();
-                model.nof0.NOF0EntryCount = streamReader.Read<int>();
-                model.nof0.NOF0DataSizeStart = streamReader.Read<int>();
-                model.nof0.relAddresses = new List<int>();
-
-                for (int nofEntry = 0; nofEntry < model.nof0.NOF0EntryCount; nofEntry++)
-                {
-                    model.nof0.relAddresses.Add(streamReader.Read<int>());
-                }
+                model.nof0 = AquaCommon.readNOF0(streamReader);
                 AlignReader(streamReader, 0x10);
 
                 //NEND
@@ -339,6 +330,69 @@ namespace AquaLibrary
         }
 
         public void ReadVTBFModel(BufferedStreamReader streamReader, int fileCount)
+        {
+
+        }
+
+        public void ReadBones(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                int type = streamReader.Peek<int>();
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals(0x6E7161) || type.Equals(0x6E7274))
+                {
+                    streamReader.Seek(0x60, SeekOrigin.Current);
+                    type = streamReader.Peek<int>();
+                    offset += 0x60;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals(0x4C46494E))
+                {
+                    aquaBones.Add(ReadNIFLBones(streamReader, offset));
+                }
+                else if (type.Equals(0x46425456))
+                {
+                    //ReadVTBFBones(streamReader, set.afp.fileCount);
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+
+            }
+        }
+
+        public AquaNode ReadNIFLBones(BufferedStreamReader streamReader, int offset)
+        {
+            AquaNode bones = new AquaNode();
+
+            bones.nifl = streamReader.Read<AquaCommon.NIFL>();
+            bones.rel0 = streamReader.Read<AquaCommon.REL0>();
+            bones.ndtr = streamReader.Read<AquaNode.NDTR>();
+            
+            for(int i = 0; i < bones.ndtr.boneCount; i++)
+            {
+                bones.nodeList.Add(streamReader.Read<AquaNode.NODE>());
+            }
+
+            for (int i = 0; i < bones.ndtr.boneCount; i++)
+            {
+                bones.nod0List.Add(streamReader.Read<AquaNode.NOD0>());
+            }
+
+            bones.nof0 = AquaCommon.readNOF0(streamReader);
+            AlignReader(streamReader, 0x10);
+            bones.nend = streamReader.Read<AquaCommon.NEND>();
+
+            return bones;
+        }
+
+        public void ReadVTBFBones()
         {
 
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Reloaded.Memory.Streams;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,6 +61,23 @@ namespace AquaModelLibrary.AquaStructs
             public int magic;
             public int size; //Size of NEND data; Always 0x8
             public double padding0;
+        }
+
+        public static NOF0 readNOF0(BufferedStreamReader streamReader)
+        {
+            NOF0 nof0 = new AquaCommon.NOF0();
+            nof0.magic = streamReader.Read<int>();
+            nof0.NOF0Size = streamReader.Read<int>();
+            nof0.NOF0EntryCount = streamReader.Read<int>();
+            nof0.NOF0DataSizeStart = streamReader.Read<int>();
+            nof0.relAddresses = new List<int>();
+
+            for (int nofEntry = 0; nofEntry < nof0.NOF0EntryCount; nofEntry++)
+            {
+                nof0.relAddresses.Add(streamReader.Read<int>());
+            }
+
+            return nof0;
         }
     }
 }

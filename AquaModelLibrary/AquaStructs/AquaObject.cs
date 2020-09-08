@@ -268,7 +268,7 @@ namespace AquaModelLibrary
             public List<byte[]> vertColors = new List<byte[]>(); //4 bytes, BGRA
             public List<byte[]> vertColor2s = new List<byte[]>(); //4 bytes, BGRA?
             public List<byte[]> vertWeightIndices = new List<byte[]>(); //4 bytes
-            public List<Vector2> uv1List = new List<Vector2>();
+            public List<Vector2> uv1List = new List<Vector2>(); //UVs probably need to be vertically flipped for most software. I usually just import v as -v.
             public List<Vector2> uv2List = new List<Vector2>();
             public List<Vector2> uv3List = new List<Vector2>();
 
@@ -279,6 +279,20 @@ namespace AquaModelLibrary
 
             public List<short> bonePalette = new List<short>(); //Indices of particular bones are used for weight indices above
             public List<short> edgeVerts = new List<short>(); //No idea if this is used, but I fill it anyways
+            
+            public List<Vector2> getUVFlipped(List<Vector2> uvList)
+            {
+                List<Vector2> uvs = uvList.ToList();
+
+                for(int i = 0; i < uvs.Count; i++)
+                {
+                    Vector2 uv = uvs[i];
+                    uv.Y = -uv.Y;
+                    uvs[i] = uv;
+                }
+
+                return uvs;
+            }
         }
 
         //Contains information about the traingle strip sets
@@ -298,7 +312,39 @@ namespace AquaModelLibrary
             public int reserve0;
             public int reserve1;
             public int reserve2;
+
+            //Triangles should be interpreted as 0, 1, 2 followed by 0, 2, 1. While this results in degenerate faces, wireframe views ingame show they are rendered with these.
             public List<short> triStrips = new List<short>();
+
+            public List<Vector3> getTriangles(bool removeDegenFaces)
+            {
+                List<Vector3> tris = new List<Vector3>();
+
+                for(int vertIndex = 0;  vertIndex < tris.Count - 2; vertIndex++)
+                {
+                    //A degenerate triangle is a triangle with two references to the same vertex index. 
+                    if (removeDegenFaces)
+                    {
+                        if (triStrips[vertIndex] == triStrips[vertIndex + 1] || triStrips[vertIndex] == triStrips[vertIndex+2] 
+                            || triStrips[vertIndex+1] == triStrips[vertIndex+2])
+                        {
+                            continue;
+                        }
+                    }
+
+                    //When index is odd, flip
+                    if((vertIndex & 1) > 0)
+                    {
+                        tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 2], triStrips[vertIndex + 1]));
+                    } else
+                    {
+                        tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 1], triStrips[vertIndex + 2]));
+                    }
+
+                }
+
+                return tris;
+            }
         }
     }
 }
