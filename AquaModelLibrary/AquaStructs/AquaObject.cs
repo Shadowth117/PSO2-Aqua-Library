@@ -279,7 +279,10 @@ namespace AquaModelLibrary
 
             public List<short> bonePalette = new List<short>(); //Indices of particular bones are used for weight indices above
             public List<short> edgeVerts = new List<short>(); //No idea if this is used, but I fill it anyways
-            
+
+            public List<Vector4> trueVertWeights = new List<Vector4>();
+            public List<byte[]> trueVertWeightIndices = new List<byte[]>();
+
             public List<Vector2> getUVFlipped(List<Vector2> uvList)
             {
                 List<Vector2> uvs = uvList.ToList();
@@ -292,6 +295,50 @@ namespace AquaModelLibrary
                 }
 
                 return uvs;
+            }
+
+            //PSO2 doesn't differentiate in the file how many weights a particular vert has. 
+            //This allows one to get the weight amount 
+            public void createTrueVertWeights()
+            {
+                if (vertWeights.Count > 0 && vertWeightIndices.Count > 0)
+                {
+                    //Account for bone palette 0 being ordered weird
+                    for (int i = 0; i < vertWeights.Count; i++)
+                    {
+                        Vector4 trueWeight = new Vector4();
+                        List<byte> trueBytes = new List<byte>();
+                        float totalWeight = 0;
+                        
+                        if (vertWeightIndices[i][0] != 0 || vertWeights[i].X > 0)
+                        {
+                            totalWeight += vertWeights[i].X;
+                            trueWeight.X = vertWeights[i].X;
+                            trueBytes.Add(vertWeightIndices[i][0]);
+                        }
+                        if (vertWeightIndices[i][1] != 0 || vertWeights[i].Y > 0)
+                        {
+                            totalWeight += vertWeights[i].Y;
+                            trueWeight.Y = vertWeights[i].Y;
+                            trueBytes.Add(vertWeightIndices[i][1]);
+                        }
+                        if (vertWeightIndices[i][2] != 0 || vertWeights[i].Z > 0)
+                        {
+                            totalWeight += vertWeights[i].Z;
+                            trueWeight.Z = vertWeights[i].Z;
+                            trueBytes.Add(vertWeightIndices[i][2]);
+                        }
+                        if (vertWeightIndices[i][3] != 0 || vertWeights[i].W > 0)
+                        {
+                            trueWeight.W = vertWeights[i].W;
+                            trueBytes.Add(vertWeightIndices[i][3]);
+                        }
+
+                        trueVertWeights.Add(trueWeight);
+                        trueVertWeightIndices.Add(trueBytes.ToArray());
+                    }
+                }
+
             }
         }
 

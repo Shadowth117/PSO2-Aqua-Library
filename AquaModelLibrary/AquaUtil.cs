@@ -80,6 +80,7 @@ namespace AquaLibrary
                 {
                     streamReader.Seek(0x10, SeekOrigin.Current);
                     model.afp = streamReader.Read<AquaPackage.AFPBase>();
+                    offset = (int)streamReader.Position() + 0x20;
                 }
 
                 model.nifl = streamReader.Read<AquaCommon.NIFL>();
@@ -153,22 +154,24 @@ namespace AquaLibrary
                         }
                     }
                     AlignReader(streamReader, 0x10);
+                    vtxl.createTrueVertWeights();
 
-                    streamReader.Seek(model.vsetList[vsetIndex].bonePaletteOffset + offset, SeekOrigin.Begin);
                     //Bone Palette
                     if (model.vsetList[vsetIndex].bonePaletteCount > 0)
                     {
-                        for(int boneId = 0; boneId < model.vsetList[vsetIndex].bonePaletteCount; boneId++)
+                        streamReader.Seek(model.vsetList[vsetIndex].bonePaletteOffset + offset, SeekOrigin.Begin);
+                        for (int boneId = 0; boneId < model.vsetList[vsetIndex].bonePaletteCount; boneId++)
                         {
                             vtxl.bonePalette.Add(streamReader.Read<short>());
                         }
                         AlignReader(streamReader, 0x10);
                     }
 
-                    streamReader.Seek(model.vsetList[vsetIndex].edgeVertsOffset + offset, SeekOrigin.Begin);
+                    
                     //Edge Verts
                     if (model.vsetList[vsetIndex].edgeVertsCount > 0)
                     {
+                        streamReader.Seek(model.vsetList[vsetIndex].edgeVertsOffset + offset, SeekOrigin.Begin);
                         for (int boneId = 0; boneId < model.vsetList[vsetIndex].edgeVertsCount; boneId++)
                         {
                             vtxl.edgeVerts.Add(streamReader.Read<short>());
