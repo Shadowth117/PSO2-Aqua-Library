@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
@@ -21,8 +22,8 @@ namespace AquaModelLibrary.AquaStructs
         {
             public int boneCount;
             public int boneAddress;
-            public int const0;
-            public int const0_2;
+            public int unknownCount;
+            public int unknownAddress;
             public int effCount;
             public int effAddress;
             public int const0_3;
@@ -34,30 +35,24 @@ namespace AquaModelLibrary.AquaStructs
         {
             public ushort boneShort1;
             public ushort boneShort2;
-            public int animatedFlag; //Should generally be 1
+            public int animatedFlag; //Should generally be 1. I assume this is what it is based on PSU's bone format
             public int parentId;
             public int unkNode; //Always observed -1
-            public int nextSibling;
             public int firstChild;
+            public int nextSibling;
             public int const0_2;
             public int const0_3;
-            public float pos_x;
-            public float pos_y;
-            public float pos_z;
+            public Vector3 pos;
             public int const0_4;
-            public float eulRot_x;
-            public float eulRot_y;
-            public float eulRot_z;
+            public Vector3 eulRot;
             public int const0_5;
-            public float scale_x;
-            public float scale_y;
-            public float scale_z;
+            public Vector3 scale;
             public int const0_6;
             // 4x4 Matrix
-            public float m11; public float m12; public float m13; public float m14;
-            public float m21; public float m22; public float m23; public float m24;
-            public float m31; public float m32; public float m33; public float m34;
-            public float m41; public float m42; public float m43; public float m44;
+            public Vector4 m1;
+            public Vector4 m2;
+            public Vector4 m3;
+            public Vector4 m4;
             public fixed char boneName[0x20];
         }
 
@@ -66,16 +61,12 @@ namespace AquaModelLibrary.AquaStructs
         {
             public ushort boneShort1;
             public ushort boneShort2;
-            public int animatedFlag; //Should generally be 0
+            public int animatedFlag; //Should generally be 1. I assume this is what it is based on PSU's bone format
             public int parentId;
             public int const_0_2;
-            public float pos_x;
-            public float pos_y;
-            public float pos_z;
+            public Vector3 pos;
             public int const0_4;
-            public float eulRot_x;
-            public float eulRot_y;
-            public float eulRot_z;
+            public Vector3 eulRot;
             public int const0_5;
             public fixed char boneName[0x20];
         }

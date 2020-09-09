@@ -392,9 +392,105 @@ namespace AquaLibrary
             return bones;
         }
 
-        public void ReadVTBFBones()
+        public void ReadVTBFBones(BufferedStreamReader streamReader, int offset)
         {
+            AquaNode bones = new AquaNode();
+            
+            //Seek past vtbf tag
+            streamReader.Seek(0x14, SeekOrigin.Current);          //VTBF + AQGF + vtc0 tags
+            int rootTagLength = streamReader.Read<int>();
+            streamReader.Seek(rootTagLength, SeekOrigin.Current);
 
+            //NDTR - Nodetree
+            streamReader.Seek(0x13, SeekOrigin.Current);        //vtc0 + NDTR tags + struct count + data tag
+            bones.ndtr = new AquaNode.NDTR();
+            bones.ndtr.boneCount = streamReader.Read<int>();
+            streamReader.Seek(0x2, SeekOrigin.Current);         //data tag
+            bones.ndtr.unknownCount = streamReader.Read<int>();
+            streamReader.Seek(0x2, SeekOrigin.Current);         //data tag
+            bones.ndtr.effCount = streamReader.Read<int>();
+            streamReader.Seek(0x10, SeekOrigin.Current);
+
+            //NODE
+            for(int i = 0; i < bones.ndtr.boneCount; i++)
+            {
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                AquaNode.NODE node = new AquaNode.NODE();
+
+                node.boneShort1 = streamReader.Read<ushort>();
+                node.boneShort2 = streamReader.Read<ushort>();
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                node.parentId = streamReader.Read<int>();
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                node.unkNode = streamReader.Read<int>();
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                node.firstChild = streamReader.Read<int>();
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                node.nextSibling = streamReader.Read<int>();
+
+                streamReader.Seek(0x3, SeekOrigin.Current);
+                node.pos = streamReader.Read<Vector3>();
+                streamReader.Seek(0x3, SeekOrigin.Current);
+                node.eulRot = streamReader.Read<Vector3>();
+                streamReader.Seek(0x3, SeekOrigin.Current);
+                node.scale = streamReader.Read<Vector3>();
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                node.m1 = streamReader.Read<Vector4>();
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                node.m2 = streamReader.Read<Vector4>();
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                node.m3 = streamReader.Read<Vector4>();
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                node.m4 = streamReader.Read<Vector4>();
+
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                node.animatedFlag = streamReader.Read<int>();
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                node.const0_2 = streamReader.Read<int>();
+                streamReader.Seek(0x2, SeekOrigin.Current);
+                int nameLength = streamReader.Read<byte>();
+                byte[] name = new byte[nameLength];
+                for(int letter = 0; letter < nameLength; letter++)
+                {
+                    name[letter] = streamReader.Read<byte>();
+                }
+                bones.nodeList.Add(node);
+            }
+
+            if(bones.ndtr.effCount > 0)
+            {
+                streamReader.Seek(0x12, SeekOrigin.Current);
+
+                //NOD0
+                for (int i = 0; i < bones.ndtr.effCount; i++)
+                {
+                    streamReader.Seek(0x4, SeekOrigin.Current);
+                    AquaNode.NOD0 node = new AquaNode.NOD0();
+
+                    node.boneShort1 = streamReader.Read<ushort>();
+                    node.boneShort2 = streamReader.Read<ushort>();
+                    streamReader.Seek(0x2, SeekOrigin.Current);
+                    node.animatedFlag = streamReader.Read<int>();
+                    streamReader.Seek(0x2, SeekOrigin.Current);
+                    node.parentId = streamReader.Read<int>();
+                    streamReader.Seek(0x2, SeekOrigin.Current);
+                    node.const_0_2 = streamReader.Read<int>();
+
+                    streamReader.Seek(0x3, SeekOrigin.Current);
+                    node.pos = streamReader.Read<Vector3>();
+                    streamReader.Seek(0x3, SeekOrigin.Current);
+                    node.eulRot = streamReader.Read<Vector3>();
+
+                    streamReader.Seek(0x2, SeekOrigin.Current);
+                    int nameLength = streamReader.Read<byte>();
+                    byte[] name = new byte[nameLength];
+                    for (int letter = 0; letter < nameLength; letter++)
+                    {
+                        name[letter] = streamReader.Read<byte>();
+                    }
+                    bones.nod0List.Add(node);
+                }
+            }
         }
 
         private static void AlignReader(BufferedStreamReader streamReader, int align)
@@ -415,3 +511,4 @@ namespace AquaLibrary
         }
     }
 }
+ 

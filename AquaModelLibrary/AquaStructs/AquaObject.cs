@@ -320,7 +320,7 @@ namespace AquaModelLibrary
             {
                 List<Vector3> tris = new List<Vector3>();
 
-                for(int vertIndex = 0;  vertIndex < tris.Count - 2; vertIndex++)
+                for(int vertIndex = 0;  vertIndex < triStrips.Count - 2; vertIndex++)
                 {
                     //A degenerate triangle is a triangle with two references to the same vertex index. 
                     if (removeDegenFaces)

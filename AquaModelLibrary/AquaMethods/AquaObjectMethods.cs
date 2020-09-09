@@ -5,11 +5,12 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static AquaModelLibrary.AquaObject;
 
 namespace AquaModelLibrary.AquaMethods
 {
-    unsafe class AquaObjectMethods
+    public unsafe class AquaObjectMethods
     {
         public static BoundingVolume GenerateBounding (List<VTXL> vertData)
         {
@@ -98,7 +99,7 @@ namespace AquaModelLibrary.AquaMethods
             }
         }
 
-        private static string GetCString(byte* str)
+        public static string GetPSO2String(byte* str)
         {
             string finalText;
 
@@ -118,6 +119,30 @@ namespace AquaModelLibrary.AquaMethods
             finalText = System.Text.Encoding.UTF8.GetString(text);
 
             return finalText;
+        }
+
+        public static string GetMatName(MATE mate) => GetPSO2String(mate.matName);
+
+        public static string GetMatOpacity(MATE mate) => GetPSO2String(mate.alphaType);
+
+        public static List<string> GetTexListNames(AquaObject model, int tsetIndex)
+        {
+            List<string> textureList = new List<string>();
+
+            TSET tset = model.tsetList[tsetIndex];
+
+            for (int index = 0; index < 4; index++) 
+            {
+                int texIndex = tset.tstaTexIDs[index];
+                if (texIndex != -1)
+                {
+                    TSTA tsta = model.tstaList[texIndex];
+
+                    textureList.Add(GetPSO2String(tsta.texName));
+                }
+            }
+
+            return textureList;
         }
     }
 }
