@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace AquaModelLibrary
 {
@@ -171,8 +172,8 @@ namespace AquaModelLibrary
         public struct SHAD
         {
             public int unk0; //Always 0?
-            public fixed byte shaderMod[0x20]; //Shader string with modifier
-            public fixed byte shader[0x20]; //Shader string
+            public fixed byte pixelShader[0x20]; //Pixel Shader string
+            public fixed byte vertexShader[0x20]; //Vertex Shader string
             public int unk1; //Always 0?
             public int unk2; //Always 0? Not read in some versions of NIFL Tool, causing misalignments
         }
@@ -308,29 +309,25 @@ namespace AquaModelLibrary
                     {
                         Vector4 trueWeight = new Vector4();
                         List<byte> trueBytes = new List<byte>();
-                        float totalWeight = 0;
                         
-                        if (vertWeightIndices[i][0] != 0 || vertWeights[i].X > 0)
+                        if (vertWeightIndices[i][0] != 0 || vertWeights[i].X != 0)
                         {
-                            totalWeight += vertWeights[i].X;
-                            trueWeight.X = vertWeights[i].X;
+                            trueWeight = addById(trueWeight, vertWeights[i].X, trueBytes.Count);
                             trueBytes.Add(vertWeightIndices[i][0]);
                         }
-                        if (vertWeightIndices[i][1] != 0 || vertWeights[i].Y > 0)
+                        if (vertWeightIndices[i][1] != 0 || vertWeights[i].Y != 0)
                         {
-                            totalWeight += vertWeights[i].Y;
-                            trueWeight.Y = vertWeights[i].Y;
+                            trueWeight = addById(trueWeight, vertWeights[i].Y, trueBytes.Count);
                             trueBytes.Add(vertWeightIndices[i][1]);
                         }
-                        if (vertWeightIndices[i][2] != 0 || vertWeights[i].Z > 0)
+                        if (vertWeightIndices[i][2] != 0 || vertWeights[i].Z != 0)
                         {
-                            totalWeight += vertWeights[i].Z;
-                            trueWeight.Z = vertWeights[i].Z;
+                            trueWeight = addById(trueWeight, vertWeights[i].Z, trueBytes.Count);
                             trueBytes.Add(vertWeightIndices[i][2]);
                         }
-                        if (vertWeightIndices[i][3] != 0 || vertWeights[i].W > 0)
+                        if (vertWeightIndices[i][3] != 0 || vertWeights[i].W != 0)
                         {
-                            trueWeight.W = vertWeights[i].W;
+                            trueWeight = addById(trueWeight, vertWeights[i].W, trueBytes.Count);
                             trueBytes.Add(vertWeightIndices[i][3]);
                         }
 
@@ -339,6 +336,27 @@ namespace AquaModelLibrary
                     }
                 }
 
+            }
+
+            private Vector4 addById(Vector4 vec4, float value, int id)
+            {
+                switch(id)
+                {
+                    case 0:
+                        vec4.X = value;
+                        break;
+                    case 1:
+                        vec4.Y = value;
+                        break;
+                    case 2:
+                        vec4.Z = value;
+                        break;
+                    case 3:
+                        vec4.W = value;
+                        break;
+                }
+
+                return vec4;
             }
         }
 

@@ -144,5 +144,17 @@ namespace AquaModelLibrary.AquaMethods
 
             return textureList;
         }
+
+        public static List<string> GetShaderNames(AquaObject model, int shadIndex)
+        {
+            List<string> shaderList = new List<string>();
+
+            SHAD shad = model.shadList[shadIndex];
+
+            shaderList.Add(GetPSO2String(shad.pixelShader));
+            shaderList.Add(GetPSO2String(shad.vertexShader));
+
+            return shaderList;
+        }
     }
 }
