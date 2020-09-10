@@ -91,11 +91,104 @@ namespace AquaModelLibrary.AquaMethods
         //Adapted from this: https://forums.cgsociety.org/t/finding-bi-normals-tangents/975005/8 
         //Binormals and tangents for each face are calculated and each face's values for a particular vertex are summed and averaged for the result before being normalized
         //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
-        public static void computeTangentSpace(AquaObject model)
+        public static void computeTangentSpace(AquaObject model, bool useFaceNormals)
         {
             for(int mesh = 0; mesh < model.vsetList.Count; mesh++)
             {
+                //Verify that there are vertices and with valid UVs
+                int vsetIndex = model.meshList[mesh].vsetIndex;
+                int psetIndex = model.meshList[mesh].psetIndex;
+                if (model.vtxlList[vsetIndex].uv1List.Count > 0 && model.vtxlList[vsetIndex].vertPositions.Count > 0)
+                {
+                    Vector3[] vertBinormalArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                    Vector3[] vertTangentArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                    Vector3[] vertFaceNormalArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                    List<Vector3> faces = model.strips[psetIndex].getTriangles(true);
 
+                    for (int f = 0; f < faces.Count; f++)
+                    {
+                        Vector3 face = faces[f];
+                        List<int> faceIndices = new List<int>()
+                        {
+                            (int)face.X,
+                            (int)face.Y,
+                            (int)face.Z
+                        };
+
+                        List<Vector3> verts = new List<Vector3>() 
+                        { 
+                          model.vtxlList[vsetIndex].vertPositions[(int)face.X], 
+                          model.vtxlList[vsetIndex].vertPositions[(int)face.Y],
+                          model.vtxlList[vsetIndex].vertPositions[(int)face.Z]
+                        };
+                        List<Vector2> uvs = new List<Vector2>()
+                        {
+                          model.vtxlList[vsetIndex].uv1List[(int)face.X],
+                          model.vtxlList[vsetIndex].uv1List[(int)face.Y],
+                          model.vtxlList[vsetIndex].uv1List[(int)face.Z]
+                        };
+
+                        Vector3 dV1 = verts[0] - verts[1];
+                        Vector3 dV2 = verts[0] - verts[2];
+                        Vector2 dUV1 = uvs[0] - uvs[1];
+                        Vector2 dUV2 = uvs[0] - uvs[2];
+
+                        float area = dUV1.X * dUV2.Y - dUV1.Y * dUV2.X;
+                        int sign;
+                        if(area < 0)
+                        {
+                            sign = -1;
+                        } else
+                        {
+                            sign = 1;
+                        }
+
+                        Vector3 tangent = new Vector3();
+                        tangent.X = dV1.X * dUV2.Y - dUV1.Y * dV2.X;
+                        tangent.Y = dV1.Y * dUV2.Y - dUV1.Y * dV2.Y;
+                        tangent.Z = dV1.Z * dUV2.Y - dUV1.Y * dV2.Z;
+                        tangent = Vector3.Normalize(tangent) * sign;
+
+                        //Calculate face normal
+                        Vector3 u = verts[1] - verts[0];
+                        Vector3 v = verts[2] - verts[0];
+
+                        Vector3 normal = Vector3.Normalize(Vector3.Cross(u, v));
+                        Vector3 binormal = Vector3.Normalize(Vector3.Cross(normal, tangent)) * sign;
+
+                        //Create or add vectors to the collections
+                        for(int i = 0; i < 3; i++)
+                        {
+                            if(vertBinormalArray[faceIndices[i]] == null)
+                            {
+                                vertBinormalArray[faceIndices[i]] = binormal;
+                                vertTangentArray[faceIndices[i]] = tangent;
+                                vertFaceNormalArray[faceIndices[i]] = normal;
+                            } else
+                            {
+                                vertBinormalArray[faceIndices[i]] += binormal;
+                                vertTangentArray[faceIndices[i]] += tangent;
+                                vertFaceNormalArray[faceIndices[i]] += normal;
+                            }
+                        }
+                    }
+
+                    //Average out the values for use ingame
+                    for(int vert = 0; vert < model.vtxlList[vsetIndex].vertPositions.Count; vert++)
+                    {
+                        vertBinormalArray[vert] = Vector3.Normalize(vertBinormalArray[vert]);
+                        vertTangentArray[vert] = Vector3.Normalize(vertTangentArray[vert]);
+                        vertFaceNormalArray[vert] = Vector3.Normalize(vertFaceNormalArray[vert]);
+                    }
+
+                    //Set these back in the model
+                    if(useFaceNormals)
+                    {
+                        model.vtxlList[vsetIndex].vertNormals = vertFaceNormalArray.ToList();
+                    }
+                    model.vtxlList[vsetIndex].vertBinormalList = vertBinormalArray.ToList();
+                    model.vtxlList[vsetIndex].vertTangentList = vertTangentArray.ToList();
+                }
             }
         }
 
