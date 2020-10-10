@@ -10,6 +10,7 @@ using System.Windows;
 
 namespace AquaModelLibrary
 {
+    //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
     public unsafe class AquaObject
     {
         public AquaPackage.AFPBase afp;
@@ -64,45 +65,45 @@ namespace AquaModelLibrary
 
         public struct BoundingVolume
         {
-            public Vector3 modelCenter;
+            public Vector3 modelCenter; //0x1E, Type 0x4A, Count 0x1
             public float reserve0; 
-            public float boundingRadius; //Distance of furthest point from the origin
-            public Vector3 modelCenter2; //Model Center... again
+            public float boundingRadius; //0x1F, Type 0xA                    //Distance of furthest point from the origin
+            public Vector3 modelCenter2; //0x20, Type 0x4A, Count 0x1        //Model Center... again 
             public float reserve1;
-            public Vector3 maxMinXYZDifference; //Distance between max/min of x, y and z divided by 2
+            public Vector3 maxMinXYZDifference; //0x21, Type 0x4A, Count 0x1 //Distance between max/min of x, y and z divided by 2
             public float reserve2;
         }
 
         public struct OBJC
         {
-            public int type;
-            public int size;
-            public int unkMeshValue;
-            public int largetsVTXL;
-            public int totalStripFaces;
+            public int type;           //0x10, Type 0x8
+            public int size;           //0x11, Type 0x8
+            public int unkMeshValue;   //0x12, Type 0x9
+            public int largetsVTXL;    //0x13, Type 0x8
+            public int totalStripFaces;//0x14, Type 0x9
             public int reserve1;
-            public int totalVTXLCount;
+            public int totalVTXLCount;//0x15, Type 0x8
             public int reserve2;
-            public int unkMeshCount; //Same as below
-            public int vsetCount;
+            public int unkMeshCount; //0x16, Type 0x8 //Same value as below
+            public int vsetCount;    //0x24, Type 0x9
             public int vsetOffset;
-            public int psetCount;
+            public int psetCount;    //0x25, Type 0x9
             public int psetOffset;
-            public int meshCount;
+            public int meshCount;    //0x17, Type 0x9
             public int meshOffset;
-            public int mateCount;
+            public int mateCount;    //0x18, Type 0x8
             public int mateOffset;
-            public int rendCount;
+            public int rendCount;    //0x19, Type 0x8
             public int rendOffset;
-            public int shadCount;
+            public int shadCount;    //0x1A, Type 0x8
             public int shadOffset;
-            public int tstaCount;
+            public int tstaCount;    //0x1B, Type 0x8
             public int tstaOffset;
-            public int tsetCount;
+            public int tsetCount;    //0x1C, Type 0x8
             public int tsetOffset;
-            public int texfCount;
+            public int texfCount;    //0x1D, Type 0x8
             public int texfOffset;
-            public BoundingVolume bounds;
+            public BoundingVolume bounds; //0x1E, 0x1F, 0x20, 0x21
             public int unrmOffset; //Never set if unused
             public long padding0;
             public int padding1;
@@ -230,21 +231,27 @@ namespace AquaModelLibrary
 
         public struct VSET
         {
-            public int vertDataSize;
-            public int vertTypesCount; //Number of data struct types per vertex
+            public int vertDataSize;   //0xB6, Type 0x9
+            public int vertTypesCount; //0xBF, Type 0x9 //Number of data struct types per vertex
             public int vtxeOffset;
-            public int vtxlCount; //Number of VTXL structs/Vertices
+            public int vtxlCount;      //0xB9, Type 0x9 //Number of VTXL structs/Vertices
             public int vtxlOffset;
-            public int reserve0;
-            public int bonePaletteCount; //Vertex groups can't have more than 15 bones
+            public int reserve0;       //0xC4, Type 0x9
+            public int bonePaletteCount; //0xBD, Type 0x8 //Vertex groups can't have more than 15 bones
             public int bonePaletteOffset;
-            public int unk0;
-            public int unk1;
-            public int unk2;
+            //In VTBF, VSET also contains bonePalette. 
+                //0xBE. Entire entry omitted if count was 0. Type is 06 if single bone, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
+                //last is 0 based count as a byte.
+            public int unk0;         //0xC8, Type 0x9 //Unknown
+            public int unk1;         //0xCC, Type 0x9 //Unknown
+            public int unk2;         //Likely an offset related to above as it's not present in VTBF.
             //Edge verts are what I christened the set of vertex ids seemingly split along where the mesh
                 //had to be separated due to bone count limitations.
-            public int edgeVertsCount; 
-            public int edgeVertsOffset; 
+            public int edgeVertsCount;  //0xC9, Type 0x9 
+            public int edgeVertsOffset;
+            //In VTBF, VSET also contains Edge Verts. 
+                //0xCA. Entire entry omitted if count was 0. Type is 06 if single bone, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
+                //last is 0 based count as a byte.
         }
 
         public class VTXE

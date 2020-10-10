@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
+    <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\PrmParameters.cs" />
     <Compile Include="AquaUtil.cs" />
     <Compile Include="AquaStructs\AquaCamera.cs" />

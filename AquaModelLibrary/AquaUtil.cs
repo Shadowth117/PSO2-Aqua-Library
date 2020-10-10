@@ -356,11 +356,11 @@ namespace AquaLibrary
                 //Proceed based on file variant
                 if (type.Equals(0x4C46494E))
                 {
-                    aquaBones.Add(ReadNIFLBones(streamReader, offset));
+                    aquaBones.Add(ReadNIFLBones(streamReader));
                 }
                 else if (type.Equals(0x46425456))
                 {
-                    //ReadVTBFBones(streamReader, set.afp.fileCount);
+                    ReadVTBFBones(streamReader);
                 }
                 else
                 {
@@ -370,7 +370,7 @@ namespace AquaLibrary
             }
         }
 
-        public AquaNode ReadNIFLBones(BufferedStreamReader streamReader, int offset)
+        public AquaNode ReadNIFLBones(BufferedStreamReader streamReader)
         {
             AquaNode bones = new AquaNode();
 
@@ -395,7 +395,7 @@ namespace AquaLibrary
             return bones;
         }
 
-        public void ReadVTBFBones(BufferedStreamReader streamReader, int offset)
+        public void ReadVTBFBones(BufferedStreamReader streamReader)
         {
             AquaNode bones = new AquaNode();
             
