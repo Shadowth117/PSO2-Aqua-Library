@@ -261,10 +261,10 @@ namespace AquaModelLibrary
 
         public struct VTXEElement
         {
-            public int dataType;
-            public int structVariation; //3 for Vector3, 4 for Vector4, 5 for 4 byte vert color, 2 for Vector2, 7 for 4 byte values
-            public int relativeAddress;
-            public int reserve0;
+            public int dataType;        //D0, type 0x9
+            public int structVariation; //D1, type 0x9 //3 for Vector3, 4 for Vector4, 5 for 4 byte vert color, 2 for Vector2, 7 for 4 byte values
+            public int relativeAddress; //D2, type 0x9
+            public int reserve0;        //D3, type 0x9
         }
 
         //Vertex List

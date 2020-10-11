@@ -5,6 +5,7 @@ using System.Windows;
 using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary;
 using System.Numerics;
+using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
 
 namespace AquaLibrary
 {
@@ -108,53 +109,9 @@ namespace AquaLibrary
                     streamReader.Seek(model.vsetList[vsetIndex].vtxlOffset + offset, SeekOrigin.Begin);
                     //VTXL
                     AquaObject.VTXL vtxl = new AquaObject.VTXL();
-                    for (int vtxlIndex = 0; vtxlIndex < model.vsetList[vsetIndex].vtxlCount; vtxlIndex++)
-                    {
-                        for (int vtxeIndex = 0; vtxeIndex < model.vsetList[vsetIndex].vertTypesCount; vtxeIndex++)
-                        {
-                            switch (vtxeSet.vertDataTypes[vtxeIndex].dataType)
-                            {
-                                case (int)AquaObject.VertFlags.VertPosition:
-                                    vtxl.vertPositions.Add(streamReader.Read<Vector3>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertWeight:
-                                    vtxl.vertWeights.Add(streamReader.Read<Vector4>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertNormal:
-                                    vtxl.vertNormals.Add(streamReader.Read<Vector3>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertColor:
-                                    vtxl.vertColors.Add(Read4Bytes(streamReader));
-                                    break;
-                                case (int)AquaObject.VertFlags.VertColor2:
-                                    vtxl.vertColor2s.Add(Read4Bytes(streamReader));
-                                    break;
-                                case (int)AquaObject.VertFlags.VertWeightIndex:
-                                    vtxl.vertWeightIndices.Add(Read4Bytes(streamReader));
-                                    break;
-                                case (int)AquaObject.VertFlags.VertUV1:
-                                    vtxl.uv1List.Add(streamReader.Read<Vector2>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertUV2:
-                                    vtxl.uv2List.Add(streamReader.Read<Vector2>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertUV3:
-                                    vtxl.uv3List.Add(streamReader.Read<Vector2>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertTangent:
-                                    vtxl.vertTangentList.Add(streamReader.Read<Vector3>());
-                                    break;
-                                case (int)AquaObject.VertFlags.VertBinormal:
-                                    vtxl.vertBinormalList.Add(streamReader.Read<Vector3>());
-                                    break;
-                                default:
-                                    MessageBox.Show($"Unknown Vert type {vtxeSet.vertDataTypes[vtxeIndex].dataType}! Please report!");
-                                    break;
-                            }
-                        }
-                    }
+                    ReadVTXL(streamReader, vtxeSet, vtxl, model.vsetList[vsetIndex].vtxlCount, model.vsetList[vsetIndex].vertTypesCount);
+
                     AlignReader(streamReader, 0x10);
-                    vtxl.createTrueVertWeights();
 
                     //Bone Palette
                     if (model.vsetList[vsetIndex].bonePaletteCount > 0)
@@ -167,7 +124,7 @@ namespace AquaLibrary
                         AlignReader(streamReader, 0x10);
                     }
 
-                    
+
                     //Edge Verts
                     if (model.vsetList[vsetIndex].edgeVertsCount > 0)
                     {
@@ -505,13 +462,6 @@ namespace AquaLibrary
             }
         }
 
-        private static byte[] Read4Bytes(BufferedStreamReader streamReader)
-        {
-            byte[] bytes = new byte[4];
-            for (int byteIndex = 0; byteIndex < 4; byteIndex++) { bytes[byteIndex] = streamReader.Read<byte>(); }
-
-            return bytes;
-        }
     }
 }
  

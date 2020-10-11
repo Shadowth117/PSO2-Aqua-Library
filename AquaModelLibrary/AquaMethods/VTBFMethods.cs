@@ -1,15 +1,13 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Lifetime;
 using System.Text;
-using System.Threading.Tasks;
 using static AquaModelLibrary.AquaObject;
+using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
+using System.Windows;
 
 namespace AquaModelLibrary.AquaMethods
 {
@@ -20,9 +18,9 @@ namespace AquaModelLibrary.AquaMethods
             List<Dictionary<int, object>> vtbfData = new List<Dictionary<int, object>>();
 
             streamReader.Seek(0x4, SeekOrigin.Current); //vtc0
-            int bodyLength = streamReader.Read<int>();
+            uint bodyLength = streamReader.Read<uint>();
             int mainTagType = streamReader.Read<int>();
-            short unkHeaderShort = streamReader.Read<short>();
+            short pointerCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
             short entryCount = streamReader.Read<short>();
 
             Dictionary<int, object> vtbfDict = new Dictionary<int, object>();
@@ -50,10 +48,10 @@ namespace AquaModelLibrary.AquaMethods
                 
                 switch(dataType)
                 {
-                    case 0x0: //Flag. Probably more for parsing purposes than data. 0xFC ID before this means first struct, 0xFE means a later struct
+                    case 0x0: //Special Flag. Probably more for parsing purposes than data. 0xFC ID before this means first struct, 0xFE means a later struct
                         data = dataType;
                         break;
-                    case 0x1: //Single byte? Needs more samples. Only seen so far in accessory.cmx
+                    case 0x1: //Boolean? Single byte
                         data = streamReader.Read<byte>();
                         break;
                     case 0x2: //String
@@ -67,15 +65,27 @@ namespace AquaModelLibrary.AquaMethods
                         }
                         streamReader.Seek(strLen, SeekOrigin.Current);
                         break;
-                    case 0x6: //short. Add 0x7 here too if it's found somewhere
+                    case 0x4: //byte
+                    case 0x5:
+                        data = streamReader.Read<byte>();
+                        break;
+                    case 0x6: //short 0x6 is signed while 0x7 is unsigned
+                    case 0x7:
                         data = streamReader.Read<short>();
                         break;
-                    case 0x8: //uint and int? Not obvious from current data. May not ever reach high enough values to be meaningful.
+                    case 0x8: //int. 0x8 is signed while 0x9 is unsigned
                     case 0x9:
                         data = streamReader.Read<int>();
                         break;
                     case 0xA: //float
                         data = streamReader.Read<float>();
+                        break;
+                    case 0xC: //color, BGRA?
+                        data = new byte[4];
+                        for(int j = 0; j < 4; j++)
+                        {
+                            ((byte[])data)[j] = streamReader.Read<byte>();
+                        }
                         break;
                     case 0x48: //Vector3 of ints
                         subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
@@ -99,6 +109,11 @@ namespace AquaModelLibrary.AquaMethods
                         {
                             ((short[])data)[j] = streamReader.Read<short>();
                         }
+                        break;
+                    case 0x89: //Vertices
+                        streamReader.Read<byte>(); // 0x10 probably
+                        data = streamReader.ReadBytes(streamReader.Position(), (int)(bodyLength) - 0xB); //Read the whole vert buffer at once. We'll handle it later.
+                        streamReader.Seek((int)(bodyLength) - 0xB, SeekOrigin.Current);
                         break;
                     case 0x4A: //Vector3 of floats
                         subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
@@ -172,15 +187,30 @@ namespace AquaModelLibrary.AquaMethods
             return objc;
         }
 
-        public byte[] toOBJC(OBJC objc)
+        public byte[] toOBJC(OBJC objc, bool useUNRMs)
         {
             List<byte> outBytes = new List<byte>();
+
+            ushort pointerCount = 0;
+            pointerCount += flagCheck(objc.vsetCount);
+            pointerCount += flagCheck(objc.psetCount);
+            pointerCount += flagCheck(objc.meshCount);
+            pointerCount += flagCheck(objc.mateCount);
+            pointerCount += flagCheck(objc.rendCount);
+            pointerCount += flagCheck(objc.shadCount);
+            pointerCount += flagCheck(objc.tstaCount);
+            pointerCount += flagCheck(objc.tsetCount);
+            pointerCount += flagCheck(objc.texfCount);
+            if(useUNRMs)
+            {
+                pointerCount += 1;
+            }
 
             outBytes.AddRange(Encoding.UTF8.GetBytes("vtc0"));
             outBytes.AddRange(BitConverter.GetBytes(0x9B));          //Data body size is always 0x9B for OBJC
             outBytes.AddRange(Encoding.UTF8.GetBytes("OBJC"));
-            outBytes.AddRange(BitConverter.GetBytes(((short)0x9)));  //Unknown tag header short
-            outBytes.AddRange(BitConverter.GetBytes(((short)0x14))); //Subtag count, always 0x14 for OBJC
+            outBytes.AddRange(BitConverter.GetBytes(pointerCount));  
+            outBytes.AddRange(BitConverter.GetBytes((short)0x14)); //Subtag count, always 0x14 for OBJC
 
             addBytes(outBytes, 0x10, 0x8, BitConverter.GetBytes(objc.type)); //Should just always be 0xC2A. Perhaps some kind of header info?
             addBytes(outBytes, 0x11, 0x8, BitConverter.GetBytes(objc.size)); //Size of the final data struct, always 0xA4. This ends up being the exact size of the NIFL variation of OBJC.
@@ -331,7 +361,7 @@ namespace AquaModelLibrary.AquaMethods
 
             //In VTBF, VSETS are all treated as part of the same struct
             outBytes.InsertRange(0, Encoding.UTF8.GetBytes("VSET"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0x2 * vsetList.Count)));  //Unknown tag header short. In this case, 0x2 times the VSET count.
+            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0x2 * vsetList.Count)));  //Pointer count. In this case, 0x2 times the VSET count.
             outBytes.InsertRange(0x8, BitConverter.GetBytes((short)subTagCount)); //Subtag count
 
             outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
@@ -342,19 +372,180 @@ namespace AquaModelLibrary.AquaMethods
 
         public void parseVTXE_VTXL(List<Dictionary<int, object>> vtxeRaw, List<Dictionary<int, object>> vtxlRaw, out VTXE vtxe, out VTXL vtxl)
         {
+            int vertSize = 0;
             vtxe = new VTXE();
             vtxl = new VTXL();
+            for (int i = 0; i < vtxeRaw.Count; i++)
+            {
+                VTXEElement vtxeEle = new VTXEElement();
+
+                vtxeEle.dataType = (int)vtxeRaw[i][0xD0];
+                vtxeEle.structVariation = (int)vtxeRaw[i][0xD1];
+                vtxeEle.relativeAddress = (int)vtxeRaw[i][0xD2];
+                vtxeEle.reserve0 = (int)vtxeRaw[i][0xD3];
+                switch (vtxeEle.dataType)
+                {
+                    case (int)AquaObject.VertFlags.VertPosition:
+                        vertSize += 0xC;
+                        break;
+                    case (int)AquaObject.VertFlags.VertWeight:
+                        vertSize += 0x10;
+                        break;
+                    case (int)AquaObject.VertFlags.VertNormal:
+                        vertSize += 0xC;
+                        break;
+                    case (int)AquaObject.VertFlags.VertColor:
+                        vertSize += 0x4;
+                        break;
+                    case (int)AquaObject.VertFlags.VertColor2:
+                        vertSize += 0x4;
+                        break;
+                    case (int)AquaObject.VertFlags.VertWeightIndex:
+                        vertSize += 0x4;
+                        break;
+                    case (int)AquaObject.VertFlags.VertUV1:
+                        vertSize += 0x8;
+                        break;
+                    case (int)AquaObject.VertFlags.VertUV2:
+                        vertSize += 0x8;
+                        break;
+                    case (int)AquaObject.VertFlags.VertUV3:
+                        vertSize += 0x8;
+                        break;
+                    case (int)AquaObject.VertFlags.VertTangent:
+                        vertSize += 0xC;
+                        break;
+                    case (int)AquaObject.VertFlags.VertBinormal:
+                        vertSize += 0xC;
+                        break;
+                    default:
+                        vertSize += 0xC;
+                        MessageBox.Show($"Unknown Vert type {vtxeEle.dataType}! Please report!");
+                        break;
+                }
+
+                vtxe.vertDataTypes.Add(vtxeEle);
+            }
+
+            int vertCount = ((byte[])vtxlRaw[0][0x89]).Length / vertSize;
+
+            using (Stream stream = new MemoryStream((byte[])vtxlRaw[0][0x89]))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                ReadVTXL(streamReader, vtxe, vtxl, vertCount, vtxe.vertDataTypes.Count);
+            }
         }
 
-        public byte[] toVTXE_VTXL()
+        public byte[] toVTXE_VTXL(VTXE vtxe, VTXL vtxl)
         {
             List<byte> outBytes = new List<byte>();
 
+            //VTXE
+            for(int i = 0; i < vtxe.vertDataTypes.Count; i++)
+            {
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
 
+                addBytes(outBytes, 0xD0, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].dataType));
+                addBytes(outBytes, 0xD1, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].structVariation));
+                addBytes(outBytes, 0xD2, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].relativeAddress));
+                addBytes(outBytes, 0xD3, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].reserve0));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("VTXE"));
+            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on VTXE
+            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)vtxe.vertDataTypes.Count * 5 + 1)); //Subtag count
+
+            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+
+            int vtxeEnd = outBytes.Count;
+
+            //VTXL
+            outBytes.Add(0xBA);
+            outBytes.Add(0x89);
+            outBytes.Add(0x10);
+            for(int i = 0; i < vtxl.vertPositions.Count; i++)
+            {
+                for(int j = 0; j < vtxe.vertDataTypes.Count; j++)
+                {
+                    switch (vtxe.vertDataTypes[j].dataType)
+                    {
+                        case (int)AquaObject.VertFlags.VertPosition:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertPositions[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertWeight:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertWeights[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertNormal:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertNormals[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertColor:
+                            for(int color = 0; color < 4; color++)
+                            {
+                                outBytes.Add(vtxl.vertColors[i][color]);
+                            }
+                            break;
+                        case (int)AquaObject.VertFlags.VertColor2:
+                            for (int color = 0; color < 4; color++)
+                            {
+                                outBytes.Add(vtxl.vertColor2s[i][color]);
+                            }
+                            break;
+                        case (int)AquaObject.VertFlags.VertWeightIndex:
+                            for (int weight = 0; weight < 4; weight++)
+                            {
+                                outBytes.Add(vtxl.vertWeightIndices[i][weight]);
+                            }
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV1:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv1List[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV2:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv2List[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV3:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv3List[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertTangent:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertTangentList[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertBinormal:
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertBinormalList[i]));
+                            break;
+                        default:
+                            MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
+                            throw new Exception("Not implemented!");
+                            break;
+                    }
+
+                    
+                }
+            }
+
+            outBytes.InsertRange(vtxeEnd, Encoding.UTF8.GetBytes("VTXL"));
+            outBytes.InsertRange(vtxeEnd + 0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on VTXL
+            outBytes.InsertRange(vtxeEnd + 0x8, BitConverter.GetBytes((short)1)); //Subtag count
+
+            outBytes.InsertRange(vtxeEnd, BitConverter.GetBytes(outBytes.Count - vtxeEnd));          //Data body size
+            outBytes.InsertRange(vtxeEnd, Encoding.UTF8.GetBytes("vtc0"));
 
             return outBytes.ToArray();
         }
 
+        public List<PSET> ParsePSET(List<Dictionary<int, object>> psetRaw)
+        {
+            List<PSET> psets = new List<PSET>();
+
+            return psets;
+        }
         public void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
         {
             outBytes.Add(id); 
@@ -377,6 +568,17 @@ namespace AquaModelLibrary.AquaMethods
             outBytes.Add(subDataType);
             outBytes.Add(subDataAdditions);
             outBytes.AddRange(data);
+        }
+
+        public ushort flagCheck(int check)
+        {
+            if(check > 0)
+            {
+                return 1;
+            } else
+            {
+                return 0;
+            }
         }
     }
 }

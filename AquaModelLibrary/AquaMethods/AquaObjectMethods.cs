@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Reloaded.Memory.Streams;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -12,6 +13,56 @@ namespace AquaModelLibrary.AquaMethods
 {
     public unsafe class AquaObjectMethods
     {
+        public static void ReadVTXL(BufferedStreamReader streamReader, AquaObject.VTXE vtxeSet, AquaObject.VTXL vtxl, int vertCount, int vertTypeCount)
+        {
+            for (int vtxlIndex = 0; vtxlIndex < vertCount; vtxlIndex++)
+            {
+                for (int vtxeIndex = 0; vtxeIndex < vertTypeCount; vtxeIndex++)
+                {
+                    switch (vtxeSet.vertDataTypes[vtxeIndex].dataType)
+                    {
+                        case (int)AquaObject.VertFlags.VertPosition:
+                            vtxl.vertPositions.Add(streamReader.Read<Vector3>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertWeight:
+                            vtxl.vertWeights.Add(streamReader.Read<Vector4>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertNormal:
+                            vtxl.vertNormals.Add(streamReader.Read<Vector3>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertColor:
+                            vtxl.vertColors.Add(Read4Bytes(streamReader));
+                            break;
+                        case (int)AquaObject.VertFlags.VertColor2:
+                            vtxl.vertColor2s.Add(Read4Bytes(streamReader));
+                            break;
+                        case (int)AquaObject.VertFlags.VertWeightIndex:
+                            vtxl.vertWeightIndices.Add(Read4Bytes(streamReader));
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV1:
+                            vtxl.uv1List.Add(streamReader.Read<Vector2>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV2:
+                            vtxl.uv2List.Add(streamReader.Read<Vector2>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV3:
+                            vtxl.uv3List.Add(streamReader.Read<Vector2>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertTangent:
+                            vtxl.vertTangentList.Add(streamReader.Read<Vector3>());
+                            break;
+                        case (int)AquaObject.VertFlags.VertBinormal:
+                            vtxl.vertBinormalList.Add(streamReader.Read<Vector3>());
+                            break;
+                        default:
+                            MessageBox.Show($"Unknown Vert type {vtxeSet.vertDataTypes[vtxeIndex].dataType}! Please report!");
+                            break;
+                    }
+                }
+            }
+            vtxl.createTrueVertWeights();
+        }
+
         public static BoundingVolume GenerateBounding (List<VTXL> vertData)
         {
             BoundingVolume bounds = new BoundingVolume();
@@ -248,6 +299,14 @@ namespace AquaModelLibrary.AquaMethods
             shaderList.Add(GetPSO2String(shad.vertexShader));
 
             return shaderList;
+        }
+
+        private static byte[] Read4Bytes(BufferedStreamReader streamReader)
+        {
+            byte[] bytes = new byte[4];
+            for (int byteIndex = 0; byteIndex < 4; byteIndex++) { bytes[byteIndex] = streamReader.Read<byte>(); }
+
+            return bytes;
         }
     }
 }
