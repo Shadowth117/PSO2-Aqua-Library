@@ -30,7 +30,7 @@ namespace AquaModelLibrary.AquaMethods
                 byte dataId = streamReader.Read<byte>();
                 byte dataType = streamReader.Read<byte>();
                 byte subDataType;
-                byte subDataAdditions;
+                int subDataAdditions;
 
                 //Check for special ids
                 switch (dataId)
@@ -88,6 +88,7 @@ namespace AquaModelLibrary.AquaMethods
                         }
                         break;
                     case 0x48: //Vector3 of ints
+                    case 0x49:
                         subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
                         data = new int[subDataAdditions][];
                         for(int j = 0; j < subDataAdditions; j++)
@@ -100,9 +101,56 @@ namespace AquaModelLibrary.AquaMethods
                             ((int[][])data)[j] = dataArr;
                         }
                         break;
+                    case 0x4A: //Vector of floats. Observed as Vector3 and Vector4
+                        subDataAdditions = streamReader.Read<byte>(); //Amount of floats past the first 2? 0x1 means Vector3, 0x2 means Vector4 total. Other amounts unobserved.
+
+                        switch(subDataAdditions)
+                        {
+                            case 0x1:
+                                data = streamReader.Read<Vector3>();
+                                break;
+                            case 0x2:
+                                data = streamReader.Read<Vector4>();
+                                break;
+                            default:
+                                MessageBox.Show($"Unknown subDataAdditions amount {subDataAdditions}");
+                                throw new Exception();
+                                break;
+                        }
+                        
+                        break;
+                    case 0x84: //Theoretical array of bytes
+                    case 0x85:
+                        subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
+                        switch (subDataType) //The last array entry aka data count - 1.
+                        {
+                            case 0x8:
+                                subDataAdditions = streamReader.Read<byte>();
+                                break;
+                            case 0x10:
+                                subDataAdditions = streamReader.Read<ushort>();
+                                break;
+                            default:
+                                throw new Exception($"Unknown subdataType {subDataType}");
+                        }
+                        data = streamReader.ReadBytes(streamReader.Position(), subDataAdditions);
+
+                        streamReader.Seek(subDataAdditions, SeekOrigin.Current);
+                        break;
                     case 0x86: //Array of shorts
-                        subDataType = streamReader.Read<byte>();      //Somewhat unsure. Observed as 0x8 or 0x6
-                        subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
+                    case 0x87:
+                        subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
+                        switch(subDataType) //The last array entry aka data count - 1.
+                        {
+                            case 0x8:
+                                subDataAdditions = streamReader.Read<byte>();
+                                break;
+                            case 0x10:
+                                subDataAdditions = streamReader.Read<ushort>();
+                                break;
+                            default:
+                                throw new Exception($"Unknown subdataType {subDataType}");
+                        }
 
                         data = new short[subDataAdditions + 1];
                         for(int j = 0; j < subDataAdditions; j++)
@@ -110,21 +158,25 @@ namespace AquaModelLibrary.AquaMethods
                             ((short[])data)[j] = streamReader.Read<short>();
                         }
                         break;
-                    case 0x89: //Vertices
-                        streamReader.Read<byte>(); // 0x10 probably
-                        data = streamReader.ReadBytes(streamReader.Position(), (int)(bodyLength) - 0xB); //Read the whole vert buffer at once. We'll handle it later.
-                        streamReader.Seek((int)(bodyLength) - 0xB, SeekOrigin.Current);
-                        break;
-                    case 0x4A: //Vector3 of floats
-                        subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
-                        data = new Vector3[subDataAdditions];
-
-                        for (int j = 0; j < subDataAdditions; j++)
+                    case 0x88:
+                    case 0x89: //Array of ints. Only observed in use for vertices thus far, which would specially handle this. 
+                        subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
+                        switch (subDataType) //The last array entry aka data count - 1.
                         {
-                            Vector3 vec3 = streamReader.Read<Vector3>();
-
-                            ((Vector3[])data)[j] = vec3;
+                            case 0x8:
+                                subDataAdditions = streamReader.Read<byte>();
+                                break;
+                            case 0x10:
+                                subDataAdditions = streamReader.Read<ushort>();
+                                break;
+                            default:
+                                throw new Exception($"Unknown subdataType {subDataType}");
                         }
+                        subDataAdditions *= 4; //The field is stored as some amount of int32s. Therefore, multiplying by 4 gives us the byte buffer length.
+
+                        data = streamReader.ReadBytes(streamReader.Position(), subDataAdditions); //Read the whole vert buffer at once as byte array. We'll handle it later.
+                        
+                        streamReader.Seek(subDataAdditions, SeekOrigin.Current);
                         break;
                     case 0xCA: //Float Matrix, observed only as 4x4
                         subDataType = streamReader.Read<byte>(); //Expected to always be 0xA for float
@@ -471,8 +523,8 @@ namespace AquaModelLibrary.AquaMethods
             //VTXL
             outBytes.Add(0xBA);
             outBytes.Add(0x89);
-            outBytes.Add(0x10);
-            for(int i = 0; i < vtxl.vertPositions.Count; i++)
+            int vtxlSizeArea = outBytes.Count;
+            for (int i = 0; i < vtxl.vertPositions.Count; i++)
             {
                 for(int j = 0; j < vtxe.vertDataTypes.Count; j++)
                 {
@@ -530,6 +582,19 @@ namespace AquaModelLibrary.AquaMethods
                 }
             }
 
+            //Calc and insert the vert data counts in post due to the way sega does it.
+            int vertDataCount = ((outBytes.Count - vtxlSizeArea) / 4) - 1;
+            if (vertDataCount > byte.MaxValue)
+            {
+                outBytes.Insert(vtxlSizeArea, 0x10);
+                outBytes.InsertRange(vtxlSizeArea + 0x4, BitConverter.GetBytes((short)(vertDataCount)));
+            }
+            else
+            {
+                outBytes.Insert(vtxlSizeArea, 0x8);
+                outBytes.Insert(vtxlSizeArea + 0x4, (byte)vertDataCount);
+            }
+
             outBytes.InsertRange(vtxeEnd, Encoding.UTF8.GetBytes("VTXL"));
             outBytes.InsertRange(vtxeEnd + 0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on VTXL
             outBytes.InsertRange(vtxeEnd + 0x8, BitConverter.GetBytes((short)1)); //Subtag count
@@ -540,12 +605,262 @@ namespace AquaModelLibrary.AquaMethods
             return outBytes.ToArray();
         }
 
-        public List<PSET> ParsePSET(List<Dictionary<int, object>> psetRaw)
+        public void ParsePSET(List<Dictionary<int, object>> psetRaw, out List<PSET> psets, out List<stripData> strips)
         {
-            List<PSET> psets = new List<PSET>();
+            psets = new List<PSET>();
+            strips = new List<stripData>();
+            for(int i = 0; i < psetRaw.Count; i++)
+            {
+                PSET pset = new PSET();
+                stripData strip = new stripData();
 
-            return psets;
+                pset.tag = (int)psetRaw[i][0xC6];
+                pset.faceType = (int)psetRaw[i][0xBB];
+                pset.psetFaceCount = (int)psetRaw[i][0xBC];
+                strip.triCount = (int)psetRaw[i][0xB7];
+                strip.triStrips = ((short[])psetRaw[i][0xB8]).ToList();
+                pset.reserve0 = (int)psetRaw[i][0xC5];
+
+                psets.Add(pset);
+                strips.Add(strip);
+            }
         }
+
+        public byte[] toPSET(List<PSET> psets, List<stripData> strips)
+        {
+            List<byte> outBytes = new List<byte>();
+            for(int i = 0; i < psets.Count; i++)
+            {
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
+                addBytes(outBytes, 0xC6, 0x9, BitConverter.GetBytes(psets[i].tag));
+                addBytes(outBytes, 0xBB, 0x9, BitConverter.GetBytes(psets[i].faceType));
+                addBytes(outBytes, 0xBC, 0x9, BitConverter.GetBytes(psets[i].psetFaceCount));
+                addBytes(outBytes, 0xB7, 0x9, BitConverter.GetBytes(strips[i].triCount));
+                
+                outBytes.Add(0xB8);
+                outBytes.Add(0x86);
+                if(strips[i].triCount - 1 > byte.MaxValue)
+                {
+                    outBytes.Add(0x10);
+                    outBytes.AddRange(BitConverter.GetBytes((short)(strips[i].triStrips.Count - 1)));
+                } else
+                {
+                    outBytes.Add(0x8);
+                    outBytes.Add((byte)(strips[i].triStrips.Count - 1));
+                }
+                for(int j = 0; j < strips[i].triStrips.Count; j++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(strips[i].triStrips[j]));
+                }
+                
+                addBytes(outBytes, 0xC5, 0x9, BitConverter.GetBytes(psets[i].reserve0));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("PSET"));
+            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on PSET
+            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)psets.Count * 0x7 + 0x1)); //Subtag count. 7 for each PSET + 1 for the end tag, always.
+
+            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+
+            return outBytes.ToArray();
+        }
+
+        public List<MESH> ParseMESH(List<Dictionary<int, object>> meshRaw)
+        {
+            List<MESH> meshList = new List<MESH>();
+
+            for (int i = 0; i < meshRaw.Count; i++)
+            {
+                MESH mesh = new MESH();
+
+                mesh.unkShort0 = (short)((int)meshRaw[i][0xB0] % 0x10000);
+                mesh.unkByte0 = (byte)((int)meshRaw[i][0xC7] % 0x100);
+                mesh.unkByte1 = (byte)(((int)meshRaw[i][0xC7] / 100) % 0x100);
+                mesh.unkShort1 = (short)((int)meshRaw[i][0xB0] / 0x10000);
+                mesh.mateIndex = (int)meshRaw[i][0xB1];
+                mesh.rendIndex = (int)meshRaw[i][0xB2];
+                mesh.shadIndex = (int)meshRaw[i][0xB3];
+                mesh.tsetIndex = (int)meshRaw[i][0xB4];
+                mesh.baseMeshNodeId = (int)meshRaw[i][0xB5];
+                mesh.vsetIndex = (int)meshRaw[i][0xC0];
+                mesh.psetIndex = (int)meshRaw[i][0xC1];
+                mesh.baseMeshSequenceId = (int)meshRaw[i][0xC2];
+
+                meshList.Add(mesh);
+            }
+
+            return meshList;
+        }
+
+        public byte[] toMESH(List<MESH> meshList)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            for(int i = 0; i < meshList.Count; i++)
+            {
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
+                int shorts = meshList[i].unkShort0 + (meshList[i].unkShort1 << 4);
+                int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 << 2);
+                addBytes(outBytes, 0xB0, 0x9, BitConverter.GetBytes(shorts));
+                addBytes(outBytes, 0xC7, 0x9, BitConverter.GetBytes(bytes));
+                addBytes(outBytes, 0xB1, 0x8, BitConverter.GetBytes(meshList[i].mateIndex));
+                addBytes(outBytes, 0xB2, 0x8, BitConverter.GetBytes(meshList[i].rendIndex));
+                addBytes(outBytes, 0xB3, 0x8, BitConverter.GetBytes(meshList[i].shadIndex));
+                addBytes(outBytes, 0xB4, 0x8, BitConverter.GetBytes(meshList[i].tsetIndex));
+                addBytes(outBytes, 0xB5, 0x8, BitConverter.GetBytes(meshList[i].baseMeshNodeId));
+                addBytes(outBytes, 0xC0, 0x8, BitConverter.GetBytes(meshList[i].vsetIndex));
+                addBytes(outBytes, 0xC1, 0x8, BitConverter.GetBytes(meshList[i].psetIndex));
+                addBytes(outBytes, 0xC2, 0x9, BitConverter.GetBytes(meshList[i].baseMeshSequenceId));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("MESH"));
+            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on MESH
+            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)meshList.Count * 0xB + 0x1)); //Subtag count. 11 for each MESH + 1 for the end tag, always.
+
+            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+
+            return outBytes.ToArray();
+        }
+
+        public unsafe List<MATE> parseMATE(List<Dictionary<int, object>> mateRaw)
+        {
+            List<MATE> mateList = new List<MATE>();
+
+            for(int i = 0; i < mateRaw.Count; i++)
+            {
+                MATE mate = new MATE();
+                mate.diffuseRGBA = (Vector4)mateRaw[i][0x30];
+                mate.unkRGBA0 = (Vector4)mateRaw[i][0x31];
+                mate._sRGBA = (Vector4)mateRaw[i][0x32];
+                mate.unkRGBA1 = (Vector4)mateRaw[i][0x33];
+                mate.reserve0 = (int)mateRaw[i][0x34];
+                mate.unkFloat0 = (float)mateRaw[i][0x35];
+                mate.unkFloat1 = (float)mateRaw[i][0x36];
+                mate.unkInt0 = (int)mateRaw[i][0x37];
+                mate.unkInt1 = (int)mateRaw[i][0x38];
+
+                byte[] alphaArr = (byte[])mateRaw[i][0x3A];
+                int alphaCount = alphaArr.Count() < 0x20 ? alphaArr.Count() : 0x20;
+                for (int j = 0; j < alphaCount; j++)
+                {
+                    mate.alphaType[j] = alphaArr[j];
+                }
+                byte[] matNameArr = (byte[])mateRaw[i][0x39];
+                int matCount = matNameArr.Count() < 0x20 ? matNameArr.Count() : 0x20;
+                for (int j = 0; j < matCount; j++)
+                {
+                    mate.matName[j] = matNameArr[j];
+                }
+
+                mateList.Add(mate);
+            }
+
+            return mateList;
+        }
+
+        public unsafe byte[] toMATE(List<MATE> mateList)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            for (int i = 0; i < mateList.Count; i++)
+            {
+                //Gotta make a local accessor for fixed arrays
+                MATE mate = mateList[i];
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
+
+                addBytes(outBytes, 0x30, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate.diffuseRGBA));
+                addBytes(outBytes, 0x31, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate.unkRGBA0));
+                addBytes(outBytes, 0x32, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate._sRGBA));
+                addBytes(outBytes, 0x33, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate.unkRGBA1));
+                addBytes(outBytes, 0x34, 0x9, BitConverter.GetBytes(mate.reserve0));
+                addBytes(outBytes, 0x35, 0xA, BitConverter.GetBytes(mate.unkFloat0));
+                addBytes(outBytes, 0x36, 0xA, BitConverter.GetBytes(mate.unkFloat1));
+                addBytes(outBytes, 0x37, 0x9, BitConverter.GetBytes(mate.unkInt0));
+                addBytes(outBytes, 0x38, 0x9, BitConverter.GetBytes(mate.unkInt1));
+
+                //Alpha Type String
+                string alphaStr = GetPSO2String(mate.alphaType);
+                addBytes(outBytes, 0x3A, 0x02, (byte)alphaStr.Length, Encoding.UTF8.GetBytes(alphaStr));
+
+                //Mat Name String
+                string matName = GetPSO2String(mate.matName);
+                addBytes(outBytes, 0x39, 0x02, (byte)matName.Length, Encoding.UTF8.GetBytes(matName));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("MATE"));
+            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on MATE
+            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)mateList.Count * 0xB + 0x1)); //Subtag count. 11 for each MATE + 1 for the end tag, always.
+
+            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+
+            return outBytes.ToArray();
+        }
+
+        public unsafe List<REND> parseREND(List<Dictionary<int, object>> rendRaw)
+        {
+            List<REND> rendList = new List<REND>();
+
+            for (int i = 0; i < rendRaw.Count; i++)
+            {
+
+            }
+
+            return rendList;
+        }
+
+        public unsafe byte[] toREND(List<REND> rendList)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            return outBytes.ToArray();
+        }
+
+        public unsafe List<SHAD> parseSHAD(List<Dictionary<int, object>> shadRaw)
+        {
+            List<SHAD> shadList = new List<SHAD>();
+
+            for(int i = 0; i < shadRaw.Count; i++)
+            {
+                
+            }
+
+            return shadList;
+        }
+
+        public unsafe byte[] toSHAD(List<SHAD> shadList)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            return outBytes.ToArray();
+        }
+
         public void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
         {
             outBytes.Add(id); 
