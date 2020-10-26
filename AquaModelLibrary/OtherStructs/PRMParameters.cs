@@ -5,9 +5,9 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.AquaStructs
+namespace AquaModelLibrary.OtherStructs
 {
-    unsafe class PrmParameters
+    unsafe class PRMParameters
     {
         //Seems to somehow link the PRM entries together when the count isn't 0
         List<short> groupIndices = new List<short>();

@@ -6,11 +6,13 @@ using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary;
 using System.Numerics;
 using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
+using AquaModelLibrary.OtherStructs;
 
 namespace AquaLibrary
 {
     public class AquaUtil
     {
+        public List<TCBTerrainConvex> tcbModels = new List<TCBTerrainConvex>();
         public List<ModelSet> aquaModels = new List<ModelSet>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
         public struct ModelSet
@@ -451,6 +453,128 @@ namespace AquaLibrary
                     bones.nod0List.Add(node);
                 }
             }
+        }
+
+        public void ReadCollision(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                tcbModels = new List<TCBTerrainConvex>();
+                TCBTerrainConvex tcbModel = new TCBTerrainConvex();
+                int type = streamReader.Peek<int>();
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals(0x626374))
+                {
+                    streamReader.Seek(0x60, SeekOrigin.Current);
+                    type = streamReader.Peek<int>();
+                    offset += 0x60;
+                }
+
+                streamReader.Seek(0x28, SeekOrigin.Current);
+                int tcbPointer = streamReader.Read<int>() + offset;
+                streamReader.Seek(tcbPointer, SeekOrigin.Begin);
+                type = streamReader.Peek<int>();
+
+                //Proceed based on file variant
+                if (type.Equals(0x626374))
+                {
+                    tcbModel.tcbInfo = streamReader.Read<TCBTerrainConvex.TCB>();
+
+                    //Read main TCB verts
+                    streamReader.Seek(tcbModel.tcbInfo.vertexDataOffset + offset, SeekOrigin.Begin);
+                    List<Vector3> verts = new List<Vector3>();
+                    for(int i = 0; i < tcbModel.tcbInfo.vertexCount; i++)
+                    {
+                        verts.Add(streamReader.Read<Vector3>());
+                    }
+
+                    //Read main TCB faces
+                    streamReader.Seek(tcbModel.tcbInfo.faceDataOffset + offset, SeekOrigin.Begin);
+                    List<TCBTerrainConvex.TCBFace> faces = new List<TCBTerrainConvex.TCBFace>();
+                    for (int i = 0; i < tcbModel.tcbInfo.faceCount; i++)
+                    {
+                        faces.Add(streamReader.Read<TCBTerrainConvex.TCBFace>());
+                    }
+
+                    //Read main TCB materials
+
+                    tcbModels.Add(tcbModel);
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+
+            }
+        }
+
+        //tcbModel components should be written before this
+        public void WriteCollision(string outFilename)
+        {
+            int offset = 0x20;
+            TCBTerrainConvex tcbModel = tcbModels[0];
+            List<byte> outBytes = new List<byte>();
+
+            //Initial tcb section setup
+            tcbModel.tcbInfo = new TCBTerrainConvex.TCB();
+            tcbModel.tcbInfo.magic = 0x626374;
+            tcbModel.tcbInfo.flag0 = 0xD;
+            tcbModel.tcbInfo.flag1 = 0x1;
+            tcbModel.tcbInfo.flag2 = 0x4;
+            tcbModel.tcbInfo.flag3 = 0x3;
+            tcbModel.tcbInfo.vertexCount = tcbModel.vertices.Count;
+            tcbModel.tcbInfo.rel0DataStart = 0x10;
+            tcbModel.tcbInfo.faceCount = tcbModel.faces.Count;
+            tcbModel.tcbInfo.materialCount = tcbModel.materials.Count;
+            tcbModel.tcbInfo.unkInt3 = 0x1;
+
+            //Data area starts with 0xFFFFFFFF
+            for (int i = 0; i < 4; i++) { outBytes.Add(0xFF); }
+
+            //Write vertices
+            tcbModel.tcbInfo.vertexDataOffset = outBytes.Count + 0x10;
+            for(int i = 0; i < tcbModel.vertices.Count; i++)
+            {
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tcbModel.vertices[i]));
+            }
+
+            //Write faces
+            tcbModel.tcbInfo.faceDataOffset = outBytes.Count + 0x10;
+            for (int i = 0; i < tcbModel.faces.Count; i++)
+            {
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tcbModel.faces[i]));
+            }
+
+            //Write materials
+            tcbModel.tcbInfo.materialDataOFfset = outBytes.Count + 0x10;
+            for(int i = 0; i < tcbModel.materials.Count; i++)
+            {
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tcbModel.materials[i]));
+            }
+
+            //Write Nexus Mesh
+            tcbModel.tcbInfo.nxsMeshOffset = outBytes.Count + 0x10;
+            List<byte> nxsBytes = new List<byte>();
+            WriteNXSMesh(nxsBytes);
+            tcbModel.tcbInfo.nxsMeshSize = nxsBytes.Count;
+            outBytes.AddRange(nxsBytes);
+
+            //Write tcb
+            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tcbModel.tcbInfo));
+
+            //Write NIFL, REL0, NOF0, NEND
+        }
+
+        public void WriteNXSMesh(List<byte> outBytes)
+        {
+            List<byte> nxsMesh = new List<byte>();
+
+
+
+            outBytes.AddRange(nxsMesh);
         }
 
         private static void AlignReader(BufferedStreamReader streamReader, int align)

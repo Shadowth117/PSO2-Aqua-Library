@@ -176,11 +176,11 @@ namespace AquaModelLibrary
 
         public struct SHAD
         {
-            public int unk0; //Always 0?
-            public fixed byte pixelShader[0x20]; //Pixel Shader string
-            public fixed byte vertexShader[0x20]; //Vertex Shader string
-            public int unk1; //Always 0?
-            public int unk2; //Always 0? Not read in some versions of NIFL Tool, causing misalignments
+            public int unk0; //0x90, type 0x9 //Always 0?
+            public fixed byte pixelShader[0x20]; //0x91, type 0x2 //Pixel Shader string
+            public fixed byte vertexShader[0x20]; //0x92, type 0x2 //Vertex Shader string
+            public int unk1; //0x93, type 0x9 //Always 0?
+            public int unk2; //Always 0? Not read in some versions of NIFL Tool, causing misalignments. Doesn't exist in VTBF, so perhaps added later on.
         }
 
         //SHAder Pixel? Seemingly only in VTBF. One per shader set so unlikely to be a standin for shape.
@@ -192,50 +192,52 @@ namespace AquaModelLibrary
         //Texture Settings
         public struct TSTA
         {
-            public int tag; //0x16, always
-            public int texUsageOrder; //0,1,2, or 3. PSO2 TSETs (Texture sets) require specific textures in specfic places. There should be a new TSTA if using a texture in a different slot for some reason.
-            public int modelUVSet; //Observed as -1, 1, and 2. 3 and maybe more theoretically usable. 1 is default, -1 is for _t maps or any map that doesn't use UVs. 2 is for _k maps.
-            public Vector3 unkVector0; //0, -0, 0, often.
-            public Vector3 unkVector1; //All 0s often
-            public int unkInt0; //1 or sometimes 3
-            public int unkInt1; //1 or sometimes 3
-            public int unkInt2; //1
-            public int unkInt3; //0
-            public int unkInt4; //0
-            public fixed byte texName[0x20]; //Texture filename (includes extension)
+            public int tag; //0x60, type 0x9 //0x16, always
+            public int texUsageOrder; //0x61, type 0x9  //0,1,2, or 3. PSO2 TSETs (Texture sets) require specific textures in specfic places. There should be a new TSTA if using a texture in a different slot for some reason.
+            public int modelUVSet;    //0x62, type 0x9  //Observed as -1, 1, and 2. 3 and maybe more theoretically usable. 1 is default, -1 is for _t maps or any map that doesn't use UVs. 2 is for _k maps.
+            public Vector3 unkVector0; //0x63, type 0x4A, 0x1 //0, -0, 0, often.
+            public int unkInt0; //0x64, type 0x9 //0
+            public int unkInt1; //0x65, type 0x9 //0
+            public int unkInt2; //0x66, type 0x9 //0
+            public int unkInt3; //0x67, type 0x9 //1 or sometimes 3
+            public int unkInt4; //0x68, type 0x9 //1 or sometimes 3
+            public int unkInt5; //0x69, type 0x9 //1
+            public float unkFloat0; //0x6A, type 0xA //0
+            public float unkFloat1; //0x6B, type 0xA //0
+            public fixed byte texName[0x20]; //0x6C, type 0x2 //Texture filename (includes extension)
         }
 
         public struct TSET
         {
-            public int unkInt0; //0
-            public int texCount; //0-4. Technically not using any textures is valid.
-            public int unkInt1; //0
-            public int unkInt2; //0
-            public int unkInt3; //0
-            public fixed int tstaTexIDs[4]; //Ids of textures in set based on their order in the file, starting at 0. Write as -1 if no texture in slot (Not all shaders require all 4 slots to use a real texture)
+            public int unkInt0; //0x70, type 0x9  //0
+            public int texCount; //0x71, type 0x8 //0-4. Technically not using any textures is valid based on observation.
+            public int unkInt1;  //0x72, type 0x9 //0
+            public int unkInt2;  //0x73, type 0x9 //0
+            public int unkInt3;  //0x74, type 0x9 //0
+            public fixed int tstaTexIDs[4]; //0x75, type 0x88 //Ids of textures in set based on their order in the file, starting at 0. -1 if no texture in slot (Not all shaders require all 4 slots to use a real texture)
         }
 
         //Laid out in same order as TSTA. Seemingly redundant.
         public struct TEXF
         {
-            public fixed byte texName[0x20]; //Texture filename (includes extension)
+            public fixed byte texName[0x20]; //0x80, type 0x2 //Texture filename (includes extension)
         }
 
         //UNRM Struct - Seemingly links vertices split for various reasons(vertex colors per face, UVs, etc.).
         public class UNRM
         {
-            public int vertGroupCountCount;  //Amount of vertex group counts (The amount of verts for each group of vertices in the mesh ids and vert ids).
+            public int vertGroupCountCount;  //0xDA, type 0x9 //Amount of vertex group counts (The amount of verts for each group of vertices in the mesh ids and vert ids).
             public int vertGroupCountOffset; //Offset for listing of vertex group counts. 
-            public int vertCount;  //Total vertices in the mesh id and vertId data
+            public int vertCount; //0xDC, type 0x9 //Total vertices in the mesh id and vertId data
             public int meshIdOffset;
             public int vertIDOffset;
             public double padding0;
             public int padding1;
-            public List<int> unrmVertGroups = new List<int>();
+            public List<int> unrmVertGroups = new List<int>(); //0xDB, type 0x89
             //Align to 0x10
-            public List<List<int>> unrmMeshIds = new List<List<int>>();
+            public List<List<int>> unrmMeshIds = new List<List<int>>(); //0xDD, type 0x89
             //Align to 0x10
-            public List<List<int>> unrmVertIds = new List<List<int>>();
+            public List<List<int>> unrmVertIds = new List<List<int>>(); //0xDE, type 0x89
             //Align to 0x10
         }
 
@@ -316,7 +318,7 @@ namespace AquaModelLibrary
             }
 
             //PSO2 doesn't differentiate in the file how many weights a particular vert has. 
-            //This allows one to get the weight amount 
+            //This allows one to condense the weight data
             public void createTrueVertWeights()
             {
                 if (vertWeights.Count > 0 && vertWeightIndices.Count > 0)

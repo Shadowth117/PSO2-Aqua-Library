@@ -63,7 +63,8 @@
   <ItemGroup>
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
-    <Compile Include="AquaStructs\PrmParameters.cs" />
+    <Compile Include="OtherStructs\NexusMesh.cs" />
+    <Compile Include="OtherStructs\PRMParameters.cs" />
     <Compile Include="AquaUtil.cs" />
     <Compile Include="AquaStructs\AquaCamera.cs" />
     <Compile Include="AquaStructs\AquaCommon.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="AquaStructs\AquaObject.cs" />
     <Compile Include="AquaStructs\AquaPackage.cs" />
     <Compile Include="AquaStructs\AquaUV.cs" />
+    <Compile Include="OtherStructs\TCBTerrainConvex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
