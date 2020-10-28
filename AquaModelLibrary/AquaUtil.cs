@@ -34,9 +34,13 @@ namespace AquaLibrary
                 //Deal with deicer's extra header nonsense
                 if (type.Equals(0x707161) || type.Equals(0x707274))
                 {
-                    streamReader.Seek(0x60, SeekOrigin.Current);
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
                     type = streamReader.Peek<int>();
-                    offset += 0x60;
+                    offset += headJunkSize;
                 }
 
                 //Deal with afp header or aqo. prefixing as needed
@@ -405,6 +409,16 @@ namespace AquaLibrary
             return aquaModels;
         }
 
+        public void WriteVTBFModel(string outFileName)
+        {
+
+        }
+
+        public void WriteNIFLModel(string outFileName)
+        {
+
+        }
+
         public void ReadBones(string inFilename)
         {
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
@@ -416,9 +430,13 @@ namespace AquaLibrary
                 //Deal with deicer's extra header nonsense
                 if (type.Equals(0x6E7161) || type.Equals(0x6E7274))
                 {
-                    streamReader.Seek(0x60, SeekOrigin.Current);
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
                     type = streamReader.Peek<int>();
-                    offset += 0x60;
+                    offset += headJunkSize;
                 }
 
                 //Proceed based on file variant

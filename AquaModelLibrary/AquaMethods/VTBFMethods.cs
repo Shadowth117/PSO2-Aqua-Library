@@ -998,32 +998,36 @@ namespace AquaModelLibrary.AquaMethods
         {
             List<TSTA> tstaList = new List<TSTA>();
 
-            for (int i = 0; i < tstaRaw.Count; i++)
+            //Make sure there are actually textures
+            if (tstaRaw[0].Keys.Count > 1)
             {
-                TSTA tsta = new TSTA();
-
-                tsta.tag = (int)tstaRaw[i][0x60];
-                tsta.texUsageOrder = (int)tstaRaw[i][0x61];
-                tsta.modelUVSet = (int)tstaRaw[i][0x62];
-                tsta.unkVector0 = (Vector3)tstaRaw[i][0x63];
-                tsta.unkInt0 = (int)tstaRaw[i][0x64];
-                tsta.unkInt1 = (int)tstaRaw[i][0x65];
-                tsta.unkInt2 = (int)tstaRaw[i][0x66];
-                tsta.unkInt3 = (int)tstaRaw[i][0x67];
-                tsta.unkInt4 = (int)tstaRaw[i][0x68];
-                tsta.unkInt5 = (int)tstaRaw[i][0x69];
-                tsta.unkFloat0 = (float)tstaRaw[i][0x6A];
-                tsta.unkFloat1 = (float)tstaRaw[i][0x6B];
-
-                //TexName String
-                byte[] textNameArr = (byte[])tstaRaw[i][0x6C];
-                int nameCount = textNameArr.Count() < 0x20 ? textNameArr.Count() : 0x20;
-                for (int j = 0; j < nameCount; j++)
+                for (int i = 0; i < tstaRaw.Count; i++)
                 {
-                    tsta.texName[j] = textNameArr[j];
-                }
+                    TSTA tsta = new TSTA();
 
-                tstaList.Add(tsta);
+                    tsta.tag = (int)tstaRaw[i][0x60];
+                    tsta.texUsageOrder = (int)tstaRaw[i][0x61];
+                    tsta.modelUVSet = (int)tstaRaw[i][0x62];
+                    tsta.unkVector0 = (Vector3)tstaRaw[i][0x63];
+                    tsta.unkInt0 = (int)tstaRaw[i][0x64];
+                    tsta.unkInt1 = (int)tstaRaw[i][0x65];
+                    tsta.unkInt2 = (int)tstaRaw[i][0x66];
+                    tsta.unkInt3 = (int)tstaRaw[i][0x67];
+                    tsta.unkInt4 = (int)tstaRaw[i][0x68];
+                    tsta.unkInt5 = (int)tstaRaw[i][0x69];
+                    tsta.unkFloat0 = (float)tstaRaw[i][0x6A];
+                    tsta.unkFloat1 = (float)tstaRaw[i][0x6B];
+
+                    //TexName String
+                    byte[] textNameArr = (byte[])tstaRaw[i][0x6C];
+                    int nameCount = textNameArr.Count() < 0x20 ? textNameArr.Count() : 0x20;
+                    for (int j = 0; j < nameCount; j++)
+                    {
+                        tsta.texName[j] = textNameArr[j];
+                    }
+
+                    tstaList.Add(tsta);
+                }
             }
 
             return tstaList;
@@ -1033,14 +1037,11 @@ namespace AquaModelLibrary.AquaMethods
         {
             List<byte> outBytes = new List<byte>();
 
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFC)); //Always there, even if there's nothing in the list
             for (int i = 0; i < tstaList.Count; i++)
             {
                 TSTA tsta = tstaList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
+                if (i != 0)
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
@@ -1138,20 +1139,23 @@ namespace AquaModelLibrary.AquaMethods
         {
             List<TEXF> texfList = new List<TEXF>();
 
-            for (int i = 0; i < texfRaw.Count; i++)
+            //Make sure there are texture refs to get
+            if (texfRaw[0].Keys.Count > 1)
             {
-                TEXF texf = new TEXF();
-
-                byte[] textNameArr = (byte[])texfRaw[i][0x80];
-                int nameCount = textNameArr.Count() < 0x20 ? textNameArr.Count() : 0x20;
-                for (int j = 0; j < nameCount; j++)
+                for (int i = 0; i < texfRaw.Count; i++)
                 {
-                    texf.texName[j] = textNameArr[j];
+                    TEXF texf = new TEXF();
+
+                    byte[] textNameArr = (byte[])texfRaw[i][0x80];
+                    int nameCount = textNameArr.Count() < 0x20 ? textNameArr.Count() : 0x20;
+                    for (int j = 0; j < nameCount; j++)
+                    {
+                        texf.texName[j] = textNameArr[j];
+                    }
+
+                    texfList.Add(texf);
                 }
-
-                texfList.Add(texf);
             }
-
             return texfList;
         }
 
@@ -1159,14 +1163,11 @@ namespace AquaModelLibrary.AquaMethods
         {
             List<byte> outBytes = new List<byte>();
 
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
             for (int i = 0; i < texfList.Count; i++)
             {
                 TEXF texf = texfList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
+                if (i != 0)
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
@@ -1428,26 +1429,29 @@ namespace AquaModelLibrary.AquaMethods
         {
             List<NODO> nodoList = new List<NODO>();
 
-            for (int i = 0; i < nod0Raw.Count; i++)
+            if (nod0Raw[0].Keys.Count > 1)
             {
-                NODO nodo = new NODO();
-
-                byte[] shorts = BitConverter.GetBytes((int)nod0Raw[i][0x03]);
-                nodo.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
-                nodo.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
-                nodo.animatedFlag = (int)nod0Raw[i][0x0B];
-                nodo.parentId = (int)nod0Raw[i][0x04];
-                nodo.pos = (Vector3)nod0Raw[i][0x07];
-                nodo.eulRot = (Vector3)nod0Raw[i][0x08];
-
-                byte[] boneNameArr = (byte[])nod0Raw[i][0x0D];
-                int nameCount = boneNameArr.Count() < 0x20 ? boneNameArr.Count() : 0x20;
-                for (int j = 0; j < nameCount; j++)
+                for (int i = 0; i < nod0Raw.Count; i++)
                 {
-                    nodo.boneName[j] = boneNameArr[j];
-                }
+                    NODO nodo = new NODO();
 
-                nodoList.Add(nodo);
+                    byte[] shorts = BitConverter.GetBytes((int)nod0Raw[i][0x03]);
+                    nodo.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
+                    nodo.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
+                    nodo.animatedFlag = (int)nod0Raw[i][0x0B];
+                    nodo.parentId = (int)nod0Raw[i][0x04];
+                    nodo.pos = (Vector3)nod0Raw[i][0x07];
+                    nodo.eulRot = (Vector3)nod0Raw[i][0x08];
+
+                    byte[] boneNameArr = (byte[])nod0Raw[i][0x0D];
+                    int nameCount = boneNameArr.Count() < 0x20 ? boneNameArr.Count() : 0x20;
+                    for (int j = 0; j < nameCount; j++)
+                    {
+                        nodo.boneName[j] = boneNameArr[j];
+                    }
+
+                    nodoList.Add(nodo);
+                }
             }
 
             return nodoList;
