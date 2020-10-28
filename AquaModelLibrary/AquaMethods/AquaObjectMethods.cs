@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using static AquaModelLibrary.AquaObject;
 
@@ -264,6 +262,10 @@ namespace AquaModelLibrary.AquaMethods
 
             return finalText;
         }
+
+        public static string GetBoneName(AquaNode.NODE node) => GetPSO2String(node.boneName);
+
+        public static string GetEffName(AquaNode.NODO eff) => GetPSO2String(eff.boneName);
 
         public static string GetMatName(MATE mate) => GetPSO2String(mate.matName);
 

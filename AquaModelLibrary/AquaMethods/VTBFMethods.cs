@@ -6,22 +6,25 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using static AquaModelLibrary.AquaObject;
+using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
 using System.Windows;
+using System.Diagnostics;
 
 namespace AquaModelLibrary.AquaMethods
 {
-    public class VTBFMethods
+    public unsafe class VTBFMethods
     {
-        public List<Dictionary<int, object>> ReadVTBFTag(BufferedStreamReader streamReader)
+        public static List<Dictionary<int, object>> ReadVTBFTag(BufferedStreamReader streamReader, out string tagString, out int entryCount)
         {
             List<Dictionary<int, object>> vtbfData = new List<Dictionary<int, object>>();
 
             streamReader.Seek(0x4, SeekOrigin.Current); //vtc0
             uint bodyLength = streamReader.Read<uint>();
             int mainTagType = streamReader.Read<int>();
+            tagString = Encoding.UTF8.GetString(BitConverter.GetBytes(mainTagType));
             short pointerCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
-            short entryCount = streamReader.Read<short>();
+            entryCount = streamReader.Read<short>();
 
             Dictionary<int, object> vtbfDict = new Dictionary<int, object>();
 
@@ -36,7 +39,8 @@ namespace AquaModelLibrary.AquaMethods
                 switch (dataId)
                 {
                     case 0xFD: //End of sequence and should be end of tag
-                        break;
+                        vtbfData.Add(vtbfDict);
+                        return vtbfData;
                     case 0xFE:
                         vtbfData.Add(vtbfDict);
                         vtbfDict = new Dictionary<int, object>();
@@ -45,7 +49,6 @@ namespace AquaModelLibrary.AquaMethods
                         break;
                 }
                 object data;
-
                 switch (dataType)
                 {
                     case 0x0: //Special Flag. Probably more for parsing purposes than data. 0xFC ID before this means first struct, 0xFE means a later struct
@@ -124,10 +127,10 @@ namespace AquaModelLibrary.AquaMethods
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
                             case 0x8:
-                                subDataAdditions = streamReader.Read<byte>();
+                                subDataAdditions = streamReader.Read<byte>() + 1;
                                 break;
                             case 0x10:
-                                subDataAdditions = streamReader.Read<ushort>();
+                                subDataAdditions = streamReader.Read<ushort>() + 1;
                                 break;
                             default:
                                 throw new Exception($"Unknown subdataType {subDataType}");
@@ -142,10 +145,10 @@ namespace AquaModelLibrary.AquaMethods
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
                             case 0x8:
-                                subDataAdditions = streamReader.Read<byte>();
+                                subDataAdditions = streamReader.Read<byte>() + 1;
                                 break;
                             case 0x10:
-                                subDataAdditions = streamReader.Read<ushort>();
+                                subDataAdditions = streamReader.Read<ushort>() + 1;
                                 break;
                             default:
                                 throw new Exception($"Unknown subdataType {subDataType}");
@@ -163,10 +166,10 @@ namespace AquaModelLibrary.AquaMethods
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
                             case 0x8:
-                                subDataAdditions = streamReader.Read<byte>();
+                                subDataAdditions = streamReader.Read<byte>() + 1;
                                 break;
                             case 0x10:
-                                subDataAdditions = streamReader.Read<ushort>();
+                                subDataAdditions = streamReader.Read<ushort>() + 1;
                                 break;
                             default:
                                 throw new Exception($"Unknown subdataType {subDataType}");
@@ -179,8 +182,8 @@ namespace AquaModelLibrary.AquaMethods
                         break;
                     case 0xCA: //Float Matrix, observed only as 4x4
                         subDataType = streamReader.Read<byte>(); //Expected to always be 0xA for float
-                        subDataAdditions = streamReader.Read<byte>(); //Expected to always be 0x3, maybe for last array entry id
-                        data = new Vector4[subDataAdditions + 1];
+                        subDataAdditions = streamReader.Read<byte>() + 1; //Expected to always be 0x3, maybe for last array entry id
+                        data = new Vector4[subDataAdditions];
 
                         for (int j = 0; j < subDataAdditions; j++)
                         {
@@ -202,11 +205,15 @@ namespace AquaModelLibrary.AquaMethods
 
                 vtbfDict.Add(dataId, data);
             }
-
+            //For non-list type tag data
+            if(vtbfData.Count == 0)
+            {
+                vtbfData.Add(vtbfDict);
+            }
             return vtbfData;
         }
 
-        public OBJC parseOBJC(List<Dictionary<int, object>> objcRaw)
+        public static OBJC parseOBJC(List<Dictionary<int, object>> objcRaw)
         {
             OBJC objc = new OBJC();
 
@@ -228,10 +235,10 @@ namespace AquaModelLibrary.AquaMethods
             objc.texfCount = (int)(objcRaw[0][0x1D]);
 
             BoundingVolume bounding = new BoundingVolume();
-            bounding.modelCenter = ((Vector3[])(objcRaw[0][0x1E]))[0];
+            bounding.modelCenter = ((Vector3)(objcRaw[0][0x1E]));
             bounding.boundingRadius = (float)(objcRaw[0][0x1F]);
-            bounding.modelCenter2 = ((Vector3[])(objcRaw[0][0x20]))[0];
-            bounding.maxMinXYZDifference = ((Vector3[])(objcRaw[0][0x21]))[0];
+            bounding.modelCenter2 = ((Vector3)(objcRaw[0][0x20]));
+            bounding.maxMinXYZDifference = ((Vector3)(objcRaw[0][0x21]));
 
             objc.bounds = bounding;
 
@@ -287,7 +294,7 @@ namespace AquaModelLibrary.AquaMethods
             return outBytes.ToArray();
         }
 
-        public List<VSET> ParseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<short>> bonePalettes, out List<List<short>> edgeVertsLists)
+        public static List<VSET> parseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<short>> bonePalettes, out List<List<short>> edgeVertsLists)
         {
             List<VSET> vsetList = new List<VSET>();
             bonePalettes = new List<List<short>>();
@@ -301,28 +308,46 @@ namespace AquaModelLibrary.AquaMethods
                 vset.vtxlCount = (int)(vsetRaw[i][0xB9]);
                 vset.reserve0 = (int)(vsetRaw[i][0xC4]);
 
+                //BonePalette
                 vset.bonePaletteCount = (int)(vsetRaw[i][0xBD]);
-                var rawBP = (vsetRaw[i][0xBE]);
-                if (rawBP is short)
+                if (vsetRaw[i].ContainsKey(0xBE))
                 {
-                    bonePalettes.Add(new List<short> { (short)rawBP });
-                } else if (rawBP is short[])
-                {
-                    bonePalettes.Add(((short[])rawBP).ToList());
+                    var rawBP = (vsetRaw[i][0xBE]);
+                    if (rawBP is short)
+                    {
+                        bonePalettes.Add(new List<short> { (short)rawBP });
+                    }
+                    else if (rawBP is short[])
+                    {
+                        bonePalettes.Add(((short[])rawBP).ToList());
+                    }
+                    else
+                    {
+                        bonePalettes.Add(null);
+                    }
                 }
+
                 //Not sure on these, but I don't know that unk0-2 get used normally
                 vset.unk0 = (int)(vsetRaw[i][0xC8]);
                 vset.unk1 = (int)(vsetRaw[i][0xCC]);
 
+                //EdgeVerts
                 vset.edgeVertsCount = (int)(vsetRaw[i][0xC9]);
-                var rawEV = (vsetRaw[i][0xCA]);
-                if (rawEV is short)
+                if(vsetRaw[i].ContainsKey(0xCA))
                 {
-                    edgeVertsLists.Add(new List<short> { (short)rawEV });
-                }
-                else if (rawEV is short[])
-                {
-                    edgeVertsLists.Add(((short[])rawEV).ToList());
+                    var rawEV = (vsetRaw[i][0xCA]);
+                    if (rawEV is short)
+                    {
+                        edgeVertsLists.Add(new List<short> { (short)rawEV });
+                    }
+                    else if (rawEV is short[])
+                    {
+                        edgeVertsLists.Add(((short[])rawEV).ToList());
+                    }
+                    else
+                    {
+                        edgeVertsLists.Add(null);
+                    }
                 }
 
                 vsetList.Add(vset);
@@ -331,7 +356,7 @@ namespace AquaModelLibrary.AquaMethods
             return vsetList;
         }
 
-        public byte[] toVSETList(List<VSET> vsetList, List<VTXL> vtxlList)
+        public static byte[] toVSETList(List<VSET> vsetList, List<VTXL> vtxlList)
         {
             List<byte> outBytes = new List<byte>();
             int subTagCount = 0;
@@ -411,17 +436,15 @@ namespace AquaModelLibrary.AquaMethods
             subTagCount++;
 
             //In VTBF, VSETS are all treated as part of the same struct
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("VSET"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0x2 * vsetList.Count)));  //Pointer count. In this case, 0x2 times the VSET count.
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)subTagCount)); //Subtag count
 
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. In this case, 0x2 times the VSET count.
+            //Subtag count
+            WriteTagHeader(outBytes, "VSET", (ushort)(0x2 * vsetList.Count), (ushort)(subTagCount));
 
             return outBytes.ToArray();
         }
 
-        public void parseVTXE_VTXL(List<Dictionary<int, object>> vtxeRaw, List<Dictionary<int, object>> vtxlRaw, out VTXE vtxe, out VTXL vtxl)
+        public static void parseVTXE_VTXL(List<Dictionary<int, object>> vtxeRaw, List<Dictionary<int, object>> vtxlRaw, out VTXE vtxe, out VTXL vtxl)
         {
             int vertSize = 0;
             vtxe = new VTXE();
@@ -478,16 +501,16 @@ namespace AquaModelLibrary.AquaMethods
                 vtxe.vertDataTypes.Add(vtxeEle);
             }
 
-            int vertCount = ((byte[])vtxlRaw[0][0x89]).Length / vertSize;
+            int vertCount = ((byte[])vtxlRaw[0][0xBA]).Length / vertSize;
 
-            using (Stream stream = new MemoryStream((byte[])vtxlRaw[0][0x89]))
+            using (Stream stream = new MemoryStream((byte[])vtxlRaw[0][0xBA]))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 ReadVTXL(streamReader, vtxe, vtxl, vertCount, vtxe.vertDataTypes.Count);
             }
         }
 
-        public byte[] toVTXE_VTXL(VTXE vtxe, VTXL vtxl)
+        public static byte[] toVTXE_VTXL(VTXE vtxe, VTXL vtxl)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -510,12 +533,9 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("VTXE"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on VTXE
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)vtxe.vertDataTypes.Count * 5 + 1)); //Subtag count
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on VTXE
+            //Subtag count
+            WriteTagHeader(outBytes, "VTXE", 0, (ushort)(vtxe.vertDataTypes.Count * 5 + 1));
 
             int vtxeEnd = outBytes.Count;
 
@@ -593,17 +613,14 @@ namespace AquaModelLibrary.AquaMethods
                 outBytes.Insert(vtxlSizeArea + 0x4, (byte)vertDataCount);
             }
 
-            outBytes.InsertRange(vtxeEnd, Encoding.UTF8.GetBytes("VTXL"));
-            outBytes.InsertRange(vtxeEnd + 0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on VTXL
-            outBytes.InsertRange(vtxeEnd + 0x8, BitConverter.GetBytes((short)1)); //Subtag count
-
-            outBytes.InsertRange(vtxeEnd, BitConverter.GetBytes(outBytes.Count - vtxeEnd));          //Data body size
-            outBytes.InsertRange(vtxeEnd, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on VTXL
+            //Subtag count
+            WriteTagHeader(outBytes, "VTXL", 0, 0x1);
 
             return outBytes.ToArray();
         }
 
-        public void ParsePSET(List<Dictionary<int, object>> psetRaw, out List<PSET> psets, out List<stripData> strips)
+        public static void parsePSET(List<Dictionary<int, object>> psetRaw, out List<PSET> psets, out List<stripData> strips)
         {
             psets = new List<PSET>();
             strips = new List<stripData>();
@@ -624,7 +641,7 @@ namespace AquaModelLibrary.AquaMethods
             }
         }
 
-        public byte[] toPSET(List<PSET> psets, List<stripData> strips)
+        public static byte[] toPSET(List<PSET> psets, List<stripData> strips)
         {
             List<byte> outBytes = new List<byte>();
             for (int i = 0; i < psets.Count; i++)
@@ -662,17 +679,14 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("PSET"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on PSET
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)psets.Count * 0x7 + 0x1)); //Subtag count. 7 for each PSET + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on PSET
+            //Subtag count. 7 for each PSET + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "PSET", 0, (ushort)(psets.Count * 0x7 + 0x1));
 
             return outBytes.ToArray();
         }
 
-        public List<MESH> ParseMESH(List<Dictionary<int, object>> meshRaw)
+        public static List<MESH> parseMESH(List<Dictionary<int, object>> meshRaw)
         {
             List<MESH> meshList = new List<MESH>();
 
@@ -699,7 +713,7 @@ namespace AquaModelLibrary.AquaMethods
             return meshList;
         }
 
-        public byte[] toMESH(List<MESH> meshList)
+        public static byte[] toMESH(List<MESH> meshList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -728,17 +742,14 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("MESH"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on MESH
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)meshList.Count * 0xB + 0x1)); //Subtag count. 11 for each MESH + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on MESH
+            //Subtag count. 11 for each MESH + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "MESH", 0, (ushort)(meshList.Count * 0xB + 0x1));
 
             return outBytes.ToArray();
         }
 
-        public unsafe List<MATE> parseMATE(List<Dictionary<int, object>> mateRaw)
+        public static unsafe List<MATE> parseMATE(List<Dictionary<int, object>> mateRaw)
         {
             List<MATE> mateList = new List<MATE>();
 
@@ -774,7 +785,7 @@ namespace AquaModelLibrary.AquaMethods
             return mateList;
         }
 
-        public unsafe byte[] toMATE(List<MATE> mateList)
+        public static unsafe byte[] toMATE(List<MATE> mateList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -811,17 +822,14 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("MATE"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on MATE
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)mateList.Count * 0xB + 0x1)); //Subtag count. 11 for each MATE + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on MATE
+            //Subtag count. 11 for each MATE + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "MATE", 0, (ushort)(mateList.Count * 0xB + 0x1));
 
             return outBytes.ToArray();
         }
 
-        public unsafe List<REND> parseREND(List<Dictionary<int, object>> rendRaw)
+        public static unsafe List<REND> parseREND(List<Dictionary<int, object>> rendRaw)
         {
             List<REND> rendList = new List<REND>();
 
@@ -855,7 +863,7 @@ namespace AquaModelLibrary.AquaMethods
             return rendList;
         }
 
-        public unsafe byte[] toREND(List<REND> rendList)
+        public static unsafe byte[] toREND(List<REND> rendList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -894,17 +902,14 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("REND"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(0)));  //Pointer count. Always 0 on REND
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)rendList.Count * 0x12 + 0x1)); //Subtag count. 18 for each REND + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on REND
+            //Subtag count. 18 for each REND + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "REND", 0, (ushort)(rendList.Count * 0x12 + 0x1));
 
             return outBytes.ToArray();
         }
 
-        public unsafe List<SHAD> parseSHAD(List<Dictionary<int, object>> shadRaw)
+        public static unsafe List<SHAD> parseSHAD(List<Dictionary<int, object>> shadRaw)
         {
             List<SHAD> shadList = new List<SHAD>();
 
@@ -938,7 +943,7 @@ namespace AquaModelLibrary.AquaMethods
             return shadList;
         }
 
-        public unsafe byte[] toSHAD(List<SHAD> shadList)
+        public static unsafe byte[] toSHAD(List<SHAD> shadList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -970,12 +975,9 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("SHAD"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)(shadList.Count)));  //Pointer count. SHAD struct count on SHAD.
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)shadList.Count * 0x5 + 0x1)); //Subtag count. 18 for each SHAD + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. SHAD struct count on SHAD.
+            //Subtag count. 18 for each SHAD + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "SHAD", (ushort)shadList.Count, (ushort)(shadList.Count * 0x5 + 0x1));
 
             //There's one of these for each SHAD, but they don't seem to have any meaningful contents in observed files
             for (int i = 0; i < shadList.Count; i++)
@@ -992,7 +994,7 @@ namespace AquaModelLibrary.AquaMethods
             return outBytes.ToArray();
         }
 
-        public unsafe List<TSTA> parseTSTA(List<Dictionary<int, object>> tstaRaw)
+        public static unsafe List<TSTA> parseTSTA(List<Dictionary<int, object>> tstaRaw)
         {
             List<TSTA> tstaList = new List<TSTA>();
 
@@ -1027,7 +1029,7 @@ namespace AquaModelLibrary.AquaMethods
             return tstaList;
         }
 
-        public unsafe byte[] toTSTA(List<TSTA> tstaList)
+        public static unsafe byte[] toTSTA(List<TSTA> tstaList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -1061,17 +1063,12 @@ namespace AquaModelLibrary.AquaMethods
                 addBytes(outBytes, 0x6C, 0x02, (byte)texNameStr.Length, Encoding.UTF8.GetBytes(texNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+            WriteTagHeader(outBytes, "TSTA", 0, (ushort)(tstaList.Count * 0xE + 0x1));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("TSTA"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)0));  //Pointer count. Always 0 on TSTA
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)tstaList.Count * 0xE + 0x1)); //Subtag count. 14 for each TSTA + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
             return outBytes.ToArray();
         }
 
-        public unsafe List<TSET> parseTSET(List<Dictionary<int, object>> tsetRaw)
+        public static unsafe List<TSET> parseTSET(List<Dictionary<int, object>> tsetRaw)
         {
             List<TSET> tsetList = new List<TSET>();
 
@@ -1101,7 +1098,7 @@ namespace AquaModelLibrary.AquaMethods
             return tsetList;
         }
 
-        public unsafe byte[] toTSET(List<TSET> tsetList)
+        public static unsafe byte[] toTSET(List<TSET> tsetList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -1130,17 +1127,14 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("TSET"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)0));  //Pointer count. Always 0 on TSET
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)tsetList.Count * 0x7 + 0x1)); //Subtag count. 7 for each TSET + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on TSET
+            //Subtag count. 7 for each TSET + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "TSET", 0, (ushort)(tsetList.Count * 0x7 + 0x1));
 
             return outBytes.ToArray();
         }
 
-        public unsafe List<TEXF> parseTEXF(List<Dictionary<int, object>> texfRaw)
+        public static unsafe List<TEXF> parseTEXF(List<Dictionary<int, object>> texfRaw)
         {
             List<TEXF> texfList = new List<TEXF>();
 
@@ -1161,7 +1155,7 @@ namespace AquaModelLibrary.AquaMethods
             return texfList;
         }
 
-        public unsafe byte[] toTEXF(List<TEXF> texfList)
+        public static unsafe byte[] toTEXF(List<TEXF> texfList)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -1183,18 +1177,15 @@ namespace AquaModelLibrary.AquaMethods
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("TEXF"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)0));  //Pointer count. Always 0 on TEXF
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)texfList.Count * 0x2 + 0x1)); //Subtag count. 2 for each TEXF + 1 for the end tag, always.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on TEXF
+            //Subtag count. 2 for each TEXF + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "TEXF", 0, (ushort)(texfList.Count * 0x2 + 0x1));
 
             return outBytes.ToArray();
         }
 
         //Technically, this data is written out as a list, but should only ever have one entry.
-        public unsafe UNRM parseUNRM(List<Dictionary<int, object>> unrmRaw)
+        public static unsafe UNRM parseUNRM(List<Dictionary<int, object>> unrmRaw)
         {
             UNRM unrm = new UNRM();
 
@@ -1249,7 +1240,7 @@ namespace AquaModelLibrary.AquaMethods
             return unrm;
         }
 
-        public unsafe byte[] toUNRM(UNRM unrm)
+        public static unsafe byte[] toUNRM(UNRM unrm)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -1260,17 +1251,18 @@ namespace AquaModelLibrary.AquaMethods
 
             //unrm vert groups
             outBytes.Add(0xDB); outBytes.Add(0x89);
-            if(unrm.vertGroupCountCount - 1 > byte.MaxValue)
+            if (unrm.vertGroupCountCount - 1 > byte.MaxValue)
             {
                 outBytes.Add(0x10);
                 outBytes.AddRange(BitConverter.GetBytes((ushort)unrm.vertGroupCountCount - 1));
-            } else
+            }
+            else
             {
                 outBytes.Add(0x08);
                 outBytes.Add((byte)(unrm.vertGroupCountCount - 1));
 
             }
-            for(int i = 0; i < unrm.vertGroupCountCount; i++)
+            for (int i = 0; i < unrm.vertGroupCountCount; i++)
             {
                 outBytes.AddRange(BitConverter.GetBytes(unrm.unrmVertGroups[i]));
             }
@@ -1290,9 +1282,9 @@ namespace AquaModelLibrary.AquaMethods
                 outBytes.Add(0x08);
                 outBytes.Add((byte)(meshIDCount - 1));
             }
-            for(int i = 0; i < unrm.unrmMeshIds.Count; i++)
+            for (int i = 0; i < unrm.unrmMeshIds.Count; i++)
             {
-                for(int j = 0; j < unrm.unrmMeshIds[i].Count; i++)
+                for (int j = 0; j < unrm.unrmMeshIds[i].Count; i++)
                 {
                     outBytes.AddRange(BitConverter.GetBytes(unrm.unrmMeshIds[i][j]));
                 }
@@ -1322,17 +1314,188 @@ namespace AquaModelLibrary.AquaMethods
             //Technically an array so we put the array end tag
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("UNRM"));
-            outBytes.InsertRange(0x4, BitConverter.GetBytes((short)0));  //Pointer count. Always 0 on UNRM
-            outBytes.InsertRange(0x8, BitConverter.GetBytes((short)0x7)); //Subtag count. In theory, always 7.
-
-            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count));          //Data body size
-            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+            //Pointer count. Always 0 on UNRM
+            //Subtag count. In theory, always 7 for UNRM
+            WriteTagHeader(outBytes, "UNRM", 0, 7);
 
             return outBytes.ToArray();
         }
 
-        public int getListOfListOfIntsIntCount(List<List<int>> intListlist)
+        public static NDTR parseNDTR(List<Dictionary<int, object>> ndtrRaw)
+        {
+            NDTR ndtr = new NDTR();
+
+            ndtr.boneCount = (int)ndtrRaw[0][0x01];
+            ndtr.unknownCount = (int)ndtrRaw[0][0x02];
+            ndtr.effCount = (int)ndtrRaw[0][0xFA];
+
+            return ndtr;
+        }
+
+        public static byte[] toNDTR(NDTR ndtr)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            addBytes(outBytes, 0x1, 0x8, BitConverter.GetBytes(ndtr.boneCount));
+            addBytes(outBytes, 0x2, 0x8, BitConverter.GetBytes(ndtr.unknownCount));
+            addBytes(outBytes, 0xFA, 0x8, BitConverter.GetBytes(ndtr.effCount));
+
+            WriteTagHeader(outBytes, "NDTR", 0x2, 0x3);
+
+            return outBytes.ToArray();
+        }
+
+        public static List<NODE> parseNODE(List<Dictionary<int, object>> nodeRaw)
+        {
+            List<NODE> nodeList = new List<NODE>();
+
+            for(int i = 0; i < nodeRaw.Count; i++)
+            {
+                NODE node = new NODE();
+
+                byte[] shorts = BitConverter.GetBytes((int)nodeRaw[i][0x03]);
+                node.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
+                node.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
+                node.animatedFlag = (int)nodeRaw[i][0x0B];
+                node.parentId = (int)nodeRaw[i][0x04];
+                node.unkNode = (int)nodeRaw[i][0x0F];
+                node.firstChild = (int)nodeRaw[i][0x05];
+                node.nextSibling = (int)nodeRaw[i][0x06];
+                node.const0_2 = (int)nodeRaw[i][0x0C];
+                node.pos = (Vector3)nodeRaw[i][0x07];
+                node.eulRot = (Vector3)nodeRaw[i][0x08];
+                node.scale = (Vector3)nodeRaw[i][0x09];
+                node.m1 = ((Vector4[])nodeRaw[i][0x0A])[0];
+                node.m2 = ((Vector4[])nodeRaw[i][0x0A])[1];
+                node.m3 = ((Vector4[])nodeRaw[i][0x0A])[2];
+                node.m4 = ((Vector4[])nodeRaw[i][0x0A])[3];
+
+                byte[] boneNameArr = (byte[])nodeRaw[i][0x0D];
+                int nameCount = boneNameArr.Count() < 0x20 ? boneNameArr.Count() : 0x20;
+                for (int j = 0; j < nameCount; j++)
+                {
+                    node.boneName[j] = boneNameArr[j];
+                }
+
+                nodeList.Add(node);
+            }
+
+            return nodeList;
+        }
+
+        public static byte[] toNODE(List<NODE> nodeList)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            for(int i = 0; i < nodeList.Count; i++)
+            {
+                NODE node = nodeList[i];
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
+                addBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(node.boneShort1 * 0x10000 + node.boneShort2));
+                addBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(node.parentId));
+                addBytes(outBytes, 0xF, 0x8, BitConverter.GetBytes(node.unkNode));
+                addBytes(outBytes, 0x5, 0x8, BitConverter.GetBytes(node.firstChild));
+                addBytes(outBytes, 0x6, 0x8, BitConverter.GetBytes(node.nextSibling));
+                addBytes(outBytes, 0x7, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(node.pos));
+                addBytes(outBytes, 0x8, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(node.eulRot));
+                addBytes(outBytes, 0x9, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(node.scale));
+                addBytes(outBytes, 0xA, 0xCA, 0xA, 0x3, Reloaded.Memory.Struct.GetBytes(node.m1));
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(node.m2));
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(node.m3));
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(node.m4));
+                addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(node.animatedFlag));
+                addBytes(outBytes, 0xC, 0x8, BitConverter.GetBytes(node.const0_2));
+
+                //Bone Name String
+                string boneNameStr = GetPSO2String(node.boneName);
+                addBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            WriteTagHeader(outBytes, "NODE", 0, (ushort)(nodeList.Count * 0xC + 1));
+
+            return outBytes.ToArray();
+        }
+
+        public static List<NODO> parseNODO(List<Dictionary<int, object>> nod0Raw)
+        {
+            List<NODO> nodoList = new List<NODO>();
+
+            for (int i = 0; i < nod0Raw.Count; i++)
+            {
+                NODO nodo = new NODO();
+
+                byte[] shorts = BitConverter.GetBytes((int)nod0Raw[i][0x03]);
+                nodo.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
+                nodo.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
+                nodo.animatedFlag = (int)nod0Raw[i][0x0B];
+                nodo.parentId = (int)nod0Raw[i][0x04];
+                nodo.pos = (Vector3)nod0Raw[i][0x07];
+                nodo.eulRot = (Vector3)nod0Raw[i][0x08];
+
+                byte[] boneNameArr = (byte[])nod0Raw[i][0x0D];
+                int nameCount = boneNameArr.Count() < 0x20 ? boneNameArr.Count() : 0x20;
+                for (int j = 0; j < nameCount; j++)
+                {
+                    nodo.boneName[j] = boneNameArr[j];
+                }
+
+                nodoList.Add(nodo);
+            }
+
+            return nodoList;
+        }
+
+        public static byte[] toNODO(List<NODO> nodoList)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            for (int i = 0; i < nodoList.Count; i++)
+            {
+                NODO nodo = nodoList[i];
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
+                addBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(nodo.boneShort1 * 0x10000 + nodo.boneShort2));
+                addBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(nodo.parentId));
+                addBytes(outBytes, 0x7, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(nodo.pos));
+                addBytes(outBytes, 0x8, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(nodo.eulRot));
+                addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(nodo.animatedFlag));
+
+                //Bone Name String
+                string boneNameStr = GetPSO2String(nodo.boneName);
+                addBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            WriteTagHeader(outBytes, "NODO", 0, (ushort)(nodoList.Count * 7 + 1));
+
+            return outBytes.ToArray();
+        }
+
+        private static void WriteTagHeader(List<byte> outBytes, string tagString, ushort pointerCount, ushort subtagCount)
+        {
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes(tagString));
+            outBytes.InsertRange(0x4, BitConverter.GetBytes(pointerCount));  //Pointer count
+            outBytes.InsertRange(0x8, BitConverter.GetBytes(subtagCount)); //Subtag count
+
+            outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count)); //Data body size
+            outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
+        }
+
+        public static int getListOfListOfIntsIntCount(List<List<int>> intListlist)
         {
             int count = 0;
             for(int i = 0; i < intListlist.Count; i++)
@@ -1343,14 +1506,14 @@ namespace AquaModelLibrary.AquaMethods
             return count;
         }
 
-        public void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
+        public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
         {
             outBytes.Add(id); 
             outBytes.Add(dataType);
             outBytes.AddRange(data);
         }
 
-        public void addBytes(List<byte> outBytes, byte id, byte dataType, byte vecAmt, byte[] data)
+        public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte vecAmt, byte[] data)
         {
             outBytes.Add(id);
             outBytes.Add(dataType);
@@ -1358,7 +1521,7 @@ namespace AquaModelLibrary.AquaMethods
             outBytes.AddRange(data);
         }
 
-        public void addBytes(List<byte> outBytes, byte id, byte dataType, byte subDataType, byte subDataAdditions, byte[] data)
+        public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte subDataType, byte subDataAdditions, byte[] data)
         {
             outBytes.Add(id);
             outBytes.Add(dataType);
@@ -1367,7 +1530,7 @@ namespace AquaModelLibrary.AquaMethods
             outBytes.AddRange(data);
         }
 
-        public ushort flagCheck(int check)
+        public static ushort flagCheck(int check)
         {
             if(check > 0)
             {

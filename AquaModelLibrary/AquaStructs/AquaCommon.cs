@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.AquaStructs
+namespace AquaModelLibrary
 {
     public class AquaCommon
     {
@@ -65,7 +65,7 @@ namespace AquaModelLibrary.AquaStructs
 
         public static NOF0 readNOF0(BufferedStreamReader streamReader)
         {
-            NOF0 nof0 = new AquaCommon.NOF0();
+            NOF0 nof0 = new NOF0();
             nof0.magic = streamReader.Read<int>();
             nof0.NOF0Size = streamReader.Read<int>();
             nof0.NOF0EntryCount = streamReader.Read<int>();

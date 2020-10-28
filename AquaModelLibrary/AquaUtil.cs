@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary;
 using System.Numerics;
 using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
+using static AquaModelLibrary.AquaMethods.VTBFMethods;
 using AquaModelLibrary.OtherStructs;
+using System;
 
 namespace AquaLibrary
 {
@@ -63,7 +64,8 @@ namespace AquaLibrary
                     aquaModels.Add(set);
                 } else if (type.Equals(0x46425456))
                 {
-                    ReadVTBFModel(streamReader, set.afp.fileCount);
+                    set.models = ReadVTBFModel(streamReader, set.afp.fileCount, set.afp.afpBase.paddingOffset);
+                    aquaModels.Add(set);
                 } else
                 {
                     MessageBox.Show("Improper File Format!");
@@ -291,9 +293,116 @@ namespace AquaLibrary
             return aquaModels;
         }
 
-        public void ReadVTBFModel(BufferedStreamReader streamReader, int fileCount)
+        public List<AquaObject> ReadVTBFModel(BufferedStreamReader streamReader, int fileCount, int firstFileSize)
         {
+            List<AquaObject> aquaModels = new List<AquaObject>();
+            int fileSize = firstFileSize;
+            for(int modelIndex = 0; modelIndex < fileCount; modelIndex++ )
+            {
+                AquaObject model = new AquaObject();
+                int objcCount = 0;
+                List<List<short>> bp = null;
+                List<List<short>> ev = null;
 
+                if (modelIndex > 0)
+                {
+                    AlignReader(streamReader, 0x10);
+                    model.afp = streamReader.Read<AquaPackage.AFPBase>();
+                    fileSize = model.afp.paddingOffset;
+                }
+                int dataEnd = (int)streamReader.Position() + fileSize;
+
+                streamReader.Seek(0x10, SeekOrigin.Current); //Skip the header and move to the tags
+                while(streamReader.Position() < dataEnd)
+                {
+                    var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
+                    switch(tagType)
+                    {
+                        case "ROOT":
+                            //We don't do anything with this right now.
+                            break;
+                        case "OBJC":
+                            objcCount++;
+                            if(objcCount > 1)
+                            {
+                                throw new System.Exception("More than one OBJC! Weird things are going on!");
+                            }
+                            model.objc = parseOBJC(data);
+                            break;
+                        case "VSET":
+                            model.vsetList = parseVSET(data, out List<List<short>> bonePalettes, out List<List<short>> edgeVertsLists);
+                            bp = bonePalettes;
+                            ev = edgeVertsLists;
+                            break;
+                        case "VTXE":
+                            var data2 = ReadVTBFTag(streamReader, out string tagType2, out int entryCount2);
+                            if(tagType2 != "VTXL")
+                            {
+                                throw new System.Exception("VTXE without paired VTXL! Please report!");
+                            }
+                            parseVTXE_VTXL(data, data2, out var vtxe, out var vtxl);
+                            model.vtxeList.Add(vtxe);
+                            model.vtxlList.Add(vtxl);
+                            break;
+                        case "PSET":
+                            parsePSET(data, out var psetList, out var tris);
+                            model.psetList = psetList;
+                            model.strips = tris;
+                            break;
+                        case "MESH":
+                            model.meshList = parseMESH(data);
+                            break;
+                        case "MATE":
+                            model.mateList = parseMATE(data);
+                            break;
+                        case "REND":
+                            model.rendList = parseREND(data);
+                            break;
+                        case "SHAD":
+                            model.shadList = parseSHAD(data);
+                            break;
+                        case "TSTA":
+                            model.tstaList = parseTSTA(data);
+                            break;
+                        case "TSET":
+                            model.tsetList = parseTSET(data);
+                            break;
+                        case "TEXF":
+                            model.texfList = parseTEXF(data);
+                            break;
+                        case "UNRM":
+                            model.unrms = parseUNRM(data);
+                            break;
+                        case "SHAP":
+                            //Poor SHAP. It's empty and useless. If it's not, we should probably do something though.
+                            if(entryCount > 2)
+                            {
+                                throw new System.Exception("SHAP has more than 2 entries! Please report!");
+                            }
+                            break;
+                        default:
+                            throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
+                    }
+                }
+                //Assign edgeverts and bone palettes. Assign them here in case of weird ordering shenanigans
+                if (bp != null)
+                {
+                    for (int i = 0; i < bp.Count; i++)
+                    {
+                        model.vtxlList[i].bonePalette = bp[i];
+                    }
+                }
+                if (ev != null)
+                {
+                    for (int i = 0; i < ev.Count; i++)
+                    {
+                        model.vtxlList[i].edgeVerts = ev[i];
+                    }
+                }
+                aquaModels.Add(model);
+            }
+
+            return aquaModels;
         }
 
         public void ReadBones(string inFilename)
@@ -319,7 +428,7 @@ namespace AquaLibrary
                 }
                 else if (type.Equals(0x46425456))
                 {
-                    ReadVTBFBones(streamReader);
+                    aquaBones.Add(ReadVTBFBones(streamReader));
                 }
                 else
                 {
@@ -336,17 +445,14 @@ namespace AquaLibrary
             bones.nifl = streamReader.Read<AquaCommon.NIFL>();
             bones.rel0 = streamReader.Read<AquaCommon.REL0>();
             bones.ndtr = streamReader.Read<AquaNode.NDTR>();
-            
             for(int i = 0; i < bones.ndtr.boneCount; i++)
             {
                 bones.nodeList.Add(streamReader.Read<AquaNode.NODE>());
             }
-
-            for (int i = 0; i < bones.ndtr.boneCount; i++)
+            for (int i = 0; i < bones.ndtr.effCount; i++)
             {
-                bones.nod0List.Add(streamReader.Read<AquaNode.NOD0>());
+                bones.nodoList.Add(streamReader.Read<AquaNode.NODO>());
             }
-
             bones.nof0 = AquaCommon.readNOF0(streamReader);
             AlignReader(streamReader, 0x10);
             bones.nend = streamReader.Read<AquaCommon.NEND>();
@@ -354,105 +460,36 @@ namespace AquaLibrary
             return bones;
         }
 
-        public void ReadVTBFBones(BufferedStreamReader streamReader)
+        public AquaNode ReadVTBFBones(BufferedStreamReader streamReader)
         {
             AquaNode bones = new AquaNode();
             
             //Seek past vtbf tag
-            streamReader.Seek(0x14, SeekOrigin.Current);          //VTBF + AQGF + vtc0 tags
-            int rootTagLength = streamReader.Read<int>();
-            streamReader.Seek(rootTagLength, SeekOrigin.Current);
+            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF + vtc0 tags
 
-            //NDTR - Nodetree
-            streamReader.Seek(0x13, SeekOrigin.Current);        //vtc0 + NDTR tags + struct count + data tag
-            bones.ndtr = new AquaNode.NDTR();
-            bones.ndtr.boneCount = streamReader.Read<int>();
-            streamReader.Seek(0x2, SeekOrigin.Current);         //data tag
-            bones.ndtr.unknownCount = streamReader.Read<int>();
-            streamReader.Seek(0x2, SeekOrigin.Current);         //data tag
-            bones.ndtr.effCount = streamReader.Read<int>();
-            streamReader.Seek(0x10, SeekOrigin.Current);
-
-            //NODE
-            for(int i = 0; i < bones.ndtr.boneCount; i++)
+            for(int i = 0; i < 4; i++)
             {
-                streamReader.Seek(0x4, SeekOrigin.Current);
-                AquaNode.NODE node = new AquaNode.NODE();
-
-                node.boneShort1 = streamReader.Read<ushort>();
-                node.boneShort2 = streamReader.Read<ushort>();
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                node.parentId = streamReader.Read<int>();
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                node.unkNode = streamReader.Read<int>();
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                node.firstChild = streamReader.Read<int>();
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                node.nextSibling = streamReader.Read<int>();
-
-                streamReader.Seek(0x3, SeekOrigin.Current);
-                node.pos = streamReader.Read<Vector3>();
-                streamReader.Seek(0x3, SeekOrigin.Current);
-                node.eulRot = streamReader.Read<Vector3>();
-                streamReader.Seek(0x3, SeekOrigin.Current);
-                node.scale = streamReader.Read<Vector3>();
-                streamReader.Seek(0x4, SeekOrigin.Current);
-                node.m1 = streamReader.Read<Vector4>();
-                streamReader.Seek(0x4, SeekOrigin.Current);
-                node.m2 = streamReader.Read<Vector4>();
-                streamReader.Seek(0x4, SeekOrigin.Current);
-                node.m3 = streamReader.Read<Vector4>();
-                streamReader.Seek(0x4, SeekOrigin.Current);
-                node.m4 = streamReader.Read<Vector4>();
-
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                node.animatedFlag = streamReader.Read<int>();
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                node.const0_2 = streamReader.Read<int>();
-                streamReader.Seek(0x2, SeekOrigin.Current);
-                int nameLength = streamReader.Read<byte>();
-                byte[] name = new byte[nameLength];
-                for(int letter = 0; letter < nameLength; letter++)
+                var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
+                switch (tagType)
                 {
-                    name[letter] = streamReader.Read<byte>();
-                }
-                bones.nodeList.Add(node);
-            }
-
-            if(bones.ndtr.effCount > 0)
-            {
-                streamReader.Seek(0x12, SeekOrigin.Current);
-
-                //NOD0
-                for (int i = 0; i < bones.ndtr.effCount; i++)
-                {
-                    streamReader.Seek(0x4, SeekOrigin.Current);
-                    AquaNode.NOD0 node = new AquaNode.NOD0();
-
-                    node.boneShort1 = streamReader.Read<ushort>();
-                    node.boneShort2 = streamReader.Read<ushort>();
-                    streamReader.Seek(0x2, SeekOrigin.Current);
-                    node.animatedFlag = streamReader.Read<int>();
-                    streamReader.Seek(0x2, SeekOrigin.Current);
-                    node.parentId = streamReader.Read<int>();
-                    streamReader.Seek(0x2, SeekOrigin.Current);
-                    node.const_0_2 = streamReader.Read<int>();
-
-                    streamReader.Seek(0x3, SeekOrigin.Current);
-                    node.pos = streamReader.Read<Vector3>();
-                    streamReader.Seek(0x3, SeekOrigin.Current);
-                    node.eulRot = streamReader.Read<Vector3>();
-
-                    streamReader.Seek(0x2, SeekOrigin.Current);
-                    int nameLength = streamReader.Read<byte>();
-                    byte[] name = new byte[nameLength];
-                    for (int letter = 0; letter < nameLength; letter++)
-                    {
-                        name[letter] = streamReader.Read<byte>();
-                    }
-                    bones.nod0List.Add(node);
+                    case "ROOT":
+                        //We don't do anything with this right now.
+                        break;
+                    case "NDTR":
+                        bones.ndtr = parseNDTR(data);
+                        break;
+                    case "NODE":
+                        bones.nodeList = parseNODE(data);
+                        break;
+                    case "NODO":
+                        bones.nodoList = parseNODO(data);
+                        break;
+                    default:
+                        throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
                 }
             }
+
+            return bones;
         }
 
         public void ReadCollision(string inFilename)

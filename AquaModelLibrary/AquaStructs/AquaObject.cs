@@ -1,12 +1,6 @@
-﻿using AquaModelLibrary.AquaStructs;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace AquaModelLibrary
 {
@@ -280,7 +274,7 @@ namespace AquaModelLibrary
         }
 
         //Vertex List
-        public class VTXL
+        public class VTXL //0xBA, type 0x89
         {
             public List<Vector3> vertPositions = new List<Vector3>();
             public List<Vector4> vertWeights = new List<Vector4>();

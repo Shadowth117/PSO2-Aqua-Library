@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.AquaStructs
+namespace AquaModelLibrary
 {
     public class AquaEffect
     {

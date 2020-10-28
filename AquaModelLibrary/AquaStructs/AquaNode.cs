@@ -1,30 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Media3D;
 
-namespace AquaModelLibrary.AquaStructs
+namespace AquaModelLibrary
 {
     public unsafe class AquaNode
     {
         public AquaCommon.NIFL nifl;
         public AquaCommon.REL0 rel0;
         public NDTR ndtr;
-        public List<NODE> nodeList= new List<NODE>();
-        public List<NOD0> nod0List = new List<NOD0>();
+        public List<NODE> nodeList = new List<NODE>();
+        public List<NODO> nodoList = new List<NODO>();
         public AquaCommon.NOF0 nof0;
         public AquaCommon.NEND nend;
 
+        public AquaNode()
+        {
+        }
+
         public struct NDTR
         {
-            public int boneCount;
-            public int boneAddress;
-            public int unknownCount;
+            public int boneCount;    //0x1, type 0x8
+            public int boneAddress; 
+            public int unknownCount; //0x2, type 0x8
             public int unknownAddress;
-            public int effCount;
+            public int effCount;     //0xFA, type 0x8
             public int effAddress;
             public int const0_3;
             public int const0_4;
@@ -33,42 +32,42 @@ namespace AquaModelLibrary.AquaStructs
         //Technically, the structs in this are all in the one big NODE struct, but it seemed more logical to separate it out a bit more.
         public struct NODE
         {
-            public ushort boneShort1;
-            public ushort boneShort2;
-            public int animatedFlag; //Should generally be 1. I assume this is what it is based on PSU's bone format
-            public int parentId;
-            public int unkNode; //Always observed -1
-            public int firstChild;
-            public int nextSibling;
-            public int const0_2;
+            public ushort boneShort1; //0x3, type 0x9 //First 2 bytes of this.
+            public ushort boneShort2; //Latter 2 bytes of above.
+            public int animatedFlag;  //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format
+            public int parentId;      //0x4, type 0x8
+            public int unkNode;       //0xF, type 0x8 //Always observed -1
+            public int firstChild;    //0x5, type 0x8
+            public int nextSibling;   //0x6, type 0x8
+            public int const0_2;      //0xC, type 0x9? Ordering and nebulous usage makes this unclear. Observed only 0.
             public int const0_3;
-            public Vector3 pos;
+            public Vector3 pos;       //0x7, type 0x4A, 0x1
             public int const0_4;
-            public Vector3 eulRot;
+            public Vector3 eulRot;    //0x8, type 0x4A, 0x1
             public int const0_5;
-            public Vector3 scale;
+            public Vector3 scale;     //0x9, type 0x4A, 0x1
             public int const0_6;
-            // 4x4 Matrix
-            public Vector4 m1;
+            // 4x4 Matrix             //0xA, type 0xCA, 0xA, 0x3
+            public Vector4 m1;        
             public Vector4 m2;
             public Vector4 m3;
             public Vector4 m4;
-            public fixed char boneName[0x20];
+            public fixed byte boneName[0x20]; //0xD, type 0x2
         }
 
         //A stripped down variant of NODE used for effect nodes. 
-        public struct NOD0
+        public struct NODO
         {
-            public ushort boneShort1;
-            public ushort boneShort2;
-            public int animatedFlag; //Should generally be 1. I assume this is what it is based on PSU's bone format
-            public int parentId;
-            public int const_0_2;
-            public Vector3 pos;
+            public ushort boneShort1;  //0x3, type 0x9 //First 2 bytes of this.
+            public ushort boneShort2;  //Latter 2 bytes of above.
+            public int animatedFlag;   //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format
+            public int parentId;       //0x4, type 0x8
+            public int const_0_2;      //0xC, type 0x9?
+            public Vector3 pos;        //0x7, type 0x4A, 0x1
             public int const0_4;
-            public Vector3 eulRot;
+            public Vector3 eulRot;     //0x8, type 0x4A, 0x1
             public int const0_5;
-            public fixed char boneName[0x20];
+            public fixed byte boneName[0x20]; //0xD, type 0x2
         }
     }
 }
