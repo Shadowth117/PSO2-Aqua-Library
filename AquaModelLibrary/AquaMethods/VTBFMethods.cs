@@ -205,11 +205,9 @@ namespace AquaModelLibrary.AquaMethods
 
                 vtbfDict.Add(dataId, data);
             }
-            //For non-list type tag data
-            if(vtbfData.Count == 0)
-            {
-                vtbfData.Add(vtbfDict);
-            }
+            //For non-list type tag data and non FD terminated lists (alpha has these)
+            vtbfData.Add(vtbfDict);
+            
             return vtbfData;
         }
 
