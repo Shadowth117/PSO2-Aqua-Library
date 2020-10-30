@@ -291,8 +291,8 @@ namespace AquaModelLibrary
             public List<Vector3> vertTangentList = new List<Vector3>();
             public List<Vector3> vertBinormalList =  new List<Vector3>();
 
-            public List<short> bonePalette = new List<short>(); //Indices of particular bones are used for weight indices above
-            public List<short> edgeVerts = new List<short>(); //No idea if this is used, but I fill it anyways
+            public List<ushort> bonePalette = new List<ushort>(); //Indices of particular bones are used for weight indices above
+            public List<ushort> edgeVerts = new List<ushort>(); //No idea if this is used, but I fill it anyways
 
             public List<Vector4> trueVertWeights = new List<Vector4>();
             public List<byte[]> trueVertWeightIndices = new List<byte[]>();
@@ -392,7 +392,7 @@ namespace AquaModelLibrary
             public int reserve2;
 
             //Triangles should be interpreted as 0, 1, 2 followed by 0, 2, 1. While this results in degenerate faces, wireframe views ingame show they are rendered with these.
-            public List<short> triStrips = new List<short>(); //0xB8, type 0x86 
+            public List<ushort> triStrips = new List<ushort>(); //0xB8, type 0x86 
 
             public List<Vector3> getTriangles(bool removeDegenFaces)
             {

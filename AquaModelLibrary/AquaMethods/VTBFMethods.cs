@@ -33,7 +33,7 @@ namespace AquaModelLibrary.AquaMethods
                 byte dataId = streamReader.Read<byte>();
                 byte dataType = streamReader.Read<byte>();
                 byte subDataType;
-                int subDataAdditions;
+                uint subDataAdditions;
 
                 //Check for special ids
                 switch (dataId)
@@ -116,7 +116,7 @@ namespace AquaModelLibrary.AquaMethods
                                 data = streamReader.Read<Vector4>();
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subDataAdditions amount {subDataAdditions}");
+                                MessageBox.Show($"Unknown subDataAdditions amount {subDataAdditions} at {streamReader.Position()}");
                                 throw new Exception();
                         }
 
@@ -127,37 +127,54 @@ namespace AquaModelLibrary.AquaMethods
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
                             case 0x8:
-                                subDataAdditions = streamReader.Read<byte>() + 1;
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1;
                                 break;
                             case 0x10:
-                                subDataAdditions = streamReader.Read<ushort>() + 1;
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1;
+                                break;
+                            case 0x18:
+                                subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                throw new Exception($"Unknown subdataType {subDataType}");
+                                throw new Exception($"Unknown subdataType {subDataType} at {streamReader.Position()}");
                         }
-                        data = streamReader.ReadBytes(streamReader.Position(), subDataAdditions);
+                        data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions);
 
                         streamReader.Seek(subDataAdditions, SeekOrigin.Current);
                         break;
-                    case 0x86: //Array of shorts
-                    case 0x87:
+                    case 0x86: //Array of ushorts?
+                    case 0x87: //Array of shorts
                         subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
                             case 0x8:
-                                subDataAdditions = streamReader.Read<byte>() + 1;
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1;
                                 break;
                             case 0x10:
-                                subDataAdditions = streamReader.Read<ushort>() + 1;
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1;
+                                break;
+                            case 0x18:
+                                subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                throw new Exception($"Unknown subdataType {subDataType}");
+                                throw new Exception($"Unknown subdataType {subDataType} at {streamReader.Position()}");
                         }
 
-                        data = new short[subDataAdditions + 1];
-                        for (int j = 0; j < subDataAdditions; j++)
+                        if (dataType == 0x86)
                         {
-                            ((short[])data)[j] = streamReader.Read<short>();
+                            data = new ushort[subDataAdditions];
+                            for (int j = 0; j < subDataAdditions; j++)
+                            {
+                                ((ushort[])data)[j] = streamReader.Read<ushort>();
+                            }
+                        }
+                        else
+                        {
+                            data = new short[subDataAdditions];
+                            for (int j = 0; j < subDataAdditions; j++)
+                            {
+                                ((short[])data)[j] = streamReader.Read<short>();
+                            }
                         }
                         break;
                     case 0x88:
@@ -166,23 +183,26 @@ namespace AquaModelLibrary.AquaMethods
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
                             case 0x8:
-                                subDataAdditions = streamReader.Read<byte>() + 1;
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1;
                                 break;
                             case 0x10:
-                                subDataAdditions = streamReader.Read<ushort>() + 1;
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1;
+                                break;
+                            case 0x18:
+                                subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                throw new Exception($"Unknown subdataType {subDataType}");
+                                throw new Exception($"Unknown subdataType {subDataType} at {streamReader.Position()}");
                         }
                         subDataAdditions *= 4; //The field is stored as some amount of int32s. Therefore, multiplying by 4 gives us the byte buffer length.
 
-                        data = streamReader.ReadBytes(streamReader.Position(), subDataAdditions); //Read the whole vert buffer at once as byte array. We'll handle it later.
+                        data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions); //Read the whole vert buffer at once as byte array. We'll handle it later.
 
                         streamReader.Seek(subDataAdditions, SeekOrigin.Current);
                         break;
                     case 0xCA: //Float Matrix, observed only as 4x4
                         subDataType = streamReader.Read<byte>(); //Expected to always be 0xA for float
-                        subDataAdditions = streamReader.Read<byte>() + 1; //Expected to always be 0x3, maybe for last array entry id
+                        subDataAdditions = streamReader.Read<byte>() + (uint)1; //Expected to always be 0x3, maybe for last array entry id
                         data = new Vector4[subDataAdditions];
 
                         for (int j = 0; j < subDataAdditions; j++)
@@ -243,7 +263,7 @@ namespace AquaModelLibrary.AquaMethods
             return objc;
         }
 
-        public byte[] toOBJC(OBJC objc, bool useUNRMs)
+        public static byte[] toOBJC(OBJC objc, bool useUNRMs)
         {
             List<byte> outBytes = new List<byte>();
 
@@ -292,11 +312,11 @@ namespace AquaModelLibrary.AquaMethods
             return outBytes.ToArray();
         }
 
-        public static List<VSET> parseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<short>> bonePalettes, out List<List<short>> edgeVertsLists)
+        public static List<VSET> parseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists)
         {
             List<VSET> vsetList = new List<VSET>();
-            bonePalettes = new List<List<short>>();
-            edgeVertsLists = new List<List<short>>();
+            bonePalettes = new List<List<ushort>>();
+            edgeVertsLists = new List<List<ushort>>();
 
             for (int i = 0; i < vsetRaw.Count; i++)
             {
@@ -311,13 +331,13 @@ namespace AquaModelLibrary.AquaMethods
                 if (vsetRaw[i].ContainsKey(0xBE))
                 {
                     var rawBP = (vsetRaw[i][0xBE]);
-                    if (rawBP is short)
+                    if (rawBP is ushort)
                     {
-                        bonePalettes.Add(new List<short> { (short)rawBP });
+                        bonePalettes.Add(new List<ushort> { (ushort)rawBP });
                     }
-                    else if (rawBP is short[])
+                    else if (rawBP is ushort[])
                     {
-                        bonePalettes.Add(((short[])rawBP).ToList());
+                        bonePalettes.Add(((ushort[])rawBP).ToList());
                     }
                     else
                     {
@@ -334,13 +354,13 @@ namespace AquaModelLibrary.AquaMethods
                 if(vsetRaw[i].ContainsKey(0xCA))
                 {
                     var rawEV = (vsetRaw[i][0xCA]);
-                    if (rawEV is short)
+                    if (rawEV is ushort)
                     {
-                        edgeVertsLists.Add(new List<short> { (short)rawEV });
+                        edgeVertsLists.Add(new List<ushort> { (ushort)rawEV });
                     }
                     else if (rawEV is short[])
                     {
-                        edgeVertsLists.Add(((short[])rawEV).ToList());
+                        edgeVertsLists.Add(((ushort[])rawEV).ToList());
                     }
                     else
                     {
@@ -602,8 +622,16 @@ namespace AquaModelLibrary.AquaMethods
             int vertDataCount = ((outBytes.Count - vtxlSizeArea) / 4) - 1;
             if (vertDataCount > byte.MaxValue)
             {
-                outBytes.Insert(vtxlSizeArea, 0x10);
-                outBytes.InsertRange(vtxlSizeArea + 0x4, BitConverter.GetBytes((short)(vertDataCount)));
+                if (vertDataCount - 1 > ushort.MaxValue)
+                {
+                    outBytes.Insert(vtxlSizeArea, 0x18);
+                    outBytes.InsertRange(vtxlSizeArea + 0x4, BitConverter.GetBytes(vertDataCount));
+                }
+                else
+                {
+                    outBytes.Insert(vtxlSizeArea, 0x10);
+                    outBytes.InsertRange(vtxlSizeArea + 0x4, BitConverter.GetBytes((short)(vertDataCount)));
+                }
             }
             else
             {
@@ -631,7 +659,7 @@ namespace AquaModelLibrary.AquaMethods
                 pset.faceType = (int)psetRaw[i][0xBB];
                 pset.psetFaceCount = (int)psetRaw[i][0xBC];
                 strip.triCount = (int)psetRaw[i][0xB7];
-                strip.triStrips = ((short[])psetRaw[i][0xB8]).ToList();
+                strip.triStrips = ((ushort[])psetRaw[i][0xB8]).ToList();
                 pset.reserve0 = (int)psetRaw[i][0xC5];
 
                 psets.Add(pset);
@@ -661,8 +689,16 @@ namespace AquaModelLibrary.AquaMethods
                 outBytes.Add(0x86);
                 if (strips[i].triCount - 1 > byte.MaxValue)
                 {
-                    outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((short)(strips[i].triStrips.Count - 1)));
+                    if (strips[i].triCount - 1 > ushort.MaxValue)
+                    {
+                        outBytes.Add(0x18);
+                        outBytes.AddRange(BitConverter.GetBytes(strips[i].triStrips.Count - 1));
+                    }
+                    else
+                    {
+                        outBytes.Add(0x10);
+                        outBytes.AddRange(BitConverter.GetBytes((short)(strips[i].triStrips.Count - 1)));
+                    }
                 } else
                 {
                     outBytes.Add(0x8);
@@ -1252,8 +1288,16 @@ namespace AquaModelLibrary.AquaMethods
             outBytes.Add(0xDB); outBytes.Add(0x89);
             if (unrm.vertGroupCountCount - 1 > byte.MaxValue)
             {
-                outBytes.Add(0x10);
-                outBytes.AddRange(BitConverter.GetBytes((ushort)unrm.vertGroupCountCount - 1));
+                if (unrm.vertGroupCountCount - 1 > ushort.MaxValue)
+                {
+                    outBytes.Add(0x18);
+                    outBytes.AddRange(BitConverter.GetBytes(unrm.vertGroupCountCount - 1));
+                }
+                else
+                {
+                    outBytes.Add(0x10);
+                    outBytes.AddRange(BitConverter.GetBytes((ushort)unrm.vertGroupCountCount - 1));
+                }
             }
             else
             {
@@ -1273,8 +1317,16 @@ namespace AquaModelLibrary.AquaMethods
             int meshIDCount = getListOfListOfIntsIntCount(unrm.unrmMeshIds);
             if (meshIDCount - 1 > byte.MaxValue)
             {
-                outBytes.Add(0x10);
-                outBytes.AddRange(BitConverter.GetBytes((ushort)meshIDCount - 1));
+                if (meshIDCount - 1 > ushort.MaxValue)
+                {
+                    outBytes.Add(0x18);
+                    outBytes.AddRange(BitConverter.GetBytes(meshIDCount - 1));
+                }
+                else
+                {
+                    outBytes.Add(0x10);
+                    outBytes.AddRange(BitConverter.GetBytes((ushort)meshIDCount - 1));
+                }
             }
             else
             {
@@ -1294,8 +1346,15 @@ namespace AquaModelLibrary.AquaMethods
             int vertIdCount = getListOfListOfIntsIntCount(unrm.unrmVertIds);
             if (vertIdCount - 1 > byte.MaxValue)
             {
-                outBytes.Add(0x10);
-                outBytes.AddRange(BitConverter.GetBytes((ushort)vertIdCount - 1));
+                if(vertIdCount - 1 > ushort.MaxValue)
+                {
+                    outBytes.Add(0x18);
+                    outBytes.AddRange(BitConverter.GetBytes(vertIdCount - 1));
+                } else
+                {
+                    outBytes.Add(0x10);
+                    outBytes.AddRange(BitConverter.GetBytes((ushort)vertIdCount - 1));
+                }
             }
             else
             {
@@ -1316,6 +1375,27 @@ namespace AquaModelLibrary.AquaMethods
             //Pointer count. Always 0 on UNRM
             //Subtag count. In theory, always 7 for UNRM
             WriteTagHeader(outBytes, "UNRM", 0, 7);
+
+            return outBytes.ToArray();
+        }
+
+        public static byte[] toROOT(string rootString = "hnd2aqg ver.1.61 Build: Feb 28 2012 18:46:06")
+        {
+            List<byte> outBytes = new List<byte>();
+
+            addBytes(outBytes, 0x0, 0x2, (byte)rootString.Length, Encoding.UTF8.GetBytes(rootString));
+            WriteTagHeader(outBytes, "ROOT", 1, 1);
+
+            return outBytes.ToArray();
+        }
+
+        public static byte[] toAQGFVTBF()
+        {
+            List<byte> outBytes = new List<byte>();
+
+            outBytes.AddRange(new byte[] { 0x56, 0x54, 0x42, 0x46 }); //VTBF
+            outBytes.AddRange(new byte[] { 0x10, 0, 0, 0 });
+            outBytes.AddRange(new byte[] { 0x41, 0x51, 0x47, 0x46, 0x1, 0, 0, 0x4C }); //AQGF and the constants after
 
             return outBytes.ToArray();
         }

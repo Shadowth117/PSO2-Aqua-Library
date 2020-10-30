@@ -75,6 +75,7 @@
     <Compile Include="AquaStructs\AquaPackage.cs" />
     <Compile Include="AquaStructs\AquaUV.cs" />
     <Compile Include="OtherStructs\TCBTerrainConvex.cs" />
+    <Compile Include="OtherStructs\TPNTexturePattern.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
