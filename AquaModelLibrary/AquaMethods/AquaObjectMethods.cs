@@ -246,6 +246,17 @@ namespace AquaModelLibrary.AquaMethods
             string finalText;
 
             //Lazily determine string end
+            int end = GetPSO2StringLength(str);
+
+            byte[] text = new byte[end];
+            Marshal.Copy(new IntPtr(str), text, 0, end);
+            finalText = System.Text.Encoding.UTF8.GetString(text);
+
+            return finalText;
+        }
+
+        public static int GetPSO2StringLength(byte* str)
+        {
             int end = 0;
             for (int j = 0; j < 0x20; j++)
             {
@@ -256,11 +267,7 @@ namespace AquaModelLibrary.AquaMethods
                 }
             }
 
-            byte[] text = new byte[end];
-            Marshal.Copy(new IntPtr(str), text, 0, end);
-            finalText = System.Text.Encoding.UTF8.GetString(text);
-
-            return finalText;
+            return end;
         }
 
         public static string GetBoneName(AquaNode.NODE node) => GetPSO2String(node.boneName);

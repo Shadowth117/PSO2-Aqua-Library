@@ -10,6 +10,7 @@ using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
 using System.Windows;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace AquaModelLibrary.AquaMethods
 {
@@ -136,7 +137,8 @@ namespace AquaModelLibrary.AquaMethods
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                throw new Exception($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                MessageBox.Show($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                throw new NotImplementedException();
                         }
                         data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions);
 
@@ -157,7 +159,8 @@ namespace AquaModelLibrary.AquaMethods
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                throw new Exception($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                throw new NotImplementedException();
                         }
 
                         if (dataType == 0x86)
@@ -192,7 +195,8 @@ namespace AquaModelLibrary.AquaMethods
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                throw new Exception($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                throw new NotImplementedException();
                         }
                         subDataAdditions *= 4; //The field is stored as some amount of int32s. Therefore, multiplying by 4 gives us the byte buffer length.
 
@@ -213,13 +217,13 @@ namespace AquaModelLibrary.AquaMethods
                                     ((Vector4[])data)[j] = streamReader.Read<Vector4>();
                                     break;
                                 default:
-                                    Console.WriteLine($"Unknown subDataType {subDataType}, please report!");
+                                    MessageBox.Show($"Unknown subDataType {subDataType.ToString("X")}, please report!");
                                     throw new NotImplementedException();
                             }
                         }
                         break;
                     default:
-                        Console.WriteLine($"Unknown dataType {dataType}, please report!");
+                        MessageBox.Show($"Unknown dataType {dataType.ToString("X")} at {streamReader.Position().ToString("X")}, please report!");
                         throw new NotImplementedException();
                 }
 
@@ -396,27 +400,27 @@ namespace AquaModelLibrary.AquaMethods
 
                 if (vtxlList[i].bonePalette != null)
                 {
-                    addBytes(outBytes, 0xBD, 0x8, BitConverter.GetBytes(vtxlList[i].bonePalette.Count));
                     if (vtxlList[i].bonePalette.Count > 0)
                     {
+                        addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes(vtxlList[i].bonePalette.Count));
                         subTagCount++;
 
                         outBytes.Add(0xBE);
                         outBytes.Add(0x86);
                         outBytes.Add(0x8);
-                        outBytes.Add((byte)vtxlList[i].bonePalette.Count);
+                        outBytes.Add((byte)(vtxlList[i].bonePalette.Count - 1));
                         for (int j = 0; j < vtxlList[i].bonePalette.Count; j++)
                         {
                             outBytes.AddRange(BitConverter.GetBytes(vtxlList[i].bonePalette[j]));
                         }
                     } else
                     {
-                        addBytes(outBytes, 0xBD, 0x8, BitConverter.GetBytes((int)0));
+                        addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes((int)0));
                     }
 
                 } else
                 {
-                    addBytes(outBytes, 0xBD, 0x8, BitConverter.GetBytes((int)0));
+                    addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes((int)0));
                 }
 
                 addBytes(outBytes, 0xC8, 0x9, BitConverter.GetBytes(vsetList[i].unk0));
@@ -424,15 +428,16 @@ namespace AquaModelLibrary.AquaMethods
 
                 if (vtxlList[i].edgeVerts != null)
                 {
-                    addBytes(outBytes, 0xC9, 0x8, BitConverter.GetBytes(vtxlList[i].edgeVerts.Count));
                     if (vtxlList[i].edgeVerts.Count > 0)
                     {
+
+                        addBytes(outBytes, 0xC9, 0x9, BitConverter.GetBytes(vtxlList[i].edgeVerts.Count));
                         subTagCount++;
 
                         outBytes.Add(0xCA);
                         outBytes.Add(0x86);
                         outBytes.Add(0x8);
-                        outBytes.Add((byte)vtxlList[i].edgeVerts.Count);
+                        outBytes.Add((byte)(vtxlList[i].edgeVerts.Count - 1));
                         for (int j = 0; j < vtxlList[i].edgeVerts.Count; j++)
                         {
                             outBytes.AddRange(BitConverter.GetBytes(vtxlList[i].edgeVerts[j]));
@@ -440,13 +445,13 @@ namespace AquaModelLibrary.AquaMethods
                     }
                     else
                     {
-                        addBytes(outBytes, 0xC9, 0x8, BitConverter.GetBytes((int)0));
+                        addBytes(outBytes, 0xC9, 0x9, BitConverter.GetBytes((int)0));
                     }
 
                 }
                 else
                 {
-                    addBytes(outBytes, 0xC9, 0x8, BitConverter.GetBytes((int)0));
+                    addBytes(outBytes, 0xC9, 0x9, BitConverter.GetBytes((int)0));
                 }
 
             }
@@ -558,9 +563,10 @@ namespace AquaModelLibrary.AquaMethods
             int vtxeEnd = outBytes.Count;
 
             //VTXL
-            outBytes.Add(0xBA);
-            outBytes.Add(0x89);
-            int vtxlSizeArea = outBytes.Count;
+            List<byte> outBytes2 = new List<byte>();
+            outBytes2.Add(0xBA);
+            outBytes2.Add(0x89);
+            int vtxlSizeArea = outBytes2.Count;
             for (int i = 0; i < vtxl.vertPositions.Count; i++)
             {
                 for (int j = 0; j < vtxe.vertDataTypes.Count; j++)
@@ -568,46 +574,46 @@ namespace AquaModelLibrary.AquaMethods
                     switch (vtxe.vertDataTypes[j].dataType)
                     {
                         case (int)AquaObject.VertFlags.VertPosition:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertPositions[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertPositions[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertWeight:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertWeights[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertWeights[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertNormal:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertNormals[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertNormals[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertColor:
                             for (int color = 0; color < 4; color++)
                             {
-                                outBytes.Add(vtxl.vertColors[i][color]);
+                                outBytes2.Add(vtxl.vertColors[i][color]);
                             }
                             break;
                         case (int)AquaObject.VertFlags.VertColor2:
                             for (int color = 0; color < 4; color++)
                             {
-                                outBytes.Add(vtxl.vertColor2s[i][color]);
+                                outBytes2.Add(vtxl.vertColor2s[i][color]);
                             }
                             break;
                         case (int)AquaObject.VertFlags.VertWeightIndex:
                             for (int weight = 0; weight < 4; weight++)
                             {
-                                outBytes.Add(vtxl.vertWeightIndices[i][weight]);
+                                outBytes2.Add(vtxl.vertWeightIndices[i][weight]);
                             }
                             break;
                         case (int)AquaObject.VertFlags.VertUV1:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv1List[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv1List[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertUV2:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv2List[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv2List[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertUV3:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv3List[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv3List[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertTangent:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertTangentList[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertTangentList[i]));
                             break;
                         case (int)AquaObject.VertFlags.VertBinormal:
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertBinormalList[i]));
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertBinormalList[i]));
                             break;
                         default:
                             MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
@@ -619,29 +625,31 @@ namespace AquaModelLibrary.AquaMethods
             }
 
             //Calc and insert the vert data counts in post due to the way sega does it.
-            int vertDataCount = ((outBytes.Count - vtxlSizeArea) / 4) - 1;
+            int vertDataCount = ((outBytes2.Count - vtxlSizeArea) / 4) - 1;
             if (vertDataCount > byte.MaxValue)
             {
                 if (vertDataCount - 1 > ushort.MaxValue)
                 {
-                    outBytes.Insert(vtxlSizeArea, 0x18);
-                    outBytes.InsertRange(vtxlSizeArea + 0x4, BitConverter.GetBytes(vertDataCount));
+                    outBytes2.Insert(vtxlSizeArea, 0x18);
+                    outBytes2.InsertRange(vtxlSizeArea + 0x1, BitConverter.GetBytes(vertDataCount));
                 }
                 else
                 {
-                    outBytes.Insert(vtxlSizeArea, 0x10);
-                    outBytes.InsertRange(vtxlSizeArea + 0x4, BitConverter.GetBytes((short)(vertDataCount)));
+                    outBytes2.Insert(vtxlSizeArea, 0x10);
+                    outBytes2.InsertRange(vtxlSizeArea + 0x1, BitConverter.GetBytes((short)(vertDataCount)));
                 }
             }
             else
             {
-                outBytes.Insert(vtxlSizeArea, 0x8);
-                outBytes.Insert(vtxlSizeArea + 0x4, (byte)vertDataCount);
+                outBytes2.Insert(vtxlSizeArea, 0x8);
+                outBytes2.Insert(vtxlSizeArea + 0x1, (byte)vertDataCount);
             }
 
             //Pointer count. Always 0 on VTXL
             //Subtag count
-            WriteTagHeader(outBytes, "VTXL", 0, 0x1);
+            WriteTagHeader(outBytes2, "VTXL", 0, 0x1);
+
+            outBytes.AddRange(outBytes2);
 
             return outBytes.ToArray();
         }
@@ -728,9 +736,11 @@ namespace AquaModelLibrary.AquaMethods
             {
                 MESH mesh = new MESH();
 
+                byte[] c7 = BitConverter.GetBytes((int)meshRaw[i][0xC7]);
+
                 mesh.unkShort0 = (short)((int)meshRaw[i][0xB0] % 0x10000);
-                mesh.unkByte0 = (byte)((int)meshRaw[i][0xC7] % 0x100);
-                mesh.unkByte1 = (byte)(((int)meshRaw[i][0xC7] / 100) % 0x100);
+                mesh.unkByte0 = c7[0];
+                mesh.unkByte1 = c7[1];
                 mesh.unkShort1 = (short)((int)meshRaw[i][0xB0] / 0x10000);
                 mesh.mateIndex = (int)meshRaw[i][0xB1];
                 mesh.rendIndex = (int)meshRaw[i][0xB2];
@@ -761,8 +771,8 @@ namespace AquaModelLibrary.AquaMethods
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
-                int shorts = meshList[i].unkShort0 + (meshList[i].unkShort1 << 4);
-                int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 << 2);
+                int shorts = meshList[i].unkShort0 + (meshList[i].unkShort1 * 0x10000);
+                int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 * 0x100);
                 addBytes(outBytes, 0xB0, 0x9, BitConverter.GetBytes(shorts));
                 addBytes(outBytes, 0xC7, 0x9, BitConverter.GetBytes(bytes));
                 addBytes(outBytes, 0xB1, 0x8, BitConverter.GetBytes(meshList[i].mateIndex));
@@ -774,11 +784,11 @@ namespace AquaModelLibrary.AquaMethods
                 addBytes(outBytes, 0xC1, 0x8, BitConverter.GetBytes(meshList[i].psetIndex));
                 addBytes(outBytes, 0xC2, 0x9, BitConverter.GetBytes(meshList[i].baseMeshSequenceId));
             }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+            //outBytes.AddRange(BitConverter.GetBytes((short)0xFD)); MESH seemingly doesn't use this for some reason
 
             //Pointer count. Always 0 on MESH
             //Subtag count. 11 for each MESH + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "MESH", 0, (ushort)(meshList.Count * 0xB + 0x1));
+            WriteTagHeader(outBytes, "MESH", 0, (ushort)(meshList.Count * 0xB));
 
             return outBytes.ToArray();
         }
@@ -850,15 +860,20 @@ namespace AquaModelLibrary.AquaMethods
                 string alphaStr = GetPSO2String(mate.alphaType);
                 addBytes(outBytes, 0x3A, 0x02, (byte)alphaStr.Length, Encoding.UTF8.GetBytes(alphaStr));
 
-                //Mat Name String
-                string matName = GetPSO2String(mate.matName);
-                addBytes(outBytes, 0x39, 0x02, (byte)matName.Length, Encoding.UTF8.GetBytes(matName));
+                //Mat Name String. Do it this way in case of names that would break when encoded to utf8 again
+                int matLen = GetPSO2StringLength(mate.matName);
+                byte[] matBytes = new byte[matLen];
+                for(int strIndex = 0; strIndex < matLen; strIndex++)
+                {
+                    matBytes[strIndex] = mate.matName[strIndex];
+                }
+                addBytes(outBytes, 0x39, 0x02, (byte)matLen, matBytes);
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
             //Pointer count. Always 0 on MATE
-            //Subtag count. 11 for each MATE + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "MATE", 0, (ushort)(mateList.Count * 0xB + 0x1));
+            //Subtag count. 12 for each MATE + 1 for the end tag, always.
+            WriteTagHeader(outBytes, "MATE", 0, (ushort)(mateList.Count * 0xC + 0x1));
 
             return outBytes.ToArray();
         }
@@ -1090,8 +1105,8 @@ namespace AquaModelLibrary.AquaMethods
                 addBytes(outBytes, 0x67, 0x9, BitConverter.GetBytes(tstaList[i].unkInt3));
                 addBytes(outBytes, 0x68, 0x9, BitConverter.GetBytes(tstaList[i].unkInt4));
                 addBytes(outBytes, 0x69, 0x9, BitConverter.GetBytes(tstaList[i].unkInt5));
-                addBytes(outBytes, 0x6A, 0x9, BitConverter.GetBytes(tstaList[i].unkFloat0));
-                addBytes(outBytes, 0x6B, 0x9, BitConverter.GetBytes(tstaList[i].unkFloat1));
+                addBytes(outBytes, 0x6A, 0xA, BitConverter.GetBytes(tstaList[i].unkFloat0));
+                addBytes(outBytes, 0x6B, 0xA, BitConverter.GetBytes(tstaList[i].unkFloat1));
 
                 //TexName String
                 string texNameStr = GetPSO2String(tsta.texName);
@@ -1571,7 +1586,7 @@ namespace AquaModelLibrary.AquaMethods
         {
             outBytes.InsertRange(0, Encoding.UTF8.GetBytes(tagString));
             outBytes.InsertRange(0x4, BitConverter.GetBytes(pointerCount));  //Pointer count
-            outBytes.InsertRange(0x8, BitConverter.GetBytes(subtagCount)); //Subtag count
+            outBytes.InsertRange(0x6, BitConverter.GetBytes(subtagCount)); //Subtag count
 
             outBytes.InsertRange(0, BitConverter.GetBytes(outBytes.Count)); //Data body size
             outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));

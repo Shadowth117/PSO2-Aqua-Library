@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
+using static AquaModelLibrary.AquaPackage;
 
 namespace AquaModelLibrary.OtherStructs
 {
     public unsafe class TPNTexturePattern
     {
+        public AFPBase tpnAFPBase = new AFPBase();
         public tpnHeader header = new tpnHeader();
         public List<texSet> texSets = new List<texSet>();
         //Header

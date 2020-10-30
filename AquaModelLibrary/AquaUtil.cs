@@ -16,6 +16,7 @@ namespace AquaLibrary
     {
         public List<TCBTerrainConvex> tcbModels = new List<TCBTerrainConvex>();
         public List<ModelSet> aquaModels = new List<ModelSet>();
+        public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
         public struct ModelSet
         {
@@ -318,6 +319,7 @@ namespace AquaLibrary
             for(int modelIndex = 0; modelIndex < fileCount; modelIndex++ )
             {
                 AquaObject model = new AquaObject();
+                TPNTexturePattern tpn = new TPNTexturePattern();
                 int objcCount = 0;
                 List<List<ushort>> bp = null;
                 List<List<ushort>> ev = null;
@@ -332,20 +334,28 @@ namespace AquaLibrary
                     {
                         AlignReader(streamReader, 0x10);
                     }
-                    model.afp = streamReader.Read<AquaPackage.AFPBase>();
+                    //Decide whether this is a tpn or not
+                    var afp = streamReader.Read<AquaPackage.AFPBase>();
+                    if (afp.fileTypeCString == 0x6E7074)
+                    {
+                        tpn.tpnAFPBase = afp;
+                    } else
+                    {
+                        model.afp = afp;
+                    }
                     fileSize = model.afp.paddingOffset;
                 }
                 int dataEnd = (int)streamReader.Position() + fileSize;
 
-                int fileMagic = streamReader.Peek<int>();
-                if (fileMagic == 0x6E7074)
+                //TPN files are uncommon, but are sometimes at the end of afp archives. 
+                if (tpn.tpnAFPBase.fileTypeCString == 0x6E7074)
                 {
-                    TPNTexturePattern tpn = new TPNTexturePattern();
                     tpn.header = streamReader.Read<TPNTexturePattern.tpnHeader>();
                     for(int i = 0; i < tpn.header.count; i++)
                     {
                         tpn.texSets.Add(streamReader.Read<TPNTexturePattern.texSet>());
                     }
+                    tpnFiles.Add(tpn);
                 } else
                 {
                     streamReader.Seek(0x10, SeekOrigin.Current); //Skip the header and move to the tags
@@ -442,11 +452,11 @@ namespace AquaLibrary
             return aquaModels;
         }
 
-        public void WriteVTBFModel(string outFileName)
+        public void WriteVTBFModel(string ogFileName, string outFileName)
         {
             List<byte> finalOutBytes = new List<byte>();
             finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0});
-            finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count));
+            finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
             finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
             finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
 
@@ -464,9 +474,9 @@ namespace AquaLibrary
                 outBytes.AddRange(toROOT());
                 outBytes.AddRange(toOBJC(aquaModels[0].models[i].objc, aquaModels[0].models[i].unrms != null));
                 outBytes.AddRange(toVSETList(aquaModels[0].models[i].vsetList, aquaModels[0].models[i].vtxlList));
-                for(int j = 0; j < aquaModels[0].models.Count; j++)
+                for(int j = 0; j < aquaModels[0].models[i].vtxlList.Count; j++)
                 {
-                    toVTXE_VTXL(aquaModels[0].models[i].vtxeList[j], aquaModels[0].models[i].vtxlList[j]);
+                    outBytes.AddRange(toVTXE_VTXL(aquaModels[0].models[i].vtxeList[j], aquaModels[0].models[i].vtxlList[j]));
                 }
                 outBytes.AddRange(toPSET(aquaModels[0].models[i].psetList, aquaModels[0].models[i].strips));
                 outBytes.AddRange(toMESH(aquaModels[0].models[i].meshList));
@@ -494,14 +504,20 @@ namespace AquaLibrary
 
                 //Handle filename text
                 byte[] fName = new byte[0x20];
-                byte[] outFileNameBytes = Encoding.UTF8.GetBytes(outFileName);
-                int nameCount = outFileName.Length < 0x20 ? outFileName.Length : 0x20;
+                string modelCount = ".";
+                if(aquaModels[0].models.Count > 1)
+                {
+                    modelCount = $"_l{i + 1}.";
+                }
+                byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName), 
+                    modelCount + Encoding.UTF8.GetString(returnModelType(ogFileName))));
+                int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
                 for (int j = 0; j < nameCount; j++)
                 {
                     fName[j] = outFileNameBytes[j];
                 }
 
-                outBytes.InsertRange(0, returnModelType(outFileName));
+                outBytes.InsertRange(0, returnModelType(ogFileName));
                 outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
                 outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
                 outBytes.InsertRange(0, BitConverter.GetBytes(size));
@@ -510,6 +526,22 @@ namespace AquaLibrary
                 AlignVTBFEndWrite(outBytes, 0x10);
 
                 finalOutBytes.AddRange(outBytes);
+            }
+            
+            //Write texture patterns
+            for(int i = 0; i < tpnFiles.Count; i++)
+            {
+                finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].tpnAFPBase));
+                finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].header));
+                for(int j = 0; j < tpnFiles[i].header.count; j++)
+                {
+                    if (i > 0)
+                    {
+                        finalOutBytes.AddRange(BitConverter.GetBytes((double)0.0));
+                    }
+                    finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].texSets[j]));
+                }
+                AlignVTBFEndWrite(finalOutBytes, 0x10);
             }
 
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
