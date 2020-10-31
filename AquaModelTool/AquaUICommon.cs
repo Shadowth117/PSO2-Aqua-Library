@@ -34,6 +34,10 @@ namespace AquaModelTool
             AquaLibrary.AquaUtil aqua = new AquaLibrary.AquaUtil();
             aqua.ReadModel(str);
 
+            //These will be output as .**p regardless and if the user really wants the o version, they can do it in 2 seconds in a hex editor.
+            str = str.Replace(".aqo", ".aqp");
+            str = str.Replace(".tro", ".trp");
+            
             //For now just write all back to VTBF
             string newStr = str.Replace(Path.GetExtension(str), "_VTBF" + Path.GetExtension(str));
             aqua.WriteVTBFModel(str, newStr);

@@ -16,7 +16,7 @@ namespace AquaModelTool
         {
             if (args.Length > 0)
             {
-                AquaUICommon.openFile();
+                AquaUICommon.openFile(args[0]);
             }
             else
             {

@@ -186,3 +186,20 @@ AquaModelTool/obj/Release/AquaModelTool.exe.config
 AquaModelTool/obj/Release/AquaModelTool.pdb
 AquaModelTool/obj/Release/AquaModelTool.Properties.Resources.resources
 AquaModelTool/obj/Release/AquaModelTool.exe
+AquaModelTool/bin/PSO2 Model Tool.7z
+AquaModelTool/bin/PSO2 Model Tool/AquaModelLibrary.dll
+AquaModelTool/bin/PSO2 Model Tool/AquaModelLibrary.dll.config
+AquaModelTool/bin/PSO2 Model Tool/AquaModelLibrary.pdb
+AquaModelTool/bin/PSO2 Model Tool/AquaModelTool.exe
+AquaModelTool/bin/PSO2 Model Tool/AquaModelTool.exe.config
+AquaModelTool/bin/PSO2 Model Tool/AquaModelTool.pdb
+AquaModelTool/bin/PSO2 Model Tool/Reloaded.Memory.dll
+AquaModelTool/bin/PSO2 Model Tool/Reloaded.Memory.xml
+AquaModelTool/bin/PSO2 Model Tool/System.Buffers.dll
+AquaModelTool/bin/PSO2 Model Tool/System.Buffers.xml
+AquaModelTool/bin/PSO2 Model Tool/System.Memory.dll
+AquaModelTool/bin/PSO2 Model Tool/System.Memory.xml
+AquaModelTool/bin/PSO2 Model Tool/System.Numerics.Vectors.dll
+AquaModelTool/bin/PSO2 Model Tool/System.Numerics.Vectors.xml
+AquaModelTool/bin/PSO2 Model Tool/System.Runtime.CompilerServices.Unsafe.dll
+AquaModelTool/bin/PSO2 Model Tool/System.Runtime.CompilerServices.Unsafe.xml

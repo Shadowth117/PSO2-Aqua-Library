@@ -199,7 +199,6 @@ namespace AquaModelLibrary.AquaMethods
                                 throw new NotImplementedException();
                         }
                         subDataAdditions *= 4; //The field is stored as some amount of int32s. Therefore, multiplying by 4 gives us the byte buffer length.
-
                         data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions); //Read the whole vert buffer at once as byte array. We'll handle it later.
 
                         streamReader.Seek(subDataAdditions, SeekOrigin.Current);
@@ -1282,7 +1281,7 @@ namespace AquaModelLibrary.AquaMethods
                         {
                             vertIds.Add(streamReader.Read<int>());
                         }
-                        unrm.unrmMeshIds.Add(vertIds);
+                        unrm.unrmVertIds.Add(vertIds);
                     }
                 }
             }
@@ -1311,7 +1310,7 @@ namespace AquaModelLibrary.AquaMethods
                 else
                 {
                     outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((ushort)unrm.vertGroupCountCount - 1));
+                    outBytes.AddRange(BitConverter.GetBytes((ushort)(unrm.vertGroupCountCount - 1)));
                 }
             }
             else
@@ -1340,7 +1339,7 @@ namespace AquaModelLibrary.AquaMethods
                 else
                 {
                     outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((ushort)meshIDCount - 1));
+                    outBytes.AddRange(BitConverter.GetBytes((ushort)(meshIDCount - 1)));
                 }
             }
             else
@@ -1350,7 +1349,7 @@ namespace AquaModelLibrary.AquaMethods
             }
             for (int i = 0; i < unrm.unrmMeshIds.Count; i++)
             {
-                for (int j = 0; j < unrm.unrmMeshIds[i].Count; i++)
+                for (int j = 0; j < unrm.unrmMeshIds[i].Count; j++)
                 {
                     outBytes.AddRange(BitConverter.GetBytes(unrm.unrmMeshIds[i][j]));
                 }
@@ -1368,7 +1367,7 @@ namespace AquaModelLibrary.AquaMethods
                 } else
                 {
                     outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((ushort)vertIdCount - 1));
+                    outBytes.AddRange(BitConverter.GetBytes((ushort)(vertIdCount - 1)));
                 }
             }
             else
@@ -1378,7 +1377,7 @@ namespace AquaModelLibrary.AquaMethods
             }
             for (int i = 0; i < unrm.unrmVertIds.Count; i++)
             {
-                for (int j = 0; j < unrm.unrmVertIds[i].Count; i++)
+                for (int j = 0; j < unrm.unrmVertIds[i].Count; j++)
                 {
                     outBytes.AddRange(BitConverter.GetBytes(unrm.unrmVertIds[i][j]));
                 }

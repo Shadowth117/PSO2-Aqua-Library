@@ -9,6 +9,7 @@ using static AquaModelLibrary.AquaMethods.VTBFMethods;
 using AquaModelLibrary.OtherStructs;
 using System;
 using System.Text;
+using System.Diagnostics;
 
 namespace AquaLibrary
 {
@@ -315,7 +316,21 @@ namespace AquaLibrary
         public List<AquaObject> ReadVTBFModel(BufferedStreamReader streamReader, int fileCount, int firstFileSize)
         {
             List<AquaObject> aquaModels = new List<AquaObject>();
-            int fileSize = firstFileSize;
+            int fileSize = firstFileSize; 
+            
+            //Handle .aqo/tro
+            if(fileSize == 0)
+            {
+                fileSize = (int)streamReader.BaseStream().Length;
+
+                //Handle the weird aqo/tro with aqo. in front of the rest of the file needlessly
+                int type = BitConverter.ToInt32(streamReader.ReadBytes(0, 4), 0);
+                if (type.Equals(0x6F7161) || type.Equals(0x6F7274))
+                {
+                    fileSize -= 0x4;
+                }
+            }
+
             for(int modelIndex = 0; modelIndex < fileCount; modelIndex++ )
             {
                 AquaObject model = new AquaObject();
