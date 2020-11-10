@@ -33,6 +33,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NvTriStripDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\NvTriStripDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Reloaded.Memory, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -66,14 +70,12 @@
     <Compile Include="OtherStructs\NexusMesh.cs" />
     <Compile Include="OtherStructs\PRMParameters.cs" />
     <Compile Include="AquaUtil.cs" />
-    <Compile Include="AquaStructs\AquaCamera.cs" />
     <Compile Include="AquaStructs\AquaCommon.cs" />
     <Compile Include="AquaStructs\AquaEffect.cs" />
     <Compile Include="AquaStructs\AquaMotion.cs" />
     <Compile Include="AquaStructs\AquaNode.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
     <Compile Include="AquaStructs\AquaPackage.cs" />
-    <Compile Include="AquaStructs\AquaUV.cs" />
     <Compile Include="OtherStructs\TCBTerrainConvex.cs" />
     <Compile Include="OtherStructs\TPNTexturePattern.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,6 +83,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libraries\NvTriStripDotNet.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -203,3 +203,10 @@ AquaModelTool/bin/PSO2 Model Tool/System.Numerics.Vectors.dll
 AquaModelTool/bin/PSO2 Model Tool/System.Numerics.Vectors.xml
 AquaModelTool/bin/PSO2 Model Tool/System.Runtime.CompilerServices.Unsafe.dll
 AquaModelTool/bin/PSO2 Model Tool/System.Runtime.CompilerServices.Unsafe.xml
+AquaModelLibrary/obj/Release/DesignTimeResolveAssemblyReferencesInput.cache
+AquaModelLibrary/bin/Release/NvTriStripDotNet.dll
+AquaModelLibrary/bin/Debug/NvTriStripDotNet.dll
+AquaModelTool/bin/Debug/NvTriStripDotNet.dll
+AquaModelTool/bin/Release/NvTriStripDotNet.dll
+AquaModelTool/obj/Release/DesignTimeResolveAssemblyReferences.cache
+AquaModelTool/obj/Release/DesignTimeResolveAssemblyReferencesInput.cache

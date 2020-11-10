@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Documents;
 using static AquaModelLibrary.AquaObject;
 
 namespace AquaModelLibrary.AquaMethods
@@ -61,7 +62,7 @@ namespace AquaModelLibrary.AquaMethods
             vtxl.createTrueVertWeights();
         }
 
-        public static BoundingVolume GenerateBounding (List<VTXL> vertData)
+        public static BoundingVolume GenerateBounding(List<VTXL> vertData)
         {
             BoundingVolume bounds = new BoundingVolume();
             Vector3 maxPoint = new Vector3();
@@ -72,10 +73,10 @@ namespace AquaModelLibrary.AquaMethods
 
             for (int vset = 0; vset < vertData.Count; vset++)
             {
-                for(int vert = 0; vert < vertData[vset].vertPositions.Count; vert++)
+                for (int vert = 0; vert < vertData[vset].vertPositions.Count; vert++)
                 {
                     //Compare to max
-                    if (maxPoint.X < vertData[vset].vertPositions[vert].X) 
+                    if (maxPoint.X < vertData[vset].vertPositions[vert].X)
                     {
                         maxPoint.X = vertData[vset].vertPositions[vert].X;
                     }
@@ -117,7 +118,7 @@ namespace AquaModelLibrary.AquaMethods
                 for (int vert = 0; vert < vertData[vset].vertPositions.Count; vert++)
                 {
                     float distance = Distance(center, vertData[vset].vertPositions[vert]);
-                    if(distance > radius)
+                    if (distance > radius)
                     {
                         radius = distance;
                     }
@@ -142,7 +143,7 @@ namespace AquaModelLibrary.AquaMethods
         //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
         public static void computeTangentSpace(AquaObject model, bool useFaceNormals)
         {
-            for(int mesh = 0; mesh < model.vsetList.Count; mesh++)
+            for (int mesh = 0; mesh < model.vsetList.Count; mesh++)
             {
                 //Verify that there are vertices and with valid UVs
                 int vsetIndex = model.meshList[mesh].vsetIndex;
@@ -164,9 +165,9 @@ namespace AquaModelLibrary.AquaMethods
                             (int)face.Z
                         };
 
-                        List<Vector3> verts = new List<Vector3>() 
-                        { 
-                          model.vtxlList[vsetIndex].vertPositions[(int)face.X], 
+                        List<Vector3> verts = new List<Vector3>()
+                        {
+                          model.vtxlList[vsetIndex].vertPositions[(int)face.X],
                           model.vtxlList[vsetIndex].vertPositions[(int)face.Y],
                           model.vtxlList[vsetIndex].vertPositions[(int)face.Z]
                         };
@@ -184,7 +185,7 @@ namespace AquaModelLibrary.AquaMethods
 
                         float area = dUV1.X * dUV2.Y - dUV1.Y * dUV2.X;
                         int sign;
-                        if(area < 0)
+                        if (area < 0)
                         {
                             sign = -1;
                         } else
@@ -206,9 +207,9 @@ namespace AquaModelLibrary.AquaMethods
                         Vector3 binormal = Vector3.Normalize(Vector3.Cross(normal, tangent)) * sign;
 
                         //Create or add vectors to the collections
-                        for(int i = 0; i < 3; i++)
+                        for (int i = 0; i < 3; i++)
                         {
-                            if(vertBinormalArray[faceIndices[i]] == null)
+                            if (vertBinormalArray[faceIndices[i]] == null)
                             {
                                 vertBinormalArray[faceIndices[i]] = binormal;
                                 vertTangentArray[faceIndices[i]] = tangent;
@@ -223,7 +224,7 @@ namespace AquaModelLibrary.AquaMethods
                     }
 
                     //Average out the values for use ingame
-                    for(int vert = 0; vert < model.vtxlList[vsetIndex].vertPositions.Count; vert++)
+                    for (int vert = 0; vert < model.vtxlList[vsetIndex].vertPositions.Count; vert++)
                     {
                         vertBinormalArray[vert] = Vector3.Normalize(vertBinormalArray[vert]);
                         vertTangentArray[vert] = Vector3.Normalize(vertTangentArray[vert]);
@@ -231,12 +232,395 @@ namespace AquaModelLibrary.AquaMethods
                     }
 
                     //Set these back in the model
-                    if(useFaceNormals)
+                    if (useFaceNormals)
                     {
                         model.vtxlList[vsetIndex].vertNormals = vertFaceNormalArray.ToList();
                     }
                     model.vtxlList[vsetIndex].vertBinormalList = vertBinormalArray.ToList();
                     model.vtxlList[vsetIndex].vertTangentList = vertTangentArray.ToList();
+                }
+            }
+        }
+
+        public static void splitMesh(AquaObject model, AquaObject outModel, int modelId, List<List<int>> facesToClone)
+        {
+            if (facesToClone.Count > 0)
+            {
+                for (int f = 0; f < facesToClone.Count; f++)
+                {
+                    Dictionary<float, int> faceVertDict = new Dictionary<float, int>();
+                    List<int> faceVertIds = new List<int>();
+
+                    List<int> tempFaceMatIds = new List<int>();
+                    List<Vector3> tempFaces = new List<Vector3>();
+
+                    int vertIndex = 0;
+                    if (facesToClone[f].Count > 0)
+                    {
+                        //Get vert ids
+                        for (int i = 0; i < facesToClone[f].Count; i++)
+                        {
+                            Vector3 face = model.tempTris[modelId].triList[facesToClone[f][i]];
+                            if (!faceVertIds.Contains((int)face.X))
+                            {
+                                faceVertDict.Add(face.X, vertIndex++);
+                                faceVertIds.Add((int)face.X);
+                            }
+                            if (!faceVertIds.Contains((int)face.Y))
+                            {
+                                faceVertDict.Add(face.Y, vertIndex++);
+                                faceVertIds.Add((int)face.Y);
+                            }
+                            if (!faceVertIds.Contains((int)face.Z))
+                            {
+                                faceVertDict.Add(face.Z, vertIndex++);
+                                faceVertIds.Add((int)face.Z);
+                            }
+
+                            tempFaceMatIds.Add(model.tempTris[modelId].matIdList[facesToClone[f][i]]);
+                            tempFaces.Add(face);
+                        }
+
+                        //Remap Ids based based on the indices of the values in faceVertIds and add to outModel
+                        for (int i = 0; i < tempFaces.Count; i++)
+                        {
+                            tempFaces[i] = new Vector3(faceVertDict[tempFaces[i].X], faceVertDict[tempFaces[i].Y], faceVertDict[tempFaces[i].Z]);
+                        }
+                        outModel.tempTris.Add(new genericTriangles(tempFaces, tempFaceMatIds));
+
+                        //Copy vertex data based on faceVertIds ordering
+                        VTXL vtxl = new VTXL();
+                        for (int i = 0; i < faceVertIds.Count; i++)
+                        {
+                            //Should probably always have vert position data, perhaps not other stuff
+                            vtxl.vertPositions.Add(model.vtxlList[modelId].vertPositions[faceVertIds[i]]);
+                            if (model.vtxlList[modelId].vertWeights != null)
+                            {
+                                vtxl.vertWeights.Add(model.vtxlList[modelId].vertWeights[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].vertNormals != null)
+                            {
+                                vtxl.vertNormals.Add(model.vtxlList[modelId].vertNormals[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].vertColors != null)
+                            {
+                                vtxl.vertColors.Add(model.vtxlList[modelId].vertColors[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].vertColor2s != null)
+                            {
+                                vtxl.vertColor2s.Add(model.vtxlList[modelId].vertColor2s[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].vertWeightIndices != null)
+                            {
+                                vtxl.vertWeightIndices.Add(model.vtxlList[modelId].vertWeightIndices[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].uv1List != null)
+                            {
+                                vtxl.uv1List.Add(model.vtxlList[modelId].uv1List[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].uv2List != null)
+                            {
+                                vtxl.uv2List.Add(model.vtxlList[modelId].uv2List[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].uv3List != null)
+                            {
+                                vtxl.uv3List.Add(model.vtxlList[modelId].uv3List[faceVertIds[i]]);
+                            }
+
+                            //Non pso2 sections
+                            if (model.vtxlList[modelId].rawVertWeights != null)
+                            {
+                                vtxl.rawVertWeights.Add(model.vtxlList[modelId].rawVertWeights[faceVertIds[i]]);
+                            }
+                            if (model.vtxlList[modelId].rawVertIds != null)
+                            {
+                                vtxl.rawVertIds.Add(model.vtxlList[modelId].rawVertIds[faceVertIds[i]]);
+                            }
+
+                        }
+
+                        //Add things that aren't linked to the vertex ids
+                        if (model.vtxlList[modelId].bonePalette != null)
+                        {
+                            vtxl.bonePalette = model.vtxlList[modelId].bonePalette;
+                        }
+                        if (model.vtxlList[modelId].edgeVerts != null)
+                        {
+                            vtxl.edgeVerts = model.vtxlList[modelId].edgeVerts;
+                        }
+
+                        outModel.vtxlList.Add(vtxl);
+                    }
+                }
+
+            }
+
+
+        }
+
+        public void SplitByBoneCount(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
+        {
+            List<List<int>> faceLists = new List<List<int>>();
+            bool[] usedFaceIds = new bool[model.tempTris[modelId].triList.Count];
+            int startFace = 0;
+
+            while (true)
+            {
+                List<int> objBones = new List<int>();
+                List<int> faceArray = new List<int>();
+
+                //Find start point for this iteration
+                for (int i = 0; i < usedFaceIds.Length; i++)
+                {
+                    if (!usedFaceIds[i])
+                    {
+                        startFace = i;
+                        break;
+                    }
+                }
+
+                for (int f = startFace; f < usedFaceIds.Length; f++)
+                {
+                    //Used to watch how many bones are being used so it can be understood where to split the meshes.
+                    //These also help to track the bones being used so the edge verts list can be generated. Not sure how important that is, but the game stores it.
+                    List<int> faceBones = new List<int>();
+                    int newBones = 0;
+
+                    //Get vert ids of the face
+                    float[] faceIds = VectorAsArray(model.tempTris[modelId].triList[f]);
+                    List<int> edgeVertCandidates = new List<int>();
+
+                    //Get bones in the face
+                    foreach (float v in faceIds)
+                    {
+                        bool vertCheck = false;
+                        for (int b = 0; b < model.vtxlList[modelId].vertWeightIndices[(int)v].Length; b++)
+                        {
+                            int id = model.vtxlList[modelId].vertWeightIndices[(int)v][b];
+                            if (!faceBones.Contains(id))
+                            {
+                                faceBones.Add(id);
+                            }
+
+                            //If it's not in here, it's a candidate to be an edgeVert
+                            if (!objBones.Contains(id))
+                            {
+                                vertCheck = true;
+                            }
+                        }
+
+                        //Add edge vert candidates 
+                        if (vertCheck)
+                        {
+                            edgeVertCandidates.Add((int)v);
+                        }
+                    }
+
+                    //Check for bones in the face that weren't in the obj bone set yet
+                    foreach (int fb in faceBones)
+                    {
+                        if (!objBones.Contains(fb))
+                        {
+                            newBones++;
+                        }
+                    }
+
+                    //If enough space or no new, add to the object amount as well
+                    if (newBones + objBones.Count <= boneLimit)
+                    {
+                        foreach (int fb in faceBones)
+                        {
+                            if (!objBones.Contains(fb))
+                            {
+                                objBones.Add(fb);
+                            }
+                        }
+                        usedFaceIds[f] = true;
+                        faceArray.Add(f);
+                    } else
+                    {
+                        foreach (int vert in edgeVertCandidates)
+                        {
+                            model.vtxlList[modelId].edgeVerts.Add((ushort)vert);
+                        }
+                    }
+                }
+                faceLists.Add(faceArray);
+
+                bool breakFromLoop = true;
+                for (int i = 0; i < usedFaceIds.Length; i++)
+                {
+                    if (!usedFaceIds[i])
+                    {
+                        breakFromLoop = false;
+                    }
+                }
+                if (breakFromLoop)
+                {
+                    break;
+                }
+            }
+
+            //Split the meshes
+            splitMesh(model, outModel, modelId, faceLists);
+        }
+
+        public void BatchSplitByBoneCount(AquaObject model, AquaObject outModel, int boneLimit)
+        {
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                RemoveUnusedBones(model.vtxlList[i]);
+                //Pass to splitting function if beyond the limit, otherwise pass untouched
+                if (model.vtxlList[i].rawVertIds != null && model.vtxlList[i].bonePalette.Count > boneLimit)
+                {
+                    SplitByBoneCount(model, outModel, i, boneLimit);
+                } else
+                {
+                    CloneUnprocessedMesh(model, outModel, i);
+                }
+            }
+
+        }
+
+        public void SplitMeshByMaterial(AquaObject model, AquaObject outModel)
+        {
+            for (int i = 0; i < model.tempTris.Count; i++)
+            {
+                splitMesh(model, outModel, i, GetAllMaterialFaceGroups(model, i));
+            }
+        }
+
+        public List<List<int>> GetAllMaterialFaceGroups(AquaObject model, int meshId)
+        {
+            List<List<int>> matGroups = new List<List<int>>();
+            for(int i = 0; i < model.mateList.Count; i++)
+            {
+                matGroups.Add(new List<int>());
+            }
+
+            for(int i = 0; i < model.tempTris[meshId].matIdList.Count; i++)
+            {
+                //create list of face groups based on material data. Assume material ids are preprocessed to fit what will be used for the final AquaObject.
+                matGroups[model.tempTris[meshId].matIdList[i]].Add(i);
+            }
+
+            return matGroups;
+        }
+
+        public void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
+        {
+            outModel.vtxlList.Add(model.vtxlList[meshId]);
+            outModel.tempTris.Add(model.tempTris[meshId]);
+        }
+
+        //To be honest I don't really know what these actually do, but this seems to generate the structure the way the game does.
+        public void CalcUNRMs(AquaObject model, bool applyNormalAveraging)
+        {
+            UNRM unrm = new UNRM();
+
+            //Set up a boolean array for tracking what we've gone through for this
+            bool[][] meshCheckArr = new bool[model.vtxlList.Count][];
+            for (int m = 0; m < model.vtxlList.Count; m++)
+            {
+                meshCheckArr[m] = new bool[model.vtxlList[m].vertPositions.Count];
+            }
+
+            for (int m = 0; m < model.vtxlList.Count; m++)
+            {
+                for (int v = 0; v < model.vtxlList[m].vertPositions.Count; v++)
+                {
+                    Vector3 normals = new Vector3(); // Vector3s cannot be null
+                    if(model.vtxlList[m].vertNormals.Count > 0)
+                    {
+                        normals = model.vtxlList[m].vertNormals[v];
+                    }
+
+                    List<int> meshNum = new List<int>() { m };
+                    List<int> vertId = new List<int>() { v };
+                    //Loop through the other vertices to match them up
+                    for (int n = 0; n < model.vtxlList.Count; n++)
+                    {
+                        for (int w = 0; w < model.vtxlList[n].vertPositions.Count; w++)
+                        {
+                            bool sameVert = (m == n && v == w);
+                            if(!sameVert && model.vtxlList[n].vertPositions[w].Equals(model.vtxlList[m].vertPositions[v]) && !meshCheckArr[n][w])
+                            {
+                                meshCheckArr[n][w] = true;
+                                meshNum.Add(n);
+                                vertId.Add(w);
+                                if (model.vtxlList[n].vertNormals.Count > 0 && applyNormalAveraging)
+                                {
+                                    normals += model.vtxlList[n].vertNormals[w];
+                                }
+                            }
+                        }
+                    }
+                    meshCheckArr[m][v] = true;
+
+                    //UNRM groups are only valid if there's more than 1, ie more than one vertex linked by position.
+                    if(meshNum.Count > 1)
+                    {
+                        unrm.vertGroupCountCount++;
+                        unrm.vertCount += meshNum.Count;
+                        unrm.unrmMeshIds.Add(meshNum);
+                        unrm.unrmVertIds.Add(vertId);
+                        if(applyNormalAveraging)
+                        {
+                            normals = Vector3.Normalize(normals);
+                            for(int i = 0; i < meshNum.Count; i++)
+                            {
+                                model.vtxlList[meshNum[i]].vertNormals[vertId[i]] = normals;
+                            }
+                        }
+                    }
+                }
+            }
+
+            model.unrms = unrm;
+        }
+
+        //Removes bones in vtxls with unprocessed weights
+        public void RemoveUnusedBones(VTXL vtxl)
+        {
+            Dictionary<int, int> oldToNewId = new Dictionary<int, int>();
+            List<int> bonesIndicesUsed = new List<int>();
+            List<ushort> bonePaletteClone = new List<ushort>();
+            bonePaletteClone.AddRange(vtxl.bonePalette);
+            
+            
+            //Check for and collect bones which are referenced
+            for(int i = 0; i < vtxl.rawVertIds.Count; i++)
+            {
+                for(int j = 0; j < vtxl.rawVertIds[i].Count; j++)
+                {
+                    if(!bonesIndicesUsed.Contains(vtxl.rawVertIds[i][j]))
+                    {
+                        bonesIndicesUsed.Add(vtxl.rawVertIds[i][j]);
+                    }
+                }
+            }
+
+            //Remove bones from bonePalette and generate oldToNewId dictionary based on differences
+            int removeCounter = 0;
+            for(int i = 0; i < vtxl.bonePalette.Count; i++)
+            {
+                if(bonesIndicesUsed.Contains(i))
+                {
+                    oldToNewId.Add(i, i + removeCounter);
+                } else
+                {
+                    bonePaletteClone.RemoveAt(i + removeCounter);
+                    removeCounter--;
+                }
+            }
+            vtxl.bonePalette = bonePaletteClone;
+
+            //Loop through again and replace ids with their new equivalents
+            for (int i = 0; i < vtxl.rawVertWeights.Count; i++)
+            {
+                for (int j = 0; j < vtxl.rawVertWeights[i].Count; j++)
+                {
+                    vtxl.rawVertIds[i][j] = oldToNewId[vtxl.rawVertIds[i][j]];
                 }
             }
         }
@@ -316,6 +700,11 @@ namespace AquaModelLibrary.AquaMethods
             for (int byteIndex = 0; byteIndex < 4; byteIndex++) { bytes[byteIndex] = streamReader.Read<byte>(); }
 
             return bytes;
+        }
+
+        public float[] VectorAsArray(Vector3 vec3)
+        {
+            return new float[] { vec3.X, vec3.Y, vec3.Z }; 
         }
     }
 }
