@@ -200,8 +200,31 @@ namespace AquaModelLibrary.AquaMethods
                         }
                         subDataAdditions *= 4; //The field is stored as some amount of int32s. Therefore, multiplying by 4 gives us the byte buffer length.
                         data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions); //Read the whole vert buffer at once as byte array. We'll handle it later.
-
                         streamReader.Seek(subDataAdditions, SeekOrigin.Current);
+                        break;
+                    case 0xC6: //Int16 array? Seen used in .cmx files for storing unicode characters.
+                        subDataType = streamReader.Read<byte>();
+                        switch (subDataType) //The last array entry aka data count - 1.
+                        {
+                            case 0x8:
+                                subDataAdditions = streamReader.Read<byte>();
+                                break;
+                            case 0x10:
+                                subDataAdditions = streamReader.Read<ushort>();
+                                break;
+                            case 0x18:
+                                subDataAdditions = streamReader.Read<uint>();
+                                break;
+                            default:
+                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                throw new NotImplementedException();
+                        }
+                        uint actualCount = subDataAdditions * 2 + 4;
+                        data = new short[actualCount]; //Yeah something is wrong in the way the og files are written. Should be all 0s after the expected data, but still.
+                        for (int j = 0; j < actualCount; j++)
+                        {
+                            ((short[])data)[j] = streamReader.Read<short>();
+                        }
                         break;
                     case 0xCA: //Float Matrix, observed only as 4x4
                         subDataType = streamReader.Read<byte>(); //Expected to always be 0xA for float

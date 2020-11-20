@@ -358,7 +358,7 @@ namespace AquaModelLibrary.AquaMethods
 
         }
 
-        public void SplitByBoneCount(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
+        public static void SplitByBoneCount(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
         {
             List<List<int>> faceLists = new List<List<int>>();
             bool[] usedFaceIds = new bool[model.tempTris[modelId].triList.Count];
@@ -465,7 +465,7 @@ namespace AquaModelLibrary.AquaMethods
             splitMesh(model, outModel, modelId, faceLists);
         }
 
-        public void BatchSplitByBoneCount(AquaObject model, AquaObject outModel, int boneLimit)
+        public static void BatchSplitByBoneCount(AquaObject model, AquaObject outModel, int boneLimit)
         {
             for (int i = 0; i < model.vtxlList.Count; i++)
             {
@@ -482,7 +482,7 @@ namespace AquaModelLibrary.AquaMethods
 
         }
 
-        public void SplitMeshByMaterial(AquaObject model, AquaObject outModel)
+        public static void SplitMeshByMaterial(AquaObject model, AquaObject outModel)
         {
             for (int i = 0; i < model.tempTris.Count; i++)
             {
@@ -490,7 +490,7 @@ namespace AquaModelLibrary.AquaMethods
             }
         }
 
-        public List<List<int>> GetAllMaterialFaceGroups(AquaObject model, int meshId)
+        public static List<List<int>> GetAllMaterialFaceGroups(AquaObject model, int meshId)
         {
             List<List<int>> matGroups = new List<List<int>>();
             for(int i = 0; i < model.mateList.Count; i++)
@@ -507,14 +507,14 @@ namespace AquaModelLibrary.AquaMethods
             return matGroups;
         }
 
-        public void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
+        public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
             outModel.vtxlList.Add(model.vtxlList[meshId]);
             outModel.tempTris.Add(model.tempTris[meshId]);
         }
 
         //To be honest I don't really know what these actually do, but this seems to generate the structure the way the game does.
-        public void CalcUNRMs(AquaObject model, bool applyNormalAveraging)
+        public static void CalcUNRMs(AquaObject model, bool applyNormalAveraging)
         {
             UNRM unrm = new UNRM();
 
@@ -580,7 +580,7 @@ namespace AquaModelLibrary.AquaMethods
         }
 
         //Removes bones in vtxls with unprocessed weights
-        public void RemoveUnusedBones(VTXL vtxl)
+        public static void RemoveUnusedBones(VTXL vtxl)
         {
             Dictionary<int, int> oldToNewId = new Dictionary<int, int>();
             List<int> bonesIndicesUsed = new List<int>();
@@ -702,7 +702,7 @@ namespace AquaModelLibrary.AquaMethods
             return bytes;
         }
 
-        public float[] VectorAsArray(Vector3 vec3)
+        public static float[] VectorAsArray(Vector3 vec3)
         {
             return new float[] { vec3.X, vec3.Y, vec3.Z }; 
         }

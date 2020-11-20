@@ -29,6 +29,8 @@ namespace AquaModelLibrary
         public AquaCommon.NOF0 nof0;
         public AquaCommon.NEND nend;
 
+        public bool applyNormalAveraging = false;
+
         public List<genericTriangles> tempTris = new List<genericTriangles>();
         public enum VertFlags : int
         {
@@ -448,7 +450,7 @@ namespace AquaModelLibrary
                 NvStripifier stripifier = new NvStripifier();
 
                 stripifier.GenerateStripsReturner(indices, true);
-
+                triCount = indices.Length;
                 triStrips = stripList;
             }
 
@@ -501,9 +503,10 @@ namespace AquaModelLibrary
                 matIdList = matIds;
             }
 
-            public genericTriangles(List<Vector3> vec3s, List<int> matIdList = null)
+            public genericTriangles(List<Vector3> vec3s, List<int> matIds = null)
             {
-
+                triList = vec3s;
+                matIdList = matIds;
             }
 
             public List<ushort> toUshorts()

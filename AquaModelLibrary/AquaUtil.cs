@@ -467,6 +467,33 @@ namespace AquaLibrary
             return aquaModels;
         }
 
+        //Materials, Textures, vtxlList data, and temptris are expected to be populated prior to this process
+        public void ConvertToPSO2Mesh(bool unrms)
+        {
+            for (int msI = 0; msI < aquaModels.Count;  msI++)
+            {
+                for(int aqI = 0; aqI < aquaModels[msI].models.Count; aqI++)
+                {
+                    AquaObject matModelSplit = new AquaObject();
+                    AquaObject outModel = new AquaObject();
+                    SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
+                    BatchSplitByBoneCount(matModelSplit, outModel, 16);
+
+                    if(unrms)
+                    {
+                        CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging);
+                    }
+
+                    //Set up PSETs and strips
+                    for(int i = 0; i < aquaModels[msI].models[aqI].tempTris.Count; i++)
+                    {
+                    }
+
+                    aquaModels[msI].models[aqI] = outModel;
+                }
+            }
+        }
+
         public void WriteVTBFModel(string ogFileName, string outFileName)
         {
             List<byte> finalOutBytes = new List<byte>();
