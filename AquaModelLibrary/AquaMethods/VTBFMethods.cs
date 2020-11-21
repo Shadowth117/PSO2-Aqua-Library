@@ -219,7 +219,7 @@ namespace AquaModelLibrary.AquaMethods
                                 MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
-                        uint actualCount = subDataAdditions * 2 + 4;
+                        uint actualCount = subDataAdditions * 2 + 2;
                         data = new short[actualCount]; //Yeah something is wrong in the way the og files are written. Should be all 0s after the expected data, but still.
                         for (int j = 0; j < actualCount; j++)
                         {
@@ -249,7 +249,16 @@ namespace AquaModelLibrary.AquaMethods
                         throw new NotImplementedException();
                 }
 
-                vtbfDict.Add(dataId, data);
+                //Really shouldn't happen, but they have this situation.
+                if(vtbfDict.ContainsKey(dataId))
+                {
+                    vtbfData.Add(vtbfDict);
+                    vtbfDict = new Dictionary<int, object>();
+                    vtbfDict.Add(dataId, data);
+                } else
+                {
+                    vtbfDict.Add(dataId, data);
+                }
             }
             //For non-list type tag data and non FD terminated lists (alpha has these)
             vtbfData.Add(vtbfDict);
