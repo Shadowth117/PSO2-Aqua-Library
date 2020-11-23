@@ -5,12 +5,11 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Documents;
 using static AquaModelLibrary.AquaObject;
 
-namespace AquaModelLibrary.AquaMethods
+namespace AquaModelLibrary
 {
-    public unsafe class AquaObjectMethods
+    public unsafe static class AquaObjectMethods
     {
         public static void ReadVTXL(BufferedStreamReader streamReader, AquaObject.VTXE vtxeSet, AquaObject.VTXL vtxl, int vertCount, int vertTypeCount)
         {

@@ -14,15 +14,13 @@ namespace AquaModelTool
         [STAThread]
         static void Main(string[] args)
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            AquaModelTool aquaModelTool = new AquaModelTool();
+            Application.Run(aquaModelTool);
             if (args.Length > 0)
             {
-                AquaUICommon.openFile(args[0]);
-            }
-            else
-            {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new AquaModelTool());
+                aquaModelTool.AquaUIOpenFile(args[0]);
             }
         }
     }

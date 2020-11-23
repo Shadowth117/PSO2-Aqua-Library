@@ -210,3 +210,8 @@ AquaModelTool/bin/Debug/NvTriStripDotNet.dll
 AquaModelTool/bin/Release/NvTriStripDotNet.dll
 AquaModelTool/obj/Release/DesignTimeResolveAssemblyReferences.cache
 AquaModelTool/obj/Release/DesignTimeResolveAssemblyReferencesInput.cache
+AquaModelTool/bin/PSO2 Model Tool/NvTriStripDotNet.dll
+AquaModelTool/obj/Debug/AquaModelTool.MaterialEditor.resources
+AquaModelTool/obj/Debug/AquaModelTool.ModelEditor.resources
+AquaModelTool/obj/Release/AquaModelTool.MaterialEditor.resources
+AquaModelTool/obj/Release/AquaModelTool.ModelEditor.resources

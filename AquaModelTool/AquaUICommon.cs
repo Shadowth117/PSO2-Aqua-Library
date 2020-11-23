@@ -8,9 +8,10 @@ using System.Windows.Forms;
 
 namespace AquaModelTool
 {
-    public static class AquaUICommon
+    public class AquaUICommon
     {
-        public static void openFile(string str = null)
+        public AquaModelLibrary.AquaUtil aqua = new AquaModelLibrary.AquaUtil();
+        public string openFile(string str = null)
         {
             if(str != null)
             {
@@ -23,24 +24,48 @@ namespace AquaModelTool
 
                 if(openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    toVTBF(openFileDialog.FileName);
+                    aqua.aquaModels.Clear();
+                    aqua.ReadModel(openFileDialog.FileName);
+                    str = openFileDialog.FileName;
                 }
 
             }
+            return str;
         }
 
-        public static void toVTBF(string str)
+        public void setAllTransparent(bool setToModels)
         {
-            AquaLibrary.AquaUtil aqua = new AquaLibrary.AquaUtil();
-            aqua.ReadModel(str);
+            if (setToModels)
+            {
+                for (int i = 0; i < aqua.aquaModels.Count; i++)
+                {
+                    for (int j = 0; j < aqua.aquaModels[i].models.Count; j++)
+                    {
+                        for (int r = 0; r < aqua.aquaModels[i].models[j].rendList.Count; r++)
+                        {
+                            var rend = aqua.aquaModels[i].models[j].rendList[r];
+                            rend.notOpaque = 1;
+                            rend.unk10 = 0;
+                            aqua.aquaModels[i].models[j].rendList[r] = rend;
+                        }
+                        for (int m = 0; m < aqua.aquaModels[i].models[j].mateList.Count; m++)
+                        {
+                            var mate = aqua.aquaModels[i].models[j].mateList[m];
+                            mate.SetAlphaType("blendalpha");
+                            aqua.aquaModels[i].models[j].mateList[m] = mate;
+                        }
+                    }
+                }
+            }
+        }
 
+        public void toVTBF(string str)
+        {
             //These will be output as .**p regardless and if the user really wants the o version, they can do it in 2 seconds in a hex editor.
             str = str.Replace(".aqo", ".aqp");
             str = str.Replace(".tro", ".trp");
             
-            //For now just write all back to VTBF
-            string newStr = str.Replace(Path.GetExtension(str), "_VTBF" + Path.GetExtension(str));
-            aqua.WriteVTBFModel(str, newStr);
+            aqua.WriteVTBFModel(str, str);
         }
     }
 }

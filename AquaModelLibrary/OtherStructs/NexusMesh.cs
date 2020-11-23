@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.OtherStructs
+namespace AquaModelLibrary
 {
     public class NexusMesh
     {

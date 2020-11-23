@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Text;
+using static AquaModelLibrary.AquaObjectMethods;
 using NvTriStripDotNet;
 
 namespace AquaModelLibrary
@@ -132,6 +133,7 @@ namespace AquaModelLibrary
 
         public struct MATE
         {
+            //Vector4 colors are assumedly based on the particular shader
             public Vector4 diffuseRGBA; //0x30, type 0x4A, variant 0x2 //alpha is always 1 in official
             public Vector4 unkRGBA0;    //0x31, type 0x4A, variant 0x2 //Defaults are .9 .9 .9 1.0
             public Vector4 _sRGBA;      //0x32, type 0x4A, variant 0x2 //Seemingly RGBA for the specular map. 
@@ -145,6 +147,54 @@ namespace AquaModelLibrary
             public fixed byte alphaType[0x20]; //0x3A, type 0x2 //Fixed length string for the alpha type of the mat. "opaque", "hollow", "blendalpha", and "add" are
                                                //all valid. Add is additive, and uses diffuse alpha for glow effects.
             public fixed byte matName[0x20];   //0x39, type 0x2 
+
+            public unsafe string GetAlphaType()
+            {
+                fixed (byte* arr = alphaType)
+                {
+                    return GetPSO2String(arr);
+                }
+            }
+
+            public unsafe void SetAlphaType(string str)
+            {
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x20; i++)
+                {
+                    if (i < strArr.Length)
+                    {
+                        alphaType[i] = strArr[i];
+                    }
+                    else
+                    {
+                        alphaType[i] = 0;
+                    }
+                }
+            }
+
+            public unsafe string GetMatName()
+            {
+                fixed (byte* arr = matName)
+                {
+                    return GetPSO2String(arr);
+                }
+            }
+
+            public unsafe void SetMatName(string str)
+            {
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x20; i++)
+                {
+                    if (i < strArr.Length)
+                    {
+                        matName[i] = strArr[i];
+                    }
+                    else
+                    {
+                        matName[i] = 0;
+                    }
+                }
+            }
         }
 
         public struct REND
@@ -180,6 +230,53 @@ namespace AquaModelLibrary
             public fixed byte vertexShader[0x20]; //0x92, type 0x2 //Vertex Shader string
             public int unk1; //0x93, type 0x9 //Always 0?
             public int unk2; //Always 0? Not read in some versions of NIFL Tool, causing misalignments. Doesn't exist in VTBF, so perhaps added later on.
+
+            public unsafe string GetPixelShader()
+            {
+                fixed(byte* pixelArr = pixelShader)
+                {
+                    return GetPSO2String(pixelArr);
+                }
+            }
+
+            public unsafe void SetPixelShader(string str)
+            {
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x20; i++)
+                {
+                    if(i < strArr.Length)
+                    {
+                        pixelShader[i] = strArr[i];
+                    } else
+                    {
+                        pixelShader[i] = 0;
+                    }
+                }
+            }
+
+            public unsafe string GetVertexShader()
+            {
+                fixed (byte* vertArr = vertexShader)
+                {
+                    return GetPSO2String(vertArr);
+                }
+            }
+
+            public unsafe void SetVertexShader(string str)
+            {
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x20; i++)
+                {
+                    if (i < strArr.Length)
+                    {
+                        vertexShader[i] = strArr[i];
+                    }
+                    else
+                    {
+                        vertexShader[i] = 0;
+                    }
+                }
+            }
         }
 
         //SHAder Pixel? Seemingly only in VTBF. One per shader set so unlikely to be a standin for shape.
@@ -204,6 +301,30 @@ namespace AquaModelLibrary
             public float unkFloat0; //0x6A, type 0xA //0
             public float unkFloat1; //0x6B, type 0xA //0
             public fixed byte texName[0x20]; //0x6C, type 0x2 //Texture filename (includes extension)
+
+            public unsafe string GetTexName()
+            {
+                fixed (byte* arr = texName)
+                {
+                    return GetPSO2String(arr);
+                }
+            }
+
+            public unsafe void SetTexName(string str)
+            {
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x20; i++)
+                {
+                    if (i < strArr.Length)
+                    {
+                        texName[i] = strArr[i];
+                    }
+                    else
+                    {
+                        texName[i] = 0;
+                    }
+                }
+            }
         }
 
         public struct TSET
@@ -214,12 +335,64 @@ namespace AquaModelLibrary
             public int unkInt2;  //0x73, type 0x9 //0
             public int unkInt3;  //0x74, type 0x9 //0
             public fixed int tstaTexIDs[4]; //0x75, type 0x88 //Ids of textures in set based on their order in the file, starting at 0. -1 if no texture in slot (Not all shaders require all 4 slots to use a real texture)
+
+            public unsafe int[] GetTSTAID()
+            {
+                int[] texIdArr = new int[4];
+                fixed (int* arr = tstaTexIDs)
+                {
+                    for(int i = 0; i < 4; i++)
+                    {
+                        texIdArr[i] = tstaTexIDs[i];
+                    }
+                    return texIdArr;
+                }
+            }
+
+            public unsafe void SetTSTAID(int[] tstaIDArr)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i < tstaIDArr.Length)
+                    {
+                        tstaTexIDs[i] = tstaIDArr[i];
+                    }
+                    else
+                    {
+                        tstaTexIDs[i] = -1;
+                    }
+                }
+            }
         }
 
         //Laid out in same order as TSTA. Seemingly redundant.
         public struct TEXF
         {
             public fixed byte texName[0x20]; //0x80, type 0x2 //Texture filename (includes extension)
+
+            public unsafe string GetTexName()
+            {
+                fixed (byte* arr = texName)
+                {
+                    return GetPSO2String(arr);
+                }
+            }
+
+            public unsafe void SetTexName(string str)
+            {
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x20; i++)
+                {
+                    if (i < strArr.Length)
+                    {
+                        texName[i] = strArr[i];
+                    }
+                    else
+                    {
+                        texName[i] = 0;
+                    }
+                }
+            }
         }
 
         //UNRM Struct - Seemingly links vertices split for various reasons(vertex colors per face, UVs, etc.).

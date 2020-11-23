@@ -1,13 +1,7 @@
-﻿using AquaModelLibrary.OtherStructs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace AquaModelLibrary.OtherStructs
+namespace AquaModelLibrary
 {
     //Props to DeadlyFugu for much of this class
     public unsafe class TCBTerrainConvex

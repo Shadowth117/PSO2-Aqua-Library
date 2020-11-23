@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using static AquaModelLibrary.AquaPackage;
 
-namespace AquaModelLibrary.OtherStructs
+namespace AquaModelLibrary
 {
     public unsafe class TPNTexturePattern
     {

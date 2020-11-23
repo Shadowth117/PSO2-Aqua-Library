@@ -38,6 +38,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,10 +57,28 @@
       <DependentUpon>AquaModelToolUI.cs</DependentUpon>
     </Compile>
     <Compile Include="AquaUICommon.cs" />
+    <Compile Include="Forms\Subpanels\MaterialEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Subpanels\MaterialEditor.Designer.cs">
+      <DependentUpon>MaterialEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ModelEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelEditor.Designer.cs">
+      <DependentUpon>ModelEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AquaModelToolUI.resx">
       <DependentUpon>AquaModelToolUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelEditor.resx">
+      <DependentUpon>ModelEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Subpanels\MaterialEditor.resx">
+      <DependentUpon>MaterialEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

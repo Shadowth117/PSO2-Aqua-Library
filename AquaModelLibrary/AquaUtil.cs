@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using AquaModelLibrary;
 using System.Numerics;
-using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
-using static AquaModelLibrary.AquaMethods.VTBFMethods;
-using AquaModelLibrary.OtherStructs;
+using static AquaModelLibrary.AquaObjectMethods;
+using static AquaModelLibrary.VTBFMethods;
 using System;
 using System.Text;
-using System.Diagnostics;
 
-namespace AquaLibrary
+namespace AquaModelLibrary
 {
     public class AquaUtil
     {

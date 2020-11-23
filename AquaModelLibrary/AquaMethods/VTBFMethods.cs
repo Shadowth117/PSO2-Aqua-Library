@@ -7,12 +7,10 @@ using System.Numerics;
 using System.Text;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaNode;
-using static AquaModelLibrary.AquaMethods.AquaObjectMethods;
+using static AquaModelLibrary.AquaObjectMethods;
 using System.Windows;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
-namespace AquaModelLibrary.AquaMethods
+namespace AquaModelLibrary
 {
     public unsafe class VTBFMethods
     {
