@@ -200,6 +200,29 @@ namespace AquaModelLibrary
                         data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions); //Read the whole vert buffer at once as byte array. We'll handle it later.
                         streamReader.Seek(subDataAdditions, SeekOrigin.Current);
                         break;
+                    case 0x8A: //Array of floats
+                        subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
+                        switch (subDataType) //The last array entry aka data count - 1.
+                        {
+                            case 0x8:
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1;
+                                break;
+                            case 0x10:
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1;
+                                break;
+                            case 0x18:
+                                subDataAdditions = streamReader.Read<uint>() + 1;
+                                break;
+                            default:
+                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                throw new NotImplementedException();
+                        }
+                        data = new float[subDataAdditions];
+                        for (int j = 0; j < subDataAdditions; j++)
+                        {
+                            ((float[])data)[j] = streamReader.Read<float>();
+                        }
+                        break;
                     case 0xC6: //Int16 array? Seen used in .cmx files for storing unicode characters.
                         subDataType = streamReader.Read<byte>();
                         switch (subDataType) //The last array entry aka data count - 1.
@@ -226,7 +249,7 @@ namespace AquaModelLibrary
                         break;
                     case 0xCA: //Float Matrix, observed only as 4x4
                         subDataType = streamReader.Read<byte>(); //Expected to always be 0xA for float
-                        subDataAdditions = streamReader.Read<byte>() + (uint)1; //Expected to always be 0x3, maybe for last array entry id
+                        subDataAdditions = streamReader.Read<byte>() + (uint)1; //last array entry id
                         data = new Vector4[subDataAdditions];
 
                         for (int j = 0; j < subDataAdditions; j++)
@@ -838,19 +861,10 @@ namespace AquaModelLibrary
                 mate.unkFloat1 = (float)mateRaw[i][0x36];
                 mate.unkInt0 = (int)mateRaw[i][0x37];
                 mate.unkInt1 = (int)mateRaw[i][0x38];
-
-                byte[] alphaArr = (byte[])mateRaw[i][0x3A];
-                int alphaCount = alphaArr.Count() < 0x20 ? alphaArr.Count() : 0x20;
-                for (int j = 0; j < alphaCount; j++)
-                {
-                    mate.alphaType[j] = alphaArr[j];
-                }
-                byte[] matNameArr = (byte[])mateRaw[i][0x39];
-                int matCount = matNameArr.Count() < 0x20 ? matNameArr.Count() : 0x20;
-                for (int j = 0; j < matCount; j++)
-                {
-                    mate.matName[j] = matNameArr[j];
-                }
+                mate.alphaType = new AquaCommon.PSO2String();
+                mate.alphaType.SetBytes((byte[])mateRaw[i][0x3A]);
+                mate.matName = new AquaCommon.PSO2String();
+                mate.matName.SetBytes((byte[])mateRaw[i][0x39]);
 
                 mateList.Add(mate);
             }
@@ -886,15 +900,16 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x38, 0x9, BitConverter.GetBytes(mate.unkInt1));
 
                 //Alpha Type String
-                string alphaStr = GetPSO2String(mate.alphaType);
+                string alphaStr = mate.alphaType.GetString();
                 addBytes(outBytes, 0x3A, 0x02, (byte)alphaStr.Length, Encoding.UTF8.GetBytes(alphaStr));
 
                 //Mat Name String. Do it this way in case of names that would break when encoded to utf8 again
-                int matLen = GetPSO2StringLength(mate.matName);
+                int matLen = mate.matName.GetLength();
                 byte[] matBytes = new byte[matLen];
+                byte[] tempMatBytes = mate.matName.GetBytes();
                 for(int strIndex = 0; strIndex < matLen; strIndex++)
                 {
-                    matBytes[strIndex] = mate.matName[strIndex];
+                    matBytes[strIndex] = tempMatBytes[strIndex];
                 }
                 addBytes(outBytes, 0x39, 0x02, (byte)matLen, matBytes);
             }
@@ -996,23 +1011,10 @@ namespace AquaModelLibrary
                 SHAD shad = new SHAD();
 
                 shad.unk0 = (int)shadRaw[i][0x90];
-
-                //Pixel Shader String
-                byte[] pixelArr = (byte[])shadRaw[i][0x91];
-                int pixCount = pixelArr.Count() < 0x20 ? pixelArr.Count() : 0x20;
-                for (int j = 0; j < pixCount; j++)
-                {
-                    shad.pixelShader[j] = pixelArr[j];
-                }
-
-                //Vertex Shader String
-                byte[] vertArr = (byte[])shadRaw[i][0x92];
-                int vertCount = vertArr.Count() < 0x20 ? vertArr.Count() : 0x20;
-                for (int j = 0; j < vertCount; j++)
-                {
-                    shad.vertexShader[j] = vertArr[j];
-                }
-
+                shad.pixelShader = new AquaCommon.PSO2String();
+                shad.pixelShader.SetBytes((byte[])shadRaw[i][0x91]);
+                shad.vertexShader = new AquaCommon.PSO2String();
+                shad.vertexShader.SetBytes((byte[])shadRaw[i][0x92]);
                 shad.unk1 = (int)shadRaw[i][0x93];
 
                 shadList.Add(shad);
@@ -1041,11 +1043,11 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x90, 0x9, BitConverter.GetBytes(shad.unk0));
 
                 //Pixel Shader String
-                string pixelStr = GetPSO2String(shad.pixelShader);
+                string pixelStr = shad.pixelShader.GetString();
                 addBytes(outBytes, 0x91, 0x02, (byte)pixelStr.Length, Encoding.UTF8.GetBytes(pixelStr));
 
                 //Vertex Shader String
-                string vertStr = GetPSO2String(shad.vertexShader);
+                string vertStr = shad.vertexShader.GetString();
                 addBytes(outBytes, 0x92, 0x02, (byte)vertStr.Length, Encoding.UTF8.GetBytes(vertStr));
 
                 addBytes(outBytes, 0x93, 0x9, BitConverter.GetBytes(shad.unk1));
@@ -1095,14 +1097,8 @@ namespace AquaModelLibrary
                     tsta.unkInt5 = (int)tstaRaw[i][0x69];
                     tsta.unkFloat0 = (float)tstaRaw[i][0x6A];
                     tsta.unkFloat1 = (float)tstaRaw[i][0x6B];
-
-                    //TexName String
-                    byte[] textNameArr = (byte[])tstaRaw[i][0x6C];
-                    int nameCount = textNameArr.Count() < 0x20 ? textNameArr.Count() : 0x20;
-                    for (int j = 0; j < nameCount; j++)
-                    {
-                        tsta.texName[j] = textNameArr[j];
-                    }
+                    tsta.texName = new AquaCommon.PSO2String();
+                    tsta.texName.SetBytes((byte[])tstaRaw[i][0x6C]);
 
                     tstaList.Add(tsta);
                 }
@@ -1138,7 +1134,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x6B, 0xA, BitConverter.GetBytes(tstaList[i].unkFloat1));
 
                 //TexName String
-                string texNameStr = GetPSO2String(tsta.texName);
+                string texNameStr = tsta.texName.GetString();
                 addBytes(outBytes, 0x6C, 0x02, (byte)texNameStr.Length, Encoding.UTF8.GetBytes(texNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
@@ -1224,12 +1220,8 @@ namespace AquaModelLibrary
                 {
                     TEXF texf = new TEXF();
 
-                    byte[] textNameArr = (byte[])texfRaw[i][0x80];
-                    int nameCount = textNameArr.Count() < 0x20 ? textNameArr.Count() : 0x20;
-                    for (int j = 0; j < nameCount; j++)
-                    {
-                        texf.texName[j] = textNameArr[j];
-                    }
+                    texf.texName = new AquaCommon.PSO2String();
+                    texf.texName.SetBytes((byte[])texfRaw[i][0x80]);
 
                     texfList.Add(texf);
                 }
@@ -1251,7 +1243,7 @@ namespace AquaModelLibrary
                 }
 
                 //TexName String
-                string texNameStr = GetPSO2String(texf.texName);
+                string texNameStr = texf.texName.GetString();
                 addBytes(outBytes, 0x80, 0x02, (byte)texNameStr.Length, Encoding.UTF8.GetBytes(texNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
@@ -1492,13 +1484,8 @@ namespace AquaModelLibrary
                 node.m2 = ((Vector4[])nodeRaw[i][0x0A])[1];
                 node.m3 = ((Vector4[])nodeRaw[i][0x0A])[2];
                 node.m4 = ((Vector4[])nodeRaw[i][0x0A])[3];
-
-                byte[] boneNameArr = (byte[])nodeRaw[i][0x0D];
-                int nameCount = boneNameArr.Count() < 0x20 ? boneNameArr.Count() : 0x20;
-                for (int j = 0; j < nameCount; j++)
-                {
-                    node.boneName[j] = boneNameArr[j];
-                }
+                node.boneName = new AquaCommon.PSO2String();
+                node.boneName.SetBytes((byte[])nodeRaw[i][0x0D]);
 
                 nodeList.Add(node);
             }
@@ -1537,7 +1524,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0xC, 0x8, BitConverter.GetBytes(node.const0_2));
 
                 //Bone Name String
-                string boneNameStr = GetPSO2String(node.boneName);
+                string boneNameStr = node.boneName.GetString();
                 addBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
@@ -1547,30 +1534,25 @@ namespace AquaModelLibrary
             return outBytes.ToArray();
         }
 
-        public static List<NODO> parseNODO(List<Dictionary<int, object>> nod0Raw)
+        public static List<NODO> parseNODO(List<Dictionary<int, object>> nodoRaw)
         {
             List<NODO> nodoList = new List<NODO>();
 
-            if (nod0Raw[0].Keys.Count > 1)
+            if (nodoRaw[0].Keys.Count > 1)
             {
-                for (int i = 0; i < nod0Raw.Count; i++)
+                for (int i = 0; i < nodoRaw.Count; i++)
                 {
                     NODO nodo = new NODO();
 
-                    byte[] shorts = BitConverter.GetBytes((int)nod0Raw[i][0x03]);
+                    byte[] shorts = BitConverter.GetBytes((int)nodoRaw[i][0x03]);
                     nodo.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
                     nodo.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
-                    nodo.animatedFlag = (int)nod0Raw[i][0x0B];
-                    nodo.parentId = (int)nod0Raw[i][0x04];
-                    nodo.pos = (Vector3)nod0Raw[i][0x07];
-                    nodo.eulRot = (Vector3)nod0Raw[i][0x08];
-
-                    byte[] boneNameArr = (byte[])nod0Raw[i][0x0D];
-                    int nameCount = boneNameArr.Count() < 0x20 ? boneNameArr.Count() : 0x20;
-                    for (int j = 0; j < nameCount; j++)
-                    {
-                        nodo.boneName[j] = boneNameArr[j];
-                    }
+                    nodo.animatedFlag = (int)nodoRaw[i][0x0B];
+                    nodo.parentId = (int)nodoRaw[i][0x04];
+                    nodo.pos = (Vector3)nodoRaw[i][0x07];
+                    nodo.eulRot = (Vector3)nodoRaw[i][0x08];
+                    nodo.boneName = new AquaCommon.PSO2String();
+                    nodo.boneName.SetBytes((byte[])nodoRaw[i][0x0D]);
 
                     nodoList.Add(nodo);
                 }
@@ -1601,7 +1583,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(nodo.animatedFlag));
 
                 //Bone Name String
-                string boneNameStr = GetPSO2String(nodo.boneName);
+                string boneNameStr = nodo.boneName.GetString();
                 addBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));

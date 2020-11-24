@@ -34,7 +34,7 @@ namespace AquaModelTool
         private void UpdateMaterialDisplay()
         {
             var mat = model.mateList[matIDCB.SelectedIndex];
-            string blendType = mat.GetAlphaType();
+            string blendType = mat.alphaType.GetString();
             switch (blendType)
             {
                 case "opaque":
@@ -53,7 +53,7 @@ namespace AquaModelTool
                     blendAlphaRB.Checked = true;
                     break;
             }
-            matNameTextBox.Text = mat.GetMatName();
+            matNameTextBox.Text = mat.matName.GetString();
             diffuseRGBButton.BackColor = ARGBFromRGBAVector4(mat.diffuseRGBA);
             tex2RGBAButton.BackColor = ARGBFromRGBAVector4(mat.unkRGBA0);
             tex3RGBAButton.BackColor = ARGBFromRGBAVector4(mat._sRGBA);
@@ -115,7 +115,7 @@ namespace AquaModelTool
         private void opaqueRB_CheckedChanged(object sender, EventArgs e)
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.SetAlphaType("opaque");
+            mate.alphaType.SetString("opaque");
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
@@ -123,7 +123,7 @@ namespace AquaModelTool
         {
             RENDhack();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.SetAlphaType("blendalpha");
+            mate.alphaType.SetString("blendalpha");
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
@@ -131,7 +131,7 @@ namespace AquaModelTool
         {
             RENDhack();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.SetAlphaType("hollow");
+            mate.alphaType.SetString("hollow");
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
@@ -139,7 +139,7 @@ namespace AquaModelTool
         {
             RENDhack();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.SetAlphaType("add");
+            mate.alphaType.SetString("add");
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
@@ -175,7 +175,7 @@ namespace AquaModelTool
         private void matNameTextBox_TextChanged(object sender, EventArgs e)
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.SetMatName(matNameTextBox.Text);
+            mate.matName.SetString(matNameTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 

@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
     public unsafe class AquaNode
     {
-        public AquaCommon.NIFL nifl;
-        public AquaCommon.REL0 rel0;
+        public NIFL nifl;
+        public REL0 rel0;
         public NDTR ndtr;
         public List<NODE> nodeList = new List<NODE>();
         public List<NODO> nodoList = new List<NODO>();
-        public AquaCommon.NOF0 nof0;
-        public AquaCommon.NEND nend;
+        public NOF0 nof0;
+        public NEND nend;
 
         public AquaNode()
         {
@@ -52,7 +53,7 @@ namespace AquaModelLibrary
             public Vector4 m2;
             public Vector4 m3;
             public Vector4 m4;
-            public fixed byte boneName[0x20]; //0xD, type 0x2
+            public PSO2String boneName; //0xD, type 0x2
         }
 
         //A stripped down variant of NODE used for effect nodes. 
@@ -67,7 +68,7 @@ namespace AquaModelLibrary
             public int const0_4;
             public Vector3 eulRot;     //0x8, type 0x4A, 0x1
             public int const0_5;
-            public fixed byte boneName[0x20]; //0xD, type 0x2
+            public PSO2String boneName; //0xD, type 0x2
         }
     }
 }

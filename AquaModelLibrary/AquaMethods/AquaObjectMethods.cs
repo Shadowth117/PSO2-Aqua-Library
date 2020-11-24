@@ -653,14 +653,6 @@ namespace AquaModelLibrary
             return end;
         }
 
-        public static string GetBoneName(AquaNode.NODE node) => GetPSO2String(node.boneName);
-
-        public static string GetEffName(AquaNode.NODO eff) => GetPSO2String(eff.boneName);
-
-        public static string GetMatName(MATE mate) => GetPSO2String(mate.matName);
-
-        public static string GetMatOpacity(MATE mate) => GetPSO2String(mate.alphaType);
-
         public static List<string> GetTexListNames(AquaObject model, int tsetIndex)
         {
             List<string> textureList = new List<string>();
@@ -674,7 +666,7 @@ namespace AquaModelLibrary
                 {
                     TSTA tsta = model.tstaList[texIndex];
 
-                    textureList.Add(GetPSO2String(tsta.texName));
+                    textureList.Add(tsta.texName.GetString());
                 }
             }
 
@@ -687,8 +679,8 @@ namespace AquaModelLibrary
 
             SHAD shad = model.shadList[shadIndex];
 
-            shaderList.Add(GetPSO2String(shad.pixelShader));
-            shaderList.Add(GetPSO2String(shad.vertexShader));
+            shaderList.Add(shad.pixelShader.GetString());
+            shaderList.Add(shad.vertexShader.GetString());
 
             return shaderList;
         }

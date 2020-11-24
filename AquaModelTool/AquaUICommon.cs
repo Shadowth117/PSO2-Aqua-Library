@@ -51,7 +51,7 @@ namespace AquaModelTool
                         for (int m = 0; m < aqua.aquaModels[i].models[j].mateList.Count; m++)
                         {
                             var mate = aqua.aquaModels[i].models[j].mateList[m];
-                            mate.SetAlphaType("blendalpha");
+                            mate.alphaType.SetString("blendalpha");
                             aqua.aquaModels[i].models[j].mateList[m] = mate;
                         }
                     }
