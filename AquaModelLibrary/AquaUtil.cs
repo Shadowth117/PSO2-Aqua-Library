@@ -16,6 +16,7 @@ namespace AquaModelLibrary
         public List<ModelSet> aquaModels = new List<ModelSet>();
         public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
+        public List<AquaMotion> aquaMotions = new List<AquaMotion>();
         public struct ModelSet
         {
             public AquaPackage.AFPMain afp;
@@ -680,6 +681,108 @@ namespace AquaModelLibrary
             }
 
             return bones;
+        }
+
+        public void ReadMotion(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                int type = streamReader.Peek<int>();
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals(0x637161) || type.Equals(0x767161) || type.Equals(0x6D7161))
+                {
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                    type = streamReader.Peek<int>();
+                    offset += headJunkSize;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals(0x4C46494E))
+                {
+                    //aquaBones.Add(ReadNIFLBones(streamReader));
+                }
+                else if (type.Equals(0x46425456))
+                {
+                    //aquaBones.Add(ReadVTBFBones(streamReader));
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+
+            }
+        }
+
+        public AquaMotion ReadVTBFMotion(BufferedStreamReader streamReader)
+        {
+            AquaMotion motion = new AquaMotion();
+            return motion;
+        }
+
+        public AquaMotion ReadNIFLMotion(BufferedStreamReader streamReader)
+        {
+            AquaMotion motion = new AquaMotion();
+            motion.nifl = streamReader.Read<AquaCommon.NIFL>();
+            motion.rel0 = streamReader.Read<AquaCommon.REL0>();
+            motion.moHeader = streamReader.Read<AquaMotion.MOheader>();
+
+            //Read MSEG data
+            for(int i = 0; i < motion.moHeader.nodeCount; i++)
+            {
+                AquaMotion.KeyData data;
+                switch(motion.moHeader.variant)
+                {
+                    case AquaMotion.stdAnim:
+                    case AquaMotion.stdPlayerAnim:
+                        data = new AquaMotion.NodeData();
+                        break;
+                    case AquaMotion.materialAnim:
+                        data = new AquaMotion.MaterialData();
+                        break;
+                    case AquaMotion.cameraAnim:
+                        data = new AquaMotion.CameraData();
+                        break;
+                    default:
+                        data = new AquaMotion.NodeData();
+                        MessageBox.Show("Unknown type");
+                        break;
+                }
+                data.mseg = streamReader.Read<AquaMotion.MSEG>();
+                motion.motionKeys.Add(data);
+            }
+
+            //Read MKEY
+            for (int i = 0; i < motion.moHeader.nodeCount; i++)
+            {/*
+                switch (motion.moHeader.variant)
+                {
+                    case AquaMotion.stdAnim:
+                    case AquaMotion.stdPlayerAnim:
+                        data = new AquaMotion.NodeData();
+                        break;
+                    case AquaMotion.materialAnim:
+                        data = new AquaMotion.MaterialData();
+                        break;
+                    case AquaMotion.cameraAnim:
+                        data = new AquaMotion.CameraData();
+                        break;
+                    default:
+                        data = new AquaMotion.NodeData();
+                        MessageBox.Show("Unknown type");
+                        break;
+                }*/
+                //var data = ()motion.motionKeys[i];
+                //data.
+            }
+
+            return motion;
         }
 
         public void ReadCollision(string inFilename)

@@ -10,9 +10,15 @@ namespace AquaModelLibrary
         public const int CAMO = 0x4F4D4143; //Camera animation
         public const int SPMO = 0x4F4D5053; //UV animation
         public const int NDMO = 0x4F4D444E; //Motion animation
+        public const int stdAnim = 0x10002;
+        public const int stdPlayerAnim = 0x10012;
+        public const int cameraAnim = 0x10004;
+        public const int materialAnim = 0x20;
         public AquaPackage.AFPBase afp;
         public NIFL nifl;
         public REL0 rel0;
+        public MOheader moHeader;
+        public List<KeyData> motionKeys;
         public NOF0 nof0;
         public NEND nend;
 
@@ -47,6 +53,8 @@ namespace AquaModelLibrary
             public int dataType; //0xEC, type 0x9
             public int unkInt0;  //0xF0, type 0x9
             public int keyCount; //0xED, type 0x9
+            public int frameAddress;
+            public int timeAddress;
             public List<Vector4> vector4Keys; //0xEE, type 0x4A or 0xCA if multiple
             public List<ushort> frameCounters; //0xEF, type 0x06 or 0x86 if multiple
             public List<float> floatKeys; //0xF1, type 0xA or 0x8A if multiple
@@ -54,26 +62,28 @@ namespace AquaModelLibrary
             public List<int> intKeys; //0xF3, type 0x8 or 0x88 if multiple
         }
 
-        public class MotionData
+        public class KeyData
         {
             public MSEG mseg = new MSEG();
+        }
+
+        public class NodeData : KeyData
+        {
             public MKEY posKeys = new MKEY();
             public MKEY rotKeys = new MKEY();
             public MKEY sclKeys = new MKEY();
         }
 
-        public class CameraData
+        public class CameraData : KeyData
         {
-            public MSEG mseg = new MSEG();
             public MKEY unkKeys0 = new MKEY();
             public MKEY unkKeys1 = new MKEY();
             public MKEY unkKeys2 = new MKEY();
             public MKEY unkKeys3 = new MKEY();
         }
 
-        public class UVData
+        public class MaterialData : KeyData
         {
-            public MSEG mseg = new MSEG();
             public MKEY unkKeys0 = new MKEY();
             public MKEY unkKeys1 = new MKEY();
             public MKEY unkKeys2 = new MKEY();

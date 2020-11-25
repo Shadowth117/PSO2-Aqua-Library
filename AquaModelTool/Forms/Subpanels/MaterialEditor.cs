@@ -74,7 +74,7 @@ namespace AquaModelTool
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
                 diffuseRGBButton.BackColor = colorDialog.Color;
-                mate.diffuseRGBA = new Vector4(colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B, mate.diffuseRGBA.W);
+                mate.diffuseRGBA = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.diffuseRGBA.W);
             }
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -85,7 +85,7 @@ namespace AquaModelTool
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
                 tex2RGBAButton.BackColor = colorDialog.Color;
-                mate.unkRGBA0 = new Vector4(colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B, mate.unkRGBA0.W);
+                mate.unkRGBA0 = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.unkRGBA0.W);
             }
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -96,7 +96,7 @@ namespace AquaModelTool
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
                 tex3RGBAButton.BackColor = colorDialog.Color;
-                mate._sRGBA = new Vector4(colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B, mate._sRGBA.W);
+                mate._sRGBA = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate._sRGBA.W);
             }
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -107,7 +107,7 @@ namespace AquaModelTool
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
                 tex4RGBAButton.BackColor = colorDialog.Color;
-                mate.unkRGBA1 = new Vector4(colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B, mate.unkRGBA1.W);
+                mate.unkRGBA1 = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.unkRGBA1.W);
             }
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -169,6 +169,22 @@ namespace AquaModelTool
 
         private static Color ARGBFromRGBAVector4(Vector4 vec4)
         {
+            if(vec4.X > 1.0f)
+            {
+                vec4.X = 1.0f;
+            }
+            if (vec4.Y > 1.0f)
+            {
+                vec4.Y = 1.0f;
+            }
+            if (vec4.Z > 1.0f)
+            {
+                vec4.Z = 1.0f;
+            }
+            if (vec4.W > 1.0f)
+            {
+                vec4.W = 1.0f;
+            }
             return Color.FromArgb((int)(vec4.W * 255), (int)(vec4.X * 255), (int)(vec4.Y * 255), (int)(vec4.Z * 255));
         }
 

@@ -10,18 +10,21 @@ namespace AquaModelTool
 {
     public class AquaUICommon
     {
+        OpenFileDialog openFileDialog = new OpenFileDialog()
+        {
+            Title = "Select a PSO2 model file",
+            Filter = "PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro"
+        };
         public AquaModelLibrary.AquaUtil aqua = new AquaModelLibrary.AquaUtil();
+
         public string openFile(string str = null)
         {
-            if(str != null)
+            if (str != null)
             {
-                toVTBF(str);
+                aqua.aquaModels.Clear();
+                aqua.ReadModel(str);
             } else
             {
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Title = "Select a PSO2 model file";
-                openFileDialog.Filter = "PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro";
-
                 if(openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     aqua.aquaModels.Clear();
