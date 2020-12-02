@@ -706,7 +706,7 @@ namespace AquaModelLibrary
                 //Proceed based on file variant
                 if (type.Equals(0x4C46494E))
                 {
-                    //aquaBones.Add(ReadNIFLBones(streamReader));
+                    //aquaBones.Add(ReadNIFLBones(streamReader, offset));
                 }
                 else if (type.Equals(0x46425456))
                 {
@@ -726,7 +726,7 @@ namespace AquaModelLibrary
             return motion;
         }
 
-        public AquaMotion ReadNIFLMotion(BufferedStreamReader streamReader)
+        public AquaMotion ReadNIFLMotion(BufferedStreamReader streamReader, int offset)
         {
             AquaMotion motion = new AquaMotion();
             motion.nifl = streamReader.Read<AquaCommon.NIFL>();
@@ -736,51 +736,71 @@ namespace AquaModelLibrary
             //Read MSEG data
             for(int i = 0; i < motion.moHeader.nodeCount; i++)
             {
-                AquaMotion.KeyData data;
-                switch(motion.moHeader.variant)
-                {
-                    case AquaMotion.stdAnim:
-                    case AquaMotion.stdPlayerAnim:
-                        data = new AquaMotion.NodeData();
-                        break;
-                    case AquaMotion.materialAnim:
-                        data = new AquaMotion.MaterialData();
-                        break;
-                    case AquaMotion.cameraAnim:
-                        data = new AquaMotion.CameraData();
-                        break;
-                    default:
-                        data = new AquaMotion.NodeData();
-                        MessageBox.Show("Unknown type");
-                        break;
-                }
+                AquaMotion.KeyData data = new AquaMotion.KeyData();
                 data.mseg = streamReader.Read<AquaMotion.MSEG>();
                 motion.motionKeys.Add(data);
             }
 
             //Read MKEY
-            for (int i = 0; i < motion.moHeader.nodeCount; i++)
-            {/*
-                switch (motion.moHeader.variant)
+            for (int i = 0; i < motion.motionKeys.Count; i++)
+            {
+                streamReader.Seek(motion.motionKeys[i].mseg.nodeOffset + offset, SeekOrigin.Begin);
+                for (int j = 0; j < motion.motionKeys[i].mseg.nodeDataCount; j++)
                 {
-                    case AquaMotion.stdAnim:
-                    case AquaMotion.stdPlayerAnim:
-                        data = new AquaMotion.NodeData();
-                        break;
-                    case AquaMotion.materialAnim:
-                        data = new AquaMotion.MaterialData();
-                        break;
-                    case AquaMotion.cameraAnim:
-                        data = new AquaMotion.CameraData();
-                        break;
-                    default:
-                        data = new AquaMotion.NodeData();
-                        MessageBox.Show("Unknown type");
-                        break;
-                }*/
-                //var data = ()motion.motionKeys[i];
-                //data.
+                    AquaMotion.MKEY mkey = new AquaMotion.MKEY();
+                    mkey.keyType = streamReader.Read<int>();
+                    mkey.dataType = streamReader.Read<int>();
+                    mkey.unkInt0 = streamReader.Read<int>();
+                    mkey.keyCount = streamReader.Read<int>();
+                    mkey.frameAddress = streamReader.Read<int>();
+                    mkey.timeAddress = streamReader.Read<int>();
+                    motion.motionKeys[i].keyData.Add(mkey);
+                }
+                //Odd amounts of MKEYs will pad 8 bytes in NIFL
+
+                //Loop through what was gathered and get the actual data
+                for (int j = 0; j < motion.motionKeys[i].mseg.nodeDataCount; j++)
+                {
+                    streamReader.Seek(motion.motionKeys[i].keyData[j].timeAddress + offset, SeekOrigin.Begin);
+
+                    for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                    {
+                        motion.motionKeys[i].keyData[j].frameTimings.Add(streamReader.Read<ushort>());
+                    }
+
+                    //Stream aligns to 0x10 after timings.
+                    streamReader.Seek(motion.motionKeys[i].keyData[j].frameAddress + offset, SeekOrigin.Begin);
+
+                    switch(motion.motionKeys[i].keyData[j].dataType)
+                    {
+                        //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                        case 0x1:
+                        case 0x3:
+                            for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                            {
+                                motion.motionKeys[i].keyData[j].vector4Keys.Add(streamReader.Read<Vector4>());
+                            }
+                            break;
+
+                        //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                        case 0x4:
+                        case 0x6:
+                            for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                            {
+                                motion.motionKeys[i].keyData[j].floatKeys.Add(streamReader.Read<float>());
+                            }
+                            break;
+                        default:
+                            MessageBox.Show($"Unexpected type {motion.motionKeys[i].keyData[j].dataType.ToString("X")} at {streamReader.Position().ToString("X")}");
+                            throw new Exception();
+                    }
+                    //Stream aligns to 0x10 again after frames.
+
+                }
             }
+            motion.nof0 = AquaCommon.readNOF0(streamReader);
+            AlignReader(streamReader, 0x10);
+            motion.nend = streamReader.Read<AquaCommon.NEND>();
 
             return motion;
         }

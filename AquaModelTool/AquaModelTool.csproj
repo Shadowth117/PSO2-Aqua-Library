@@ -59,6 +59,12 @@
       <DependentUpon>AquaModelToolUI.cs</DependentUpon>
     </Compile>
     <Compile Include="AquaUICommon.cs" />
+    <Compile Include="Forms\AnimationEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\AnimationEditor.Designer.cs">
+      <DependentUpon>AnimationEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Subpanels\MaterialEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -75,6 +81,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AquaModelToolUI.resx">
       <DependentUpon>AquaModelToolUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AnimationEditor.resx">
+      <DependentUpon>AnimationEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelEditor.resx">
       <DependentUpon>ModelEditor.cs</DependentUpon>

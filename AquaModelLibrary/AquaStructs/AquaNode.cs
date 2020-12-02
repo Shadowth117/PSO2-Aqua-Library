@@ -4,6 +4,8 @@ using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
+    //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
+
     public unsafe class AquaNode
     {
         public NIFL nifl;

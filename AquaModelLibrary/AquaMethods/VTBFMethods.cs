@@ -1110,6 +1110,13 @@ namespace AquaModelLibrary
         public static unsafe byte[] toTSTA(List<TSTA> tstaList)
         {
             List<byte> outBytes = new List<byte>();
+            
+            //Normally the FC tag is included in the count of the rest of these, but when there's no tags we account for it here.
+            int emptyArray = 0;
+            if (tstaList.Count == 0)
+            {
+                emptyArray++;
+            }
 
             outBytes.AddRange(BitConverter.GetBytes((short)0xFC)); //Always there, even if there's nothing in the list
             for (int i = 0; i < tstaList.Count; i++)
@@ -1138,7 +1145,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x6C, 0x02, (byte)texNameStr.Length, Encoding.UTF8.GetBytes(texNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-            WriteTagHeader(outBytes, "TSTA", 0, (ushort)(tstaList.Count * 0xE + 0x1));
+            WriteTagHeader(outBytes, "TSTA", 0, (ushort)(tstaList.Count * 0xE + 0x1 + emptyArray));
 
             return outBytes.ToArray();
         }
@@ -1233,6 +1240,13 @@ namespace AquaModelLibrary
         {
             List<byte> outBytes = new List<byte>();
 
+            //Normally the FC tag is included in the count of the rest of these, but when there's no tags we account for it here.
+            int emptyArray = 0;
+            if (texfList.Count == 0)
+            {
+                emptyArray++;
+            }
+
             outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
             for (int i = 0; i < texfList.Count; i++)
             {
@@ -1250,7 +1264,7 @@ namespace AquaModelLibrary
 
             //Pointer count. Always 0 on TEXF
             //Subtag count. 2 for each TEXF + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "TEXF", 0, (ushort)(texfList.Count * 0x2 + 0x1));
+            WriteTagHeader(outBytes, "TEXF", 0, (ushort)(texfList.Count * 0x2 + 0x1 + emptyArray));
 
             return outBytes.ToArray();
         }

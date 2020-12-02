@@ -4,6 +4,8 @@ using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
+    //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
+
     //Cameras, UV, and standard motions are essentially the same format.
     public unsafe class AquaMotion
     {
@@ -14,6 +16,25 @@ namespace AquaModelLibrary
         public const int stdPlayerAnim = 0x10012;
         public const int cameraAnim = 0x10004;
         public const int materialAnim = 0x20;
+        public Dictionary<int, string> keyTypeNames = new Dictionary<int, string>() 
+        {
+            {0x1, "0x1 Position" },
+            {0x2, "0x2 Rotation" },
+            {0x3, "0x3 Scale" },
+            {0x4, "0x4 Unk Floats" },
+            //Are 0x5-0x13 reserved for effects? Effects seem to use values in this range for equivalent area there. 
+            //In addition, the way those are constructed is akin to an alternative or early version of the overall motion format, based on namings and other bits.  
+            {0x14, "0x14 Unk Floats" },
+            {0x15, "0x15 Unk Floats" },
+            {0x16, "0x16 Unk Floats" },
+            {0x17, "0x17 Unk Floats" },
+            {0x18, "0x18 Unk Floats" },
+            {0x19, "0x19 Unk Floats" },
+            {0x1A, "0x1A Unk Floats" },
+            {0x1B, "0x1B Unk Floats" },
+            {0x1C, "0x1C Unk Floats" },
+            {0x1D, "0x1D Unk Floats" }
+        };
         public AquaPackage.AFPBase afp;
         public NIFL nifl;
         public REL0 rel0;
@@ -40,7 +61,7 @@ namespace AquaModelLibrary
         public unsafe struct MSEG
         {
             public int nodeType; //0xE7, type 0x9 
-            public int nodeDataSet; //0xE8, type 0x9 
+            public int nodeDataCount; //0xE8, type 0x9 
             public int nodeOffset;
             public PSO2String boneName; //0xE9, type 0x2  
             public int nodeId; //0xEA, type 0x9           //0 on material entries
@@ -55,41 +76,33 @@ namespace AquaModelLibrary
             public int keyCount; //0xED, type 0x9
             public int frameAddress;
             public int timeAddress;
-            public List<Vector4> vector4Keys; //0xEE, type 0x4A or 0xCA if multiple
-            public List<ushort> frameCounters; //0xEF, type 0x06 or 0x86 if multiple
-            public List<float> floatKeys; //0xF1, type 0xA or 0x8A if multiple
+            public List<Vector4> vector4Keys = new List<Vector4>(); //0xEE, type 0x4A or 0xCA if multiple
+            public List<ushort> frameTimings = new List<ushort>(); //0xEF, type 0x06 or 0x86 if multiple //Frame timings start with 0 + 0x1 to represent the first frame.
+                                                                                //Subsequent frames are multiplied by 0x10 and the final frame will have 0x2 added.
+            public List<float> floatKeys = new List<float>(); //0xF1, type 0xA or 0x8A if multiple
                                           //0xF2. Theoretical. 
-            public List<int> intKeys; //0xF3, type 0x8 or 0x88 if multiple
+            public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
         }
 
         public class KeyData
         {
             public MSEG mseg = new MSEG();
+            public List<MKEY> keyData = new List<MKEY>();
+            //Typically, keyData is generally stored this way, but technically doesn't have to follow this convention:
+
+            //Player/Standard animation data
+            //Pos, Rot, Scale data
+
+            //Camera animation Data - Unlike most animation data, only seems to ever contain one node. Seemingly just for fixed cameras. 
+            //Pos, unk, unk, unk
+            
+            //Texture/UV anim data - Seems to contain many types of data, though somewhat untested
+            //Seemingly 8 data sets. 
+
+            //Node Tree Flag - Special subsec tion of data for player animations with an unknown purpose. Not necessary to include, but can be filled
+            //with somewhat valid data if the user wishes
+            //Pos, Rot data
         }
 
-        public class NodeData : KeyData
-        {
-            public MKEY posKeys = new MKEY();
-            public MKEY rotKeys = new MKEY();
-            public MKEY sclKeys = new MKEY();
-        }
-
-        public class CameraData : KeyData
-        {
-            public MKEY unkKeys0 = new MKEY();
-            public MKEY unkKeys1 = new MKEY();
-            public MKEY unkKeys2 = new MKEY();
-            public MKEY unkKeys3 = new MKEY();
-        }
-
-        public class MaterialData : KeyData
-        {
-            public MKEY unkKeys0 = new MKEY();
-            public MKEY unkKeys1 = new MKEY();
-            public MKEY unkKeys2 = new MKEY();
-            public MKEY unkKeys3 = new MKEY();
-            public MKEY unkKeys4 = new MKEY();
-            public MKEY unkKeys5 = new MKEY();
-        }
     }
 }

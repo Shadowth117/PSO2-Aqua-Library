@@ -169,6 +169,7 @@ namespace AquaModelTool
 
         private static Color ARGBFromRGBAVector4(Vector4 vec4)
         {
+            //Limit input. It can technically be higher than this in theory, but usually it wouldn't be.
             if(vec4.X > 1.0f)
             {
                 vec4.X = 1.0f;
