@@ -215,3 +215,6 @@ AquaModelTool/obj/Debug/AquaModelTool.MaterialEditor.resources
 AquaModelTool/obj/Debug/AquaModelTool.ModelEditor.resources
 AquaModelTool/obj/Release/AquaModelTool.MaterialEditor.resources
 AquaModelTool/obj/Release/AquaModelTool.ModelEditor.resources
+AquaModelTool/obj/Debug/AquaModelTool.AnimationEditor.resources
+AquaModelTool/bin/Release.zip
+AquaModelTool/obj/Release/AquaModelTool.AnimationEditor.resources

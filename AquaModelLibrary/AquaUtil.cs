@@ -82,6 +82,7 @@ namespace AquaModelLibrary
         public List<AquaObject> ReadNIFLModel(BufferedStreamReader streamReader, int fileCount, int offset)
         {
             List<AquaObject> aquaModels = new List<AquaObject>();
+            #region Read NIFL model
             for (int modelIndex = 0; modelIndex < fileCount; modelIndex++)
             {
                 AquaObject model = new AquaObject();
@@ -307,7 +308,7 @@ namespace AquaModelLibrary
                     aquaModels.Add(model);
                 }
             }
-
+            #endregion
             return aquaModels;
         }
 
@@ -375,6 +376,11 @@ namespace AquaModelLibrary
                     while(streamReader.Position() < dataEnd)
                     {
                         var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
+                        //Force stop if we've already hit the end
+                        if(data == null)
+                        {
+                            break;
+                        }
                         switch(tagType)
                         {
                             case "ROOT":
@@ -494,13 +500,21 @@ namespace AquaModelLibrary
 
         public void WriteVTBFModel(string ogFileName, string outFileName)
         {
+            bool package = outFileName.Contains(".aqp") || outFileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
+            int modelCount = aquaModels[0].models.Count;
             List<byte> finalOutBytes = new List<byte>();
-            finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0});
-            finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
-            finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
-            finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            if(package)
+            {
+                finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
+                finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            } else
+            {
+                modelCount = 1;
+            }
 
-            for(int i = 0; i < aquaModels[0].models.Count; i++)
+            for(int i = 0; i < modelCount; i++)
             {
                 int bonusBytes = 0;
                 if(i == 0)
@@ -532,64 +546,111 @@ namespace AquaModelLibrary
                 }
 
                 //Header info
-                int size = outBytes.Count;
-                int difference;
-                if(size % 0x10 == 0)
+                if (package)
                 {
-                    difference = 0x10;
-                } else
-                {
-                    difference = 0x10 - (size % 0x10);
-                }
+                    int size = outBytes.Count;
+                    int difference;
+                    if (size % 0x10 == 0)
+                    {
+                        difference = 0x10;
+                    }
+                    else
+                    {
+                        difference = 0x10 - (size % 0x10);
+                    }
 
-                //Handle filename text
-                byte[] fName = new byte[0x20];
-                string modelCount = ".";
-                if(aquaModels[0].models.Count > 1)
-                {
-                    modelCount = $"_l{i + 1}.";
-                }
-                byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName), 
-                    modelCount + Encoding.UTF8.GetString(returnModelType(ogFileName))));
-                int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
-                for (int j = 0; j < nameCount; j++)
-                {
-                    fName[j] = outFileNameBytes[j];
-                }
+                    //Handle filename text
+                    byte[] fName = new byte[0x20];
+                    string modelCounter = ".";
+                    if (aquaModels[0].models.Count > 1)
+                    {
+                        modelCounter = $"_l{i + 1}.";
+                    }
+                    byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName),
+                        modelCounter + Encoding.UTF8.GetString(returnModelType(ogFileName))));
+                    int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
+                    for (int j = 0; j < nameCount; j++)
+                    {
+                        fName[j] = outFileNameBytes[j];
+                    }
 
-                outBytes.InsertRange(0, returnModelType(ogFileName));
-                outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
-                outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
-                outBytes.InsertRange(0, BitConverter.GetBytes(size));
-                outBytes.InsertRange(0, fName);
-
-                AlignVTBFEndWrite(outBytes, 0x10);
+                    outBytes.InsertRange(0, returnModelType(ogFileName));
+                    outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
+                    outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
+                    outBytes.InsertRange(0, BitConverter.GetBytes(size));
+                    outBytes.InsertRange(0, fName);
+                }
 
                 finalOutBytes.AddRange(outBytes);
-            }
-            
-            //Write texture patterns
-            for(int i = 0; i < tpnFiles.Count; i++)
-            {
-                finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].tpnAFPBase));
-                finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].header));
-                for(int j = 0; j < tpnFiles[i].header.count; j++)
-                {
-                    if (i > 0)
-                    {
-                        finalOutBytes.AddRange(BitConverter.GetBytes((double)0.0));
-                    }
-                    finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].texSets[j]));
-                }
+
                 AlignVTBFEndWrite(finalOutBytes, 0x10);
+            }
+
+            //Write texture patterns
+            if (package)
+            {
+                for (int i = 0; i < tpnFiles.Count; i++)
+                {
+                    finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].tpnAFPBase));
+                    finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].header));
+                    for (int j = 0; j < tpnFiles[i].header.count; j++)
+                    {
+                        if (i > 0)
+                        {
+                            finalOutBytes.AddRange(BitConverter.GetBytes((double)0.0));
+                        }
+                        finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].texSets[j]));
+                    }
+                    AlignVTBFEndWrite(finalOutBytes, 0x10);
+                }
             }
 
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
 
-        public void WriteNIFLModel(string outFileName)
+        public void WriteNIFLModel(string ogFileName, string outFileName)
         {
+            bool package = outFileName.Contains(".aqp") || outFileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
+            int modelCount = aquaModels[0].models.Count;
+            List<byte> finalOutBytes = new List<byte>();
+            if (package)
+            {
+                modelCount = 1;
+                finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
+                finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            }
 
+            //Write model data out
+            #region NIFL model write code
+            for (int i = 0; i < modelCount; i++)
+            {
+                var model = aquaModels[0].models[0];
+                List<byte> outBytes = new List<byte>();
+                List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+                //REL0
+                outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+                int rel0SizeOffset = outBytes.Count; //We'll fill this later
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0x10));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //OBJC
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.type));
+
+                //Write REL0 size
+
+                //Write NIFL
+
+                //Write AFP Main
+
+                finalOutBytes.AddRange(outBytes);
+            }
+            #endregion
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
 
         public void ReadBones(string inFilename)

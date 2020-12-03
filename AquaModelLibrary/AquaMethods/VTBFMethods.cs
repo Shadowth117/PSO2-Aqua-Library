@@ -18,10 +18,19 @@ namespace AquaModelLibrary
         {
             List<Dictionary<int, object>> vtbfData = new List<Dictionary<int, object>>();
 
-            streamReader.Seek(0x4, SeekOrigin.Current); //vtc0
+            string vtc0 = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>())); //vtc0
+            if(vtc0 != "vtc0")
+            {
+                tagString = null;
+                entryCount = 0;
+                return null;
+            }
             uint bodyLength = streamReader.Read<uint>();
             int mainTagType = streamReader.Read<int>();
             tagString = Encoding.UTF8.GetString(BitConverter.GetBytes(mainTagType));
+            #if DEBUG
+                        Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
+            #endif
             short pointerCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
             entryCount = streamReader.Read<short>();
 
@@ -280,10 +289,17 @@ namespace AquaModelLibrary
                 {
                     vtbfDict.Add(dataId, data);
                 }
+            #if DEBUG
+                Console.WriteLine($"Processed { dataType.ToString("X")} around { streamReader.Position().ToString("X")}");
+            #endif
             }
             //For non-list type tag data and non FD terminated lists (alpha has these)
             vtbfData.Add(vtbfDict);
-            
+
+            #if DEBUG
+                Console.WriteLine($"Processed {tagString} around { streamReader.Position().ToString("X")}");
+            #endif
+
             return vtbfData;
         }
 
