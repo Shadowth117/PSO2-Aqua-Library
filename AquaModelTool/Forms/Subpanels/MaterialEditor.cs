@@ -10,6 +10,7 @@ namespace AquaModelTool
     {
         private ColorDialog colorDialog = new ColorDialog();
         AquaModelLibrary.AquaObject model;
+        bool loaded = false;
         public MaterialEditor(AquaModelLibrary.AquaObject aquaModel)
         {
             InitializeComponent();
@@ -34,6 +35,7 @@ namespace AquaModelTool
         private void UpdateMaterialDisplay()
         {
             var mat = model.mateList[matIDCB.SelectedIndex];
+            loaded = false;
             string blendType = mat.alphaType.GetString();
             switch (blendType)
             {
@@ -66,6 +68,7 @@ namespace AquaModelTool
             unkF32UD.Value = (decimal)mat.unkFloat1;
             unkInt0UD.Value = mat.unkInt0;
             unkInt1UD.Value = mat.unkInt1;
+            loaded = true;
         }
 
         private void diffuseRGBButton_Click(object sender, EventArgs e)
@@ -146,24 +149,27 @@ namespace AquaModelTool
         //Since normally materials are divorced from REND structs in offical models, we'll just fix the necessary REND areas for all that are used with this MATE 
         private void RENDhack()
         {
-            List<int> rendIds = new List<int>();
-            for(int i = 0; i < model.meshList.Count; i++)
+            if(loaded)
             {
-                if(model.meshList[i].mateIndex == matIDCB.SelectedIndex)
+                List<int> rendIds = new List<int>();
+                for (int i = 0; i < model.meshList.Count; i++)
                 {
-                    if(!rendIds.Contains(model.meshList[i].rendIndex))
+                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
                     {
-                        rendIds.Add(model.meshList[i].rendIndex);
+                        if (!rendIds.Contains(model.meshList[i].rendIndex))
+                        {
+                            rendIds.Add(model.meshList[i].rendIndex);
+                        }
                     }
                 }
-            }
 
-            for(int i = 0; i < rendIds.Count; i++)
-            {
-                var rend = model.rendList[rendIds[i]];
-                rend.notOpaque = 1;
-                rend.unk10 = 0;
-                model.rendList[rendIds[i]] = rend;
+                for (int i = 0; i < rendIds.Count; i++)
+                {
+                    var rend = model.rendList[rendIds[i]];
+                    rend.notOpaque = 1;
+                    rend.unk10 = 0;
+                    model.rendList[rendIds[i]] = rend;
+                }
             }
         }
 
