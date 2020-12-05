@@ -471,7 +471,7 @@ namespace AquaModelLibrary
             return aquaModels;
         }
 
-        //Materials, Textures, vtxlList data, and temptris are expected to be populated prior to this process
+        //Materials, Textures, vtxlList data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
         public void ConvertToPSO2Mesh(bool unrms)
         {
             for (int msI = 0; msI < aquaModels.Count;  msI++)
@@ -583,7 +583,7 @@ namespace AquaModelLibrary
 
                 finalOutBytes.AddRange(outBytes);
 
-                AlignVTBFEndWrite(finalOutBytes, 0x10);
+                AlignFileEndWrite(finalOutBytes, 0x10);
             }
 
             //Write texture patterns
@@ -601,7 +601,7 @@ namespace AquaModelLibrary
                         }
                         finalOutBytes.AddRange(Reloaded.Memory.Struct.GetBytes(tpnFiles[i].texSets[j]));
                     }
-                    AlignVTBFEndWrite(finalOutBytes, 0x10);
+                    AlignFileEndWrite(finalOutBytes, 0x10);
                 }
             }
 
@@ -624,21 +624,264 @@ namespace AquaModelLibrary
 
             //Write model data out
             #region NIFL model write code
-            for (int i = 0; i < modelCount; i++)
+            for (int modelId = 0; modelId < modelCount; modelId++)
             {
                 var model = aquaModels[0].models[0];
+                
+                //Pointer data offsets for filling in later
+                int rel0SizeOffset;
+
+                //OBJC Offsets
+                int objcVsetOffset;
+                int objcPsetOffset;
+                int objcMeshOffset;
+                int objcMateOffset;
+
+                int objcRendOffset;
+                int objcShadOffset;
+                int objcTstaOffset;
+                int objcTsetOffset;
+
+                int objcTexfOffset;
+                int objcUnrmOffset;
+
+                List<int> vsetVtxeOffsets = new List<int>();
+                List<int> vsetVtxlOffsets = new List<int>();
+                List<int> vsetBonePaletteOffsets = new List<int>();
+                List<int> vsetEdgeVertOffsets = new List<int>();
+
+                List<int> psetfirstOffsets = new List<int>();
+
                 List<byte> outBytes = new List<byte>();
                 List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
 
                 //REL0
                 outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
-                int rel0SizeOffset = outBytes.Count; //We'll fill this later
+                rel0SizeOffset = outBytes.Count; //We'll fill this later
                 outBytes.AddRange(BitConverter.GetBytes(0));
                 outBytes.AddRange(BitConverter.GetBytes(0x10));
                 outBytes.AddRange(BitConverter.GetBytes(0));
 
                 //OBJC
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.type));
+
+                //Set up OBJC pointers
+                objcVsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x28, model.objc.vsetCount);
+                objcPsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, model.objc.psetCount);
+                objcMeshOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x38, model.objc.meshCount);
+                objcMateOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x40, model.objc.mateCount);
+
+                objcRendOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x48, model.objc.rendCount);
+                objcShadOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x50, model.objc.shadCount);
+                objcTstaOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x58, model.objc.tstaCount);
+                objcTsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x60, model.objc.tsetCount);
+
+                objcTexfOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x68, model.objc.texfCount);
+                if(model.unrms != null)
+                {
+                    objcUnrmOffset = outBytes.Count + 0xA0;
+                    nof0PointerLocations.Add(objcUnrmOffset);
+                } else
+                {
+                    objcUnrmOffset = -1;
+                }
+
+                //Write OBJC block
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.objc));
+
+                //VSET
+                //Write VSET pointer
+                SetByteListInt(outBytes, objcVsetOffset, outBytes.Count);
+
+                //Write VSET
+                for (int vsetId = 0; vsetId < model.vsetList.Count; vsetId++)
+                {
+                    vsetVtxeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8, model.vsetList[vsetId].vertTypesCount));
+                    vsetVtxlOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x10, model.vsetList[vsetId].vtxlCount));
+                    vsetBonePaletteOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, model.vsetList[vsetId].bonePaletteCount));
+                    vsetEdgeVertOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x2C, model.vsetList[vsetId].edgeVertsCount));
+
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.vsetList[vsetId]));
+                }
+
+                //VTXE + VTXL
+                for(int vertListId = 0; vertListId < model.vtxlList.Count; vertListId++)
+                {
+                    //Write VTXE pointer
+                    SetByteListInt(outBytes, vsetVtxeOffsets[vertListId], outBytes.Count);
+                    //Write current VTXE array
+                    for(int vtxeId = 0; vtxeId < model.vtxeList[vertListId].vertDataTypes.Count; vtxeId++)
+                    {
+                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.vtxeList[vertListId].vertDataTypes[vtxeId]));
+                    }
+
+                    //Write VTXL pointer
+                    SetByteListInt(outBytes, vsetVtxlOffsets[vertListId], outBytes.Count);
+                    //Write current VTXL array
+                    WriteVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write bone palette pointer
+                    SetByteListInt(outBytes, vsetBonePaletteOffsets[vertListId], outBytes.Count);
+                    //Write bone palette
+                    for (int bpId = 0; bpId < model.vtxlList[vertListId].bonePalette.Count; bpId++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].bonePalette[bpId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write edge verts pointer
+                    SetByteListInt(outBytes, vsetEdgeVertOffsets[vertListId], outBytes.Count);
+                    //Write edge verts
+                    for (int evId = 0; evId < model.vtxlList[vertListId].edgeVerts.Count; evId++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].edgeVerts[evId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //PSET
+
+                //Write PSET pointer
+                SetByteListInt(outBytes, objcPsetOffset, outBytes.Count);
+
+                //Write PSET
+                for(int psetId = 0; psetId < model.psetList.Count; psetId++)
+                {
+                    psetfirstOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
+
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.psetList[psetId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //Write tristrip data
+                for (int stripId = 0; stripId < model.strips.Count; stripId++)
+                {
+                    SetByteListInt(outBytes, psetfirstOffsets[stripId], outBytes.Count);
+                    SetByteListInt(outBytes, psetfirstOffsets[stripId] + 0x8, outBytes.Count + 0x10); //Strip indices offset; always a set distance
+
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triCount));
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve0));
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve1));
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve2));
+
+                    for(int faceId = 0; faceId < model.strips[stripId].triStrips.Count; faceId++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triStrips[faceId]));
+                    }
+                    AlignWriter(outBytes, 0x10); //Intentionally aligned inside, unlike the basic PSET array's alignment
+                }
+
+                //MESH
+
+                //Write MESH pointer
+                SetByteListInt(outBytes, objcMeshOffset, outBytes.Count);
+
+                //Write MESH
+                for (int meshId = 0; meshId < model.meshList.Count; meshId++)
+                {
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.meshList[meshId]));
+                }
+
+                //MATE
+
+                //Write MATE pointer
+                SetByteListInt(outBytes, objcMateOffset, outBytes.Count);
+
+                //Write MATE
+                for (int mateId = 0; mateId < model.mateList.Count; mateId++)
+                {
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.meshList[mateId]));
+                }
+
+                //MATE
+
+                //Write MATE pointer
+                SetByteListInt(outBytes, objcMateOffset, outBytes.Count);
+
+                //Write MATE
+                for (int mateId = 0; mateId < model.mateList.Count; mateId++)
+                {
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.meshList[mateId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //REND
+
+                //Write REND pointer
+                SetByteListInt(outBytes, objcRendOffset, outBytes.Count);
+
+                //Write REND
+                for (int rendId = 0; rendId < model.rendList.Count; rendId++)
+                {
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.rendList[rendId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //SHAD
+
+                //Write SHAD pointer
+                SetByteListInt(outBytes, objcShadOffset, outBytes.Count);
+
+                //Write SHAD
+                for (int shadId = 0; shadId < model.shadList.Count; shadId++)
+                {
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.shadList[shadId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //TSTA
+                if(model.tstaList.Count > 0)
+                {
+                    //Write TSTA pointer
+                    SetByteListInt(outBytes, objcTstaOffset, outBytes.Count);
+
+                    //Write TSTA
+                    for (int tstaId = 0; tstaId < model.tstaList.Count; tstaId++)
+                    {
+                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.tstaList[tstaId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //TSET
+
+                //Write TSET pointer
+                SetByteListInt(outBytes, objcTsetOffset, outBytes.Count);
+
+                //Write TSET
+                for (int tsetId = 0; tsetId < model.tsetList.Count; tsetId++)
+                {
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.tsetList[tsetId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //TEXF
+                if (model.tstaList.Count > 0)
+                {
+                    //Write TEXF pointer
+                    SetByteListInt(outBytes, objcTexfOffset, outBytes.Count);
+
+                    //Write TEXF
+                    for (int texfId = 0; texfId < model.texfList.Count; texfId++)
+                    {
+                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.texfList[texfId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //UNRM
+                if (model.unrms != null)
+                {
+                    //Write UNRM pointer
+                    SetByteListInt(outBytes, objcUnrmOffset, outBytes.Count);
+
+                    //Write UNRM
+                    //outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triCount));
+                }
+
+                //NOF0
+
+                //NEND
 
                 //Write REL0 size
 
@@ -1013,7 +1256,16 @@ namespace AquaModelLibrary
             }
         }
 
-        public void AlignVTBFEndWrite(List<byte> outBytes, int align)
+        public void AlignWriter(List<byte> outBytes, int align)
+        {
+            //Align to 0x10
+            while (outBytes.Count % align > 0)
+            {
+                outBytes.Add(0);
+            }
+        }
+
+        public void AlignFileEndWrite(List<byte> outBytes, int align)
         {
             if (outBytes.Count % align == 0)
             {
@@ -1030,6 +1282,30 @@ namespace AquaModelLibrary
                     outBytes.Add(0);
                 }
             }
+        }
+
+        //Mainly for handling pointer offsets
+        public int SetByteListInt(List<byte> outBytes, int offset, int value)
+        {
+            var newBytes = BitConverter.GetBytes(value);
+            for (int i = 0; i < 4; i++)
+            {
+                outBytes[offset + i] = newBytes[i];
+            }
+
+            return value;
+        }
+
+        public int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
+        {
+            if(countToCheck < 1)
+            {
+                return -1;
+            }
+            int newAddress = currentOffset - subtractedOffset;
+            nof0.Add(newAddress);
+
+            return newAddress;
         }
     }
 }

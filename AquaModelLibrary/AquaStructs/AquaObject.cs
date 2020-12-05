@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using static AquaModelLibrary.AquaObjectMethods;
 using NvTriStripDotNet;
 using static AquaModelLibrary.AquaCommon;
 
@@ -12,8 +10,8 @@ namespace AquaModelLibrary
     public unsafe class AquaObject
     {
         public AquaPackage.AFPBase afp;
-        public AquaCommon.NIFL nifl;
-        public AquaCommon.REL0 rel0;
+        public NIFL nifl;
+        public REL0 rel0;
         public OBJC objc;
         public List<VSET> vsetList = new List<VSET>();
         public List<VTXE> vtxeList = new List<VTXE>();
@@ -28,8 +26,8 @@ namespace AquaModelLibrary
         public List<TSTA> tstaList = new List<TSTA>();
         public List<TEXF> texfList = new List<TEXF>();
         public UNRM unrms;
-        public AquaCommon.NOF0 nof0;
-        public AquaCommon.NEND nend;
+        public NOF0 nof0;
+        public NEND nend;
 
         public bool applyNormalAveraging = false;
 
@@ -81,26 +79,32 @@ namespace AquaModelLibrary
             public int size;           //0x11, Type 0x8
             public int unkMeshValue;   //0x12, Type 0x9
             public int largetsVTXL;    //0x13, Type 0x8
+
             public int totalStripFaces;//0x14, Type 0x9
             public int reserve1;
             public int totalVTXLCount;//0x15, Type 0x8
             public int reserve2;
+
             public int unkMeshCount; //0x16, Type 0x8 //Same value as below
             public int vsetCount;    //0x24, Type 0x9
             public int vsetOffset;
             public int psetCount;    //0x25, Type 0x9
+
             public int psetOffset;
             public int meshCount;    //0x17, Type 0x9
             public int meshOffset;
             public int mateCount;    //0x18, Type 0x8
+
             public int mateOffset;
             public int rendCount;    //0x19, Type 0x8
             public int rendOffset;
             public int shadCount;    //0x1A, Type 0x8
+
             public int shadOffset;
             public int tstaCount;    //0x1B, Type 0x8
             public int tstaOffset;
             public int tsetCount;    //0x1C, Type 0x8
+
             public int tsetOffset;
             public int texfCount;    //0x1D, Type 0x8
             public int texfOffset;
@@ -278,6 +282,7 @@ namespace AquaModelLibrary
             public int vertTypesCount; //0xBF, Type 0x9 //Number of data struct types per vertex
             public int vtxeOffset;
             public int vtxlCount;      //0xB9, Type 0x9 //Number of VTXL structs/Vertices
+
             public int vtxlOffset;
             public int reserve0;       //0xC4, Type 0x9
             public int bonePaletteCount; //0xBD, Type 0x8 //Vertex groups can't have more than 15 bones
@@ -285,6 +290,7 @@ namespace AquaModelLibrary
             //In VTBF, VSET also contains bonePalette. 
             //0xBE. Entire entry omitted if count was 0. Type is 06 if single bone, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
             //last is 0 based count as a byte.
+
             public int unk0;         //0xC8, Type 0x9 //Unknown
             public int unk1;         //0xCC, Type 0x9 //Unknown
             public int unk2;         //Likely an offset related to above as it's not present in VTBF.
@@ -293,7 +299,7 @@ namespace AquaModelLibrary
             public int edgeVertsCount;  //0xC9, Type 0x9 
             public int edgeVertsOffset;
             //In VTBF, VSET also contains Edge Verts. 
-            //0xCA. Entire entry omitted if count was 0. Type is 06 if single bone, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
+            //0xCA. Entire entry omitted if count was 0. Type is 06 if single vert, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
             //last is 0 based count as a byte.
         }
 
@@ -580,5 +586,35 @@ namespace AquaModelLibrary
                 return false;
             }
         }
+
+        public int getStripIndexCount()
+        {
+            int indexCount = 0;
+            for(int i = 0; i < strips.Count; i++)
+            {
+                indexCount += strips[i].triCount;
+            }
+            return indexCount;
+        }
+
+        public int getVertexCount()
+        {
+            int vertCount = 0;
+            for (int i = 0; i < vtxlList.Count; i++)
+            {
+                vertCount += vtxlList[i].vertPositions.Count;
+            }
+            return vertCount;
+        }
+
+        /*
+        public int getBiggestVertSize()
+        {
+            int vertSize = 0;
+            for (int i = 0; i < vtxeList.Count; i++)
+            {
+            }
+            //return vertSize;
+        }*/
     }
 }

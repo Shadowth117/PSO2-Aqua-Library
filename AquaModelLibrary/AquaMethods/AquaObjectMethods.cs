@@ -624,6 +624,66 @@ namespace AquaModelLibrary
             }
         }
 
+        public static void WriteVTXL(VTXE vtxe, VTXL vtxl, List<byte> outBytes2)
+        {
+            for (int i = 0; i < vtxl.vertPositions.Count; i++)
+            {
+                for (int j = 0; j < vtxe.vertDataTypes.Count; j++)
+                {
+                    switch (vtxe.vertDataTypes[j].dataType)
+                    {
+                        case (int)AquaObject.VertFlags.VertPosition:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertPositions[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertWeight:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertWeights[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertNormal:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertNormals[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertColor:
+                            for (int color = 0; color < 4; color++)
+                            {
+                                outBytes2.Add(vtxl.vertColors[i][color]);
+                            }
+                            break;
+                        case (int)AquaObject.VertFlags.VertColor2:
+                            for (int color = 0; color < 4; color++)
+                            {
+                                outBytes2.Add(vtxl.vertColor2s[i][color]);
+                            }
+                            break;
+                        case (int)AquaObject.VertFlags.VertWeightIndex:
+                            for (int weight = 0; weight < 4; weight++)
+                            {
+                                outBytes2.Add(vtxl.vertWeightIndices[i][weight]);
+                            }
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV1:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv1List[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV2:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv2List[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertUV3:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.uv3List[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertTangent:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertTangentList[i]));
+                            break;
+                        case (int)AquaObject.VertFlags.VertBinormal:
+                            outBytes2.AddRange(Reloaded.Memory.Struct.GetBytes(vtxl.vertBinormalList[i]));
+                            break;
+                        default:
+                            MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
+                            throw new Exception("Not implemented!");
+                    }
+
+
+                }
+            }
+        }
+
         public static string GetPSO2String(byte* str)
         {
             string finalText;
