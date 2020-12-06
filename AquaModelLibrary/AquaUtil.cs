@@ -623,9 +623,14 @@ namespace AquaModelLibrary
             }
 
             //Write model data out
-            #region NIFL model write code
             for (int modelId = 0; modelId < modelCount; modelId++)
             {
+                int bonusBytes = 0;
+                if (modelId == 0)
+                {
+                    bonusBytes = 0x10;
+                }
+
                 var model = aquaModels[0].models[0];
                 
                 //Pointer data offsets for filling in later
@@ -748,7 +753,7 @@ namespace AquaModelLibrary
                 for(int psetId = 0; psetId < model.psetList.Count; psetId++)
                 {
                     psetfirstOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
-
+                    nof0PointerLocations.Add(outBytes.Count + 0x10);
                     outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.psetList[psetId]));
                 }
                 AlignWriter(outBytes, 0x10);
@@ -872,26 +877,129 @@ namespace AquaModelLibrary
                 //UNRM
                 if (model.unrms != null)
                 {
+                    int meshIDPointerOffset = 0;
+                    int vertIDPointerOffset = 0;
+
                     //Write UNRM pointer
                     SetByteListInt(outBytes, objcUnrmOffset, outBytes.Count);
 
                     //Write UNRM
-                    //outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triCount));
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertGroupCountCount));
+                    outBytes.AddRange(BitConverter.GetBytes(outBytes.Count + 0x1C)); //Should always start a set amount after here
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertCount));
+                    meshIDPointerOffset = NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.meshIdOffset));
+                    vertIDPointerOffset = NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertIDOffset));
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.padding0));
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.padding1));
+
+                    //Write group counts
+                    for(int i = 0; i < model.unrms.unrmVertGroups.Count; i++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmVertGroups[i]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write Mesh Ids
+                    SetByteListInt(outBytes, meshIDPointerOffset, outBytes.Count);
+                    for (int i = 0; i < model.unrms.unrmMeshIds.Count; i++)
+                    {
+                        for(int j = 0; j < model.unrms.unrmMeshIds[i].Count; j++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmMeshIds[i][j]));
+                        }
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write Vert Ids
+                    SetByteListInt(outBytes, vertIDPointerOffset, outBytes.Count);
+                    for (int i = 0; i < model.unrms.unrmMeshIds.Count; i++)
+                    {
+                        for (int j = 0; j < model.unrms.unrmMeshIds[i].Count; j++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmVertIds[i][j]));
+                        }
+                    }
+                    AlignWriter(outBytes, 0x10);
                 }
 
                 //NOF0
+                int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+                outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+                outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //Write pointer offsets
+                for(int i = 0; i < nof0PointerLocations.Count; i++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+                }
+                AlignWriter(outBytes, 0x10);
 
                 //NEND
+                outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+                outBytes.AddRange(BitConverter.GetBytes(0x8));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                AlignFileEndWrite(finalOutBytes, 0x10);
 
-                //Write REL0 size
+                //Write REL0 Size
+                SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
 
                 //Write NIFL
+                AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+                nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+                nifl.NIFLLength = 0x18;
+                nifl.unkInt0 = 1;
+                nifl.offsetAddition = 0x20;
 
-                //Write AFP Main
+                nifl.NOF0Offset = outBytes.Count;
+                nifl.NOF0OffsetFull = outBytes.Count - 0x20;
+                nifl.NOF0BlockSize = NOF0Size + 8;
+                nifl.padding0 = 0;
+
+                outBytes.InsertRange(0, Reloaded.Memory.Struct.GetBytes(nifl));
+
+                //Write AFP Base
+                if (package)
+                {
+                    int size = outBytes.Count;
+                    int difference;
+                    if (size % 0x10 == 0)
+                    {
+                        difference = 0x10;
+                    }
+                    else
+                    {
+                        difference = 0x10 - (size % 0x10);
+                    }
+
+                    //Handle filename text
+                    byte[] fName = new byte[0x20];
+                    string modelCounter = ".";
+                    if (aquaModels[0].models.Count > 1)
+                    {
+                        modelCounter = $"_l{modelId + 1}.";
+                    }
+                    byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName),
+                        modelCounter + Encoding.UTF8.GetString(returnModelType(ogFileName))));
+                    int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
+                    for (int j = 0; j < nameCount; j++)
+                    {
+                        fName[j] = outFileNameBytes[j];
+                    }
+
+                    outBytes.InsertRange(0, returnModelType(ogFileName));
+                    outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
+                    outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
+                    outBytes.InsertRange(0, BitConverter.GetBytes(size));
+                    outBytes.InsertRange(0, fName);
+                }
 
                 finalOutBytes.AddRange(outBytes);
             }
-            #endregion
 
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
