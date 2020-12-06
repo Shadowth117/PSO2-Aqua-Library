@@ -82,7 +82,6 @@ namespace AquaModelLibrary
         public List<AquaObject> ReadNIFLModel(BufferedStreamReader streamReader, int fileCount, int offset)
         {
             List<AquaObject> aquaModels = new List<AquaObject>();
-            #region Read NIFL model
             for (int modelIndex = 0; modelIndex < fileCount; modelIndex++)
             {
                 AquaObject model = new AquaObject();
@@ -308,7 +307,6 @@ namespace AquaModelLibrary
                     aquaModels.Add(model);
                 }
             }
-            #endregion
             return aquaModels;
         }
 
@@ -503,21 +501,22 @@ namespace AquaModelLibrary
             bool package = outFileName.Contains(".aqp") || outFileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
             int modelCount = aquaModels[0].models.Count;
             List<byte> finalOutBytes = new List<byte>();
-            if(package)
+            if (package)
             {
                 finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
                 finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
-            } else
+            }
+            else
             {
                 modelCount = 1;
             }
 
-            for(int i = 0; i < modelCount; i++)
+            for (int i = 0; i < modelCount; i++)
             {
                 int bonusBytes = 0;
-                if(i == 0)
+                if (i == 0)
                 {
                     bonusBytes = 0x10;
                 }
@@ -528,7 +527,7 @@ namespace AquaModelLibrary
                 outBytes.AddRange(toROOT());
                 outBytes.AddRange(toOBJC(aquaModels[0].models[i].objc, aquaModels[0].models[i].unrms != null));
                 outBytes.AddRange(toVSETList(aquaModels[0].models[i].vsetList, aquaModels[0].models[i].vtxlList));
-                for(int j = 0; j < aquaModels[0].models[i].vtxlList.Count; j++)
+                for (int j = 0; j < aquaModels[0].models[i].vtxlList.Count; j++)
                 {
                     outBytes.AddRange(toVTXE_VTXL(aquaModels[0].models[i].vtxeList[j], aquaModels[0].models[i].vtxlList[j]));
                 }
@@ -540,51 +539,63 @@ namespace AquaModelLibrary
                 outBytes.AddRange(toTSTA(aquaModels[0].models[i].tstaList));
                 outBytes.AddRange(toTSET(aquaModels[0].models[i].tsetList));
                 outBytes.AddRange(toTEXF(aquaModels[0].models[i].texfList));
-                if(aquaModels[0].models[i].unrms != null)
+                if (aquaModels[0].models[i].unrms != null)
                 {
                     outBytes.AddRange(toUNRM(aquaModels[0].models[i].unrms));
                 }
 
                 //Header info
-                if (package)
-                {
-                    int size = outBytes.Count;
-                    int difference;
-                    if (size % 0x10 == 0)
-                    {
-                        difference = 0x10;
-                    }
-                    else
-                    {
-                        difference = 0x10 - (size % 0x10);
-                    }
-
-                    //Handle filename text
-                    byte[] fName = new byte[0x20];
-                    string modelCounter = ".";
-                    if (aquaModels[0].models.Count > 1)
-                    {
-                        modelCounter = $"_l{i + 1}.";
-                    }
-                    byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName),
-                        modelCounter + Encoding.UTF8.GetString(returnModelType(ogFileName))));
-                    int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
-                    for (int j = 0; j < nameCount; j++)
-                    {
-                        fName[j] = outFileNameBytes[j];
-                    }
-
-                    outBytes.InsertRange(0, returnModelType(ogFileName));
-                    outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
-                    outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
-                    outBytes.InsertRange(0, BitConverter.GetBytes(size));
-                    outBytes.InsertRange(0, fName);
-                }
+                int size = outBytes.Count;
+                WriteAFPBase(ogFileName, package, i, bonusBytes, outBytes, size);
 
                 finalOutBytes.AddRange(outBytes);
 
                 AlignFileEndWrite(finalOutBytes, 0x10);
             }
+            WriteTPN(package, finalOutBytes);
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
+        }
+
+        private void WriteAFPBase(string ogFileName, bool package, int i, int bonusBytes, List<byte> outBytes, int size)
+        {
+            if (package)
+            {
+                int difference;
+                if (size % 0x10 == 0)
+                {
+                    difference = 0x10;
+                }
+                else
+                {
+                    difference = 0x10 - (size % 0x10);
+                }
+
+                //Handle filename text
+                byte[] fName = new byte[0x20];
+                string modelCounter = ".";
+                if (aquaModels[0].models.Count > 1)
+                {
+                    modelCounter = $"_l{i + 1}.";
+                }
+                byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName),
+                    modelCounter + Encoding.UTF8.GetString(returnModelType(ogFileName))));
+                int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
+                for (int j = 0; j < nameCount; j++)
+                {
+                    fName[j] = outFileNameBytes[j];
+                }
+
+                outBytes.InsertRange(0, returnModelType(ogFileName));
+                outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
+                outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
+                outBytes.InsertRange(0, BitConverter.GetBytes(size));
+                outBytes.InsertRange(0, fName);
+            }
+        }
+
+        private void WriteTPN(bool package, List<byte> finalOutBytes)
+        {
 
             //Write texture patterns
             if (package)
@@ -604,8 +615,6 @@ namespace AquaModelLibrary
                     AlignFileEndWrite(finalOutBytes, 0x10);
                 }
             }
-
-            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
 
         public void WriteNIFLModel(string ogFileName, string outFileName)
@@ -615,23 +624,20 @@ namespace AquaModelLibrary
             List<byte> finalOutBytes = new List<byte>();
             if (package)
             {
-                modelCount = 1;
                 finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
                 finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            } else
+            {
+                modelCount = 1;
             }
 
             //Write model data out
             for (int modelId = 0; modelId < modelCount; modelId++)
             {
-                int bonusBytes = 0;
-                if (modelId == 0)
-                {
-                    bonusBytes = 0x10;
-                }
-
-                var model = aquaModels[0].models[0];
+                int bonusBytes = 0; //Should be 0 for NIFL
+                var model = aquaModels[0].models[modelId];
                 
                 //Pointer data offsets for filling in later
                 int rel0SizeOffset;
@@ -692,6 +698,7 @@ namespace AquaModelLibrary
 
                 //Write OBJC block
                 outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.objc));
+                AlignWriter(outBytes, 0x10);
 
                 //VSET
                 //Write VSET pointer
@@ -707,9 +714,10 @@ namespace AquaModelLibrary
 
                     outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.vsetList[vsetId]));
                 }
+                AlignWriter(outBytes, 0x10);
 
                 //VTXE + VTXL
-                for(int vertListId = 0; vertListId < model.vtxlList.Count; vertListId++)
+                for (int vertListId = 0; vertListId < model.vtxlList.Count; vertListId++)
                 {
                     //Write VTXE pointer
                     SetByteListInt(outBytes, vsetVtxeOffsets[vertListId], outBytes.Count);
@@ -795,18 +803,7 @@ namespace AquaModelLibrary
                 //Write MATE
                 for (int mateId = 0; mateId < model.mateList.Count; mateId++)
                 {
-                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.meshList[mateId]));
-                }
-
-                //MATE
-
-                //Write MATE pointer
-                SetByteListInt(outBytes, objcMateOffset, outBytes.Count);
-
-                //Write MATE
-                for (int mateId = 0; mateId < model.mateList.Count; mateId++)
-                {
-                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.meshList[mateId]));
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.mateList[mateId]));
                 }
                 AlignWriter(outBytes, 0x10);
 
@@ -924,82 +921,54 @@ namespace AquaModelLibrary
                     AlignWriter(outBytes, 0x10);
                 }
 
+                //Write REL0 Size
+                SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
                 //NOF0
+                int NOF0Offset = outBytes.Count;
                 int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+                int NOF0FullSize = NOF0Size + 0x8;
                 outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
                 outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
                 outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
                 outBytes.AddRange(BitConverter.GetBytes(0));
 
                 //Write pointer offsets
-                for(int i = 0; i < nof0PointerLocations.Count; i++)
+                for (int i = 0; i < nof0PointerLocations.Count; i++)
                 {
                     outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
                 }
-                AlignWriter(outBytes, 0x10);
+                NOF0FullSize += AlignWriter(outBytes, 0x10);
 
                 //NEND
                 outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
                 outBytes.AddRange(BitConverter.GetBytes(0x8));
                 outBytes.AddRange(BitConverter.GetBytes(0));
                 outBytes.AddRange(BitConverter.GetBytes(0));
-                AlignFileEndWrite(finalOutBytes, 0x10);
 
-                //Write REL0 Size
-                SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
-
-                //Write NIFL
+                //Generate NIFL
                 AquaCommon.NIFL nifl = new AquaCommon.NIFL();
                 nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
                 nifl.NIFLLength = 0x18;
                 nifl.unkInt0 = 1;
                 nifl.offsetAddition = 0x20;
 
-                nifl.NOF0Offset = outBytes.Count;
-                nifl.NOF0OffsetFull = outBytes.Count - 0x20;
-                nifl.NOF0BlockSize = NOF0Size + 8;
+                nifl.NOF0Offset = NOF0Offset;
+                nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+                nifl.NOF0BlockSize = NOF0FullSize;
                 nifl.padding0 = 0;
 
+                //Write NIFL
                 outBytes.InsertRange(0, Reloaded.Memory.Struct.GetBytes(nifl));
+                AlignFileEndWrite(outBytes, 0x10);
 
                 //Write AFP Base
-                if (package)
-                {
-                    int size = outBytes.Count;
-                    int difference;
-                    if (size % 0x10 == 0)
-                    {
-                        difference = 0x10;
-                    }
-                    else
-                    {
-                        difference = 0x10 - (size % 0x10);
-                    }
-
-                    //Handle filename text
-                    byte[] fName = new byte[0x20];
-                    string modelCounter = ".";
-                    if (aquaModels[0].models.Count > 1)
-                    {
-                        modelCounter = $"_l{modelId + 1}.";
-                    }
-                    byte[] outFileNameBytes = Encoding.UTF8.GetBytes(Path.GetFileName(ogFileName).Replace(Path.GetExtension(ogFileName),
-                        modelCounter + Encoding.UTF8.GetString(returnModelType(ogFileName))));
-                    int nameCount = outFileNameBytes.Length < 0x20 ? outFileNameBytes.Length : 0x20;
-                    for (int j = 0; j < nameCount; j++)
-                    {
-                        fName[j] = outFileNameBytes[j];
-                    }
-
-                    outBytes.InsertRange(0, returnModelType(ogFileName));
-                    outBytes.InsertRange(0, BitConverter.GetBytes(size + difference + 0x30 + bonusBytes));
-                    outBytes.InsertRange(0, BitConverter.GetBytes(0x30));
-                    outBytes.InsertRange(0, BitConverter.GetBytes(size));
-                    outBytes.InsertRange(0, fName);
-                }
+                int size = outBytes.Count - 0x10; //Size is 0x10 less than what it would be for VTBF afp headers for some reason
+                WriteAFPBase(ogFileName, package, modelId, bonusBytes, outBytes, size);
 
                 finalOutBytes.AddRange(outBytes);
             }
+            WriteTPN(package, finalOutBytes);
 
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
@@ -1364,13 +1333,17 @@ namespace AquaModelLibrary
             }
         }
 
-        public void AlignWriter(List<byte> outBytes, int align)
+        public int AlignWriter(List<byte> outBytes, int align)
         {
             //Align to 0x10
+            int additions = 0;
             while (outBytes.Count % align > 0)
             {
+                additions++;
                 outBytes.Add(0);
             }
+
+            return additions;
         }
 
         public void AlignFileEndWrite(List<byte> outBytes, int align)
@@ -1395,13 +1368,18 @@ namespace AquaModelLibrary
         //Mainly for handling pointer offsets
         public int SetByteListInt(List<byte> outBytes, int offset, int value)
         {
-            var newBytes = BitConverter.GetBytes(value);
-            for (int i = 0; i < 4; i++)
+            if (offset != -1)
             {
-                outBytes[offset + i] = newBytes[i];
+                var newBytes = BitConverter.GetBytes(value);
+                for (int i = 0; i < 4; i++)
+                {
+                    outBytes[offset + i] = newBytes[i];
+                }
+
+                return value;
             }
 
-            return value;
+            return -1;
         }
 
         public int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)

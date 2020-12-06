@@ -751,10 +751,11 @@ namespace AquaModelLibrary
 
                 byte[] c7 = BitConverter.GetBytes((int)meshRaw[i][0xC7]);
 
-                mesh.unkShort0 = (short)((int)meshRaw[i][0xB0] % 0x10000);
+                mesh.tag = (short)((int)meshRaw[i][0xB0] % 0x10000);
+                mesh.unkShort0 = (short)((int)meshRaw[i][0xB0] / 0x10000);
                 mesh.unkByte0 = c7[0];
                 mesh.unkByte1 = c7[1];
-                mesh.unkShort1 = (short)((int)meshRaw[i][0xB0] / 0x10000);
+                mesh.unkShort1 = (short)((int)meshRaw[i][0xC7] / 0x10000);
                 mesh.mateIndex = (int)meshRaw[i][0xB1];
                 mesh.rendIndex = (int)meshRaw[i][0xB2];
                 mesh.shadIndex = (int)meshRaw[i][0xB3];
@@ -762,6 +763,7 @@ namespace AquaModelLibrary
                 mesh.baseMeshNodeId = (int)meshRaw[i][0xB5];
                 mesh.vsetIndex = (int)meshRaw[i][0xC0];
                 mesh.psetIndex = (int)meshRaw[i][0xC1];
+                mesh.unkInt0 = (int)meshRaw[i][0xCD];
                 mesh.baseMeshSequenceId = (int)meshRaw[i][0xC2];
 
                 meshList.Add(mesh);
@@ -784,8 +786,8 @@ namespace AquaModelLibrary
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
-                int shorts = meshList[i].unkShort0 + (meshList[i].unkShort1 * 0x10000);
-                int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 * 0x100);
+                int shorts = meshList[i].tag + (meshList[i].unkShort0 * 0x10000);
+                int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 * 0x100) + (meshList[i].unkShort1 * 0x10000);
                 addBytes(outBytes, 0xB0, 0x9, BitConverter.GetBytes(shorts));
                 addBytes(outBytes, 0xC7, 0x9, BitConverter.GetBytes(bytes));
                 addBytes(outBytes, 0xB1, 0x8, BitConverter.GetBytes(meshList[i].mateIndex));
@@ -795,6 +797,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0xB5, 0x8, BitConverter.GetBytes(meshList[i].baseMeshNodeId));
                 addBytes(outBytes, 0xC0, 0x8, BitConverter.GetBytes(meshList[i].vsetIndex));
                 addBytes(outBytes, 0xC1, 0x8, BitConverter.GetBytes(meshList[i].psetIndex));
+                addBytes(outBytes, 0xCD, 0x8, BitConverter.GetBytes(meshList[i].unkInt0));
                 addBytes(outBytes, 0xC2, 0x9, BitConverter.GetBytes(meshList[i].baseMeshSequenceId));
             }
             //outBytes.AddRange(BitConverter.GetBytes((short)0xFD)); MESH seemingly doesn't use this for some reason

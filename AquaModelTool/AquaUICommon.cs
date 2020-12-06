@@ -62,12 +62,21 @@ namespace AquaModelTool
             }
         }
 
-        public void toVTBF(string str)
+        public void toNIFLModel(string str)
         {
             //These will be output as .**p regardless and if the user really wants the o version, they can do it in 2 seconds in a hex editor.
             str = str.Replace(".aqo", ".aqp");
             str = str.Replace(".tro", ".trp");
             
+            aqua.WriteNIFLModel(str, str);
+        }
+
+        public void toVTBFModel(string str)
+        {
+            //These will be output as .**p regardless and if the user really wants the o version, they can do it in 2 seconds in a hex editor.
+            str = str.Replace(".aqo", ".aqp");
+            str = str.Replace(".tro", ".trp");
+
             aqua.WriteVTBFModel(str, str);
         }
     }
