@@ -689,8 +689,7 @@ namespace AquaModelLibrary
                 objcTexfOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x68, model.objc.texfCount);
                 if(model.unrms != null)
                 {
-                    objcUnrmOffset = outBytes.Count + 0xA0;
-                    nof0PointerLocations.Add(objcUnrmOffset);
+                    objcUnrmOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xA0, 1);
                 } else
                 {
                     objcUnrmOffset = -1;
@@ -710,7 +709,7 @@ namespace AquaModelLibrary
                     vsetVtxeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8, model.vsetList[vsetId].vertTypesCount));
                     vsetVtxlOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x10, model.vsetList[vsetId].vtxlCount));
                     vsetBonePaletteOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, model.vsetList[vsetId].bonePaletteCount));
-                    vsetEdgeVertOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x2C, model.vsetList[vsetId].edgeVertsCount));
+                    vsetEdgeVertOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, model.vsetList[vsetId].edgeVertsCount));
 
                     outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(model.vsetList[vsetId]));
                 }
@@ -882,6 +881,7 @@ namespace AquaModelLibrary
 
                     //Write UNRM
                     outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertGroupCountCount));
+                    NOF0Append(nof0PointerLocations, outBytes.Count, 1);
                     outBytes.AddRange(BitConverter.GetBytes(outBytes.Count + 0x1C)); //Should always start a set amount after here
                     outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertCount));
                     meshIDPointerOffset = NOF0Append(nof0PointerLocations, outBytes.Count, 1);

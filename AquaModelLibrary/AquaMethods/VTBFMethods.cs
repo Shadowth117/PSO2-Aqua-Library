@@ -290,14 +290,14 @@ namespace AquaModelLibrary
                     vtbfDict.Add(dataId, data);
                 }
             #if DEBUG
-                Console.WriteLine($"Processed { dataType.ToString("X")} around { streamReader.Position().ToString("X")}");
+                //Console.WriteLine($"Processed { dataType.ToString("X")} around { streamReader.Position().ToString("X")}");
             #endif
             }
             //For non-list type tag data and non FD terminated lists (alpha has these)
             vtbfData.Add(vtbfDict);
 
             #if DEBUG
-                Console.WriteLine($"Processed {tagString} around { streamReader.Position().ToString("X")}");
+                //Console.WriteLine($"Processed {tagString} around { streamReader.Position().ToString("X")}");
             #endif
 
             return vtbfData;
@@ -763,7 +763,10 @@ namespace AquaModelLibrary
                 mesh.baseMeshNodeId = (int)meshRaw[i][0xB5];
                 mesh.vsetIndex = (int)meshRaw[i][0xC0];
                 mesh.psetIndex = (int)meshRaw[i][0xC1];
-                mesh.unkInt0 = (int)meshRaw[i][0xCD];
+                if(meshRaw[i].ContainsKey(0xCD))
+                {
+                    mesh.unkInt0 = (int)meshRaw[i][0xCD];
+                }
                 mesh.baseMeshSequenceId = (int)meshRaw[i][0xC2];
 
                 meshList.Add(mesh);
@@ -804,7 +807,7 @@ namespace AquaModelLibrary
 
             //Pointer count. Always 0 on MESH
             //Subtag count. 11 for each MESH + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "MESH", 0, (ushort)(meshList.Count * 0xB));
+            WriteTagHeader(outBytes, "MESH", 0, (ushort)(meshList.Count * 0xC));
 
             return outBytes.ToArray();
         }
