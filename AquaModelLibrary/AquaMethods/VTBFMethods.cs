@@ -9,6 +9,7 @@ using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.AquaObjectMethods;
 using System.Windows;
+using static AquaModelLibrary.AquaMotion;
 
 namespace AquaModelLibrary
 {
@@ -1570,6 +1571,99 @@ namespace AquaModelLibrary
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
             WriteTagHeader(outBytes, "NODO", 0, (ushort)(nodoList.Count * 7 + 1));
+
+            return outBytes.ToArray();
+        }
+
+        public static MOHeader parseMOHeader(List<Dictionary<int, object>> moRaw)
+        {
+            MOHeader moHeader = new MOHeader();
+
+            moHeader.variant = (int)moRaw[0][0xE0];
+            moHeader.loopPoint = (int)moRaw[0][0xE1];
+            moHeader.endFrame = (int)moRaw[0][0xE2];
+            moHeader.frameSpeed = (float)moRaw[0][0xE3];
+            moHeader.unkInt0 = (int)moRaw[0][0xE4];
+            moHeader.nodeCount = (int)moRaw[0][0xE5];
+            moHeader.testString = new AquaCommon.PSO2String();
+            moHeader.testString.SetBytes((byte[])moRaw[0][0xE6]);
+
+            return moHeader;
+        }
+
+        public static byte[] toMOHeader(MOHeader moHeader, string motionType)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            addBytes(outBytes, 0xE0, 0x9, BitConverter.GetBytes(moHeader.variant));
+            addBytes(outBytes, 0xE1, 0x9, BitConverter.GetBytes(moHeader.loopPoint));
+            addBytes(outBytes, 0xE2, 0x9, BitConverter.GetBytes(moHeader.endFrame));
+            addBytes(outBytes, 0xE3, 0x9, BitConverter.GetBytes(moHeader.frameSpeed));
+            addBytes(outBytes, 0xE4, 0x9, BitConverter.GetBytes(moHeader.unkInt0));
+            addBytes(outBytes, 0xE5, 0x9, BitConverter.GetBytes(moHeader.nodeCount));
+
+            //Test String
+            string testStr = moHeader.testString.GetString();
+            addBytes(outBytes, 0xE6, 0x02, (byte)testStr.Length, Encoding.UTF8.GetBytes(testStr));
+
+            WriteTagHeader(outBytes, motionType, (ushort)moHeader.nodeCount, 0x7);
+
+            return outBytes.ToArray();
+        }
+
+        public static MOHeader parseNDMO(List<Dictionary<int, object>> ndmoRaw)
+        {
+            return parseMOHeader(ndmoRaw);
+        }
+
+        public static byte[] toNDMO(MOHeader moHeader)
+        {
+            return toMOHeader(moHeader, "NDMO");
+        }
+
+        public static MOHeader parseSPMO(List<Dictionary<int, object>> ndmoRaw)
+        {
+            return parseMOHeader(ndmoRaw);
+        }
+
+        public static byte[] toSPMO(MOHeader moHeader)
+        {
+            return toMOHeader(moHeader, "SPMO");
+        }
+        public static MOHeader parseCAMO(List<Dictionary<int, object>> ndmoRaw)
+        {
+            return parseMOHeader(ndmoRaw);
+        }
+
+        public static byte[] toCAMO(MOHeader moHeader)
+        {
+            return toMOHeader(moHeader, "CAMO");
+        }
+
+        public static MSEG parseMSEG(List<Dictionary<int, object>> msegRaw)
+        {
+            MSEG mseg = new MSEG();
+
+            return mseg; 
+        }
+
+        public static byte[] toMSEG(MSEG mseg)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            return outBytes.ToArray();
+        }
+
+        public static MKEY parseMKEY(List<Dictionary<int, object>> mkeyRaw)
+        {
+            MKEY mkey = new MKEY();
+
+            return mkey;
+        }
+
+        public static byte[] toMKEY(MKEY mkey)
+        {
+            List<byte> outBytes = new List<byte>();
 
             return outBytes.ToArray();
         }

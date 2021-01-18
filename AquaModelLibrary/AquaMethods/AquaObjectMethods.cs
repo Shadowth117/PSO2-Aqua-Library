@@ -506,14 +506,43 @@ namespace AquaModelLibrary
             return matGroups;
         }
 
+        public static void splitOptimizedFaceGroups(AquaObject model, int faceLimit)
+        {
+            for(int i = 0; i < model.strips.Count; i++)
+            {
+                List<Vector3> tris = model.strips[i].getTriangles(true);
+
+                if(tris.Count > faceLimit)
+                {
+
+                }
+            }
+
+        }
+
+        public static void splitOptimizedVertGroups(AquaObject model, int vertLimit)
+        {
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                if(model.vtxlList[i].vertPositions.Count > vertLimit)
+                {
+                    int vertSplitCount = model.vtxlList[i].vertPositions.Count / vertLimit;
+
+                    //for(int j = 0; j < )
+                }
+            }
+
+        }
+
         public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
             outModel.vtxlList.Add(model.vtxlList[meshId]);
             outModel.tempTris.Add(model.tempTris[meshId]);
         }
 
-        //To be honest I don't really know what these actually do, but this seems to generate the structure the way the game does.
-        public static void CalcUNRMs(AquaObject model, bool applyNormalAveraging)
+        //To be honest I don't really know what these actually do, but this seems to generate the structure roughly the way the game's exporter does.
+        //Essentially, vertices between different meshes are linked together 
+        public static void CalcUNRMs(AquaObject model, bool applyNormalAveraging, bool useUNRMs)
         {
             UNRM unrm = new UNRM();
 
@@ -542,7 +571,7 @@ namespace AquaModelLibrary
                         for (int w = 0; w < model.vtxlList[n].vertPositions.Count; w++)
                         {
                             bool sameVert = (m == n && v == w);
-                            if(!sameVert && model.vtxlList[n].vertPositions[w].Equals(model.vtxlList[m].vertPositions[v]) && !meshCheckArr[n][w])
+                            if (!sameVert && model.vtxlList[n].vertPositions[w].Equals(model.vtxlList[m].vertPositions[v]) && !meshCheckArr[n][w])
                             {
                                 meshCheckArr[n][w] = true;
                                 meshNum.Add(n);
@@ -575,7 +604,11 @@ namespace AquaModelLibrary
                 }
             }
 
-            model.unrms = unrm;
+            //Only actually apply them if we choose to. This function may just be used for averaging normals.
+            if(useUNRMs)
+            {
+                model.unrms = unrm;
+            }
         }
 
         //Removes bones in vtxls with unprocessed weights

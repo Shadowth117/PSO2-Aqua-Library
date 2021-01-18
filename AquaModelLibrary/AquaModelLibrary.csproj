@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
+    <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
     <Compile Include="OtherStructs\PRMParameters.cs" />
     <Compile Include="AquaUtil.cs" />

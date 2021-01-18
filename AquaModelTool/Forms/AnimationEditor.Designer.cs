@@ -28,8 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.animTreeView = new System.Windows.Forms.TreeView();
             this.dataPanel = new System.Windows.Forms.Panel();
+            this.nodeMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.insertNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.duplicateNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameNodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.transformGroupMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.insertTransformGroupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeTransformGroupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.keyframeMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.insertKeyframeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.duplicateKeyframeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeKeyframeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nodeMenuStrip.SuspendLayout();
+            this.transformGroupMenuStrip.SuspendLayout();
+            this.keyframeMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // animTreeView
@@ -49,6 +65,87 @@
             this.dataPanel.Size = new System.Drawing.Size(230, 250);
             this.dataPanel.TabIndex = 1;
             // 
+            // nodeMenuStrip
+            // 
+            this.nodeMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.insertNodeToolStripMenuItem,
+            this.duplicateNodeToolStripMenuItem,
+            this.renameNodeToolStripMenuItem,
+            this.removeNodeToolStripMenuItem});
+            this.nodeMenuStrip.Name = "nodeMenuStrip";
+            this.nodeMenuStrip.Size = new System.Drawing.Size(157, 92);
+            // 
+            // insertNodeToolStripMenuItem
+            // 
+            this.insertNodeToolStripMenuItem.Name = "insertNodeToolStripMenuItem";
+            this.insertNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.insertNodeToolStripMenuItem.Text = "Insert Node";
+            // 
+            // duplicateNodeToolStripMenuItem
+            // 
+            this.duplicateNodeToolStripMenuItem.Name = "duplicateNodeToolStripMenuItem";
+            this.duplicateNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.duplicateNodeToolStripMenuItem.Text = "Duplicate Node";
+            // 
+            // removeNodeToolStripMenuItem
+            // 
+            this.removeNodeToolStripMenuItem.Name = "removeNodeToolStripMenuItem";
+            this.removeNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.removeNodeToolStripMenuItem.Text = "Remove Node";
+            // 
+            // renameNodeToolStripMenuItem
+            // 
+            this.renameNodeToolStripMenuItem.Name = "renameNodeToolStripMenuItem";
+            this.renameNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.renameNodeToolStripMenuItem.Text = "Rename Node";
+            // 
+            // transformGroupMenuStrip
+            // 
+            this.transformGroupMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.insertTransformGroupToolStripMenuItem,
+            this.removeTransformGroupToolStripMenuItem});
+            this.transformGroupMenuStrip.Name = "transformGroupMenuStrip";
+            this.transformGroupMenuStrip.Size = new System.Drawing.Size(210, 48);
+            // 
+            // insertTransformGroupToolStripMenuItem
+            // 
+            this.insertTransformGroupToolStripMenuItem.Name = "insertTransformGroupToolStripMenuItem";
+            this.insertTransformGroupToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
+            this.insertTransformGroupToolStripMenuItem.Text = "Insert Transform Group";
+            // 
+            // removeTransformGroupToolStripMenuItem
+            // 
+            this.removeTransformGroupToolStripMenuItem.Name = "removeTransformGroupToolStripMenuItem";
+            this.removeTransformGroupToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
+            this.removeTransformGroupToolStripMenuItem.Text = "Remove Transform Group";
+            // 
+            // keyframeMenuStrip
+            // 
+            this.keyframeMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.insertKeyframeToolStripMenuItem,
+            this.duplicateKeyframeToolStripMenuItem,
+            this.removeKeyframeToolStripMenuItem});
+            this.keyframeMenuStrip.Name = "keyframeMenuStrip";
+            this.keyframeMenuStrip.Size = new System.Drawing.Size(181, 92);
+            // 
+            // insertKeyframeToolStripMenuItem
+            // 
+            this.insertKeyframeToolStripMenuItem.Name = "insertKeyframeToolStripMenuItem";
+            this.insertKeyframeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.insertKeyframeToolStripMenuItem.Text = "Insert Keyframe";
+            // 
+            // duplicateKeyframeToolStripMenuItem
+            // 
+            this.duplicateKeyframeToolStripMenuItem.Name = "duplicateKeyframeToolStripMenuItem";
+            this.duplicateKeyframeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.duplicateKeyframeToolStripMenuItem.Text = "Duplicate Keyframe";
+            // 
+            // removeKeyframeToolStripMenuItem
+            // 
+            this.removeKeyframeToolStripMenuItem.Name = "removeKeyframeToolStripMenuItem";
+            this.removeKeyframeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeKeyframeToolStripMenuItem.Text = "Remove Keyframe";
+            // 
             // AnimationEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -57,6 +154,9 @@
             this.Controls.Add(this.animTreeView);
             this.Name = "AnimationEditor";
             this.Size = new System.Drawing.Size(384, 250);
+            this.nodeMenuStrip.ResumeLayout(false);
+            this.transformGroupMenuStrip.ResumeLayout(false);
+            this.keyframeMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -65,5 +165,17 @@
 
         private System.Windows.Forms.TreeView animTreeView;
         private System.Windows.Forms.Panel dataPanel;
+        private System.Windows.Forms.ContextMenuStrip nodeMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem insertNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem duplicateNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameNodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeNodeToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip transformGroupMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem insertTransformGroupToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeTransformGroupToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip keyframeMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem insertKeyframeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem duplicateKeyframeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeKeyframeToolStripMenuItem;
     }
 }

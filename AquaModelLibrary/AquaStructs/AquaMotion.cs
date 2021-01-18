@@ -11,40 +11,40 @@ namespace AquaModelLibrary
     {
         public const int CAMO = 0x4F4D4143; //Camera animation
         public const int SPMO = 0x4F4D5053; //UV animation
-        public const int NDMO = 0x4F4D444E; //Motion animation
+        public const int NDMO = 0x4F4D444E; //3d Motion animation
         public const int stdAnim = 0x10002;
         public const int stdPlayerAnim = 0x10012;
         public const int cameraAnim = 0x10004;
         public const int materialAnim = 0x20;
         public Dictionary<int, string> keyTypeNames = new Dictionary<int, string>() 
         {
-            {0x1, "0x1 Position" },
-            {0x2, "0x2 Rotation" },
-            {0x3, "0x3 Scale" },
-            {0x4, "0x4 Unk Floats" },
+            {0x1, "0x1 Position" },  //Standard, Camera
+            {0x2, "0x2 Rotation" },  //Standard
+            {0x3, "0x3 Scale" },     //Standard
+            {0x4, "0x4 Unk Floats" },//Camera
             //Are 0x5-0x13 reserved for effects? Effects seem to use values in this range for equivalent area there. 
             //In addition, the way those are constructed is akin to an alternative or early version of the overall motion format, based on namings and other bits.  
-            {0x14, "0x14 Unk Floats" },
-            {0x15, "0x15 Unk Floats" },
-            {0x16, "0x16 Unk Floats" },
-            {0x17, "0x17 Unk Floats" },
-            {0x18, "0x18 Unk Floats" },
-            {0x19, "0x19 Unk Floats" },
-            {0x1A, "0x1A Unk Floats" },
-            {0x1B, "0x1B Unk Floats" },
-            {0x1C, "0x1C Unk Floats" },
-            {0x1D, "0x1D Unk Floats" }
+            {0x14, "0x14 Unk Floats" },//Camera
+            {0x15, "0x15 Unk Floats" },//Camera
+            {0x16, "0x16 Unk Floats" },//UV
+            {0x17, "0x17 Unk Floats" },//UV
+            {0x18, "0x18 Unk Floats" },//UV
+            {0x19, "0x19 Unk Floats" },//UV
+            {0x1A, "0x1A Unk Floats" },//UV
+            {0x1B, "0x1B Unk Floats" },//UV
+            {0x1C, "0x1C Unk Floats" },//UV
+            {0x1D, "0x1D Unk Floats" } //UV
         };
         public AquaPackage.AFPBase afp;
         public NIFL nifl;
         public REL0 rel0;
-        public MOheader moHeader;
+        public MOHeader moHeader;
         public List<KeyData> motionKeys;
         public NOF0 nof0;
         public NEND nend;
 
         //MO Header
-        public struct MOheader
+        public struct MOHeader
         {
             public int variant; //0xE0, type 0x9 //Seems to be different pending type of anim. 0x10002 standard anims, 0x10012 player anims, 0x10004 camera, 0x20 texture anims
             public int loopPoint; //0xE1, type 0x9 //Loop point? Only seen in live dance aqms and lower than anim range. Otherwise, 0.
@@ -102,6 +102,35 @@ namespace AquaModelLibrary
             //Node Tree Flag - Special subsec tion of data for player animations with an unknown purpose. Not necessary to include, but can be filled
             //with somewhat valid data if the user wishes
             //Pos, Rot data
+        }
+
+        public static int GetKeyDataType(int keyType)
+        {
+            switch(keyType)
+            {
+                case 0x1:
+                    return 0x1;
+                case 0x2:
+                    return 0x3;
+                case 0x3:
+                case 0x4:
+                    return 0x1;
+                case 0x14:
+                case 0x15:
+                    return 0x6;
+                case 0x16:
+                case 0x17:
+                case 0x18:
+                case 0x19:
+                case 0x1A:
+                case 0x1B:
+                case 0x1C:
+                case 0x1D:
+                    return 0x4;
+                default:
+                    System.Console.WriteLine($"Unknown key type: {keyType}. Returning 1");
+                    return 0x1;
+            }
         }
 
     }

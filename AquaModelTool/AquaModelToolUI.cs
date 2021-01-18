@@ -111,7 +111,7 @@ namespace AquaModelTool
         
         public void AquaUIOpenFile(string str = null)
         {
-            string file = aquaUI.openFile(str);
+            string file = aquaUI.confirmFile(str);
             if (file != null)
             {
                 UserControl control;
@@ -125,11 +125,30 @@ namespace AquaModelTool
                     case ".aqo":
                     case ".trp":
                     case ".tro":
+                        aquaUI.aqua.aquaModels.Clear();
+                        aquaUI.aqua.aquaMotions.Clear();
+                        aquaUI.aqua.ReadModel(str);
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if(aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
                         {
                             isNIFL = true;
                         } else
+                        {
+                            isNIFL = false;
+                        }
+                        break;
+                    case ".aqm":
+                    case ".aqv":
+                    case ".aqc":
+                        aquaUI.aqua.aquaModels.Clear();
+                        aquaUI.aqua.aquaMotions.Clear();
+                        aquaUI.aqua.ReadMotion(str);
+                        control = new AnimationEditor(aquaUI.aqua.aquaMotions[0]);
+                        if (aquaUI.aqua.aquaMotions[0].nifl.magic != 0)
+                        {
+                            isNIFL = true;
+                        }
+                        else
                         {
                             isNIFL = false;
                         }
@@ -142,6 +161,12 @@ namespace AquaModelTool
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();
             }
+        }
+
+        private void averageNormalsOnSharedPositionVerticesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            aquaUI.averageNormals();
+            MessageBox.Show("Normal averaging complete!");
         }
     }
 }

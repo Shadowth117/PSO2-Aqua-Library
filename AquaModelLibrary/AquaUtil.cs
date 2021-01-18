@@ -470,7 +470,7 @@ namespace AquaModelLibrary
         }
 
         //Materials, Textures, vtxlList data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
-        public void ConvertToPSO2Mesh(bool unrms)
+        public void ConvertToPSO2Mesh(bool useUnrms)
         {
             for (int msI = 0; msI < aquaModels.Count;  msI++)
             {
@@ -481,10 +481,7 @@ namespace AquaModelLibrary
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
                     BatchSplitByBoneCount(matModelSplit, outModel, 16);
 
-                    if(unrms)
-                    {
-                        CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging);
-                    }
+                    CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
 
                     //Set up PSETs and strips
                     for(int i = 0; i < aquaModels[msI].models[aqI].tempTris.Count; i++)
@@ -1037,7 +1034,7 @@ namespace AquaModelLibrary
             AquaNode bones = new AquaNode();
             
             //Seek past vtbf tag
-            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF + vtc0 tags
+            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
 
             for(int i = 0; i < 4; i++)
             {
@@ -1087,11 +1084,11 @@ namespace AquaModelLibrary
                 //Proceed based on file variant
                 if (type.Equals(0x4C46494E))
                 {
-                    //aquaBones.Add(ReadNIFLBones(streamReader, offset));
+                    aquaMotions.Add(ReadNIFLMotion(streamReader, offset));
                 }
                 else if (type.Equals(0x46425456))
                 {
-                    //aquaBones.Add(ReadVTBFBones(streamReader));
+                    aquaMotions.Add(ReadVTBFMotion(streamReader));
                 }
                 else
                 {
@@ -1104,6 +1101,36 @@ namespace AquaModelLibrary
         public AquaMotion ReadVTBFMotion(BufferedStreamReader streamReader)
         {
             AquaMotion motion = new AquaMotion();
+
+            //Seek past vtbf tag
+            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
+
+            for (int i = 0; i < 4; i++)
+            {
+                var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
+                switch (tagType)
+                {
+                    case "ROOT":
+                        //We don't do anything with this right now.
+                        break;
+                    case "NDMO":
+                        //Signifies a 3d motion animation
+                        motion.moHeader = parse
+                        break;
+                    case "NDTR":
+                        bones.ndtr = parseNDTR(data);
+                        break;
+                    case "NODE":
+                        bones.nodeList = parseNODE(data);
+                        break;
+                    case "NODO":
+                        bones.nodoList = parseNODO(data);
+                        break;
+                    default:
+                        throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
+                }
+            }
+
             return motion;
         }
 
@@ -1112,7 +1139,7 @@ namespace AquaModelLibrary
             AquaMotion motion = new AquaMotion();
             motion.nifl = streamReader.Read<AquaCommon.NIFL>();
             motion.rel0 = streamReader.Read<AquaCommon.REL0>();
-            motion.moHeader = streamReader.Read<AquaMotion.MOheader>();
+            motion.moHeader = streamReader.Read<AquaMotion.MOHeader>();
 
             //Read MSEG data
             for(int i = 0; i < motion.moHeader.nodeCount; i++)

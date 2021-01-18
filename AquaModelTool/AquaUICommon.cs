@@ -17,21 +17,11 @@ namespace AquaModelTool
         };
         public AquaModelLibrary.AquaUtil aqua = new AquaModelLibrary.AquaUtil();
 
-        public string openFile(string str = null)
+        public string confirmFile(string str = null)
         {
-            if (str != null)
+            if(openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                aqua.aquaModels.Clear();
-                aqua.ReadModel(str);
-            } else
-            {
-                if(openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    aqua.aquaModels.Clear();
-                    aqua.ReadModel(openFileDialog.FileName);
-                    str = openFileDialog.FileName;
-                }
-
+                str = openFileDialog.FileName;
             }
             return str;
         }
@@ -58,6 +48,17 @@ namespace AquaModelTool
                             aqua.aquaModels[i].models[j].mateList[m] = mate;
                         }
                     }
+                }
+            }
+        }
+
+        public void averageNormals()
+        {
+            for (int i = 0; i < aqua.aquaModels.Count; i++)
+            {
+                for(int j = 0; j < aqua.aquaModels[i].models.Count; j++)
+                {
+                    AquaModelLibrary.AquaObjectMethods.CalcUNRMs(aqua.aquaModels[i].models[j], true, false);
                 }
             }
         }
