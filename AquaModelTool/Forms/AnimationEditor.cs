@@ -7,39 +7,66 @@ namespace AquaModelTool
 {
     public partial class AnimationEditor : UserControl
     {
-        private AquaMotion motion; 
-        public AnimationEditor(AquaMotion aquaMotion)
+        private AquaModelLibrary.AquaUtil.AnimSet animSet;
+        private AquaMotion currentMotion;
+        public AnimationEditor(AquaModelLibrary.AquaUtil.AnimSet aquaAnimSet)
         {
             InitializeComponent();
-            motion = aquaMotion;
+            animSet = aquaAnimSet;
 
-            //Populate the anim tree
-            for(int i = 0; i < motion.motionKeys.Count; i++)
+            //Populate anims dropdown 
+            animIDCB.BeginUpdate();
+            for (int i = 0; i < animSet.anims.Count; i++)
             {
-                TreeNode topNode = new TreeNode(motion.motionKeys[i].mseg.boneName.GetString());
+                animIDCB.Items.Add(i);
+            }
+            animIDCB.EndUpdate();
+            animIDCB.SelectedIndex = 0;
+            currentMotion = animSet.anims[animIDCB.SelectedIndex];
+
+            InitializeAnimTreeView();
+
+            //Add context menu strip for right clicking
+        }
+
+        private void InitializeAnimTreeView()
+        {
+            //Populate the anim tree
+            animTreeView.Nodes.Clear();
+            for (int i = 0; i < currentMotion.motionKeys.Count; i++)
+            {
+                TreeNode topNode = new TreeNode(currentMotion.motionKeys[i].mseg.nodeName.GetString());
                 topNode.Tag = 0;
                 animTreeView.Nodes.Add(topNode);
 
-                for(int j = 0; j < motion.motionKeys[i].keyData.Count; j++)
+                for (int j = 0; j < currentMotion.motionKeys[i].keyData.Count; j++)
                 {
-                    if(!motion.keyTypeNames.ContainsKey(motion.motionKeys[i].keyData[j].keyType))
+                    if (!currentMotion.keyTypeNames.ContainsKey(currentMotion.motionKeys[i].keyData[j].keyType))
                     {
-                        throw new Exception($"Keyframe type {motion.motionKeys[i].keyData[j].keyType} not found!");
+                        throw new Exception($"Keyframe type {currentMotion.motionKeys[i].keyData[j].keyType} not found!");
                     }
-                    TreeNode midNode = new TreeNode(motion.keyTypeNames[motion.motionKeys[i].keyData[j].keyType]);
+                    TreeNode midNode = new TreeNode(currentMotion.keyTypeNames[currentMotion.motionKeys[i].keyData[j].keyType]);
                     midNode.Tag = 1;
                     animTreeView.Nodes[i].Nodes.Add(midNode);
 
-                    for(int k = 0; k < motion.motionKeys[i].keyData[j].frameTimings.Count; k++)
+                    //Account for VTBF motions not having to have frametimings if there's only one frame
+                    if (currentMotion.motionKeys[i].keyData[j].frameTimings.Count > 0)
                     {
-                        TreeNode lowNode = new TreeNode("Frame " + (motion.motionKeys[i].keyData[j].frameTimings[k] / 0x10));
+                        for (int k = 0; k < currentMotion.motionKeys[i].keyData[j].frameTimings.Count; k++)
+                        {
+                            TreeNode lowNode = new TreeNode("Frame " + (currentMotion.motionKeys[i].keyData[j].frameTimings[k] / 0x10));
+                            lowNode.Tag = 2;
+                            animTreeView.Nodes[i].Nodes[j].Nodes.Add(lowNode);
+                        }
+                    }
+                    else
+                    {
+                        TreeNode lowNode = new TreeNode("Frame 0");
                         lowNode.Tag = 2;
                         animTreeView.Nodes[i].Nodes[j].Nodes.Add(lowNode);
                     }
                 }
             }
-
-            //Add context menu strip for right clicking
         }
 
         public void animTreeView_MouseDown(object sender, MouseEventArgs e)
@@ -61,7 +88,7 @@ namespace AquaModelTool
         public void animTreeView_Insert(TreeNode node)
         {
             //Camera motions should only ever have one node
-            if ((int)node.Tag == 0 && motion.moHeader.variant == AquaMotion.cameraAnim)
+            if ((int)node.Tag == 0 && currentMotion.moHeader.variant == AquaMotion.cameraAnim)
             {
                 MessageBox.Show("You cannot have multiple camera nodes!");
                 return;
@@ -70,7 +97,7 @@ namespace AquaModelTool
             //If node.Tag is 1, check that the transform categories aren't maxed already
             if((int)node.Tag == 1)
             {
-                switch(motion.moHeader.variant)
+                switch(currentMotion.moHeader.variant)
                 {
                     case AquaMotion.cameraAnim:
                     case AquaMotion.stdAnim:
@@ -89,13 +116,13 @@ namespace AquaModelTool
                         }
                         break;
                     default:
-                        MessageBox.Show($"Unknown motion variant {motion.moHeader.variant}");
+                        MessageBox.Show($"Unknown motion variant {currentMotion.moHeader.variant}");
                         return;
                 }
             }
 
             //Since frames must be whole numbers, prevent more frames than the endframe count from being added
-            if ((int)node.Tag == 2 && motion.motionKeys[node.Parent.Parent.Index].keyData.Count < motion.moHeader.endFrame)
+            if ((int)node.Tag == 2 && currentMotion.motionKeys[node.Parent.Parent.Index].keyData.Count < currentMotion.moHeader.endFrame)
             {
                 MessageBox.Show("You can't add more frames than the frame count!");
                 return;
@@ -124,10 +151,10 @@ namespace AquaModelTool
                     break;
                 case 2:
                     newNode.Text = node.Text;
-                    var keySet = motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
+                    var keySet = currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
                     keySet.keyCount++;
 
-                    keySet.frameTimings.Insert(node.Index, motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
+                    keySet.frameTimings.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
                     switch (keySet.dataType)
                     {
                         //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
@@ -159,24 +186,21 @@ namespace AquaModelTool
             AquaMotion.KeyData keyData = new AquaMotion.KeyData();
             AquaMotion.MSEG newMseg = new AquaMotion.MSEG();
             newMseg.nodeDataCount = 1;
-            newMseg.nodeId = motion.motionKeys[node.Index].mseg.nodeId + 1;
-            newMseg.boneName.SetString("Node " + newMseg.nodeId);
+            newMseg.nodeId = currentMotion.motionKeys[node.Index].mseg.nodeId + 1;
+            newMseg.nodeName.SetString("Node " + newMseg.nodeId);
 
             //Set up the dialog
-            AnimationTransformSelect tfmDialog = new AnimationTransformSelect();
-            switch (motion.moHeader.variant)
+            AnimationTransformSelect tfmDialog = new AnimationTransformSelect(currentMotion.moHeader.variant);
+            switch (currentMotion.moHeader.variant)
             {
                 case AquaMotion.stdAnim:
                 case AquaMotion.stdPlayerAnim:
-                    tfmDialog.standardAnim();
                     newMseg.nodeType = 0x2;
                     break;
                 case AquaMotion.cameraAnim:
-                    tfmDialog.cameraAnim();
                     newMseg.nodeType = 0x20;
                     break;
                 case AquaMotion.materialAnim:
-                    tfmDialog.uvAnim();
                     newMseg.nodeType = 0x10;
                     break;
                 default:
@@ -185,9 +209,9 @@ namespace AquaModelTool
             }
 
             //Find preused transform types and disallow them
-            for (int i = 0; i < motion.motionKeys[node.Index].keyData.Count; i++)
+            for (int i = 0; i < currentMotion.motionKeys[node.Index].keyData.Count; i++)
             {
-                int kType = motion.motionKeys[node.Index].keyData[i].keyType;
+                int kType = currentMotion.motionKeys[node.Index].keyData[i].keyType;
                 tfmDialog.transformButtons[kType - 1].Enabled = false;
             }
             //Set the first enabled type to checked
@@ -207,7 +231,7 @@ namespace AquaModelTool
             //Run Dialog and check results
             tfmDialog.ShowDialog();
             int transformType = tfmDialog.currentChoice;
-            transformNode.Text = motion.keyTypeNames[transformType];
+            transformNode.Text = currentMotion.keyTypeNames[transformType];
 
             //Add an empty frame
             TreeNode keyNode = new TreeNode("Frame 0");
@@ -235,16 +259,16 @@ namespace AquaModelTool
                     newMkey.floatKeys.Add(0);
                     break;
                 default:
-                    throw new Exception("Unexpected data type!");
+                    throw new Exception($"Unexpected data type: {newMkey.dataType}");
             }
             keyData.keyData.Add(newMkey);
-            motion.motionKeys.Add(keyData);
+            currentMotion.motionKeys.Add(keyData);
         }
 
         public void animTreeView_Duplicate(TreeNode node)
         {
             //Camera motions should only ever have one node
-            if ((int)node.Tag == 0 && motion.moHeader.variant == AquaMotion.cameraAnim)
+            if ((int)node.Tag == 0 && currentMotion.moHeader.variant == AquaMotion.cameraAnim)
             {
                 MessageBox.Show("You cannot have multiple camera nodes!");
                 return;
@@ -258,7 +282,7 @@ namespace AquaModelTool
             }
 
             //Since frames must be whole numbers, prevent more frames than the endframe count from being added
-            if((int)node.Tag == 2 && motion.motionKeys[node.Parent.Parent.Index].keyData.Count < motion.moHeader.endFrame)
+            if((int)node.Tag == 2 && currentMotion.motionKeys[node.Parent.Parent.Index].keyData.Count < currentMotion.moHeader.endFrame)
             {
                 MessageBox.Show("You can't add more frames than the frame count!");
                 return;
@@ -290,10 +314,10 @@ namespace AquaModelTool
                     }
 
                     //Set actual data
-                    AquaMotion.KeyData oldData = motion.motionKeys[node.Index];
+                    AquaMotion.KeyData oldData = currentMotion.motionKeys[node.Index];
                     AquaMotion.KeyData keyData = new AquaMotion.KeyData();
                     keyData.mseg = new AquaMotion.MSEG();
-                    keyData.mseg.boneName = oldData.mseg.boneName;
+                    keyData.mseg.nodeName = oldData.mseg.nodeName;
                     keyData.mseg.nodeDataCount = oldData.mseg.nodeDataCount;
                     keyData.mseg.nodeId = oldData.mseg.nodeId;
                     keyData.mseg.nodeType = oldData.mseg.nodeType;
@@ -302,7 +326,7 @@ namespace AquaModelTool
                     for(int i = 0; i < oldData.keyData.Count; i++)
                     {
                         //Duplicate MKEY value data
-                        AquaMotion.MKEY oldKey = motion.motionKeys[node.Index].keyData[i];
+                        AquaMotion.MKEY oldKey = currentMotion.motionKeys[node.Index].keyData[i];
                         AquaMotion.MKEY newKey = new AquaMotion.MKEY();
                         newKey.dataType = oldKey.dataType;
                         newKey.keyCount = oldKey.keyCount;
@@ -315,26 +339,26 @@ namespace AquaModelTool
 
                         keyData.keyData.Add(newKey);
                     }
-                    motion.motionKeys.Insert(node.Index, keyData);
-                    motion.moHeader.nodeCount++;
+                    currentMotion.motionKeys.Insert(node.Index, keyData);
+                    currentMotion.moHeader.nodeCount++;
                     break;
                 case 2:
-                    var keySet = motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
+                    var keySet = currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
                     keySet.keyCount++;
 
-                    keySet.frameTimings.Insert(node.Index, motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
+                    keySet.frameTimings.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
                     switch (keySet.dataType)
                     {
                         //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:
                         case 0x3:
-                            keySet.vector4Keys.Insert(node.Index, motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].vector4Keys[node.Index]);
+                            keySet.vector4Keys.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].vector4Keys[node.Index]);
                             break;
 
                         //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                         case 0x4:
                         case 0x6:
-                            keySet.floatKeys.Insert(node.Index, motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].floatKeys[node.Index]);
+                            keySet.floatKeys.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].floatKeys[node.Index]);
                             break;
                         default:
                             throw new Exception("Unexpected data type!");
@@ -367,15 +391,15 @@ namespace AquaModelTool
             switch((int)node.Tag)
             {
                 case 0:
-                    motion.motionKeys.RemoveAt(node.Index);
-                    motion.moHeader.nodeCount--;
+                    currentMotion.motionKeys.RemoveAt(node.Index);
+                    currentMotion.moHeader.nodeCount--;
                     break;
                 case 1:
-                    motion.motionKeys[node.Parent.Index].keyData.RemoveAt(node.Index);
-                    motion.motionKeys[node.Parent.Index].mseg.nodeDataCount--;
+                    currentMotion.motionKeys[node.Parent.Index].keyData.RemoveAt(node.Index);
+                    currentMotion.motionKeys[node.Parent.Index].mseg.nodeDataCount--;
                     break;
                 case 2:
-                    var keySet = motion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
+                    var keySet = currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
                     keySet.keyCount--;
                     keySet.frameTimings.RemoveAt(node.Index);
 
@@ -401,5 +425,11 @@ namespace AquaModelTool
             }
         }
 
+        private void animIDCB_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            currentMotion = animSet.anims[animIDCB.SelectedIndex];
+
+            InitializeAnimTreeView();
+        }
     }
 }

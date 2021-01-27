@@ -259,20 +259,24 @@ namespace AquaModelLibrary
                         break;
                     case 0xCA: //Float Matrix, observed only as 4x4
                         subDataType = streamReader.Read<byte>(); //Expected to always be 0xA for float
-                        subDataAdditions = streamReader.Read<byte>() + (uint)1; //last array entry id
-                        data = new Vector4[subDataAdditions];
 
+                        switch (subDataType)
+                        {
+                            case 0xA:
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1; //last array entry id
+                                break;
+                            case 0x12:
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1; //last array entry id
+                                break;
+                            default:
+                                MessageBox.Show($"Unknown subDataAdditions value {subDataType.ToString("X")}, please report!");
+                                throw new NotImplementedException();
+                        }
+
+                        data = new Vector4[subDataAdditions];
                         for (int j = 0; j < subDataAdditions; j++)
                         {
-                            switch (subDataType)
-                            {
-                                case 0xA:
-                                    ((Vector4[])data)[j] = streamReader.Read<Vector4>();
-                                    break;
-                                default:
-                                    MessageBox.Show($"Unknown subDataType {subDataType.ToString("X")}, please report!");
-                                    throw new NotImplementedException();
-                            }
+                            ((Vector4[])data)[j] = streamReader.Read<Vector4>();
                         }
                         break;
                     default:
@@ -1644,6 +1648,12 @@ namespace AquaModelLibrary
         {
             MSEG mseg = new MSEG();
 
+            mseg.nodeType = (int)msegRaw[0][0xE7];
+            mseg.nodeDataCount = (int)msegRaw[0][0xE8];
+            mseg.nodeName = new AquaCommon.PSO2String();
+            mseg.nodeName.SetBytes((byte[])msegRaw[0][0xE9]);
+            mseg.nodeId = (int)msegRaw[0][0xEA];
+
             return mseg; 
         }
 
@@ -1651,12 +1661,77 @@ namespace AquaModelLibrary
         {
             List<byte> outBytes = new List<byte>();
 
+            addBytes(outBytes, 0xE7, 0x9, BitConverter.GetBytes(mseg.nodeType));
+            addBytes(outBytes, 0xE8, 0x9, BitConverter.GetBytes(mseg.nodeDataCount));
+
+            //Node name
+            string nodeStr = mseg.nodeName.GetString();
+            addBytes(outBytes, 0xE9, 0x2, (byte)nodeStr.Length, Encoding.UTF8.GetBytes(nodeStr));
+
+            addBytes(outBytes, 0xEA, 0x9, BitConverter.GetBytes(mseg.nodeDataCount));
+
+            WriteTagHeader(outBytes, "MSEG", 0x3, 0x4);
+
             return outBytes.ToArray();
         }
 
         public static MKEY parseMKEY(List<Dictionary<int, object>> mkeyRaw)
         {
             MKEY mkey = new MKEY();
+            mkey.keyType = (int)mkeyRaw[0][0xEB];
+            mkey.dataType = (int)mkeyRaw[0][0xEC];
+            mkey.unkInt0 = (int)mkeyRaw[0][0xF0];
+            mkey.keyCount = (int)mkeyRaw[0][0xED];
+            
+            //Get frame timings. Seemingly may not store a frame timing if there's only one frame.
+            if(mkey.keyCount > 1)
+            {
+                for (int j = 0; j < mkey.keyCount; j++)
+                {
+                    mkey.frameTimings.Add(((ushort[])mkeyRaw[0][0xEF])[j]);
+                }
+            } else if (mkeyRaw[0].ContainsKey(0xEF))
+            {
+                mkey.frameTimings.Add((ushort)mkeyRaw[0][0xEF]);
+            }
+
+            //Get frames. The data types stored are different depending on the key count.
+            switch(mkey.dataType)
+            {
+                //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                    if (mkey.keyCount > 1)
+                    {
+                        for (int j = 0; j < mkey.keyCount; j++)
+                        {
+                            mkey.vector4Keys.Add(((Vector4[])mkeyRaw[0][0xEE])[j]);
+                        }
+                    }
+                    else
+                    {
+                        mkey.vector4Keys.Add((Vector4)mkeyRaw[0][0xEE]);
+                    }
+                    break;
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    if (mkey.keyCount > 1)
+                    {
+                        for (int j = 0; j < mkey.keyCount; j++)
+                        {
+                            mkey.floatKeys.Add(((float[])mkeyRaw[0][0xF1])[j]);
+                        }
+                    }
+                    else
+                    {
+                        mkey.floatKeys.Add((float)mkeyRaw[0][0xF1]);
+                    }
+                    break;
+                default:
+                    throw new Exception($"Unexpected data type: {mkey.dataType}");
+            }
 
             return mkey;
         }
@@ -1664,6 +1739,45 @@ namespace AquaModelLibrary
         public static byte[] toMKEY(MKEY mkey)
         {
             List<byte> outBytes = new List<byte>();
+
+            addBytes(outBytes, 0xEB, 0x9, BitConverter.GetBytes(mkey.keyType));
+            addBytes(outBytes, 0xEC, 0x9, BitConverter.GetBytes(mkey.dataType));
+            addBytes(outBytes, 0xF0, 0x9, BitConverter.GetBytes(mkey.unkInt0));
+            addBytes(outBytes, 0xED, 0x9, BitConverter.GetBytes(mkey.keyCount));
+
+            //Set frame timings. The data types stored are different depending on the key count
+            handleOptionalArrayHeader(outBytes, 0xEF, mkey.keyCount, 0x06);
+            //Write the actual timings
+            for (int j = 0; j < mkey.frameTimings.Count; j++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(mkey.frameTimings[j]));
+            }
+
+            //Write frame data. Types will vary.
+            switch (mkey.dataType)
+            {
+                //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                case 0x1:
+                case 0x3:
+                    handleOptionalArrayHeader(outBytes, 0xEE, mkey.keyCount, 0x4A);
+                    for (int j = 0; j < mkey.frameTimings.Count; j++)
+                    {
+                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(mkey.vector4Keys[j]));
+                    }
+                    break;
+
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    handleOptionalArrayHeader(outBytes, 0xF1, mkey.keyCount, 0xA);
+                    for (int j = 0; j < mkey.frameTimings.Count; j++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(mkey.floatKeys[j]));
+                    }
+                    break;
+                default:
+                    throw new Exception("Unexpected data type!");
+            }
 
             return outBytes.ToArray();
         }
@@ -1687,6 +1801,37 @@ namespace AquaModelLibrary
             }
 
             return count;
+        }
+
+        public static void handleOptionalArrayHeader(List<byte> outBytes, byte subTagID, int vertIdCount, byte baseDataType)
+        {
+            outBytes.Add(subTagID);
+            if (vertIdCount > 1)
+            {
+                outBytes.Add((byte)(baseDataType + 0x80));
+                if (vertIdCount - 1 > byte.MaxValue)
+                {
+                    if (vertIdCount - 1 > ushort.MaxValue)
+                    {
+                        outBytes.Add(0x18);
+                        outBytes.AddRange(BitConverter.GetBytes(vertIdCount - 1));
+                    }
+                    else
+                    {
+                        outBytes.Add(0x10);
+                        outBytes.AddRange(BitConverter.GetBytes((ushort)(vertIdCount - 1)));
+                    }
+                }
+                else
+                {
+                    outBytes.Add(0x08);
+                    outBytes.Add((byte)(vertIdCount - 1));
+                }
+            }
+            else
+            {
+                outBytes.Add(baseDataType);
+            }
         }
 
         public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)

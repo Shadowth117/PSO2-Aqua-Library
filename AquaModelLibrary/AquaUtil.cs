@@ -16,11 +16,17 @@ namespace AquaModelLibrary
         public List<ModelSet> aquaModels = new List<ModelSet>();
         public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
-        public List<AquaMotion> aquaMotions = new List<AquaMotion>();
+        public List<AnimSet> aquaMotions = new List<AnimSet>();
         public struct ModelSet
         {
             public AquaPackage.AFPMain afp;
             public List<AquaObject> models;
+        }
+
+        public struct AnimSet
+        {
+            public AquaPackage.AFPMain afp;
+            public List<AquaMotion> anims;
         }
 
         public void ReadModel(string inFilename)
@@ -29,45 +35,45 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 ModelSet set = new ModelSet();
-                int type = streamReader.Peek<int>();
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                 int offset = 0x20; //Base offset due to NIFL header
 
                 //Deal with deicer's extra header nonsense
-                if (type.Equals(0x707161) || type.Equals(0x707274))
+                if (type.Equals("aqp\0") || type.Equals("trp\0"))
                 {
                     streamReader.Seek(0xC, SeekOrigin.Begin);
                     //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
                     int headJunkSize = streamReader.Read<int>();
 
                     streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = streamReader.Peek<int>();
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += headJunkSize;
                 }
 
                 //Deal with afp header or aqo. prefixing as needed
-                if (type.Equals(0x706661) || type.Equals(0x707274))
+                if (type.Equals("afp\0"))
                 {
                     set.afp = streamReader.Read<AquaPackage.AFPMain>();
-                    type = streamReader.Peek<int>();
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += 0x40;
-                } else if(type.Equals(0x6F7161) || type.Equals(0x6F7274))
+                } else if(type.Equals("aqo\0") || type.Equals("tro\0"))
                 {
                     streamReader.Seek(0x4, SeekOrigin.Current);
-                    type = streamReader.Peek<int>();
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += 0x4;
                 }
 
-                if(set.afp.fileCount == 0)
+                if (set.afp.fileCount == 0)
                 {
                     set.afp.fileCount = 1;
                 }
 
                 //Proceed based on file variant
-                if (type.Equals(0x4C46494E))
+                if (type.Equals("NIFL"))
                 {
                     set.models = ReadNIFLModel(streamReader, set.afp.fileCount, offset);
                     aquaModels.Add(set);
-                } else if (type.Equals(0x46425456))
+                } else if (type.Equals("VTBF"))
                 {
                     set.models = ReadVTBFModel(streamReader, set.afp.fileCount, set.afp.afpBase.paddingOffset);
                     aquaModels.Add(set);
@@ -75,7 +81,6 @@ namespace AquaModelLibrary
                 {
                     MessageBox.Show("Improper File Format!");
                 }
-
             }
         }
 
@@ -444,6 +449,12 @@ namespace AquaModelLibrary
                                 }
                                 break;
                             default:
+                                //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
+                                if (firstFileSize == 0)
+                                {
+                                    aquaModels.Add(model);
+                                    return aquaModels;
+                                }
                                 throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
                         }
                     }
@@ -975,27 +986,27 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                int type = streamReader.Peek<int>();
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                 int offset = 0x20; //Base offset due to NIFL header
 
                 //Deal with deicer's extra header nonsense
-                if (type.Equals(0x6E7161) || type.Equals(0x6E7274))
+                if (type.Equals("aqn\0") || type.Equals("trn\0"))
                 {
                     streamReader.Seek(0xC, SeekOrigin.Begin);
                     //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
                     int headJunkSize = streamReader.Read<int>();
 
                     streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = streamReader.Peek<int>();
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += headJunkSize;
                 }
 
                 //Proceed based on file variant
-                if (type.Equals(0x4C46494E))
+                if (type.Equals("NIFL"))
                 {
                     aquaBones.Add(ReadNIFLBones(streamReader));
                 }
-                else if (type.Equals(0x46425456))
+                else if (type.Equals("VTBF"))
                 {
                     aquaBones.Add(ReadVTBFBones(streamReader));
                 }
@@ -1032,11 +1043,13 @@ namespace AquaModelLibrary
         public AquaNode ReadVTBFBones(BufferedStreamReader streamReader)
         {
             AquaNode bones = new AquaNode();
-            
+
+            int dataEnd = (int)streamReader.BaseStream().Length;
+
             //Seek past vtbf tag
             streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
 
-            for(int i = 0; i < 4; i++)
+            while (streamReader.Position() < dataEnd)
             {
                 var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
                 switch (tagType)
@@ -1054,6 +1067,11 @@ namespace AquaModelLibrary
                         bones.nodoList = parseNODO(data);
                         break;
                     default:
+                        //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
+                        if (data == null)
+                        {
+                            return bones;
+                        }
                         throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
                 }
             }
@@ -1066,29 +1084,45 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                int type = streamReader.Peek<int>();
+                AnimSet set = new AnimSet();
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                 int offset = 0x20; //Base offset due to NIFL header
 
                 //Deal with deicer's extra header nonsense
-                if (type.Equals(0x637161) || type.Equals(0x767161) || type.Equals(0x6D7161))
+                if (type.Equals("aqm\0") || type.Equals("aqv\0") || type.Equals("aqw\0") || type.Equals("aqc\0") || type.Equals("trm\0") || type.Equals("trv\0") || type.Equals("trw\0"))
                 {
                     streamReader.Seek(0xC, SeekOrigin.Begin);
                     //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
                     int headJunkSize = streamReader.Read<int>();
 
                     streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = streamReader.Peek<int>();
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += headJunkSize;
                 }
 
-                //Proceed based on file variant
-                if (type.Equals(0x4C46494E))
+                //Deal with afp header or aqo. prefixing as needed
+                if (type.Equals("afp\0"))
                 {
-                    aquaMotions.Add(ReadNIFLMotion(streamReader, offset));
+                    set.afp = streamReader.Read<AquaPackage.AFPMain>();
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                    offset += 0x40;
                 }
-                else if (type.Equals(0x46425456))
+
+                if (set.afp.fileCount == 0)
                 {
-                    aquaMotions.Add(ReadVTBFMotion(streamReader));
+                    set.afp.fileCount = 1;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals("NIFL"))
+                {
+                    set.anims = ReadNIFLMotion(streamReader, set.afp.fileCount, offset);
+                    aquaMotions.Add(set);
+                }
+                else if (type.Equals("VTBF"))
+                {
+                    set.anims = ReadVTBFMotion(streamReader, set.afp.fileCount, set.afp.afpBase.paddingOffset);
+                    aquaMotions.Add(set);
                 }
                 else
                 {
@@ -1098,119 +1132,188 @@ namespace AquaModelLibrary
             }
         }
 
-        public AquaMotion ReadVTBFMotion(BufferedStreamReader streamReader)
+        public List<AquaMotion> ReadVTBFMotion(BufferedStreamReader streamReader, int fileCount, int firstFileSize)
         {
-            AquaMotion motion = new AquaMotion();
+            List<AquaMotion> aquaMotions = new List<AquaMotion>();
+            int fileSize = firstFileSize;
 
-            //Seek past vtbf tag
-            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
-
-            for (int i = 0; i < 4; i++)
+            //Handle .aqo/tro
+            if (fileSize == 0)
             {
-                var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
-                switch (tagType)
+                fileSize = (int)streamReader.BaseStream().Length;
+
+                //Handle the weird aqo/tro with aqo. in front of the rest of the file needlessly
+                int type = BitConverter.ToInt32(streamReader.ReadBytes(0, 4), 0);
+                if (type.Equals(0x6F7161) || type.Equals(0x6F7274))
                 {
-                    case "ROOT":
-                        //We don't do anything with this right now.
-                        break;
-                    case "NDMO":
-                        //Signifies a 3d motion animation
-                        motion.moHeader = parse
-                        break;
-                    case "NDTR":
-                        bones.ndtr = parseNDTR(data);
-                        break;
-                    case "NODE":
-                        bones.nodeList = parseNODE(data);
-                        break;
-                    case "NODO":
-                        bones.nodoList = parseNODO(data);
-                        break;
-                    default:
-                        throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
+                    fileSize -= 0x4;
                 }
             }
 
-            return motion;
-        }
-
-        public AquaMotion ReadNIFLMotion(BufferedStreamReader streamReader, int offset)
-        {
-            AquaMotion motion = new AquaMotion();
-            motion.nifl = streamReader.Read<AquaCommon.NIFL>();
-            motion.rel0 = streamReader.Read<AquaCommon.REL0>();
-            motion.moHeader = streamReader.Read<AquaMotion.MOHeader>();
-
-            //Read MSEG data
-            for(int i = 0; i < motion.moHeader.nodeCount; i++)
+            for (int animIndex = 0; animIndex < fileCount; animIndex++)
             {
-                AquaMotion.KeyData data = new AquaMotion.KeyData();
-                data.mseg = streamReader.Read<AquaMotion.MSEG>();
-                motion.motionKeys.Add(data);
-            }
+                AquaMotion motion = new AquaMotion();
 
-            //Read MKEY
-            for (int i = 0; i < motion.motionKeys.Count; i++)
-            {
-                streamReader.Seek(motion.motionKeys[i].mseg.nodeOffset + offset, SeekOrigin.Begin);
-                for (int j = 0; j < motion.motionKeys[i].mseg.nodeDataCount; j++)
+                if (animIndex > 0)
                 {
-                    AquaMotion.MKEY mkey = new AquaMotion.MKEY();
-                    mkey.keyType = streamReader.Read<int>();
-                    mkey.dataType = streamReader.Read<int>();
-                    mkey.unkInt0 = streamReader.Read<int>();
-                    mkey.keyCount = streamReader.Read<int>();
-                    mkey.frameAddress = streamReader.Read<int>();
-                    mkey.timeAddress = streamReader.Read<int>();
-                    motion.motionKeys[i].keyData.Add(mkey);
-                }
-                //Odd amounts of MKEYs will pad 8 bytes in NIFL
-
-                //Loop through what was gathered and get the actual data
-                for (int j = 0; j < motion.motionKeys[i].mseg.nodeDataCount; j++)
-                {
-                    streamReader.Seek(motion.motionKeys[i].keyData[j].timeAddress + offset, SeekOrigin.Begin);
-
-                    for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                    //There's 0x10 of padding present following the last model if it ends aligned to 0x10 already. Otherwise, padding to alignment.
+                    if (streamReader.Position() % 0x10 == 0)
                     {
-                        motion.motionKeys[i].keyData[j].frameTimings.Add(streamReader.Read<ushort>());
+                        streamReader.Seek(0x10, SeekOrigin.Current);
                     }
-
-                    //Stream aligns to 0x10 after timings.
-                    streamReader.Seek(motion.motionKeys[i].keyData[j].frameAddress + offset, SeekOrigin.Begin);
-
-                    switch(motion.motionKeys[i].keyData[j].dataType)
+                    else
                     {
-                        //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
-                        case 0x1:
-                        case 0x3:
-                            for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
-                            {
-                                motion.motionKeys[i].keyData[j].vector4Keys.Add(streamReader.Read<Vector4>());
-                            }
-                            break;
+                        AlignReader(streamReader, 0x10);
+                    }
+                    //Decide whether this is a tpn or not
+                    var afp = streamReader.Read<AquaPackage.AFPBase>();
+                    motion.afp = afp;
+                    
+                    fileSize = motion.afp.paddingOffset;
+                }
+                int dataEnd = (int)streamReader.Position() + fileSize;
 
-                        //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
-                        case 0x4:
-                        case 0x6:
-                            for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
-                            {
-                                motion.motionKeys[i].keyData[j].floatKeys.Add(streamReader.Read<float>());
-                            }
+                //Seek past vtbf tag
+                streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
+
+                while (streamReader.Position() < dataEnd)
+                {
+                    var data = ReadVTBFTag(streamReader, out string tagType, out int entryCount);
+                    switch (tagType)
+                    {
+                        case "ROOT":
+                            //We don't do anything with this right now.
+                            break;
+                        case "NDMO":
+                            //Signifies a 3d motion
+                            motion.moHeader = parseNDMO(data);
+                            break;
+                        case "SPMO":
+                            //Signifies a material animation
+                            motion.moHeader = parseSPMO(data);
+                            break;
+                        case "CAMO":
+                            //Signifies a camera motion
+                            motion.moHeader = parseCAMO(data);
+                            break;
+                        case "MSEG":
+                            //Motion segment - Signifies the start a node's animation data
+                            motion.motionKeys.Add(new AquaMotion.KeyData());
+                            motion.motionKeys[motion.motionKeys.Count - 1].mseg = parseMSEG(data);
+                            break;
+                        case "MKEY":
+                            //Motion key - These contain frame data for the various animation types and always follow the MSEG for the node they apply to.
+                            motion.motionKeys[motion.motionKeys.Count - 1].keyData.Add(parseMKEY(data));
                             break;
                         default:
-                            MessageBox.Show($"Unexpected type {motion.motionKeys[i].keyData[j].dataType.ToString("X")} at {streamReader.Position().ToString("X")}");
-                            throw new Exception();
+                            //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
+                            if (firstFileSize == 0)
+                            {
+                                aquaMotions.Add(motion);
+                                return aquaMotions;
+                            }
+                            throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
                     }
-                    //Stream aligns to 0x10 again after frames.
-
                 }
-            }
-            motion.nof0 = AquaCommon.readNOF0(streamReader);
-            AlignReader(streamReader, 0x10);
-            motion.nend = streamReader.Read<AquaCommon.NEND>();
 
-            return motion;
+                aquaMotions.Add(motion);
+            }
+
+            return aquaMotions;
+        }
+
+        public List<AquaMotion> ReadNIFLMotion(BufferedStreamReader streamReader, int fileCount, int offset)
+        {
+            List<AquaMotion> aquaMotions = new List<AquaMotion>();
+
+            for (int animIndex = 0; animIndex < fileCount; animIndex++)
+            {
+                AquaMotion motion = new AquaMotion();
+
+                if (animIndex > 0)
+                {
+                    streamReader.Seek(0x10, SeekOrigin.Current);
+                    motion.afp = streamReader.Read<AquaPackage.AFPBase>();
+                    offset = (int)streamReader.Position() + 0x20;
+                }
+
+                motion.nifl = streamReader.Read<AquaCommon.NIFL>();
+                motion.rel0 = streamReader.Read<AquaCommon.REL0>();
+                motion.moHeader = streamReader.Read<AquaMotion.MOHeader>();
+
+                //Read MSEG data
+                for (int i = 0; i < motion.moHeader.nodeCount; i++)
+                {
+                    AquaMotion.KeyData data = new AquaMotion.KeyData();
+                    data.mseg = streamReader.Read<AquaMotion.MSEG>();
+                    motion.motionKeys.Add(data);
+                }
+
+                //Read MKEY
+                for (int i = 0; i < motion.motionKeys.Count; i++)
+                {
+                    streamReader.Seek(motion.motionKeys[i].mseg.nodeOffset + offset, SeekOrigin.Begin);
+                    for (int j = 0; j < motion.motionKeys[i].mseg.nodeDataCount; j++)
+                    {
+                        AquaMotion.MKEY mkey = new AquaMotion.MKEY();
+                        mkey.keyType = streamReader.Read<int>();
+                        mkey.dataType = streamReader.Read<int>();
+                        mkey.unkInt0 = streamReader.Read<int>();
+                        mkey.keyCount = streamReader.Read<int>();
+                        mkey.frameAddress = streamReader.Read<int>();
+                        mkey.timeAddress = streamReader.Read<int>();
+                        motion.motionKeys[i].keyData.Add(mkey);
+                    }
+                    //Odd amounts of MKEYs will pad 8 bytes in NIFL
+
+                    //Loop through what was gathered and get the actual data
+                    for (int j = 0; j < motion.motionKeys[i].mseg.nodeDataCount; j++)
+                    {
+                        streamReader.Seek(motion.motionKeys[i].keyData[j].timeAddress + offset, SeekOrigin.Begin);
+
+                        for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                        {
+                            motion.motionKeys[i].keyData[j].frameTimings.Add(streamReader.Read<ushort>());
+                        }
+
+                        //Stream aligns to 0x10 after timings.
+                        streamReader.Seek(motion.motionKeys[i].keyData[j].frameAddress + offset, SeekOrigin.Begin);
+
+                        switch (motion.motionKeys[i].keyData[j].dataType)
+                        {
+                            //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                            case 0x1:
+                            case 0x3:
+                                for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                                {
+                                    motion.motionKeys[i].keyData[j].vector4Keys.Add(streamReader.Read<Vector4>());
+                                }
+                                break;
+
+                            //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                            case 0x4:
+                            case 0x6:
+                                for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
+                                {
+                                    motion.motionKeys[i].keyData[j].floatKeys.Add(streamReader.Read<float>());
+                                }
+                                break;
+                            default:
+                                MessageBox.Show($"Unexpected type {motion.motionKeys[i].keyData[j].dataType.ToString("X")} at {streamReader.Position().ToString("X")}");
+                                throw new Exception();
+                        }
+                        //Stream aligns to 0x10 again after frames.
+
+                    }
+                }
+                motion.nof0 = AquaCommon.readNOF0(streamReader);
+                AlignReader(streamReader, 0x10);
+                motion.nend = streamReader.Read<AquaCommon.NEND>();
+
+                aquaMotions.Add(motion);
+            }
+
+            return aquaMotions;
         }
 
         public void ReadCollision(string inFilename)

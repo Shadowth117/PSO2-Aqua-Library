@@ -127,7 +127,7 @@ namespace AquaModelTool
                     case ".tro":
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.ReadModel(str);
+                        aquaUI.aqua.ReadModel(file);
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if(aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
                         {
@@ -140,11 +140,15 @@ namespace AquaModelTool
                     case ".aqm":
                     case ".aqv":
                     case ".aqc":
+                    case ".aqw":
+                    case ".trm":
+                    case ".trv":
+                    case ".trw":
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.ReadMotion(str);
+                        aquaUI.aqua.ReadMotion(file);
                         control = new AnimationEditor(aquaUI.aqua.aquaMotions[0]);
-                        if (aquaUI.aqua.aquaMotions[0].nifl.magic != 0)
+                        if (aquaUI.aqua.aquaMotions[0].anims[0].nifl.magic != 0)
                         {
                             isNIFL = true;
                         }

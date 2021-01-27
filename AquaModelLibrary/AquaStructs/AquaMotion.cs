@@ -21,32 +21,74 @@ namespace AquaModelLibrary
             {0x1, "0x1 Position" },  //Standard, Camera
             {0x2, "0x2 Rotation" },  //Standard
             {0x3, "0x3 Scale" },     //Standard
-            {0x4, "0x4 Unk Floats" },//Camera
-            //Are 0x5-0x13 reserved for effects? Effects seem to use values in this range for equivalent area there. 
+            {0x4, "0x4 Unk Floats" }, //Camera
+            {0x8, "0x8 Unk Vector4s" }, //Alternate UV
+            {0x9, "0x9 Unk Vector4s" }, //Alternate UV
+            {0xA, "0xA Unk Vector4s" }, //Alternate UV
+            {0xB, "0xB Unk Vector4s" }, //Alternate UV
+            {0xC, "0xC Unk Vector4s" }, //Alternate UV
+            //0x5-0x7 and 0xD-0x13 seemingly not used in this format. Effects seem to use values in this range for equivalent area there. 
             //In addition, the way those are constructed is akin to an alternative or early version of the overall motion format, based on namings and other bits.  
-            {0x14, "0x14 Unk Floats" },//Camera
-            {0x15, "0x15 Unk Floats" },//Camera
-            {0x16, "0x16 Unk Floats" },//UV
-            {0x17, "0x17 Unk Floats" },//UV
-            {0x18, "0x18 Unk Floats" },//UV
-            {0x19, "0x19 Unk Floats" },//UV
-            {0x1A, "0x1A Unk Floats" },//UV
-            {0x1B, "0x1B Unk Floats" },//UV
-            {0x1C, "0x1C Unk Floats" },//UV
-            {0x1D, "0x1D Unk Floats" } //UV
+            {0x14, "0x14 Unk Floats" }, //Camera
+            {0x15, "0x15 Unk Floats" }, //Camera
+            {0x16, "0x16 Unk Floats" }, //UV
+            {0x17, "0x17 Unk Floats" }, //UV
+            {0x18, "0x18 Unk Floats" }, //UV
+            {0x19, "0x19 Unk Floats" }, //UV
+            {0x1A, "0x1A Unk Floats" }, //UV
+            {0x1B, "0x1B Unk Floats" }, //UV
+            {0x1C, "0x1C Unk Floats" }, //UV
+            {0x1D, "0x1D Unk Floats" }, //UV
+            {0x1E, "0x1E Unk Floats" }, //Alternate UV
+            {0x1F, "0x1F Unk Floats" }, //Alternate UV
+            {0x20, "0x20 Unk Floats" }, //Alternate UV
+            {0x21, "0x21 Unk Floats" } //Alternate UV
         };
+        public List<int> standardTypes = new List<int>()
+        {
+            0x1,
+            0x2,
+            0x3
+        };
+        public List<int> cameraTypes = new List<int>()
+        {
+            0x1,
+            0x4,
+            0x14,
+            0x15
+        };
+        public List<int> materialTypes = new List<int>()
+        {
+            0x8,
+            0x9,
+            0xA,
+            0xB,
+            0xC,
+            0x16,
+            0x17,
+            0x18,
+            0x19,
+            0x1A,
+            0x1B,
+            0x1C,
+            0x1E,
+            0x1F,
+            0x20,
+            0x21
+        };
+
         public AquaPackage.AFPBase afp;
         public NIFL nifl;
         public REL0 rel0;
         public MOHeader moHeader;
-        public List<KeyData> motionKeys;
+        public List<KeyData> motionKeys = new List<KeyData>();
         public NOF0 nof0;
         public NEND nend;
 
         //MO Header
         public struct MOHeader
         {
-            public int variant; //0xE0, type 0x9 //Seems to be different pending type of anim. 0x10002 standard anims, 0x10012 player anims, 0x10004 camera, 0x20 texture anims
+            public int variant; //0xE0, type 0x9 //Seems to be different pending type of anim. 0x10002 standard anims, 0x10012 player anims, 0x10004 camera, 0x20 material anims
             public int loopPoint; //0xE1, type 0x9 //Loop point? Only seen in live dance aqms and lower than anim range. Otherwise, 0.
             public int endFrame; //0xE2, type 0x9 //Last frame of the animation (0 based)
             public float frameSpeed; //0xE3, type 0xA //FPS of the animation. PSO2's default is 30.0f
@@ -63,7 +105,7 @@ namespace AquaModelLibrary
             public int nodeType; //0xE7, type 0x9 
             public int nodeDataCount; //0xE8, type 0x9 
             public int nodeOffset;
-            public PSO2String boneName; //0xE9, type 0x2  
+            public PSO2String nodeName; //0xE9, type 0x2  
             public int nodeId; //0xEA, type 0x9           //0 on material entries
         }
 
