@@ -14,10 +14,10 @@ namespace AquaModelTool
     public partial class AnimationTransformSelect : Form
     {
         private AquaMotion motion = new AquaMotion();
-        private int maxRow = 13;
-        private int radioXStart = 12;
-        private int radioYStart = 3;
-        public int currentChoice = 0x1;
+        private int maxRow = 13;        //Maximum allowable row for radiobuttons in the form
+        private int radioXStart = 12;   //Starting x of all radiobuttons in the form
+        private int radioYStart = 3;    //Starting y of all radiobuttons in the form 
+        public int currentChoice;       //Value to return on closing the form based on final selection
         public List<RadioButton> transformButtons;
 
         public AnimationTransformSelect(int type)
