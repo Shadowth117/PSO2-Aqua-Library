@@ -415,6 +415,18 @@ namespace AquaModelLibrary
                     else if (rawBP is ushort[])
                     {
                         bonePalettes.Add(((ushort[])rawBP).ToList());
+                    } else if (rawBP is short)
+                    {
+                        bonePalettes.Add(new List<ushort> { (ushort)((short)rawBP) });
+                    } else if (rawBP is short[])
+                    {
+                        var rawBPUshort = new List<ushort>();
+                        var BPArr = (short[])rawBP;
+                        for (int s = 0; s < BPArr.Length; s++)
+                        {
+                            rawBPUshort.Add((ushort)BPArr[s]);
+                        }
+                        bonePalettes.Add(rawBPUshort);
                     }
                     else
                     {
@@ -438,6 +450,20 @@ namespace AquaModelLibrary
                     else if (rawEV is short[])
                     {
                         edgeVertsLists.Add(((ushort[])rawEV).ToList());
+                    }
+                    else if (rawEV is short)
+                    {
+                        edgeVertsLists.Add(new List<ushort> { (ushort)((short)rawEV) });
+                    }
+                    else if (rawEV is short[])
+                    {
+                        var rawEshort = new List<ushort>();
+                        var EArr = (short[])rawEV;
+                        for (int s = 0; s < EArr.Length; s++)
+                        {
+                            rawEshort.Add((ushort)EArr[s]);
+                        }
+                        edgeVertsLists.Add(rawEshort);
                     }
                     else
                     {
