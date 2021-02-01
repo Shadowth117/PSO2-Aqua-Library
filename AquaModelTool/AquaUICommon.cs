@@ -21,9 +21,12 @@ namespace AquaModelTool
                          "|PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro" +
                          "|PSO2 Motion Files (*.aqm, *.aqv, *.aqw, *.aqc, *.trm, *.trv, *.trw)|*.aqm;*.aqv;*.aqw;*.aqc;*.trm;*.trv;*.trw"
             };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            if(str == null)
             {
-                str = openFileDialog.FileName;
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    str = openFileDialog.FileName;
+                }
             }
             return str;
         }

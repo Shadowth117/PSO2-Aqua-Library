@@ -740,23 +740,29 @@ namespace AquaModelLibrary
                     WriteVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
                     AlignWriter(outBytes, 0x10);
 
-                    //Write bone palette pointer
-                    SetByteListInt(outBytes, vsetBonePaletteOffsets[vertListId], outBytes.Count);
-                    //Write bone palette
-                    for (int bpId = 0; bpId < model.vtxlList[vertListId].bonePalette.Count; bpId++)
+                    if(model.vtxlList[vertListId].bonePalette != null)
                     {
-                        outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].bonePalette[bpId]));
+                        //Write bone palette pointer
+                        SetByteListInt(outBytes, vsetBonePaletteOffsets[vertListId], outBytes.Count);
+                        //Write bone palette
+                        for (int bpId = 0; bpId < model.vtxlList[vertListId].bonePalette.Count; bpId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].bonePalette[bpId]));
+                        }
+                        AlignWriter(outBytes, 0x10);
                     }
-                    AlignWriter(outBytes, 0x10);
 
-                    //Write edge verts pointer
-                    SetByteListInt(outBytes, vsetEdgeVertOffsets[vertListId], outBytes.Count);
-                    //Write edge verts
-                    for (int evId = 0; evId < model.vtxlList[vertListId].edgeVerts.Count; evId++)
+                    if (model.vtxlList[vertListId].edgeVerts != null)
                     {
-                        outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].edgeVerts[evId]));
+                        //Write edge verts pointer
+                        SetByteListInt(outBytes, vsetEdgeVertOffsets[vertListId], outBytes.Count);
+                        //Write edge verts
+                        for (int evId = 0; evId < model.vtxlList[vertListId].edgeVerts.Count; evId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].edgeVerts[evId]));
+                        }
+                        AlignWriter(outBytes, 0x10);
                     }
-                    AlignWriter(outBytes, 0x10);
                 }
 
                 //PSET
