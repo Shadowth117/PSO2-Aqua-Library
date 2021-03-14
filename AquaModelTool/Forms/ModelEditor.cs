@@ -20,6 +20,10 @@ namespace AquaModelTool
             }
             modelIDCB.EndUpdate();
             modelIDCB.SelectedIndex = 0;
+            if(modelIDCB.Items.Count < 2)
+            {
+                modelIDCB.Enabled = false;
+            }
         }
 
         public bool GetAllTransparentChecked()

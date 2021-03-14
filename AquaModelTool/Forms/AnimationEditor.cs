@@ -43,7 +43,7 @@ namespace AquaModelTool
                 {
                     if (!currentMotion.keyTypeNames.ContainsKey(currentMotion.motionKeys[i].keyData[j].keyType))
                     {
-                        throw new Exception($"Keyframe type {currentMotion.motionKeys[i].keyData[j].keyType} not found!");
+                        throw new Exception($"Keyframe type {currentMotion.motionKeys[i].keyData[j].keyType.ToString("X")} not found!");
                     }
                     TreeNode midNode = new TreeNode(currentMotion.keyTypeNames[currentMotion.motionKeys[i].keyData[j].keyType]);
                     midNode.Tag = 1;

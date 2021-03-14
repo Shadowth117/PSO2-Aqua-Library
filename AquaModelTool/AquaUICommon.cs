@@ -12,6 +12,11 @@ namespace AquaModelTool
     {
         public AquaModelLibrary.AquaUtil aqua = new AquaModelLibrary.AquaUtil();
 
+        public AquaUICommon()
+        {
+        }
+
+
         public string confirmFile(string str = null)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -74,7 +79,7 @@ namespace AquaModelTool
             str = str.Replace(".aqo", ".aqp");
             str = str.Replace(".tro", ".trp");
             
-            aqua.WriteNIFLModel(str, str);
+            aqua.WriteClassicNIFLModel(str, str);
         }
 
         public void toVTBFModel(string str)

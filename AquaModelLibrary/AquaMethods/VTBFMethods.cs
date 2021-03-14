@@ -10,6 +10,7 @@ using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.AquaObjectMethods;
 using System.Windows;
 using static AquaModelLibrary.AquaMotion;
+using static AquaModelLibrary.ClassicAquaObject;
 
 namespace AquaModelLibrary
 {
@@ -315,10 +316,10 @@ namespace AquaModelLibrary
             objc.type = (int)(objcRaw[0][0x10]);
             objc.size = (int)(objcRaw[0][0x11]);
             objc.unkMeshValue = (int)(objcRaw[0][0x12]);
-            objc.largetsVTXL = (int)(objcRaw[0][0x13]);
+            objc.largetsVtxl = (int)(objcRaw[0][0x13]);
             objc.totalStripFaces = (int)(objcRaw[0][0x14]);
             objc.totalVTXLCount = (int)(objcRaw[0][0x15]);
-            objc.unkMeshCount = (int)(objcRaw[0][0x16]);
+            objc.unkStructCount = (int)(objcRaw[0][0x16]);
             objc.vsetCount = (int)(objcRaw[0][0x24]);
             objc.psetCount = (int)(objcRaw[0][0x25]);
             objc.meshCount = (int)(objcRaw[0][0x17]);
@@ -368,10 +369,10 @@ namespace AquaModelLibrary
             addBytes(outBytes, 0x10, 0x8, BitConverter.GetBytes(objc.type)); //Should just always be 0xC2A. Perhaps some kind of header info?
             addBytes(outBytes, 0x11, 0x8, BitConverter.GetBytes(objc.size)); //Size of the final data struct, always 0xA4. This ends up being the exact size of the NIFL variation of OBJC.
             addBytes(outBytes, 0x12, 0x9, BitConverter.GetBytes(objc.unkMeshValue));
-            addBytes(outBytes, 0x13, 0x8, BitConverter.GetBytes(objc.largetsVTXL));
+            addBytes(outBytes, 0x13, 0x8, BitConverter.GetBytes(objc.largetsVtxl));
             addBytes(outBytes, 0x14, 0x9, BitConverter.GetBytes(objc.totalStripFaces));
             addBytes(outBytes, 0x15, 0x8, BitConverter.GetBytes(objc.totalVTXLCount));
-            addBytes(outBytes, 0x16, 0x8, BitConverter.GetBytes(objc.unkMeshCount));
+            addBytes(outBytes, 0x16, 0x8, BitConverter.GetBytes(objc.unkStructCount));
             addBytes(outBytes, 0x24, 0x9, BitConverter.GetBytes(objc.vsetCount));
             addBytes(outBytes, 0x25, 0x9, BitConverter.GetBytes(objc.psetCount));
             addBytes(outBytes, 0x17, 0x9, BitConverter.GetBytes(objc.meshCount));
@@ -381,10 +382,10 @@ namespace AquaModelLibrary
             addBytes(outBytes, 0x1B, 0x8, BitConverter.GetBytes(objc.tstaCount));
             addBytes(outBytes, 0x1C, 0x8, BitConverter.GetBytes(objc.tsetCount));
             addBytes(outBytes, 0x1D, 0x8, BitConverter.GetBytes(objc.texfCount));
-            addBytes(outBytes, 0x1E, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(objc.bounds.modelCenter));
+            addBytes(outBytes, 0x1E, 0x4A, 0x1, ConvertStruct(objc.bounds.modelCenter));
             addBytes(outBytes, 0x1F, 0xA, BitConverter.GetBytes(objc.bounds.boundingRadius));
-            addBytes(outBytes, 0x20, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(objc.bounds.modelCenter2));
-            addBytes(outBytes, 0x21, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(objc.bounds.maxMinXYZDifference));
+            addBytes(outBytes, 0x20, 0x4A, 0x1, ConvertStruct(objc.bounds.modelCenter2));
+            addBytes(outBytes, 0x21, 0x4A, 0x1, ConvertStruct(objc.bounds.maxMinXYZDifference));
 
             return outBytes.ToArray();
         }
@@ -399,9 +400,9 @@ namespace AquaModelLibrary
             {
                 VSET vset = new VSET();
                 vset.vertDataSize = (int)(vsetRaw[i][0xB6]);
-                vset.vertTypesCount = (int)(vsetRaw[i][0xBF]);
+                vset.vtxeCount = (int)(vsetRaw[i][0xBF]);
                 vset.vtxlCount = (int)(vsetRaw[i][0xB9]);
-                vset.reserve0 = (int)(vsetRaw[i][0xC4]);
+                vset.vtxlStartVert = (int)(vsetRaw[i][0xC4]);
 
                 //BonePalette
                 vset.bonePaletteCount = (int)(vsetRaw[i][0xBD]);
@@ -493,9 +494,9 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
                 addBytes(outBytes, 0xB6, 0x9, BitConverter.GetBytes(vsetList[i].vertDataSize));
-                addBytes(outBytes, 0xBF, 0x9, BitConverter.GetBytes(vsetList[i].vertTypesCount));
+                addBytes(outBytes, 0xBF, 0x9, BitConverter.GetBytes(vsetList[i].vtxeCount));
                 addBytes(outBytes, 0xB9, 0x9, BitConverter.GetBytes(vsetList[i].vtxlCount));
-                addBytes(outBytes, 0xC4, 0x9, BitConverter.GetBytes(vsetList[i].reserve0));
+                addBytes(outBytes, 0xC4, 0x9, BitConverter.GetBytes(vsetList[i].vtxlStartVert));
 
                 if (vtxlList[i].bonePalette != null)
                 {
@@ -581,37 +582,37 @@ namespace AquaModelLibrary
                 vtxeEle.reserve0 = (int)vtxeRaw[i][0xD3];
                 switch (vtxeEle.dataType)
                 {
-                    case (int)AquaObject.VertFlags.VertPosition:
+                    case (int)VertFlags.VertPosition:
                         vertSize += 0xC;
                         break;
-                    case (int)AquaObject.VertFlags.VertWeight:
+                    case (int)VertFlags.VertWeight:
                         vertSize += 0x10;
                         break;
-                    case (int)AquaObject.VertFlags.VertNormal:
+                    case (int)VertFlags.VertNormal:
                         vertSize += 0xC;
                         break;
-                    case (int)AquaObject.VertFlags.VertColor:
+                    case (int)VertFlags.VertColor:
                         vertSize += 0x4;
                         break;
-                    case (int)AquaObject.VertFlags.VertColor2:
+                    case (int)VertFlags.VertColor2:
                         vertSize += 0x4;
                         break;
-                    case (int)AquaObject.VertFlags.VertWeightIndex:
+                    case (int)VertFlags.VertWeightIndex:
                         vertSize += 0x4;
                         break;
-                    case (int)AquaObject.VertFlags.VertUV1:
+                    case (int)VertFlags.VertUV1:
                         vertSize += 0x8;
                         break;
-                    case (int)AquaObject.VertFlags.VertUV2:
+                    case (int)VertFlags.VertUV2:
                         vertSize += 0x8;
                         break;
-                    case (int)AquaObject.VertFlags.VertUV3:
+                    case (int)VertFlags.VertUV3:
                         vertSize += 0x8;
                         break;
-                    case (int)AquaObject.VertFlags.VertTangent:
+                    case (int)VertFlags.VertTangent:
                         vertSize += 0xC;
                         break;
-                    case (int)AquaObject.VertFlags.VertBinormal:
+                    case (int)VertFlags.VertBinormal:
                         vertSize += 0xC;
                         break;
                     default:
@@ -666,7 +667,7 @@ namespace AquaModelLibrary
             outBytes2.Add(0xBA);
             outBytes2.Add(0x89);
             int vtxlSizeArea = outBytes2.Count;
-            WriteVTXL(vtxe, vtxl, outBytes2);
+            WriteClassicVTXL(vtxe, vtxl, outBytes2);
 
             //Calc and insert the vert data counts in post due to the way sega does it.
             int vertDataCount = ((outBytes2.Count - vtxlSizeArea) / 4) - 1;
@@ -710,9 +711,9 @@ namespace AquaModelLibrary
                 pset.tag = (int)psetRaw[i][0xC6];
                 pset.faceType = (int)psetRaw[i][0xBB];
                 pset.psetFaceCount = (int)psetRaw[i][0xBC];
-                strip.triCount = (int)psetRaw[i][0xB7];
+                strip.triIdCount = (int)psetRaw[i][0xB7];
                 strip.triStrips = ((ushort[])psetRaw[i][0xB8]).ToList();
-                pset.reserve0 = (int)psetRaw[i][0xC5];
+                pset.stripStartCount = (int)psetRaw[i][0xC5];
 
                 psets.Add(pset);
                 strips.Add(strip);
@@ -735,13 +736,13 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0xC6, 0x9, BitConverter.GetBytes(psets[i].tag));
                 addBytes(outBytes, 0xBB, 0x9, BitConverter.GetBytes(psets[i].faceType));
                 addBytes(outBytes, 0xBC, 0x9, BitConverter.GetBytes(psets[i].psetFaceCount));
-                addBytes(outBytes, 0xB7, 0x9, BitConverter.GetBytes(strips[i].triCount));
+                addBytes(outBytes, 0xB7, 0x9, BitConverter.GetBytes(strips[i].triIdCount));
 
                 outBytes.Add(0xB8);
                 outBytes.Add(0x86);
-                if (strips[i].triCount - 1 > byte.MaxValue)
+                if (strips[i].triIdCount - 1 > byte.MaxValue)
                 {
-                    if (strips[i].triCount - 1 > ushort.MaxValue)
+                    if (strips[i].triIdCount - 1 > ushort.MaxValue)
                     {
                         outBytes.Add(0x18);
                         outBytes.AddRange(BitConverter.GetBytes(strips[i].triStrips.Count - 1));
@@ -761,7 +762,7 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes(strips[i].triStrips[j]));
                 }
 
-                addBytes(outBytes, 0xC5, 0x9, BitConverter.GetBytes(psets[i].reserve0));
+                addBytes(outBytes, 0xC5, 0x9, BitConverter.GetBytes(psets[i].stripStartCount));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
@@ -798,7 +799,7 @@ namespace AquaModelLibrary
                 {
                     mesh.unkInt0 = (int)meshRaw[i][0xCD];
                 }
-                mesh.baseMeshSequenceId = (int)meshRaw[i][0xC2];
+                mesh.baseMeshDummyId = (int)meshRaw[i][0xC2];
 
                 meshList.Add(mesh);
             }
@@ -832,7 +833,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0xC0, 0x8, BitConverter.GetBytes(meshList[i].vsetIndex));
                 addBytes(outBytes, 0xC1, 0x8, BitConverter.GetBytes(meshList[i].psetIndex));
                 addBytes(outBytes, 0xCD, 0x8, BitConverter.GetBytes(meshList[i].unkInt0));
-                addBytes(outBytes, 0xC2, 0x9, BitConverter.GetBytes(meshList[i].baseMeshSequenceId));
+                addBytes(outBytes, 0xC2, 0x9, BitConverter.GetBytes(meshList[i].baseMeshDummyId));
             }
             //outBytes.AddRange(BitConverter.GetBytes((short)0xFD)); MESH seemingly doesn't use this for some reason
 
@@ -887,10 +888,10 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
 
-                addBytes(outBytes, 0x30, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate.diffuseRGBA));
-                addBytes(outBytes, 0x31, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate.unkRGBA0));
-                addBytes(outBytes, 0x32, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate._sRGBA));
-                addBytes(outBytes, 0x33, 0x4A, 0x2, Reloaded.Memory.Struct.GetBytes(mate.unkRGBA1));
+                addBytes(outBytes, 0x30, 0x4A, 0x2, ConvertStruct(mate.diffuseRGBA));
+                addBytes(outBytes, 0x31, 0x4A, 0x2, ConvertStruct(mate.unkRGBA0));
+                addBytes(outBytes, 0x32, 0x4A, 0x2, ConvertStruct(mate._sRGBA));
+                addBytes(outBytes, 0x33, 0x4A, 0x2, ConvertStruct(mate.unkRGBA1));
                 addBytes(outBytes, 0x34, 0x9, BitConverter.GetBytes(mate.reserve0));
                 addBytes(outBytes, 0x35, 0xA, BitConverter.GetBytes(mate.unkFloat0));
                 addBytes(outBytes, 0x36, 0xA, BitConverter.GetBytes(mate.unkFloat1));
@@ -1013,7 +1014,7 @@ namespace AquaModelLibrary
                 shad.pixelShader.SetBytes((byte[])shadRaw[i][0x91]);
                 shad.vertexShader = new AquaCommon.PSO2String();
                 shad.vertexShader.SetBytes((byte[])shadRaw[i][0x92]);
-                shad.unk1 = (int)shadRaw[i][0x93];
+                shad.shadDetailOffset = (int)shadRaw[i][0x93];
 
                 shadList.Add(shad);
             }
@@ -1048,7 +1049,7 @@ namespace AquaModelLibrary
                 string vertStr = shad.vertexShader.GetString();
                 addBytes(outBytes, 0x92, 0x02, (byte)vertStr.Length, Encoding.UTF8.GetBytes(vertStr));
 
-                addBytes(outBytes, 0x93, 0x9, BitConverter.GetBytes(shad.unk1));
+                addBytes(outBytes, 0x93, 0x9, BitConverter.GetBytes(shad.shadDetailOffset));
 
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
@@ -1128,7 +1129,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x60, 0x9, BitConverter.GetBytes(tstaList[i].tag));
                 addBytes(outBytes, 0x61, 0x9, BitConverter.GetBytes(tstaList[i].texUsageOrder));
                 addBytes(outBytes, 0x62, 0x9, BitConverter.GetBytes(tstaList[i].modelUVSet));
-                addBytes(outBytes, 0x63, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(tstaList[i].unkVector0));
+                addBytes(outBytes, 0x63, 0x4A, 0x1, ConvertStruct(tstaList[i].unkVector0));
                 addBytes(outBytes, 0x64, 0x9, BitConverter.GetBytes(tstaList[i].unkInt0));
                 addBytes(outBytes, 0x65, 0x9, BitConverter.GetBytes(tstaList[i].unkInt1));
                 addBytes(outBytes, 0x66, 0x9, BitConverter.GetBytes(tstaList[i].unkInt2));
@@ -1168,7 +1169,7 @@ namespace AquaModelLibrary
                 {
                     for(int j = 0; j < 4; j++)
                     {
-                        tset.tstaTexIDs[j] = streamReader.Read<int>();
+                        tset.tstaTexIDs.Add(streamReader.Read<int>());
                     }
                 }
 
@@ -1525,13 +1526,13 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0xF, 0x8, BitConverter.GetBytes(node.unkNode));
                 addBytes(outBytes, 0x5, 0x8, BitConverter.GetBytes(node.firstChild));
                 addBytes(outBytes, 0x6, 0x8, BitConverter.GetBytes(node.nextSibling));
-                addBytes(outBytes, 0x7, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(node.pos));
-                addBytes(outBytes, 0x8, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(node.eulRot));
-                addBytes(outBytes, 0x9, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(node.scale));
-                addBytes(outBytes, 0xA, 0xCA, 0xA, 0x3, Reloaded.Memory.Struct.GetBytes(node.m1));
-                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(node.m2));
-                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(node.m3));
-                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(node.m4));
+                addBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(node.pos));
+                addBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(node.eulRot));
+                addBytes(outBytes, 0x9, 0x4A, 0x1, ConvertStruct(node.scale));
+                addBytes(outBytes, 0xA, 0xCA, 0xA, 0x3, ConvertStruct(node.m1));
+                outBytes.AddRange(ConvertStruct(node.m2));
+                outBytes.AddRange(ConvertStruct(node.m3));
+                outBytes.AddRange(ConvertStruct(node.m4));
                 addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(node.animatedFlag));
                 addBytes(outBytes, 0xC, 0x8, BitConverter.GetBytes(node.const0_2));
 
@@ -1590,8 +1591,8 @@ namespace AquaModelLibrary
                 }
                 addBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(nodo.boneShort1 * 0x10000 + nodo.boneShort2));
                 addBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(nodo.parentId));
-                addBytes(outBytes, 0x7, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(nodo.pos));
-                addBytes(outBytes, 0x8, 0x4A, 0x1, Reloaded.Memory.Struct.GetBytes(nodo.eulRot));
+                addBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(nodo.pos));
+                addBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(nodo.eulRot));
                 addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(nodo.animatedFlag));
 
                 //Bone Name String
@@ -1788,7 +1789,7 @@ namespace AquaModelLibrary
                     handleOptionalArrayHeader(outBytes, 0xEE, mkey.keyCount, 0x4A);
                     for (int j = 0; j < mkey.frameTimings.Count; j++)
                     {
-                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(mkey.vector4Keys[j]));
+                        outBytes.AddRange(ConvertStruct(mkey.vector4Keys[j]));
                     }
                     break;
 

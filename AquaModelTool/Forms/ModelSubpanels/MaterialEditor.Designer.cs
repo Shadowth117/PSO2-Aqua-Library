@@ -193,6 +193,11 @@
             0,
             0,
             0});
+            this.diffuseUD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147418112});
             this.diffuseUD.Name = "diffuseUD";
             this.diffuseUD.Size = new System.Drawing.Size(45, 20);
             this.diffuseUD.TabIndex = 12;
@@ -212,6 +217,11 @@
             0,
             0,
             0});
+            this.tex2UD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147418112});
             this.tex2UD.Name = "tex2UD";
             this.tex2UD.Size = new System.Drawing.Size(45, 20);
             this.tex2UD.TabIndex = 15;
@@ -250,6 +260,11 @@
             0,
             0,
             0});
+            this.tex3SpecUD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147418112});
             this.tex3SpecUD.Name = "tex3SpecUD";
             this.tex3SpecUD.Size = new System.Drawing.Size(45, 20);
             this.tex3SpecUD.TabIndex = 18;
@@ -288,6 +303,11 @@
             0,
             0,
             0});
+            this.tex4UD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147418112});
             this.tex4UD.Name = "tex4UD";
             this.tex4UD.Size = new System.Drawing.Size(45, 20);
             this.tex4UD.TabIndex = 21;

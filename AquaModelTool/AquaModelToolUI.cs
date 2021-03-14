@@ -127,7 +127,12 @@ namespace AquaModelTool
                     case ".tro":
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.ReadModel(file);
+                        aquaUI.aqua.ReadModel(file); 
+                        //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
+#if DEBUG
+                        var test = aquaUI.aqua.aquaModels[0].models[0];
+                        test = aquaUI.aqua.aquaModels[0].models[0];
+#endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if(aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
                         {
@@ -136,6 +141,7 @@ namespace AquaModelTool
                         {
                             isNIFL = false;
                         }
+                        setModelOptions(true);
                         break;
                     case ".aqm":
                     case ".aqv":
@@ -156,6 +162,7 @@ namespace AquaModelTool
                         {
                             isNIFL = false;
                         }
+                        setModelOptions(false);
                         break;
                     default:
                         MessageBox.Show("Invalid File");
@@ -165,6 +172,11 @@ namespace AquaModelTool
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();
             }
+        }
+
+        private void setModelOptions(bool setting)
+        {
+            averageNormalsOnSharedPositionVerticesToolStripMenuItem.Enabled = setting;
         }
 
         private void averageNormalsOnSharedPositionVerticesToolStripMenuItem_Click(object sender, EventArgs e)

@@ -27,8 +27,13 @@ namespace AquaModelLibrary
             {0xA, "0xA Unk Vector4s" }, //Alternate UV
             {0xB, "0xB Unk Vector4s" }, //Alternate UV
             {0xC, "0xC Unk Vector4s" }, //Alternate UV
+            {0xD, "0xD Unk Vector4s" }, //Alternate UV
+            {0xE, "0xE Unk Vector4s" }, //Alternate UV
             //0x5-0x7 and 0xD-0x13 seemingly not used in this format. Effects seem to use values in this range for equivalent area there. 
             //In addition, the way those are constructed is akin to an alternative or early version of the overall motion format, based on namings and other bits.  
+            {0x10, "0x10 NodeTreeFlag Ints 1" }, //Standard (Player)
+            {0x11, "0x11 NodeTreeFlag Ints 2" }, //Standard (Player)
+            {0x12, "0x12 NodeTreeFlag Ints 3" }, //Standard (Player)
             {0x14, "0x14 Unk Floats" }, //Camera
             {0x15, "0x15 Unk Floats" }, //Camera
             {0x16, "0x16 Unk Floats" }, //UV
@@ -48,7 +53,10 @@ namespace AquaModelLibrary
         {
             0x1,
             0x2,
-            0x3
+            0x3,
+            0x10,
+            0x11,
+            0x12
         };
         public List<int> cameraTypes = new List<int>()
         {
@@ -64,6 +72,8 @@ namespace AquaModelLibrary
             0xA,
             0xB,
             0xC,
+            0xD,
+            0xE,
             0x16,
             0x17,
             0x18,
@@ -157,6 +167,18 @@ namespace AquaModelLibrary
                 case 0x3:
                 case 0x4:
                     return 0x1;
+                case 0x8:
+                case 0x9:
+                    return 0x2;
+                case 0x10:
+                    return 0x5;
+                case 0xA:
+                    return 0x1;
+                case 0xB:
+                case 0xC:
+                case 0xD:
+                case 0xE:
+                    return 0x2;
                 case 0x14:
                 case 0x15:
                     return 0x6;

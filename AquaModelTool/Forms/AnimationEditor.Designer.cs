@@ -64,9 +64,9 @@
             // dataPanel
             // 
             this.dataPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataPanel.Location = new System.Drawing.Point(156, 3);
+            this.dataPanel.Location = new System.Drawing.Point(160, 3);
             this.dataPanel.Name = "dataPanel";
-            this.dataPanel.Size = new System.Drawing.Size(229, 253);
+            this.dataPanel.Size = new System.Drawing.Size(225, 253);
             this.dataPanel.TabIndex = 1;
             // 
             // nodeMenuStrip

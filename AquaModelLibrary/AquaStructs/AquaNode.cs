@@ -40,10 +40,12 @@ namespace AquaModelLibrary
             public int animatedFlag;  //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format
             public int parentId;      //0x4, type 0x8
             public int unkNode;       //0xF, type 0x8 //Always observed -1
+
             public int firstChild;    //0x5, type 0x8
             public int nextSibling;   //0x6, type 0x8
             public int const0_2;      //0xC, type 0x9? Ordering and nebulous usage makes this unclear. Observed only 0.
             public int const0_3;
+
             public Vector3 pos;       //0x7, type 0x4A, 0x1
             public int const0_4;
             public Vector3 eulRot;    //0x8, type 0x4A, 0x1
