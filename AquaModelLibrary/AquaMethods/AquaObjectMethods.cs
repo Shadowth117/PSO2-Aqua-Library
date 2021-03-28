@@ -694,7 +694,7 @@ namespace AquaModelLibrary
 
             bounds.modelCenter = center;
             bounds.modelCenter2 = center;
-            bounds.maxMinXYZDifference = difference;
+            bounds.halfExtents = difference;
             bounds.boundingRadius = radius;
 
             return bounds;
@@ -1230,6 +1230,9 @@ namespace AquaModelLibrary
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV3:
                             outBytes2.AddRange(ConvertStruct(vtxl.uv3List[i]));
+                            break;
+                        case (int)ClassicAquaObject.VertFlags.VertUV4:
+                            outBytes2.AddRange(ConvertStruct(vtxl.uv4List[i]));
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertTangent:
                             outBytes2.AddRange(ConvertStruct(vtxl.vertTangentList[i]));

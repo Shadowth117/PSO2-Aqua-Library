@@ -9,6 +9,7 @@ namespace AquaModelTool
     {
         private AquaModelLibrary.AquaUtil.AnimSet animSet;
         private AquaMotion currentMotion;
+        private TreeNode selectedNode;
         public AnimationEditor(AquaModelLibrary.AquaUtil.AnimSet aquaAnimSet)
         {
             InitializeComponent();
@@ -80,7 +81,16 @@ namespace AquaModelTool
             {
             } else if (e.Button == MouseButtons.Left)
             {
+                if ((int)node_here.Tag == 0x2)
+                {
+                    selectedNode = node_here;
 
+                    //Set up panel data
+
+                } else
+                {
+                    selectedNode = null;
+                }
             }
 
         }
@@ -157,10 +167,15 @@ namespace AquaModelTool
                     keySet.frameTimings.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
                     switch (keySet.dataType)
                     {
-                        //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                        //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:
+                        case 0x2:
                         case 0x3:
                             keySet.vector4Keys.Insert(node.Index, new Vector4(0, 0, 0, 0));
+                            break;
+
+                        case 0x5:
+                            keySet.intKeys.Insert(node.Index, 0);
                             break;
 
                         //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
@@ -247,12 +262,16 @@ namespace AquaModelTool
             newMkey.keyCount = 1;
             switch (newMkey.dataType)
             {
-                //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                //0x1 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                 case 0x1:
+                case 0x2:
                 case 0x3:
                     newMkey.vector4Keys.Add(new Vector4(0, 0, 0, 0));
                     break;
 
+                case 0x5:
+                    newMkey.intKeys.Add(0);
+                    break;
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                 case 0x4:
                 case 0x6:
@@ -349,12 +368,16 @@ namespace AquaModelTool
                     keySet.frameTimings.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
                     switch (keySet.dataType)
                     {
-                        //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                        //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:
+                        case 0x2:
                         case 0x3:
                             keySet.vector4Keys.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].vector4Keys[node.Index]);
                             break;
 
+                        case 0x5:
+                            keySet.intKeys.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].intKeys[node.Index]);
+                            break;
                         //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                         case 0x4:
                         case 0x6:
@@ -405,12 +428,16 @@ namespace AquaModelTool
 
                     switch (keySet.dataType)
                     {
-                        //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                        //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:
+                        case 0x2:
                         case 0x3:
                             keySet.vector4Keys.RemoveAt(node.Index);
                             break;
 
+                        case 0x5:
+                            keySet.intKeys.RemoveAt(node.Index);
+                            break;
                         //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                         case 0x4:
                         case 0x6:

@@ -57,7 +57,7 @@ namespace AquaModelLibrary
             public float boundingRadius; //0x1F, Type 0xA                    //Distance of furthest point from the origin
             public Vector3 modelCenter2; //0x20, Type 0x4A, Count 0x1        //Model Center... again 
             public float reserve1;
-            public Vector3 maxMinXYZDifference; //0x21, Type 0x4A, Count 0x1 //Distance between max/min of x, y and z divided by 2
+            public Vector3 halfExtents; //0x21, Type 0x4A, Count 0x1 //Distance between max/min of x, y and z divided by 2
         }
 
         public class OBJC

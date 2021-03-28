@@ -20,6 +20,7 @@ namespace AquaModelLibrary
             VertUV1 = 0x10,
             VertUV2 = 0x11,
             VertUV3 = 0x12,
+            VertUV4 = 0x13,
             VertTangent = 0x20,
             VertBinormal = 0x21
         }
@@ -35,6 +36,7 @@ namespace AquaModelLibrary
             { (int)VertFlags.VertUV1, 0x2 }, //(0x10 UV1 Buffer)
             { (int)VertFlags.VertUV2, 0x2 }, //(0x11 UV2 Buffer)
             { (int)VertFlags.VertUV3, 0x2 }, //(0x12 UV3 Buffer)
+            { (int)VertFlags.VertUV4, 0x2 }, //(0x12 UV4 Buffer)
             { (int)VertFlags.VertTangent, 0x3 }, //(0x20 Tangents)
             { (int)VertFlags.VertBinormal, 0x3 } //(0x21 Binormals)
         };

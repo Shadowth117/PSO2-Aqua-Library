@@ -16,15 +16,17 @@ namespace AquaModelLibrary
 {
     public unsafe class VTBFMethods
     {
-        public static List<Dictionary<int, object>> ReadVTBFTag(BufferedStreamReader streamReader, out string tagString, out int entryCount)
+        public static List<Dictionary<int, object>> ReadVTBFTag(BufferedStreamReader streamReader, out string tagString, out int ptrCount, out int entryCount)
         {
             List<Dictionary<int, object>> vtbfData = new List<Dictionary<int, object>>();
+            bool listType = false;
 
             string vtc0 = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>())); //vtc0
             if(vtc0 != "vtc0")
             {
                 tagString = null;
                 entryCount = 0;
+                ptrCount = 0;
                 return null;
             }
             uint bodyLength = streamReader.Read<uint>();
@@ -32,8 +34,8 @@ namespace AquaModelLibrary
             tagString = Encoding.UTF8.GetString(BitConverter.GetBytes(mainTagType));
             #if DEBUG
                         Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
-            #endif
-            short pointerCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
+#endif
+            ptrCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
             entryCount = streamReader.Read<short>();
 
             Dictionary<int, object> vtbfDict = new Dictionary<int, object>();
@@ -45,19 +47,28 @@ namespace AquaModelLibrary
                 byte subDataType;
                 uint subDataAdditions;
 
-                //Check for special ids
-                switch (dataId)
+                if(i == 0 && dataId == 0xFC)
                 {
-                    case 0xFD: //End of sequence and should be end of tag
-                        vtbfData.Add(vtbfDict);
-                        return vtbfData;
-                    case 0xFE:
-                        vtbfData.Add(vtbfDict);
-                        vtbfDict = new Dictionary<int, object>();
-                        break;
-                    default: //Nothing needs to be done if this is a normal id. 0xFC, start of sequence, is special, but for reading purposes can also go through here.
-                        break;
+                    listType = true;
                 }
+
+                //Check for special ids
+                if(listType)
+                {
+                    switch (dataId)
+                    {
+                        case 0xFD: //End of sequence and should be end of tag
+                            vtbfData.Add(vtbfDict);
+                            return vtbfData;
+                        case 0xFE:
+                            vtbfData.Add(vtbfDict);
+                            vtbfDict = new Dictionary<int, object>();
+                            break;
+                        default: //Nothing needs to be done if this is a normal id. 0xFC, start of sequence, is special, but for reading purposes can also go through here.
+                            break;
+                    }
+                }
+                
                 object data;
                 switch (dataType)
                 {
@@ -100,6 +111,24 @@ namespace AquaModelLibrary
                             ((byte[])data)[j] = streamReader.Read<byte>();
                         }
                         break;
+                    case 0x42: 
+                    case 0x43: //Vector3 of bytes
+                        subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
+                        if(subDataAdditions == 0)
+                        {
+                            subDataAdditions = 4;
+                        }
+                        data = new byte[subDataAdditions][];
+                        for (int j = 0; j < subDataAdditions; j++)
+                        {
+                            byte[] dataArr = new byte[3];
+                            dataArr[0] = streamReader.Read<byte>();
+                            dataArr[1] = streamReader.Read<byte>();
+                            dataArr[2] = streamReader.Read<byte>();
+
+                            ((byte[][])data)[j] = dataArr;
+                        }
+                        break;
                     case 0x48: //Vector3 of ints
                     case 0x49:
                         subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
@@ -130,6 +159,28 @@ namespace AquaModelLibrary
                                 throw new Exception();
                         }
 
+                        break;
+                    case 0x82:
+                    case 0x83: //Array of bytes
+                        subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
+                        switch (subDataType) //The last array entry aka data count - 1.
+                        {
+                            case 0x8:
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1;
+                                break;
+                            case 0x10:
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1;
+                                break;
+                            case 0x18:
+                                subDataAdditions = streamReader.Read<uint>() + 1;
+                                break;
+                            default:
+                                MessageBox.Show($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                throw new NotImplementedException();
+                        }
+                        data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions);
+
+                        streamReader.Seek(subDataAdditions, SeekOrigin.Current);
                         break;
                     case 0x84: //Theoretical array of bytes
                     case 0x85:
@@ -190,7 +241,7 @@ namespace AquaModelLibrary
                         }
                         break;
                     case 0x88:
-                    case 0x89: //Array of ints. Often needs to be processed in various ways in post.
+                    case 0x89: //Array of ints. Often needs to be processed in various ways in post so we read it in bytes.
                         subDataType = streamReader.Read<byte>();      //Next entity type. 0x8 for byte, 0x10 for short
                         switch (subDataType) //The last array entry aka data count - 1.
                         {
@@ -334,7 +385,7 @@ namespace AquaModelLibrary
             bounding.modelCenter = ((Vector3)(objcRaw[0][0x1E]));
             bounding.boundingRadius = (float)(objcRaw[0][0x1F]);
             bounding.modelCenter2 = ((Vector3)(objcRaw[0][0x20]));
-            bounding.maxMinXYZDifference = ((Vector3)(objcRaw[0][0x21]));
+            bounding.halfExtents = ((Vector3)(objcRaw[0][0x21]));
 
             objc.bounds = bounding;
 
@@ -385,7 +436,7 @@ namespace AquaModelLibrary
             addBytes(outBytes, 0x1E, 0x4A, 0x1, ConvertStruct(objc.bounds.modelCenter));
             addBytes(outBytes, 0x1F, 0xA, BitConverter.GetBytes(objc.bounds.boundingRadius));
             addBytes(outBytes, 0x20, 0x4A, 0x1, ConvertStruct(objc.bounds.modelCenter2));
-            addBytes(outBytes, 0x21, 0x4A, 0x1, ConvertStruct(objc.bounds.maxMinXYZDifference));
+            addBytes(outBytes, 0x21, 0x4A, 0x1, ConvertStruct(objc.bounds.halfExtents));
 
             return outBytes.ToArray();
         }
@@ -1203,7 +1254,13 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x75, 0x88, 0x8, 0x3, BitConverter.GetBytes(tset.tstaTexIDs[0]));
                 for(int j = 1; j < 4; j++)
                 {
-                    outBytes.AddRange(BitConverter.GetBytes(tset.tstaTexIDs[j]));
+                    if(tset.tstaTexIDs.Count > j)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(tset.tstaTexIDs[j]));
+                    } else
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes((int)-1));
+                    }
                 }
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));

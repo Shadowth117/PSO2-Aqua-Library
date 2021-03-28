@@ -184,5 +184,32 @@ namespace AquaModelTool
             aquaUI.averageNormals();
             MessageBox.Show("Normal averaging complete!");
         }
+
+        private void parseVTBFToTextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a VTBF PSO2 file",
+                Filter = "All Files|*"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaModelLibrary.AquaUtil.AnalyzeVTBF(openFileDialog.FileName);
+            }
+            
+        }
+
+        private void readCMXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a cmx file",
+                Filter = "Character Making IndeX (*.cmx) Files|*.cmx"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.ReadCMX(openFileDialog.FileName);
+            }
+        }
     }
 }

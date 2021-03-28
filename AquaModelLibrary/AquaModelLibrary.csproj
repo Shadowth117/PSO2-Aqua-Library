@@ -34,6 +34,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AssimpNet, Version=5.0.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\AssimpNet.dll</HintPath>
+    </Reference>
     <Reference Include="NvTriStripDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libraries\NvTriStripDotNet.dll</HintPath>
@@ -71,6 +75,7 @@
     <Compile Include="AquaStructs\AquaObject.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
+    <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
     <Compile Include="OtherStructs\PRMParameters.cs" />
     <Compile Include="AquaUtil.cs" />
@@ -89,6 +94,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Libraries\AssimpNet.dll" />
     <Content Include="Libraries\NvTriStripDotNet.dll" />
   </ItemGroup>
   <ItemGroup>
