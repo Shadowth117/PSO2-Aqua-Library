@@ -308,3 +308,14 @@ packages/Microsoft-WindowsAPICodePack-ShellExtensions.1.1.4/lib/netcoreapp3.0/Mi
 packages/Microsoft-WindowsAPICodePack-ShellExtensions.1.1.4/lib/netcoreapp3.1/Microsoft.WindowsAPICodePack.ShellExtensions.dll
 packages/Microsoft-WindowsAPICodePack-ShellExtensions.1.1.4/lib/netcoreapp3.1/Microsoft.WindowsAPICodePack.ShellExtensions.xml
 packages/Microsoft-WindowsAPICodePack-ShellExtensions.1.1.4/Microsoft-WindowsAPICodePack-ShellExtensions.1.1.4.nupkg
+AquaModelTool/bin/Release/Microsoft.WindowsAPICodePack.dll
+AquaModelTool/bin/Release/Microsoft.WindowsAPICodePack.Shell.dll
+AquaModelTool/bin/Release/Microsoft.WindowsAPICodePack.Shell.xml
+AquaModelTool/bin/Release/Microsoft.WindowsAPICodePack.ShellExtensions.dll
+AquaModelTool/bin/Release/Microsoft.WindowsAPICodePack.ShellExtensions.xml
+AquaModelTool/bin/Release/Microsoft.WindowsAPICodePack.xml
+AquaModelTool/obj/Debug/build.force
+AquaModelTool/obj/Release/.NETFramework,Version=v4.8.AssemblyAttributes.cs
+AquaModelTool/obj/Release/TempPE/Properties.Resources.Designer.cs.dll
+AquaModelLibrary/obj/Release/.NETFramework,Version=v4.8.AssemblyAttributes.cs
+AquaModelLibrary/bin/Release/AssimpNet.dll

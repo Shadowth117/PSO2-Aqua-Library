@@ -224,6 +224,28 @@ namespace AquaModelTool
             {
                 aquaUI.aqua.ReadPSO2Text(openFileDialog.FileName);
             }
+            
+            StringBuilder output = new StringBuilder();
+
+            for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
+            {
+                output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
+
+                for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
+                {
+                    output.AppendLine($"Group {j}");
+
+                    for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
+                    {
+                        var pair = aquaUI.aqua.aquaText.text[i][j][k];
+                        output.AppendLine($"{pair.name} - {pair.str}");
+                    }
+                    output.AppendLine();
+                }
+                output.AppendLine();
+            }
+
+            File.WriteAllText(openFileDialog.FileName + ".txt", output.ToString());
         }
 
         private void generateCharacterFileSheetToolStripMenuItem_Click(object sender, EventArgs e)
