@@ -4,15 +4,20 @@ using System.IO;
 using System.Windows;
 using System.Numerics;
 using static AquaModelLibrary.AquaObjectMethods;
+using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.VTBFMethods;
 using System;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace AquaModelLibrary
 {
     public class AquaUtil
     {
+        public string pso2_binDir = null;
+        public CharacterMakingIndex aquaCMX = null;
+        public PSO2Text aquaText = null;
         public List<TCBTerrainConvex> tcbModels = new List<TCBTerrainConvex>();
         public List<ModelSet> aquaModels = new List<ModelSet>();
         public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
@@ -2314,7 +2319,12 @@ namespace AquaModelLibrary
 
         }
 
-        public void ReadCMX(string fileName)
+        public void LoadCMX(string fileName)
+        {
+            aquaCMX = ReadCMX(fileName);
+        }
+
+        public void ReadPSO2Text(string fileName)
         {
             using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
@@ -2323,7 +2333,7 @@ namespace AquaModelLibrary
                 int offset = 0x20; //Base offset due to NIFL header
 
                 //Deal with deicer's extra header nonsense
-                if (type.Equals("cmx\0"))
+                if (type.Equals("text"))
                 {
                     streamReader.Seek(0xC, SeekOrigin.Begin);
                     //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
@@ -2338,11 +2348,11 @@ namespace AquaModelLibrary
                 if (type.Equals("NIFL"))
                 {
                     //NIFL
-                    ReadNIFLCMX(streamReader, offset);
+                    aquaText = ReadNIFLText(streamReader, offset, fileName);
                 }
                 else if (type.Equals("VTBF"))
                 {
-                    //VTBF
+                    //Text should really never be VTBF...
                 }
                 else
                 {
@@ -2351,26 +2361,118 @@ namespace AquaModelLibrary
             }
         }
 
-        public void ReadNIFLCMX(BufferedStreamReader streamReader, int offset)
+        public PSO2Text ReadNIFLText(BufferedStreamReader streamReader, int offset, string fileName)
         {
-            var cmx = new CharacterMakingIndex();
-            cmx.nifl = streamReader.Read<AquaCommon.NIFL>();
-            cmx.rel0 = streamReader.Read<AquaCommon.REL0>();
-            streamReader.Seek(cmx.rel0.REL0DataStart + offset, SeekOrigin.Begin);
+            var txt = new PSO2Text();
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var end = nifl.NOF0Offset + offset;
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
 
-            List<int> addresses = new List<int>();
-            List<int> sizes = new List<int>();
+            var categoryPointer = streamReader.Read<int>();
+            var categoryCount = streamReader.Read<int>();
 
-            for(int i = 0; i < 29; i++)
+            //Read through categories
+            streamReader.Seek(categoryPointer + offset, SeekOrigin.Begin);
+            for(int i = 0; i < categoryCount; i++)
             {
-                addresses.Add(streamReader.Read<int>());
+                var categoryNameOffset = streamReader.Read<int>();
+                var categoryDataInfoOffset = streamReader.Read<int>();
+                var subCategoryCount = streamReader.Read<int>();
+
+                //Setup subcategory lists
+                txt.text.Add(new List<List<PSO2Text.textPair>>());
+                for(int j = 0; j < subCategoryCount; j++)
+                {
+                    txt.text[i].Add(new List<PSO2Text.textPair>());
+                }
+
+                //Get category name
+                long bookmark = streamReader.Position();
+                streamReader.Seek(categoryNameOffset + offset, SeekOrigin.Begin);
+                
+                txt.categoryNames.Add(ReadCString(streamReader, end));
+
+                //Get Category Info
+                streamReader.Seek(categoryDataInfoOffset + offset, SeekOrigin.Begin);
+
+                for (int sub = 0; sub < subCategoryCount; sub++)
+                {
+                    
+                    var categoryIndexOffset = streamReader.Read<int>();
+                    var unkValue = streamReader.Read<int>();
+                    var categoryIndexCount = streamReader.Read<int>();
+                    var bookMarkSub = streamReader.Position();
+
+                    streamReader.Seek(categoryIndexOffset + offset, SeekOrigin.Begin);
+                    for (int j = 0; j < categoryIndexCount; j++)
+                    {
+                        var pair = new PSO2Text.textPair();
+                        int nameLoc = streamReader.Read<int>();
+                        int textLoc = streamReader.Read<int>();
+                        long bookmarkLocal = streamReader.Position();
+
+                        streamReader.Seek(nameLoc + offset, SeekOrigin.Begin);
+                        pair.name = ReadCString(streamReader, end);
+
+                        streamReader.Seek(textLoc + offset, SeekOrigin.Begin);
+                        pair.str = ReadUTF16String(streamReader, end);
+
+                        txt.text[i][sub].Add(pair);
+                        streamReader.Seek(bookmarkLocal, SeekOrigin.Begin);
+                    }
+                    streamReader.Seek(bookMarkSub, SeekOrigin.Begin);
+                }
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
             }
-            for(int i = 0; i < 29; i++)
+
+#if DEBUG
+            StringBuilder output = new StringBuilder();
+
+            for (int i = 0; i < txt.text.Count; i++)
             {
-                sizes.Add(streamReader.Read<int>());
-                Console.WriteLine($"Address {i}: {addresses[i].ToString("X")}   Size: {sizes[i]}");
+                output.AppendLine(txt.categoryNames[i]);
+
+                for(int j = 0; j < txt.text[i].Count; j++)
+                {
+                    output.AppendLine($"Group {j}");
+
+                    for(int k = 0; k < txt.text[i][j].Count; k++)
+                    {
+                        var pair = txt.text[i][j][k];
+                        output.AppendLine($"{pair.name} - {pair.str}");
+                    }
+                    output.AppendLine();
+                }
+                output.AppendLine();
             }
-            
+
+            File.WriteAllText(fileName + ".txt", output.ToString());
+#endif
+            return txt;
+        }
+
+        public static string ReadCString(BufferedStreamReader streamReader, long end)
+        {
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x40));
+            return str.Remove(str.IndexOf(char.MinValue));
+        }
+
+        public static string ReadUTF16String(BufferedStreamReader streamReader, long end)
+        {
+            string str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position())));
+            return str.Remove(str.IndexOf(char.MinValue));
+        }
+
+        public void GenerateCharacterFileList(string cmxFileName, string ui_charamake_partsFileName,　string ui_accessories_textFileName, string face_variationFileName, string pso2_binDir, string outputDirectory)
+        {
+            ReadCMX(cmxFileName);
+            ReadPSO2Text(ui_charamake_partsFileName);
+            var parts = aquaText;
+            ReadPSO2Text(ui_accessories_textFileName);
+            ReadFaceVariationLua(face_variationFileName);
+            OutputCharacterFileList(aquaCMX, parts, aquaText, pso2_binDir, outputDirectory);
         }
 
         //For now, we'll just assume we don't care about LOD models and export the first model stored
@@ -2390,7 +2492,7 @@ namespace AquaModelLibrary
                 //Assign bones
                 foreach (AquaNode.NODE bn in aquaBones[0].nodeList)
                 {
-                    
+
                 }
 
                 foreach (AquaNode.NODO bn in aquaBones[0].nodoList)
@@ -2417,7 +2519,7 @@ namespace AquaModelLibrary
                 mate.Name = mat.matName.GetString();
                 mate.TextureDiffuse = 
             }
-            
+
         }*/
     }
 }

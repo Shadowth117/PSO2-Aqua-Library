@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace AquaModelTool
 {
@@ -208,8 +209,76 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                aquaUI.aqua.ReadCMX(openFileDialog.FileName);
+                aquaUI.aqua.LoadCMX(openFileDialog.FileName);
             }
+        }
+
+        private void parsePSO2TextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a pso2 .text file",
+                Filter = "PSO2 Text (*.text) Files|*.text"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.ReadPSO2Text(openFileDialog.FileName);
+            }
+        }
+
+        private void generateCharacterFileSheetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                goodFolderDialog.Title = "Select output directory";
+                var pso2_binDir = goodFolderDialog.FileName;
+
+                if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                     var outfolder = goodFolderDialog.FileName;
+
+                    //Get files for now, but just get them properly with an ice interface later
+                    OpenFileDialog openFileDialog = new OpenFileDialog()
+                    {
+                        Title = "Select a pso2 .cmx file",
+                        Filter = "PSO2 Character Making Index (*.cmx)|*.cmx"
+                    };
+                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var cmxFile = openFileDialog.FileName;
+
+                        openFileDialog.Title = "Select ui_charamake_parts.text";
+                        openFileDialog.Filter = "PSO2 Character Making Parts text file (ui_charamake_parts.text)|ui_charamake_parts.text";
+                        if (openFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            var charparts = openFileDialog.FileName;
+                            openFileDialog.Title = "Select ui_accessories_text.text";
+                            openFileDialog.Filter = "PSO2 Character Making Parts text file (ui_accessories_text.text)|ui_accessories_text.text";
+                            if (openFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                var acceText = openFileDialog.FileName;
+                                openFileDialog.Title = "Select face_variation.cmp.lua";
+                                openFileDialog.Filter = "PSO2 Character Making Parts text file (face_variation.cmp.lua)|face_variation.cmp.lua";
+                                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                                {
+                                    var faceVar = openFileDialog.FileName;
+                                    aquaUI.aqua.pso2_binDir = pso2_binDir;
+                                    aquaUI.aqua.GenerateCharacterFileList(cmxFile, charparts, acceText, faceVar, pso2_binDir, outfolder);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            
+
         }
     }
 }

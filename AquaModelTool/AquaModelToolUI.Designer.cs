@@ -36,10 +36,12 @@
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filePanel = new System.Windows.Forms.Panel();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readCMXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePanel = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -109,19 +111,13 @@
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Text = "Average Normals on shared position vertices";
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Click += new System.EventHandler(this.averageNormalsOnSharedPositionVerticesToolStripMenuItem_Click);
             // 
-            // filePanel
-            // 
-            this.filePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.filePanel.Location = new System.Drawing.Point(0, 24);
-            this.filePanel.Name = "filePanel";
-            this.filePanel.Size = new System.Drawing.Size(384, 256);
-            this.filePanel.TabIndex = 1;
-            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.parseVTBFToTextToolStripMenuItem,
-            this.readCMXToolStripMenuItem});
+            this.parsePSO2TextToolStripMenuItem,
+            this.readCMXToolStripMenuItem,
+            this.generateCharacterFileSheetToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -129,16 +125,38 @@
             // parseVTBFToTextToolStripMenuItem
             // 
             this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
-            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
             this.parseVTBFToTextToolStripMenuItem.Text = "ParseVTBFToText";
             this.parseVTBFToTextToolStripMenuItem.Click += new System.EventHandler(this.parseVTBFToTextToolStripMenuItem_Click);
+            // 
+            // parsePSO2TextToolStripMenuItem
+            // 
+            this.parsePSO2TextToolStripMenuItem.Name = "parsePSO2TextToolStripMenuItem";
+            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
+            this.parsePSO2TextToolStripMenuItem.Text = "ParsePSO2Text";
+            this.parsePSO2TextToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextToolStripMenuItem_Click);
             // 
             // readCMXToolStripMenuItem
             // 
             this.readCMXToolStripMenuItem.Name = "readCMXToolStripMenuItem";
-            this.readCMXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.readCMXToolStripMenuItem.Text = "ReadCMX";
+            this.readCMXToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
+            this.readCMXToolStripMenuItem.Text = "ReadCMX (NIFL Only atm)";
             this.readCMXToolStripMenuItem.Click += new System.EventHandler(this.readCMXToolStripMenuItem_Click);
+            // 
+            // generateCharacterFileSheetToolStripMenuItem
+            // 
+            this.generateCharacterFileSheetToolStripMenuItem.Name = "generateCharacterFileSheetToolStripMenuItem";
+            this.generateCharacterFileSheetToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
+            this.generateCharacterFileSheetToolStripMenuItem.Text = "GenerateCharacterFileSheet (Unfinished)";
+            this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateCharacterFileSheetToolStripMenuItem_Click);
+            // 
+            // filePanel
+            // 
+            this.filePanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.filePanel.Location = new System.Drawing.Point(0, 24);
+            this.filePanel.Name = "filePanel";
+            this.filePanel.Size = new System.Drawing.Size(384, 256);
+            this.filePanel.TabIndex = 1;
             // 
             // AquaModelTool
             // 
@@ -172,6 +190,8 @@
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parseVTBFToTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readCMXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parsePSO2TextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem generateCharacterFileSheetToolStripMenuItem;
     }
 }
 

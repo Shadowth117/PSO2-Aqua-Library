@@ -71,9 +71,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
+    <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
+    <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
