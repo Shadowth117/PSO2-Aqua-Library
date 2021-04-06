@@ -2467,11 +2467,12 @@ namespace AquaModelLibrary
 
         public void GenerateCharacterFileList(string cmxFileName, string ui_charamake_partsFileName,　string ui_accessories_textFileName, string face_variationFileName, string pso2_binDir, string outputDirectory)
         {
-            ReadCMX(cmxFileName);
+            aquaCMX = ReadCMX(cmxFileName);
             ReadPSO2Text(ui_charamake_partsFileName);
             var parts = aquaText;
             ReadPSO2Text(ui_accessories_textFileName);
             ReadFaceVariationLua(face_variationFileName);
+
             OutputCharacterFileList(aquaCMX, parts, aquaText, pso2_binDir, outputDirectory);
         }
 

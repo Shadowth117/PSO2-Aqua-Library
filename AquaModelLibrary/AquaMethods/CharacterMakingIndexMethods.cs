@@ -466,6 +466,7 @@ namespace AquaModelLibrary
             StringBuilder outputBasewearFemale = new StringBuilder();
             StringBuilder outputNGSBasewearMale = new StringBuilder();
             StringBuilder outputNGSBasewearFemale = new StringBuilder();
+            StringBuilder outputNGSGenderlessBasewear = new StringBuilder();
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -569,6 +570,9 @@ namespace AquaModelLibrary
                 else if (id < 300000)
                 {
                     outputNGSBasewearFemale.Append(output);
+                } else if (id < 600000)
+                {
+                    outputNGSGenderlessBasewear.Append(output);
                 } else
                 {
                     Console.WriteLine("Unknown bw with id: " + id);
@@ -578,6 +582,7 @@ namespace AquaModelLibrary
             File.WriteAllText(Path.Combine(outputDirectory, "FemaleBasewear.csv"), outputBasewearFemale.ToString());
             File.WriteAllText(Path.Combine(outputDirectory, "MaleNGSBasewear.csv"), outputNGSBasewearMale.ToString());
             File.WriteAllText(Path.Combine(outputDirectory, "FemaleNGSBasewear.csv"), outputNGSBasewearFemale.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "GenderlessNGSBasewear.csv"), outputNGSGenderlessBasewear.ToString());
 
             //---------------------------Parse out innerwear
             StringBuilder outputInnerwearMale = new StringBuilder();

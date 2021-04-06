@@ -319,3 +319,5 @@ AquaModelTool/obj/Release/.NETFramework,Version=v4.8.AssemblyAttributes.cs
 AquaModelTool/obj/Release/TempPE/Properties.Resources.Designer.cs.dll
 AquaModelLibrary/obj/Release/.NETFramework,Version=v4.8.AssemblyAttributes.cs
 AquaModelLibrary/bin/Release/AssimpNet.dll
+AquaModelTool/bin/Release/AquaModelTool.7z
+AquaModelTool/bin/Debug/.txt
