@@ -79,7 +79,7 @@
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
-    <Compile Include="OtherStructs\PRMParameters.cs" />
+    <Compile Include="OtherStructs\PRMModel.cs" />
     <Compile Include="AquaUtil.cs" />
     <Compile Include="AquaStructs\AquaCommon.cs" />
     <Compile Include="AquaStructs\AquaEffect.cs" />

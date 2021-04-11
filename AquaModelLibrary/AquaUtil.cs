@@ -19,6 +19,7 @@ namespace AquaModelLibrary
         public CharacterMakingIndex aquaCMX = null;
         public PSO2Text aquaText = null;
         public List<TCBTerrainConvex> tcbModels = new List<TCBTerrainConvex>();
+        public List<PRMModel> prmModels = new List<PRMModel>();
         public List<ModelSet> aquaModels = new List<ModelSet>();
         public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
@@ -2024,6 +2025,210 @@ namespace AquaModelLibrary
 
 
             outBytes.AddRange(nxsMesh);
+        }
+
+        public void ReadPRM(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                int offset = 0x0; //No NIFL header
+                prmModels = new List<PRMModel>();
+                PRMModel prmModel = new PRMModel();
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                int type = streamReader.Peek<int>();
+
+                //Deal with deicer's extra header nonsense
+                if (type > 0x10)
+                {
+                    streamReader.Seek(0x60, SeekOrigin.Begin);
+                    offset += 0x60;
+                }
+                streamReader.Seek(0x0 + offset, SeekOrigin.Begin);
+
+                prmModel.header = streamReader.Read<PRMModel.PRMHeader>();
+
+                int faceCount;
+                switch (prmModel.header.entryVersion)
+                {
+                    case 1:
+                        for (int i = 0; i < prmModel.header.entryCount; i++)
+                        {
+                            prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType01Vert>()));
+                        }
+
+                        if(prmModel.header.groupIndexCount > 0)
+                        {
+                            faceCount = prmModel.header.groupIndexCount / 3;
+
+                            for (int i = 0; i < faceCount; i++)
+                            {
+
+                                prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                            }
+                        } else
+                        {
+                            faceCount = prmModel.header.entryCount;
+                            for (int i = 0; i < faceCount; i+= 3)
+                            {
+                                prmModel.faces.Add(new Vector3(i, i + 1, i + 2));
+                            }
+                        }
+                        break;
+                    case 2:
+                        MessageBox.Show("Unimplemented PRM version! Please report if found!");
+                        return;
+                    case 3:
+                        for(int i = 0; i < prmModel.header.entryCount; i++)
+                        {
+                            prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
+                        }
+
+                        faceCount = prmModel.header.groupIndexCount / 3;
+                        for (int i = 0; i < faceCount; i++)
+                        {
+                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        }
+                        break;
+                    case 4:
+                        for (int i = 0; i < prmModel.header.entryCount; i++)
+                        {
+                            prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType04Vert>()));
+                        }
+
+                        faceCount = prmModel.header.groupIndexCount / 3;
+                        for (int i = 0; i < faceCount; i++)
+                        {
+                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        }
+                        break;
+                    default:
+                        MessageBox.Show("Unknown PRM version! Please report!");
+                        return;
+                }
+
+                prmModels.Add(prmModel);
+            }
+        }
+
+        //Version 1 is the most basic and was seen in alpha pso2. Version 3 was used in PSO2 Classic for most of its life. Version 4 was used some in PSO2 and in NGS.
+        //Version 1 requires some extra work to convert to since it doesn't have a face array and so is not supported at this time.
+        public unsafe void WritePRM(string outFileName, int version)
+        {
+            List<byte> finalOutBytes = new List<byte>();
+            finalOutBytes.AddRange(Encoding.UTF8.GetBytes("prm\0"));
+            finalOutBytes.AddRange(BitConverter.GetBytes(prmModels[0].vertices.Count));
+            switch (version)
+            {
+                case 1:
+                    MessageBox.Show("Version 1 unsupported at this time!");
+                    return;
+                case 2:
+                    MessageBox.Show("Version 2 unsupported at this time!");
+                    return;
+                case 3:
+                case 4:
+                    finalOutBytes.AddRange(BitConverter.GetBytes(prmModels[0].faces.Count * 3));
+                    break;
+                default:
+                    MessageBox.Show($"Version {version} unsupported at this time!");
+                    return;
+            }
+            finalOutBytes.AddRange(BitConverter.GetBytes(version));
+
+            for(int i = 0; i < prmModels[0].vertices.Count; i++)
+            {
+                switch(version)
+                {
+                    case 3:
+                        var vert3 = prmModels[0].vertices[i].GetType03Vert();
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.Z));
+                        finalOutBytes.Add(vert3.color[0]);
+                        finalOutBytes.Add(vert3.color[1]);
+                        finalOutBytes.Add(vert3.color[2]);
+                        finalOutBytes.Add(vert3.color[3]);
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv1.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv1.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv2.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv2.Y));
+                        break;
+                    case 4:
+                        var vert4 = prmModels[0].vertices[i].GetType04Vert();
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.Z));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.Z));
+                        finalOutBytes.Add(vert4.color[0]);
+                        finalOutBytes.Add(vert4.color[1]);
+                        finalOutBytes.Add(vert4.color[2]);
+                        finalOutBytes.Add(vert4.color[3]);
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv1.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv1.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv2.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv2.Y));
+                        break;
+                    default:
+                        return;
+                }
+            }
+
+            for(int i = 0; i < prmModels[0].faces.Count; i++)
+            {
+                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].X));
+                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].Y));
+                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].Z));
+            }
+
+            AlignWriter(finalOutBytes, 0x10); //Should be padded at the end
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
+        }
+
+        //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.
+        //PRM is very simple and can only take in: Vertex positions, vertex normals, vert colors, and 2 UV mappings along with a list of triangles at best. It also expects only one object. 
+        //The main purpose of this function is to fix UV and vert color conflicts upon conversion. While you can just do this logic yourself, this will do it for you as needed.
+        public void ConvertToPRM()
+        {
+            //Assemble vtxlList
+            if (aquaModels[0].models[0].vtxlList == null || aquaModels[0].models[0].vtxlList.Count == 0)
+            {
+                VTXLFromFaceVerts(aquaModels[0].models[0]);
+            }
+
+            PRMModel prmModel = new PRMModel();
+            for(int i = 0; i < aquaModels[0].models[0].vtxlList[0].vertPositions.Count; i++)
+            {
+                PRMModel.PRMVert prmVert = new PRMModel.PRMVert();
+
+                prmVert.pos = aquaModels[0].models[0].vtxlList[0].vertPositions[i];
+
+                if (aquaModels[0].models[0].vtxlList[0].vertNormals.Count > 0)
+                {
+                    prmVert.normal = aquaModels[0].models[0].vtxlList[0].vertNormals[i];
+                }
+                if (aquaModels[0].models[0].vtxlList[0].vertColors.Count > 0)
+                {
+                    prmVert.color = aquaModels[0].models[0].vtxlList[0].vertColors[i];
+                }
+
+                if (aquaModels[0].models[0].vtxlList[0].uv1List.Count > 0)
+                {
+                    prmVert.uv1 = aquaModels[0].models[0].vtxlList[0].uv1List[i];
+                }
+                if (aquaModels[0].models[0].vtxlList[0].uv2List.Count > 0)
+                {
+                    prmVert.uv2 = aquaModels[0].models[0].vtxlList[0].uv2List[i];
+                }
+
+                prmModel.vertices.Add(prmVert);
+            }
+            prmModel.faces = aquaModels[0].models[0].tempTris[0].triList;
+
+            prmModels.Add(prmModel);
         }
 
         public byte[] returnModelType(string fileName)
