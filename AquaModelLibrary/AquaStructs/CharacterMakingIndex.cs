@@ -23,6 +23,10 @@ namespace AquaModelLibrary
         public static string voiceMan = "11_voice_man";
         public static string voiceWoman = "11_voice_woman";
 
+        public static string rebootHornDataStr = "pl_rhn_";
+        public static string rebootTeethDataStr = "pl_rdt_";
+        public static string rebootEarDataStr = "pl_rea_";
+
         public Dictionary<int, BODY> costumeDict = new Dictionary<int, BODY>();
         public Dictionary<int, BODY> carmDict = new Dictionary<int, BODY>();
         public Dictionary<int, BODY> clegDict = new Dictionary<int, BODY>();
@@ -40,10 +44,11 @@ namespace AquaModelLibrary
 
         public Dictionary<int, ACCE> accessoryDict = new Dictionary<int, ACCE>();
         public Dictionary<int, EYE> eyeDict = new Dictionary<int, EYE>();
-        public List<NGS_Ear> ngsEarList = new List<NGS_Ear>();
-        public List<NGS_Teeth> ngsTeethList = new List<NGS_Teeth>();
+        public Dictionary<int, NGS_EarObject> ngsEarDict = new Dictionary<int, NGS_EarObject>();
+        public Dictionary<int, NGS_TeethObject> ngsTeethDict = new Dictionary<int, NGS_TeethObject>();
 
-        public List<NGS_Horn> ngsHornList = new List<NGS_Horn>();
+        public List<NGS_HornObject> ngsHornList = new List<NGS_HornObject>(); //Necessary since there are unindexable structs in these. Unfortunate.
+        public Dictionary<int, NGS_HornObject> ngsHornDict = new Dictionary<int, NGS_HornObject>();
         public Dictionary<int, NGS_Skin> ngsSkinDict = new Dictionary<int, NGS_Skin>();
         public Dictionary<int, EYEB> eyebrowDict = new Dictionary<int, EYEB>();
         public Dictionary<int, EYEB> eyelashDict = new Dictionary<int, EYEB>();
@@ -307,16 +312,30 @@ namespace AquaModelLibrary
             public float unkFloat1;
         }
 
+        public class NGS_EarObject
+        {
+            public NGS_Ear ngsEar;
+            public NGS_Unk_Substruct subStruct;
+
+            public string dataString;
+            public string texString1;
+            public string texString2;
+            public string texString3;
+
+            public string texString4;
+            public string texString5;
+        }
+
         public struct NGS_Ear
         {
             public int unkSubStructPtr; //Not sure what this is at the moment.
+            public int dataStringPtr;
             public int texString1Ptr;
             public int texString2Ptr;
-            public int texString3Ptr;
 
+            public int texString3Ptr;
             public int texString4Ptr;
             public int texString5Ptr;
-            public int texString6Ptr;
             public int unkInt0;
 
             public int unkInt1;
@@ -335,15 +354,36 @@ namespace AquaModelLibrary
             public short unkShort4;
         }
 
+        public class NGS_TeethObject
+        {
+            public NGS_Teeth ngsTeeth;
+            public NGS_Unk_Substruct substruct;
+
+            public string dataString;
+            public string texString1;
+            public string texString2;
+            public string texString3;
+
+            public string texString4;
+        }
+
         public struct NGS_Teeth
         {
             public int unkSubStructPtr; //Not sure what this is at the moment.
+            public int dataStringPtr;
             public int texString1Ptr;
             public int texString2Ptr;
-            public int texString3Ptr;
 
+            public int texString3Ptr;
             public int texString4Ptr;
-            public int texString5Ptr;
+        }
+
+        public class NGS_HornObject
+        {
+            public NGS_Horn ngsHorn;
+            public NGS_Unk_Substruct substruct;
+
+            public string dataString;
         }
 
         public struct NGS_Horn

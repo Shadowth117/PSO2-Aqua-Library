@@ -77,26 +77,11 @@ namespace AquaModelLibrary
 
             ReadACCE(streamReader, offset, cmx.cmxTable.accessoryAddress, cmx.cmxTable.accessoryCount, cmx.accessoryDict);
             ReadEYE(streamReader, offset, cmx.cmxTable.eyeTextureAddress, cmx.cmxTable.eyeTextureCount, cmx.eyeDict);
-            //NGS ears
-            streamReader.Seek(cmx.cmxTable.earAddress + offset, SeekOrigin.Begin);
-            for (int i = 0; i < cmx.cmxTable.earCount; i++)
-            {
-                cmx.ngsEarList.Add(streamReader.Read<CharacterMakingIndex.NGS_Ear>());
-            }
 
-            //NGS Teeth
-            streamReader.Seek(cmx.cmxTable.teethAddress + offset, SeekOrigin.Begin);
-            for (int i = 0; i < cmx.cmxTable.teethCount; i++)
-            {
-                cmx.ngsTeethList.Add(streamReader.Read<CharacterMakingIndex.NGS_Teeth>());
-            }
+            ReadNGSEAR(streamReader, offset, cmx);
+            ReadNGSTEETH(streamReader, offset, cmx);
+            ReadNGSHorn(streamReader, offset, cmx);
 
-            //NGS Horns
-            streamReader.Seek(cmx.cmxTable.hornAddress + offset, SeekOrigin.Begin);
-            for (int i = 0; i < cmx.cmxTable.hornCount; i++)
-            {
-                cmx.ngsHornList.Add(streamReader.Read<CharacterMakingIndex.NGS_Horn>());
-            }
             ReadNGSSKIN(streamReader, offset, cmx.cmxTable.skinAddress, cmx.cmxTable.skinCount, cmx.ngsSkinDict);
             ReadEYEB(streamReader, offset, cmx.cmxTable.eyebrowAddress, cmx.cmxTable.eyebrowCount, cmx.eyebrowDict);
             ReadEYEB(streamReader, offset, cmx.cmxTable.eyelashAddress, cmx.cmxTable.eyelashCount, cmx.eyelashDict);
@@ -120,6 +105,129 @@ namespace AquaModelLibrary
             ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.innerWearIdLink);
 
             return cmx;
+        }
+
+        private static void ReadNGSHorn(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
+        {
+            //NGS Horns
+            streamReader.Seek(cmx.cmxTable.hornAddress + offset, SeekOrigin.Begin);
+            for (int i = 0; i < cmx.cmxTable.hornCount; i++)
+            {
+                var ngsHornObj = new CharacterMakingIndex.NGS_HornObject();
+                ngsHornObj.ngsHorn = streamReader.Read<CharacterMakingIndex.NGS_Horn>();
+                long bookmark = streamReader.Position();
+
+                streamReader.Seek(ngsHornObj.ngsHorn.unkSubStructPtr + offset, SeekOrigin.Begin);
+                ngsHornObj.substruct = streamReader.Read<CharacterMakingIndex.NGS_Unk_Substruct>();
+
+                streamReader.Seek(ngsHornObj.ngsHorn.dataStringPtr + offset, SeekOrigin.Begin);
+                ngsHornObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+
+                cmx.ngsHornList.Add(ngsHornObj);
+
+                //Some ids can't be parsed and indexed properly. In this case, skip them. They seemingly don't have associated files anyways. 
+                if (!ngsHornObj.dataString.Contains(CharacterMakingIndex.rebootHornDataStr))
+                {
+                    continue;    
+                }
+
+                //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
+                int id = Int32.Parse(ngsHornObj.dataString.Replace(CharacterMakingIndex.rebootHornDataStr, ""));
+
+                //There aren't texture strings to double check this like with the teeth and ears so we have to assume this is correct. Thankfully, the game doesn't appear to have any conflicts here so far.
+
+                cmx.ngsHornDict.Add(id, ngsHornObj);
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+        }
+
+        private static void ReadNGSTEETH(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
+        {
+            //NGS Teeth
+            streamReader.Seek(cmx.cmxTable.teethAddress + offset, SeekOrigin.Begin);
+            for (int i = 0; i < cmx.cmxTable.teethCount; i++)
+            {
+                var ngsTeethObj = new CharacterMakingIndex.NGS_TeethObject();
+                ngsTeethObj.ngsTeeth = streamReader.Read<CharacterMakingIndex.NGS_Teeth>();
+                long bookmark = streamReader.Position();
+
+                streamReader.Seek(ngsTeethObj.ngsTeeth.unkSubStructPtr + offset, SeekOrigin.Begin);
+                ngsTeethObj.substruct = streamReader.Read<CharacterMakingIndex.NGS_Unk_Substruct>();
+
+                streamReader.Seek(ngsTeethObj.ngsTeeth.dataStringPtr + offset, SeekOrigin.Begin);
+                ngsTeethObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsTeethObj.ngsTeeth.texString1Ptr + offset, SeekOrigin.Begin);
+                ngsTeethObj.texString1 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsTeethObj.ngsTeeth.texString2Ptr + offset, SeekOrigin.Begin);
+                ngsTeethObj.texString2 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsTeethObj.ngsTeeth.texString3Ptr + offset, SeekOrigin.Begin);
+                ngsTeethObj.texString3 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsTeethObj.ngsTeeth.texString4Ptr + offset, SeekOrigin.Begin);
+                ngsTeethObj.texString4 = AquaObjectMethods.ReadCString(streamReader);
+
+                //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
+                int id = Int32.Parse(ngsTeethObj.dataString.Replace(CharacterMakingIndex.rebootTeethDataStr, ""));
+                string tempId2 = ngsTeethObj.texString1.Replace(CharacterMakingIndex.rebootTeethDataStr, "");
+                int id2 = Int32.Parse(tempId2.Replace("_d.dds", ""));
+
+                //Some of the more debug looking stuff recycles the data names. This is hacky, but getting the id from these strings is already hacky.
+                if (id != id2)
+                {
+                    id = id2;
+                }
+                cmx.ngsTeethDict.Add(id, ngsTeethObj);
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+        }
+
+        private static void ReadNGSEAR(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
+        {
+            //NGS ears
+            streamReader.Seek(cmx.cmxTable.earAddress + offset, SeekOrigin.Begin);
+            for (int i = 0; i < cmx.cmxTable.earCount; i++)
+            {
+                var ngsEarObj = new CharacterMakingIndex.NGS_EarObject();
+                ngsEarObj.ngsEar = streamReader.Read<CharacterMakingIndex.NGS_Ear>();
+                long bookmark = streamReader.Position();
+
+                streamReader.Seek(ngsEarObj.ngsEar.unkSubStructPtr + offset, SeekOrigin.Begin);
+                ngsEarObj.subStruct = streamReader.Read<CharacterMakingIndex.NGS_Unk_Substruct>();
+
+                streamReader.Seek(ngsEarObj.ngsEar.dataStringPtr + offset, SeekOrigin.Begin);
+                ngsEarObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsEarObj.ngsEar.texString1Ptr + offset, SeekOrigin.Begin);
+                ngsEarObj.texString1 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsEarObj.ngsEar.texString2Ptr + offset, SeekOrigin.Begin);
+                ngsEarObj.texString2 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsEarObj.ngsEar.texString3Ptr + offset, SeekOrigin.Begin);
+                ngsEarObj.texString3 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsEarObj.ngsEar.texString4Ptr + offset, SeekOrigin.Begin);
+                ngsEarObj.texString4 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsEarObj.ngsEar.texString5Ptr + offset, SeekOrigin.Begin);
+                ngsEarObj.texString5 = AquaObjectMethods.ReadCString(streamReader);
+
+                //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
+                int id = Int32.Parse(ngsEarObj.dataString.Replace(CharacterMakingIndex.rebootEarDataStr, ""));
+                string tempId2 = ngsEarObj.texString1.Replace(CharacterMakingIndex.rebootEarDataStr, "");
+                int id2 = Int32.Parse(tempId2.Replace("_d.dds", ""));
+                
+                //Some of the more debug looking stuff recycles the data names. This is hacky, but getting the id from these strings is already hacky.
+                if(id != id2)
+                {
+                    id = id2;
+                }
+                cmx.ngsEarDict.Add(id, ngsEarObj);
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         private static void ReadBODY(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.BODY> dict)
@@ -376,7 +484,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     output += "\n";
-                    output = AddBodyExtraFiles(output, reb, pso2_binDir, "_" + typeString);
+                    output = AddBodyExtraFiles(output, reb, pso2_binDir, "_" + typeString, false);
 
 
                     output += ",[HQ Texture Ice]," + rebExHash;
@@ -385,7 +493,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     output += "\n";
-                    output = AddBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString);
+                    output = AddBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
 
                 }
                 else
@@ -401,7 +509,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     output += "\n";
-                    output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString);
+                    output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
                 }
 
                 //Decide which type this is
@@ -530,7 +638,7 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-                    output = AddBasewearExtraFiles(output, reb, pso2_binDir);
+                    output = AddBasewearExtraFiles(output, reb, pso2_binDir, false);
 
                     output += ",[HQ Texture Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
@@ -539,7 +647,7 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-                    output = AddBasewearExtraFiles(output, rebEx, pso2_binDir);
+                    output = AddBasewearExtraFiles(output, rebEx, pso2_binDir, false);
 
                 }
                 else
@@ -556,7 +664,7 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-                    output = AddBasewearExtraFiles(output, classic, pso2_binDir);
+                    output = AddBasewearExtraFiles(output, classic, pso2_binDir, true);
 
                 }
 
@@ -2193,18 +2301,264 @@ namespace AquaModelLibrary
             File.WriteAllText(Path.Combine(outputDirectory, "LobbyActions.csv"), lobbyActions.ToString());
 
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
+            StringBuilder outputNGSEars = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "ears", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}ea_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}ea_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    /*
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+                    */
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}ea_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                outputNGSEars.Append(output);
+
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "NGSEars.csv"), outputNGSEars.ToString());
 
             //---------------------------Parse out NGS teeth 
+            StringBuilder outputNGSTeeth = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}de_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}de_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    /*
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    
+                    output += "\n";
+                    */
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}de_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                outputNGSTeeth.Append(output);
+
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "NGSTeeth.csv"), outputNGSTeeth.ToString());
 
             //---------------------------Parse out NGS horns 
+            StringBuilder outputNGSHorns = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}hn_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}hn_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    /*
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+                    */
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}hn_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                outputNGSHorns.Append(output);
+
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "NGSHorns.csv"), outputNGSHorns.ToString());
 
         }
 
-        private static string AddBodyExtraFiles(string output, string classic, string pso2_binDir, string typeString)
+        private static string AddBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
         {
-            string rpCheck = GetFileHash(classic.Replace(".ice", "_rp.ice"));
-            string bmCheck = GetFileHash(classic.Replace(typeString, "_bm_"));
-            string hnCheck = GetFileHash(classic.Replace(typeString, "_hn_")); //If not basewear, hn. If basewear, ho
+            string rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
+            string bmCheck = GetFileHash(fname.Replace(typeString, "_bm_"));
+            string hnCheck = GetFileHash(fname.Replace(typeString, "_hn_")); //If not basewear, hn. If basewear, ho
 
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rpCheck)))
@@ -2216,29 +2570,39 @@ namespace AquaModelLibrary
             {
                 output += ",[Aqv]," + bmCheck + "\n";
             }
-            //Hand textures
-            if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, hnCheck)))
+
+            //NGS doesn't have these sorts of files
+            if (isClassic)
             {
-                output += ",[Hand Textures]," + hnCheck + "\n";
+                //Hand textures
+                if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, hnCheck)))
+                {
+                    output += ",[Hand Textures]," + hnCheck + "\n";
+                }
             }
 
             return output;
         }
 
-        private static string AddBasewearExtraFiles(string output, string classic, string pso2_binDir)
+        private static string AddBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
         {
-            string rpCheck = GetFileHash(classic.Replace(".ice", "_rp.ice"));
-            string hnCheck = GetFileHash(classic.Replace("bw", "ho")); //If not basewear, hn. If basewear, ho
+            string rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
+            string hnCheck = GetFileHash(fname.Replace("bw", "ho")); //If not basewear, hn. If basewear, ho
 
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rpCheck)))
             {
                 output += ",[Alt Model]," + rpCheck + "\n";
             }
-            //Hand textures
-            if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, hnCheck)))
+
+            //NGS doesn't have these sorts of files
+            if(isClassic)
             {
-                output += ",[Hand Textures]," + hnCheck + "\n";
+                //Hand textures
+                if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, hnCheck)))
+                {
+                    output += ",[Hand Textures]," + hnCheck + "\n";
+                }
             }
 
             return output;
