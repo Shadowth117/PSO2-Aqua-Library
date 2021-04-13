@@ -343,6 +343,7 @@
             // 
             // specLevelUD
             // 
+            this.specLevelUD.DecimalPlaces = 6;
             this.specLevelUD.Location = new System.Drawing.Point(4, 129);
             this.specLevelUD.Maximum = new decimal(new int[] {
             10000000,
@@ -361,6 +362,7 @@
             // 
             // unkF32UD
             // 
+            this.unkF32UD.DecimalPlaces = 6;
             this.unkF32UD.Location = new System.Drawing.Point(5, 169);
             this.unkF32UD.Maximum = new decimal(new int[] {
             10000000,
@@ -388,6 +390,7 @@
             // 
             // unkInt0UD
             // 
+            this.unkInt0UD.DecimalPlaces = 6;
             this.unkInt0UD.Location = new System.Drawing.Point(88, 129);
             this.unkInt0UD.Maximum = new decimal(new int[] {
             10000000,
@@ -415,6 +418,7 @@
             // 
             // unkInt1UD
             // 
+            this.unkInt1UD.DecimalPlaces = 6;
             this.unkInt1UD.Location = new System.Drawing.Point(88, 169);
             this.unkInt1UD.Maximum = new decimal(new int[] {
             10000000,

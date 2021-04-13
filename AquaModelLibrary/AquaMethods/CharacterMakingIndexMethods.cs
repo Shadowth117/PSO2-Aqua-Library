@@ -270,7 +270,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void OutputCharacterFileList(CharacterMakingIndex aquaCMX, PSO2Text partsText, PSO2Text acceText, string pso2_binDir, string outputDirectory)
+        public static void OutputCharacterFileList(CharacterMakingIndex aquaCMX, PSO2Text partsText, PSO2Text acceText, Dictionary<int, string> faceIds, string pso2_binDir, string outputDirectory)
         {
             //Since we have an idea of what should be there and what we're interested in parsing out, throw these into a dictionary and go
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
@@ -1200,13 +1200,15 @@ namespace AquaModelLibrary
 
                     output += "\n";
 
+                    //Not used?
+                    /*
                     output += ",[HQ Texture Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
+                    output += "\n"; */
 
                 }
                 else
@@ -1302,6 +1304,8 @@ namespace AquaModelLibrary
 
                     output += "\n";
 
+                    //No hq used?
+                    /*
                     output += ",[HQ Texture Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
                     {
@@ -1309,7 +1313,7 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-
+                    */
                 }
                 else
                 {
@@ -1328,7 +1332,7 @@ namespace AquaModelLibrary
 
                 }
 
-                if (id >= 100000)
+                if (id <= 100000)
                 {
                     outputEyes.Append(output);
                 } else
@@ -1392,6 +1396,8 @@ namespace AquaModelLibrary
 
                     output += "\n";
 
+                    //Not used?
+                    /*
                     output += ",[HQ Texture Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
                     {
@@ -1399,7 +1405,7 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-
+                    */
                 }
                 else
                 {
@@ -1418,7 +1424,7 @@ namespace AquaModelLibrary
 
                 }
 
-                if (id >= 100000)
+                if (id <= 100000)
                 {
                     outputEyebrows.Append(output);
                 }
@@ -1483,6 +1489,8 @@ namespace AquaModelLibrary
 
                     output += "\n";
 
+                    //Not used?
+                    /*
                     output += ",[HQ Texture Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
                     {
@@ -1490,7 +1498,7 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-
+                    */
                 }
                 else
                 {
@@ -1509,7 +1517,7 @@ namespace AquaModelLibrary
 
                 }
 
-                if (id >= 100000)
+                if (id <= 100000)
                 {
                     outputEyelashes.Append(output);
                 }
@@ -1573,13 +1581,15 @@ namespace AquaModelLibrary
 
                     output += "\n";
 
+                    //No HQ Accessories?
+                    /*
                     output += ",[HQ Texture Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
+                    output += "\n";*/
 
                 }
                 else
@@ -1603,15 +1613,515 @@ namespace AquaModelLibrary
             }
             File.WriteAllText(Path.Combine(outputDirectory, "Accessories.csv"), outputAccessories.ToString());
 
-            //---------------------------Parse out FCP1
+            //---------------------------Parse out skin
+            StringBuilder outputSkin = new StringBuilder();
+            StringBuilder outputNGSSkin = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "skin", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.ngsSkinDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}sk_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}sk_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}sk_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                if (id < 100000)
+                {
+                    outputSkin.Append(output);
+                }
+                else
+                {
+                    outputNGSSkin.Append(output);
+                }
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "Skins.csv"), outputSkin.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "NGSSkins.csv"), outputNGSSkin.ToString());
+
+            //---------------------------Parse out FCP1, Face Textures
+            StringBuilder outputFCP1 = new StringBuilder();
+            StringBuilder outputNGSFCP1 = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint1", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}f1_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}f1_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}f1_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                if (id <= 100000)
+                {
+                    outputFCP1.Append(output);
+                }
+                else
+                {
+                    outputNGSFCP1.Append(output);
+                }
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "FaceTextures.csv"), outputFCP1.ToString());
+            if(outputNGSFCP1.Length > 0)
+            {
+                File.WriteAllText(Path.Combine(outputDirectory, "NGSFaceTextures.csv"), outputNGSFCP1.ToString());
+            }
 
             //---------------------------Parse out FCP2
+            StringBuilder outputFCP2 = new StringBuilder();
+            StringBuilder outputNGSFCP2 = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint2", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}f1_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}f1_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}f1_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                if (id <= 100000)
+                {
+                    outputFCP2.Append(output);
+                }
+                else
+                {
+                    outputNGSFCP2.Append(output);
+                }
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "FacePaint.csv"), outputFCP2.ToString());
+            if (outputNGSFCP2.Length > 0)
+            {
+                File.WriteAllText(Path.Combine(outputDirectory, "NGSFacePaint.csv"), outputNGSFCP2.ToString());
+            }
 
             //---------------------------Parse out FACE //face_variation.cmp.lua in 75b1632526cd6a1039625349df6ee8dd used to map file face ids to .text ids
+            //This targets facevariations specifically. face seems to be redundant and not actually particularly useful at a glance.
+            StringBuilder outputHumanMaleFace = new StringBuilder();
+            StringBuilder outputHumanFemaleFace = new StringBuilder();
+            StringBuilder outputNewmanMaleFace = new StringBuilder();
+            StringBuilder outputNewmanFemaleFace = new StringBuilder();
+            StringBuilder outputCastMaleFace = new StringBuilder();
+            StringBuilder outputCastFemaleFace = new StringBuilder();
+            StringBuilder outputDewmanMaleFace = new StringBuilder();
+            StringBuilder outputDewmanFemaleFace = new StringBuilder();
+            StringBuilder outputNGSFace = new StringBuilder();
 
-            //----------------------------//End CMX related ids
+            masterIdList.Clear();
+            nameDicts.Clear();
+
+            List<string> masterNameList = new List<string>();
+            List<Dictionary<string, string>> strNameDicts = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "facevariation", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.faceDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+
+                string realId = "";
+                if (!faceIds.TryGetValue(id, out realId))
+                {
+                    realId = "No" + id;
+                }
+                
+
+                foreach (var dict in strNameDicts)
+                {
+                    if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{CharacterMakingIndex.rebootStart}fc_{id}.ice";
+                    string rebEx = $"{CharacterMakingIndex.rebootExStart}fc_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    output += rebHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    output += ",[HQ Texture Ice]," + rebExHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+                else
+                {
+                    string finalId = ToFive(id);
+                    string classic = $"{CharacterMakingIndex.classicStart}fc_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                }
+
+                if (id < 10000)
+                {
+                    outputHumanMaleFace.Append(output);
+                }
+                else if (id < 20000)
+                {
+                    outputHumanFemaleFace.Append(output);
+                }
+                else if (id < 30000)
+                {
+                    outputNewmanMaleFace.Append(output);
+                }
+                else if (id < 40000)
+                {
+                    outputNewmanFemaleFace.Append(output);
+                }
+                else if (id < 50000)
+                {
+                    outputCastMaleFace.Append(output);
+                }
+                else if (id < 60000)
+                {
+                    outputCastFemaleFace.Append(output);
+                }
+                else if (id < 70000)
+                {
+                    outputDewmanMaleFace.Append(output);
+                }
+                else if (id < 100000)
+                {
+                    outputDewmanFemaleFace.Append(output);
+                }
+                else
+                {
+                    outputNGSFace.Append(output);
+                }
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "MaleHumanFaces.csv"), outputHumanMaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "FemaleHumanFaces.csv"), outputHumanFemaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "MaleNewmanFaces.csv"), outputNewmanMaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "FemaleNewmanFaces.csv"), outputNewmanFemaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "CastFaces_Heads.csv"), outputCastMaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "CasealFaces_Heads.csv"), outputCastFemaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "MaleDeumanFaces.csv"), outputDewmanMaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "FemaleDeumanFaces.csv"), outputDewmanFemaleFace.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "NGSFaces.csv"), outputNGSFace.ToString());
+
+            //---------------------------------------------------------------------------------------//End CMX related ids
 
             //---------------------------Parse out voices 
+            StringBuilder outputMaleVoices = new StringBuilder();
+            StringBuilder outputFemaleVoices = new StringBuilder();
+            StringBuilder outputCastVoices = new StringBuilder();
+            StringBuilder outputCasealVoices = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            strNameDicts.Clear();
+            masterNameList.Clear();
+            GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "voice", true);
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (string str in masterNameList)
+            {
+                string output = "";
+                int id = 0;
+                foreach (var dict in strNameDicts)
+                {
+                    dict.TryGetValue(str, out string newStr);
+                    output += newStr + ",";
+                }
+
+                int voiceNum = -1;
+                if(str.Contains(CharacterMakingIndex.voiceCman))
+                {
+                    id = 0;
+                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceCman, ""));
+                } else if (str.Contains(CharacterMakingIndex.voiceCwoman))
+                {
+                    id = 1;
+                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceCwoman, ""));
+                }
+                else if (str.Contains(CharacterMakingIndex.voiceMan))
+                {
+                    id = 2;
+                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceMan, ""));
+                }
+                else if (str.Contains(CharacterMakingIndex.voiceWoman))
+                {
+                    id = 3;
+                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceWoman, ""));
+                }
+                string conversion = "11_sound_voice_";
+                if (voiceNum > 31)
+                {
+                    conversion += "ac";
+                }
+
+                var finalName = str.Replace("11_voice_", conversion);
+
+                string classic = $"{CharacterMakingIndex.playerVoiceStart}{finalName}.ice";
+
+                var classicHash = GetFileHash(classic);
+
+                output += classicHash;
+                if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                {
+                    output += ", (Not found)";
+                }
+
+                output += "\n";
+
+                switch(id)
+                {
+                    case 0:
+                        outputMaleVoices.Append(output);
+                        break;
+                    case 1:
+                        outputFemaleVoices.Append(output);
+                        break;
+                    case 2:
+                        outputCastVoices.Append(output);
+                        break;
+                    case 3:
+                        outputCasealVoices.Append(output);
+                        break;
+                }
+            }
+            File.WriteAllText(Path.Combine(outputDirectory, "MaleVoices.csv"), outputMaleVoices.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "FemaleVoices.csv"), outputFemaleVoices.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "CastVoices.csv"), outputCastVoices.ToString());
+            File.WriteAllText(Path.Combine(outputDirectory, "CasealVoices.csv"), outputCasealVoices.ToString());
 
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
 
@@ -1714,6 +2224,28 @@ namespace AquaModelLibrary
             }
         }
 
+        private static void GatherTextIdsStringRef(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<string> masterNameList, List<Dictionary<string, string>> nameDicts, string category, bool firstDictSet)
+        {
+            for (int sub = 0; sub < textByCat[category].Count; sub++)
+            {
+                if (firstDictSet == true)
+                {
+                    nameDicts.Add(new Dictionary<string, string>());
+                }
+                foreach (var pair in textByCat[category][sub])
+                {
+                    if (!nameDicts[sub].ContainsKey(pair.name))
+                    {
+                        nameDicts[sub].Add(pair.name, pair.str);
+                    }
+                    if(!masterNameList.Contains(pair.name))
+                    {
+                        masterNameList.Add(pair.name);
+                    }
+                }
+            }
+        }
+
         public static Dictionary<int, string> ReadFaceVariationLua(string face_variationFileName)
         {
             Dictionary<int, string> faceStrings = new Dictionary<int, string>();
@@ -1734,12 +2266,12 @@ namespace AquaModelLibrary
                         }
                     } else if(line.Contains("crop_name"))
                     {
-                        language = null;
                         line = line.Split('\"')[1];
                         if(line != "") //ONE face doesn't use a crop_name. As it also doesn't have a crop_name, we don't care. Otherwise, add it to the dict
                         {
                             faceStrings.Add(Int32.Parse(line.Substring(7)), language);
                         }
+                        language = null;
                     }
                 }
             }

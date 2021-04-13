@@ -87,6 +87,12 @@
     <Compile Include="Forms\AnimSubpanels\AnimationTransformSelect.Designer.cs">
       <DependentUpon>AnimationTransformSelect.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\AnimSubpanels\KeyEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\AnimSubpanels\KeyEditor.Designer.cs">
+      <DependentUpon>KeyEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ModelSubpanels\MaterialEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -109,6 +115,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AnimSubpanels\AnimationTransformSelect.resx">
       <DependentUpon>AnimationTransformSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AnimSubpanels\KeyEditor.resx">
+      <DependentUpon>KeyEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelEditor.resx">
       <DependentUpon>ModelEditor.cs</DependentUpon>

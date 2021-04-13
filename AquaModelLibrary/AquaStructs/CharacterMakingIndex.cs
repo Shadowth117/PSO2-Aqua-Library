@@ -15,6 +15,12 @@ namespace AquaModelLibrary
         public static string classicStart = $"character/making/pl_";
         public static string rebootStart = $"character/making_reboot/pl_";
         public static string rebootExStart = $"character/making_reboot_ex/pl_";
+        public static string playerVoiceStart = $"player_voice/";
+
+        public static string voiceCman = "11_voice_cman";
+        public static string voiceCwoman = "11_voice_cwoman";
+        public static string voiceMan = "11_voice_man";
+        public static string voiceWoman = "11_voice_woman";
 
         public Dictionary<int, BODY> costumeDict = new Dictionary<int, BODY>();
         public Dictionary<int, BODY> carmDict = new Dictionary<int, BODY>();

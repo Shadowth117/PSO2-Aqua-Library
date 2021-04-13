@@ -2676,9 +2676,9 @@ namespace AquaModelLibrary
             ReadPSO2Text(ui_charamake_partsFileName);
             var parts = aquaText;
             ReadPSO2Text(ui_accessories_textFileName);
-            ReadFaceVariationLua(face_variationFileName);
+            var faceIds = ReadFaceVariationLua(face_variationFileName);
 
-            OutputCharacterFileList(aquaCMX, parts, aquaText, pso2_binDir, outputDirectory);
+            OutputCharacterFileList(aquaCMX, parts, aquaText, faceIds, pso2_binDir, outputDirectory);
         }
 
         //For now, we'll just assume we don't care about LOD models and export the first model stored
