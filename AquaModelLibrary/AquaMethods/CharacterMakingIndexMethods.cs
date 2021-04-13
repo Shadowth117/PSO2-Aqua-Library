@@ -270,10 +270,12 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void OutputCharacterFileList(CharacterMakingIndex aquaCMX, PSO2Text partsText, PSO2Text acceText, Dictionary<int, string> faceIds, string pso2_binDir, string outputDirectory)
+        public static void OutputCharacterFileList(CharacterMakingIndex aquaCMX, PSO2Text partsText, PSO2Text acceText, PSO2Text commonText, Dictionary<int, string> faceIds, 
+            LobbyActionCommon lac, string pso2_binDir, string outputDirectory)
         {
             //Since we have an idea of what should be there and what we're interested in parsing out, throw these into a dictionary and go
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             for (int i = 0; i < partsText.text.Count; i++)
             {
                 textByCat.Add(partsText.categoryNames[i], partsText.text[i]);
@@ -281,6 +283,10 @@ namespace AquaModelLibrary
             for (int i = 0; i < acceText.text.Count; i++)
             {
                 textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
+            }
+            for (int i = 0; i < commonText.text.Count; i++)
+            {
+                commByCat.Add(commonText.categoryNames[i], commonText.text[i]);
             }
 
             //---------------------------Parse out costume and body (includes outers and cast bodies)
@@ -2122,6 +2128,69 @@ namespace AquaModelLibrary
             File.WriteAllText(Path.Combine(outputDirectory, "FemaleVoices.csv"), outputFemaleVoices.ToString());
             File.WriteAllText(Path.Combine(outputDirectory, "CastVoices.csv"), outputCastVoices.ToString());
             File.WriteAllText(Path.Combine(outputDirectory, "CasealVoices.csv"), outputCasealVoices.ToString());
+
+            //---------------------------Parse out Lobby Action files -- in lobby_action_setting.lac within defaa92bd5435c84af0da0302544b811 and common.text in a1d84c3c748cebdb6fc42f66b73d2e57
+            StringBuilder lobbyActions = new StringBuilder();
+            strNameDicts.Clear();
+            masterNameList.Clear();
+            List<string> iceTracker = new List<string>();
+            GatherTextIdsStringRef(commByCat, masterNameList, strNameDicts, "LobbyAction", true);
+
+            for (int i = 0; i < lac.dataBlocks.Count; i++)
+            {
+                //There are sometimes multiple references to the same ice, but we're not interested in these entries
+                if(iceTracker.Contains(lac.dataBlocks[i].iceName))
+                {
+                    continue;
+                }
+                iceTracker.Add(lac.dataBlocks[i].iceName);
+                string output = "";
+                bool named = false;
+                foreach (var dict in strNameDicts)
+                {
+                    if (dict.TryGetValue(lac.dataBlocks[i].commonReference1, out string str))
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+
+                //Account for lack of a name
+                if (named == false)
+                {
+                    output = $"[Unnamed {lac.dataBlocks[i].commonReference1}]" + output;
+                }
+
+                string classic = $"{CharacterMakingIndex.lobbyActionStart}{lac.dataBlocks[i].iceName}";
+
+                var classicHash = GetFileHash(classic);
+
+                output += classicHash;
+
+                if(lac.dataBlocks[i].iceName.Contains("_m.ice"))
+                {
+                    output += (", Male");
+                }
+                else if (lac.dataBlocks[i].iceName.Contains("_f.ice"))
+                {
+                    output += (", Female");
+                }
+
+                if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                {
+                    output += ", (Not found)";
+                }
+
+                output += "\n";
+
+                lobbyActions.Append(output);
+            }
+
+            File.WriteAllText(Path.Combine(outputDirectory, "LobbyActions.csv"), lobbyActions.ToString());
 
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
 

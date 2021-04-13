@@ -16,6 +16,7 @@ namespace AquaModelLibrary
         public static string rebootStart = $"character/making_reboot/pl_";
         public static string rebootExStart = $"character/making_reboot_ex/pl_";
         public static string playerVoiceStart = $"player_voice/";
+        public static string lobbyActionStart = $"actor/lobby_action/";
 
         public static string voiceCman = "11_voice_cman";
         public static string voiceCwoman = "11_voice_cwoman";

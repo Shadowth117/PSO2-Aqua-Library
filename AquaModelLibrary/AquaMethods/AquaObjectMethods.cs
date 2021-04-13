@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using static AquaModelLibrary.AquaObject;
 
@@ -1582,5 +1583,19 @@ namespace AquaModelLibrary
         {
             return ConvertStruct(ref str);
         }
+
+
+        public static string ReadCString(BufferedStreamReader streamReader)
+        {
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x40));
+            return str.Remove(str.IndexOf(char.MinValue));
+        }
+
+        public static string ReadUTF16String(BufferedStreamReader streamReader, long end)
+        {
+            string str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position())));
+            return str.Remove(str.IndexOf(char.MinValue));
+        }
+
     }
 }

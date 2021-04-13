@@ -74,6 +74,7 @@
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
+    <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="NNStructs\NNObject.cs" />

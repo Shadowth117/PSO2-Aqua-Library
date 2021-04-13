@@ -2596,7 +2596,7 @@ namespace AquaModelLibrary
                 long bookmark = streamReader.Position();
                 streamReader.Seek(categoryNameOffset + offset, SeekOrigin.Begin);
                 
-                txt.categoryNames.Add(ReadCString(streamReader, end));
+                txt.categoryNames.Add(ReadCString(streamReader));
 
                 //Get Category Info
                 streamReader.Seek(categoryDataInfoOffset + offset, SeekOrigin.Begin);
@@ -2618,7 +2618,7 @@ namespace AquaModelLibrary
                         long bookmarkLocal = streamReader.Position();
 
                         streamReader.Seek(nameLoc + offset, SeekOrigin.Begin);
-                        pair.name = ReadCString(streamReader, end);
+                        pair.name = ReadCString(streamReader);
 
                         streamReader.Seek(textLoc + offset, SeekOrigin.Begin);
                         pair.str = ReadUTF16String(streamReader, end);
@@ -2658,27 +2658,85 @@ namespace AquaModelLibrary
             return txt;
         }
 
-        public static string ReadCString(BufferedStreamReader streamReader, long end)
+        public LobbyActionCommon ReadLAC(string fileName)
         {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x40));
-            return str.Remove(str.IndexOf(char.MinValue));
+            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals("lac\0"))
+                {
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                    offset += headJunkSize;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals("NIFL"))
+                {
+                    //NIFL
+                    return ReadNIFLLAC(streamReader, offset);
+                }
+                else if (type.Equals("VTBF"))
+                {
+                    //Lacs should really never be VTBF...
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+            }
+            return null;
         }
 
-        public static string ReadUTF16String(BufferedStreamReader streamReader, long end)
+        public LobbyActionCommon ReadNIFLLAC(BufferedStreamReader streamReader, int offset)
         {
-            string str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position())));
-            return str.Remove(str.IndexOf(char.MinValue));
+            var lac = new LobbyActionCommon();
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var end = nifl.NOF0Offset + offset;
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
+
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
+            lac.header = streamReader.Read<LobbyActionCommon.lacHeader>();
+
+            streamReader.Seek(lac.header.dataInfoPointer + offset, SeekOrigin.Begin);
+            lac.info = streamReader.Read<LobbyActionCommon.dataInfo>();
+
+            streamReader.Seek(lac.info.blockOffset + offset, SeekOrigin.Begin);
+
+            for(int i = 0; i < lac.info.blockCount; i++)
+            {
+                var block = streamReader.Read<LobbyActionCommon.dataBlock>();
+                long bookmark = streamReader.Position();
+
+                lac.dataBlocks.Add(LobbyActionCommon.ReadDataBlock(streamReader, offset, block));
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+
+            return lac;
         }
 
-        public void GenerateCharacterFileList(string cmxFileName, string ui_charamake_partsFileName,　string ui_accessories_textFileName, string face_variationFileName, string pso2_binDir, string outputDirectory)
+        public void GenerateCharacterFileList(string cmxFileName, string ui_charamake_partsFileName, string ui_accessories_textFileName, string commonFilename, string face_variationFileName, 
+            string lacFilename, string pso2_binDir, string outputDirectory)
         {
             aquaCMX = ReadCMX(cmxFileName);
             ReadPSO2Text(ui_charamake_partsFileName);
             var parts = aquaText;
             ReadPSO2Text(ui_accessories_textFileName);
+            var accText = aquaText;
+            ReadPSO2Text(commonFilename);
+            var commText = aquaText;
             var faceIds = ReadFaceVariationLua(face_variationFileName);
+            var lac = ReadLAC(lacFilename);
 
-            OutputCharacterFileList(aquaCMX, parts, aquaText, faceIds, pso2_binDir, outputDirectory);
+            OutputCharacterFileList(aquaCMX, parts, accText, commText, faceIds, lac, pso2_binDir, outputDirectory);
         }
 
         //For now, we'll just assume we don't care about LOD models and export the first model stored

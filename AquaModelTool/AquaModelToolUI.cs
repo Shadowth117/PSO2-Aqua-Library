@@ -289,8 +289,23 @@ namespace AquaModelTool
                                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                                 {
                                     var faceVar = openFileDialog.FileName;
-                                    aquaUI.aqua.pso2_binDir = pso2_binDir;
-                                    aquaUI.aqua.GenerateCharacterFileList(cmxFile, charparts, acceText, faceVar, pso2_binDir, outfolder);
+
+                                    openFileDialog.Title = "Select common.text";
+                                    openFileDialog.Filter = "PSO2 common text file (common.text)|common.text";
+                                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                                    {
+                                        var common = openFileDialog.FileName;
+
+                                        openFileDialog.Title = "Select lobby_action_setting.lac";
+                                        openFileDialog.Filter = "PSO2 Lobby Action Setting (lobby_action_setting.lac)|lobby_action_setting.lac";
+                                        if (openFileDialog.ShowDialog() == DialogResult.OK)
+                                        {
+                                            var lac = openFileDialog.FileName;
+
+                                            aquaUI.aqua.pso2_binDir = pso2_binDir;
+                                            aquaUI.aqua.GenerateCharacterFileList(cmxFile, charparts, acceText, common, faceVar, lac, pso2_binDir, outfolder);
+                                        }
+                                    }
                                 }
                             }
                         }
