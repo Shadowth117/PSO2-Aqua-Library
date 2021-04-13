@@ -2483,6 +2483,11 @@ namespace AquaModelLibrary
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
+                //Skip the なし horn entry. I'm not even sure why that's in there.
+                if(id == 0)
+                {
+                    continue;
+                }
                 string output = "";
                 bool named = false;
                 foreach (var dict in nameDicts)
