@@ -1903,6 +1903,257 @@ namespace AquaModelLibrary
             return aquaMotions;
         }
 
+        public void WriteVTBFMotion(string outFileName)
+        {
+            bool package = outFileName.Contains(".aqw") || outFileName.Contains(".trw"); //If we're doing .aqv/.trv or other motions instead, we write only the first motion and no aqp header
+            int motionCount = aquaMotions[0].anims.Count;
+            List<byte> finalOutBytes = new List<byte>();
+            if (package)
+            {
+                finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
+                finalOutBytes.AddRange(BitConverter.GetBytes(aquaMotions[0].anims.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            }
+            else
+            {
+                motionCount = 1;
+            }
+
+            for (int i = 0; i < motionCount; i++)
+            {
+                int bonusBytes = 0;
+                if (i == 0)
+                {
+                    bonusBytes = 0x10;
+                }
+
+                List<byte> outBytes = new List<byte>();
+                AquaMotion motion = aquaMotions[0].anims[i];
+                outBytes.AddRange(toAQGFVTBF());
+                outBytes.AddRange(toROOT());
+                switch(motion.moHeader.variant)
+                {
+                    case AquaMotion.stdAnim:
+                    case AquaMotion.stdPlayerAnim:
+                        outBytes.AddRange(toNDMO(motion.moHeader));
+                        break;
+                    case AquaMotion.materialAnim:
+                        outBytes.AddRange(toSPMO(motion.moHeader));
+                        break;
+                    case AquaMotion.cameraAnim:
+                        outBytes.AddRange(toCAMO(motion.moHeader));
+                        break;
+                }
+                for(int mseg = 0; mseg < motion.motionKeys.Count; mseg++)
+                {
+                    outBytes.AddRange(toMSEG(motion.motionKeys[mseg].mseg));
+                    for(int keys = 0; keys < motion.motionKeys[mseg].keyData.Count; keys++)
+                    {
+                        outBytes.AddRange(toMKEY(motion.motionKeys[mseg].keyData[keys]));
+                    }
+                }
+
+                if(package)
+                {
+                    //Header info
+                    int size = outBytes.Count;
+                    WriteAFPBase(outFileName, package, i, bonusBytes, outBytes, size);
+
+                    finalOutBytes.AddRange(outBytes);
+                    AlignFileEndWrite(finalOutBytes, 0x10);
+                }
+            }
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
+        }
+
+        public void WriteNIFLMotion(string outFileName)
+        {
+            bool package = outFileName.Contains(".aqw") || outFileName.Contains(".trw"); //If we're doing .aqv/.trv or other motions instead, we write only the first motion and no aqp header
+            int motionCount = aquaMotions[0].anims.Count;
+            List<byte> finalOutBytes = new List<byte>();
+            if (package)
+            {
+                finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
+                finalOutBytes.AddRange(BitConverter.GetBytes(aquaMotions[0].anims.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            }
+            else
+            {
+                motionCount = 1;
+            }
+
+            for (int motionId = 0; motionId < motionCount; motionId++)
+            {
+                var motion = aquaMotions[0].anims[motionId];
+                int bonusBytes = 0;
+
+                int rel0SizeOffset = 0;
+                int boneTableOffset = 0;
+
+                List<int> boneOffAddresses = new List<int>();
+
+                List<byte> outBytes = new List<byte>();
+                List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+                //REL0
+                outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+                rel0SizeOffset = outBytes.Count; //We'll fill this later
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0x10));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //MoHeader
+                outBytes.AddRange(BitConverter.GetBytes(motion.moHeader.variant));
+                outBytes.AddRange(BitConverter.GetBytes(motion.moHeader.loopPoint));
+                outBytes.AddRange(BitConverter.GetBytes(motion.moHeader.endFrame));
+                outBytes.AddRange(BitConverter.GetBytes(motion.moHeader.frameSpeed));
+
+                outBytes.AddRange(BitConverter.GetBytes((int)0x2));
+                outBytes.AddRange(BitConverter.GetBytes(motion.moHeader.nodeCount));
+                boneTableOffset = NOF0Append(nof0PointerLocations, outBytes.Count);
+                outBytes.AddRange(BitConverter.GetBytes((int)0x50));
+                outBytes.AddRange(motion.moHeader.testString.GetBytes());
+
+                //Padding
+                outBytes.AddRange(BitConverter.GetBytes((int)0x0));
+
+                //Bonelist
+                for(int i = 0; i < motion.motionKeys.Count; i++)
+                {
+                    boneOffAddresses.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
+                    outBytes.AddRange(ConvertStruct(motion.motionKeys[i].mseg));
+                }
+
+                //BoneAnims
+                for (int i = 0; i < motion.motionKeys.Count; i++)
+                {
+                    int[] dataOffsets = new int[motion.motionKeys[i].keyData.Count];
+                    int[] timeOffsets = new int[motion.motionKeys[i].keyData.Count];
+
+                    SetByteListInt(outBytes, boneOffAddresses[i], outBytes.Count);
+                    //Write keyset info
+                    for(int keySet = 0; keySet < motion.motionKeys[i].keyData.Count; keySet++)
+                    {
+                        dataOffsets[keySet] = NOF0Append(nof0PointerLocations, outBytes.Count + 0x10);
+                        if(motion.motionKeys[i].keyData[keySet].keyCount > 1)
+                        {
+                            timeOffsets[keySet] = NOF0Append(nof0PointerLocations, outBytes.Count + 0x14);
+                        }
+                        outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].keyType));
+                        outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].dataType));
+                        outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].unkInt0));
+                        outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].keyCount));
+
+                        outBytes.AddRange(BitConverter.GetBytes((int)0));
+                        outBytes.AddRange(BitConverter.GetBytes((int)0));
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write timings and frame data
+                    for (int keySet = 0; keySet < motion.motionKeys[i].keyData.Count; keySet++)
+                    {
+                        if (motion.motionKeys[i].keyData[keySet].keyCount > 1)
+                        {
+                            SetByteListInt(outBytes, timeOffsets[keySet], outBytes.Count);
+                            for(int time = 0; time < motion.motionKeys[i].keyData[keySet].keyCount; time++)
+                            {
+                                //Beginning time should internally be 0x1 while ending time should have a 2 in the ones decimal place
+                                outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].frameTimings[time]));
+                            }
+                            AlignWriter(outBytes, 0x10);
+                        }
+
+                        SetByteListInt(outBytes, dataOffsets[keySet], outBytes.Count);
+                        for (int data = 0; data < motion.motionKeys[i].keyData[keySet].keyCount; data++)
+                        {
+                            switch(motion.motionKeys[i].keyData[keySet].dataType)
+                            {
+                                //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                                case 0x1:
+                                case 0x2:
+                                case 0x3:
+                                    outBytes.AddRange(ConvertStruct(motion.motionKeys[i].keyData[keySet].vector4Keys[data]));
+                                    break;
+
+                                case 0x5:
+                                    outBytes.AddRange(ConvertStruct(motion.motionKeys[i].keyData[keySet].intKeys[data]));
+                                    break;
+
+                                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                                case 0x4:
+                                case 0x6:
+                                    outBytes.AddRange(ConvertStruct(motion.motionKeys[i].keyData[keySet].floatKeys[data]));
+                                    break;
+                                default:
+                                    throw new Exception($"Unexpected data type {motion.motionKeys[i].keyData[keySet].dataType}!");
+                            }
+                        }
+                        AlignWriter(outBytes, 0x10);
+                    }
+                }
+
+
+                //Write REL0 Size
+                SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+                //NOF0
+                int NOF0Offset = outBytes.Count;
+                int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+                int NOF0FullSize = NOF0Size + 0x8;
+                outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+                outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //Write pointer offsets
+                for (int i = 0; i < nof0PointerLocations.Count; i++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+                }
+                NOF0FullSize += AlignWriter(outBytes, 0x10);
+
+                //NEND
+                outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+                outBytes.AddRange(BitConverter.GetBytes(0x8));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //Generate NIFL
+                AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+                nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+                nifl.NIFLLength = 0x18;
+                nifl.unkInt0 = 1;
+                nifl.offsetAddition = 0x20;
+
+                nifl.NOF0Offset = NOF0Offset;
+                nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+                nifl.NOF0BlockSize = NOF0FullSize;
+                nifl.padding0 = 0;
+
+                //Write NIFL
+                outBytes.InsertRange(0, ConvertStruct(nifl));
+                AlignFileEndWrite(outBytes, 0x10);
+
+
+                if (package)
+                {
+                    //Write AFP Base
+                    int size = outBytes.Count - 0x10; //Size is 0x10 less than what it would be for VTBF afp headers for some reason
+                    WriteAFPBase(outFileName, package, motionId, bonusBytes, outBytes, size);
+
+                    finalOutBytes.AddRange(outBytes);
+                    AlignFileEndWrite(finalOutBytes, 0x10);
+                }
+
+                finalOutBytes.AddRange(outBytes);
+            }
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
+        }
+
         public void ReadCollision(string inFilename)
         {
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
@@ -2737,6 +2988,73 @@ namespace AquaModelLibrary
             var lac = ReadLAC(lacFilename);
 
             OutputCharacterFileList(aquaCMX, parts, accText, commText, faceIds, lac, pso2_binDir, outputDirectory);
+        }
+
+        public void ReadItNameCacheAppendix(string fileName)
+        {
+            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals("inca"))
+                {
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                    offset += headJunkSize;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals("NIFL"))
+                {
+                    //NIFL
+                    ReadInca(streamReader, offset, fileName);
+                }
+                else if (type.Equals("VTBF"))
+                {
+                    //Should really never be VTBF...
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+            }
+            return;
+        }
+
+        public void ReadInca(BufferedStreamReader streamReader, int offset, string fileName)
+        {
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var end = nifl.NOF0Offset + offset;
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
+
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
+            streamReader.Seek(streamReader.Read<int>() + offset, SeekOrigin.Begin);
+
+            StringBuilder output = new StringBuilder();
+            while(true)
+            {
+                int category = streamReader.Read<int>(); //Category?
+                int id = streamReader.Read<int>(); //id
+                if (category + id == 0)
+                {
+                    break;
+                }
+                int strPointer = streamReader.Read<int>();
+                long bookmark = streamReader.Position();
+                streamReader.Seek(strPointer + offset, SeekOrigin.Begin);
+                output.AppendLine($"{category.ToString("X")} {id.ToString("X")} " + ReadUTF16String(streamReader, end));
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+
+            File.WriteAllText(fileName + ".txt", output.ToString());
         }
 
         //For now, we'll just assume we don't care about LOD models and export the first model stored

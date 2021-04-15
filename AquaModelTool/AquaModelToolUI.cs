@@ -15,6 +15,8 @@ namespace AquaModelTool
     public partial class AquaModelTool : Form
     {
         public AquaUICommon aquaUI = new AquaUICommon();
+        public List<string> modelExtensions = new List<string>() { ".aqp", ".aqo", ".trp", ".tro" };
+        public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public string currentFile;
         public bool isNIFL = false;
         public AquaModelTool()
@@ -46,47 +48,82 @@ namespace AquaModelTool
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string ext = Path.GetExtension(currentFile);
+            SaveFileDialog saveFileDialog;
             //Model saving
-            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            if (modelExtensions.Contains(ext))
             {
-                Title = "Save character file",
-                Filter = "PSO2 VTBF Model (*.aqp)|*.aqp|PSO2 VTBF Terrain (*.trp)|*.trp|PSO2 NIFL Model (*.aqp)|*.aqp|PSO2 NIFL Terrain (*.trp)|*.trp"
-            };
-            switch (Path.GetExtension(currentFile))
-            {
-                case ".aqp":
-                case ".aqo":
-                    saveFileDialog.FilterIndex = 1;
-                    break;
-                case ".trp":
-                case ".tro":
-                    saveFileDialog.FilterIndex = 2;
-                    break;
-                default:
-                    saveFileDialog.FilterIndex = 1;
-                    return;
-            }
-            if (isNIFL)
-            {
-                saveFileDialog.FilterIndex += 2;
-            }
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                aquaUI.setAllTransparent(((ModelEditor)filePanel.Controls[0]).GetAllTransparentChecked());
-                switch (saveFileDialog.FilterIndex)
+                saveFileDialog = new SaveFileDialog()
                 {
-                    case 1:
-                    case 2:
-                        aquaUI.toVTBFModel(saveFileDialog.FileName);
+                    Title = "Save model file",
+                    Filter = "PSO2 VTBF Model (*.aqp)|*.aqp|PSO2 VTBF Terrain (*.trp)|*.trp|PSO2 NIFL Model (*.aqp)|*.aqp|PSO2 NIFL Terrain (*.trp)|*.trp"
+                };
+                switch (ext)
+                {
+                    case ".aqp":
+                    case ".aqo":
+                        saveFileDialog.FilterIndex = 1;
                         break;
-                    case 3:
-                    case 4:
-                        aquaUI.toNIFLModel(saveFileDialog.FileName);
+                    case ".trp":
+                    case ".tro":
+                        saveFileDialog.FilterIndex = 2;
                         break;
+                    default:
+                        saveFileDialog.FilterIndex = 1;
+                        return;
                 }
-                currentFile = saveFileDialog.FileName;
-                AquaUIOpenFile(saveFileDialog.FileName);
-                this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                if (isNIFL)
+                {
+                    saveFileDialog.FilterIndex += 2;
+                }
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    aquaUI.setAllTransparent(((ModelEditor)filePanel.Controls[0]).GetAllTransparentChecked());
+                    switch (saveFileDialog.FilterIndex)
+                    {
+                        case 1:
+                        case 2:
+                            aquaUI.toVTBFModel(saveFileDialog.FileName);
+                            break;
+                        case 3:
+                        case 4:
+                            aquaUI.toNIFLModel(saveFileDialog.FileName);
+                            break;
+                    }
+                    currentFile = saveFileDialog.FileName;
+                    AquaUIOpenFile(saveFileDialog.FileName);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                }
+
+            }
+            //Anim Saving
+            else if (motionExtensions.Contains(ext))
+            {
+                saveFileDialog = new SaveFileDialog()
+                {
+                    Title = "Save model file",
+                    Filter = $"PSO2 VTBF Motion (*{ext})|*{ext}|PSO2 NIFL Motion (*{ext})|*{ext}"
+                };
+                if (isNIFL)
+                {
+                    saveFileDialog.FilterIndex += 1;
+                }
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    switch (saveFileDialog.FilterIndex)
+                    {
+                        case 1:
+                            aquaUI.aqua.WriteVTBFMotion(saveFileDialog.FileName);
+                            break;
+                        case 2:
+                            aquaUI.aqua.WriteNIFLMotion(saveFileDialog.FileName);
+                            break;
+                    }
+                    currentFile = saveFileDialog.FileName;
+                    AquaUIOpenFile(saveFileDialog.FileName);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                }
+
             }
         }
 
@@ -94,19 +131,38 @@ namespace AquaModelTool
         {
             if(currentFile != null)
             {
+                string ext = Path.GetExtension(currentFile);
+
                 //Model saving
-                aquaUI.setAllTransparent(((ModelEditor)filePanel.Controls[0]).GetAllTransparentChecked());
-                switch (isNIFL)
+                if (modelExtensions.Contains(ext))
                 {
-                    case true:
-                        aquaUI.toNIFLModel(currentFile);
-                        break;
-                    case false:
-                        aquaUI.toVTBFModel(currentFile);
-                        break;
+                    aquaUI.setAllTransparent(((ModelEditor)filePanel.Controls[0]).GetAllTransparentChecked());
+                    switch (isNIFL)
+                    {
+                        case true:
+                            aquaUI.toNIFLModel(currentFile);
+                            break;
+                        case false:
+                            aquaUI.toVTBFModel(currentFile);
+                            break;
+                    }
+                    AquaUIOpenFile(currentFile);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
                 }
-                AquaUIOpenFile(currentFile);
-                this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                else if (motionExtensions.Contains(ext))
+                {
+                    switch (isNIFL)
+                    {
+                        case true:
+                            aquaUI.aqua.WriteNIFLMotion(currentFile);
+                            break;
+                        case false:
+                            aquaUI.aqua.WriteVTBFMotion(currentFile);
+                            break;
+                    }
+                    AquaUIOpenFile(currentFile);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                }
             }
         }
         
@@ -316,6 +372,19 @@ namespace AquaModelTool
 
             
 
+        }
+
+        private void parseIncaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select item_name_cache_appendix.inca",
+                Filter = "(item_name_cache_appendix.inca)|item_name_cache_appendix.inca"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.ReadItNameCacheAppendix(openFileDialog.FileName);
+            }
         }
     }
 }

@@ -42,6 +42,7 @@
             this.readCMXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
+            this.parseIncaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -117,7 +118,8 @@
             this.parseVTBFToTextToolStripMenuItem,
             this.parsePSO2TextToolStripMenuItem,
             this.readCMXToolStripMenuItem,
-            this.generateCharacterFileSheetToolStripMenuItem});
+            this.generateCharacterFileSheetToolStripMenuItem,
+            this.parseIncaToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -158,6 +160,13 @@
             this.filePanel.Size = new System.Drawing.Size(384, 256);
             this.filePanel.TabIndex = 1;
             // 
+            // parseIncaToolStripMenuItem
+            // 
+            this.parseIncaToolStripMenuItem.Name = "parseIncaToolStripMenuItem";
+            this.parseIncaToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
+            this.parseIncaToolStripMenuItem.Text = "ParseInca";
+            this.parseIncaToolStripMenuItem.Click += new System.EventHandler(this.parseIncaToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -192,6 +201,7 @@
         private System.Windows.Forms.ToolStripMenuItem readCMXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parsePSO2TextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateCharacterFileSheetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parseIncaToolStripMenuItem;
     }
 }
 

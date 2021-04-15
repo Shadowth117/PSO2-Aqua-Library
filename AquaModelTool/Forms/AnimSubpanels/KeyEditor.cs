@@ -8,12 +8,11 @@ namespace AquaModelTool
 {
     public partial class KeyEditor : UserControl
     {
-        private ColorDialog colorDialog = new ColorDialog();
         AquaModelLibrary.AquaMotion motion;
         int keyNodeId;
         int keyDataId;
         int keyId;
-        bool loaded = false;
+
         public KeyEditor(AquaModelLibrary.AquaMotion aquaMotion, int nodeId, int dataId, int id)
         {
             InitializeComponent();
@@ -21,8 +20,11 @@ namespace AquaModelTool
             keyNodeId = nodeId;
             keyDataId = dataId;
             keyId = id;
-            internalTimeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId];
-            timeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId] / 0x10;
+            if(motion.motionKeys[nodeId].keyData[keyDataId].frameTimings.Count > 0)
+            {
+                internalTimeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId];
+                timeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId] / 0x10;
+            }
 
             switch (motion.motionKeys[nodeId].keyData[keyDataId].dataType)
             {
@@ -116,21 +118,47 @@ namespace AquaModelTool
 
         private void Data0UDChanged(object sender, EventArgs e)
         {
+            switch(motion.motionKeys[keyNodeId].keyData[keyDataId].dataType)
+            {
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                    var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
+                    vec.X = (float)data0UD.Value;
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
+                    break;
 
+                case 0x5:
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys[keyId] = (int)data0UD.Value;
+                    break;
+
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].floatKeys[keyId] = (float)data0UD.Value;
+                    break;
+            }
         }
+
         private void Data1UDChanged(object sender, EventArgs e)
         {
-
+            var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
+            vec.Y = (float)data0UD.Value;
+            motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
         }
 
         private void Data2UDChanged(object sender, EventArgs e)
         {
-
+            var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
+            vec.Z = (float)data0UD.Value;
+            motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
         }
 
         private void Data3UDChanged(object sender, EventArgs e)
         {
-
+            var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
+            vec.W = (float)data0UD.Value;
+            motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
         }
 
 

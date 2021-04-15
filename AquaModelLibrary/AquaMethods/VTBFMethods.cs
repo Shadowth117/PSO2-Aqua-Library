@@ -1798,6 +1798,19 @@ namespace AquaModelLibrary
                         mkey.vector4Keys.Add((Vector4)mkeyRaw[0][0xEE]);
                     }
                     break;
+                case 0x5:
+                    if (mkey.keyCount > 1)
+                    {
+                        for (int j = 0; j < mkey.keyCount; j++)
+                        {
+                            mkey.intKeys.Add(((int[])mkeyRaw[0][0xF3])[j]);
+                        }
+                    }
+                    else
+                    {
+                        mkey.intKeys.Add((int)mkeyRaw[0][0xF3]);
+                    }
+                    break;
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                 case 0x4:
                 case 0x6:
@@ -1840,8 +1853,9 @@ namespace AquaModelLibrary
             //Write frame data. Types will vary.
             switch (mkey.dataType)
             {
-                //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                 case 0x1:
+                case 0x2:
                 case 0x3:
                     handleOptionalArrayHeader(outBytes, 0xEE, mkey.keyCount, 0x4A);
                     for (int j = 0; j < mkey.frameTimings.Count; j++)
@@ -1849,7 +1863,13 @@ namespace AquaModelLibrary
                         outBytes.AddRange(ConvertStruct(mkey.vector4Keys[j]));
                     }
                     break;
-
+                case 0x5:
+                    handleOptionalArrayHeader(outBytes, 0xF3, mkey.keyCount, 0x48);
+                    for (int j = 0; j < mkey.frameTimings.Count; j++)
+                    {
+                        outBytes.AddRange(ConvertStruct(mkey.intKeys[j]));
+                    }
+                    break;
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                 case 0x4:
                 case 0x6:

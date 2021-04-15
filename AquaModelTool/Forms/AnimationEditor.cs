@@ -86,10 +86,14 @@ namespace AquaModelTool
                     selectedNode = node_here;
 
                     //Set up panel data
+                    var control = new KeyEditor(currentMotion, selectedNode.Parent.Parent.Index, selectedNode.Parent.Index, selectedNode.Index);
+                    dataPanel.Controls.Clear();
+                    dataPanel.Controls.Add(control);
+                    control.Dock = DockStyle.Fill;
 
                 } else
                 {
-                    selectedNode = null;
+                    dataPanel.Controls.Clear();
                 }
             }
 

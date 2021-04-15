@@ -2254,6 +2254,8 @@ namespace AquaModelLibrary
                 iceTracker.Add(lac.dataBlocks[i].iceName);
                 string output = "";
                 bool named = false;
+
+                output += lac.dataBlocks[i].chatCommand + ",";
                 foreach (var dict in strNameDicts)
                 {
                     if (dict.TryGetValue(lac.dataBlocks[i].commonReference1, out string str))

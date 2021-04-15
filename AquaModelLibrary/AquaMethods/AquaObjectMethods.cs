@@ -1587,13 +1587,13 @@ namespace AquaModelLibrary
 
         public static string ReadCString(BufferedStreamReader streamReader)
         {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x40));
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x40)); //Shouldn't ever be more than 0x40... in theory
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
         public static string ReadUTF16String(BufferedStreamReader streamReader, long end)
         {
-            string str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position())));
+            string str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Come up with a better way handling sometime because I hate this.
             return str.Remove(str.IndexOf(char.MinValue));
         }
 

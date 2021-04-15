@@ -59,6 +59,7 @@
             // 
             // timeUD
             // 
+            this.timeUD.Enabled = false;
             this.timeUD.Location = new System.Drawing.Point(8, 20);
             this.timeUD.Maximum = new decimal(new int[] {
             10000000,
@@ -78,7 +79,7 @@
             // data1UD
             // 
             this.data1UD.DecimalPlaces = 6;
-            this.data1UD.Location = new System.Drawing.Point(88, 70);
+            this.data1UD.Location = new System.Drawing.Point(8, 110);
             this.data1UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -97,7 +98,7 @@
             // data1Label
             // 
             this.data1Label.AutoSize = true;
-            this.data1Label.Location = new System.Drawing.Point(88, 53);
+            this.data1Label.Location = new System.Drawing.Point(8, 93);
             this.data1Label.Name = "data1Label";
             this.data1Label.Size = new System.Drawing.Size(39, 13);
             this.data1Label.TabIndex = 24;
@@ -134,7 +135,7 @@
             // data2UD
             // 
             this.data2UD.DecimalPlaces = 6;
-            this.data2UD.Location = new System.Drawing.Point(168, 70);
+            this.data2UD.Location = new System.Drawing.Point(8, 150);
             this.data2UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -153,7 +154,7 @@
             // data2Label
             // 
             this.data2Label.AutoSize = true;
-            this.data2Label.Location = new System.Drawing.Point(168, 53);
+            this.data2Label.Location = new System.Drawing.Point(8, 133);
             this.data2Label.Name = "data2Label";
             this.data2Label.Size = new System.Drawing.Size(39, 13);
             this.data2Label.TabIndex = 28;
@@ -162,7 +163,7 @@
             // data3UD
             // 
             this.data3UD.DecimalPlaces = 6;
-            this.data3UD.Location = new System.Drawing.Point(248, 70);
+            this.data3UD.Location = new System.Drawing.Point(8, 190);
             this.data3UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -181,7 +182,7 @@
             // data3Label
             // 
             this.data3Label.AutoSize = true;
-            this.data3Label.Location = new System.Drawing.Point(248, 53);
+            this.data3Label.Location = new System.Drawing.Point(8, 173);
             this.data3Label.Name = "data3Label";
             this.data3Label.Size = new System.Drawing.Size(39, 13);
             this.data3Label.TabIndex = 30;
@@ -189,6 +190,7 @@
             // 
             // internalTimeUD
             // 
+            this.internalTimeUD.Enabled = false;
             this.internalTimeUD.Location = new System.Drawing.Point(89, 20);
             this.internalTimeUD.Maximum = new decimal(new int[] {
             10000000,
@@ -231,7 +233,7 @@
             this.Controls.Add(this.timeUD);
             this.Controls.Add(this.timingLabel);
             this.Name = "KeyEditor";
-            this.Size = new System.Drawing.Size(378, 204);
+            this.Size = new System.Drawing.Size(225, 253);
             ((System.ComponentModel.ISupportInitialize)(this.timeUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.data1UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.data0UD)).EndInit();
