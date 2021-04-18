@@ -7,6 +7,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static AquaModelLibrary.CharacterMakingIndex;
+using static AquaModelLibrary.VTBFMethods;
 
 namespace AquaModelLibrary
 {
@@ -41,7 +43,7 @@ namespace AquaModelLibrary
                 else if (type.Equals("VTBF"))
                 {
                     //VTBF
-                    return null;
+                    return ReadVTBFCMX(streamReader);
                 }
                 else
                 {
@@ -49,6 +51,89 @@ namespace AquaModelLibrary
                     return null;
                 }
             }
+        }
+        
+        public static CharacterMakingIndex ReadVTBFCMX(BufferedStreamReader streamReader)
+        {
+            var cmx = new CharacterMakingIndex();
+            /*
+            //Seek to and read the DOC tag's 
+            streamReader.Seek(0x1C, SeekOrigin.Current);
+            int cmxCount = streamReader.Read<ushort>();
+            streamReader.Seek(0x2, SeekOrigin.Current);
+            //Read tags, get id from subtag 0xFF, and assign to dictionary with that. 
+            for (int i = 0; i < cmxCount; i++)
+            {
+                List<Dictionary<int, object>> data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
+                switch (tagType)
+                {
+                    case "ACCE":
+                        parts.acceTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "BODY":
+                        parts.bodyTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "CARM":
+                        parts.carmTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "CLEG":
+                        parts.clegTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "BDP1":
+                        parts.bdp1Tags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "BDP2":
+                        parts.bdp2Tags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "FACE":
+                        parts.faceTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "FCMN":
+                        parts.fcmnTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "FCP1":
+                        parts.fcp1Tags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "FCP2":
+                        parts.fcp2Tags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "EYE ":
+                        parts.eyeTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "EYEB":
+                        parts.eyeBTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "EYEL":
+                        parts.eyeLTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "HAIR":
+                        parts.hairTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "COL ":
+                        parts.colTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "BBLY":
+                        parts.bblyTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "BCLN":
+                        parts.bclnTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "LCLN":
+                        parts.lclnTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "ACLN":
+                        parts.aclnTags.Add((int)data[0][0xFF], data);
+                        break;
+                    case "ICLN":
+                        parts.iclnTags.Add((int)data[0][0xFF], data);
+                        break;
+                    default:
+                        throw new Exception($"Unexpected tag type {tagType}");
+                        break;
+                }
+            }
+            */
+            return cmx;
         }
 
         public static CharacterMakingIndex ReadNIFLCMX(BufferedStreamReader streamReader, int offset)
@@ -58,7 +143,7 @@ namespace AquaModelLibrary
             cmx.rel0 = streamReader.Read<AquaCommon.REL0>();
 
             streamReader.Seek(cmx.rel0.REL0DataStart + offset, SeekOrigin.Begin);
-            cmx.cmxTable = streamReader.Read<CharacterMakingIndex.CMXTable>();
+            cmx.cmxTable = streamReader.Read<CMXTable>();
 
             ReadBODY(streamReader, offset, cmx.cmxTable.bodyAddress, cmx.cmxTable.bodyCount, cmx.costumeDict);
             ReadBODY(streamReader, offset, cmx.cmxTable.carmAddress, cmx.cmxTable.carmCount, cmx.carmDict);
@@ -93,7 +178,7 @@ namespace AquaModelLibrary
             streamReader.Seek(cmx.cmxTable.unkAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < cmx.cmxTable.unkCount; i++)
             {
-                cmx.unkList.Add(streamReader.Read<CharacterMakingIndex.Unk_IntField>());
+                cmx.unkList.Add(streamReader.Read<Unk_IntField>());
             }
             ReadIndexLinks(streamReader, offset, cmx.cmxTable.costumeIdLinkAddress, cmx.cmxTable.costumeIdLinkCount, cmx.costumeIdLink);
 
@@ -113,26 +198,26 @@ namespace AquaModelLibrary
             streamReader.Seek(cmx.cmxTable.hornAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < cmx.cmxTable.hornCount; i++)
             {
-                var ngsHornObj = new CharacterMakingIndex.NGS_HornObject();
-                ngsHornObj.ngsHorn = streamReader.Read<CharacterMakingIndex.NGS_Horn>();
+                var ngsHornObj = new NGS_HornObject();
+                ngsHornObj.ngsHorn = streamReader.Read<NGS_Horn>();
                 long bookmark = streamReader.Position();
 
                 streamReader.Seek(ngsHornObj.ngsHorn.unkSubStructPtr + offset, SeekOrigin.Begin);
-                ngsHornObj.substruct = streamReader.Read<CharacterMakingIndex.NGS_Unk_Substruct>();
+                ngsHornObj.substruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsHornObj.ngsHorn.dataStringPtr + offset, SeekOrigin.Begin);
-                ngsHornObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+                ngsHornObj.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 cmx.ngsHornList.Add(ngsHornObj);
 
                 //Some ids can't be parsed and indexed properly. In this case, skip them. They seemingly don't have associated files anyways. 
-                if (!ngsHornObj.dataString.Contains(CharacterMakingIndex.rebootHornDataStr))
+                if (!ngsHornObj.dataString.GetString().Contains(rebootHornDataStr))
                 {
                     continue;    
                 }
 
                 //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
-                int id = Int32.Parse(ngsHornObj.dataString.Replace(CharacterMakingIndex.rebootHornDataStr, ""));
+                int id = Int32.Parse(ngsHornObj.dataString.GetString().Replace(rebootHornDataStr, ""));
 
                 //There aren't texture strings to double check this like with the teeth and ears so we have to assume this is correct. Thankfully, the game doesn't appear to have any conflicts here so far.
 
@@ -147,31 +232,31 @@ namespace AquaModelLibrary
             streamReader.Seek(cmx.cmxTable.teethAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < cmx.cmxTable.teethCount; i++)
             {
-                var ngsTeethObj = new CharacterMakingIndex.NGS_TeethObject();
-                ngsTeethObj.ngsTeeth = streamReader.Read<CharacterMakingIndex.NGS_Teeth>();
+                var ngsTeethObj = new NGS_TeethObject();
+                ngsTeethObj.ngsTeeth = streamReader.Read<NGS_Teeth>();
                 long bookmark = streamReader.Position();
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.unkSubStructPtr + offset, SeekOrigin.Begin);
-                ngsTeethObj.substruct = streamReader.Read<CharacterMakingIndex.NGS_Unk_Substruct>();
+                ngsTeethObj.substruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.dataStringPtr + offset, SeekOrigin.Begin);
-                ngsTeethObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
-                int id = Int32.Parse(ngsTeethObj.dataString.Replace(CharacterMakingIndex.rebootTeethDataStr, ""));
-                string tempId2 = ngsTeethObj.texString1.Replace(CharacterMakingIndex.rebootTeethDataStr, "");
+                int id = Int32.Parse(ngsTeethObj.dataString.GetString().Replace(rebootTeethDataStr, ""));
+                string tempId2 = ngsTeethObj.texString1.GetString().Replace(rebootTeethDataStr, "");
                 int id2 = Int32.Parse(tempId2.Replace("_d.dds", ""));
 
                 //Some of the more debug looking stuff recycles the data names. This is hacky, but getting the id from these strings is already hacky.
@@ -190,34 +275,34 @@ namespace AquaModelLibrary
             streamReader.Seek(cmx.cmxTable.earAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < cmx.cmxTable.earCount; i++)
             {
-                var ngsEarObj = new CharacterMakingIndex.NGS_EarObject();
-                ngsEarObj.ngsEar = streamReader.Read<CharacterMakingIndex.NGS_Ear>();
+                var ngsEarObj = new NGS_EarObject();
+                ngsEarObj.ngsEar = streamReader.Read<NGS_Ear>();
                 long bookmark = streamReader.Position();
 
                 streamReader.Seek(ngsEarObj.ngsEar.unkSubStructPtr + offset, SeekOrigin.Begin);
-                ngsEarObj.subStruct = streamReader.Read<CharacterMakingIndex.NGS_Unk_Substruct>();
+                ngsEarObj.subStruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsEarObj.ngsEar.dataStringPtr + offset, SeekOrigin.Begin);
-                ngsEarObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString5Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
 
                 //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
-                int id = Int32.Parse(ngsEarObj.dataString.Replace(CharacterMakingIndex.rebootEarDataStr, ""));
-                string tempId2 = ngsEarObj.texString1.Replace(CharacterMakingIndex.rebootEarDataStr, "");
+                int id = Int32.Parse(ngsEarObj.dataString.GetString().Replace(rebootEarDataStr, ""));
+                string tempId2 = ngsEarObj.texString1.GetString().Replace(rebootEarDataStr, "");
                 int id2 = Int32.Parse(tempId2.Replace("_d.dds", ""));
                 
                 //Some of the more debug looking stuff recycles the data names. This is hacky, but getting the id from these strings is already hacky.
@@ -230,142 +315,387 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void ReadBODY(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.BODY> dict)
+        private static void ReadBODY(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BODYObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var body = streamReader.Read<CharacterMakingIndex.BODY>();
-                dict.Add(body.id, body); //Set like this so we can access it by id later if we want. 
+                BODYObject body = new BODYObject();
+                body.body = streamReader.Read<BODY>();
+
+                streamReader.Seek(body.body.dataStringPtr + offset, SeekOrigin.Begin);
+                body.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(body.body.texString1Ptr + offset, SeekOrigin.Begin);
+                body.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(body.body.texString2Ptr + offset, SeekOrigin.Begin);
+                body.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(body.body.texString3Ptr + offset, SeekOrigin.Begin);
+                body.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(body.body.texString4Ptr + offset, SeekOrigin.Begin);
+                body.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(body.body.texString5Ptr + offset, SeekOrigin.Begin);
+                body.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
+                body.texString6.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(body.body.id, body); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadBBLY(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.BBLY> dict)
+        private static void ReadBBLY(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BBLYObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var bbly = streamReader.Read<CharacterMakingIndex.BBLY>();
-                dict.Add(bbly.id, bbly); //Set like this so we can access it by id later if we want. 
+                BBLYObject bbly = new BBLYObject();
+                bbly.bbly = streamReader.Read<BBLY>();
+
+                streamReader.Seek(bbly.bbly.texString1Ptr + offset, SeekOrigin.Begin);
+                bbly.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(bbly.bbly.texString2Ptr + offset, SeekOrigin.Begin);
+                bbly.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(bbly.bbly.texString3Ptr + offset, SeekOrigin.Begin);
+                bbly.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(bbly.bbly.texString4Ptr + offset, SeekOrigin.Begin);
+                bbly.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(bbly.bbly.texString5Ptr + offset, SeekOrigin.Begin);
+                bbly.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(bbly.bbly.id, bbly); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadSticker(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.Sticker> dict)
+        private static void ReadSticker(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, StickerObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var sticker = streamReader.Read<CharacterMakingIndex.Sticker>();
-                dict.Add(sticker.id, sticker); //Set like this so we can access it by id later if we want. 
+                StickerObject sticker = new StickerObject();
+                sticker.sticker = streamReader.Read<Sticker>();
+
+                streamReader.Seek(sticker.sticker.texStringPtr + offset, SeekOrigin.Begin);
+                sticker.texString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(sticker.sticker.id, sticker); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.FACE> dict)
+        private static void ReadFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, FACEObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var face = streamReader.Read<CharacterMakingIndex.FACE>();
-                dict.Add(face.id, face); //Set like this so we can access it by id later if we want. 
+                FACEObject face = new FACEObject();
+                face.face = streamReader.Read<FACE>();
+
+                streamReader.Seek(face.face.dataStringPtr + offset, SeekOrigin.Begin);
+                face.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(face.face.texString1Ptr + offset, SeekOrigin.Begin);
+                face.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(face.face.texString2Ptr + offset, SeekOrigin.Begin);
+                face.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(face.face.texString3Ptr + offset, SeekOrigin.Begin);
+                face.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(face.face.texString4Ptr + offset, SeekOrigin.Begin);
+                face.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(face.face.texString5Ptr + offset, SeekOrigin.Begin);
+                face.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
+                face.texString6.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(face.face.id, face); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadFCMN(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.FCMN> dict)
+        private static void ReadFCMN(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, FCMNObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var fcmn = streamReader.Read<CharacterMakingIndex.FCMN>();
-                dict.Add(fcmn.id, fcmn); //Set like this so we can access it by id later if we want. 
+                FCMNObject fcmn = new FCMNObject();
+                fcmn.fcmn = streamReader.Read<FCMN>();
+
+                streamReader.Seek(fcmn.fcmn.proportionAnimPtr + offset, SeekOrigin.Begin);
+                fcmn.proportionAnim.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim1Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim2Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim3Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim4Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim5Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim6Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim6.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim7Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim7.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim8Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim8.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim9Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim9.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcmn.fcmn.faceAnim10Ptr + offset, SeekOrigin.Begin);
+                fcmn.faceAnim10.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(fcmn.fcmn.id, fcmn); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadFCP(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.FCP> dict)
+        private static void ReadFCP(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, FCPObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var fcp = streamReader.Read<CharacterMakingIndex.FCP>();
-                dict.Add(fcp.id, fcp); //Set like this so we can access it by id later if we want. 
+                FCPObject fcp = new FCPObject();
+                fcp.fcp = streamReader.Read<FCP>();
+
+                streamReader.Seek(fcp.fcp.texString1Ptr + offset, SeekOrigin.Begin);
+                fcp.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcp.fcp.texString2Ptr + offset, SeekOrigin.Begin);
+                fcp.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcp.fcp.texString3Ptr + offset, SeekOrigin.Begin);
+                fcp.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(fcp.fcp.texString4Ptr + offset, SeekOrigin.Begin);
+                fcp.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(fcp.fcp.id, fcp); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadNGSFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.NGS_FACE> dict)
+        private static void ReadNGSFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, NGS_FACEObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var ngsFace = streamReader.Read<CharacterMakingIndex.NGS_FACE>();
-                dict.Add(ngsFace.id, ngsFace); //Set like this so we can access it by id later if we want. 
+                NGS_FACEObject ngsFace = new NGS_FACEObject();
+                ngsFace.ngsFace = streamReader.Read<NGS_FACE>();
+
+                streamReader.Seek(ngsFace.ngsFace.texString1Ptr + offset, SeekOrigin.Begin);
+                ngsFace.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsFace.ngsFace.texString2Ptr + offset, SeekOrigin.Begin);
+                ngsFace.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsFace.ngsFace.texString3Ptr + offset, SeekOrigin.Begin);
+                ngsFace.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsFace.ngsFace.texString4Ptr + offset, SeekOrigin.Begin);
+                ngsFace.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(ngsFace.ngsFace.id, ngsFace); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadACCE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.ACCE> dict)
+        private static void ReadACCE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, ACCEObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var acce = streamReader.Read<CharacterMakingIndex.ACCE>();
-                dict.Add(acce.id, acce); //Set like this so we can access it by id later if we want. 
+                ACCEObject acce = new ACCEObject();
+                acce.acce = streamReader.Read<ACCE>();
+
+                streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
+                acce.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach1Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach2Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach3Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach4Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach5Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach6Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach6.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach7Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach7.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
+                acce.nodeAttach8.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(acce.acce.id, acce); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadEYE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.EYE> dict)
+        private static void ReadEYE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, EYEObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var eye = streamReader.Read<CharacterMakingIndex.EYE>();
-                dict.Add(eye.id, eye); //Set like this so we can access it by id later if we want. 
+                EYEObject eye = new EYEObject();
+                eye.eye = streamReader.Read<EYE>();
+
+                streamReader.Seek(eye.eye.texString1Ptr + offset, SeekOrigin.Begin);
+                eye.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eye.eye.texString2Ptr + offset, SeekOrigin.Begin);
+                eye.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eye.eye.texString3Ptr + offset, SeekOrigin.Begin);
+                eye.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eye.eye.texString4Ptr + offset, SeekOrigin.Begin);
+                eye.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eye.eye.texString5Ptr + offset, SeekOrigin.Begin);
+                eye.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(eye.eye.id, eye); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadNGSSKIN(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.NGS_Skin> dict)
+        private static void ReadNGSSKIN(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, NGS_SKINObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var ngsSkin = streamReader.Read<CharacterMakingIndex.NGS_Skin>();
-                dict.Add(ngsSkin.id, ngsSkin); //Set like this so we can access it by id later if we want. 
+                NGS_SKINObject ngsSkin = new NGS_SKINObject();
+                ngsSkin.ngsSkin = streamReader.Read<NGS_Skin>();
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString1Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString2Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString3Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString4Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString5Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString6.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString7Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString7.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(ngsSkin.ngsSkin.id, ngsSkin); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadEYEB(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.EYEB> dict)
+        private static void ReadEYEB(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, EYEBObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var eyeb = streamReader.Read<CharacterMakingIndex.EYEB>();
-                dict.Add(eyeb.id, eyeb); //Set like this so we can access it by id later if we want. 
+                EYEBObject eyeb = new EYEBObject();
+                eyeb.eyeb = streamReader.Read<EYEB>();
+
+                streamReader.Seek(eyeb.eyeb.texString1Ptr + offset, SeekOrigin.Begin);
+                eyeb.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eyeb.eyeb.texString2Ptr + offset, SeekOrigin.Begin);
+                eyeb.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eyeb.eyeb.texString3Ptr + offset, SeekOrigin.Begin);
+                eyeb.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(eyeb.eyeb.texString4Ptr + offset, SeekOrigin.Begin);
+                eyeb.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(eyeb.eyeb.id, eyeb); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadHAIR(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.HAIR> dict)
+        private static void ReadHAIR(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, HAIRObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var hair = streamReader.Read<CharacterMakingIndex.HAIR>();
-                dict.Add(hair.id, hair); //Set like this so we can access it by id later if we want. 
+                HAIRObject hair = new HAIRObject();
+                hair.hair = streamReader.Read<HAIR>();
+
+                streamReader.Seek(hair.hair.dataStringPtr + offset, SeekOrigin.Begin);
+                hair.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString1Ptr + offset, SeekOrigin.Begin);
+                hair.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString2Ptr + offset, SeekOrigin.Begin);
+                hair.texString2.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString3Ptr + offset, SeekOrigin.Begin);
+                hair.texString3.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString4Ptr + offset, SeekOrigin.Begin);
+                hair.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString5Ptr + offset, SeekOrigin.Begin);
+                hair.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString6Ptr + offset, SeekOrigin.Begin);
+                hair.texString6.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(hair.hair.texString7Ptr + offset, SeekOrigin.Begin);
+                hair.texString7.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(hair.hair.id, hair); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadNIFLCOL(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.NIFL_COL> dict)
+        private static void ReadNIFLCOL(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, NIFL_COLObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var COL = streamReader.Read<CharacterMakingIndex.NIFL_COL>();
-                dict.Add(COL.id, COL); //Set like this so we can access it by id later if we want. 
+                NIFL_COLObject col = new NIFL_COLObject();
+                col.niflCol = streamReader.Read<NIFL_COL>();
+
+                streamReader.Seek(col.niflCol.textStringPtr + offset, SeekOrigin.Begin);
+                col.textString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                dict.Add(col.niflCol.id, col); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, CharacterMakingIndex.BCLN> dict)
+        private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BCLN> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                var bcln = streamReader.Read<CharacterMakingIndex.BCLN>();
+                var bcln = streamReader.Read<BCLN>();
                 if (!dict.ContainsKey(bcln.id))
                 {
                     dict.Add(bcln.id, bcln); //Set like this so we can access it by id later if we want. 
@@ -473,13 +803,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}{typeString}{adjustedId}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}{typeString}{adjustedId}_ex.ice";
+                    string reb = $"{rebootStart}{typeString}{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -488,7 +818,7 @@ namespace AquaModelLibrary
 
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -499,12 +829,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
-                    string classic = $"{CharacterMakingIndex.classicStart}bd_{finalId}.ice";
+                    string classic = $"{classicStart}bd_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -626,13 +956,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}bw_{adjustedId}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}bw_{adjustedId}_ex.ice";
+                    string reb = $"{rebootStart}bw_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}bw_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -641,7 +971,7 @@ namespace AquaModelLibrary
                     output = AddBasewearExtraFiles(output, reb, pso2_binDir, false);
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -653,12 +983,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
-                    string classic = $"{CharacterMakingIndex.classicStart}bw_{finalId}.ice";
+                    string classic = $"{classicStart}bw_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -746,13 +1076,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}iw_{adjustedId}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}iw_{adjustedId}_ex.ice";
+                    string reb = $"{rebootStart}iw_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}iw_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -760,7 +1090,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -771,12 +1101,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
-                    string classic = $"{CharacterMakingIndex.classicStart}iw_{finalId}.ice";
+                    string classic = $"{classicStart}iw_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -860,13 +1190,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}am_{adjustedId}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}am_{adjustedId}_ex.ice";
+                    string reb = $"{rebootStart}am_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}am_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -874,7 +1204,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -885,12 +1215,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
-                    string classic = $"{CharacterMakingIndex.classicStart}am_{finalId}.ice";
+                    string classic = $"{classicStart}am_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -974,13 +1304,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}lg_{adjustedId}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}lg_{adjustedId}_ex.ice";
+                    string reb = $"{rebootStart}lg_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}lg_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -988,7 +1318,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -999,12 +1329,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
-                    string classic = $"{CharacterMakingIndex.classicStart}lg_{finalId}.ice";
+                    string classic = $"{classicStart}lg_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1087,13 +1417,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}b1_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}b1_{id}_ex.ice";
+                    string reb = $"{rebootStart}b1_{id}.ice";
+                    string rebEx = $"{rebootExStart}b1_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1101,7 +1431,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1112,12 +1442,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}b1_{finalId}.ice";
+                    string classic = $"{classicStart}b1_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1216,13 +1546,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}b2_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}b2_{id}_ex.ice";
+                    string reb = $"{rebootStart}b2_{id}.ice";
+                    string rebEx = $"{rebootExStart}b2_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1230,7 +1560,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1241,12 +1571,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}b2_{finalId}.ice";
+                    string classic = $"{classicStart}b2_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1301,13 +1631,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}hr_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}hr_{id}_ex.ice";
+                    string reb = $"{rebootStart}hr_{id}.ice";
+                    string rebEx = $"{rebootExStart}hr_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1317,7 +1647,7 @@ namespace AquaModelLibrary
                     //Not used?
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1328,12 +1658,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}hr_{finalId}.ice";
+                    string classic = $"{classicStart}hr_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1405,13 +1735,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}ey_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}ey_{id}_ex.ice";
+                    string reb = $"{rebootStart}ey_{id}.ice";
+                    string rebEx = $"{rebootExStart}ey_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1421,7 +1751,7 @@ namespace AquaModelLibrary
                     //No hq used?
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1432,12 +1762,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}ey_{finalId}.ice";
+                    string classic = $"{classicStart}ey_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1497,13 +1827,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}eb_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}eb_{id}_ex.ice";
+                    string reb = $"{rebootStart}eb_{id}.ice";
+                    string rebEx = $"{rebootExStart}eb_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1513,7 +1843,7 @@ namespace AquaModelLibrary
                     //Not used?
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1524,12 +1854,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}eb_{finalId}.ice";
+                    string classic = $"{classicStart}eb_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1590,13 +1920,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}el_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}el_{id}_ex.ice";
+                    string reb = $"{rebootStart}el_{id}.ice";
+                    string rebEx = $"{rebootExStart}el_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1606,7 +1936,7 @@ namespace AquaModelLibrary
                     //Not used?
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1617,12 +1947,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}el_{finalId}.ice";
+                    string classic = $"{classicStart}el_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1682,13 +2012,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}ac_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}ac_{id}_ex.ice";
+                    string reb = $"{rebootStart}ac_{id}.ice";
+                    string rebEx = $"{rebootExStart}ac_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1698,7 +2028,7 @@ namespace AquaModelLibrary
                     //No HQ Accessories?
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1709,12 +2039,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}ac_{finalId}.ice";
+                    string classic = $"{classicStart}ac_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1767,13 +2097,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}sk_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}sk_{id}_ex.ice";
+                    string reb = $"{rebootStart}sk_{id}.ice";
+                    string rebEx = $"{rebootExStart}sk_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1781,7 +2111,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1792,12 +2122,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}sk_{finalId}.ice";
+                    string classic = $"{classicStart}sk_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1858,13 +2188,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}f1_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}f1_{id}_ex.ice";
+                    string reb = $"{rebootStart}f1_{id}.ice";
+                    string rebEx = $"{rebootExStart}f1_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1872,7 +2202,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1883,12 +2213,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}f1_{finalId}.ice";
+                    string classic = $"{classicStart}f1_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1952,13 +2282,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}f1_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}f1_{id}_ex.ice";
+                    string reb = $"{rebootStart}f1_{id}.ice";
+                    string rebEx = $"{rebootExStart}f1_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1966,7 +2296,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -1977,12 +2307,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}f1_{finalId}.ice";
+                    string classic = $"{classicStart}f1_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2065,13 +2395,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}fc_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}fc_{id}_ex.ice";
+                    string reb = $"{rebootStart}fc_{id}.ice";
+                    string rebEx = $"{rebootExStart}fc_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2079,7 +2409,7 @@ namespace AquaModelLibrary
                     output += "\n";
 
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2090,12 +2420,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}fc_{finalId}.ice";
+                    string classic = $"{classicStart}fc_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2177,24 +2507,24 @@ namespace AquaModelLibrary
                 }
 
                 int voiceNum = -1;
-                if(str.Contains(CharacterMakingIndex.voiceCman))
+                if(str.Contains(voiceCman))
                 {
                     id = 0;
-                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceCman, ""));
-                } else if (str.Contains(CharacterMakingIndex.voiceCwoman))
+                    voiceNum = Int32.Parse(str.Replace(voiceCman, ""));
+                } else if (str.Contains(voiceCwoman))
                 {
                     id = 1;
-                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceCwoman, ""));
+                    voiceNum = Int32.Parse(str.Replace(voiceCwoman, ""));
                 }
-                else if (str.Contains(CharacterMakingIndex.voiceMan))
+                else if (str.Contains(voiceMan))
                 {
                     id = 2;
-                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceMan, ""));
+                    voiceNum = Int32.Parse(str.Replace(voiceMan, ""));
                 }
-                else if (str.Contains(CharacterMakingIndex.voiceWoman))
+                else if (str.Contains(voiceWoman))
                 {
                     id = 3;
-                    voiceNum = Int32.Parse(str.Replace(CharacterMakingIndex.voiceWoman, ""));
+                    voiceNum = Int32.Parse(str.Replace(voiceWoman, ""));
                 }
                 string conversion = "11_sound_voice_";
                 if (voiceNum > 31)
@@ -2204,12 +2534,12 @@ namespace AquaModelLibrary
 
                 var finalName = str.Replace("11_voice_", conversion);
 
-                string classic = $"{CharacterMakingIndex.playerVoiceStart}{finalName}.ice";
+                string classic = $"{playerVoiceStart}{finalName}.ice";
 
                 var classicHash = GetFileHash(classic);
 
                 output += classicHash;
-                if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                 {
                     output += ", (Not found)";
                 }
@@ -2275,7 +2605,7 @@ namespace AquaModelLibrary
                     output = $"[Unnamed {lac.dataBlocks[i].commonReference1}]" + output;
                 }
 
-                string classic = $"{CharacterMakingIndex.lobbyActionStart}{lac.dataBlocks[i].iceName}";
+                string classic = $"{lobbyActionStart}{lac.dataBlocks[i].iceName}";
 
                 var classicHash = GetFileHash(classic);
 
@@ -2290,7 +2620,7 @@ namespace AquaModelLibrary
                     output += (", Female");
                 }
 
-                if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                 {
                     output += ", (Not found)";
                 }
@@ -2341,13 +2671,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}ea_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}ea_{id}_ex.ice";
+                    string reb = $"{rebootStart}ea_{id}.ice";
+                    string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2356,7 +2686,7 @@ namespace AquaModelLibrary
 
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2367,12 +2697,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}ea_{finalId}.ice";
+                    string classic = $"{classicStart}ea_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2425,13 +2755,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}de_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}de_{id}_ex.ice";
+                    string reb = $"{rebootStart}de_{id}.ice";
+                    string rebEx = $"{rebootExStart}de_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2440,7 +2770,7 @@ namespace AquaModelLibrary
 
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2451,12 +2781,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}de_{finalId}.ice";
+                    string classic = $"{classicStart}de_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2514,13 +2844,13 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{CharacterMakingIndex.rebootStart}hn_{id}.ice";
-                    string rebEx = $"{CharacterMakingIndex.rebootExStart}hn_{id}_ex.ice";
+                    string reb = $"{rebootStart}hn_{id}.ice";
+                    string rebEx = $"{rebootExStart}hn_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2529,7 +2859,7 @@ namespace AquaModelLibrary
 
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rebExHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2540,12 +2870,12 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{CharacterMakingIndex.classicStart}hn_{finalId}.ice";
+                    string classic = $"{classicStart}hn_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
                     output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, classicHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
                     }
@@ -2568,12 +2898,12 @@ namespace AquaModelLibrary
             string hnCheck = GetFileHash(fname.Replace(typeString, "_hn_")); //If not basewear, hn. If basewear, ho
 
             //_rp alt model
-            if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rpCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
                 output += ",[Alt Model]," + rpCheck + "\n";
             }
             //Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, bmCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
             {
                 output += ",[Aqv]," + bmCheck + "\n";
             }
@@ -2582,7 +2912,7 @@ namespace AquaModelLibrary
             if (isClassic)
             {
                 //Hand textures
-                if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, hnCheck)))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
                     output += ",[Hand Textures]," + hnCheck + "\n";
                 }
@@ -2597,7 +2927,7 @@ namespace AquaModelLibrary
             string hnCheck = GetFileHash(fname.Replace("bw", "ho")); //If not basewear, hn. If basewear, ho
 
             //_rp alt model
-            if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, rpCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
                 output += ",[Alt Model]," + rpCheck + "\n";
             }
@@ -2606,7 +2936,7 @@ namespace AquaModelLibrary
             if(isClassic)
             {
                 //Hand textures
-                if (File.Exists(Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, hnCheck)))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
                     output += ",[Hand Textures]," + hnCheck + "\n";
                 }

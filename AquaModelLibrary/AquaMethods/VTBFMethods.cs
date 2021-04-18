@@ -11,6 +11,8 @@ using static AquaModelLibrary.AquaObjectMethods;
 using System.Windows;
 using static AquaModelLibrary.AquaMotion;
 using static AquaModelLibrary.ClassicAquaObject;
+using static AquaModelLibrary.CharacterMakingIndex;
+using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
@@ -1884,6 +1886,112 @@ namespace AquaModelLibrary
             }
 
             return outBytes.ToArray();
+        }
+
+        public static BODYObject parseBODY(List<Dictionary<int, object>> bodyRaw)
+        {
+            BODYObject body = new BODYObject();
+            body.body.id = (int)bodyRaw[0][0xFF];
+
+            body.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 0));
+            body.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 1));
+            body.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 2));
+            body.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 3));
+            body.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 4));
+            body.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 5));
+            //TexString6 seemingly isn't stored in vtbf? Might correct later if that's not really the case.
+
+            body.body.int_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
+            body.body.int_0xA_0x8 = GetObject<int>(bodyRaw[0], 0xA);
+            body.body.reference_id = GetObject<int>(bodyRaw[0], 0xD);
+            body.body.flt_0x8 = GetObject<float>(bodyRaw[0], 0x8);
+            body.body.flt_0xB = GetObject<float>(bodyRaw[0], 0xB);
+
+            //Todo, handle default junk data added with NIFL
+
+            return body;
+        }
+
+        public static byte[] toBODY(BODYObject body)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            addBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(body.body.id));
+
+            string dataStr = body.dataString.GetString();
+            addBytes(outBytes, 0x00, 0x2, (byte)dataStr.Length, Encoding.UTF8.GetBytes(dataStr));
+            string texStr1 = body.texString1.GetString();
+            addBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
+            string texStr2 = body.texString2.GetString();
+            addBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
+            string texStr3 = body.texString3.GetString();
+            addBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
+            string texStr4 = body.texString4.GetString();
+            addBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
+            string texStr5 = body.texString5.GetString();
+            addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
+
+            addBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body.int_0xA_0x8));
+            addBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body.flt_0xB));
+            addBytes(outBytes, 0xC, 0x9, BitConverter.GetBytes((int)0));
+            addBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
+            addBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
+            addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body.flt_0x8));
+            addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body.int_0x9_0x9));
+
+            WriteTagHeader(outBytes, "BODY", 0x0, 0xE);
+
+            return outBytes.ToArray();
+        }
+
+        public static BBLYObject parseBBLY(List<Dictionary<int, object>> bblyRaw)
+        {
+            BBLYObject bbly = new BBLYObject();
+            bbly.bbly.id = (int)bblyRaw[0][0xFF];
+
+            bbly.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x10));
+            bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11));
+            bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12));
+            bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13));
+            bbly.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x14));
+
+            //Todo, handle default junk data added with NIFL
+
+            return bbly;
+        }
+
+        public static byte[] toBBLY(BBLYObject bbly)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            addBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(bbly.bbly.id));
+
+            string texStr1 = bbly.texString1.GetString();
+            addBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
+            string texStr2 = bbly.texString2.GetString();
+            addBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
+            string texStr3 = bbly.texString3.GetString();
+            addBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
+            string texStr4 = bbly.texString4.GetString();
+            addBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
+            string texStr5 = bbly.texString5.GetString();
+            addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
+
+            WriteTagHeader(outBytes, "BBLY", 0x0, 0xE);
+
+            return outBytes.ToArray();
+        }
+
+        //Safely retrieves objects in the case that they don't exist in the given dictionary
+        public static T GetObject<T>(Dictionary<int, object> dict, int key)
+        {
+            if(dict.ContainsKey(key))
+            {
+                return (T)dict[key];
+            } else
+            {
+                return default(T);
+            }
         }
 
         private static void WriteTagHeader(List<byte> outBytes, string tagString, ushort pointerCount, ushort subtagCount)

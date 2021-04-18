@@ -210,16 +210,11 @@ namespace AquaModelTool
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
                         aquaUI.aqua.ReadMotion(file);
-                        control = new AnimationEditor(aquaUI.aqua.aquaMotions[0]);
-                        if (aquaUI.aqua.aquaMotions[0].anims[0].nifl.magic != 0)
-                        {
-                            isNIFL = true;
-                        }
-                        else
-                        {
-                            isNIFL = false;
-                        }
-                        setModelOptions(false);
+#if DEBUG
+                        var test2 = aquaUI.aqua.aquaMotions[0].anims[0];
+                        test2 = aquaUI.aqua.aquaMotions[0].anims[0];
+#endif
+                        control = SetMotion();
                         break;
                     default:
                         MessageBox.Show("Invalid File");
@@ -229,6 +224,21 @@ namespace AquaModelTool
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();
             }
+        }
+
+        private UserControl SetMotion()
+        {
+            UserControl control = new AnimationEditor(aquaUI.aqua.aquaMotions[0]);
+            if (aquaUI.aqua.aquaMotions[0].anims[0].nifl.magic != 0)
+            {
+                isNIFL = true;
+            }
+            else
+            {
+                isNIFL = false;
+            }
+            setModelOptions(false);
+            return control;
         }
 
         private void setModelOptions(bool setting)
@@ -384,6 +394,58 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 aquaUI.aqua.ReadItNameCacheAppendix(openFileDialog.FileName);
+            }
+        }
+
+        private void readBonesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 Bones",
+                Filter = "PSO2 Bones (*.aqn, *.trn)|*.aqn;*.trn"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.ReadBones(openFileDialog.FileName);
+            }
+        }
+
+        private void updateClassicPlayerAnimToNGSAnimToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 Bones",
+                Filter = "PSO2 Bones (*.aqn)|*.aqn"
+            };
+            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.aquaBones.Clear();
+                aquaUI.aqua.ReadBones(openFileDialog.FileName);
+                var data = new AquaModelLibrary.PlayerData();
+                data.GetDefaultTransformsFromBones(aquaUI.aqua.aquaBones[0]);
+
+                openFileDialog = new OpenFileDialog()
+                {
+                    Title = "Select Classic PSO2 Player Animation",
+                    Filter = "PSO2 Player Animation (*.aqm)|*.aqm",
+                    FileName = ""
+                };
+                if(openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    aquaUI.aqua.aquaBones.Clear();
+                    aquaUI.aqua.aquaMotions.Clear();
+                    aquaUI.aqua.ReadMotion(openFileDialog.FileName);
+                    data.UpdateToNGSPlayerMotion(aquaUI.aqua.aquaMotions[0].anims[0]);
+
+                    currentFile = openFileDialog.FileName;
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+
+                    filePanel.Controls.Clear();
+                    var control = SetMotion();
+                    filePanel.Controls.Add(control);
+                    control.Dock = DockStyle.Fill;
+                    control.BringToFront();
+                }
             }
         }
     }

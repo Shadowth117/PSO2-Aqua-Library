@@ -45,9 +45,15 @@
             this.removeKeyframeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.animIDLabel = new System.Windows.Forms.Label();
             this.animIDCB = new System.Windows.Forms.ComboBox();
+            this.fpsUD = new System.Windows.Forms.NumericUpDown();
+            this.fpsLabel = new System.Windows.Forms.Label();
+            this.loopUD = new System.Windows.Forms.NumericUpDown();
+            this.loopFrameLabel = new System.Windows.Forms.Label();
             this.nodeMenuStrip.SuspendLayout();
             this.transformGroupMenuStrip.SuspendLayout();
             this.keyframeMenuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.fpsUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.loopUD)).BeginInit();
             this.SuspendLayout();
             // 
             // animTreeView
@@ -168,11 +174,59 @@
             this.animIDCB.TabIndex = 3;
             this.animIDCB.SelectedIndexChanged += new System.EventHandler(this.animIDCB_SelectedIndexChanged);
             // 
+            // fpsUD
+            // 
+            this.fpsUD.Location = new System.Drawing.Point(118, 19);
+            this.fpsUD.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.fpsUD.Minimum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            -2147483648});
+            this.fpsUD.Name = "fpsUD";
+            this.fpsUD.Size = new System.Drawing.Size(42, 20);
+            this.fpsUD.TabIndex = 7;
+            this.fpsUD.ValueChanged += new System.EventHandler(this.fpsUD_ValueChanged);
+            // 
+            // fpsLabel
+            // 
+            this.fpsLabel.AutoSize = true;
+            this.fpsLabel.Location = new System.Drawing.Point(127, 3);
+            this.fpsLabel.Name = "fpsLabel";
+            this.fpsLabel.Size = new System.Drawing.Size(27, 13);
+            this.fpsLabel.TabIndex = 6;
+            this.fpsLabel.Text = "FPS";
+            // 
+            // loopUD
+            // 
+            this.loopUD.Location = new System.Drawing.Point(62, 19);
+            this.loopUD.Name = "loopUD";
+            this.loopUD.Size = new System.Drawing.Size(50, 20);
+            this.loopUD.TabIndex = 5;
+            this.loopUD.ValueChanged += new System.EventHandler(this.loopUD_ValueChanged);
+            // 
+            // loopFrameLabel
+            // 
+            this.loopFrameLabel.AutoSize = true;
+            this.loopFrameLabel.Location = new System.Drawing.Point(62, 3);
+            this.loopFrameLabel.Name = "loopFrameLabel";
+            this.loopFrameLabel.Size = new System.Drawing.Size(63, 13);
+            this.loopFrameLabel.TabIndex = 8;
+            this.loopFrameLabel.Text = "Loop Frame";
+            // 
             // AnimationEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
+            this.Controls.Add(this.loopFrameLabel);
+            this.Controls.Add(this.loopUD);
+            this.Controls.Add(this.fpsLabel);
+            this.Controls.Add(this.fpsUD);
             this.Controls.Add(this.animIDLabel);
             this.Controls.Add(this.animIDCB);
             this.Controls.Add(this.dataPanel);
@@ -182,6 +236,8 @@
             this.nodeMenuStrip.ResumeLayout(false);
             this.transformGroupMenuStrip.ResumeLayout(false);
             this.keyframeMenuStrip.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.fpsUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.loopUD)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -205,5 +261,9 @@
         private System.Windows.Forms.ToolStripMenuItem removeKeyframeToolStripMenuItem;
         private System.Windows.Forms.Label animIDLabel;
         private System.Windows.Forms.ComboBox animIDCB;
+        private System.Windows.Forms.NumericUpDown fpsUD;
+        private System.Windows.Forms.Label fpsLabel;
+        private System.Windows.Forms.NumericUpDown loopUD;
+        private System.Windows.Forms.Label loopFrameLabel;
     }
 }

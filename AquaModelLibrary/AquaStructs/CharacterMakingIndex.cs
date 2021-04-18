@@ -27,34 +27,34 @@ namespace AquaModelLibrary
         public static string rebootTeethDataStr = "pl_rdt_";
         public static string rebootEarDataStr = "pl_rea_";
 
-        public Dictionary<int, BODY> costumeDict = new Dictionary<int, BODY>();
-        public Dictionary<int, BODY> carmDict = new Dictionary<int, BODY>();
-        public Dictionary<int, BODY> clegDict = new Dictionary<int, BODY>();
-        public Dictionary<int, BODY> outerDict = new Dictionary<int, BODY>();
+        public Dictionary<int, BODYObject> costumeDict = new Dictionary<int, BODYObject>();
+        public Dictionary<int, BODYObject> carmDict = new Dictionary<int, BODYObject>();
+        public Dictionary<int, BODYObject> clegDict = new Dictionary<int, BODYObject>();
+        public Dictionary<int, BODYObject> outerDict = new Dictionary<int, BODYObject>();
 
-        public Dictionary<int, BODY> baseWearDict = new Dictionary<int, BODY>();
-        public Dictionary<int, BBLY> innerWearDict = new Dictionary<int, BBLY>();
-        public Dictionary<int, BBLY> bodyPaintDict = new Dictionary<int, BBLY>();
-        public Dictionary<int, Sticker> stickerDict = new Dictionary<int, Sticker>();
+        public Dictionary<int, BODYObject> baseWearDict = new Dictionary<int, BODYObject>();
+        public Dictionary<int, BBLYObject> innerWearDict = new Dictionary<int, BBLYObject>();
+        public Dictionary<int, BBLYObject> bodyPaintDict = new Dictionary<int, BBLYObject>();
+        public Dictionary<int, StickerObject> stickerDict = new Dictionary<int, StickerObject>();
 
-        public Dictionary<int, FACE> faceDict = new Dictionary<int, FACE>();
-        public Dictionary<int, FCMN> fcmnDict = new Dictionary<int, FCMN>();
-        public Dictionary<int, NGS_FACE> ngsFaceDict = new Dictionary<int, NGS_FACE>();
-        public Dictionary<int, FCP> fcpDict = new Dictionary<int, FCP>();
+        public Dictionary<int, FACEObject> faceDict = new Dictionary<int, FACEObject>();
+        public Dictionary<int, FCMNObject> fcmnDict = new Dictionary<int, FCMNObject>();
+        public Dictionary<int, NGS_FACEObject> ngsFaceDict = new Dictionary<int, NGS_FACEObject>();
+        public Dictionary<int, FCPObject> fcpDict = new Dictionary<int, FCPObject>();
 
-        public Dictionary<int, ACCE> accessoryDict = new Dictionary<int, ACCE>();
-        public Dictionary<int, EYE> eyeDict = new Dictionary<int, EYE>();
+        public Dictionary<int, ACCEObject> accessoryDict = new Dictionary<int, ACCEObject>();
+        public Dictionary<int, EYEObject> eyeDict = new Dictionary<int, EYEObject>();
         public Dictionary<int, NGS_EarObject> ngsEarDict = new Dictionary<int, NGS_EarObject>();
         public Dictionary<int, NGS_TeethObject> ngsTeethDict = new Dictionary<int, NGS_TeethObject>();
 
         public List<NGS_HornObject> ngsHornList = new List<NGS_HornObject>(); //Necessary since there are unindexable structs in these. Unfortunate.
         public Dictionary<int, NGS_HornObject> ngsHornDict = new Dictionary<int, NGS_HornObject>();
-        public Dictionary<int, NGS_Skin> ngsSkinDict = new Dictionary<int, NGS_Skin>();
-        public Dictionary<int, EYEB> eyebrowDict = new Dictionary<int, EYEB>();
-        public Dictionary<int, EYEB> eyelashDict = new Dictionary<int, EYEB>();
+        public Dictionary<int, NGS_SKINObject> ngsSkinDict = new Dictionary<int, NGS_SKINObject>();
+        public Dictionary<int, EYEBObject> eyebrowDict = new Dictionary<int, EYEBObject>();
+        public Dictionary<int, EYEBObject> eyelashDict = new Dictionary<int, EYEBObject>();
 
-        public Dictionary<int, HAIR> hairDict = new Dictionary<int, HAIR>();
-        public Dictionary<int, NIFL_COL> colDict = new Dictionary<int, NIFL_COL>();
+        public Dictionary<int, HAIRObject> hairDict = new Dictionary<int, HAIRObject>();
+        public Dictionary<int, NIFL_COLObject> colDict = new Dictionary<int, NIFL_COLObject>();
         public List<Unk_IntField> unkList = new List<Unk_IntField>();
         public Dictionary<int, BCLN> costumeIdLink = new Dictionary<int, BCLN>();
 
@@ -108,8 +108,8 @@ namespace AquaModelLibrary
 
             public int fSet2;
             public int fSet3;
-            public float flt_0x8_0xA;   //0x8, 0xA
-            public float flt_0xB_0xA;   //0xB, 0xA
+            public float flt_0x8;   //0x8, 0xA
+            public float flt_0xB;   //0xB, 0xA
 
             public int unkInt3;
             public float unkFloat0;
@@ -120,7 +120,18 @@ namespace AquaModelLibrary
             public int unkInt4;
         }
 
-        //BBLY, BDP1, BDP2(stickers)
+        public class BBLYObject
+        {
+            public BBLY bbly;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
+
+            public PSO2String texString4;
+            public PSO2String texString5;
+        }
+
+        //BBLY, BDP1
         public struct BBLY
         {
             public int id; //0xFF, 0x8
@@ -147,11 +158,31 @@ namespace AquaModelLibrary
             public float unkFloat5;
         }
 
+        //BDP2(stickers)
+        public class StickerObject
+        {
+            public Sticker sticker;
+            public PSO2String texString;
+        }
+
         public struct Sticker
         {
             public int id;
             public int texStringPtr;
             public int reserve0;
+        }
+
+        public class FACEObject
+        {
+            public FACE face;
+            public PSO2String dataString;
+            public PSO2String texString1;
+            public PSO2String texString2;
+
+            public PSO2String texString3;
+            public PSO2String texString4;
+            public PSO2String texString5;
+            public PSO2String texString6;
         }
 
         public struct FACE
@@ -165,7 +196,7 @@ namespace AquaModelLibrary
             public int texString4Ptr;
             public int texString5Ptr;
             public int texString6Ptr;
-            
+
             public int unkInt0;
             public int unkInt1;
             public int unkInt2;
@@ -187,6 +218,24 @@ namespace AquaModelLibrary
             public int unkInt11;
         }
 
+        public class FCMNObject
+        {
+            public FCMN fcmn;
+            public PSO2String proportionAnim;
+            public PSO2String faceAnim1;
+            public PSO2String faceAnim2;
+
+            public PSO2String faceAnim3;
+            public PSO2String faceAnim4;
+            public PSO2String faceAnim5;
+            public PSO2String faceAnim6;
+
+            public PSO2String faceAnim7;
+            public PSO2String faceAnim8;
+            public PSO2String faceAnim9;
+            public PSO2String faceAnim10;
+        }
+
         public struct FCMN
         {
             public int id; //FF, 0x8
@@ -205,14 +254,34 @@ namespace AquaModelLibrary
             public int faceAnim10Ptr;
         }
 
+        public class NGS_FACEObject
+        {
+            public NGS_FACE ngsFace;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
+
+            public PSO2String texString4;
+        }
+
         public struct NGS_FACE
         {
-            public int id; 
+            public int id;
             public int texString1Ptr;
             public int texString2Ptr;
             public int texString3Ptr;
 
             public int texString4Ptr;
+        }
+
+        public class FCPObject
+        {
+            public FCP fcp;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
+
+            public PSO2String texString4;
         }
 
         public struct FCP
@@ -230,6 +299,22 @@ namespace AquaModelLibrary
             public int unkInt3;
             public int unkInt4;
             public int unkInt5;
+        }
+
+        public class ACCEObject
+        {
+            public ACCE acce;
+            public PSO2String dataString;
+            public PSO2String nodeAttach1;
+            public PSO2String nodeAttach2;
+
+            public PSO2String nodeAttach3;
+            public PSO2String nodeAttach4;
+            public PSO2String nodeAttach5;
+            public PSO2String nodeAttach6;
+
+            public PSO2String nodeAttach7;
+            public PSO2String nodeAttach8;
         }
 
         public struct ACCE
@@ -281,7 +366,7 @@ namespace AquaModelLibrary
             public short unkshort5;
             public int unktIn14;
             public int unkInt15;
-            
+
             public int unkInt16;
             public short unkShort6;
             public short unkShort7;
@@ -297,6 +382,17 @@ namespace AquaModelLibrary
 
             public short unkShort12;
             public short unkShort13;
+        }
+
+        public class EYEObject
+        {
+            public EYE eye;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
+
+            public PSO2String texString4;
+            public PSO2String texString5;
         }
 
         public struct EYE
@@ -317,13 +413,13 @@ namespace AquaModelLibrary
             public NGS_Ear ngsEar;
             public NGS_Unk_Substruct subStruct;
 
-            public string dataString;
-            public string texString1;
-            public string texString2;
-            public string texString3;
+            public PSO2String dataString;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
 
-            public string texString4;
-            public string texString5;
+            public PSO2String texString4;
+            public PSO2String texString5;
         }
 
         public struct NGS_Ear
@@ -359,12 +455,12 @@ namespace AquaModelLibrary
             public NGS_Teeth ngsTeeth;
             public NGS_Unk_Substruct substruct;
 
-            public string dataString;
-            public string texString1;
-            public string texString2;
-            public string texString3;
+            public PSO2String dataString;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
 
-            public string texString4;
+            public PSO2String texString4;
         }
 
         public struct NGS_Teeth
@@ -383,7 +479,7 @@ namespace AquaModelLibrary
             public NGS_Horn ngsHorn;
             public NGS_Unk_Substruct substruct;
 
-            public string dataString;
+            public PSO2String dataString;
         }
 
         public struct NGS_Horn
@@ -391,6 +487,19 @@ namespace AquaModelLibrary
             public int unkSubStructPtr; //Not sure what this is at the moment. Shared with NGS_Ear versions? Assumedly not used when 0.
             public int dataStringPtr; //Name of the aqp, aqn, fltd, etc.
             public int reserve0;      //Always 0 so far.
+        }
+
+        public class NGS_SKINObject
+        {
+            public NGS_Skin ngsSkin;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
+
+            public PSO2String texString4;
+            public PSO2String texString5;
+            public PSO2String texString6;
+            public PSO2String texString7;
         }
 
         public struct NGS_Skin
@@ -414,6 +523,16 @@ namespace AquaModelLibrary
             public byte unkByte3;
         }
 
+        public class EYEBObject
+        {
+            public EYEB eyeb;
+            public PSO2String texString1;
+            public PSO2String texString2;
+            public PSO2String texString3;
+
+            public PSO2String texString4;
+        }
+
         //Also for EYEL
         public struct EYEB
         {
@@ -423,6 +542,21 @@ namespace AquaModelLibrary
             public int texString3Ptr;
 
             public int texString4Ptr;
+        }
+
+        public class HAIRObject
+        {
+            public HAIR hair;
+            public PSO2String dataString;
+            public PSO2String texString1;
+            public PSO2String texString2;
+
+            public PSO2String texString3;
+            public PSO2String texString4;
+            public PSO2String texString5;
+            public PSO2String texString6;
+
+            public PSO2String texString7;
         }
 
         public struct HAIR
@@ -441,7 +575,7 @@ namespace AquaModelLibrary
             public int unkInt0;
             public int unkInt1;
             public int unkInt2;
-            
+
             public float unkFloat0;
             public float unkFloat1;
             public float unkFloat2;
@@ -471,7 +605,7 @@ namespace AquaModelLibrary
             public float unkFloat9;
             public int unkInt15;
             public int unkInt16;
-            
+
             public int unkInt17;
             public int unkInt18;
             public int unkInt19;
@@ -479,6 +613,12 @@ namespace AquaModelLibrary
 
             public int unkInt21;
             public int unkInt22;
+        }
+
+        public class NIFL_COLObject
+        {
+            public NIFL_COL niflCol;
+            public PSO2String textString;
         }
 
         //The color data here seems to be totally different than before so data just won't be compatible with the old format, not that we understood it before.

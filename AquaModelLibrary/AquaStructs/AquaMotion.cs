@@ -16,6 +16,7 @@ namespace AquaModelLibrary
         public const int stdPlayerAnim = 0x10012;
         public const int cameraAnim = 0x10004;
         public const int materialAnim = 0x20;
+      
         public Dictionary<int, string> keyTypeNames = new Dictionary<int, string>() 
         {
             {0x1, "0x1 Position" },  //Standard, Camera

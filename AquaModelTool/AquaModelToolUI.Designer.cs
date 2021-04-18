@@ -41,8 +41,10 @@
             this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readCMXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filePanel = new System.Windows.Forms.Panel();
             this.parseIncaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePanel = new System.Windows.Forms.Panel();
+            this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -100,7 +102,8 @@
             // extraToolStripMenuItem
             // 
             this.extraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.averageNormalsOnSharedPositionVerticesToolStripMenuItem});
+            this.averageNormalsOnSharedPositionVerticesToolStripMenuItem,
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem});
             this.extraToolStripMenuItem.Name = "extraToolStripMenuItem";
             this.extraToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.extraToolStripMenuItem.Text = "Extra";
@@ -119,7 +122,8 @@
             this.parsePSO2TextToolStripMenuItem,
             this.readCMXToolStripMenuItem,
             this.generateCharacterFileSheetToolStripMenuItem,
-            this.parseIncaToolStripMenuItem});
+            this.parseIncaToolStripMenuItem,
+            this.readBonesToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -152,6 +156,13 @@
             this.generateCharacterFileSheetToolStripMenuItem.Text = "GenerateCharacterFileSheet (Unfinished)";
             this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateCharacterFileSheetToolStripMenuItem_Click);
             // 
+            // parseIncaToolStripMenuItem
+            // 
+            this.parseIncaToolStripMenuItem.Name = "parseIncaToolStripMenuItem";
+            this.parseIncaToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
+            this.parseIncaToolStripMenuItem.Text = "ParseInca";
+            this.parseIncaToolStripMenuItem.Click += new System.EventHandler(this.parseIncaToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -160,12 +171,19 @@
             this.filePanel.Size = new System.Drawing.Size(384, 256);
             this.filePanel.TabIndex = 1;
             // 
-            // parseIncaToolStripMenuItem
+            // readBonesToolStripMenuItem
             // 
-            this.parseIncaToolStripMenuItem.Name = "parseIncaToolStripMenuItem";
-            this.parseIncaToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
-            this.parseIncaToolStripMenuItem.Text = "ParseInca";
-            this.parseIncaToolStripMenuItem.Click += new System.EventHandler(this.parseIncaToolStripMenuItem_Click);
+            this.readBonesToolStripMenuItem.Name = "readBonesToolStripMenuItem";
+            this.readBonesToolStripMenuItem.Size = new System.Drawing.Size(287, 22);
+            this.readBonesToolStripMenuItem.Text = "ReadBones";
+            this.readBonesToolStripMenuItem.Click += new System.EventHandler(this.readBonesToolStripMenuItem_Click);
+            // 
+            // updateClassicPlayerAnimToNGSAnimToolStripMenuItem
+            // 
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Name = "updateClassicPlayerAnimToNGSAnimToolStripMenuItem";
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Text = "Update classic player anim to NGS anim";
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Click += new System.EventHandler(this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -202,6 +220,8 @@
         private System.Windows.Forms.ToolStripMenuItem parsePSO2TextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateCharacterFileSheetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parseIncaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readBonesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateClassicPlayerAnimToNGSAnimToolStripMenuItem;
     }
 }
 

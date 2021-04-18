@@ -145,6 +145,22 @@ namespace AquaModelLibrary
         {
             public fixed byte stringArray[0x20];
 
+            public static PSO2String GeneratePSO2String(byte[] bytes)
+            {
+                var str = new PSO2String();
+                str.SetBytes(bytes);
+
+                return str;
+            }
+
+            public static PSO2String GeneratePSO2String(string newString)
+            {
+                var str = new PSO2String();
+                str.SetString(newString);
+
+                return str;
+            }
+
             //Sometimes strings don't convert to the expected character set (Possibly sega setting in Unicode chars without warning?) This can help deal with that
             public int GetLength()
             {
@@ -188,6 +204,10 @@ namespace AquaModelLibrary
 
             public void SetBytes(byte[] newBytes)
             {
+                if(newBytes == null)
+                {
+                    newBytes = new byte[0];
+                }
                 for (int i = 0; i < 0x20; i++)
                 {
                     if(i < newBytes.Length)
@@ -202,6 +222,10 @@ namespace AquaModelLibrary
 
             public void SetString(string str)
             {
+                if(str == null)
+                {
+                    str = "";
+                }
                 byte[] strArr = Encoding.UTF8.GetBytes(str);
                 for (int i = 0; i < 0x20; i++)
                 {

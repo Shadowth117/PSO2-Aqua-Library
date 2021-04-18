@@ -40,6 +40,7 @@
             this.data3Label = new System.Windows.Forms.Label();
             this.internalTimeUD = new System.Windows.Forms.NumericUpDown();
             this.internalTimeLabel = new System.Windows.Forms.Label();
+            this.nodeLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.timeUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.data1UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.data0UD)).BeginInit();
@@ -51,7 +52,7 @@
             // timingLabel
             // 
             this.timingLabel.AutoSize = true;
-            this.timingLabel.Location = new System.Drawing.Point(4, 4);
+            this.timingLabel.Location = new System.Drawing.Point(-1, 24);
             this.timingLabel.Name = "timingLabel";
             this.timingLabel.Size = new System.Drawing.Size(30, 13);
             this.timingLabel.TabIndex = 0;
@@ -60,7 +61,7 @@
             // timeUD
             // 
             this.timeUD.Enabled = false;
-            this.timeUD.Location = new System.Drawing.Point(8, 20);
+            this.timeUD.Location = new System.Drawing.Point(3, 40);
             this.timeUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -73,13 +74,13 @@
             -2147483648});
             this.timeUD.Name = "timeUD";
             this.timeUD.Size = new System.Drawing.Size(74, 20);
-            this.timeUD.TabIndex = 23;
+            this.timeUD.TabIndex = 28;
             this.timeUD.ValueChanged += new System.EventHandler(this.TimeUDChanged);
             // 
             // data1UD
             // 
             this.data1UD.DecimalPlaces = 6;
-            this.data1UD.Location = new System.Drawing.Point(8, 110);
+            this.data1UD.Location = new System.Drawing.Point(3, 130);
             this.data1UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -92,13 +93,13 @@
             -2147483648});
             this.data1UD.Name = "data1UD";
             this.data1UD.Size = new System.Drawing.Size(74, 20);
-            this.data1UD.TabIndex = 25;
+            this.data1UD.TabIndex = 31;
             this.data1UD.ValueChanged += new System.EventHandler(this.Data1UDChanged);
             // 
             // data1Label
             // 
             this.data1Label.AutoSize = true;
-            this.data1Label.Location = new System.Drawing.Point(8, 93);
+            this.data1Label.Location = new System.Drawing.Point(3, 113);
             this.data1Label.Name = "data1Label";
             this.data1Label.Size = new System.Drawing.Size(39, 13);
             this.data1Label.TabIndex = 24;
@@ -107,7 +108,7 @@
             // data0UD
             // 
             this.data0UD.DecimalPlaces = 6;
-            this.data0UD.Location = new System.Drawing.Point(8, 70);
+            this.data0UD.Location = new System.Drawing.Point(3, 90);
             this.data0UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -120,13 +121,13 @@
             -2147483648});
             this.data0UD.Name = "data0UD";
             this.data0UD.Size = new System.Drawing.Size(74, 20);
-            this.data0UD.TabIndex = 27;
+            this.data0UD.TabIndex = 30;
             this.data0UD.ValueChanged += new System.EventHandler(this.Data0UDChanged);
             // 
             // data0Label
             // 
             this.data0Label.AutoSize = true;
-            this.data0Label.Location = new System.Drawing.Point(8, 53);
+            this.data0Label.Location = new System.Drawing.Point(3, 73);
             this.data0Label.Name = "data0Label";
             this.data0Label.Size = new System.Drawing.Size(39, 13);
             this.data0Label.TabIndex = 26;
@@ -135,7 +136,7 @@
             // data2UD
             // 
             this.data2UD.DecimalPlaces = 6;
-            this.data2UD.Location = new System.Drawing.Point(8, 150);
+            this.data2UD.Location = new System.Drawing.Point(3, 170);
             this.data2UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -148,13 +149,13 @@
             -2147483648});
             this.data2UD.Name = "data2UD";
             this.data2UD.Size = new System.Drawing.Size(74, 20);
-            this.data2UD.TabIndex = 29;
+            this.data2UD.TabIndex = 32;
             this.data2UD.ValueChanged += new System.EventHandler(this.Data2UDChanged);
             // 
             // data2Label
             // 
             this.data2Label.AutoSize = true;
-            this.data2Label.Location = new System.Drawing.Point(8, 133);
+            this.data2Label.Location = new System.Drawing.Point(3, 153);
             this.data2Label.Name = "data2Label";
             this.data2Label.Size = new System.Drawing.Size(39, 13);
             this.data2Label.TabIndex = 28;
@@ -163,7 +164,7 @@
             // data3UD
             // 
             this.data3UD.DecimalPlaces = 6;
-            this.data3UD.Location = new System.Drawing.Point(8, 190);
+            this.data3UD.Location = new System.Drawing.Point(3, 210);
             this.data3UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -176,13 +177,13 @@
             -2147483648});
             this.data3UD.Name = "data3UD";
             this.data3UD.Size = new System.Drawing.Size(74, 20);
-            this.data3UD.TabIndex = 31;
+            this.data3UD.TabIndex = 33;
             this.data3UD.ValueChanged += new System.EventHandler(this.Data3UDChanged);
             // 
             // data3Label
             // 
             this.data3Label.AutoSize = true;
-            this.data3Label.Location = new System.Drawing.Point(8, 173);
+            this.data3Label.Location = new System.Drawing.Point(3, 193);
             this.data3Label.Name = "data3Label";
             this.data3Label.Size = new System.Drawing.Size(39, 13);
             this.data3Label.TabIndex = 30;
@@ -191,7 +192,7 @@
             // internalTimeUD
             // 
             this.internalTimeUD.Enabled = false;
-            this.internalTimeUD.Location = new System.Drawing.Point(89, 20);
+            this.internalTimeUD.Location = new System.Drawing.Point(84, 40);
             this.internalTimeUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -204,22 +205,32 @@
             -2147483648});
             this.internalTimeUD.Name = "internalTimeUD";
             this.internalTimeUD.Size = new System.Drawing.Size(74, 20);
-            this.internalTimeUD.TabIndex = 33;
+            this.internalTimeUD.TabIndex = 29;
             this.internalTimeUD.ValueChanged += new System.EventHandler(this.InternalTimeUDChanged);
             // 
             // internalTimeLabel
             // 
             this.internalTimeLabel.AutoSize = true;
-            this.internalTimeLabel.Location = new System.Drawing.Point(85, 4);
+            this.internalTimeLabel.Location = new System.Drawing.Point(80, 24);
             this.internalTimeLabel.Name = "internalTimeLabel";
             this.internalTimeLabel.Size = new System.Drawing.Size(104, 13);
             this.internalTimeLabel.TabIndex = 32;
             this.internalTimeLabel.Text = "Time (Internal Value)";
             // 
+            // nodeLabel
+            // 
+            this.nodeLabel.AutoSize = true;
+            this.nodeLabel.Location = new System.Drawing.Point(-3, 5);
+            this.nodeLabel.Name = "nodeLabel";
+            this.nodeLabel.Size = new System.Drawing.Size(59, 13);
+            this.nodeLabel.TabIndex = 34;
+            this.nodeLabel.Text = "NodeLabel";
+            // 
             // KeyEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.nodeLabel);
             this.Controls.Add(this.internalTimeUD);
             this.Controls.Add(this.internalTimeLabel);
             this.Controls.Add(this.data3UD);
@@ -259,5 +270,6 @@
         private System.Windows.Forms.Label data3Label;
         private System.Windows.Forms.NumericUpDown internalTimeUD;
         private System.Windows.Forms.Label internalTimeLabel;
+        private System.Windows.Forms.Label nodeLabel;
     }
 }

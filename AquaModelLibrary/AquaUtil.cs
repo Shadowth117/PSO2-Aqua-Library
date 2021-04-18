@@ -8,8 +8,6 @@ using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.VTBFMethods;
 using System;
 using System.Text;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace AquaModelLibrary
 {

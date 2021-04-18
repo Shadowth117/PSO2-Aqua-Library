@@ -16,6 +16,7 @@ namespace AquaModelTool
         public KeyEditor(AquaModelLibrary.AquaMotion aquaMotion, int nodeId, int dataId, int id)
         {
             InitializeComponent();
+            
             motion = aquaMotion;
             keyNodeId = nodeId;
             keyDataId = dataId;
@@ -47,6 +48,8 @@ namespace AquaModelTool
                 default:
                     throw new Exception("Unexpected data type!");
             }
+
+            nodeLabel.Text = motion.motionKeys[nodeId].mseg.nodeName.GetString();
         }
 
         private void SetVector4Layout()

@@ -77,6 +77,7 @@
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
+    <Compile Include="Extra\PlayerData.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />

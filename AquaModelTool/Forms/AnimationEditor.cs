@@ -24,6 +24,10 @@ namespace AquaModelTool
             animIDCB.EndUpdate();
             animIDCB.SelectedIndex = 0;
             currentMotion = animSet.anims[animIDCB.SelectedIndex];
+            if (animIDCB.Items.Count < 2)
+            {
+                animIDCB.Enabled = false;
+            }
 
             InitializeAnimTreeView();
 
@@ -32,6 +36,8 @@ namespace AquaModelTool
 
         private void InitializeAnimTreeView()
         {
+            loopUD.Value = currentMotion.moHeader.loopPoint;
+            fpsUD.Value = (decimal)currentMotion.moHeader.frameSpeed;
             //Populate the anim tree
             animTreeView.Nodes.Clear();
             for (int i = 0; i < currentMotion.motionKeys.Count; i++)
@@ -461,6 +467,17 @@ namespace AquaModelTool
             currentMotion = animSet.anims[animIDCB.SelectedIndex];
 
             InitializeAnimTreeView();
+        }
+
+        private void loopUD_ValueChanged(object sender, EventArgs e)
+        {
+            currentMotion.moHeader.loopPoint = (int)loopUD.Value;
+        }
+
+        private void fpsUD_ValueChanged(object sender, EventArgs e)
+        {
+
+            currentMotion.moHeader.frameSpeed = (float)fpsUD.Value;
         }
     }
 }

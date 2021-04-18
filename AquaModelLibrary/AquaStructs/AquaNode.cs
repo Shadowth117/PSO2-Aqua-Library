@@ -36,8 +36,8 @@ namespace AquaModelLibrary
         public struct NODE
         {
             public ushort boneShort1; //0x3, type 0x9 //First 2 bytes of this.
-            public ushort boneShort2; //Latter 2 bytes of above.
-            public int animatedFlag;  //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format
+            public ushort boneShort2; //Latter 2 bytes of above. Bones with 0x400 in this value are not exported in animations.
+            public int animatedFlag;  //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format Never really used normally?
             public int parentId;      //0x4, type 0x8
             public int unkNode;       //0xF, type 0x8 //Always observed -1
 
