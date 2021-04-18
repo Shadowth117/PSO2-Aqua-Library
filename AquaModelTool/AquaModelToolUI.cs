@@ -414,13 +414,19 @@ namespace AquaModelTool
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
-                Title = "Select PSO2 Bones",
+                Title = "Select NGS PSO2 Bones",
                 Filter = "PSO2 Bones (*.aqn)|*.aqn"
             };
             if(openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 aquaUI.aqua.aquaBones.Clear();
                 aquaUI.aqua.ReadBones(openFileDialog.FileName);
+                if (aquaUI.aqua.aquaBones[0].nodeList.Count < 171)
+                {
+                    aquaUI.aqua.aquaBones.Clear();
+                    MessageBox.Show("Not an NGS PSO2 .aqn");
+                    return;
+                }
                 var data = new AquaModelLibrary.PlayerData();
                 data.GetDefaultTransformsFromBones(aquaUI.aqua.aquaBones[0]);
 
