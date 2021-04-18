@@ -44,7 +44,7 @@ namespace AquaModelLibrary
 
         //Note, as of this writing, NGS only writes from ids 0 - 171 to animations, with the 172nd animation "node" being the NodeTreeFlag thing.
         //Nodes after this are presumably handled in the fltd and then by the physics engine. 
-        public int oldRange = 51; 
+        public int oldRange = 50; //50 because animations don't keep the bodymodel bit
         public int endRange = 171; //camera_target
         public List<string> nodeNames = new List<string>(); //Default node names for NGS player models
         public Dictionary<int, Quaternion> defaultRots = new Dictionary<int, Quaternion>(); //Bind pose rotations for animations
