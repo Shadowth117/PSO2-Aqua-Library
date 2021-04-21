@@ -358,7 +358,7 @@ namespace AquaModelLibrary
             public int unkInt12;
             public int unkInt13;
             public short unkShort0;
-            public short unkShort1;
+            public short unkShort_D7; //0xD7, 0x6
 
             public short unkShort2;
             public short unkShort3;
@@ -369,12 +369,12 @@ namespace AquaModelLibrary
 
             public int unkInt16;
             public short unkShort6;
-            public short unkShort7;
+            public short unkShort_C7; //0xC7, 0x6
             public short unkShort8;
             public short unkShort9;
-            public float unkfloat7;
+            public float unkFloat7;
 
-            public int unkInt17;
+            public float unkFloat8;
             public int unkInt18;
             public int unkInt19;
             public short unkShort10;
@@ -572,7 +572,7 @@ namespace AquaModelLibrary
             public int texString6Ptr;
 
             public int texString7Ptr;
-            public int unkInt0;
+            public int unkIntB1;      //B0, 0x9
             public int unkInt1;
             public int unkInt2;
 
@@ -611,8 +611,10 @@ namespace AquaModelLibrary
             public int unkInt19;
             public int unkInt20;
 
-            public int unkInt21;
-            public int unkInt22;
+            public short unkShortB1; //0xB1, 0x6
+            public short unkShortB2; //0xB2, 0x6
+            public short unkShortB3; //0xB3, 0x6
+            public short unkShort0;
         }
 
         public class NIFL_COLObject
@@ -675,9 +677,9 @@ namespace AquaModelLibrary
             public int unkAddress; //Unknown arrays
             public int costumeIdLinkAddress; //BCLN Costume ids for recolors
 
-            public int castArmIdLinkAddress; //BCLN Cast body ids for recolors
+            public int castArmIdLinkAddress; //BCLN Cast arm ids for recolors
             public int castLegIdLinkAddress; //BCLN Cast leg ids for recolors
-            public int outerIdLinkAddress; //BCLN Cast arm ids for recolors
+            public int outerIdLinkAddress; //BCLN Outer ids for recolors
             public int baseWearIdLinkAddress; //BCLN basewear ids for recolors
 
             public int innerWearIdLinkAddress; //BCLN innerwear ids for recolors

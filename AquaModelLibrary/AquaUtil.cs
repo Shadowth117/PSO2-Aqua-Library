@@ -3055,6 +3055,54 @@ namespace AquaModelLibrary
             File.WriteAllText(fileName + ".txt", output.ToString());
         }
 
+        public void ReadMus(string fileName)
+        {
+            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals("mus\0"))
+                {
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                    offset += headJunkSize;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals("NIFL"))
+                {
+                    //NIFL
+                    ReadNIFLMus(streamReader, offset, fileName);
+                }
+                else if (type.Equals("VTBF"))
+                {
+                    //Should really never be VTBF...
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+            }
+            return;
+        }
+
+        public void ReadNIFLMus(BufferedStreamReader streamReader, int offset, string fileName)
+        {
+            AquaCommon.NIFL nifl = streamReader.Read<AquaCommon.NIFL>();
+            AquaCommon.REL0 rel0 = streamReader.Read<AquaCommon.REL0>();
+
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
+            int offsetOffset = streamReader.Read<int>();
+            streamReader.Seek(offsetOffset + offset, SeekOrigin.Begin);
+        }
+
         //For now, we'll just assume we don't care about LOD models and export the first model stored
         /*
         public void ExportToDae(string filePath)

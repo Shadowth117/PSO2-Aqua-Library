@@ -53,10 +53,19 @@ namespace AquaModelLibrary
             }
         }
         
-        public static CharacterMakingIndex ReadVTBFCMX(BufferedStreamReader streamReader)
+        public static CharacterMakingIndex ReadVTBFCMX(BufferedStreamReader streamReader, CharacterMakingIndex cmx = null)
         {
-            var cmx = new CharacterMakingIndex();
-            /*
+            //Create one if it's not passed. The idea is multiple files can be combined as needed.
+            if(cmx == null)
+            {
+                cmx = new CharacterMakingIndex();
+            }
+
+            //Due to how structs are laid out and their repeating, we have to assume these are in order and that specific sections correlate to specific types
+            bool pastBody0 = false;
+            bool pastCarm0 = false;
+            bool pastBcln0 = false;
+
             //Seek to and read the DOC tag's 
             streamReader.Seek(0x1C, SeekOrigin.Current);
             int cmxCount = streamReader.Read<ushort>();
@@ -68,71 +77,94 @@ namespace AquaModelLibrary
                 switch (tagType)
                 {
                     case "ACCE":
-                        parts.acceTags.Add((int)data[0][0xFF], data);
+                        cmx.accessoryDict.Add((int)data[0][0xFF], parseACCE(data));
                         break;
                     case "BODY":
-                        parts.bodyTags.Add((int)data[0][0xFF], data);
+                        if(pastBody0 == false)
+                        {
+                            cmx.costumeDict.Add((int)data[0][0xFF], parseBODY(data));
+                        } else
+                        {
+                            cmx.baseWearDict.Add((int)data[0][0xFF], parseBODY(data));
+                        }
                         break;
                     case "CARM":
-                        parts.carmTags.Add((int)data[0][0xFF], data);
+                        pastBody0 = true;
+                        if(pastCarm0 == false)
+                        {
+                            cmx.carmDict.Add((int)data[0][0xFF], parseCARM(data));
+                        } else
+                        {
+                            cmx.outerDict.Add((int)data[0][0xFF], parseCARM(data));
+                        }
                         break;
                     case "CLEG":
-                        parts.clegTags.Add((int)data[0][0xFF], data);
+                        pastCarm0 = true;
+                        cmx.clegDict.Add((int)data[0][0xFF], parseCLEG(data));
                         break;
                     case "BDP1":
-                        parts.bdp1Tags.Add((int)data[0][0xFF], data);
+                        cmx.bodyPaintDict.Add((int)data[0][0xFF], parseBDP1(data));
                         break;
                     case "BDP2":
-                        parts.bdp2Tags.Add((int)data[0][0xFF], data);
+                        cmx.stickerDict.Add((int)data[0][0xFF], parseBDP2(data));
                         break;
                     case "FACE":
-                        parts.faceTags.Add((int)data[0][0xFF], data);
+                        cmx.faceDict.Add((int)data[0][0xFF], parseFACE(data));
                         break;
                     case "FCMN":
-                        parts.fcmnTags.Add((int)data[0][0xFF], data);
+                        cmx.fcmnDict.Add((int)data[0][0xFF], parseFCMN(data));
                         break;
                     case "FCP1":
-                        parts.fcp1Tags.Add((int)data[0][0xFF], data);
+                        //These were kinda redundant with the FACE structs so SEGA yeeted them for NIFL. Not much reason to read them.
+                        //cmx.fcpDict.Add((int)data[0][0xFF], parseFCP1(data));
                         break;
                     case "FCP2":
-                        parts.fcp2Tags.Add((int)data[0][0xFF], data);
+                        cmx.fcpDict.Add((int)data[0][0xFF], parseFCP2(data));
                         break;
                     case "EYE ":
-                        parts.eyeTags.Add((int)data[0][0xFF], data);
+                        cmx.eyeDict.Add((int)data[0][0xFF], parseEYE(data));
                         break;
                     case "EYEB":
-                        parts.eyeBTags.Add((int)data[0][0xFF], data);
+                        cmx.eyebrowDict.Add((int)data[0][0xFF], parseEYEB(data));
                         break;
                     case "EYEL":
-                        parts.eyeLTags.Add((int)data[0][0xFF], data);
+                        cmx.eyelashDict.Add((int)data[0][0xFF], parseEYEB(data));
                         break;
                     case "HAIR":
-                        parts.hairTags.Add((int)data[0][0xFF], data);
+                        cmx.hairDict.Add((int)data[0][0xFF], parseHAIR(data));
                         break;
                     case "COL ":
-                        parts.colTags.Add((int)data[0][0xFF], data);
+                        //These are entirely different for VTBF. Not really sure what to do with them for now.
+                        //parts.colTags.Add((int)data[0][0xFF], data);
                         break;
                     case "BBLY":
-                        parts.bblyTags.Add((int)data[0][0xFF], data);
+                        cmx.innerWearDict.Add((int)data[0][0xFF], parseBBLY(data));
                         break;
                     case "BCLN":
-                        parts.bclnTags.Add((int)data[0][0xFF], data);
+                        if (pastBcln0 == false)
+                        {
+                            cmx.costumeIdLink.Add((int)data[0][0xFF], parseLN(data));
+                        }
+                        else
+                        {
+                            cmx.baseWearIdLink.Add((int)data[0][0xFF], parseLN(data));
+                        }
                         break;
                     case "LCLN":
-                        parts.lclnTags.Add((int)data[0][0xFF], data);
+                        pastBcln0 = true;
+                        cmx.clegIdLink.Add((int)data[0][0xFF], parseLN(data));
                         break;
                     case "ACLN":
-                        parts.aclnTags.Add((int)data[0][0xFF], data);
+                        cmx.castArmIdLink.Add((int)data[0][0xFF], parseLN(data));
                         break;
                     case "ICLN":
-                        parts.iclnTags.Add((int)data[0][0xFF], data);
+                        cmx.innerWearIdLink.Add((int)data[0][0xFF], parseLN(data));
                         break;
                     default:
                         throw new Exception($"Unexpected tag type {tagType}");
-                        break;
                 }
             }
-            */
+            
             return cmx;
         }
 
@@ -322,6 +354,7 @@ namespace AquaModelLibrary
             {
                 BODYObject body = new BODYObject();
                 body.body = streamReader.Read<BODY>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(body.body.dataStringPtr + offset, SeekOrigin.Begin);
                 body.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -344,6 +377,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
                 body.texString6.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(body.body.id, body); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -355,6 +390,7 @@ namespace AquaModelLibrary
             {
                 BBLYObject bbly = new BBLYObject();
                 bbly.bbly = streamReader.Read<BBLY>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(bbly.bbly.texString1Ptr + offset, SeekOrigin.Begin);
                 bbly.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -371,6 +407,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(bbly.bbly.texString5Ptr + offset, SeekOrigin.Begin);
                 bbly.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(bbly.bbly.id, bbly); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -382,9 +420,12 @@ namespace AquaModelLibrary
             {
                 StickerObject sticker = new StickerObject();
                 sticker.sticker = streamReader.Read<Sticker>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(sticker.sticker.texStringPtr + offset, SeekOrigin.Begin);
                 sticker.texString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(temp, SeekOrigin.Begin);
 
                 dict.Add(sticker.sticker.id, sticker); //Set like this so we can access it by id later if we want. 
             }
@@ -397,6 +438,7 @@ namespace AquaModelLibrary
             {
                 FACEObject face = new FACEObject();
                 face.face = streamReader.Read<FACE>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(face.face.dataStringPtr + offset, SeekOrigin.Begin);
                 face.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -419,6 +461,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
                 face.texString6.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(face.face.id, face); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -430,6 +474,7 @@ namespace AquaModelLibrary
             {
                 FCMNObject fcmn = new FCMNObject();
                 fcmn.fcmn = streamReader.Read<FCMN>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(fcmn.fcmn.proportionAnimPtr + offset, SeekOrigin.Begin);
                 fcmn.proportionAnim.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -464,6 +509,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(fcmn.fcmn.faceAnim10Ptr + offset, SeekOrigin.Begin);
                 fcmn.faceAnim10.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(fcmn.fcmn.id, fcmn); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -475,6 +522,7 @@ namespace AquaModelLibrary
             {
                 FCPObject fcp = new FCPObject();
                 fcp.fcp = streamReader.Read<FCP>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(fcp.fcp.texString1Ptr + offset, SeekOrigin.Begin);
                 fcp.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -488,6 +536,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(fcp.fcp.texString4Ptr + offset, SeekOrigin.Begin);
                 fcp.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(fcp.fcp.id, fcp); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -499,6 +549,7 @@ namespace AquaModelLibrary
             {
                 NGS_FACEObject ngsFace = new NGS_FACEObject();
                 ngsFace.ngsFace = streamReader.Read<NGS_FACE>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(ngsFace.ngsFace.texString1Ptr + offset, SeekOrigin.Begin);
                 ngsFace.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -512,6 +563,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(ngsFace.ngsFace.texString4Ptr + offset, SeekOrigin.Begin);
                 ngsFace.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(ngsFace.ngsFace.id, ngsFace); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -523,6 +576,7 @@ namespace AquaModelLibrary
             {
                 ACCEObject acce = new ACCEObject();
                 acce.acce = streamReader.Read<ACCE>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
                 acce.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -551,6 +605,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
                 acce.nodeAttach8.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(acce.acce.id, acce); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -562,6 +618,7 @@ namespace AquaModelLibrary
             {
                 EYEObject eye = new EYEObject();
                 eye.eye = streamReader.Read<EYE>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(eye.eye.texString1Ptr + offset, SeekOrigin.Begin);
                 eye.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -578,6 +635,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(eye.eye.texString5Ptr + offset, SeekOrigin.Begin);
                 eye.texString5.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(eye.eye.id, eye); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -589,6 +648,7 @@ namespace AquaModelLibrary
             {
                 NGS_SKINObject ngsSkin = new NGS_SKINObject();
                 ngsSkin.ngsSkin = streamReader.Read<NGS_Skin>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString1Ptr + offset, SeekOrigin.Begin);
                 ngsSkin.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -611,6 +671,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(ngsSkin.ngsSkin.texString7Ptr + offset, SeekOrigin.Begin);
                 ngsSkin.texString7.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(ngsSkin.ngsSkin.id, ngsSkin); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -622,6 +684,7 @@ namespace AquaModelLibrary
             {
                 EYEBObject eyeb = new EYEBObject();
                 eyeb.eyeb = streamReader.Read<EYEB>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(eyeb.eyeb.texString1Ptr + offset, SeekOrigin.Begin);
                 eyeb.texString1.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -635,6 +698,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(eyeb.eyeb.texString4Ptr + offset, SeekOrigin.Begin);
                 eyeb.texString4.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(eyeb.eyeb.id, eyeb); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -646,6 +711,7 @@ namespace AquaModelLibrary
             {
                 HAIRObject hair = new HAIRObject();
                 hair.hair = streamReader.Read<HAIR>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(hair.hair.dataStringPtr + offset, SeekOrigin.Begin);
                 hair.dataString.SetString(AquaObjectMethods.ReadCString(streamReader));
@@ -671,6 +737,8 @@ namespace AquaModelLibrary
                 streamReader.Seek(hair.hair.texString7Ptr + offset, SeekOrigin.Begin);
                 hair.texString7.SetString(AquaObjectMethods.ReadCString(streamReader));
 
+                streamReader.Seek(temp, SeekOrigin.Begin);
+
                 dict.Add(hair.hair.id, hair); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -682,9 +750,12 @@ namespace AquaModelLibrary
             {
                 NIFL_COLObject col = new NIFL_COLObject();
                 col.niflCol = streamReader.Read<NIFL_COL>();
+                long temp = streamReader.Position();
 
                 streamReader.Seek(col.niflCol.textStringPtr + offset, SeekOrigin.Begin);
                 col.textString.SetString(AquaObjectMethods.ReadCString(streamReader));
+
+                streamReader.Seek(temp, SeekOrigin.Begin);
 
                 dict.Add(col.niflCol.id, col); //Set like this so we can access it by id later if we want. 
             }
@@ -704,7 +775,6 @@ namespace AquaModelLibrary
                 {
                     Console.WriteLine($"Duplicate key at {streamReader.Position().ToString("X")}");
                 }
-
             }
         }
 
@@ -720,7 +790,14 @@ namespace AquaModelLibrary
             }
             for (int i = 0; i < acceText.text.Count; i++)
             {
-                textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
+                //Handle dummy decoy entry in old versions
+                if(textByCat.ContainsKey(acceText.categoryNames[i]) && textByCat[acceText.categoryNames[i]][0].Count == 0)
+                {
+                    textByCat[acceText.categoryNames[i]] = acceText.text[i];
+                } else
+                {
+                    textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
+                }
             }
             for (int i = 0; i < commonText.text.Count; i++)
             {
@@ -740,7 +817,7 @@ namespace AquaModelLibrary
             StringBuilder outputNGSCasealBody = new StringBuilder();
             //StringBuilder outputNGSCostumeMale = new StringBuilder();   //Replaced by Set type basewear maybe?
             //StringBuilder outputNGSCostumeFemale = new StringBuilder();
-            StringBuilder outputUnknown = new StringBuilder();
+            StringBuilder outputUnknownWearables = new StringBuilder();
 
             //Build text Dict
             List<int> masterIdList = new List<int>();
@@ -786,7 +863,7 @@ namespace AquaModelLibrary
                 {
                     adjustedId = aquaCMX.costumeIdLink[id].fileId;
                 }
-                else if (aquaCMX.castArmIdLink.ContainsKey(id))
+                else if (aquaCMX.outerWearIdLink.ContainsKey(id))
                 {
                     adjustedId = aquaCMX.outerWearIdLink[id].fileId;
                 }
@@ -885,24 +962,24 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    outputUnknown.Append(output);
+                    outputUnknownWearables.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleCostumes.csv"), outputCostumeMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleCostumes.csv"), outputCostumeFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleOuters.csv"), outputOuterMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleOuters.csv"), outputOuterFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CastBodies.csv"), outputCastBody.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealBodies.csv"), outputCasealBody.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleNGSOuters.csv"), outputNGSOuterMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleNGSOuters.csv"), outputNGSOuterFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CastNGSBodies.csv"), outputNGSCastBody.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealNGSBodies.csv"), outputNGSCasealBody.ToString());
-            //File.WriteAllText(Path.Combine(outputDirectory, "MaleNGSCostumes.csv"), outputNGSCostumeMale.ToString());
-            //File.WriteAllText(Path.Combine(outputDirectory, "FemaleNGSCostumes.csv"), outputNGSCostumeFemale.ToString());
-            if(outputUnknown.Length > 0)
+            WriteCSV(outputDirectory, "MaleCostumes.csv", outputCostumeMale);
+            WriteCSV(outputDirectory, "FemaleCostumes.csv", outputCostumeFemale);
+            WriteCSV(outputDirectory, "MaleOuters.csv", outputOuterMale);
+            WriteCSV(outputDirectory, "FemaleOuters.csv", outputOuterFemale);
+            WriteCSV(outputDirectory, "CastBodies.csv", outputCastBody);
+            WriteCSV(outputDirectory, "CasealBodies.csv", outputCasealBody);
+            WriteCSV(outputDirectory, "MaleNGSOuters.csv", outputNGSOuterMale);
+            WriteCSV(outputDirectory, "FemaleNGSOuters.csv", outputNGSOuterFemale);
+            WriteCSV(outputDirectory, "CastNGSBodies.csv", outputNGSCastBody);
+            WriteCSV(outputDirectory, "CasealNGSBodies.csv", outputNGSCasealBody);
+            //WriteCSV(outputDirectory, "MaleNGSCostumes.csv", outputNGSCostumeMale);
+            //WriteCSV(outputDirectory, "FemaleNGSCostumes.csv", outputNGSCostumeFemale);
+            if (outputUnknownWearables.Length > 0)
             {
-                File.WriteAllText(Path.Combine(outputDirectory, "UnknownOutfits.csv"), outputUnknown.ToString());
+                WriteCSV(outputDirectory, "UnknownOutfits.csv", outputUnknownWearables);
             }
 
             //---------------------------Parse out basewear
@@ -1014,19 +1091,21 @@ namespace AquaModelLibrary
                 else if (id < 300000)
                 {
                     outputNGSBasewearFemale.Append(output);
-                } else if (id < 600000)
+                }
+                else if (id < 600000)
                 {
                     outputNGSGenderlessBasewear.Append(output);
-                } else
+                }
+                else
                 {
                     Console.WriteLine("Unknown bw with id: " + id);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleBasewear.csv"), outputBasewearMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleBasewear.csv"), outputBasewearFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleNGSBasewear.csv"), outputNGSBasewearMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleNGSBasewear.csv"), outputNGSBasewearFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "GenderlessNGSBasewear.csv"), outputNGSGenderlessBasewear.ToString());
+            WriteCSV(outputDirectory, "MaleBasewear.csv", outputBasewearMale);
+            WriteCSV(outputDirectory, "FemaleBasewear.csv", outputBasewearFemale);
+            WriteCSV(outputDirectory, "MaleNGSBasewear.csv", outputNGSBasewearMale);
+            WriteCSV(outputDirectory, "FemaleNGSBasewear.csv", outputNGSBasewearFemale);
+            WriteCSV(outputDirectory, "GenderlessNGSBasewear.csv", outputNGSGenderlessBasewear);
 
             //---------------------------Parse out innerwear
             StringBuilder outputInnerwearMale = new StringBuilder();
@@ -1137,10 +1216,10 @@ namespace AquaModelLibrary
                     Console.WriteLine("Unknown iw with id: " + id);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleInnerwear.csv"), outputInnerwearMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleInnerwear.csv"), outputInnerwearFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleNGSInnerwear.csv"), outputNGSInnerwearMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleNGSInnerwear.csv"), outputNGSInnerwearFemale.ToString());
+            WriteCSV(outputDirectory, "MaleInnerwear.csv", outputInnerwearMale);
+            WriteCSV(outputDirectory, "FemaleInnerwear.csv", outputInnerwearFemale);
+            WriteCSV(outputDirectory, "MaleNGSInnerwear.csv", outputNGSInnerwearMale);
+            WriteCSV(outputDirectory, "FemaleNGSInnerwear.csv", outputNGSInnerwearFemale);
 
             //---------------------------Parse out cast arms
             StringBuilder outputCastArmMale = new StringBuilder();
@@ -1251,10 +1330,10 @@ namespace AquaModelLibrary
                     Console.WriteLine("Unknown am with id: " + id);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "CastArms.csv"), outputCastArmMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealArms.csv"), outputCastArmFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSCastArms.csv"), outputNGSCastArmMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSCasealArms.csv"), outputNGSCastArmFemale.ToString());
+            WriteCSV(outputDirectory, "CastArms.csv", outputCastArmMale);
+            WriteCSV(outputDirectory, "CasealArms.csv", outputCastArmFemale);
+            WriteCSV(outputDirectory, "NGSCastArms.csv", outputNGSCastArmMale);
+            WriteCSV(outputDirectory, "NGSCasealArms.csv", outputNGSCastArmFemale);
 
             //---------------------------Parse out cast legs
             StringBuilder outputCastLegMale = new StringBuilder();
@@ -1365,10 +1444,10 @@ namespace AquaModelLibrary
                     Console.WriteLine("Unknown lg with id: " + id);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "CastLegs.csv"), outputCastLegMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealLegs.csv"), outputCastLegFemale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSCastLegs.csv"), outputNGSCastLegMale.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSCasealLegs.csv"), outputNGSCastLegFemale.ToString());
+            WriteCSV(outputDirectory, "CastLegs.csv", outputCastLegMale);
+            WriteCSV(outputDirectory, "CasealLegs.csv", outputCastLegFemale);
+            WriteCSV(outputDirectory, "NGSCastLegs.csv", outputNGSCastLegMale);
+            WriteCSV(outputDirectory, "NGSCasealLegs.csv", outputNGSCastLegFemale);
 
             //---------------------------Parse out body paint
             StringBuilder outputMaleBodyPaint = new StringBuilder();
@@ -1383,7 +1462,7 @@ namespace AquaModelLibrary
 
             masterIdList.Clear();
             nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint1", true); 
+            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint1", true);
 
             //Add potential cmx ids that wouldn't be stored in
             GatherDictKeys(masterIdList, aquaCMX.bodyPaintDict.Keys);
@@ -1488,7 +1567,8 @@ namespace AquaModelLibrary
                 else if (id < 500000)
                 {
                     outputNGSCastFemaleBodyPaint.Append(output);
-                } else if(id < 600000)
+                }
+                else if (id < 600000)
                 {
                     outputNGSGenderlessBodyPaint.Append(output);
                 }
@@ -1497,15 +1577,15 @@ namespace AquaModelLibrary
                     Console.WriteLine("Unknown b1 with id: " + id);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleBodyPaint.csv"), outputMaleBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleBodyPaint.csv"), outputFemaleBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleLayeredBodyPaint.csv"), outputMaleLayeredBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleLayeredBodyPaint.csv"), outputFemaleLayeredBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSMaleBodyPaint.csv"), outputNGSMaleBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSFemaleBodyPaint.csv"), outputNGSFemaleBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSCastBodyPaint.csv"), outputNGSCastMaleBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSCasealBodyPaint.csv"), outputNGSCastFemaleBodyPaint.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSGenderlessBodyPaint.csv"), outputNGSGenderlessBodyPaint.ToString());
+            WriteCSV(outputDirectory, "MaleBodyPaint.csv", outputMaleBodyPaint);
+            WriteCSV(outputDirectory, "FemaleBodyPaint.csv", outputFemaleBodyPaint);
+            WriteCSV(outputDirectory, "MaleLayeredBodyPaint.csv", outputMaleLayeredBodyPaint);
+            WriteCSV(outputDirectory, "FemaleLayeredBodyPaint.csv", outputFemaleLayeredBodyPaint);
+            WriteCSV(outputDirectory, "NGSMaleBodyPaint.csv", outputNGSMaleBodyPaint);
+            WriteCSV(outputDirectory, "NGSFemaleBodyPaint.csv", outputNGSFemaleBodyPaint);
+            WriteCSV(outputDirectory, "NGSCastBodyPaint.csv", outputNGSCastMaleBodyPaint);
+            WriteCSV(outputDirectory, "NGSCasealBodyPaint.csv", outputNGSCastFemaleBodyPaint);
+            WriteCSV(outputDirectory, "NGSGenderlessBodyPaint.csv", outputNGSGenderlessBodyPaint);
 
             //---------------------------Parse out stickers
             StringBuilder outputStickers = new StringBuilder();
@@ -1587,7 +1667,7 @@ namespace AquaModelLibrary
 
                 outputStickers.Append(output);
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "Stickers.csv"), outputStickers.ToString());
+            WriteCSV(outputDirectory, "Stickers.csv", outputStickers);
 
             //---------------------------Parse out hair
             StringBuilder outputMaleHair = new StringBuilder();
@@ -1690,10 +1770,10 @@ namespace AquaModelLibrary
                     outputNGSHair.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleHair.csv"), outputMaleHair.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleHair.csv"), outputFemaleHair.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealHair.csv"), outputCasealHair.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSHair.csv"), outputNGSHair.ToString());
+            WriteCSV(outputDirectory, "MaleHair.csv", outputMaleHair);
+            WriteCSV(outputDirectory, "FemaleHair.csv", outputFemaleHair);
+            WriteCSV(outputDirectory, "CasealHair.csv", outputCasealHair);
+            WriteCSV(outputDirectory, "NGSHair.csv", outputNGSHair);
 
             //---------------------------Parse out Eye
             StringBuilder outputEyes = new StringBuilder();
@@ -1779,13 +1859,14 @@ namespace AquaModelLibrary
                 if (id <= 100000)
                 {
                     outputEyes.Append(output);
-                } else
+                }
+                else
                 {
                     outputNGSEyes.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "Eyes.csv"), outputEyes.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSEyes.csv"), outputNGSEyes.ToString());
+            WriteCSV(outputDirectory, "Eyes.csv", outputEyes);
+            WriteCSV(outputDirectory, "NGSEyes.csv", outputNGSEyes);
 
             //---------------------------Parse out EYEB
             StringBuilder outputEyebrows = new StringBuilder();
@@ -1877,8 +1958,8 @@ namespace AquaModelLibrary
                     outputNGSEyebrows.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "Eyebrows.csv"), outputEyebrows.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSEyebrows.csv"), outputNGSEyebrows.ToString());
+            WriteCSV(outputDirectory, "Eyebrows.csv", outputEyebrows);
+            WriteCSV(outputDirectory, "NGSEyebrows.csv", outputNGSEyebrows);
 
             //---------------------------Parse out EYEL
             StringBuilder outputEyelashes = new StringBuilder();
@@ -1970,8 +2051,8 @@ namespace AquaModelLibrary
                     outputNGSEyelashes.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "Eyelashes.csv"), outputEyelashes.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSEyelashes.csv"), outputNGSEyelashes.ToString());
+            WriteCSV(outputDirectory, "Eyelashes.csv", outputEyelashes);
+            WriteCSV(outputDirectory, "NGSEyelashes.csv", outputNGSEyelashes);
 
             //---------------------------Parse out ACCE //Stored under decoy in a99be286e3a7e1b45d88a3ea4d6c18c4
             StringBuilder outputAccessories = new StringBuilder();
@@ -2023,8 +2104,6 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
-
                     //No HQ Accessories?
                     /*
                     output += ",[HQ Texture Ice]," + rebExHash;
@@ -2048,14 +2127,24 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
-
                 }
+
+                output += "\n";
+
+                //Add linked character nodes
+                if (aquaCMX.accessoryDict.ContainsKey(id))
+                {
+                    var acce = aquaCMX.accessoryDict[id];
+
+                    output += $",{acce.nodeAttach1.GetString()},{acce.nodeAttach2.GetString()},{acce.nodeAttach3.GetString()},{acce.nodeAttach4.GetString()},{acce.nodeAttach5.GetString()}," +
+                        $"{acce.nodeAttach6.GetString()},{acce.nodeAttach7.GetString()},{acce.nodeAttach8.GetString()}";
+                }
+
+                output += "\n";
 
                 outputAccessories.Append(output);
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "Accessories.csv"), outputAccessories.ToString());
+            WriteCSV(outputDirectory, "Accessories.csv", outputAccessories);
 
             //---------------------------Parse out skin
             StringBuilder outputSkin = new StringBuilder();
@@ -2145,8 +2234,8 @@ namespace AquaModelLibrary
                     outputNGSSkin.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "Skins.csv"), outputSkin.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSSkins.csv"), outputNGSSkin.ToString());
+            WriteCSV(outputDirectory, "Skins.csv", outputSkin);
+            WriteCSV(outputDirectory, "NGSSkins.csv", outputNGSSkin);
 
             //---------------------------Parse out FCP1, Face Textures
             StringBuilder outputFCP1 = new StringBuilder();
@@ -2236,10 +2325,10 @@ namespace AquaModelLibrary
                     outputNGSFCP1.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "FaceTextures.csv"), outputFCP1.ToString());
-            if(outputNGSFCP1.Length > 0)
+            WriteCSV(outputDirectory, "FaceTextures.csv", outputFCP1);
+            if (outputNGSFCP1.Length > 0)
             {
-                File.WriteAllText(Path.Combine(outputDirectory, "NGSFaceTextures.csv"), outputNGSFCP1.ToString());
+                WriteCSV(outputDirectory, "NGSFaceTextures.csv", outputNGSFCP1);
             }
 
             //---------------------------Parse out FCP2
@@ -2330,10 +2419,10 @@ namespace AquaModelLibrary
                     outputNGSFCP2.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "FacePaint.csv"), outputFCP2.ToString());
+            WriteCSV(outputDirectory, "FacePaint.csv", outputFCP2);
             if (outputNGSFCP2.Length > 0)
             {
-                File.WriteAllText(Path.Combine(outputDirectory, "NGSFacePaint.csv"), outputNGSFCP2.ToString());
+                WriteCSV(outputDirectory, "NGSFacePaint.csv", outputNGSFCP2);
             }
 
             //---------------------------Parse out FACE //face_variation.cmp.lua in 75b1632526cd6a1039625349df6ee8dd used to map file face ids to .text ids
@@ -2371,7 +2460,7 @@ namespace AquaModelLibrary
                 {
                     realId = "No" + id;
                 }
-                
+
 
                 foreach (var dict in strNameDicts)
                 {
@@ -2471,15 +2560,15 @@ namespace AquaModelLibrary
                     outputNGSFace.Append(output);
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleHumanFaces.csv"), outputHumanMaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleHumanFaces.csv"), outputHumanFemaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleNewmanFaces.csv"), outputNewmanMaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleNewmanFaces.csv"), outputNewmanFemaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CastFaces_Heads.csv"), outputCastMaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealFaces_Heads.csv"), outputCastFemaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleDeumanFaces.csv"), outputDewmanMaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleDeumanFaces.csv"), outputDewmanFemaleFace.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSFaces.csv"), outputNGSFace.ToString());
+            WriteCSV(outputDirectory, "MaleHumanFaces.csv", outputHumanMaleFace);
+            WriteCSV(outputDirectory, "FemaleHumanFaces.csv", outputHumanFemaleFace);
+            WriteCSV(outputDirectory, "MaleNewmanFaces.csv", outputNewmanMaleFace);
+            WriteCSV(outputDirectory, "FemaleNewmanFaces.csv", outputNewmanFemaleFace);
+            WriteCSV(outputDirectory, "CastFaces_Heads.csv", outputCastMaleFace);
+            WriteCSV(outputDirectory, "CasealFaces_Heads.csv", outputCastFemaleFace);
+            WriteCSV(outputDirectory, "MaleDeumanFaces.csv", outputDewmanMaleFace);
+            WriteCSV(outputDirectory, "FemaleDeumanFaces.csv", outputDewmanFemaleFace);
+            WriteCSV(outputDirectory, "NGSFaces.csv", outputNGSFace);
 
             //---------------------------------------------------------------------------------------//End CMX related ids
 
@@ -2507,11 +2596,12 @@ namespace AquaModelLibrary
                 }
 
                 int voiceNum = -1;
-                if(str.Contains(voiceCman))
+                if (str.Contains(voiceCman))
                 {
                     id = 0;
                     voiceNum = Int32.Parse(str.Replace(voiceCman, ""));
-                } else if (str.Contains(voiceCwoman))
+                }
+                else if (str.Contains(voiceCwoman))
                 {
                     id = 1;
                     voiceNum = Int32.Parse(str.Replace(voiceCwoman, ""));
@@ -2546,7 +2636,7 @@ namespace AquaModelLibrary
 
                 output += "\n";
 
-                switch(id)
+                switch (id)
                 {
                     case 0:
                         outputMaleVoices.Append(output);
@@ -2562,10 +2652,10 @@ namespace AquaModelLibrary
                         break;
                 }
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "MaleVoices.csv"), outputMaleVoices.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "FemaleVoices.csv"), outputFemaleVoices.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CastVoices.csv"), outputCastVoices.ToString());
-            File.WriteAllText(Path.Combine(outputDirectory, "CasealVoices.csv"), outputCasealVoices.ToString());
+            WriteCSV(outputDirectory, "MaleVoices.csv", outputMaleVoices);
+            WriteCSV(outputDirectory, "FemaleVoices.csv", outputFemaleVoices);
+            WriteCSV(outputDirectory, "CastVoices.csv", outputCastVoices);
+            WriteCSV(outputDirectory, "CasealVoices.csv", outputCasealVoices);
 
             //---------------------------Parse out Lobby Action files -- in lobby_action_setting.lac within defaa92bd5435c84af0da0302544b811 and common.text in a1d84c3c748cebdb6fc42f66b73d2e57
             StringBuilder lobbyActions = new StringBuilder();
@@ -2577,7 +2667,7 @@ namespace AquaModelLibrary
             for (int i = 0; i < lac.dataBlocks.Count; i++)
             {
                 //There are sometimes multiple references to the same ice, but we're not interested in these entries
-                if(iceTracker.Contains(lac.dataBlocks[i].iceName))
+                if (iceTracker.Contains(lac.dataBlocks[i].iceName))
                 {
                     continue;
                 }
@@ -2611,7 +2701,7 @@ namespace AquaModelLibrary
 
                 output += classicHash;
 
-                if(lac.dataBlocks[i].iceName.Contains("_m.ice"))
+                if (lac.dataBlocks[i].iceName.Contains("_m.ice"))
                 {
                     output += (", Male");
                 }
@@ -2630,7 +2720,7 @@ namespace AquaModelLibrary
                 lobbyActions.Append(output);
             }
 
-            File.WriteAllText(Path.Combine(outputDirectory, "LobbyActions.csv"), lobbyActions.ToString());
+            WriteCSV(outputDirectory, "LobbyActions.csv", lobbyActions);
 
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
             StringBuilder outputNGSEars = new StringBuilder();
@@ -2714,7 +2804,7 @@ namespace AquaModelLibrary
                 outputNGSEars.Append(output);
 
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSEars.csv"), outputNGSEars.ToString());
+            WriteCSV(outputDirectory, "NGSEars.csv", outputNGSEars);
 
             //---------------------------Parse out NGS teeth 
             StringBuilder outputNGSTeeth = new StringBuilder();
@@ -2798,7 +2888,7 @@ namespace AquaModelLibrary
                 outputNGSTeeth.Append(output);
 
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSTeeth.csv"), outputNGSTeeth.ToString());
+            WriteCSV(outputDirectory, "NGSTeeth.csv", outputNGSTeeth);
 
             //---------------------------Parse out NGS horns 
             StringBuilder outputNGSHorns = new StringBuilder();
@@ -2816,7 +2906,7 @@ namespace AquaModelLibrary
             foreach (int id in masterIdList)
             {
                 //Skip the なし horn entry. I'm not even sure why that's in there.
-                if(id == 0)
+                if (id == 0)
                 {
                     continue;
                 }
@@ -2887,8 +2977,16 @@ namespace AquaModelLibrary
                 outputNGSHorns.Append(output);
 
             }
-            File.WriteAllText(Path.Combine(outputDirectory, "NGSHorns.csv"), outputNGSHorns.ToString());
+            WriteCSV(outputDirectory, "NGSHorns.csv", outputNGSHorns);
 
+        }
+
+        private static void WriteCSV(string outputDirectory, string fileName, StringBuilder output)
+        {
+            if (output.Length != 0)
+            {
+                File.WriteAllText(Path.Combine(outputDirectory, fileName), output.ToString());
+            }
         }
 
         private static string AddBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
@@ -2958,39 +3056,46 @@ namespace AquaModelLibrary
 
         private static void GatherTextIds(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, string category, bool firstDictSet)
         {
-            for (int sub = 0; sub < textByCat[category].Count; sub++)
+            if(textByCat.ContainsKey(category))
             {
-                if (firstDictSet == true)
+                for (int sub = 0; sub < textByCat[category].Count; sub++)
                 {
-                    nameDicts.Add(new Dictionary<int, string>());
-                }
-                foreach (var pair in textByCat[category][sub])
-                {
-                    //ids should be stored as an ascii string with "No" in front of them
-                    int id;
-                    if (pair.name.Substring(0, 2).ToUpper().Equals("NO"))
+                    if (firstDictSet == true)
                     {
-                        Int32.TryParse(pair.name.Substring(2), out id);
+                        nameDicts.Add(new Dictionary<int, string>());
                     }
-                    else
+                    foreach (var pair in textByCat[category][sub])
                     {
-                        if (Int32.TryParse(pair.name, out id) == false)
+                        //ids should be stored as an ascii string with "No" in front of them
+                        int id;
+                        if (pair.name.Substring(0, 2).ToUpper().Equals("NO"))
                         {
-                            Console.WriteLine($"Could not parse {pair.name} : {pair.str}");
-                            continue;
+                            Int32.TryParse(pair.name.Substring(2), out id);
+                        }
+                        else
+                        {
+                            if (Int32.TryParse(pair.name, out id) == false)
+                            {
+                                Console.WriteLine($"Could not parse {pair.name} : {pair.str}");
+                                continue;
+                            }
+                        }
+
+                        //When combining areas, such as with body and costume, there will be duplicates so we have to account for that.
+                        if (!nameDicts[sub].ContainsKey(id))
+                        {
+                            nameDicts[sub].Add(id, pair.str);
+                        }
+                        if (!masterIdList.Contains(id))
+                        {
+                            masterIdList.Add(id);
                         }
                     }
-
-                    //When combining areas, such as with body and costume, there will be duplicates so we have to account for that.
-                    if (!nameDicts[sub].ContainsKey(id))
-                    {
-                        nameDicts[sub].Add(id, pair.str);
-                    }
-                    if (!masterIdList.Contains(id))
-                    {
-                        masterIdList.Add(id);
-                    }
                 }
+
+            } else
+            {
+                Console.WriteLine($"No category '{category}' present.");
             }
         }
 

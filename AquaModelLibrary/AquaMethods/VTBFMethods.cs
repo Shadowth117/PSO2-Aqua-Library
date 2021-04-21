@@ -1912,6 +1912,16 @@ namespace AquaModelLibrary
             return body;
         }
 
+        public static BODYObject parseCARM(List<Dictionary<int, object>> carmRaw)
+        {
+            return parseBODY(carmRaw);
+        }
+
+        public static BODYObject parseCLEG(List<Dictionary<int, object>> clegRaw)
+        {
+            return parseBODY(clegRaw);
+        }
+
         public static byte[] toBODY(BODYObject body)
         {
             List<byte> outBytes = new List<byte>();
@@ -1953,7 +1963,6 @@ namespace AquaModelLibrary
             bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11));
             bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12));
             bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13));
-            bbly.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x14));
 
             //Todo, handle default junk data added with NIFL
 
@@ -1980,6 +1989,184 @@ namespace AquaModelLibrary
             WriteTagHeader(outBytes, "BBLY", 0x0, 0xE);
 
             return outBytes.ToArray();
+        }
+
+        //NIFL cmx lumps this in with BBLY
+        public static BBLYObject parseBDP1(List<Dictionary<int, object>> bblyRaw)
+        {
+            BBLYObject bbly = new BBLYObject();
+            bbly.bbly.id = (int)bblyRaw[0][0xFF];
+
+            bbly.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x10));
+            bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11));
+            bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12));
+            bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13));
+
+            //Todo, handle default junk data added with NIFL
+
+            return bbly;
+        }
+
+        public static StickerObject parseBDP2(List<Dictionary<int, object>> bdp2Raw)
+        {
+            StickerObject bdp2 = new StickerObject();
+            bdp2.sticker.id = (int)bdp2Raw[0][0xFF];
+
+            bdp2.texString = PSO2String.GeneratePSO2String(GetObject<byte[]>(bdp2Raw[0], 0x20));
+            bdp2.sticker.reserve0 = GetObject<int>(bdp2Raw[0], 0x21);
+
+            return bdp2;
+        }
+
+        public static FACEObject parseFACE(List<Dictionary<int, object>> faceRaw)
+        {
+            FACEObject face = new FACEObject();
+            face.face.id = (int)faceRaw[0][0xFF];
+
+            face.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x70));
+            face.face.unkInt3 = GetObject<int>(faceRaw[0], 0x71);
+            face.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x72));
+            face.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x73));
+            face.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x74));
+            face.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x75));
+            face.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x76));
+
+            //0x77 seemingly isn't parsed
+            //0x78 seemingly isn't parsed
+            face.face.unkInt5 = GetObject<int>(faceRaw[0], 0x79);
+
+            return face;
+        }
+
+        public static FCMNObject parseFCMN(List<Dictionary<int, object>> fcmnRaw)
+        {
+            FCMNObject fcmn = new FCMNObject();
+            fcmn.fcmn.id = (int)fcmnRaw[0][0xFF];
+            fcmn.proportionAnim = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC0));
+            fcmn.faceAnim1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC1));
+
+            PSO2String[] faceAnims = new PSO2String[8];
+            if(fcmnRaw.Count > 1)
+            {
+                for (int i = 1; i < fcmnRaw.Count; i++)
+                {
+                    faceAnims[i - 1] = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC1));
+                }
+            }
+            fcmn.faceAnim2 = faceAnims[0];
+            fcmn.faceAnim3 = faceAnims[1];
+            fcmn.faceAnim4 = faceAnims[2];
+            fcmn.faceAnim5 = faceAnims[3];
+            fcmn.faceAnim6 = faceAnims[4];
+            fcmn.faceAnim7 = faceAnims[5];
+            fcmn.faceAnim8 = faceAnims[6];
+            fcmn.faceAnim9 = faceAnims[7];
+
+            return fcmn;
+        }
+
+        public static FCPObject parseFCP1(List<Dictionary<int, object>> fcp1Raw)
+        {
+            FCPObject fcp = new FCPObject();
+            fcp.fcp.id = (int)fcp1Raw[0][0xFF];
+            
+            fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x80));
+            fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x81));
+            fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x82));
+            fcp.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x83));
+
+            return fcp;
+        }
+
+        public static FCPObject parseFCP2(List<Dictionary<int, object>> fcp2Raw)
+        {
+            FCPObject fcp = new FCPObject();
+            fcp.fcp.id = (int)fcp2Raw[0][0xFF];
+
+            fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x90));
+            fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x92));
+            fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x93));
+            
+            return fcp;
+        }
+
+        public static EYEObject parseEYE(List<Dictionary<int, object>> eyeRaw)
+        {
+            EYEObject eye = new EYEObject();
+            eye.eye.id = (int)eyeRaw[0][0xFF];
+
+            eye.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x40));
+            eye.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x42));
+            eye.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x43));
+            eye.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x44));
+
+            return eye;
+        }
+
+        public static EYEBObject parseEYEB(List<Dictionary<int, object>> eyebRaw)
+        {
+            EYEBObject eyeb = new EYEBObject();
+            eyeb.eyeb.id = (int)eyebRaw[0][0xFF];
+
+            eyeb.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyebRaw[0], 0x50));
+
+            return eyeb;
+        }
+
+        public static EYEBObject parseEYEL(List<Dictionary<int, object>> eyelRaw)
+        {
+            EYEBObject eyel = new EYEBObject();
+            eyel.eyeb.id = (int)eyelRaw[0][0xFF];
+
+            eyel.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyelRaw[0], 0x60));
+
+            return eyel;
+        }
+
+        public static HAIRObject parseHAIR(List<Dictionary<int, object>> hairRaw)
+        {
+            HAIRObject hair = new HAIRObject();
+            hair.hair.id = (int)hairRaw[0][0xFF];
+
+            hair.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA0));
+            hair.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA1));
+            hair.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA2));
+            hair.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA3));
+            hair.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA4));
+            hair.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA5));
+            //A8, A9, and AA don't seem to be stored in the NIFL 
+
+            return hair;
+        }
+
+        public static BCLN parseLN(List<Dictionary<int, object>> lnRaw)
+        {
+            BCLN bcln = new BCLN();
+            bcln.id = (int)lnRaw[0][0xFF];
+            bcln.fileId = GetObject<int>(lnRaw[0], 0x1);
+            bcln.unkInt = GetObject<int>(lnRaw[0], 0x2);
+
+            return bcln;
+        }
+
+        public static ACCEObject parseACCE(List<Dictionary<int, object>> acceRaw)
+        {
+            ACCEObject acce = new ACCEObject();
+
+            acce.acce.id = (int)acceRaw[0][0xFF];
+            acce.acce.unkShort_C7 = GetObject<short>(acceRaw[0], 0xC7);
+            acce.acce.unkShort_D7 = GetObject<short>(acceRaw[0], 0xD7);
+
+            acce.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF0));
+            acce.nodeAttach1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF1));
+            acce.nodeAttach2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF2));
+            acce.nodeAttach3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF3));
+            acce.nodeAttach4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF4));
+            acce.nodeAttach5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF5));
+            acce.nodeAttach6 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF6));
+            acce.nodeAttach7 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF7));
+
+            return acce;
         }
 
         //Safely retrieves objects in the case that they don't exist in the given dictionary
