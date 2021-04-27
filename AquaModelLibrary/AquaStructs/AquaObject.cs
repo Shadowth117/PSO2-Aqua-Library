@@ -492,9 +492,9 @@ namespace AquaModelLibrary
                 {
                     uv1ListNGS = new List<short[]>(new short[vertCount][]);
                 }
-                if (modelVtxl.uv2ListShort.Count > 0)
+                if (modelVtxl.uv2ListNGS.Count > 0)
                 {
-                    uv2ListShort = new List<short[]>(new short[vertCount][]);
+                    uv2ListNGS = new List<short[]>(new short[vertCount][]);
                 }
                 if (modelVtxl.uv2List.Count > 0)
                 {
@@ -536,7 +536,7 @@ namespace AquaModelLibrary
             public List<byte[]> vertColor2s = new List<byte[]>(); //4 bytes, BGRA?
             public List<byte[]> vertWeightIndices = new List<byte[]>(); //4 bytes
             public List<short[]> uv1ListNGS = new List<short[]>(); //2 16 bit values. UVs probably need to be vertically flipped for most software. I usually just import v as -v.
-            public List<short[]> uv2ListShort = new List<short[]>(); //Uncommon NGS uv2 variation
+            public List<short[]> uv2ListNGS = new List<short[]>(); //Uncommon NGS uv2 variation
             public List<Vector2> uv2List = new List<Vector2>(); //For some reason 0xC33 seemingly retained vector2 data types for these.
             public List<Vector2> uv3List = new List<Vector2>();
             public List<Vector2> uv4List = new List<Vector2>();
@@ -678,11 +678,11 @@ namespace AquaModelLibrary
                 {
                     //UV1List
                     uv2List.Clear();
-                    for (int i = 0; i < uv2ListShort.Count; i++)
+                    for (int i = 0; i < uv2ListNGS.Count; i++)
                     {
                         var uv = new Vector2();
-                        uv.X = ((float)((float)uv2ListShort[i][0] / short.MaxValue));
-                        uv.Y = ((float)((float)uv2ListShort[i][1] / short.MaxValue));
+                        uv.X = ((float)((float)uv2ListNGS[i][0] / short.MaxValue));
+                        uv.Y = ((float)((float)uv2ListNGS[i][1] / short.MaxValue));
                         uv2List.Add(uv);
                     }
                 }

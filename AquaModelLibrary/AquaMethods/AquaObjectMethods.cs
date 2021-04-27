@@ -93,9 +93,9 @@ namespace AquaModelLibrary
                     {
                         vtxl.uv1ListNGS[i] = new short[2];
                     }
-                    if (vtxl.uv2ListShort.Count > 0 && vtxl.uv2ListShort[i] == null)
+                    if (vtxl.uv2ListNGS.Count > 0 && vtxl.uv2ListNGS[i] == null)
                     {
-                        vtxl.uv2ListShort[i] = new short[2];
+                        vtxl.uv2ListNGS[i] = new short[2];
                     }
                     if (vtxl.uv2List.Count > 0 && vtxl.uv2List[i] == null)
                     {
@@ -179,7 +179,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertWeightsNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertWeightsNGS[destinationIndex] = sourceVTXL.vertWeightsNGS[sourceIndex];
+                destinationVTXL.vertWeightsNGS[destinationIndex] = (ushort[])sourceVTXL.vertWeightsNGS[sourceIndex].Clone();
             }
             if (sourceVTXL.vertWeights.Count > sourceIndex)
             {
@@ -187,7 +187,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertNormalsNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertNormalsNGS[destinationIndex] = sourceVTXL.vertNormalsNGS[sourceIndex];
+                destinationVTXL.vertNormalsNGS[destinationIndex] = (short[])sourceVTXL.vertNormalsNGS[sourceIndex].Clone();
             }
             if (sourceVTXL.vertNormals.Count > sourceIndex)
             {
@@ -195,19 +195,23 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertColors.Count > sourceIndex)
             {
-                destinationVTXL.vertColors[destinationIndex] = sourceVTXL.vertColors[sourceIndex];
+                destinationVTXL.vertColors[destinationIndex] = (byte[])sourceVTXL.vertColors[sourceIndex].Clone();
             }
             if (sourceVTXL.vertColor2s.Count > sourceIndex)
             {
-                destinationVTXL.vertColor2s[destinationIndex] = sourceVTXL.vertColor2s[sourceIndex];
+                destinationVTXL.vertColor2s[destinationIndex] = (byte[])sourceVTXL.vertColor2s[sourceIndex].Clone();
             }
             if (sourceVTXL.vertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.vertWeightIndices[destinationIndex] = sourceVTXL.vertWeightIndices[sourceIndex];
+                destinationVTXL.vertWeightIndices[destinationIndex] = (byte[])sourceVTXL.vertWeightIndices[sourceIndex].Clone();
             }
             if (sourceVTXL.uv1ListNGS.Count > sourceIndex)
             {
-                destinationVTXL.uv1ListNGS[destinationIndex] = sourceVTXL.uv1ListNGS[sourceIndex];
+                destinationVTXL.uv1ListNGS[destinationIndex] = (short[])sourceVTXL.uv1ListNGS[sourceIndex].Clone();
+            }
+            if (sourceVTXL.uv2ListNGS.Count > sourceIndex)
+            {
+                destinationVTXL.uv2ListNGS[destinationIndex] = (short[])sourceVTXL.uv2ListNGS[sourceIndex].Clone();
             }
             if (sourceVTXL.uv1List.Count > sourceIndex)
             {
@@ -227,15 +231,15 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vert0x22.Count > sourceIndex)
             {
-                destinationVTXL.vert0x22[destinationIndex] = sourceVTXL.vert0x22[sourceIndex];
+                destinationVTXL.vert0x22[destinationIndex] = (short[])sourceVTXL.vert0x22[sourceIndex].Clone();
             }
             if (sourceVTXL.vert0x23.Count > sourceIndex)
             {
-                destinationVTXL.vert0x23[destinationIndex] = sourceVTXL.vert0x23[sourceIndex];
+                destinationVTXL.vert0x23[destinationIndex] = (short[])sourceVTXL.vert0x23[sourceIndex].Clone();
             }
             if (sourceVTXL.vertTangentListNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertTangentListNGS[destinationIndex] = sourceVTXL.vertTangentListNGS[sourceIndex];
+                destinationVTXL.vertTangentListNGS[destinationIndex] = (short[])sourceVTXL.vertTangentListNGS[sourceIndex].Clone();
             }
             if (sourceVTXL.vertTangentList.Count > sourceIndex)
             {
@@ -243,7 +247,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertBinormalListNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertBinormalListNGS[destinationIndex] = sourceVTXL.vertBinormalListNGS[sourceIndex];
+                destinationVTXL.vertBinormalListNGS[destinationIndex] = (short[])sourceVTXL.vertBinormalListNGS[sourceIndex].Clone();
             }
             if (sourceVTXL.vertBinormalList.Count > sourceIndex)
             {
@@ -251,11 +255,11 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.rawVertWeights.Count > sourceIndex)
             {
-                destinationVTXL.rawVertWeights[destinationIndex] = sourceVTXL.rawVertWeights[sourceIndex];
+                destinationVTXL.rawVertWeights[destinationIndex] = new List<float>(sourceVTXL.rawVertWeights[sourceIndex]);
             }
             if (sourceVTXL.rawVertWeightIds.Count > sourceIndex)
             {
-                destinationVTXL.rawVertWeightIds[destinationIndex] = sourceVTXL.rawVertWeightIds[sourceIndex];
+                destinationVTXL.rawVertWeightIds[destinationIndex] = new List<int>(sourceVTXL.rawVertWeightIds[sourceIndex]);
             }
             if (sourceVTXL.trueVertWeights.Count > sourceIndex)
             {
@@ -263,7 +267,11 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.trueVertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.trueVertWeightIndices[destinationIndex] = sourceVTXL.trueVertWeightIndices[sourceIndex];
+                destinationVTXL.trueVertWeightIndices[destinationIndex] = (byte[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone();
+            }
+            if (sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
+            {
+                destinationVTXL.edgeVerts.Add((ushort)destinationIndex);
             }
         }
 
@@ -275,7 +283,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertWeightsNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertWeightsNGS.Add(sourceVTXL.vertWeightsNGS[sourceIndex]);
+                destinationVTXL.vertWeightsNGS.Add((ushort[])sourceVTXL.vertWeightsNGS[sourceIndex].Clone());
             }
             if (sourceVTXL.vertWeights.Count > sourceIndex)
             {
@@ -283,7 +291,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertNormalsNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertNormalsNGS.Add(sourceVTXL.vertNormalsNGS[sourceIndex]);
+                destinationVTXL.vertNormalsNGS.Add((short[])sourceVTXL.vertNormalsNGS[sourceIndex].Clone());
             }
             if (sourceVTXL.vertNormals.Count > sourceIndex)
             {
@@ -291,19 +299,23 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertColors.Count > sourceIndex)
             {
-                destinationVTXL.vertColors.Add(sourceVTXL.vertColors[sourceIndex]);
+                destinationVTXL.vertColors.Add((byte[])sourceVTXL.vertColors[sourceIndex].Clone());
             }
             if (sourceVTXL.vertColor2s.Count > sourceIndex)
             {
-                destinationVTXL.vertColor2s.Add(sourceVTXL.vertColor2s[sourceIndex]);
+                destinationVTXL.vertColor2s.Add((byte[])sourceVTXL.vertColor2s[sourceIndex].Clone());
             }
             if (sourceVTXL.vertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.vertWeightIndices.Add(sourceVTXL.vertWeightIndices[sourceIndex]);
+                destinationVTXL.vertWeightIndices.Add((byte[])sourceVTXL.vertWeightIndices[sourceIndex].Clone());
             }
             if (sourceVTXL.uv1ListNGS.Count > sourceIndex)
             {
-                destinationVTXL.uv1ListNGS.Add(sourceVTXL.uv1ListNGS[sourceIndex]);
+                destinationVTXL.uv1ListNGS.Add((short[])sourceVTXL.uv1ListNGS[sourceIndex].Clone());
+            }
+            if (sourceVTXL.uv2ListNGS.Count > sourceIndex)
+            {
+                destinationVTXL.uv2ListNGS.Add((short[])sourceVTXL.uv2ListNGS[sourceIndex].Clone());
             }
             if (sourceVTXL.uv1List.Count > sourceIndex)
             {
@@ -323,15 +335,15 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vert0x22.Count > sourceIndex)
             {
-                destinationVTXL.vert0x22.Add(sourceVTXL.vert0x22[sourceIndex]);
+                destinationVTXL.vert0x22.Add((short[])sourceVTXL.vert0x22[sourceIndex].Clone());
             }
             if (sourceVTXL.vert0x23.Count > sourceIndex)
             {
-                destinationVTXL.vert0x23.Add(sourceVTXL.vert0x23[sourceIndex]);
+                destinationVTXL.vert0x23.Add((short[])sourceVTXL.vert0x23[sourceIndex].Clone());
             }
             if (sourceVTXL.vertTangentListNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertTangentListNGS.Add(sourceVTXL.vertTangentListNGS[sourceIndex]);
+                destinationVTXL.vertTangentListNGS.Add((short[])sourceVTXL.vertTangentListNGS[sourceIndex].Clone());
             }
             if (sourceVTXL.vertTangentList.Count > sourceIndex)
             {
@@ -339,7 +351,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertBinormalListNGS.Count > sourceIndex)
             {
-                destinationVTXL.vertBinormalListNGS.Add(sourceVTXL.vertBinormalListNGS[sourceIndex]);
+                destinationVTXL.vertBinormalListNGS.Add((short[])sourceVTXL.vertBinormalListNGS[sourceIndex].Clone());
             }
             if (sourceVTXL.vertBinormalList.Count > sourceIndex)
             {
@@ -347,11 +359,11 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.rawVertWeights.Count > sourceIndex)
             {
-                destinationVTXL.rawVertWeights.Add(sourceVTXL.rawVertWeights[sourceIndex]);
+                destinationVTXL.rawVertWeights.Add(new List<float>(sourceVTXL.rawVertWeights[sourceIndex]));
             }
             if (sourceVTXL.rawVertWeightIds.Count > sourceIndex)
             {
-                destinationVTXL.rawVertWeightIds.Add(sourceVTXL.rawVertWeightIds[sourceIndex]);
+                destinationVTXL.rawVertWeightIds.Add(new List<int>(sourceVTXL.rawVertWeightIds[sourceIndex]));
             }
             if (sourceVTXL.trueVertWeights.Count > sourceIndex)
             {
@@ -359,7 +371,11 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.trueVertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.trueVertWeightIndices.Add(sourceVTXL.trueVertWeightIndices[sourceIndex]);
+                destinationVTXL.trueVertWeightIndices.Add((byte[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone());
+            }
+            if(sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
+            {
+                destinationVTXL.edgeVerts.Add((ushort)(destinationVTXL.vertPositions.Count - 1));
             }
         }
 
@@ -389,7 +405,7 @@ namespace AquaModelLibrary
             {
                 return false;
             }
-            if (vtxl.uv2ListShort.Count > 0 && !IsEqualShortArray(vtxl.uv2ListShort[vertIndex], vtxl2.uv2ListShort[faceVertIndex]))
+            if (vtxl.uv2ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv2ListNGS[vertIndex], vtxl2.uv2ListNGS[faceVertIndex]))
             {
                 return false;
             }
@@ -565,7 +581,7 @@ namespace AquaModelLibrary
                                     vtxl.uv2List.Add(streamReader.Read<Vector2>());
                                     break;
                                 case 0xE:
-                                    vtxl.uv2ListShort.Add(Read2Shorts(streamReader));
+                                    vtxl.uv2ListNGS.Add(Read2Shorts(streamReader));
                                     break;
                                 default:
                                     throw new Exception($"Unexpected vert uv1 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
@@ -812,14 +828,15 @@ namespace AquaModelLibrary
 
         public static void splitMesh(AquaObject model, AquaObject outModel, int modelId, List<List<int>> facesToClone)
         {
+            List<List<int>> boneIdList = new List<List<int>>();
             if (facesToClone.Count > 0)
             {
                 for (int f = 0; f < facesToClone.Count; f++)
                 {
                     Dictionary<float, int> faceVertDict = new Dictionary<float, int>();
                     List<int> faceVertIds = new List<int>();
-
                     List<int> tempFaceMatIds = new List<int>();
+                    List<int> boneIds = new List<int>();
                     List<Vector3> tempFaces = new List<Vector3>();
 
                     int vertIndex = 0;
@@ -833,16 +850,37 @@ namespace AquaModelLibrary
                             {
                                 faceVertDict.Add(face.X, vertIndex++);
                                 faceVertIds.Add((int)face.X);
+                                for(int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.X].Length; bi++)
+                                {
+                                    if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.X][bi]))
+                                    {
+                                        boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.X][bi]);
+                                    }
+                                }
                             }
                             if (!faceVertIds.Contains((int)face.Y))
                             {
                                 faceVertDict.Add(face.Y, vertIndex++);
                                 faceVertIds.Add((int)face.Y);
+                                for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.Y].Length; bi++)
+                                {
+                                    if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.Y][bi]))
+                                    {
+                                        boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.Y][bi]);
+                                    }
+                                }
                             }
                             if (!faceVertIds.Contains((int)face.Z))
                             {
                                 faceVertDict.Add(face.Z, vertIndex++);
                                 faceVertIds.Add((int)face.Z);
+                                for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.Z].Length; bi++)
+                                {
+                                    if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.Z][bi]))
+                                    {
+                                        boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.Z][bi]);
+                                    }
+                                }
                             }
 
                             tempFaceMatIds.Add(model.tempTris[modelId].matIdList[facesToClone[f][i]]);
@@ -871,13 +909,9 @@ namespace AquaModelLibrary
                         //Add things that aren't linked to the vertex ids
                         if (model.vtxlList[modelId].bonePalette != null)
                         {
-                            vtxl.bonePalette = model.vtxlList[modelId].bonePalette;
+                            vtxl.bonePalette.AddRange(model.vtxlList[modelId].bonePalette);
                         }
-                        if (model.vtxlList[modelId].edgeVerts != null)
-                        {
-                            vtxl.edgeVerts = model.vtxlList[modelId].edgeVerts;
-                        }
-
+                        boneIdList.Add(boneIds);
                         outModel.vtxlList.Add(vtxl);
                     }
                 }
@@ -890,6 +924,9 @@ namespace AquaModelLibrary
         public static void SplitByBoneCount(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
         {
             List<List<int>> faceLists = new List<List<int>>();
+ /*  Debug*/List<List<int>> usedVertsMaster = new List<List<int>>();
+ /*  Debug*/List<List<int>> objBonesList = new List<List<int>>();
+
             bool[] usedFaceIds = new bool[model.tempTris[modelId].triList.Count];
             int startFace = 0;
 
@@ -908,78 +945,97 @@ namespace AquaModelLibrary
                     }
                 }
 
+                List<int> edgeVertCandidates = new List<int>();
+                List<int> usedVerts = new List<int>();
                 for (int f = startFace; f < usedFaceIds.Length; f++)
                 {
-                    //Used to watch how many bones are being used so it can be understood where to split the meshes.
-                    //These also help to track the bones being used so the edge verts list can be generated. Not sure how important that is, but the game stores it.
-                    List<int> faceBones = new List<int>();
-                    int newBones = 0;
-
-                    //Get vert ids of the face
-                    float[] faceIds = VectorAsArray(model.tempTris[modelId].triList[f]);
-                    List<int> edgeVertCandidates = new List<int>();
-
-                    //Get bones in the face
-                    foreach (float v in faceIds)
+                    if(usedFaceIds[f] != true)
                     {
-                        bool vertCheck = false;
-                        for (int b = 0; b < model.vtxlList[modelId].vertWeightIndices[(int)v].Length; b++)
+                        //Used to watch how many bones are being used so it can be understood where to split the meshes.
+                        //These also help to track the bones being used so the edge verts list can be generated. Not sure how important that is, but the game stores it.
+                        List<int> faceBones = new List<int>();
+                        int newBones = 0;
+
+                        //Get vert ids of the face
+                        float[] faceIds = VectorAsArray(model.tempTris[modelId].triList[f]);
+
+                        //Get bones in the face
+                        foreach (float v in faceIds)
                         {
-                            int id = model.vtxlList[modelId].vertWeightIndices[(int)v][b];
-                            if (!faceBones.Contains(id))
+                            bool vertCheck = false;
+                            for (int b = 0; b < model.vtxlList[modelId].vertWeightIndices[(int)v].Length; b++)
                             {
-                                faceBones.Add(id);
+                                int id = model.vtxlList[modelId].vertWeightIndices[(int)v][b];
+                                if (!faceBones.Contains(id))
+                                {
+                                    faceBones.Add(id);
+                                }
+
+                                //If it's not in here, it's a candidate to be an edgeVert
+                                if (!objBones.Contains(id))
+                                {
+                                    vertCheck = true;
+                                }
                             }
 
-                            //If it's not in here, it's a candidate to be an edgeVert
-                            if (!objBones.Contains(id))
+                            //Add edge vert candidates 
+                            if (vertCheck && !edgeVertCandidates.Contains((int)v))
                             {
-                                vertCheck = true;
+                                edgeVertCandidates.Add((int)v);
                             }
                         }
 
-                        //Add edge vert candidates 
-                        if (vertCheck)
-                        {
-                            edgeVertCandidates.Add((int)v);
-                        }
-                    }
-
-                    //Check for bones in the face that weren't in the obj bone set yet
-                    foreach (int fb in faceBones)
-                    {
-                        if (!objBones.Contains(fb))
-                        {
-                            newBones++;
-                        }
-                    }
-
-                    //If enough space or no new, add to the object amount as well
-                    if (newBones + objBones.Count <= boneLimit)
-                    {
+                        //Check for bones in the face that weren't in the obj bone set yet
                         foreach (int fb in faceBones)
                         {
                             if (!objBones.Contains(fb))
                             {
-                                objBones.Add(fb);
+                                newBones++;
                             }
                         }
-                        usedFaceIds[f] = true;
-                        faceArray.Add(f);
-                    } else
-                    {
-                        foreach (int vert in edgeVertCandidates)
+
+                        //If enough space or no new, add to the object amount as well
+                        if (newBones + objBones.Count <= boneLimit)
                         {
-                            model.vtxlList[modelId].edgeVerts.Add((ushort)vert);
+                            //Add new bones if there's room
+                            foreach (int fb in faceBones)
+                            {
+                                if (!objBones.Contains(fb))
+                                {
+                                    objBones.Add(fb);
+                                }
+                            }
+                            //Track used verts so we can figure out edge verts later
+                            foreach (float id in faceIds)
+                            {
+                                if (!usedVerts.Contains((int)id))
+                                {
+                                    usedVerts.Add((int)id);
+                                }
+                            }
+                            usedFaceIds[f] = true;
+                            faceArray.Add(f);
                         }
                     }
                 }
+                //Determine what should be added to the final edge vert list
+                foreach (int vert in edgeVertCandidates)
+                {
+                    if (!model.vtxlList[modelId].edgeVerts.Contains((ushort)vert) && usedVerts.Contains(vert))
+                    {
+                        model.vtxlList[modelId].edgeVerts.Add((ushort)vert);
+                    }
+                }
                 faceLists.Add(faceArray);
+                
+/*     Debug  */usedVertsMaster.Add(usedVerts);
+ /*    Debug  */objBonesList.Add(objBones);
+
 
                 bool breakFromLoop = true;
                 for (int i = 0; i < usedFaceIds.Length; i++)
                 {
-                    if (!usedFaceIds[i])
+                    if (usedFaceIds[i] == false)
                     {
                         breakFromLoop = false;
                     }
@@ -992,6 +1048,29 @@ namespace AquaModelLibrary
 
             //Split the meshes
             splitMesh(model, outModel, modelId, faceLists);
+            /*
+#if DEBUG
+            for(int i = 0; i < objBonesList.Count; i++)
+            {
+                for (int bn = 0; bn < objBonesList[i].Count; bn++)
+                {
+                    objBonesList[i][bn] = model.vtxlList[modelId].bonePalette[objBonesList[i][bn]];
+                }
+            }
+            RemoveAllUnusedBones(outModel);
+            //Remove this when you find out what the hell is making this not limit bones sometimes
+            var bonesss = objBonesList;
+            var a = outModel;
+#endif
+            */
+        }
+
+        public static void RemoveAllUnusedBones(AquaObject model)
+        {
+            for(int i = 0; i < model.vtxlList.Count; i++)
+            {
+                RemoveUnusedBones(model.vtxlList[i]);
+            }
         }
 
         public static void BatchSplitByBoneCount(AquaObject model, AquaObject outModel, int boneLimit)
@@ -1000,7 +1079,7 @@ namespace AquaModelLibrary
             {
                 RemoveUnusedBones(model.vtxlList[i]);
                 //Pass to splitting function if beyond the limit, otherwise pass untouched
-                if (model.vtxlList[i].rawVertWeightIds != null && model.vtxlList[i].bonePalette.Count > boneLimit)
+                if (model.vtxlList[i].bonePalette.Count > boneLimit)
                 {
                     SplitByBoneCount(model, outModel, i, boneLimit);
                 } else
@@ -1050,7 +1129,7 @@ namespace AquaModelLibrary
             }
 
         }
-
+        /*
         public static void splitOptimizedVertGroups(AquaObject model, int vertLimit)
         {
             for (int i = 0; i < model.vtxlList.Count; i++)
@@ -1063,7 +1142,7 @@ namespace AquaModelLibrary
                 }
             }
 
-        }
+        }*/
 
         public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
@@ -1145,47 +1224,51 @@ namespace AquaModelLibrary
         //Removes bones in vtxls with unprocessed weights
         public static void RemoveUnusedBones(VTXL vtxl)
         {
-            Dictionary<int, int> oldToNewId = new Dictionary<int, int>();
-            List<int> bonesIndicesUsed = new List<int>();
-            List<ushort> bonePaletteClone = new List<ushort>();
-            bonePaletteClone.AddRange(vtxl.bonePalette);
-            
-            
-            //Check for and collect bones which are referenced
-            for(int i = 0; i < vtxl.rawVertWeightIds.Count; i++)
+            List<int> newBonePaletteCheck = new List<int>();
+            List<ushort> newBonePalette = new List<ushort>();
+
+            //Loop through weight indices and gather them as they're stored
+            for(int v = 0; v < vtxl.vertWeightIndices.Count; v++)
             {
-                for(int j = 0; j < vtxl.rawVertWeightIds[i].Count; j++)
+                List<int> usedIds = new List<int>();
+                for(int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
                 {
-                    if(!bonesIndicesUsed.Contains(vtxl.rawVertWeightIds[i][j]))
+                    usedIds.Add(vtxl.vertWeightIndices[v][vi]);
+                    if (!newBonePaletteCheck.Contains(vtxl.vertWeightIndices[v][vi]))
                     {
-                        bonesIndicesUsed.Add(vtxl.rawVertWeightIds[i][j]);
+                        newBonePaletteCheck.Add(vtxl.vertWeightIndices[v][vi]);
                     }
                 }
             }
-
-            //Remove bones from bonePalette and generate oldToNewId dictionary based on differences
-            int removeCounter = 0;
-            for(int i = 0; i < vtxl.bonePalette.Count; i++)
+            
+            //Use weight indices to get true bone palette
+            for(int bn = 0; bn < newBonePaletteCheck.Count; bn++)
             {
-                if(bonesIndicesUsed.Contains(i))
+                newBonePalette.Add(vtxl.bonePalette[newBonePaletteCheck[bn]]);
+            }
+
+            //Set the weight indices based on new positions
+            for (int v = 0; v < vtxl.vertWeightIndices.Count; v++)
+            {
+                List<int> usedIds = new List<int>();
+                for (int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
                 {
-                    oldToNewId.Add(i, i + removeCounter);
-                } else
-                {
-                    bonePaletteClone.RemoveAt(i + removeCounter);
-                    removeCounter--;
+            
+                    //There really should never be 2 of the same index in the same set so if there is, set to 0
+                    if (usedIds.Contains(vtxl.vertWeightIndices[v][vi]))
+                    {
+                        vtxl.vertWeightIndices[v][vi] = 0;
+                    }
+                    else
+                    {
+                        usedIds.Add(vtxl.vertWeightIndices[v][vi]);
+                        vtxl.vertWeightIndices[v][vi] = (byte)newBonePaletteCheck.IndexOf(vtxl.vertWeightIndices[v][vi]);
+                    }
+
                 }
             }
-            vtxl.bonePalette = bonePaletteClone;
 
-            //Loop through again and replace ids with their new equivalents
-            for (int i = 0; i < vtxl.rawVertWeights.Count; i++)
-            {
-                for (int j = 0; j < vtxl.rawVertWeights[i].Count; j++)
-                {
-                    vtxl.rawVertWeightIds[i][j] = oldToNewId[vtxl.rawVertWeightIds[i][j]];
-                }
-            }
+            vtxl.bonePalette = newBonePalette;
         }
 
         public static void WriteClassicVTXL(VTXE vtxe, VTXL vtxl, List<byte> outBytes2)

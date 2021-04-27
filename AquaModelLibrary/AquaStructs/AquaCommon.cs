@@ -71,7 +71,7 @@ namespace AquaModelLibrary
             //Sometimes strings don't convert to the expected character set (Possibly sega setting in Unicode chars without warning?) This can help deal with that
             public int GetLength()
             {
-                for (int j = 0; j < 0x20; j++)
+                for (int j = 0; j < 0xA; j++)
                 {
                     if (stringArray[j] == 0)
                     {
@@ -79,13 +79,13 @@ namespace AquaModelLibrary
                     }
                 }
 
-                return 0x20;
+                return 0xA;
             }
 
             public byte[] GetBytes()
             {
-                byte[] unfixedBytes = new byte[0x20];
-                for (int i = 0; i < 0x20; i++)
+                byte[] unfixedBytes = new byte[0xA];
+                for (int i = 0; i < 0xA; i++)
                 {
                     unfixedBytes[i] = stringArray[i];
                 }
@@ -111,7 +111,7 @@ namespace AquaModelLibrary
 
             public void SetBytes(byte[] newBytes)
             {
-                for (int i = 0; i < 0x20; i++)
+                for (int i = 0; i < 0xA; i++)
                 {
                     if (i < newBytes.Length)
                     {
@@ -127,7 +127,7 @@ namespace AquaModelLibrary
             public void SetString(string str)
             {
                 byte[] strArr = Encoding.UTF8.GetBytes(str);
-                for (int i = 0; i < 0x20; i++)
+                for (int i = 0; i < 0xA; i++)
                 {
                     if (i < strArr.Length)
                     {

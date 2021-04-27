@@ -2857,16 +2857,6 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    
-                    output += "\n";
-                    */
                 }
                 else
                 {
@@ -2946,16 +2936,6 @@ namespace AquaModelLibrary
                     }
 
                     output += "\n";
-
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-                    */
                 }
                 else
                 {

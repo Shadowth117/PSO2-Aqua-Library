@@ -887,7 +887,7 @@ namespace AquaModelLibrary
 
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
                     BatchSplitByBoneCount(matModelSplit, outModel, 16);
-
+                    RemoveAllUnusedBones(outModel);
                     CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
 
                     //Set up materials and related data

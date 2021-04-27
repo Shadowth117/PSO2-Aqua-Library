@@ -184,9 +184,10 @@ namespace AquaModelTool
                     case ".tro":
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.ReadModel(file); 
-                        //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
+                        aquaUI.aqua.ReadModel(file);
+
 #if DEBUG
+                        //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
                         var test = aquaUI.aqua.aquaModels[0].models[0];
                         test = aquaUI.aqua.aquaModels[0].models[0];
 #endif
