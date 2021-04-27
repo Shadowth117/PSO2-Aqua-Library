@@ -1233,38 +1233,24 @@ namespace AquaModelLibrary
                 List<int> usedIds = new List<int>();
                 for(int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
                 {
-                    usedIds.Add(vtxl.vertWeightIndices[v][vi]);
-                    if (!newBonePaletteCheck.Contains(vtxl.vertWeightIndices[v][vi]))
-                    {
-                        newBonePaletteCheck.Add(vtxl.vertWeightIndices[v][vi]);
-                    }
-                }
-            }
-            
-            //Use weight indices to get true bone palette
-            for(int bn = 0; bn < newBonePaletteCheck.Count; bn++)
-            {
-                newBonePalette.Add(vtxl.bonePalette[newBonePaletteCheck[bn]]);
-            }
-
-            //Set the weight indices based on new positions
-            for (int v = 0; v < vtxl.vertWeightIndices.Count; v++)
-            {
-                List<int> usedIds = new List<int>();
-                for (int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
-                {
-            
-                    //There really should never be 2 of the same index in the same set so if there is, set to 0
+                    //Repeat ids shouldn't exist and should be 0ed. Usually a duplicate implies that the original was 0 anyways.
                     if (usedIds.Contains(vtxl.vertWeightIndices[v][vi]))
                     {
                         vtxl.vertWeightIndices[v][vi] = 0;
-                    }
-                    else
+                    } else
                     {
                         usedIds.Add(vtxl.vertWeightIndices[v][vi]);
-                        vtxl.vertWeightIndices[v][vi] = (byte)newBonePaletteCheck.IndexOf(vtxl.vertWeightIndices[v][vi]);
+                        if (!newBonePaletteCheck.Contains(vtxl.vertWeightIndices[v][vi]))
+                        {
+                            newBonePaletteCheck.Add(vtxl.vertWeightIndices[v][vi]);
+                            newBonePalette.Add(vtxl.bonePalette[vtxl.vertWeightIndices[v][vi]]);
+                            vtxl.vertWeightIndices[v][vi] = (byte)(newBonePaletteCheck.Count - 1);
+                        }
+                        else
+                        {
+                            vtxl.vertWeightIndices[v][vi] = (byte)newBonePaletteCheck.IndexOf(vtxl.vertWeightIndices[v][vi]);
+                        }
                     }
-
                 }
             }
 
