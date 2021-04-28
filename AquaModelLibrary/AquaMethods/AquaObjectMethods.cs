@@ -488,14 +488,14 @@ namespace AquaModelLibrary
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x13, 0x2, curLength));
                 curLength += 0x8;
             }
-            if (vtxl.vertTangentList.Count > 0)
-            {
-                vtxe.vertDataTypes.Add(vtxeElementGenerator(0x20, 0x3, curLength));
-                curLength += 0xC;
-            }
             if (vtxl.vertBinormalList.Count > 0)
             {
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x21, 0x3, curLength));
+                curLength += 0xC;
+            }
+            if (vtxl.vertTangentList.Count > 0)
+            {
+                vtxe.vertDataTypes.Add(vtxeElementGenerator(0x20, 0x3, curLength));
                 curLength += 0xC;
             }
 

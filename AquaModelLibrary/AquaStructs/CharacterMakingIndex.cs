@@ -27,6 +27,19 @@ namespace AquaModelLibrary
         public static string rebootTeethDataStr = "pl_rdt_";
         public static string rebootEarDataStr = "pl_rea_";
 
+        public static string classicCMX = $"character/making/pl_system.ice";
+        public static string classicPartText = $"ui_charamake_text.ice";
+        public static string classicAcceText = $"ui_fashion_text.ice";
+        public static string classicCharCreate = $"ui_character_making.ice";
+        public static string classicCommon = $"sy_common_text.ice";
+        public static string classicLobbyAction = $"actor/lobby_action/pl_lobby_action_setting.ice";
+
+        public static string partsTextName = "ui_charamake_parts.text";
+        public static string acceTextName = "ui_accessories_text.text";
+        public static string commonTextName = "common.text";
+        public static string faceVarName = "face_variation.cmp.lua";
+        public static string lacName = "lobby_action_setting.lac";
+
         public Dictionary<int, BODYObject> costumeDict = new Dictionary<int, BODYObject>();
         public Dictionary<int, BODYObject> carmDict = new Dictionary<int, BODYObject>();
         public Dictionary<int, BODYObject> clegDict = new Dictionary<int, BODYObject>();

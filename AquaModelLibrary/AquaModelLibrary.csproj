@@ -70,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AquaMethods\AquaMiscMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
@@ -104,6 +105,12 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">
+      <Project>{f0c5b71b-5956-42fe-8dac-10759cf6bee0}</Project>
+      <Name>ZamboniLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

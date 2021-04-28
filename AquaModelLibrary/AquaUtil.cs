@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Numerics;
+using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.AquaObjectMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.VTBFMethods;
@@ -2778,214 +2779,14 @@ namespace AquaModelLibrary
             aquaCMX = ReadCMX(fileName);
         }
 
-        public void ReadPSO2Text(string fileName)
+        public void LoadPSO2Text(string fileName)
         {
-            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                int offset = 0x20; //Base offset due to NIFL header
-
-                //Deal with deicer's extra header nonsense
-                if (type.Equals("text"))
-                {
-                    streamReader.Seek(0xC, SeekOrigin.Begin);
-                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
-                    int headJunkSize = streamReader.Read<int>();
-
-                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += headJunkSize;
-                }
-
-                //Proceed based on file variant
-                if (type.Equals("NIFL"))
-                {
-                    //NIFL
-                    aquaText = ReadNIFLText(streamReader, offset, fileName);
-                }
-                else if (type.Equals("VTBF"))
-                {
-                    //Text should really never be VTBF...
-                }
-                else
-                {
-                    MessageBox.Show("Improper File Format!");
-                }
-            }
+            aquaText = ReadPSO2Text(fileName);
         }
 
-        public PSO2Text ReadNIFLText(BufferedStreamReader streamReader, int offset, string fileName)
+        public void GenerateCharacterFileList(string pso2_binDir, string outputDirectory)
         {
-            var txt = new PSO2Text();
-            var nifl = streamReader.Read<AquaCommon.NIFL>();
-            var end = nifl.NOF0Offset + offset;
-            var rel0 = streamReader.Read<AquaCommon.REL0>();
-            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
-
-            var categoryPointer = streamReader.Read<int>();
-            var categoryCount = streamReader.Read<int>();
-
-            //Read through categories
-            streamReader.Seek(categoryPointer + offset, SeekOrigin.Begin);
-            for(int i = 0; i < categoryCount; i++)
-            {
-                var categoryNameOffset = streamReader.Read<int>();
-                var categoryDataInfoOffset = streamReader.Read<int>();
-                var subCategoryCount = streamReader.Read<int>();
-
-                //Setup subcategory lists
-                txt.text.Add(new List<List<PSO2Text.textPair>>());
-                for(int j = 0; j < subCategoryCount; j++)
-                {
-                    txt.text[i].Add(new List<PSO2Text.textPair>());
-                }
-
-                //Get category name
-                long bookmark = streamReader.Position();
-                streamReader.Seek(categoryNameOffset + offset, SeekOrigin.Begin);
-                
-                txt.categoryNames.Add(ReadCString(streamReader));
-
-                //Get Category Info
-                streamReader.Seek(categoryDataInfoOffset + offset, SeekOrigin.Begin);
-
-                for (int sub = 0; sub < subCategoryCount; sub++)
-                {
-                    
-                    var categoryIndexOffset = streamReader.Read<int>();
-                    var unkValue = streamReader.Read<int>();
-                    var categoryIndexCount = streamReader.Read<int>();
-                    var bookMarkSub = streamReader.Position();
-
-                    streamReader.Seek(categoryIndexOffset + offset, SeekOrigin.Begin);
-                    for (int j = 0; j < categoryIndexCount; j++)
-                    {
-                        var pair = new PSO2Text.textPair();
-                        int nameLoc = streamReader.Read<int>();
-                        int textLoc = streamReader.Read<int>();
-                        long bookmarkLocal = streamReader.Position();
-
-                        streamReader.Seek(nameLoc + offset, SeekOrigin.Begin);
-                        pair.name = ReadCString(streamReader);
-
-                        streamReader.Seek(textLoc + offset, SeekOrigin.Begin);
-                        pair.str = ReadUTF16String(streamReader, end);
-
-                        txt.text[i][sub].Add(pair);
-                        streamReader.Seek(bookmarkLocal, SeekOrigin.Begin);
-                    }
-                    streamReader.Seek(bookMarkSub, SeekOrigin.Begin);
-                }
-
-                streamReader.Seek(bookmark, SeekOrigin.Begin);
-            }
-
-#if DEBUG
-            StringBuilder output = new StringBuilder();
-
-            for (int i = 0; i < txt.text.Count; i++)
-            {
-                output.AppendLine(txt.categoryNames[i]);
-
-                for(int j = 0; j < txt.text[i].Count; j++)
-                {
-                    output.AppendLine($"Group {j}");
-
-                    for(int k = 0; k < txt.text[i][j].Count; k++)
-                    {
-                        var pair = txt.text[i][j][k];
-                        output.AppendLine($"{pair.name} - {pair.str}");
-                    }
-                    output.AppendLine();
-                }
-                output.AppendLine();
-            }
-
-            File.WriteAllText(fileName + ".txt", output.ToString());
-#endif
-            return txt;
-        }
-
-        public LobbyActionCommon ReadLAC(string fileName)
-        {
-            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                int offset = 0x20; //Base offset due to NIFL header
-
-                //Deal with deicer's extra header nonsense
-                if (type.Equals("lac\0"))
-                {
-                    streamReader.Seek(0xC, SeekOrigin.Begin);
-                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
-                    int headJunkSize = streamReader.Read<int>();
-
-                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += headJunkSize;
-                }
-
-                //Proceed based on file variant
-                if (type.Equals("NIFL"))
-                {
-                    //NIFL
-                    return ReadNIFLLAC(streamReader, offset);
-                }
-                else if (type.Equals("VTBF"))
-                {
-                    //Lacs should really never be VTBF...
-                }
-                else
-                {
-                    MessageBox.Show("Improper File Format!");
-                }
-            }
-            return null;
-        }
-
-        public LobbyActionCommon ReadNIFLLAC(BufferedStreamReader streamReader, int offset)
-        {
-            var lac = new LobbyActionCommon();
-            var nifl = streamReader.Read<AquaCommon.NIFL>();
-            var end = nifl.NOF0Offset + offset;
-            var rel0 = streamReader.Read<AquaCommon.REL0>();
-
-            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
-            lac.header = streamReader.Read<LobbyActionCommon.lacHeader>();
-
-            streamReader.Seek(lac.header.dataInfoPointer + offset, SeekOrigin.Begin);
-            lac.info = streamReader.Read<LobbyActionCommon.dataInfo>();
-
-            streamReader.Seek(lac.info.blockOffset + offset, SeekOrigin.Begin);
-
-            for(int i = 0; i < lac.info.blockCount; i++)
-            {
-                var block = streamReader.Read<LobbyActionCommon.dataBlock>();
-                long bookmark = streamReader.Position();
-
-                lac.dataBlocks.Add(LobbyActionCommon.ReadDataBlock(streamReader, offset, block));
-                streamReader.Seek(bookmark, SeekOrigin.Begin);
-            }
-
-            return lac;
-        }
-
-        public void GenerateCharacterFileList(string cmxFileName, string ui_charamake_partsFileName, string ui_accessories_textFileName, string commonFilename, string face_variationFileName, 
-            string lacFilename, string pso2_binDir, string outputDirectory)
-        {
-            aquaCMX = ReadCMX(cmxFileName);
-            ReadPSO2Text(ui_charamake_partsFileName);
-            var parts = aquaText;
-            ReadPSO2Text(ui_accessories_textFileName);
-            var accText = aquaText;
-            ReadPSO2Text(commonFilename);
-            var commText = aquaText;
-            var faceIds = ReadFaceVariationLua(face_variationFileName);
-            var lac = ReadLAC(lacFilename);
-
-            OutputCharacterFileList(aquaCMX, parts, accText, commText, faceIds, lac, pso2_binDir, outputDirectory);
+            OutputCharacterFileList(pso2_binDir, outputDirectory);
         }
 
         public void ReadItNameCacheAppendix(string fileName)

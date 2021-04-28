@@ -7,52 +7,69 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using zamboni;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.VTBFMethods;
+using static AquaModelLibrary.AquaMiscMethods;
 
 namespace AquaModelLibrary
 {
     public class CharacterMakingIndexMethods
     {
-        public static CharacterMakingIndex ReadCMX(string fileName)
+        public static CharacterMakingIndex ReadCMX(string fileName, CharacterMakingIndex cmx = null)
         {
             using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                int offset = 0x20; //Base offset due to NIFL header
-
-                //Deal with deicer's extra header nonsense
-                if (type.Equals("cmx\0"))
-                {
-                    streamReader.Seek(0xC, SeekOrigin.Begin);
-                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
-                    int headJunkSize = streamReader.Read<int>();
-
-                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += headJunkSize;
-                }
-
-                //Proceed based on file variant
-                if (type.Equals("NIFL"))
-                {
-                    //NIFL
-                    return ReadNIFLCMX(streamReader, offset);
-                }
-                else if (type.Equals("VTBF"))
-                {
-                    //VTBF
-                    return ReadVTBFCMX(streamReader);
-                }
-                else
-                {
-                    MessageBox.Show("Improper File Format!");
-                    return null;
-                }
+                return BeginReadCMX(streamReader, cmx);
             }
         }
-        
+
+        public static CharacterMakingIndex ReadCMX(byte[] file, CharacterMakingIndex cmx = null)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadCMX(streamReader, cmx);
+            }
+        }
+
+        public static CharacterMakingIndex BeginReadCMX(BufferedStreamReader streamReader, CharacterMakingIndex cmx = null)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("cmx\0"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                //NIFL
+                cmx = ReadNIFLCMX(streamReader, offset);
+                return cmx;
+            }
+            else if (type.Equals("VTBF"))
+            {
+                //VTBF
+                return ReadVTBFCMX(streamReader, cmx);
+            }
+            else
+            {
+                MessageBox.Show("Improper File Format!");
+                return null;
+            }
+        }
+
         public static CharacterMakingIndex ReadVTBFCMX(BufferedStreamReader streamReader, CharacterMakingIndex cmx = null)
         {
             //Create one if it's not passed. The idea is multiple files can be combined as needed.
@@ -778,9 +795,107 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void OutputCharacterFileList(CharacterMakingIndex aquaCMX, PSO2Text partsText, PSO2Text acceText, PSO2Text commonText, Dictionary<int, string> faceIds, 
-            LobbyActionCommon lac, string pso2_binDir, string outputDirectory)
+        //Takes in pso2_bin directory and outputDirectory. From there, it will read to memory various files in order to determine namings. 
+        //As win32_na is a patching folder, if it exists in the pso2_bin it will be prioritized for text related items.
+        public static void OutputCharacterFileList(string pso2_binDir, string outputDirectory)
         {
+            var aquaCMX = new CharacterMakingIndex();
+            PSO2Text partsText = null;
+            PSO2Text acceText = null;
+            PSO2Text commonText = null;
+            LobbyActionCommon lac = null;
+            Dictionary<int, string> faceIds = new Dictionary<int, string>();
+
+            //Load CMX
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
+
+            if (File.Exists(cmxPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
+                var cmxIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(cmxIce.groupOneFiles));
+                files.AddRange(cmxIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(".cmx"))
+                    {
+                        aquaCMX = ReadCMX(file, aquaCMX);
+                    }
+                }
+
+                cmxIce = null;
+            }
+
+            //Load partsText
+            string partsTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicPartText));
+            string partsTextPathNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicPartText));
+
+            partsText = GetTextConditional(partsTextPath, partsTextPathNA, partsTextName);
+
+            //Load acceText
+            string acceTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicAcceText));
+            string acceTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicAcceText));
+
+            acceText = GetTextConditional(acceTextPath, acceTextPathhNA, acceTextName);
+
+            //Load commonText
+            string commonTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCommon));
+            string commonTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicCommon));
+
+            commonText = GetTextConditional(commonTextPath, commonTextPathhNA, commonTextName);
+
+            //Load faceVariationLua
+            string faceVarPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCharCreate));
+
+            if (File.Exists(faceVarPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(faceVarPath));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
+                files.AddRange(fVarIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(faceVarName))
+                    {
+                        faceIds = ReadFaceVariationLua(file);
+                    }
+                }
+
+                fVarIce = null;
+            }
+
+            //Load lac
+            string lacPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicLobbyAction));
+
+            if (File.Exists(lacPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(lacPath));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
+                files.AddRange(fVarIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(lacName))
+                    {
+                        lac = ReadLAC(file);
+                    }
+                }
+
+                fVarIce = null;
+            }
+
             //Since we have an idea of what should be there and what we're interested in parsing out, throw these into a dictionary and go
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
@@ -791,10 +906,11 @@ namespace AquaModelLibrary
             for (int i = 0; i < acceText.text.Count; i++)
             {
                 //Handle dummy decoy entry in old versions
-                if(textByCat.ContainsKey(acceText.categoryNames[i]) && textByCat[acceText.categoryNames[i]][0].Count == 0)
+                if (textByCat.ContainsKey(acceText.categoryNames[i]) && textByCat[acceText.categoryNames[i]][0].Count == 0)
                 {
                     textByCat[acceText.categoryNames[i]] = acceText.text[i];
-                } else
+                }
+                else
                 {
                     textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
                 }
@@ -3103,31 +3219,44 @@ namespace AquaModelLibrary
 
         public static Dictionary<int, string> ReadFaceVariationLua(string face_variationFileName)
         {
-            Dictionary<int, string> faceStrings = new Dictionary<int, string>();
-
             using (StreamReader streamReader = new StreamReader(face_variationFileName))
             {
-                string language = null;
-                
-                //Cheap hacky way to do this. We don't really need to keep these separate so we loop through and get the 'language' value, our key for the .text dictionary. Our key to get this is the number from crop_name
-                while(streamReader.EndOfStream == false)
+                return ParseFaceVariationLua(streamReader);
+            }
+        }
+
+        public static Dictionary<int, string> ReadFaceVariationLua(byte[] face_variationLua)
+        {
+            using (StreamReader streamReader = new StreamReader(new MemoryStream(face_variationLua)))
+            {
+                return ParseFaceVariationLua(streamReader);
+            }
+        }
+
+        public static Dictionary<int, string> ParseFaceVariationLua(StreamReader streamReader)
+        {
+            Dictionary<int, string> faceStrings = new Dictionary<int, string>();
+            string language = null;
+
+            //Cheap hacky way to do this. We don't really need to keep these separate so we loop through and get the 'language' value, our key for the .text dictionary. Our key to get this is the number from crop_name
+            while (streamReader.EndOfStream == false)
+            {
+                var line = streamReader.ReadLine();
+                if (language == null)
                 {
-                    var line = streamReader.ReadLine();
-                    if(language == null)
+                    if (line.Contains("language"))
                     {
-                        if(line.Contains("language"))
-                        {
-                            language = line.Split('\"')[1];
-                        }
-                    } else if(line.Contains("crop_name"))
-                    {
-                        line = line.Split('\"')[1];
-                        if(line != "") //ONE face doesn't use a crop_name. As it also doesn't have a crop_name, we don't care. Otherwise, add it to the dict
-                        {
-                            faceStrings.Add(Int32.Parse(line.Substring(7)), language);
-                        }
-                        language = null;
+                        language = line.Split('\"')[1];
                     }
+                }
+                else if (line.Contains("crop_name"))
+                {
+                    line = line.Split('\"')[1];
+                    if (line != "") //ONE face doesn't use a crop_name. As it also doesn't have a crop_name, we don't care. Otherwise, add it to the dict
+                    {
+                        faceStrings.Add(Int32.Parse(line.Substring(7)), language);
+                    }
+                    language = null;
                 }
             }
 

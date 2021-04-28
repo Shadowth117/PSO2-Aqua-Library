@@ -323,3 +323,7 @@ AquaModelTool/bin/Release/AquaModelTool.7z
 AquaModelTool/bin/Debug/.txt
 AquaModelTool/bin/Release/AquaModelTool.zip
 AquaModelTool/bin/Release/Release.zip
+
+AquaModelTool/bin/
+
+AquaModelLibrary/bin/
