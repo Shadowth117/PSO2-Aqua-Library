@@ -966,6 +966,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1133,6 +1134,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1255,6 +1257,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1369,6 +1372,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1483,6 +1487,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1602,6 +1607,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1732,6 +1738,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1817,6 +1824,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -1921,6 +1929,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2014,6 +2023,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2107,6 +2117,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2199,6 +2210,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2292,6 +2304,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2383,6 +2396,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2477,6 +2491,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2590,6 +2605,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2867,6 +2883,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -2951,6 +2968,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
@@ -3030,6 +3048,7 @@ namespace AquaModelLibrary
                         output += ",";
                     }
                 }
+                output += $"{id},";
 
                 //Account for lack of a name on an outfit
                 if (named == false)
