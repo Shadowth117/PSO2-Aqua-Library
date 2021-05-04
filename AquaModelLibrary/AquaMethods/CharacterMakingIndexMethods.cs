@@ -1023,7 +1023,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
-                    string classic = $"{classicStart}bd_{finalId}.ice";
+                    string classic = $"{classicStart}{typeString}{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 

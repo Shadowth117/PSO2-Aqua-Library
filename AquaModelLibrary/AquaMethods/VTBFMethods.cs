@@ -92,9 +92,9 @@ namespace AquaModelLibrary
                         streamReader.Seek(strLen, SeekOrigin.Current);
                         break;
                     case 0x4: //byte
-                    case 0x5:
                         data = streamReader.Read<byte>();
                         break;
+                    case 0x5: //Breaks the pattern. I guess some kind of short?
                     case 0x6: //short 0x6 is signed while 0x7 is unsigned
                     case 0x7:
                         data = streamReader.Read<short>();

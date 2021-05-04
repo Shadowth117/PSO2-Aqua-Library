@@ -2613,8 +2613,7 @@ namespace AquaModelLibrary
                                 //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
                                 if (data == null)
                                 {
-                                    File.WriteAllText(fileName + ".txt", output.ToString());
-                                    return;
+                                    goto FINISH;
                                 } else
                                 {
                                     if(!tagTracker.ContainsKey(tagType))
@@ -2719,6 +2718,7 @@ namespace AquaModelLibrary
                         }
                     }
 
+                    FINISH:
                     output.AppendLine("");
                     output.AppendLine("*******************************");
                     output.AppendLine("Sub tag tracking per tag");

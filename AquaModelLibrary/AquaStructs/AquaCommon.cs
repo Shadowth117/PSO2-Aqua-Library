@@ -241,6 +241,107 @@ namespace AquaModelLibrary
             }
         }
 
+        public unsafe struct PSO2Stringx30
+        {
+            public fixed byte stringArray[0x30];
+
+            public static PSO2String GeneratePSO2String(byte[] bytes)
+            {
+                var str = new PSO2String();
+                str.SetBytes(bytes);
+
+                return str;
+            }
+
+            public static PSO2String GeneratePSO2String(string newString)
+            {
+                var str = new PSO2String();
+                str.SetString(newString);
+
+                return str;
+            }
+
+            //Sometimes strings don't convert to the expected character set (Possibly sega setting in Unicode chars without warning?) This can help deal with that
+            public int GetLength()
+            {
+                for (int j = 0; j < 0x30; j++)
+                {
+                    if (stringArray[j] == 0)
+                    {
+                        return j;
+                    }
+                }
+
+                return 0x30;
+            }
+
+            public byte[] GetBytes()
+            {
+                byte[] unfixedBytes = new byte[0x20];
+                for (int i = 0; i < 0x30; i++)
+                {
+                    unfixedBytes[i] = stringArray[i];
+                }
+                return unfixedBytes;
+            }
+
+            public unsafe string GetString()
+            {
+                fixed (byte* arr = stringArray)
+                {
+                    string finalText;
+
+                    int end = this.GetLength();
+                    byte[] text = new byte[end];
+                    for (int i = 0; i < end; i++)
+                    {
+                        text[i] = stringArray[i];
+                    }
+                    finalText = System.Text.Encoding.UTF8.GetString(text);
+                    return GetPSO2String(arr);
+                }
+            }
+
+            public void SetBytes(byte[] newBytes)
+            {
+                if (newBytes == null)
+                {
+                    newBytes = new byte[0];
+                }
+                for (int i = 0; i < 0x30; i++)
+                {
+                    if (i < newBytes.Length)
+                    {
+                        stringArray[i] = newBytes[i];
+                    }
+                    else
+                    {
+                        stringArray[i] = 0;
+                    }
+                }
+            }
+
+            public void SetString(string str)
+            {
+                if (str == null)
+                {
+                    str = "";
+                }
+                byte[] strArr = Encoding.UTF8.GetBytes(str);
+                for (int i = 0; i < 0x30; i++)
+                {
+                    if (i < strArr.Length)
+                    {
+                        stringArray[i] = strArr[i];
+                    }
+                    else
+                    {
+                        stringArray[i] = 0;
+                    }
+                }
+            }
+        }
+
         public static NOF0 readNOF0(BufferedStreamReader streamReader)
         {
             NOF0 nof0 = new NOF0();

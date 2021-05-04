@@ -605,6 +605,14 @@ namespace AquaModelLibrary
                     uv1ListNGS[i][1] = ((short)(uv1List[i].Y * short.MaxValue)); if (uv1ListNGS[i][1] == -short.MaxValue) { uv1ListNGS[i][1]--; }
                 }
 
+                uv2ListNGS.Clear();
+                for (int i = 0; i < uv2List.Count; i++)
+                {
+                    uv2ListNGS.Add(new short[2]);
+                    uv2ListNGS[i][0] = ((short)(uv2List[i].X * short.MaxValue)); if (uv2ListNGS[i][0] == -short.MaxValue) { uv2ListNGS[i][0]--; }
+                    uv2ListNGS[i][1] = ((short)(uv2List[i].Y * short.MaxValue)); if (uv2ListNGS[i][1] == -short.MaxValue) { uv2ListNGS[i][1]--; }
+                }
+
                 //Tangents
                 vertTangentListNGS.Clear();
                 for (int i = 0; i < vertTangentList.Count; i++)
@@ -676,7 +684,7 @@ namespace AquaModelLibrary
 
                 if (force || uv2List.Count == 0)
                 {
-                    //UV1List
+                    //UV2List
                     uv2List.Clear();
                     for (int i = 0; i < uv2ListNGS.Count; i++)
                     {

@@ -75,6 +75,7 @@
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
+    <Compile Include="AquaStructs\FLTDPhysics.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\MusicFile.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />

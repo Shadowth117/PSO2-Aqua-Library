@@ -4,29 +4,58 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
+    //PSO2 Implementation of Glitter particle effect files. Shares striking similarity to Project Diva variations.
     //May be entirely different than the NIFL variation 
-    public class AquaEffect
+    //Seemingly, the file seems to be an efct header followed by an emit nodes, their animations and particle nodes with their animations.
+    //There should be at least one EFCT, one EMIT, and one PTCL per file while they must all have ANIMs, null or not.
+    public unsafe class AquaEffect
     {
+        public NIFL nifl;
+        public REL0 rel0;
+
+        public NOF0 nof0;
+        public NEND nend;
+
+        //In VTBF, the pointer int16 is the number of nodes in the file. Ie, the single EFCT + the EMIT count
         public struct EFCT
         {
-            //0x1, Type 0x8
-            //0x2, Type 0x8
-            //0x3, Type 0x8
-            //0x42, Type 0xC
-            //0x4, Type 0x1
-            //0x10, Type 0x4A, 0x1
-            //0x11, Type 0x4A, 0x1
-            //0x90, Type 0x2
-            //0x91, Type 0x8
-            //0x92, Type 0x8
-            //0x0, Type 0x1
-            //0x7, Type 0x1
+            public Vector3 unkVec3_0; //0x10, Type 0x4A, 0x1 //Translation?
+            public int reserve0;
+            public Vector3 unkVec3_1; //0x11, Type 0x4A, 0x1 //Rotation?
+            public int reserve1;
+            public Vector3 unkVec3_2; //Scale?
+            public int reserve2;
+
+            public float unkFloat0;
+            public int curvOffset;
+            public int curvCount;
+            public int reserve3;
+
+            public float startFrame; //0x1, Type 0x8 //Just an educated guess based on sister formats for now.
+            public float endFrame; //0x2, Type 0x8 //This becomes a float in NIFL variations rather than an int as it is in VTBF
+            public int unkInt1; //0x3, Type 0x8
+            public fixed byte color[4]; //0x42, Type 0xC
+            
+            public int unkInt2;
+            public int boolInt0;    //0x4, Type 0x1
+            public int boolInt1;    //0x0, Type 0x1
+            public int boolInt2;    //0x7, Type 0x1
+            
+            public float unkFloat1; //0x91, Type 0x8
+            public float unkFloat2; //0x92, Type 0x8
+
+            public PSO2Stringx30 soundName; //0x90, Type 0x2
+            public int emmitOffset;
+            public int emitCount;
         }
 
-        //Seems fairly variable, various items missing or not seemingly randomly.
+        //Seems fairly variable, various items missing or not seemingly randomly in VTBF.
+        //In VTBF, the pointer int16 is the number of nodes at and below this. Ie, the single EMIT + the PTCL count
+        //In NIFL, these are laid out sequentially based on the count within the EFCT structure
         public struct EMIT
         {
             //0x86, Type 0x8
@@ -113,6 +142,8 @@ namespace AquaModelLibrary
         {
             //0x70, Type 0x4
             //0x71, Type 0x4
+            //0x76, Type 0x9
+            //0x77, Type 0xA
             //0x73, Type 0x6
             //0x74, Type 0xA
             //0x75, Type 0xA
