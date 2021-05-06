@@ -290,29 +290,29 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 aquaUI.aqua.LoadPSO2Text(openFileDialog.FileName);
-            }
-            
-            StringBuilder output = new StringBuilder();
 
-            for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
-            {
-                output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
+                StringBuilder output = new StringBuilder();
 
-                for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
+                for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
                 {
-                    output.AppendLine($"Group {j}");
+                    output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
 
-                    for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
+                    for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
                     {
-                        var pair = aquaUI.aqua.aquaText.text[i][j][k];
-                        output.AppendLine($"{pair.name} - {pair.str}");
+                        output.AppendLine($"Group {j}");
+
+                        for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
+                        {
+                            var pair = aquaUI.aqua.aquaText.text[i][j][k];
+                            output.AppendLine($"{pair.name} - {pair.str}");
+                        }
+                        output.AppendLine();
                     }
                     output.AppendLine();
                 }
-                output.AppendLine();
-            }
 
-            File.WriteAllText(openFileDialog.FileName + ".txt", output.ToString());
+                File.WriteAllText(openFileDialog.FileName + ".txt", output.ToString());
+            }
         }
 
         private void parseIncaToolStripMenuItem_Click(object sender, EventArgs e)

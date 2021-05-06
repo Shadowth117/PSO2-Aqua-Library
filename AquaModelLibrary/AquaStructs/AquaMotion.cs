@@ -135,7 +135,8 @@ namespace AquaModelLibrary
             public List<ushort> frameTimings = new List<ushort>(); //0xEF, type 0x06 or 0x86 if multiple //Frame timings start with 0 + 0x1 to represent the first frame.
                                                                                 //Subsequent frames are multiplied by 0x10 and the final frame will have 0x2 added.
             public List<float> floatKeys = new List<float>(); //0xF1, type 0xA or 0x8A if multiple
-                                          //0xF2. Theoretical. 
+            public List<byte> byteKeys = new List<byte>();   //0xF2. Only observed in Alpha PSO2 animations. Appear to be int arrays rendered in bytes... for some reason.
+                                                             //Also uses the designator for int keys in newer iterations. Combine every 4 to convert to an int array.
             public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
         }
 

@@ -1803,14 +1803,32 @@ namespace AquaModelLibrary
                 case 0x5:
                     if (mkey.keyCount > 1)
                     {
-                        for (int j = 0; j < mkey.keyCount; j++)
+                        if(mkeyRaw[0].ContainsKey(0xF3))
                         {
-                            mkey.intKeys.Add(((int[])mkeyRaw[0][0xF3])[j]);
+                            for (int j = 0; j < mkey.keyCount; j++)
+                            {
+                                mkey.intKeys.Add(((int[])mkeyRaw[0][0xF3])[j]);
+                            }
+                        } else
+                        {
+                            for (int j = 0; j < mkey.keyCount; j++)
+                            {
+                                mkey.byteKeys.Add(((byte[])mkeyRaw[0][0xF2])[j]);
+                            }
                         }
                     }
                     else
                     {
-                        mkey.intKeys.Add((int)mkeyRaw[0][0xF3]);
+                        if (mkeyRaw[0].ContainsKey(0xF3))
+                        {
+                            mkey.intKeys.Add((int)mkeyRaw[0][0xF3]);
+                        } else
+                        {
+                            for (int j = 0; j < mkey.keyCount; j++)
+                            {
+                                mkey.byteKeys.Add(((byte[])mkeyRaw[0][0xF2])[j]);
+                            }
+                        }
                     }
                     break;
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
@@ -1867,9 +1885,16 @@ namespace AquaModelLibrary
                     break;
                 case 0x5:
                     handleOptionalArrayHeader(outBytes, 0xF3, mkey.keyCount, 0x48);
-                    for (int j = 0; j < mkey.frameTimings.Count; j++)
+                    if (mkey.intKeys.Count > 0)
                     {
-                        outBytes.AddRange(ConvertStruct(mkey.intKeys[j]));
+                        for (int j = 0; j < mkey.frameTimings.Count; j++)
+                        {
+
+                            outBytes.AddRange(BitConverter.GetBytes(mkey.intKeys[j]));
+                        }
+                    } else
+                    {
+                        outBytes.AddRange(mkey.byteKeys);
                     }
                     break;
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly

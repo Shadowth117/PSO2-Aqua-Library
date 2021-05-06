@@ -87,7 +87,13 @@ namespace AquaModelTool
 
             data0UD.DecimalPlaces = 0;
             data0UD.Visible = true;
-            data0UD.Value = (decimal)motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys[keyId];
+            if(motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys.Count > 0)
+            {
+                data0UD.Value = (decimal)motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys[keyId];
+            } else
+            {
+                data0UD.Value = (decimal)motion.motionKeys[keyNodeId].keyData[keyDataId].byteKeys[keyId];
+            }
             data1UD.Visible = false;
             data2UD.Visible = false;
             data3UD.Visible = false;
@@ -132,7 +138,13 @@ namespace AquaModelTool
                     break;
 
                 case 0x5:
-                    motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys[keyId] = (int)data0UD.Value;
+                    if(motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys.Count > 0)
+                    {
+                        motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys[keyId] = (int)data0UD.Value;
+                    } else
+                    {
+                        motion.motionKeys[keyNodeId].keyData[keyDataId].byteKeys[keyId] = (byte)data0UD.Value;
+                    }
                     break;
 
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
