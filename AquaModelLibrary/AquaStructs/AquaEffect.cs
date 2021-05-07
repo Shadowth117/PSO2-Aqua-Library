@@ -16,9 +16,35 @@ namespace AquaModelLibrary
     {
         public NIFL nifl;
         public REL0 rel0;
-
+        public EFCTObject efct;
         public NOF0 nof0;
         public NEND nend;
+
+        public class EFCTObject
+        {
+            public EFCT efct;
+            public List<EMITObject> emits;
+            public List<CURVObject> curvs;
+        }
+
+        public class EMITObject
+        {
+            public EMIT emit;
+            public List<PTCLObject> ptcls;
+            public List<CURVObject> curvs;
+        }
+
+        public class PTCLObject
+        {
+            public PTCL ptcl;
+            public List<CURVObject> curvs;
+        }
+
+        public class CURVObject
+        {
+            public CURV curv;
+            public List<KEYS> keys;
+        }
 
         //In VTBF, the pointer int16 is the number of nodes in the file. Ie, the single EFCT + the EMIT count
         public struct EFCT
@@ -240,23 +266,25 @@ namespace AquaModelLibrary
 
         public struct CURV
         {
-            //0x70, Type 0x4
-            //0x71, Type 0x4
-            //0x76, Type 0x9
-            //0x77, Type 0xA
-            //0x73, Type 0x6
-            //0x74, Type 0xA
-            //0x75, Type 0xA
+            public int type; //0x70, Type 0x4 //0x71, Type 0x4 //71 possibly combined with this? Never observed filled so unsure.
+            public float startFrame; //0x74, Type 0xA //Probably start frame. It's this or float_10;
+            public int int_0C; //0x73, Type 0x6
+            public float float_10; //0x77, Type 0xA
+            public int int_14; //0x76, Type 0x9 
+            public float endFrame; //0x75, Type 0xA
         }
 
         //Array, but no control types
         public struct KEYS
-        { 
-            //0x72, Type 0x4
-            //0x78, Type 0xA
-            //0x7A, Type 0xA
-            //0x7B, Type 0xA
-            //0x79, Type 0xA
+        {
+            public int type; //0x72, Type 0x4
+            public float time; //0x78, Type 0xA
+            public float value; //0x79, Type 0xA
+            public float inParam; //0x7A, Type 0xA
+
+            public float outParam; //0x7B, Type 0xA
+            public int field_0x18;
+            public int field_0x1C;
         }
 
     }
