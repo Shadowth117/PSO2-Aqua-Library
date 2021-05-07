@@ -44,6 +44,7 @@ namespace AquaModelLibrary
         {
             public CURV curv;
             public List<KEYS> keys;
+            public List<int> times;
         }
 
         //In VTBF, the pointer int16 is the number of nodes in the file. Ie, the single EFCT + the EMIT count
@@ -270,8 +271,14 @@ namespace AquaModelLibrary
             public float startFrame; //0x74, Type 0xA //Probably start frame. It's this or float_10;
             public int int_0C; //0x73, Type 0x6
             public float float_10; //0x77, Type 0xA
+            
             public int int_14; //0x76, Type 0x9 
             public float endFrame; //0x75, Type 0xA
+            public int keysOffset;
+            public int keysCount;
+
+            public int timeOffset;
+            public int timeCount;
         }
 
         //Array, but no control types
