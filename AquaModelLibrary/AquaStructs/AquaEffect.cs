@@ -20,24 +20,27 @@ namespace AquaModelLibrary
         public NOF0 nof0;
         public NEND nend;
 
-        public class EFCTObject
+        public class AnimObject
+        {
+            public List<CURVObject> curvs;
+        }
+
+        public class EFCTObject : AnimObject
         {
             public EFCT efct;
             public List<EMITObject> emits;
-            public List<CURVObject> curvs;
         }
 
-        public class EMITObject
+        public class EMITObject : AnimObject
         {
             public EMIT emit;
             public List<PTCLObject> ptcls;
-            public List<CURVObject> curvs;
         }
 
-        public class PTCLObject
+        public class PTCLObject : AnimObject
         {
             public PTCL ptcl;
-            public List<CURVObject> curvs;
+            public PTCLStrings strings;
         }
 
         public class CURVObject

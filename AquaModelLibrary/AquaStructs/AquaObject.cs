@@ -6,16 +6,13 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 
 {    //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
-    public unsafe abstract class AquaObject
+    public unsafe abstract class AquaObject : AquaCommon
     {
         public AquaPackage.AFPBase afp;
-        public NIFL nifl;
-        public REL0 rel0;
         public OBJC objc;
         public List<VSET> vsetList = new List<VSET>();
         public List<VTXE> vtxeList = new List<VTXE>();
@@ -29,8 +26,6 @@ namespace AquaModelLibrary
         public List<TSET> tsetList = new List<TSET>();
         public List<TEXF> texfList = new List<TEXF>();
         public UNRM unrms;
-        public NOF0 nof0;
-        public NEND nend;
         public List<stripData> strips = new List<stripData>();
 
         //*** 0xC33 only

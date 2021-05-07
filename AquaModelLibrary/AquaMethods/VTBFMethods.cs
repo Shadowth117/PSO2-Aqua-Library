@@ -13,6 +13,7 @@ using static AquaModelLibrary.AquaMotion;
 using static AquaModelLibrary.ClassicAquaObject;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.AquaCommon;
+using static AquaModelLibrary.AquaEffect;
 
 namespace AquaModelLibrary
 {
@@ -2192,6 +2193,55 @@ namespace AquaModelLibrary
             acce.nodeAttach7 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF7));
 
             return acce;
+        }
+
+        public static EFCT parseEFCT(List<Dictionary<int, object>> efctRaw)
+        {
+            EFCT efct = new EFCT();
+            efct.unkVec3_0 = GetObject<Vector3>(efctRaw[0], 0x10);
+            efct.unkVec3_1 = GetObject<Vector3>(efctRaw[0], 0x11);
+            efct.unkVec3_2 = GetObject<Vector3>(efctRaw[0], 0x12); //May not ever be used, but we're gonna check for it
+
+            efct.unkFloat0 = 1.0f;
+
+            efct.startFrame = GetObject<int>(efctRaw[0], 0x1);
+            efct.endFrame = GetObject<int>(efctRaw[0], 0x2);
+            efct.unkInt1 = GetObject<int>(efctRaw[0], 0x3);
+
+            var color = GetObject<byte[]>(efctRaw[0], 0x42);
+            for (int i = 0; i < 0x4; i++)
+            {
+                if (i < color.Length)
+                {
+                    efct.color[i] = color[i];
+                }
+                else
+                {
+                    efct.color[i] = 0;
+                }
+            }
+
+            efct.boolInt0 = GetObject<byte>(efctRaw[0], 0x4);
+            efct.boolInt1 = GetObject<byte>(efctRaw[0], 0x0);
+            efct.boolInt2 = GetObject<byte>(efctRaw[0], 0x7);
+
+            efct.unkFloat1 = GetObject<int>(efctRaw[0], 0x91);
+            efct.unkFloat2 = GetObject<int>(efctRaw[0], 0x92);
+
+            efct.soundName = PSO2Stringx30.GeneratePSO2String(GetObject<byte[]>(efctRaw[0], 0x90));
+
+            return efct;
+        }
+
+        public static EMITObject parseEmit(List<Dictionary<int, object>> emitRaw)
+        {
+            EMITObject emitObject = new EMITObject();
+            var emit = new EMIT();
+            
+            emit.
+            
+            
+            emitObject.emit = emit;
         }
 
         //Safely retrieves objects in the case that they don't exist in the given dictionary

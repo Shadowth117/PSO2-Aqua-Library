@@ -358,7 +358,7 @@ namespace AquaModelTool
                     MessageBox.Show("Not an NGS PSO2 .aqn");
                     return;
                 }
-                var data = new AquaModelLibrary.PlayerData();
+                var data = new AquaModelLibrary.NGSAnimUpdater();
                 data.GetDefaultTransformsFromBones(aquaUI.aqua.aquaBones[0]);
 
                 openFileDialog = new OpenFileDialog()

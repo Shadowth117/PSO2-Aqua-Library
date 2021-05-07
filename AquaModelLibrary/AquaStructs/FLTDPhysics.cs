@@ -7,14 +7,8 @@ using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
-    public class FLTDPhysics
+    public class FLTDPhysics : AquaCommon
     {
-        public NIFL nifl;
-        public REL0 rel0;
-
-        public NOF0 nof0;
-        public NEND nend;
-
         public struct fltdHeader
         {
             public byte version;         //Apparently there are a number of these and they work differently. This makes things painful

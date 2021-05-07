@@ -10,6 +10,13 @@ namespace AquaModelLibrary
 {
     public unsafe class AquaCommon
     {
+        public VTBF vtbf;
+        public NIFL nifl;
+        public REL0 rel0;
+
+        public NOF0 nof0;
+        public NEND nend;
+
         public struct VTBF
         {
             public int magicVTBF;
@@ -245,9 +252,9 @@ namespace AquaModelLibrary
         {
             public fixed byte stringArray[0x30];
 
-            public static PSO2String GeneratePSO2String(byte[] bytes)
+            public static PSO2Stringx30 GeneratePSO2String(byte[] bytes)
             {
-                var str = new PSO2String();
+                var str = new PSO2Stringx30();
                 str.SetBytes(bytes);
 
                 return str;

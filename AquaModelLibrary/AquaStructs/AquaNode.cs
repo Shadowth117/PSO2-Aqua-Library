@@ -1,21 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
 
-    public unsafe class AquaNode
+    public unsafe class AquaNode : AquaCommon
     {
-        public NIFL nifl;
-        public REL0 rel0;
         public NDTR ndtr;
         public List<NODE> nodeList = new List<NODE>();
         public List<NODO> nodoList = new List<NODO>();
-        public NOF0 nof0;
-        public NEND nend;
-
         public AquaNode()
         {
         }

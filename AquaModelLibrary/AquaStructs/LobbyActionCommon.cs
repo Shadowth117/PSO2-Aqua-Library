@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AquaModelLibrary
 {
-    public class LobbyActionCommon
+    public class LobbyActionCommon : AquaCommon
     {
         public lacHeader header;
         public dataInfo info;

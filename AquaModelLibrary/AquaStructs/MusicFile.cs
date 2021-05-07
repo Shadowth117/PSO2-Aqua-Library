@@ -9,14 +9,9 @@ namespace AquaModelLibrary.AquaStructs
 {
     //These are the .mus files used by the Sympathy system. The format seems to match what SEGA described overall:
     //https://www.bumped.org/psublog/phantasy-star-online-2s-dynamic-music-system-sympathy/
-    public class MusicFile
+    public class MusicFile : AquaCommon
     {
         public bool isAlpha = false;
-        public NIFL nifl;
-        public REL0 rel0;
-
-        public NOF0 nof0;
-        public NEND nend;
 
         public struct musHeader
         {

@@ -22,6 +22,7 @@ namespace AquaModelLibrary
         public List<ModelSet> aquaModels = new List<ModelSet>();
         public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
+        public List<AquaEffect> aquaEffect = new List<AquaEffect>();
         public List<AnimSet> aquaMotions = new List<AnimSet>();
         public class ModelSet
         {
@@ -2902,6 +2903,104 @@ namespace AquaModelLibrary
             streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
             int offsetOffset = streamReader.Read<int>();
             streamReader.Seek(offsetOffset + offset, SeekOrigin.Begin);
+        }
+
+        public void ReadEffect(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                int offset = 0x20; //Base offset due to NIFL header
+
+                //Deal with deicer's extra header nonsense
+                if (type.Equals("aqe\0"))
+                {
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
+
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                    offset += headJunkSize;
+                }
+
+                //Proceed based on file variant
+                if (type.Equals("NIFL"))
+                {
+                    aquaEffect.Add(ReadNIFLEffect(streamReader, offset));
+                }
+                else if (type.Equals("VTBF"))
+                {
+                    aquaEffect.Add(ReadVTBFEffect(streamReader));
+                }
+                else
+                {
+                    MessageBox.Show("Improper File Format!");
+                }
+
+            }
+        }
+
+        public AquaEffect ReadNIFLEffect(BufferedStreamReader streamReader, int offset)
+        {
+            AquaEffect effect = new AquaEffect();
+            return effect;
+        }
+
+        public AquaEffect ReadVTBFEffect(BufferedStreamReader streamReader)
+        {
+            AquaEffect effect = new AquaEffect();
+
+            int dataEnd = (int)streamReader.BaseStream().Length;
+
+            //Seek past vtbf tag
+            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + GLIT tags
+
+            var efct = new AquaEffect.EFCTObject();
+            AquaEffect.AnimObject obj = new AquaEffect.AnimObject();
+
+            while (streamReader.Position() < dataEnd)
+            {
+                var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
+                switch (tagType)
+                {
+                    case "ROOT":
+                        //We don't do anything with this right now.
+                        break;
+                    case "DOC ":
+                        break;
+                    case "EFCT":
+                        efct.efct = parseEFCT(data);
+                        break;
+                    case "EMIT":
+                        obj = parseEMIT(data);
+                        efct.emits.Add((AquaEffect.EMITObject)emit);
+                        break;
+                    case "PTCL":
+                        obj = parsePTCL(data);
+                        efct.emits[efct.emits.Count - 1].ptcls.Add((AquaEffect.PTCLObject)obj);
+                        break;
+                    case "CURV":
+                        obj.curvs.Add(parseCURV(data));
+                        break;
+                    case "KEYS":
+                        obj.curvs[obj.curvs.Count - 1].keys = parseKEYS(data); //KEYS tags lump all of the keys into one tag
+                        break;
+                    default:
+                        //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
+                        if (data == null)
+                        {
+                            effect.efct = efct;
+
+                            return effect;
+                        }
+                        throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
+                }
+            }
+            effect.efct = efct;
+
+            return effect;
         }
 
         //For now, we'll just assume we don't care about LOD models and export the first model stored

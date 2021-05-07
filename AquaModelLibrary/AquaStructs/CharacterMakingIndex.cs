@@ -8,7 +8,7 @@ using static AquaModelLibrary.AquaCommon;
 namespace AquaModelLibrary
 {
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
-    public unsafe class CharacterMakingIndex
+    public unsafe class CharacterMakingIndex : AquaCommon
     {
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -78,11 +78,7 @@ namespace AquaModelLibrary
 
         public Dictionary<int, BCLN> innerWearIdLink = new Dictionary<int, BCLN>();
 
-        public NIFL nifl;
-        public REL0 rel0;
         public CMXTable cmxTable;
-        public NOF0 nof0;
-        public NEND nend;
 
         public class BODYObject
         {

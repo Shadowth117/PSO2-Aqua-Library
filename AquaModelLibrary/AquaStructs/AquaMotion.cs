@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
 
     //Cameras, UV, and standard motions are essentially the same format.
-    public unsafe class AquaMotion
+    public unsafe class AquaMotion : AquaCommon
     {
         public const int CAMO = 0x4F4D4143; //Camera animation
         public const int SPMO = 0x4F4D5053; //UV animation
@@ -89,12 +88,8 @@ namespace AquaModelLibrary
         };
 
         public AquaPackage.AFPBase afp;
-        public NIFL nifl;
-        public REL0 rel0;
         public MOHeader moHeader;
         public List<KeyData> motionKeys = new List<KeyData>();
-        public NOF0 nof0;
-        public NEND nend;
 
         //MO Header
         public struct MOHeader
