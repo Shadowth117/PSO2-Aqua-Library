@@ -90,24 +90,28 @@
             this.insertNodeToolStripMenuItem.Name = "insertNodeToolStripMenuItem";
             this.insertNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.insertNodeToolStripMenuItem.Text = "Insert Node";
+            this.insertNodeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Insert);
             // 
             // duplicateNodeToolStripMenuItem
             // 
             this.duplicateNodeToolStripMenuItem.Name = "duplicateNodeToolStripMenuItem";
             this.duplicateNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.duplicateNodeToolStripMenuItem.Text = "Duplicate Node";
+            this.duplicateNodeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Duplicate);
             // 
             // renameNodeToolStripMenuItem
             // 
             this.renameNodeToolStripMenuItem.Name = "renameNodeToolStripMenuItem";
             this.renameNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.renameNodeToolStripMenuItem.Text = "Rename Node";
+            this.renameNodeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Rename);
             // 
             // removeNodeToolStripMenuItem
             // 
             this.removeNodeToolStripMenuItem.Name = "removeNodeToolStripMenuItem";
             this.removeNodeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.removeNodeToolStripMenuItem.Text = "Remove Node";
+            this.removeNodeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Delete);
             // 
             // transformGroupMenuStrip
             // 
@@ -122,12 +126,14 @@
             this.insertTransformGroupToolStripMenuItem.Name = "insertTransformGroupToolStripMenuItem";
             this.insertTransformGroupToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.insertTransformGroupToolStripMenuItem.Text = "Insert Transform Group";
+            this.insertTransformGroupToolStripMenuItem.Click += new System.EventHandler(animTreeView_Insert);
             // 
             // removeTransformGroupToolStripMenuItem
             // 
             this.removeTransformGroupToolStripMenuItem.Name = "removeTransformGroupToolStripMenuItem";
             this.removeTransformGroupToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
             this.removeTransformGroupToolStripMenuItem.Text = "Remove Transform Group";
+            this.removeTransformGroupToolStripMenuItem.Click += new System.EventHandler(animTreeView_Delete);
             // 
             // keyframeMenuStrip
             // 
@@ -143,18 +149,21 @@
             this.insertKeyframeToolStripMenuItem.Name = "insertKeyframeToolStripMenuItem";
             this.insertKeyframeToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.insertKeyframeToolStripMenuItem.Text = "Insert Keyframe";
+            this.insertKeyframeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Insert);
             // 
             // duplicateKeyframeToolStripMenuItem
             // 
             this.duplicateKeyframeToolStripMenuItem.Name = "duplicateKeyframeToolStripMenuItem";
             this.duplicateKeyframeToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.duplicateKeyframeToolStripMenuItem.Text = "Duplicate Keyframe";
+            this.duplicateKeyframeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Duplicate);
             // 
             // removeKeyframeToolStripMenuItem
             // 
             this.removeKeyframeToolStripMenuItem.Name = "removeKeyframeToolStripMenuItem";
             this.removeKeyframeToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.removeKeyframeToolStripMenuItem.Text = "Remove Keyframe";
+            this.removeKeyframeToolStripMenuItem.Click += new System.EventHandler(animTreeView_Delete);
             // 
             // animIDLabel
             // 

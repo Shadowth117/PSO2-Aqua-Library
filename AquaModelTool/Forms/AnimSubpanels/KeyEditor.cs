@@ -12,11 +12,13 @@ namespace AquaModelTool
         int keyNodeId;
         int keyDataId;
         int keyId;
-
-        public KeyEditor(AquaModelLibrary.AquaMotion aquaMotion, int nodeId, int dataId, int id)
+        int nodeIndex;
+        TreeNode node;
+        public KeyEditor(AquaModelLibrary.AquaMotion aquaMotion, TreeNode thisNode, int nodeId, int dataId, int id)
         {
             InitializeComponent();
-            
+            node = thisNode;
+            nodeIndex = node.Index;
             motion = aquaMotion;
             keyNodeId = nodeId;
             keyDataId = dataId;
@@ -117,12 +119,85 @@ namespace AquaModelTool
 
         private void TimeUDChanged(object sender, EventArgs e)
         {
+            if (motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.Count > 0)
+            {
+                motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId] = (ushort)(timeUD.Value * 0x10);
+                internalTimeUD.Value = motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId];
+            }
+            else
+            {
+                MessageBox.Show("Cannot change frame time when there is only one keyframe in this section!");
+            }
+            if (timeUD.Value > motion.moHeader.endFrame)
+            {
+                motion.moHeader.endFrame = (int)timeUD.Value;
+            }
+            node.Text = "Frame " + timeUD.Value;
 
+            ReorderNodes();
+        }
+
+        private void ReorderNodes()
+        {
+            //Handle node ordering
+            motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.Sort();
+            int index = motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.IndexOf((ushort)internalTimeUD.Value);
+
+            var parent = node.Parent;
+            parent.Nodes.RemoveAt(nodeIndex);
+            parent.Nodes.Insert(index, node);
+
+            switch (motion.motionKeys[keyNodeId].keyData[keyDataId].dataType)
+            {
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                    var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys.RemoveAt(nodeIndex);
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys.Insert(index, vec);
+                    break;
+
+                case 0x5:
+                    if (motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys.Count > 0)
+                    {
+                        motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys.RemoveAt(nodeIndex);
+                        motion.motionKeys[keyNodeId].keyData[keyDataId].intKeys.Insert(index, (int)data0UD.Value);
+                    }
+                    else
+                    {
+                        motion.motionKeys[keyNodeId].keyData[keyDataId].byteKeys.RemoveAt(nodeIndex);
+                        motion.motionKeys[keyNodeId].keyData[keyDataId].byteKeys.Insert(index, (byte)data0UD.Value);
+                    }
+                    break;
+
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].floatKeys.RemoveAt(nodeIndex);
+                    motion.motionKeys[keyNodeId].keyData[keyDataId].floatKeys.Insert(index, (float)data0UD.Value);
+                    break;
+            }
+
+            nodeIndex = index;
         }
 
         private void InternalTimeUDChanged(object sender, EventArgs e)
         {
+            if(motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.Count > 0)
+            {
+                motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId] = (ushort)internalTimeUD.Value;
+                timeUD.Value = internalTimeUD.Value / 0x10;
+            } else
+            {
+                MessageBox.Show("Cannot change frame time when there is only one keyframe in this section!");
+            }
+            if (timeUD.Value > motion.moHeader.endFrame)
+            {
+                motion.moHeader.endFrame = (int)timeUD.Value;
+            }
+            node.Text = "Frame " + timeUD.Value;
 
+            ReorderNodes();
         }
 
         private void Data0UDChanged(object sender, EventArgs e)

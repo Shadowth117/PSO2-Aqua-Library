@@ -16,6 +16,7 @@ namespace AquaModelTool
     {
         public AquaUICommon aquaUI = new AquaUICommon();
         public List<string> modelExtensions = new List<string>() { ".aqp", ".aqo", ".trp", ".tro" };
+        public List<string> effectExtensions = new List<string>() { ".aqe" };
         public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public string currentFile;
         public bool isNIFL = false;

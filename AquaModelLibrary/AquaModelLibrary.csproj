@@ -75,12 +75,13 @@
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
+    <Compile Include="AquaStructs\CharacterMakingOffsets.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\MusicFile.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
-    <Compile Include="Extra\PlayerData.cs" />
+    <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />

@@ -60,7 +60,6 @@
             // 
             // timeUD
             // 
-            this.timeUD.Enabled = false;
             this.timeUD.Location = new System.Drawing.Point(3, 40);
             this.timeUD.Maximum = new decimal(new int[] {
             10000000,
@@ -191,7 +190,6 @@
             // 
             // internalTimeUD
             // 
-            this.internalTimeUD.Enabled = false;
             this.internalTimeUD.Location = new System.Drawing.Point(84, 40);
             this.internalTimeUD.Maximum = new decimal(new int[] {
             10000000,

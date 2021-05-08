@@ -29,6 +29,7 @@ namespace AquaModelTool
             int xAddition = 0;
             int yAddition = 0;
             List<int> activeCheck;
+            transformButtons = new List<RadioButton>();
 
             //Set the types to activate for form based on motion type
             switch (type)
@@ -59,7 +60,7 @@ namespace AquaModelTool
                 {
                     buttonTracker = 0;
                     yAddition = 0;
-                    xAddition += 100;
+                    xAddition += 200;
                 }
 
                 //Check if the key is valid
@@ -82,6 +83,8 @@ namespace AquaModelTool
                     
                     yAddition += 16;
                     buttonTracker++;
+                    this.Controls.Add(rButton);
+                    transformButtons.Add(rButton);
                 }
             }
         }

@@ -2945,7 +2945,92 @@ namespace AquaModelLibrary
         public AquaEffect ReadNIFLEffect(BufferedStreamReader streamReader, int offset)
         {
             AquaEffect effect = new AquaEffect();
+            effect.nifl = streamReader.Read<AquaCommon.NIFL>();
+            effect.rel0 = streamReader.Read<AquaCommon.REL0>();
+
+            var efct = new AquaEffect.EFCTObject();
+            efct.efct = streamReader.Read<AquaEffect.EFCT>();
+            effect.efct = efct;
+            ReadNIFLAQECurves(streamReader, efct, efct.efct.curvCount, efct.efct.curvOffset, offset);
+            
+            if(efct.efct.emitCount > 0)
+            {
+                streamReader.Seek(efct.efct.emitOffset + offset, SeekOrigin.Begin);
+
+                for (int i = 0; i < efct.efct.emitCount; i++)
+                {
+                    var emit = new AquaEffect.EMITObject();
+                    emit.emit = streamReader.Read<AquaEffect.EMIT>();
+                    ReadNIFLAQECurves(streamReader, emit, emit.emit.curvCount, emit.emit.curvOffset, offset);
+
+                    if (emit.emit.ptclCount > 0)
+                    {
+                        streamReader.Seek(emit.emit.ptclOffset + offset, SeekOrigin.Begin);
+
+                        for (int pt = 0; pt < emit.emit.ptclCount; pt++)
+                        {
+                            var ptcl = new AquaEffect.PTCLObject();
+                            ptcl.ptcl = streamReader.Read<AquaEffect.PTCL>();
+                            ReadNIFLAQECurves(streamReader, ptcl, ptcl.ptcl.curvCount, ptcl.ptcl.curvOffset, offset);
+
+                            long bookmark = streamReader.Position();
+                            if(ptcl.ptcl.ptclStringsOffset > 0)
+                            {
+                                streamReader.Seek(ptcl.ptcl.ptclStringsOffset + offset, SeekOrigin.Begin);
+                                ptcl.strings = streamReader.Read<AquaEffect.PTCLStrings>();
+                            }
+                            streamReader.Seek(bookmark, SeekOrigin.Begin);
+
+                            emit.ptcls.Add(ptcl);
+                        }
+                    }
+                    efct.emits.Add(emit);
+                }
+            }
+
+            effect.nof0 = AquaCommon.readNOF0(streamReader);
+            effect.nend = streamReader.Read<AquaCommon.NEND>();
+
             return effect;
+        }
+
+        public void ReadNIFLAQECurves(BufferedStreamReader streamReader, AquaEffect.AnimObject efct, int curvCount, int curvOffset, int offset)
+        {
+            long bookmark = streamReader.Position();
+
+            if (curvCount > 0)
+            {
+                streamReader.Seek(curvOffset + offset, SeekOrigin.Begin);
+                for (int i = 0; i < curvCount; i++)
+                {
+                    var curv = new AquaEffect.CURVObject();
+                    curv.curv = streamReader.Read<AquaEffect.CURV>();
+                    efct.curvs.Add(curv);
+                }
+                for (int i = 0; i < curvOffset; i++)
+                {
+                    if(efct.curvs[i].curv.keysCount > 0)
+                    {
+                        streamReader.Seek(efct.curvs[i].curv.keysOffset + offset, SeekOrigin.Begin);
+                        for (int key = 0; key < efct.curvs[i].curv.keysCount; key++)
+                        {
+                            efct.curvs[i].keys.Add(streamReader.Read<AquaEffect.KEYS>());
+                        }
+                    }
+                    if(efct.curvs[i].curv.timeCount > 0)
+                    {
+                        streamReader.Seek(efct.curvs[i].curv.timeOffset + offset, SeekOrigin.Begin);
+                        for (int key = 0; key < efct.curvs[i].curv.timeCount; key++)
+                        {
+                            efct.curvs[i].keys.Add(streamReader.Read<AquaEffect.KEYS>());
+                        }
+                    }
+                }
+            }
+
+            streamReader.Seek(bookmark, SeekOrigin.Begin);
+
+            return;
         }
 
         public AquaEffect ReadVTBFEffect(BufferedStreamReader streamReader)
@@ -2965,9 +3050,6 @@ namespace AquaModelLibrary
                 var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
                 switch (tagType)
                 {
-                    case "ROOT":
-                        //We don't do anything with this right now.
-                        break;
                     case "DOC ":
                         break;
                     case "EFCT":
@@ -2975,7 +3057,7 @@ namespace AquaModelLibrary
                         break;
                     case "EMIT":
                         obj = parseEMIT(data);
-                        efct.emits.Add((AquaEffect.EMITObject)emit);
+                        efct.emits.Add((AquaEffect.EMITObject)obj);
                         break;
                     case "PTCL":
                         obj = parsePTCL(data);

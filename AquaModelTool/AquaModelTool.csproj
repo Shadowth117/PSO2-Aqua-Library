@@ -93,6 +93,24 @@
     <Compile Include="Forms\AnimSubpanels\KeyEditor.Designer.cs">
       <DependentUpon>KeyEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\EffectEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\EffectEditor.Designer.cs">
+      <DependentUpon>EffectEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EffectSubpanels\EfctEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\EffectSubpanels\EfctEditor.Designer.cs">
+      <DependentUpon>EfctEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\General\TextBoxPopUp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\General\TextBoxPopUp.Designer.cs">
+      <DependentUpon>TextBoxPopUp.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ModelSubpanels\MaterialEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -118,6 +136,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AnimSubpanels\KeyEditor.resx">
       <DependentUpon>KeyEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EffectEditor.resx">
+      <DependentUpon>EffectEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EffectSubpanels\EfctEditor.resx">
+      <DependentUpon>EfctEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\General\TextBoxPopUp.resx">
+      <DependentUpon>TextBoxPopUp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelEditor.resx">
       <DependentUpon>ModelEditor.cs</DependentUpon>

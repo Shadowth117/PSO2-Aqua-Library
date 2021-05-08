@@ -2202,11 +2202,11 @@ namespace AquaModelLibrary
             efct.unkVec3_1 = GetObject<Vector3>(efctRaw[0], 0x11);
             efct.unkVec3_2 = GetObject<Vector3>(efctRaw[0], 0x12); //May not ever be used, but we're gonna check for it
 
-            efct.unkFloat0 = 1.0f;
+            efct.float_30 = 1.0f;
 
             efct.startFrame = GetObject<int>(efctRaw[0], 0x1);
             efct.endFrame = GetObject<int>(efctRaw[0], 0x2);
-            efct.unkInt1 = GetObject<int>(efctRaw[0], 0x3);
+            efct.int_48 = GetObject<int>(efctRaw[0], 0x3);
 
             var color = GetObject<byte[]>(efctRaw[0], 0x42);
             for (int i = 0; i < 0x4; i++)
@@ -2221,27 +2221,176 @@ namespace AquaModelLibrary
                 }
             }
 
-            efct.boolInt0 = GetObject<byte>(efctRaw[0], 0x4);
-            efct.boolInt1 = GetObject<byte>(efctRaw[0], 0x0);
-            efct.boolInt2 = GetObject<byte>(efctRaw[0], 0x7);
+            efct.boolInt_54 = GetObject<byte>(efctRaw[0], 0x4);
+            efct.boolInt_58 = GetObject<byte>(efctRaw[0], 0x0);
+            efct.boolInt_5C = GetObject<byte>(efctRaw[0], 0x7);
 
-            efct.unkFloat1 = GetObject<int>(efctRaw[0], 0x91);
-            efct.unkFloat2 = GetObject<int>(efctRaw[0], 0x92);
+            efct.float_60 = GetObject<int>(efctRaw[0], 0x91);
+            efct.float_64 = GetObject<int>(efctRaw[0], 0x92);
 
             efct.soundName = PSO2Stringx30.GeneratePSO2String(GetObject<byte[]>(efctRaw[0], 0x90));
 
             return efct;
         }
 
-        public static EMITObject parseEmit(List<Dictionary<int, object>> emitRaw)
+        public static EMITObject parseEMIT(List<Dictionary<int, object>> emitRaw)
         {
             EMITObject emitObject = new EMITObject();
             var emit = new EMIT();
-            
-            emit.
-            
-            
+
+            emit.unkVec3_0 = GetObject<Vector3>(emitRaw[0], 0x10);
+            emit.unkVec3_1 = GetObject<Vector3>(emitRaw[0], 0x11);
+            emit.unkVec3_2 = GetObject<Vector3>(emitRaw[0], 0x13);
+            emit.unkVec3_3 = GetObject<Vector3>(emitRaw[0], 0x12);
+            emit.unkVec3_4 = GetObject<Vector3>(emitRaw[0], 0x14);
+            emit.unkVec3_5 = GetObject<Vector3>(emitRaw[0], 0x15);
+
+            emit.startFrame = GetObject<int>(emitRaw[0], 0x1);
+            emit.endFrame = GetObject<int>(emitRaw[0], 0x2);
+            emit.unkInt1 = GetObject<int>(emitRaw[0], 0x20);
+            emit.unkFloat1 = GetObject<int>(emitRaw[0], 0x21);
+
+            emit.unkInt2 = GetObject<byte>(emitRaw[0], 0x43);
+            emit.unkInt3 = GetObject<int>(emitRaw[0], 0x5);
+            emit.unkInt4 = GetObject<byte>(emitRaw[0], 0x32);
+            emit.float_8C = GetObject<float>(emitRaw[0], 0x37);
+
+            emit.float_90 = GetObject<float>(emitRaw[0], 0x35);
+            emit.int_94 = GetObject<byte>(emitRaw[0], 0x33);
+            emit.float_98 = GetObject<float>(emitRaw[0], 0x37);
+
+            emit.int_B8 = -1;
+            emit.int_BC = -1;
+
+            emit.unkVec3_7 = GetObject<Vector3>(emitRaw[0], 0x19);
+            emit.int_E0 = GetObject<int>(emitRaw[0], 0x86);
+
             emitObject.emit = emit;
+
+            return emitObject;
+        }
+
+        public static PTCLObject parsePTCL(List<Dictionary<int, object>> ptclRaw)
+        {
+            PTCLObject ptclObject = new PTCLObject();
+            var ptcl = new PTCL();
+
+            ptcl.size = GetObject<Vector3>(ptclRaw[0], 0x19);
+            ptcl.sizeRandom = GetObject<Vector3>(ptclRaw[0], 0x1A);
+            ptcl.rotation = GetObject<Vector3>(ptclRaw[0], 0x11);
+            ptcl.rotationRandom = GetObject<Vector3>(ptclRaw[0], 0x12);
+            ptcl.rotationAdd = GetObject<Vector3>(ptclRaw[0], 0x14);
+            ptcl.rotationAddRandom = GetObject<Vector3>(ptclRaw[0], 0x15);
+            ptcl.direction = GetObject<Vector3>(ptclRaw[0], 0x44);
+            ptcl.directionRandom = GetObject<Vector3>(ptclRaw[0], 0x45);
+            ptcl.gravitationalAccel = GetObject<Vector3>(ptclRaw[0], 0x50);
+            ptcl.externalAccel = GetObject<Vector3>(ptclRaw[0], 0x51);
+            ptcl.externalAccelRandom = GetObject<Vector3>(ptclRaw[0], 0x5C);
+
+            ptcl.float_B0 = GetObject<float>(ptclRaw[0], 0x56);
+            ptcl.float_B4 = GetObject<float>(ptclRaw[0], 0x57);
+            ptcl.float_B8 = GetObject<float>(ptclRaw[0], 0x52);
+            ptcl.float_BC = GetObject<float>(ptclRaw[0], 0x53);
+
+            ptcl.int_C0 = GetObject<int>(ptclRaw[0], 0x5);
+            ptcl.float_C4 = GetObject<float>(ptclRaw[0], 0x2);
+            ptcl.byte_C8 = GetObject<byte>(ptclRaw[0], 0x41);
+            ptcl.byte_C9 = GetObject<byte>(ptclRaw[0], 0x98);
+            ptcl.byte_CA = GetObject<byte>(ptclRaw[0], 0x43);
+            ptcl.byte_CB = GetObject<byte>(ptclRaw[0], 0x4F);
+            ptcl.float_CC = GetObject<float>(ptclRaw[0], 0x4E);
+
+            ptcl.speed = GetObject<float>(ptclRaw[0], 0x46);
+            ptcl.speedRandom = GetObject<float>(ptclRaw[0], 0x47);
+
+            ptcl.float_E0 = 1.0f;
+
+            var color = GetObject<byte[]>(ptclRaw[0], 0x42);
+            for (int i = 0; i < 0x4; i++)
+            {
+                if (i < color.Length)
+                {
+                    ptcl.color[i] = color[i];
+                }
+                else
+                {
+                    ptcl.color[i] = 0;
+                }
+            }
+
+            ptcl.int_F0 = GetObject<byte>(ptclRaw[0], 0x4B);
+            ptcl.int_F4 = GetObject<short>(ptclRaw[0], 0x4C);
+            ptcl.int_F8 = GetObject<short>(ptclRaw[0], 0x4D);
+            ptcl.byte_FC = GetObject<byte>(ptclRaw[0], 0x61);
+            ptcl.byte_FD = GetObject<byte>(ptclRaw[0], 0x62);
+            ptcl.byte_FE = GetObject<byte>(ptclRaw[0], 0x67);
+            ptcl.byte_FF = GetObject<byte>(ptclRaw[0], 0x5D);
+
+            ptcl.int_100 = GetObject<byte>(ptclRaw[0], 0x64);
+            ptcl.int_104 = GetObject<byte>(ptclRaw[0], 0x66);
+            ptcl.int_108 = GetObject<byte>(ptclRaw[0], 0x68);
+            ptcl.short_10C = GetObject<byte>(ptclRaw[0], 0x5E);
+            ptcl.short_10E = GetObject<byte>(ptclRaw[0], 0x5F);
+
+            ptcl.field_110 = GetObject<int>(ptclRaw[0], 0x6);
+            ptcl.field_114 = GetObject<short>(ptclRaw[0], 0x55);
+
+            ptcl.field_120 = GetObject<float>(ptclRaw[0], 0x54);
+            ptcl.field_124 = GetObject<float>(ptclRaw[0], 0x48);
+            ptcl.field_128 = GetObject<float>(ptclRaw[0], 0x49);
+            ptcl.float_12C = GetObject<float>(ptclRaw[0], 0x4A);
+
+            ptcl.float_130 = GetObject<float>(ptclRaw[0], 0x88);
+
+            PTCLStrings strings = new PTCLStrings();
+            strings.assetName.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x34));
+            strings.subDirectory.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x40));
+            strings.diffuseTex.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x63));
+            strings.opacityTex.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x65));
+
+            ptclObject.strings = strings;
+            ptclObject.ptcl = ptcl;
+
+            return ptclObject;
+        }
+
+        public static CURVObject parseCURV(List<Dictionary<int, object>> curvRaw)
+        {
+            CURVObject curvObject = new CURVObject();
+            var curv = new CURV();
+
+            curv.type = GetObject<byte>(curvRaw[0], 0x71);
+            curv.startFrame = GetObject<float>(curvRaw[0], 0x74);
+            curv.int_0C = GetObject<short>(curvRaw[0], 0x73);
+            curv.float_10 = GetObject<float>(curvRaw[0], 0x77);
+
+            curv.int_14 = GetObject<int>(curvRaw[0], 0x76);
+            curv.endFrame = GetObject<float>(curvRaw[0], 0x75);
+
+            curvObject.curv = curv;
+
+            return curvObject;
+        }
+
+        public static List<KEYS> parseKEYS(List<Dictionary<int, object>> keysRaw)
+        {
+            List<KEYS> keyList = new List<KEYS>();
+
+            for(int i = 0; i < keysRaw.Count; i++)
+            {
+                var keys = new KEYS();
+
+                keys.type = GetObject<byte>(keysRaw[0], 0x72);
+                keys.time = GetObject<float>(keysRaw[0], 0x78);
+                keys.time = GetObject<float>(keysRaw[0], 0x79);
+                keys.time = GetObject<float>(keysRaw[0], 0x7A);
+
+                keys.time = GetObject<float>(keysRaw[0], 0x7B);
+
+                keyList.Add(keys);
+            }
+
+            return keyList;
         }
 
         //Safely retrieves objects in the case that they don't exist in the given dictionary

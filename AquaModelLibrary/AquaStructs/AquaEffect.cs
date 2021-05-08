@@ -60,26 +60,26 @@ namespace AquaModelLibrary
             public Vector3 unkVec3_2; //Scale?
             public int reserve2;
 
-            public float unkFloat0;
+            public float float_30;
             public int curvOffset;
             public int curvCount;
             public int reserve3;
 
             public float startFrame; //0x1, Type 0x8 //Just an educated guess based on sister formats for now.
             public float endFrame; //0x2, Type 0x8 //This becomes a float in NIFL variations rather than an int as it is in VTBF
-            public int unkInt1; //0x3, Type 0x8
+            public int int_48; //0x3, Type 0x8
             public fixed byte color[4]; //0x42, Type 0xC
             
-            public int unkInt2;
-            public int boolInt0;    //0x4, Type 0x1
-            public int boolInt1;    //0x0, Type 0x1
-            public int boolInt2;    //0x7, Type 0x1
+            public int int_50;
+            public int boolInt_54;    //0x4, Type 0x1
+            public int boolInt_58;    //0x0, Type 0x1
+            public int boolInt_5C;    //0x7, Type 0x1
             
-            public float unkFloat1; //0x91, Type 0x8
-            public float unkFloat2; //0x92, Type 0x8
+            public float float_60; //0x91, Type 0x8
+            public float float_64; //0x92, Type 0x8
 
             public PSO2Stringx30 soundName; //0x90, Type 0x2
-            public int emmitOffset;
+            public int emitOffset;
             public int emitCount;
         }
 
@@ -114,8 +114,8 @@ namespace AquaModelLibrary
 
             public int unkInt2; //0x43, Type 0x4 //This became a full int in NIFL
             public int unkInt3; //0x5, Type 0x9
-            public int unkInt4; 
-            public float unkFloat2;
+            public int unkInt4;             //0x32, Type 0x4
+            public float float_8C;            //0x31, Type 0xA
 
             public float float_90;            //0x35, Type 0xA
             public int int_94;                //0x33, Type 0x4
@@ -140,7 +140,7 @@ namespace AquaModelLibrary
             public Vector3 unkVec3_7;           //This is maybe:  //0x19, Type 0x4A, Count 0x1 
             public int reserve8;
 
-            public int int_E0;
+            public int int_E0;            //0x86, Type 0x8
             public int field_E4;
             public int field_E8;
             public int field_EC;
@@ -151,10 +151,6 @@ namespace AquaModelLibrary
             public int field_FC;
 
             //****The below exist in VTBF, but seemingly aren't in NIFL...
-
-            //0x86, Type 0x8
-            //0x32, Type 0x4
-            //0x31, Type 0xA
             //0x3B, Type 0xA
             //0x3C, Type 0xA
             //0x36, Type 0x9
@@ -239,8 +235,8 @@ namespace AquaModelLibrary
             public float float_13C;
 
             public int ptclStringsOffset;
-            public int curveOffset;
-            public int curveCount;
+            public int curvOffset;
+            public int curvCount;
             public int field_14C;
 
             //***** Used differently in NIFL:
@@ -256,10 +252,10 @@ namespace AquaModelLibrary
 
         public struct PTCLStrings
         {
-            PSO2Stringx30 assetName;
-            PSO2Stringx30 subDirectory;
-            PSO2String diffuseTex;
-            PSO2String opacityTex;
+            public PSO2Stringx30 assetName;
+            public PSO2Stringx30 subDirectory;
+            public PSO2String diffuseTex;
+            public PSO2String opacityTex;
         }
 
         //Seems to have varying pointer data, but no actual data

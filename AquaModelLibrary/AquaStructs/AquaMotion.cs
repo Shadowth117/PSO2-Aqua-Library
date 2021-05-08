@@ -81,6 +81,7 @@ namespace AquaModelLibrary
             0x1A,
             0x1B,
             0x1C,
+            0x1D,
             0x1E,
             0x1F,
             0x20,
