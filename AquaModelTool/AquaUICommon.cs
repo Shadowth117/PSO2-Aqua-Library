@@ -47,7 +47,9 @@ namespace AquaModelTool
                         for (int r = 0; r < aqua.aquaModels[i].models[j].rendList.Count; r++)
                         {
                             var rend = aqua.aquaModels[i].models[j].rendList[r];
-                            rend.int_0C = 1;
+                            
+                            rend.int_0C = 0;
+                            rend.unk8 = 1;
                             rend.unk10 = 0;
                             aqua.aquaModels[i].models[j].rendList[r] = rend;
                         }

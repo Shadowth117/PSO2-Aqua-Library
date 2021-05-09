@@ -71,6 +71,7 @@
             this.float60UD = new System.Windows.Forms.NumericUpDown();
             this.float64Label = new System.Windows.Forms.Label();
             this.float64UD = new System.Windows.Forms.NumericUpDown();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.startFrameUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.posYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.posXUD)).BeginInit();
@@ -207,7 +208,7 @@
             // 
             // diffuseUD
             // 
-            this.diffuseUD.Location = new System.Drawing.Point(305, 43);
+            this.diffuseUD.Location = new System.Drawing.Point(305, 67);
             this.diffuseUD.Maximum = new decimal(new int[] {
             255,
             0,
@@ -221,7 +222,7 @@
             // diffuseRGBALabel
             // 
             this.diffuseRGBALabel.AutoSize = true;
-            this.diffuseRGBALabel.Location = new System.Drawing.Point(265, 26);
+            this.diffuseRGBALabel.Location = new System.Drawing.Point(265, 50);
             this.diffuseRGBALabel.Name = "diffuseRGBALabel";
             this.diffuseRGBALabel.Size = new System.Drawing.Size(57, 13);
             this.diffuseRGBALabel.TabIndex = 36;
@@ -230,7 +231,7 @@
             // diffuseRGBButton
             // 
             this.diffuseRGBButton.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.diffuseRGBButton.Location = new System.Drawing.Point(267, 41);
+            this.diffuseRGBButton.Location = new System.Drawing.Point(267, 65);
             this.diffuseRGBButton.Name = "diffuseRGBButton";
             this.diffuseRGBButton.Size = new System.Drawing.Size(31, 23);
             this.diffuseRGBButton.TabIndex = 35;
@@ -670,12 +671,22 @@
             this.float64UD.TabIndex = 41;
             this.float64UD.ValueChanged += new System.EventHandler(this.float64UD_ValueChanged);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(275, 9);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 51;
+            this.button1.Text = "Animations";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
             // EfctEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.boolInt5CUD);
             this.Controls.Add(this.boolInt5CLabel);
             this.Controls.Add(this.boolInt58UD);
@@ -791,5 +802,6 @@
         private System.Windows.Forms.NumericUpDown float60UD;
         private System.Windows.Forms.Label float64Label;
         private System.Windows.Forms.NumericUpDown float64UD;
+        private System.Windows.Forms.Button button1;
     }
 }

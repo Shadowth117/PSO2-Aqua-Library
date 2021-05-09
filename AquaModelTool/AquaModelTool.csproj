@@ -99,6 +99,12 @@
     <Compile Include="Forms\EffectEditor.Designer.cs">
       <DependentUpon>EffectEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\EffectSubpanels\EmitEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\EffectSubpanels\EmitEditor.Designer.cs">
+      <DependentUpon>EmitEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EffectSubpanels\EfctEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -139,6 +145,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EffectEditor.resx">
       <DependentUpon>EffectEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EffectSubpanels\EmitEditor.resx">
+      <DependentUpon>EmitEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EffectSubpanels\EfctEditor.resx">
       <DependentUpon>EfctEditor.cs</DependentUpon>

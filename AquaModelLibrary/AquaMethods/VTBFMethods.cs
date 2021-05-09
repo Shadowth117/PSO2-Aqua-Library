@@ -2238,21 +2238,21 @@ namespace AquaModelLibrary
             EMITObject emitObject = new EMITObject();
             var emit = new EMIT();
 
-            emit.unkVec3_0 = GetObject<Vector3>(emitRaw[0], 0x10);
-            emit.unkVec3_1 = GetObject<Vector3>(emitRaw[0], 0x11);
-            emit.unkVec3_2 = GetObject<Vector3>(emitRaw[0], 0x13);
-            emit.unkVec3_3 = GetObject<Vector3>(emitRaw[0], 0x12);
-            emit.unkVec3_4 = GetObject<Vector3>(emitRaw[0], 0x14);
-            emit.unkVec3_5 = GetObject<Vector3>(emitRaw[0], 0x15);
+            emit.unkVec3_00 = GetObject<Vector3>(emitRaw[0], 0x10);
+            emit.unkVec3_10 = GetObject<Vector3>(emitRaw[0], 0x11);
+            emit.unkVec3_20 = GetObject<Vector3>(emitRaw[0], 0x13);
+            emit.unkVec3_40 = GetObject<Vector3>(emitRaw[0], 0x12);
+            emit.unkVec3_50 = GetObject<Vector3>(emitRaw[0], 0x14);
+            emit.unkVec3_60 = GetObject<Vector3>(emitRaw[0], 0x15);
 
             emit.startFrame = GetObject<int>(emitRaw[0], 0x1);
             emit.endFrame = GetObject<int>(emitRaw[0], 0x2);
-            emit.unkInt1 = GetObject<int>(emitRaw[0], 0x20);
-            emit.unkFloat1 = GetObject<int>(emitRaw[0], 0x21);
+            emit.int_78 = GetObject<int>(emitRaw[0], 0x20);
+            emit.float_7C = GetObject<int>(emitRaw[0], 0x21);
 
-            emit.unkInt2 = GetObject<byte>(emitRaw[0], 0x43);
-            emit.unkInt3 = GetObject<int>(emitRaw[0], 0x5);
-            emit.unkInt4 = GetObject<byte>(emitRaw[0], 0x32);
+            emit.int_80 = GetObject<byte>(emitRaw[0], 0x43);
+            emit.int_84 = GetObject<int>(emitRaw[0], 0x5);
+            emit.int_88 = GetObject<byte>(emitRaw[0], 0x32);
             emit.float_8C = GetObject<float>(emitRaw[0], 0x37);
 
             emit.float_90 = GetObject<float>(emitRaw[0], 0x35);
@@ -2262,7 +2262,7 @@ namespace AquaModelLibrary
             emit.int_B8 = -1;
             emit.int_BC = -1;
 
-            emit.unkVec3_7 = GetObject<Vector3>(emitRaw[0], 0x19);
+            emit.unkVec3_D0 = GetObject<Vector3>(emitRaw[0], 0x19);
             emit.int_E0 = GetObject<int>(emitRaw[0], 0x86);
 
             emitObject.emit = emit;

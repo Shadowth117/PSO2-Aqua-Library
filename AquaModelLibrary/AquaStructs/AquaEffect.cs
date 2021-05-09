@@ -88,33 +88,33 @@ namespace AquaModelLibrary
         //In NIFL, these are laid out sequentially based on the count within the EFCT structure
         public struct EMIT
         {
-            public Vector3 unkVec3_0; //0x10, Type 0x4A, 0x1 //Translation?
+            public Vector3 unkVec3_00; //0x10, Type 0x4A, 0x1 //Translation?
             public int reserve0;
-            public Vector3 unkVec3_1; //0x11, Type 0x4A, 0x1 //Rotation?
+            public Vector3 unkVec3_10; //0x11, Type 0x4A, 0x1 //Rotation?
             public int reserve1;
-            public Vector3 unkVec3_2; //0x13, Type 0x4A, Count 0x1 //Scale?
+            public Vector3 unkVec3_20; //0x13, Type 0x4A, Count 0x1 //Scale?
             public int reserve2;
 
-            public float unkFloat0;
+            public float float_30;
             public int curvOffset;
             public int curvCount;
             public int reserve3;
 
-            public Vector3 unkVec3_3;  //0x12, Type 0x4A, Count 0x1
+            public Vector3 unkVec3_40;  //0x12, Type 0x4A, Count 0x1
             public int reserve4;
-            public Vector3 unkVec3_4;  //0x14, Type 0x4A, Count 0x1
+            public Vector3 unkVec3_50;  //0x14, Type 0x4A, Count 0x1
             public int reserve5;
-            public Vector3 unkVec3_5;  //0x15, Type 0x4A, Count 0x1
+            public Vector3 unkVec3_60;  //0x15, Type 0x4A, Count 0x1
             public int reserve6;
 
             public float startFrame; //0x1, Type 0x8 //Just an educated guess based on sister formats for now.
             public float endFrame; //0x2, Type 0x8 //This becomes a float in NIFL variations rather than an int as it is in VTBF
-            public int unkInt1;     //0x20, Type 0x8
-            public float unkFloat1;  //0x21, Type 0x8
+            public int int_78;     //0x20, Type 0x8
+            public float float_7C;  //0x21, Type 0x8
 
-            public int unkInt2; //0x43, Type 0x4 //This became a full int in NIFL
-            public int unkInt3; //0x5, Type 0x9
-            public int unkInt4;             //0x32, Type 0x4
+            public int int_80; //0x43, Type 0x4 //This became a full int in NIFL
+            public int int_84; //0x5, Type 0x9
+            public int int_88;             //0x32, Type 0x4
             public float float_8C;            //0x31, Type 0xA
 
             public float float_90;            //0x35, Type 0xA
@@ -135,9 +135,9 @@ namespace AquaModelLibrary
             public int int_B8; //usually -1;
             public int int_BC;
 
-            public Vector3 unkVec3_6;  
+            public Vector3 unkVec3_C0;  
             public int reserve7;
-            public Vector3 unkVec3_7;           //This is maybe:  //0x19, Type 0x4A, Count 0x1 
+            public Vector3 unkVec3_D0;           //This is maybe:  //0x19, Type 0x4A, Count 0x1 
             public int reserve8;
 
             public int int_E0;            //0x86, Type 0x8
