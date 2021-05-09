@@ -166,7 +166,7 @@ namespace AquaModelTool
                 for (int i = 0; i < rendIds.Count; i++)
                 {
                     var rend = model.rendList[rendIds[i]];
-                    rend.notOpaque = 1;
+                    rend.unk8 = 1;
                     rend.unk10 = 0;
                     model.rendList[rendIds[i]] = rend;
                 }

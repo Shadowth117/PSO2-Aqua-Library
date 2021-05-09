@@ -1759,11 +1759,11 @@ namespace AquaModelLibrary
             switch(mat.blendType)
             {
                 case "opaque":
-                    rend.notOpaque = 0;
+                    rend.int_0C = 0;
                     rend.unk10 = 0;
                     break;
                 default:
-                    rend.notOpaque = 1;
+                    rend.int_0C = 1;
                     rend.unk10 = 0;
                     break;
             }

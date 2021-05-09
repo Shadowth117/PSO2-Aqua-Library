@@ -249,7 +249,7 @@ namespace AquaModelLibrary
             public int tag;      //0x40, type 0x9 //Always 0x1FF
             public int unk0;     //0x41, type 0x9 //3 usually
             public int twosided; //0x42, type 0x9 //0 for backface cull, 1 for twosided, 2 used in persona live dance models for unknown purposes (backface only?)
-            public int notOpaque;//0x43, type 0x9 //0 for opaque, 1 for anything else
+            public int int_0C; //0x43, type 0x9 //Maybe related to blend sort order? I'm not sure...
 
             //Next 12 values appear related, maybe to some texture setting? There are 3 sets that start with 5, first two go to 6, all go to 1, thhen 4th is typically different.
             public int unk1; //0x44, type 0x9 //5 usually
@@ -268,6 +268,33 @@ namespace AquaModelLibrary
             public int unk12; //0x4F, type 0x9 //4 usually
 
             public int unk13; //0x50, type 0x9 //1 usually
+
+            public bool Equals(REND c)
+            {
+
+                // Optimization for a common success case.
+                if (Object.ReferenceEquals(this, c))
+                {
+                    return true;
+                }
+
+                // If run-time types are not exactly the same, return false.
+                if (this.GetType() != c.GetType())
+                {
+                    return false;
+                }
+
+                return (tag == c.tag) && (unk0 == c.unk0) && (twosided == c.twosided) && (int_0C == c.int_0C) && (unk1 == c.unk1) && (unk2 == c.unk2) && (unk3 == c.unk3) 
+                    && (unk4 == c.unk4) && (unk5 == c.unk5) && (unk6 == c.unk6) && (unk7 == c.unk7) && (unk8 == c.unk8) && (unk9 == c.unk9) && (unk10 == c.unk10) && (unk11 == c.unk11) 
+                    && (unk12 == c.unk12) && (unk13 == c.unk13);
+            }
+
+            public static bool operator ==(REND lhs, REND rhs)
+            {
+                return lhs.Equals(rhs);
+            }
+
+            public static bool operator !=(REND lhs, REND rhs) => !(lhs == rhs);
         }
 
         //Contains information about the triangle strip sets

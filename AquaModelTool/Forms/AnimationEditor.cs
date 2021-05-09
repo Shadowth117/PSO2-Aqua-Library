@@ -138,6 +138,9 @@ namespace AquaModelTool
 
         public void animTreeView_Insert(object sender, EventArgs e)
         {
+            int mainId = -1;
+            int keyDataId = -1;
+            int frameId = -1;
             TreeNode node = animTreeView.SelectedNode;
             //Camera motions should only ever have one node
             if ((int)node.Tag == 0 && currentMotion.moHeader.variant == AquaMotion.cameraAnim)
@@ -180,27 +183,19 @@ namespace AquaModelTool
             }
 
             //Insert the new node
-            TreeNode newNode = new TreeNode();
-            newNode.Tag = node.Tag;
             switch ((int)node.Tag)
             {
                 case 0:
-                    newNode.Text = node.Text;
-
-                    //Create the lower nodes
-                    TreeNode transformNode = new TreeNode();
-                    transformNode.Tag = 1;
-
-                    SetupNewTransformNode(node, transformNode);
-
-                    newNode.Nodes.Add(transformNode);
+                    SetupNewTopNode(node);
                     break;
                 case 1:
-                    newNode.Tag = 1;
-                    SetupNewTransformNode(node.Parent, newNode);
+                    mainId = node.Parent.Index;
+                    keyDataId = AddTransformType(node.Parent);
                     break;
                 case 2:
-                    newNode.Text = node.Text;
+                    mainId = node.Parent.Parent.Index;
+                    keyDataId = node.Parent.Index;
+                    frameId = node.Index;
                     var keySet = currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
                     keySet.keyCount++;
 
@@ -240,14 +235,25 @@ namespace AquaModelTool
                     break;
             }
 
-            node.Parent.Nodes.Insert(node.Index, newNode);
+            InitializeAnimTreeView();
 
-
-
-            //throw
+            switch ((int)node.Tag)
+            {
+                case 0:
+                    animTreeView.SelectedNode = animTreeView.Nodes[animTreeView.Nodes.Count - 1];
+                    break;
+                case 1:
+                    animTreeView.SelectedNode = animTreeView.Nodes[mainId].Nodes[keyDataId];
+                    animTreeView.SelectedNode.Expand();
+                    break;
+                case 2:
+                    animTreeView.SelectedNode = animTreeView.Nodes[mainId].Nodes[keyDataId].Nodes[frameId];
+                    animTreeView.SelectedNode.Expand();
+                    break;
+            }
         }
 
-        private void SetupNewTransformNode(TreeNode node, TreeNode transformNode)
+        private void SetupNewTopNode(TreeNode node)
         {
             //Create MSEG and Keyset
             AquaMotion.KeyData keyData = new AquaMotion.KeyData();
@@ -255,75 +261,28 @@ namespace AquaModelTool
             newMseg.nodeDataCount = 1;
             newMseg.nodeId = currentMotion.motionKeys[node.Index].mseg.nodeId + 1;
             newMseg.nodeName.SetString("Node " + newMseg.nodeId);
-            List<int> activeCheck;
-            List<int> usedKeys = new List<int>();
+            int transformType = GetTransformType(node, out int nodeType);
 
-            //Set up the dialog
-            AnimationTransformSelect tfmDialog = new AnimationTransformSelect(currentMotion.moHeader.variant);
-            switch (currentMotion.moHeader.variant)
+            if (nodeType == -1)
             {
-                case AquaMotion.stdAnim:
-                case AquaMotion.stdPlayerAnim:
-                    newMseg.nodeType = 0x2;
-                    activeCheck = currentMotion.standardTypes;
-                    break;
-                case AquaMotion.cameraAnim:
-                    newMseg.nodeType = 0x20;
-                    activeCheck = currentMotion.cameraTypes;
-                    break;
-                case AquaMotion.materialAnim:
-                    newMseg.nodeType = 0x10;
-                    activeCheck = currentMotion.materialTypes;
-                    break;
-                default:
-                    MessageBox.Show("Unknown animation type. Please report!");
-                    return;
+                return;
             }
 
-            //Find preused transform types 
-            for (int i = 0; i < currentMotion.motionKeys[node.Index].keyData.Count; i++)
-            {
-                usedKeys.Add(currentMotion.motionKeys[node.Index].keyData[i].keyType);
-            }
-
-            //Set the first enabled type to checked
-            bool set = false;
-            for (int i = 0; i < tfmDialog.transformButtons.Count; i++)
-            {
-                //Disallow invalid and used tags
-                int tag = (int)tfmDialog.transformButtons[i].Tag;
-                if (!activeCheck.Contains(tag) || usedKeys.Contains(tag))
-                {
-                    tfmDialog.transformButtons[i].Enabled = false;
-                } else if(activeCheck.Contains(tag))
-                {
-                    tfmDialog.transformButtons[i].Enabled = true;
-                }
-
-                //Set the button checked state
-                if (tfmDialog.transformButtons[i].Enabled == false && set == false)
-                {
-                    tfmDialog.transformButtons[i].Checked = false;
-                }
-                else
-                {
-                    tfmDialog.transformButtons[i].Checked = true;
-                    set = true;
-                }
-            }
-
-            //Run Dialog and check results
-            tfmDialog.ShowDialog();
-            int transformType = tfmDialog.currentChoice;
-            transformNode.Text = currentMotion.keyTypeNames[transformType];
+            newMseg.nodeType = nodeType;
 
             //Add an empty frame
             TreeNode keyNode = new TreeNode("Frame 0");
             keyNode.Tag = 2;
-            transformNode.Nodes.Add(keyNode);
 
             //Add MKEY data
             keyData.mseg = newMseg;
+            AquaMotion.MKEY newMkey = GenerateMKEY(transformType);
+            keyData.keyData.Add(newMkey);
+            currentMotion.motionKeys.Add(keyData);
+        }
+
+        private static AquaMotion.MKEY GenerateMKEY(int transformType)
+        {
             AquaMotion.MKEY newMkey = new AquaMotion.MKEY();
             newMkey.keyType = transformType;
             newMkey.dataType = AquaMotion.GetKeyDataType(transformType);
@@ -349,8 +308,100 @@ namespace AquaModelTool
                 default:
                     throw new Exception($"Unexpected data type: {newMkey.dataType}");
             }
-            keyData.keyData.Add(newMkey);
-            currentMotion.motionKeys.Add(keyData);
+
+            return newMkey;
+        }
+
+        private int AddTransformType(TreeNode node)
+        {
+            int tfmType = GetTransformType(node, out int check);
+            if(check == -1)
+            {
+                return -1;
+            }
+
+            //Find where to insert this
+            int id = -1;
+            for(int i = 0; i < currentMotion.motionKeys[node.Index].keyData.Count; i++)
+            {
+                if(currentMotion.motionKeys[node.Index].keyData[i].keyType < tfmType)
+                {
+                    id = i;
+                }
+            }
+
+            currentMotion.motionKeys[node.Index].keyData.Insert(id + 1, GenerateMKEY(tfmType));
+
+            return id + 1;
+        }
+
+        private int GetTransformType(TreeNode node, out int nodeType)
+        {
+            List<int> activeCheck;
+            List<int> usedKeys = new List<int>();
+
+            //Set up the dialog
+            AnimationTransformSelect tfmDialog = new AnimationTransformSelect(currentMotion.moHeader.variant);
+            switch (currentMotion.moHeader.variant)
+            {
+                case AquaMotion.stdAnim:
+                case AquaMotion.stdPlayerAnim:
+                    nodeType = 0x2;
+                    activeCheck = currentMotion.standardTypes;
+                    break;
+                case AquaMotion.cameraAnim:
+                    nodeType = 0x20;
+                    activeCheck = currentMotion.cameraTypes;
+                    break;
+                case AquaMotion.materialAnim:
+                    nodeType = 0x10;
+                    activeCheck = currentMotion.materialTypes;
+                    break;
+                default:
+                    nodeType = -1;
+                    activeCheck = currentMotion.standardTypes;
+                    MessageBox.Show("Bad anim? " + currentMotion.moHeader.variant);
+                    break;
+            }
+
+            //Find preused transform types 
+            for (int i = 0; i < currentMotion.motionKeys[node.Index].keyData.Count; i++)
+            {
+                usedKeys.Add(currentMotion.motionKeys[node.Index].keyData[i].keyType);
+            }
+
+            //Set the first enabled type to checked
+            bool set = false;
+            for (int i = 0; i < tfmDialog.transformButtons.Count; i++)
+            {
+                //Disallow invalid and used tags
+                int tag = (int)tfmDialog.transformButtons[i].Tag;
+                if (!activeCheck.Contains(tag) || usedKeys.Contains(tag))
+                {
+                    tfmDialog.transformButtons[i].Enabled = false;
+                }
+                else if (activeCheck.Contains(tag))
+                {
+                    tfmDialog.transformButtons[i].Enabled = true;
+                }
+
+                //Set the button checked state
+                if (tfmDialog.transformButtons[i].Enabled == false || set == true)
+                {
+                    tfmDialog.transformButtons[i].Checked = false;
+                }
+                else if (set == false)
+                {
+                    tfmDialog.transformButtons[i].Checked = true;
+                    set = true;
+                }
+            }
+
+            //Run Dialog and check results
+            tfmDialog.ShowDialog();
+            int transformType = tfmDialog.currentChoice;
+
+            return transformType;
         }
 
         public void animTreeView_Duplicate(object sender, EventArgs e)

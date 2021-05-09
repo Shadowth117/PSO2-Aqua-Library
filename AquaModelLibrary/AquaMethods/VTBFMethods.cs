@@ -985,7 +985,7 @@ namespace AquaModelLibrary
                 rend.tag = (int)rendRaw[i][0x40];
                 rend.unk0 = (int)rendRaw[i][0x41];
                 rend.twosided = (int)rendRaw[i][0x42];
-                rend.notOpaque = (int)rendRaw[i][0x43];
+                rend.int_0C = (int)rendRaw[i][0x43];
 
                 rend.unk1 = (int)rendRaw[i][0x44];
                 rend.unk2 = (int)rendRaw[i][0x45];
@@ -1027,7 +1027,7 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x40, 0x9, BitConverter.GetBytes(rendList[i].tag));
                 addBytes(outBytes, 0x41, 0x9, BitConverter.GetBytes(rendList[i].unk0));
                 addBytes(outBytes, 0x42, 0x9, BitConverter.GetBytes(rendList[i].twosided));
-                addBytes(outBytes, 0x43, 0x9, BitConverter.GetBytes(rendList[i].notOpaque));
+                addBytes(outBytes, 0x43, 0x9, BitConverter.GetBytes(rendList[i].int_0C));
 
                 addBytes(outBytes, 0x44, 0x9, BitConverter.GetBytes(rendList[i].unk1));
                 addBytes(outBytes, 0x45, 0x9, BitConverter.GetBytes(rendList[i].unk2));

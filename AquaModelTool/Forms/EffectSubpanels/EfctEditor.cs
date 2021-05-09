@@ -16,8 +16,32 @@ namespace AquaModelTool
             InitializeComponent();
             node = thisNode;
             efct = efctObj;
+            startFrameUD.Value = (decimal)efct.efct.startFrame;
+            endFrameUD.Value = (decimal)efct.efct.endFrame;
             soundNameBox.Text = efctObj.efct.soundName.GetString();
             diffuseRGBButton.BackColor = Color.FromArgb(efct.efct.color[3], efct.efct.color[2], efct.efct.color[1], efct.efct.color[0]);
+            diffuseUD.Value = efct.efct.color[3];
+
+            posXUD.Value = (decimal)efct.efct.unkVec3_0.X;
+            posYUD.Value = (decimal)efct.efct.unkVec3_0.Y;
+            posZUD.Value = (decimal)efct.efct.unkVec3_0.Z;
+
+            rotXUD.Value = (decimal)efct.efct.unkVec3_1.X;
+            rotYUD.Value = (decimal)efct.efct.unkVec3_1.Y;
+            rotZUD.Value = (decimal)efct.efct.unkVec3_1.Z;
+
+            scaleXUD.Value = (decimal)efct.efct.unkVec3_2.X;
+            scaleYUD.Value = (decimal)efct.efct.unkVec3_2.Y;
+            scaleZUD.Value = (decimal)efct.efct.unkVec3_2.Z;
+
+            float30UD.Value = (decimal)efct.efct.float_30;
+            int48UD.Value = efct.efct.int_48;
+            int50UD.Value = efct.efct.int_50;
+            boolInt54UD.Value = efct.efct.boolInt_54;
+            boolInt58UD.Value = efct.efct.boolInt_58;
+            boolInt5CUD.Value = efct.efct.boolInt_5C;
+            float60UD.Value = (decimal)efct.efct.float_60;
+            float64UD.Value = (decimal)efct.efct.float_64;
         }
 
 
@@ -49,6 +73,8 @@ namespace AquaModelTool
         private void diffuseUD_ValueChanged(object sender, EventArgs e)
         {
             efct.efct.color[3] = (byte)diffuseUD.Value;
+
+            diffuseUD.Value = efct.efct.color[3];
         }
 
         private void soundNameBox_TextChanged(object sender, EventArgs e)
@@ -197,9 +223,9 @@ namespace AquaModelTool
 
         private void float64UD_ValueChanged(object sender, EventArgs e)
         {
-            efct.efct.float_60 = (float)float60UD.Value;
+            efct.efct.float_64 = (float)float64UD.Value;
 
-            float60UD.Value = (decimal)efct.efct.float_60;
+            float64UD.Value = (decimal)efct.efct.float_64;
         }
     }
 }
