@@ -99,6 +99,18 @@
     <Compile Include="Forms\EffectEditor.Designer.cs">
       <DependentUpon>EffectEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\EffectSubpanels\AqeAnimEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\EffectSubpanels\AqeAnimEditor.Designer.cs">
+      <DependentUpon>AqeAnimEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EffectSubpanels\PtclEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\EffectSubpanels\PtclEditor.Designer.cs">
+      <DependentUpon>PtclEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EffectSubpanels\EmitEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -145,6 +157,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EffectEditor.resx">
       <DependentUpon>EffectEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EffectSubpanels\AqeAnimEditor.resx">
+      <DependentUpon>AqeAnimEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EffectSubpanels\PtclEditor.resx">
+      <DependentUpon>PtclEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EffectSubpanels\EmitEditor.resx">
       <DependentUpon>EmitEditor.cs</DependentUpon>

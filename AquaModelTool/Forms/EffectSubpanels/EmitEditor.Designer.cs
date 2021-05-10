@@ -136,7 +136,7 @@
             this.fieldF8UD = new System.Windows.Forms.NumericUpDown();
             this.int84Label = new System.Windows.Forms.Label();
             this.int84UD = new System.Windows.Forms.NumericUpDown();
-            this.button1 = new System.Windows.Forms.Button();
+            this.animButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.startFrameUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.posYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.posXUD)).BeginInit();
@@ -1682,21 +1682,21 @@
             this.int84UD.TabIndex = 41;
             this.int84UD.ValueChanged += new System.EventHandler(this.int84UD_ValueChanged);
             // 
-            // button1
+            // animButton
             // 
-            this.button1.Location = new System.Drawing.Point(393, 6);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 51;
-            this.button1.Text = "Animations";
-            this.button1.UseVisualStyleBackColor = true;
+            this.animButton.Location = new System.Drawing.Point(393, 9);
+            this.animButton.Name = "animButton";
+            this.animButton.Size = new System.Drawing.Size(75, 23);
+            this.animButton.TabIndex = 51;
+            this.animButton.Text = "Animations";
+            this.animButton.UseVisualStyleBackColor = true;
             // 
             // EmitEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.animButton);
             this.Controls.Add(this.shortA6UD);
             this.Controls.Add(this.shortA4UD);
             this.Controls.Add(this.shortA6Label);
@@ -1976,6 +1976,6 @@
         private System.Windows.Forms.NumericUpDown fieldF8UD;
         private System.Windows.Forms.Label int84Label;
         private System.Windows.Forms.NumericUpDown int84UD;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button animButton;
     }
 }

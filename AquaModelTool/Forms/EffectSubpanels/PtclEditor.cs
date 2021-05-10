@@ -174,9 +174,7 @@ namespace AquaModelTool
 
         private void float30UD_ValueChanged(object sender, EventArgs e)
         {
-            ptcl.ptcl.float_30 = (float)float30UD.Value;
 
-            float30UD.Value = (decimal)ptcl.ptcl.float_30;
         }
 
         private void int48UD_ValueChanged(object sender, EventArgs e)

@@ -71,7 +71,7 @@
             this.float60UD = new System.Windows.Forms.NumericUpDown();
             this.float64Label = new System.Windows.Forms.Label();
             this.float64UD = new System.Windows.Forms.NumericUpDown();
-            this.button1 = new System.Windows.Forms.Button();
+            this.animButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.startFrameUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.posYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.posXUD)).BeginInit();
@@ -671,14 +671,14 @@
             this.float64UD.TabIndex = 41;
             this.float64UD.ValueChanged += new System.EventHandler(this.float64UD_ValueChanged);
             // 
-            // button1
+            // animButton
             // 
-            this.button1.Location = new System.Drawing.Point(275, 9);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 51;
-            this.button1.Text = "Animations";
-            this.button1.UseVisualStyleBackColor = true;
+            this.animButton.Location = new System.Drawing.Point(275, 9);
+            this.animButton.Name = "animButton";
+            this.animButton.Size = new System.Drawing.Size(75, 23);
+            this.animButton.TabIndex = 51;
+            this.animButton.Text = "Animations";
+            this.animButton.UseVisualStyleBackColor = true;
             // 
             // EfctEditor
             // 
@@ -686,7 +686,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.animButton);
             this.Controls.Add(this.boolInt5CUD);
             this.Controls.Add(this.boolInt5CLabel);
             this.Controls.Add(this.boolInt58UD);
@@ -802,6 +802,6 @@
         private System.Windows.Forms.NumericUpDown float60UD;
         private System.Windows.Forms.Label float64Label;
         private System.Windows.Forms.NumericUpDown float64UD;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button animButton;
     }
 }

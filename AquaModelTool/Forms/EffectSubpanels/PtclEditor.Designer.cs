@@ -52,66 +52,146 @@
             this.rotZLabel = new System.Windows.Forms.Label();
             this.rotZUD = new System.Windows.Forms.NumericUpDown();
             this.boolInt54UD = new System.Windows.Forms.NumericUpDown();
-            this.boolInt54Label = new System.Windows.Forms.Label();
-            this.boolInt58Label = new System.Windows.Forms.Label();
-            this.boolInt58UD = new System.Windows.Forms.NumericUpDown();
-            this.boolInt5CLabel = new System.Windows.Forms.Label();
-            this.boolInt5CUD = new System.Windows.Forms.NumericUpDown();
+            this.intC0Label = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.subDirBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.diffuseBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.opacityBox = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.rotRNGYLabel = new System.Windows.Forms.Label();
+            this.rotationRandomYUD = new System.Windows.Forms.NumericUpDown();
+            this.rotAddYLabel = new System.Windows.Forms.Label();
+            this.rotRNGXLabel = new System.Windows.Forms.Label();
+            this.rotationAddRandomYLabel = new System.Windows.Forms.Label();
+            this.rotationAddYUD = new System.Windows.Forms.NumericUpDown();
+            this.rotationRandomXUD = new System.Windows.Forms.NumericUpDown();
+            this.rotationAddRandomYUD = new System.Windows.Forms.NumericUpDown();
+            this.rotAddXLabel = new System.Windows.Forms.Label();
+            this.rotationAddXUD = new System.Windows.Forms.NumericUpDown();
+            this.rotationAddRandomXLabel = new System.Windows.Forms.Label();
+            this.rotationAddRandomXUD = new System.Windows.Forms.NumericUpDown();
+            this.rotRNGZLabel = new System.Windows.Forms.Label();
+            this.rotAddZLabel = new System.Windows.Forms.Label();
+            this.rotationAddRandomZLabel = new System.Windows.Forms.Label();
+            this.rotationRandomZUD = new System.Windows.Forms.NumericUpDown();
+            this.rotationAddZUD = new System.Windows.Forms.NumericUpDown();
+            this.rotationAddRandomZUD = new System.Windows.Forms.NumericUpDown();
+            this.directionYLabel = new System.Windows.Forms.Label();
+            this.directionYUD = new System.Windows.Forms.NumericUpDown();
+            this.directionRandomYLabel = new System.Windows.Forms.Label();
+            this.directionXLabel = new System.Windows.Forms.Label();
+            this.gravitationalAccelYLabel = new System.Windows.Forms.Label();
+            this.directionRandomYUD = new System.Windows.Forms.NumericUpDown();
+            this.directionXUD = new System.Windows.Forms.NumericUpDown();
+            this.gravitationalAccelYUD = new System.Windows.Forms.NumericUpDown();
+            this.directionRandomXLabel = new System.Windows.Forms.Label();
+            this.directionRandomXUD = new System.Windows.Forms.NumericUpDown();
+            this.gravitationalAccelXLabel = new System.Windows.Forms.Label();
+            this.gravitationalAccelXUD = new System.Windows.Forms.NumericUpDown();
+            this.directionZLabel = new System.Windows.Forms.Label();
+            this.directionRandomZLabel = new System.Windows.Forms.Label();
+            this.gravitationalAccelZLabel = new System.Windows.Forms.Label();
+            this.directionZUD = new System.Windows.Forms.NumericUpDown();
+            this.directionRandomZUD = new System.Windows.Forms.NumericUpDown();
+            this.gravitationalAccelZUD = new System.Windows.Forms.NumericUpDown();
+            this.externalAccelYLabel = new System.Windows.Forms.Label();
+            this.externalAccelRandomYLabel = new System.Windows.Forms.Label();
+            this.externalAccelYUD = new System.Windows.Forms.NumericUpDown();
+            this.externalAccelRandomYUD = new System.Windows.Forms.NumericUpDown();
+            this.externalAccelXLabel = new System.Windows.Forms.Label();
+            this.externalAccelXUD = new System.Windows.Forms.NumericUpDown();
+            this.externalAccelRandomXLabel = new System.Windows.Forms.Label();
+            this.externalAccelRandomXUD = new System.Windows.Forms.NumericUpDown();
+            this.externalAccelZLabel = new System.Windows.Forms.Label();
+            this.externalAccelRandomZLabel = new System.Windows.Forms.Label();
+            this.externalAccelZUD = new System.Windows.Forms.NumericUpDown();
+            this.externalAccelRandomZUD = new System.Windows.Forms.NumericUpDown();
+            this.animButton = new System.Windows.Forms.Button();
+            this.speedUD = new System.Windows.Forms.NumericUpDown();
+            this.speedLabel = new System.Windows.Forms.Label();
+            this.speedRNGLabel = new System.Windows.Forms.Label();
+            this.speedRandomUD = new System.Windows.Forms.NumericUpDown();
+            this.floatB0Label = new System.Windows.Forms.Label();
+            this.floatB0UD = new System.Windows.Forms.NumericUpDown();
+            this.floatB4Label = new System.Windows.Forms.Label();
+            this.floatB4UD = new System.Windows.Forms.NumericUpDown();
+            this.floatB8Label = new System.Windows.Forms.Label();
+            this.floatB8UD = new System.Windows.Forms.NumericUpDown();
+            this.floatBCLabel = new System.Windows.Forms.Label();
+            this.floatBCUD = new System.Windows.Forms.NumericUpDown();
+            this.floatC4Label = new System.Windows.Forms.Label();
+            this.floatC4UD = new System.Windows.Forms.NumericUpDown();
+            this.byteC8Label = new System.Windows.Forms.Label();
+            this.byteC8UD = new System.Windows.Forms.NumericUpDown();
+            this.byteC9Label = new System.Windows.Forms.Label();
+            this.byteC9UD = new System.Windows.Forms.NumericUpDown();
+            this.byteCALabel = new System.Windows.Forms.Label();
+            this.byteCAUD = new System.Windows.Forms.NumericUpDown();
+            this.byteCBLabel = new System.Windows.Forms.Label();
+            this.byteCBUD = new System.Windows.Forms.NumericUpDown();
+            this.floatCCLabel = new System.Windows.Forms.Label();
+            this.floatCCUD = new System.Windows.Forms.NumericUpDown();
+            this.floatD8Label = new System.Windows.Forms.Label();
+            this.floatD8UD = new System.Windows.Forms.NumericUpDown();
+            this.floatDCLabel = new System.Windows.Forms.Label();
+            this.floatDCUD = new System.Windows.Forms.NumericUpDown();
+            this.floatEULabel = new System.Windows.Forms.Label();
+            this.floatE0UD = new System.Windows.Forms.NumericUpDown();
+            this.floatE4Label = new System.Windows.Forms.Label();
+            this.floatE4UD = new System.Windows.Forms.NumericUpDown();
+            this.floatE8Label = new System.Windows.Forms.Label();
+            this.floatE8UD = new System.Windows.Forms.NumericUpDown();
+            this.intF0Label = new System.Windows.Forms.Label();
+            this.intF0UD = new System.Windows.Forms.NumericUpDown();
+            this.intF4Label = new System.Windows.Forms.Label();
+            this.intF4UD = new System.Windows.Forms.NumericUpDown();
+            this.intF8Label = new System.Windows.Forms.Label();
+            this.intF8UD = new System.Windows.Forms.NumericUpDown();
+            this.byteFCLabel = new System.Windows.Forms.Label();
+            this.byteFCUD = new System.Windows.Forms.NumericUpDown();
+            this.byteFDLabel = new System.Windows.Forms.Label();
+            this.byteFDUD = new System.Windows.Forms.NumericUpDown();
+            this.byteFELabel = new System.Windows.Forms.Label();
+            this.byteFEUD = new System.Windows.Forms.NumericUpDown();
+            this.byteFFLabel = new System.Windows.Forms.Label();
+            this.byteFFUD = new System.Windows.Forms.NumericUpDown();
+            this.int100Label = new System.Windows.Forms.Label();
+            this.int100UD = new System.Windows.Forms.NumericUpDown();
+            this.int104Label = new System.Windows.Forms.Label();
+            this.int104UD = new System.Windows.Forms.NumericUpDown();
+            this.int108Label = new System.Windows.Forms.Label();
+            this.int108UD = new System.Windows.Forms.NumericUpDown();
+            this.short10CLabel = new System.Windows.Forms.Label();
+            this.short10CUD = new System.Windows.Forms.NumericUpDown();
+            this.short10Label = new System.Windows.Forms.Label();
+            this.short10EUD = new System.Windows.Forms.NumericUpDown();
+            this.field110Label = new System.Windows.Forms.Label();
+            this.field110UD = new System.Windows.Forms.NumericUpDown();
+            this.field114Label = new System.Windows.Forms.Label();
+            this.field114UD = new System.Windows.Forms.NumericUpDown();
+            this.field118Label = new System.Windows.Forms.Label();
+            this.field118UD = new System.Windows.Forms.NumericUpDown();
+            this.field11CLabel = new System.Windows.Forms.Label();
+            this.field11CUD = new System.Windows.Forms.NumericUpDown();
+            this.field120 = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
-            this.label8 = new System.Windows.Forms.Label();
-            this.numericUpDown5 = new System.Windows.Forms.NumericUpDown();
-            this.label9 = new System.Windows.Forms.Label();
-            this.numericUpDown6 = new System.Windows.Forms.NumericUpDown();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.numericUpDown7 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown8 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown9 = new System.Windows.Forms.NumericUpDown();
-            this.label13 = new System.Windows.Forms.Label();
-            this.numericUpDown10 = new System.Windows.Forms.NumericUpDown();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.numericUpDown11 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown12 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown13 = new System.Windows.Forms.NumericUpDown();
-            this.label17 = new System.Windows.Forms.Label();
-            this.numericUpDown14 = new System.Windows.Forms.NumericUpDown();
-            this.label18 = new System.Windows.Forms.Label();
-            this.numericUpDown15 = new System.Windows.Forms.NumericUpDown();
-            this.label19 = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
-            this.label21 = new System.Windows.Forms.Label();
-            this.numericUpDown16 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown17 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown18 = new System.Windows.Forms.NumericUpDown();
-            this.label22 = new System.Windows.Forms.Label();
-            this.label23 = new System.Windows.Forms.Label();
-            this.numericUpDown19 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown20 = new System.Windows.Forms.NumericUpDown();
-            this.label24 = new System.Windows.Forms.Label();
-            this.numericUpDown21 = new System.Windows.Forms.NumericUpDown();
-            this.label25 = new System.Windows.Forms.Label();
-            this.numericUpDown22 = new System.Windows.Forms.NumericUpDown();
-            this.label26 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
-            this.numericUpDown23 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown24 = new System.Windows.Forms.NumericUpDown();
-            this.button1 = new System.Windows.Forms.Button();
+            this.field124Label = new System.Windows.Forms.Label();
+            this.field124UD = new System.Windows.Forms.NumericUpDown();
+            this.field128Label = new System.Windows.Forms.Label();
+            this.field128UD = new System.Windows.Forms.NumericUpDown();
+            this.field12CLabel = new System.Windows.Forms.Label();
+            this.field12CUD = new System.Windows.Forms.NumericUpDown();
+            this.field130Label = new System.Windows.Forms.Label();
+            this.field130UD = new System.Windows.Forms.NumericUpDown();
+            this.field134Label = new System.Windows.Forms.Label();
+            this.field = new System.Windows.Forms.NumericUpDown();
+            this.field138Label = new System.Windows.Forms.Label();
+            this.field138UD = new System.Windows.Forms.NumericUpDown();
+            this.field13CLabel = new System.Windows.Forms.Label();
+            this.field13CUD = new System.Windows.Forms.NumericUpDown();
+            this.field14CLabel = new System.Windows.Forms.Label();
+            this.field14CUD = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.sizeYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sizeXUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sizeZUD)).BeginInit();
@@ -123,32 +203,72 @@
             ((System.ComponentModel.ISupportInitialize)(this.rotXUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotZUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.boolInt54UD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.boolInt58UD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.boolInt5CUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationRandomYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationRandomXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddRandomYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddRandomXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationRandomZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddRandomZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionRandomYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gravitationalAccelYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionRandomXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gravitationalAccelXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionRandomZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gravitationalAccelZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelRandomYUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelRandomXUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelRandomZUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedRandomUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatB0UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatB4UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatB8UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatBCUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatC4UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteC8UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteC9UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteCAUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteCBUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatCCUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatD8UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatDCUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatE0UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatE4UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatE8UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intF0UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intF4UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intF8UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFCUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFDUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFEUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFFUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int100UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int104UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int108UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.short10CUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.short10EUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field110UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field114UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field118UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field11CUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown7)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown9)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown10)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown11)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown12)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown13)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown14)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown15)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown16)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown17)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown18)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown19)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown20)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown21)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown22)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown23)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown24)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field124UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field128UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field12CUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field130UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field138UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field13CUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field14CUD)).BeginInit();
             this.SuspendLayout();
             // 
             // sizeYUD
@@ -455,7 +575,7 @@
             // 
             // boolInt54UD
             // 
-            this.boolInt54UD.Location = new System.Drawing.Point(267, 280);
+            this.boolInt54UD.Location = new System.Drawing.Point(253, 284);
             this.boolInt54UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -471,68 +591,14 @@
             this.boolInt54UD.TabIndex = 43;
             this.boolInt54UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // boolInt54Label
+            // intC0Label
             // 
-            this.boolInt54Label.AutoSize = true;
-            this.boolInt54Label.Location = new System.Drawing.Point(264, 263);
-            this.boolInt54Label.Name = "boolInt54Label";
-            this.boolInt54Label.Size = new System.Drawing.Size(57, 13);
-            this.boolInt54Label.TabIndex = 42;
-            this.boolInt54Label.Text = "boolInt_54";
-            // 
-            // boolInt58Label
-            // 
-            this.boolInt58Label.AutoSize = true;
-            this.boolInt58Label.Location = new System.Drawing.Point(337, 263);
-            this.boolInt58Label.Name = "boolInt58Label";
-            this.boolInt58Label.Size = new System.Drawing.Size(57, 13);
-            this.boolInt58Label.TabIndex = 42;
-            this.boolInt58Label.Text = "boolInt_58";
-            // 
-            // boolInt58UD
-            // 
-            this.boolInt58UD.Location = new System.Drawing.Point(340, 280);
-            this.boolInt58UD.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.boolInt58UD.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.boolInt58UD.Name = "boolInt58UD";
-            this.boolInt58UD.Size = new System.Drawing.Size(67, 20);
-            this.boolInt58UD.TabIndex = 43;
-            this.boolInt58UD.ValueChanged += new System.EventHandler(this.boolInt58UD_ValueChanged);
-            // 
-            // boolInt5CLabel
-            // 
-            this.boolInt5CLabel.AutoSize = true;
-            this.boolInt5CLabel.Location = new System.Drawing.Point(264, 305);
-            this.boolInt5CLabel.Name = "boolInt5CLabel";
-            this.boolInt5CLabel.Size = new System.Drawing.Size(58, 13);
-            this.boolInt5CLabel.TabIndex = 42;
-            this.boolInt5CLabel.Text = "boolInt_5C";
-            // 
-            // boolInt5CUD
-            // 
-            this.boolInt5CUD.Location = new System.Drawing.Point(267, 322);
-            this.boolInt5CUD.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.boolInt5CUD.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.boolInt5CUD.Name = "boolInt5CUD";
-            this.boolInt5CUD.Size = new System.Drawing.Size(67, 20);
-            this.boolInt5CUD.TabIndex = 43;
-            this.boolInt5CUD.ValueChanged += new System.EventHandler(this.boolInt5CUD_ValueChanged);
+            this.intC0Label.AutoSize = true;
+            this.intC0Label.Location = new System.Drawing.Point(250, 267);
+            this.intC0Label.Name = "intC0Label";
+            this.intC0Label.Size = new System.Drawing.Size(37, 13);
+            this.intC0Label.TabIndex = 42;
+            this.intC0Label.Text = "int_C0";
             // 
             // label1
             // 
@@ -585,19 +651,1590 @@
             this.opacityBox.Size = new System.Drawing.Size(216, 20);
             this.opacityBox.TabIndex = 48;
             // 
-            // label4
+            // rotRNGYLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(81, 127);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(37, 13);
-            this.label4.TabIndex = 24;
-            this.label4.Text = "Size Y";
+            this.rotRNGYLabel.AutoSize = true;
+            this.rotRNGYLabel.Location = new System.Drawing.Point(81, 127);
+            this.rotRNGYLabel.Name = "rotRNGYLabel";
+            this.rotRNGYLabel.Size = new System.Drawing.Size(64, 13);
+            this.rotRNGYLabel.TabIndex = 24;
+            this.rotRNGYLabel.Text = "Rot. RNG Y";
+            // 
+            // rotationRandomYUD
+            // 
+            this.rotationRandomYUD.DecimalPlaces = 6;
+            this.rotationRandomYUD.Location = new System.Drawing.Point(81, 144);
+            this.rotationRandomYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationRandomYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationRandomYUD.Name = "rotationRandomYUD";
+            this.rotationRandomYUD.Size = new System.Drawing.Size(72, 20);
+            this.rotationRandomYUD.TabIndex = 31;
+            this.rotationRandomYUD.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
+            // 
+            // rotAddYLabel
+            // 
+            this.rotAddYLabel.AutoSize = true;
+            this.rotAddYLabel.Location = new System.Drawing.Point(81, 167);
+            this.rotAddYLabel.Name = "rotAddYLabel";
+            this.rotAddYLabel.Size = new System.Drawing.Size(59, 13);
+            this.rotAddYLabel.TabIndex = 24;
+            this.rotAddYLabel.Text = "Rot. Add Y";
+            // 
+            // rotRNGXLabel
+            // 
+            this.rotRNGXLabel.AutoSize = true;
+            this.rotRNGXLabel.Location = new System.Drawing.Point(3, 127);
+            this.rotRNGXLabel.Name = "rotRNGXLabel";
+            this.rotRNGXLabel.Size = new System.Drawing.Size(64, 13);
+            this.rotRNGXLabel.TabIndex = 26;
+            this.rotRNGXLabel.Text = "Rot. RNG X";
+            // 
+            // rotationAddRandomYLabel
+            // 
+            this.rotationAddRandomYLabel.AutoSize = true;
+            this.rotationAddRandomYLabel.Location = new System.Drawing.Point(81, 207);
+            this.rotationAddRandomYLabel.Name = "rotationAddRandomYLabel";
+            this.rotationAddRandomYLabel.Size = new System.Drawing.Size(77, 13);
+            this.rotationAddRandomYLabel.TabIndex = 24;
+            this.rotationAddRandomYLabel.Text = "R. Add RNG Y";
+            // 
+            // rotationAddYUD
+            // 
+            this.rotationAddYUD.DecimalPlaces = 6;
+            this.rotationAddYUD.Location = new System.Drawing.Point(81, 184);
+            this.rotationAddYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationAddYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationAddYUD.Name = "rotationAddYUD";
+            this.rotationAddYUD.Size = new System.Drawing.Size(72, 20);
+            this.rotationAddYUD.TabIndex = 31;
+            this.rotationAddYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            // 
+            // rotationRandomXUD
+            // 
+            this.rotationRandomXUD.DecimalPlaces = 6;
+            this.rotationRandomXUD.Location = new System.Drawing.Point(3, 144);
+            this.rotationRandomXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationRandomXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationRandomXUD.Name = "rotationRandomXUD";
+            this.rotationRandomXUD.Size = new System.Drawing.Size(72, 20);
+            this.rotationRandomXUD.TabIndex = 30;
+            this.rotationRandomXUD.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
+            // 
+            // rotationAddRandomYUD
+            // 
+            this.rotationAddRandomYUD.DecimalPlaces = 6;
+            this.rotationAddRandomYUD.Location = new System.Drawing.Point(81, 224);
+            this.rotationAddRandomYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationAddRandomYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationAddRandomYUD.Name = "rotationAddRandomYUD";
+            this.rotationAddRandomYUD.Size = new System.Drawing.Size(72, 20);
+            this.rotationAddRandomYUD.TabIndex = 31;
+            this.rotationAddRandomYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            // 
+            // rotAddXLabel
+            // 
+            this.rotAddXLabel.AutoSize = true;
+            this.rotAddXLabel.Location = new System.Drawing.Point(3, 167);
+            this.rotAddXLabel.Name = "rotAddXLabel";
+            this.rotAddXLabel.Size = new System.Drawing.Size(59, 13);
+            this.rotAddXLabel.TabIndex = 26;
+            this.rotAddXLabel.Text = "Rot. Add X";
+            // 
+            // rotationAddXUD
+            // 
+            this.rotationAddXUD.DecimalPlaces = 6;
+            this.rotationAddXUD.Location = new System.Drawing.Point(3, 184);
+            this.rotationAddXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationAddXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationAddXUD.Name = "rotationAddXUD";
+            this.rotationAddXUD.Size = new System.Drawing.Size(72, 20);
+            this.rotationAddXUD.TabIndex = 30;
+            this.rotationAddXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            // 
+            // rotationAddRandomXLabel
+            // 
+            this.rotationAddRandomXLabel.AutoSize = true;
+            this.rotationAddRandomXLabel.Location = new System.Drawing.Point(3, 207);
+            this.rotationAddRandomXLabel.Name = "rotationAddRandomXLabel";
+            this.rotationAddRandomXLabel.Size = new System.Drawing.Size(77, 13);
+            this.rotationAddRandomXLabel.TabIndex = 26;
+            this.rotationAddRandomXLabel.Text = "R. Add RNG X";
+            // 
+            // rotationAddRandomXUD
+            // 
+            this.rotationAddRandomXUD.DecimalPlaces = 6;
+            this.rotationAddRandomXUD.Location = new System.Drawing.Point(3, 224);
+            this.rotationAddRandomXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationAddRandomXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationAddRandomXUD.Name = "rotationAddRandomXUD";
+            this.rotationAddRandomXUD.Size = new System.Drawing.Size(72, 20);
+            this.rotationAddRandomXUD.TabIndex = 30;
+            this.rotationAddRandomXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            // 
+            // rotRNGZLabel
+            // 
+            this.rotRNGZLabel.AutoSize = true;
+            this.rotRNGZLabel.Location = new System.Drawing.Point(159, 127);
+            this.rotRNGZLabel.Name = "rotRNGZLabel";
+            this.rotRNGZLabel.Size = new System.Drawing.Size(64, 13);
+            this.rotRNGZLabel.TabIndex = 28;
+            this.rotRNGZLabel.Text = "Rot. RNG Z";
+            // 
+            // rotAddZLabel
+            // 
+            this.rotAddZLabel.AutoSize = true;
+            this.rotAddZLabel.Location = new System.Drawing.Point(159, 167);
+            this.rotAddZLabel.Name = "rotAddZLabel";
+            this.rotAddZLabel.Size = new System.Drawing.Size(59, 13);
+            this.rotAddZLabel.TabIndex = 28;
+            this.rotAddZLabel.Text = "Rot. Add Z";
+            // 
+            // rotationAddRandomZLabel
+            // 
+            this.rotationAddRandomZLabel.AutoSize = true;
+            this.rotationAddRandomZLabel.Location = new System.Drawing.Point(159, 207);
+            this.rotationAddRandomZLabel.Name = "rotationAddRandomZLabel";
+            this.rotationAddRandomZLabel.Size = new System.Drawing.Size(77, 13);
+            this.rotationAddRandomZLabel.TabIndex = 28;
+            this.rotationAddRandomZLabel.Text = "R. Add RNG Z";
+            // 
+            // rotationRandomZUD
+            // 
+            this.rotationRandomZUD.DecimalPlaces = 6;
+            this.rotationRandomZUD.Location = new System.Drawing.Point(159, 144);
+            this.rotationRandomZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationRandomZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationRandomZUD.Name = "rotationRandomZUD";
+            this.rotationRandomZUD.Size = new System.Drawing.Size(66, 20);
+            this.rotationRandomZUD.TabIndex = 32;
+            this.rotationRandomZUD.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
+            // 
+            // rotationAddZUD
+            // 
+            this.rotationAddZUD.DecimalPlaces = 6;
+            this.rotationAddZUD.Location = new System.Drawing.Point(159, 184);
+            this.rotationAddZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationAddZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationAddZUD.Name = "rotationAddZUD";
+            this.rotationAddZUD.Size = new System.Drawing.Size(66, 20);
+            this.rotationAddZUD.TabIndex = 32;
+            this.rotationAddZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            // 
+            // rotationAddRandomZUD
+            // 
+            this.rotationAddRandomZUD.DecimalPlaces = 6;
+            this.rotationAddRandomZUD.Location = new System.Drawing.Point(159, 224);
+            this.rotationAddRandomZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.rotationAddRandomZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.rotationAddRandomZUD.Name = "rotationAddRandomZUD";
+            this.rotationAddRandomZUD.Size = new System.Drawing.Size(66, 20);
+            this.rotationAddRandomZUD.TabIndex = 32;
+            this.rotationAddRandomZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            // 
+            // directionYLabel
+            // 
+            this.directionYLabel.AutoSize = true;
+            this.directionYLabel.Location = new System.Drawing.Point(81, 246);
+            this.directionYLabel.Name = "directionYLabel";
+            this.directionYLabel.Size = new System.Drawing.Size(59, 13);
+            this.directionYLabel.TabIndex = 24;
+            this.directionYLabel.Text = "Direction Y";
+            // 
+            // directionYUD
+            // 
+            this.directionYUD.DecimalPlaces = 6;
+            this.directionYUD.Location = new System.Drawing.Point(81, 263);
+            this.directionYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.directionYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.directionYUD.Name = "directionYUD";
+            this.directionYUD.Size = new System.Drawing.Size(72, 20);
+            this.directionYUD.TabIndex = 31;
+            this.directionYUD.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
+            // 
+            // directionRandomYLabel
+            // 
+            this.directionRandomYLabel.AutoSize = true;
+            this.directionRandomYLabel.Location = new System.Drawing.Point(81, 286);
+            this.directionRandomYLabel.Name = "directionRandomYLabel";
+            this.directionRandomYLabel.Size = new System.Drawing.Size(60, 13);
+            this.directionRandomYLabel.TabIndex = 24;
+            this.directionRandomYLabel.Text = "Dir. RNG Y";
+            // 
+            // directionXLabel
+            // 
+            this.directionXLabel.AutoSize = true;
+            this.directionXLabel.Location = new System.Drawing.Point(3, 246);
+            this.directionXLabel.Name = "directionXLabel";
+            this.directionXLabel.Size = new System.Drawing.Size(59, 13);
+            this.directionXLabel.TabIndex = 26;
+            this.directionXLabel.Text = "Direction X";
+            // 
+            // gravitationalAccelYLabel
+            // 
+            this.gravitationalAccelYLabel.AutoSize = true;
+            this.gravitationalAccelYLabel.Location = new System.Drawing.Point(81, 326);
+            this.gravitationalAccelYLabel.Name = "gravitationalAccelYLabel";
+            this.gravitationalAccelYLabel.Size = new System.Drawing.Size(74, 13);
+            this.gravitationalAccelYLabel.TabIndex = 24;
+            this.gravitationalAccelYLabel.Text = "Gravity Accl Y";
+            // 
+            // directionRandomYUD
+            // 
+            this.directionRandomYUD.DecimalPlaces = 6;
+            this.directionRandomYUD.Location = new System.Drawing.Point(81, 303);
+            this.directionRandomYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.directionRandomYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.directionRandomYUD.Name = "directionRandomYUD";
+            this.directionRandomYUD.Size = new System.Drawing.Size(72, 20);
+            this.directionRandomYUD.TabIndex = 31;
+            this.directionRandomYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            // 
+            // directionXUD
+            // 
+            this.directionXUD.DecimalPlaces = 6;
+            this.directionXUD.Location = new System.Drawing.Point(3, 263);
+            this.directionXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.directionXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.directionXUD.Name = "directionXUD";
+            this.directionXUD.Size = new System.Drawing.Size(72, 20);
+            this.directionXUD.TabIndex = 30;
+            this.directionXUD.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
+            // 
+            // gravitationalAccelYUD
+            // 
+            this.gravitationalAccelYUD.DecimalPlaces = 6;
+            this.gravitationalAccelYUD.Location = new System.Drawing.Point(81, 343);
+            this.gravitationalAccelYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.gravitationalAccelYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.gravitationalAccelYUD.Name = "gravitationalAccelYUD";
+            this.gravitationalAccelYUD.Size = new System.Drawing.Size(72, 20);
+            this.gravitationalAccelYUD.TabIndex = 31;
+            this.gravitationalAccelYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            // 
+            // directionRandomXLabel
+            // 
+            this.directionRandomXLabel.AutoSize = true;
+            this.directionRandomXLabel.Location = new System.Drawing.Point(3, 286);
+            this.directionRandomXLabel.Name = "directionRandomXLabel";
+            this.directionRandomXLabel.Size = new System.Drawing.Size(60, 13);
+            this.directionRandomXLabel.TabIndex = 26;
+            this.directionRandomXLabel.Text = "Dir. RNG X";
+            // 
+            // directionRandomXUD
+            // 
+            this.directionRandomXUD.DecimalPlaces = 6;
+            this.directionRandomXUD.Location = new System.Drawing.Point(3, 303);
+            this.directionRandomXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.directionRandomXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.directionRandomXUD.Name = "directionRandomXUD";
+            this.directionRandomXUD.Size = new System.Drawing.Size(72, 20);
+            this.directionRandomXUD.TabIndex = 30;
+            this.directionRandomXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            // 
+            // gravitationalAccelXLabel
+            // 
+            this.gravitationalAccelXLabel.AutoSize = true;
+            this.gravitationalAccelXLabel.Location = new System.Drawing.Point(3, 326);
+            this.gravitationalAccelXLabel.Name = "gravitationalAccelXLabel";
+            this.gravitationalAccelXLabel.Size = new System.Drawing.Size(74, 13);
+            this.gravitationalAccelXLabel.TabIndex = 26;
+            this.gravitationalAccelXLabel.Text = "Gravity Accl X";
+            // 
+            // gravitationalAccelXUD
+            // 
+            this.gravitationalAccelXUD.DecimalPlaces = 6;
+            this.gravitationalAccelXUD.Location = new System.Drawing.Point(3, 343);
+            this.gravitationalAccelXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.gravitationalAccelXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.gravitationalAccelXUD.Name = "gravitationalAccelXUD";
+            this.gravitationalAccelXUD.Size = new System.Drawing.Size(72, 20);
+            this.gravitationalAccelXUD.TabIndex = 30;
+            this.gravitationalAccelXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            // 
+            // directionZLabel
+            // 
+            this.directionZLabel.AutoSize = true;
+            this.directionZLabel.Location = new System.Drawing.Point(159, 246);
+            this.directionZLabel.Name = "directionZLabel";
+            this.directionZLabel.Size = new System.Drawing.Size(59, 13);
+            this.directionZLabel.TabIndex = 28;
+            this.directionZLabel.Text = "Direction Z";
+            // 
+            // directionRandomZLabel
+            // 
+            this.directionRandomZLabel.AutoSize = true;
+            this.directionRandomZLabel.Location = new System.Drawing.Point(159, 286);
+            this.directionRandomZLabel.Name = "directionRandomZLabel";
+            this.directionRandomZLabel.Size = new System.Drawing.Size(60, 13);
+            this.directionRandomZLabel.TabIndex = 28;
+            this.directionRandomZLabel.Text = "Dir. RNG Z";
+            // 
+            // gravitationalAccelZLabel
+            // 
+            this.gravitationalAccelZLabel.AutoSize = true;
+            this.gravitationalAccelZLabel.Location = new System.Drawing.Point(159, 326);
+            this.gravitationalAccelZLabel.Name = "gravitationalAccelZLabel";
+            this.gravitationalAccelZLabel.Size = new System.Drawing.Size(74, 13);
+            this.gravitationalAccelZLabel.TabIndex = 28;
+            this.gravitationalAccelZLabel.Text = "Gravity Accl Z";
+            // 
+            // directionZUD
+            // 
+            this.directionZUD.DecimalPlaces = 6;
+            this.directionZUD.Location = new System.Drawing.Point(159, 263);
+            this.directionZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.directionZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.directionZUD.Name = "directionZUD";
+            this.directionZUD.Size = new System.Drawing.Size(66, 20);
+            this.directionZUD.TabIndex = 32;
+            this.directionZUD.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
+            // 
+            // directionRandomZUD
+            // 
+            this.directionRandomZUD.DecimalPlaces = 6;
+            this.directionRandomZUD.Location = new System.Drawing.Point(159, 303);
+            this.directionRandomZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.directionRandomZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.directionRandomZUD.Name = "directionRandomZUD";
+            this.directionRandomZUD.Size = new System.Drawing.Size(66, 20);
+            this.directionRandomZUD.TabIndex = 32;
+            this.directionRandomZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            // 
+            // gravitationalAccelZUD
+            // 
+            this.gravitationalAccelZUD.DecimalPlaces = 6;
+            this.gravitationalAccelZUD.Location = new System.Drawing.Point(159, 343);
+            this.gravitationalAccelZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.gravitationalAccelZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.gravitationalAccelZUD.Name = "gravitationalAccelZUD";
+            this.gravitationalAccelZUD.Size = new System.Drawing.Size(66, 20);
+            this.gravitationalAccelZUD.TabIndex = 32;
+            this.gravitationalAccelZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            // 
+            // externalAccelYLabel
+            // 
+            this.externalAccelYLabel.AutoSize = true;
+            this.externalAccelYLabel.Location = new System.Drawing.Point(81, 365);
+            this.externalAccelYLabel.Name = "externalAccelYLabel";
+            this.externalAccelYLabel.Size = new System.Drawing.Size(77, 13);
+            this.externalAccelYLabel.TabIndex = 24;
+            this.externalAccelYLabel.Text = "Extern Accel Y";
+            // 
+            // externalAccelRandomYLabel
+            // 
+            this.externalAccelRandomYLabel.AutoSize = true;
+            this.externalAccelRandomYLabel.Location = new System.Drawing.Point(81, 405);
+            this.externalAccelRandomYLabel.Name = "externalAccelRandomYLabel";
+            this.externalAccelRandomYLabel.Size = new System.Drawing.Size(78, 13);
+            this.externalAccelRandomYLabel.TabIndex = 24;
+            this.externalAccelRandomYLabel.Text = "E. Accl RNG Y";
+            // 
+            // externalAccelYUD
+            // 
+            this.externalAccelYUD.DecimalPlaces = 6;
+            this.externalAccelYUD.Location = new System.Drawing.Point(81, 382);
+            this.externalAccelYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.externalAccelYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.externalAccelYUD.Name = "externalAccelYUD";
+            this.externalAccelYUD.Size = new System.Drawing.Size(72, 20);
+            this.externalAccelYUD.TabIndex = 31;
+            this.externalAccelYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            // 
+            // externalAccelRandomYUD
+            // 
+            this.externalAccelRandomYUD.DecimalPlaces = 6;
+            this.externalAccelRandomYUD.Location = new System.Drawing.Point(81, 422);
+            this.externalAccelRandomYUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.externalAccelRandomYUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.externalAccelRandomYUD.Name = "externalAccelRandomYUD";
+            this.externalAccelRandomYUD.Size = new System.Drawing.Size(72, 20);
+            this.externalAccelRandomYUD.TabIndex = 31;
+            this.externalAccelRandomYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            // 
+            // externalAccelXLabel
+            // 
+            this.externalAccelXLabel.AutoSize = true;
+            this.externalAccelXLabel.Location = new System.Drawing.Point(3, 365);
+            this.externalAccelXLabel.Name = "externalAccelXLabel";
+            this.externalAccelXLabel.Size = new System.Drawing.Size(77, 13);
+            this.externalAccelXLabel.TabIndex = 26;
+            this.externalAccelXLabel.Text = "Extern Accel X";
+            // 
+            // externalAccelXUD
+            // 
+            this.externalAccelXUD.DecimalPlaces = 6;
+            this.externalAccelXUD.Location = new System.Drawing.Point(3, 382);
+            this.externalAccelXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.externalAccelXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.externalAccelXUD.Name = "externalAccelXUD";
+            this.externalAccelXUD.Size = new System.Drawing.Size(72, 20);
+            this.externalAccelXUD.TabIndex = 30;
+            this.externalAccelXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            // 
+            // externalAccelRandomXLabel
+            // 
+            this.externalAccelRandomXLabel.AutoSize = true;
+            this.externalAccelRandomXLabel.Location = new System.Drawing.Point(3, 405);
+            this.externalAccelRandomXLabel.Name = "externalAccelRandomXLabel";
+            this.externalAccelRandomXLabel.Size = new System.Drawing.Size(78, 13);
+            this.externalAccelRandomXLabel.TabIndex = 26;
+            this.externalAccelRandomXLabel.Text = "E. Accl RNG X";
+            // 
+            // externalAccelRandomXUD
+            // 
+            this.externalAccelRandomXUD.DecimalPlaces = 6;
+            this.externalAccelRandomXUD.Location = new System.Drawing.Point(3, 422);
+            this.externalAccelRandomXUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.externalAccelRandomXUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.externalAccelRandomXUD.Name = "externalAccelRandomXUD";
+            this.externalAccelRandomXUD.Size = new System.Drawing.Size(72, 20);
+            this.externalAccelRandomXUD.TabIndex = 30;
+            this.externalAccelRandomXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            // 
+            // externalAccelZLabel
+            // 
+            this.externalAccelZLabel.AutoSize = true;
+            this.externalAccelZLabel.Location = new System.Drawing.Point(159, 365);
+            this.externalAccelZLabel.Name = "externalAccelZLabel";
+            this.externalAccelZLabel.Size = new System.Drawing.Size(77, 13);
+            this.externalAccelZLabel.TabIndex = 28;
+            this.externalAccelZLabel.Text = "Extern Accel Z";
+            // 
+            // externalAccelRandomZLabel
+            // 
+            this.externalAccelRandomZLabel.AutoSize = true;
+            this.externalAccelRandomZLabel.Location = new System.Drawing.Point(159, 405);
+            this.externalAccelRandomZLabel.Name = "externalAccelRandomZLabel";
+            this.externalAccelRandomZLabel.Size = new System.Drawing.Size(78, 13);
+            this.externalAccelRandomZLabel.TabIndex = 28;
+            this.externalAccelRandomZLabel.Text = "E. Accl RNG Z";
+            // 
+            // externalAccelZUD
+            // 
+            this.externalAccelZUD.DecimalPlaces = 6;
+            this.externalAccelZUD.Location = new System.Drawing.Point(159, 382);
+            this.externalAccelZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.externalAccelZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.externalAccelZUD.Name = "externalAccelZUD";
+            this.externalAccelZUD.Size = new System.Drawing.Size(66, 20);
+            this.externalAccelZUD.TabIndex = 32;
+            this.externalAccelZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            // 
+            // externalAccelRandomZUD
+            // 
+            this.externalAccelRandomZUD.DecimalPlaces = 6;
+            this.externalAccelRandomZUD.Location = new System.Drawing.Point(159, 422);
+            this.externalAccelRandomZUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.externalAccelRandomZUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.externalAccelRandomZUD.Name = "externalAccelRandomZUD";
+            this.externalAccelRandomZUD.Size = new System.Drawing.Size(66, 20);
+            this.externalAccelRandomZUD.TabIndex = 32;
+            this.externalAccelRandomZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            // 
+            // animButton
+            // 
+            this.animButton.Location = new System.Drawing.Point(393, 9);
+            this.animButton.Name = "animButton";
+            this.animButton.Size = new System.Drawing.Size(75, 23);
+            this.animButton.TabIndex = 50;
+            this.animButton.Text = "Animations";
+            this.animButton.UseVisualStyleBackColor = true;
+            // 
+            // speedUD
+            // 
+            this.speedUD.DecimalPlaces = 6;
+            this.speedUD.Location = new System.Drawing.Point(368, 58);
+            this.speedUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.speedUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.speedUD.Name = "speedUD";
+            this.speedUD.Size = new System.Drawing.Size(67, 20);
+            this.speedUD.TabIndex = 52;
+            // 
+            // speedLabel
+            // 
+            this.speedLabel.AutoSize = true;
+            this.speedLabel.Location = new System.Drawing.Point(365, 41);
+            this.speedLabel.Name = "speedLabel";
+            this.speedLabel.Size = new System.Drawing.Size(38, 13);
+            this.speedLabel.TabIndex = 51;
+            this.speedLabel.Text = "Speed";
+            // 
+            // speedRNGLabel
+            // 
+            this.speedRNGLabel.AutoSize = true;
+            this.speedRNGLabel.Location = new System.Drawing.Point(438, 41);
+            this.speedRNGLabel.Name = "speedRNGLabel";
+            this.speedRNGLabel.Size = new System.Drawing.Size(65, 13);
+            this.speedRNGLabel.TabIndex = 51;
+            this.speedRNGLabel.Text = "Speed RNG";
+            // 
+            // speedRandomUD
+            // 
+            this.speedRandomUD.DecimalPlaces = 6;
+            this.speedRandomUD.Location = new System.Drawing.Point(441, 58);
+            this.speedRandomUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.speedRandomUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.speedRandomUD.Name = "speedRandomUD";
+            this.speedRandomUD.Size = new System.Drawing.Size(67, 20);
+            this.speedRandomUD.TabIndex = 52;
+            // 
+            // floatB0Label
+            // 
+            this.floatB0Label.AutoSize = true;
+            this.floatB0Label.Location = new System.Drawing.Point(250, 229);
+            this.floatB0Label.Name = "floatB0Label";
+            this.floatB0Label.Size = new System.Drawing.Size(46, 13);
+            this.floatB0Label.TabIndex = 51;
+            this.floatB0Label.Text = "float_B0";
+            // 
+            // floatB0UD
+            // 
+            this.floatB0UD.DecimalPlaces = 6;
+            this.floatB0UD.Location = new System.Drawing.Point(253, 246);
+            this.floatB0UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatB0UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatB0UD.Name = "floatB0UD";
+            this.floatB0UD.Size = new System.Drawing.Size(67, 20);
+            this.floatB0UD.TabIndex = 52;
+            // 
+            // floatB4Label
+            // 
+            this.floatB4Label.AutoSize = true;
+            this.floatB4Label.Location = new System.Drawing.Point(323, 229);
+            this.floatB4Label.Name = "floatB4Label";
+            this.floatB4Label.Size = new System.Drawing.Size(46, 13);
+            this.floatB4Label.TabIndex = 51;
+            this.floatB4Label.Text = "float_B4";
+            // 
+            // floatB4UD
+            // 
+            this.floatB4UD.DecimalPlaces = 6;
+            this.floatB4UD.Location = new System.Drawing.Point(326, 246);
+            this.floatB4UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatB4UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatB4UD.Name = "floatB4UD";
+            this.floatB4UD.Size = new System.Drawing.Size(67, 20);
+            this.floatB4UD.TabIndex = 52;
+            // 
+            // floatB8Label
+            // 
+            this.floatB8Label.AutoSize = true;
+            this.floatB8Label.Location = new System.Drawing.Point(396, 229);
+            this.floatB8Label.Name = "floatB8Label";
+            this.floatB8Label.Size = new System.Drawing.Size(46, 13);
+            this.floatB8Label.TabIndex = 51;
+            this.floatB8Label.Text = "float_B8";
+            // 
+            // floatB8UD
+            // 
+            this.floatB8UD.DecimalPlaces = 6;
+            this.floatB8UD.Location = new System.Drawing.Point(399, 246);
+            this.floatB8UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatB8UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatB8UD.Name = "floatB8UD";
+            this.floatB8UD.Size = new System.Drawing.Size(67, 20);
+            this.floatB8UD.TabIndex = 52;
+            // 
+            // floatBCLabel
+            // 
+            this.floatBCLabel.AutoSize = true;
+            this.floatBCLabel.Location = new System.Drawing.Point(469, 229);
+            this.floatBCLabel.Name = "floatBCLabel";
+            this.floatBCLabel.Size = new System.Drawing.Size(47, 13);
+            this.floatBCLabel.TabIndex = 51;
+            this.floatBCLabel.Text = "float_BC";
+            // 
+            // floatBCUD
+            // 
+            this.floatBCUD.DecimalPlaces = 6;
+            this.floatBCUD.Location = new System.Drawing.Point(472, 246);
+            this.floatBCUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatBCUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatBCUD.Name = "floatBCUD";
+            this.floatBCUD.Size = new System.Drawing.Size(67, 20);
+            this.floatBCUD.TabIndex = 52;
+            // 
+            // floatC4Label
+            // 
+            this.floatC4Label.AutoSize = true;
+            this.floatC4Label.Location = new System.Drawing.Point(323, 267);
+            this.floatC4Label.Name = "floatC4Label";
+            this.floatC4Label.Size = new System.Drawing.Size(46, 13);
+            this.floatC4Label.TabIndex = 51;
+            this.floatC4Label.Text = "float_C4";
+            // 
+            // floatC4UD
+            // 
+            this.floatC4UD.DecimalPlaces = 6;
+            this.floatC4UD.Location = new System.Drawing.Point(326, 284);
+            this.floatC4UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatC4UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatC4UD.Name = "floatC4UD";
+            this.floatC4UD.Size = new System.Drawing.Size(67, 20);
+            this.floatC4UD.TabIndex = 52;
+            // 
+            // byteC8Label
+            // 
+            this.byteC8Label.AutoSize = true;
+            this.byteC8Label.Location = new System.Drawing.Point(396, 267);
+            this.byteC8Label.Name = "byteC8Label";
+            this.byteC8Label.Size = new System.Drawing.Size(46, 13);
+            this.byteC8Label.TabIndex = 42;
+            this.byteC8Label.Text = "byte_C8";
+            // 
+            // byteC8UD
+            // 
+            this.byteC8UD.Location = new System.Drawing.Point(399, 284);
+            this.byteC8UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteC8UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteC8UD.Name = "byteC8UD";
+            this.byteC8UD.Size = new System.Drawing.Size(67, 20);
+            this.byteC8UD.TabIndex = 43;
+            this.byteC8UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteC9Label
+            // 
+            this.byteC9Label.AutoSize = true;
+            this.byteC9Label.Location = new System.Drawing.Point(469, 267);
+            this.byteC9Label.Name = "byteC9Label";
+            this.byteC9Label.Size = new System.Drawing.Size(46, 13);
+            this.byteC9Label.TabIndex = 42;
+            this.byteC9Label.Text = "byte_C9";
+            // 
+            // byteC9UD
+            // 
+            this.byteC9UD.Location = new System.Drawing.Point(472, 284);
+            this.byteC9UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteC9UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteC9UD.Name = "byteC9UD";
+            this.byteC9UD.Size = new System.Drawing.Size(67, 20);
+            this.byteC9UD.TabIndex = 43;
+            this.byteC9UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteCALabel
+            // 
+            this.byteCALabel.AutoSize = true;
+            this.byteCALabel.Location = new System.Drawing.Point(250, 307);
+            this.byteCALabel.Name = "byteCALabel";
+            this.byteCALabel.Size = new System.Drawing.Size(47, 13);
+            this.byteCALabel.TabIndex = 42;
+            this.byteCALabel.Text = "byte_CA";
+            // 
+            // byteCAUD
+            // 
+            this.byteCAUD.Location = new System.Drawing.Point(253, 324);
+            this.byteCAUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteCAUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteCAUD.Name = "byteCAUD";
+            this.byteCAUD.Size = new System.Drawing.Size(67, 20);
+            this.byteCAUD.TabIndex = 43;
+            this.byteCAUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteCBLabel
+            // 
+            this.byteCBLabel.AutoSize = true;
+            this.byteCBLabel.Location = new System.Drawing.Point(323, 307);
+            this.byteCBLabel.Name = "byteCBLabel";
+            this.byteCBLabel.Size = new System.Drawing.Size(47, 13);
+            this.byteCBLabel.TabIndex = 42;
+            this.byteCBLabel.Text = "byte_CB";
+            // 
+            // byteCBUD
+            // 
+            this.byteCBUD.Location = new System.Drawing.Point(326, 324);
+            this.byteCBUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteCBUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteCBUD.Name = "byteCBUD";
+            this.byteCBUD.Size = new System.Drawing.Size(67, 20);
+            this.byteCBUD.TabIndex = 43;
+            this.byteCBUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // floatCCLabel
+            // 
+            this.floatCCLabel.AutoSize = true;
+            this.floatCCLabel.Location = new System.Drawing.Point(395, 307);
+            this.floatCCLabel.Name = "floatCCLabel";
+            this.floatCCLabel.Size = new System.Drawing.Size(47, 13);
+            this.floatCCLabel.TabIndex = 51;
+            this.floatCCLabel.Text = "float_CC";
+            // 
+            // floatCCUD
+            // 
+            this.floatCCUD.DecimalPlaces = 6;
+            this.floatCCUD.Location = new System.Drawing.Point(398, 324);
+            this.floatCCUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatCCUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatCCUD.Name = "floatCCUD";
+            this.floatCCUD.Size = new System.Drawing.Size(67, 20);
+            this.floatCCUD.TabIndex = 52;
+            // 
+            // floatD8Label
+            // 
+            this.floatD8Label.AutoSize = true;
+            this.floatD8Label.Location = new System.Drawing.Point(469, 307);
+            this.floatD8Label.Name = "floatD8Label";
+            this.floatD8Label.Size = new System.Drawing.Size(47, 13);
+            this.floatD8Label.TabIndex = 51;
+            this.floatD8Label.Text = "float_D8";
+            // 
+            // floatD8UD
+            // 
+            this.floatD8UD.DecimalPlaces = 6;
+            this.floatD8UD.Location = new System.Drawing.Point(472, 324);
+            this.floatD8UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatD8UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatD8UD.Name = "floatD8UD";
+            this.floatD8UD.Size = new System.Drawing.Size(67, 20);
+            this.floatD8UD.TabIndex = 52;
+            // 
+            // floatDCLabel
+            // 
+            this.floatDCLabel.AutoSize = true;
+            this.floatDCLabel.Location = new System.Drawing.Point(250, 346);
+            this.floatDCLabel.Name = "floatDCLabel";
+            this.floatDCLabel.Size = new System.Drawing.Size(48, 13);
+            this.floatDCLabel.TabIndex = 51;
+            this.floatDCLabel.Text = "float_DC";
+            // 
+            // floatDCUD
+            // 
+            this.floatDCUD.DecimalPlaces = 6;
+            this.floatDCUD.Location = new System.Drawing.Point(253, 363);
+            this.floatDCUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatDCUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatDCUD.Name = "floatDCUD";
+            this.floatDCUD.Size = new System.Drawing.Size(67, 20);
+            this.floatDCUD.TabIndex = 52;
+            // 
+            // floatEULabel
+            // 
+            this.floatEULabel.AutoSize = true;
+            this.floatEULabel.Location = new System.Drawing.Point(323, 346);
+            this.floatEULabel.Name = "floatEULabel";
+            this.floatEULabel.Size = new System.Drawing.Size(46, 13);
+            this.floatEULabel.TabIndex = 51;
+            this.floatEULabel.Text = "float_E0";
+            // 
+            // floatE0UD
+            // 
+            this.floatE0UD.DecimalPlaces = 6;
+            this.floatE0UD.Location = new System.Drawing.Point(326, 363);
+            this.floatE0UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatE0UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatE0UD.Name = "floatE0UD";
+            this.floatE0UD.Size = new System.Drawing.Size(67, 20);
+            this.floatE0UD.TabIndex = 52;
+            // 
+            // floatE4Label
+            // 
+            this.floatE4Label.AutoSize = true;
+            this.floatE4Label.Location = new System.Drawing.Point(396, 346);
+            this.floatE4Label.Name = "floatE4Label";
+            this.floatE4Label.Size = new System.Drawing.Size(46, 13);
+            this.floatE4Label.TabIndex = 51;
+            this.floatE4Label.Text = "float_E4";
+            // 
+            // floatE4UD
+            // 
+            this.floatE4UD.DecimalPlaces = 6;
+            this.floatE4UD.Location = new System.Drawing.Point(399, 363);
+            this.floatE4UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatE4UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatE4UD.Name = "floatE4UD";
+            this.floatE4UD.Size = new System.Drawing.Size(67, 20);
+            this.floatE4UD.TabIndex = 52;
+            // 
+            // floatE8Label
+            // 
+            this.floatE8Label.AutoSize = true;
+            this.floatE8Label.Location = new System.Drawing.Point(469, 346);
+            this.floatE8Label.Name = "floatE8Label";
+            this.floatE8Label.Size = new System.Drawing.Size(46, 13);
+            this.floatE8Label.TabIndex = 51;
+            this.floatE8Label.Text = "float_E8";
+            // 
+            // floatE8UD
+            // 
+            this.floatE8UD.DecimalPlaces = 6;
+            this.floatE8UD.Location = new System.Drawing.Point(472, 363);
+            this.floatE8UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.floatE8UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.floatE8UD.Name = "floatE8UD";
+            this.floatE8UD.Size = new System.Drawing.Size(67, 20);
+            this.floatE8UD.TabIndex = 52;
+            // 
+            // intF0Label
+            // 
+            this.intF0Label.AutoSize = true;
+            this.intF0Label.Location = new System.Drawing.Point(250, 386);
+            this.intF0Label.Name = "intF0Label";
+            this.intF0Label.Size = new System.Drawing.Size(36, 13);
+            this.intF0Label.TabIndex = 42;
+            this.intF0Label.Text = "int_F0";
+            // 
+            // intF0UD
+            // 
+            this.intF0UD.Location = new System.Drawing.Point(253, 403);
+            this.intF0UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.intF0UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.intF0UD.Name = "intF0UD";
+            this.intF0UD.Size = new System.Drawing.Size(67, 20);
+            this.intF0UD.TabIndex = 43;
+            this.intF0UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // intF4Label
+            // 
+            this.intF4Label.AutoSize = true;
+            this.intF4Label.Location = new System.Drawing.Point(323, 386);
+            this.intF4Label.Name = "intF4Label";
+            this.intF4Label.Size = new System.Drawing.Size(36, 13);
+            this.intF4Label.TabIndex = 42;
+            this.intF4Label.Text = "int_F4";
+            // 
+            // intF4UD
+            // 
+            this.intF4UD.Location = new System.Drawing.Point(326, 403);
+            this.intF4UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.intF4UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.intF4UD.Name = "intF4UD";
+            this.intF4UD.Size = new System.Drawing.Size(67, 20);
+            this.intF4UD.TabIndex = 43;
+            this.intF4UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // intF8Label
+            // 
+            this.intF8Label.AutoSize = true;
+            this.intF8Label.Location = new System.Drawing.Point(396, 386);
+            this.intF8Label.Name = "intF8Label";
+            this.intF8Label.Size = new System.Drawing.Size(36, 13);
+            this.intF8Label.TabIndex = 42;
+            this.intF8Label.Text = "int_F8";
+            // 
+            // intF8UD
+            // 
+            this.intF8UD.Location = new System.Drawing.Point(399, 403);
+            this.intF8UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.intF8UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.intF8UD.Name = "intF8UD";
+            this.intF8UD.Size = new System.Drawing.Size(67, 20);
+            this.intF8UD.TabIndex = 43;
+            this.intF8UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteFCLabel
+            // 
+            this.byteFCLabel.AutoSize = true;
+            this.byteFCLabel.Location = new System.Drawing.Point(469, 386);
+            this.byteFCLabel.Name = "byteFCLabel";
+            this.byteFCLabel.Size = new System.Drawing.Size(46, 13);
+            this.byteFCLabel.TabIndex = 42;
+            this.byteFCLabel.Text = "byte_FC";
+            // 
+            // byteFCUD
+            // 
+            this.byteFCUD.Location = new System.Drawing.Point(472, 403);
+            this.byteFCUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteFCUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteFCUD.Name = "byteFCUD";
+            this.byteFCUD.Size = new System.Drawing.Size(67, 20);
+            this.byteFCUD.TabIndex = 43;
+            this.byteFCUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteFDLabel
+            // 
+            this.byteFDLabel.AutoSize = true;
+            this.byteFDLabel.Location = new System.Drawing.Point(250, 426);
+            this.byteFDLabel.Name = "byteFDLabel";
+            this.byteFDLabel.Size = new System.Drawing.Size(47, 13);
+            this.byteFDLabel.TabIndex = 42;
+            this.byteFDLabel.Text = "byte_FD";
+            // 
+            // byteFDUD
+            // 
+            this.byteFDUD.Location = new System.Drawing.Point(253, 443);
+            this.byteFDUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteFDUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteFDUD.Name = "byteFDUD";
+            this.byteFDUD.Size = new System.Drawing.Size(67, 20);
+            this.byteFDUD.TabIndex = 43;
+            this.byteFDUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteFELabel
+            // 
+            this.byteFELabel.AutoSize = true;
+            this.byteFELabel.Location = new System.Drawing.Point(323, 426);
+            this.byteFELabel.Name = "byteFELabel";
+            this.byteFELabel.Size = new System.Drawing.Size(46, 13);
+            this.byteFELabel.TabIndex = 42;
+            this.byteFELabel.Text = "byte_FE";
+            // 
+            // byteFEUD
+            // 
+            this.byteFEUD.Location = new System.Drawing.Point(326, 443);
+            this.byteFEUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteFEUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteFEUD.Name = "byteFEUD";
+            this.byteFEUD.Size = new System.Drawing.Size(67, 20);
+            this.byteFEUD.TabIndex = 43;
+            this.byteFEUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // byteFFLabel
+            // 
+            this.byteFFLabel.AutoSize = true;
+            this.byteFFLabel.Location = new System.Drawing.Point(395, 426);
+            this.byteFFLabel.Name = "byteFFLabel";
+            this.byteFFLabel.Size = new System.Drawing.Size(45, 13);
+            this.byteFFLabel.TabIndex = 42;
+            this.byteFFLabel.Text = "byte_FF";
+            // 
+            // byteFFUD
+            // 
+            this.byteFFUD.Location = new System.Drawing.Point(398, 443);
+            this.byteFFUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.byteFFUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.byteFFUD.Name = "byteFFUD";
+            this.byteFFUD.Size = new System.Drawing.Size(67, 20);
+            this.byteFFUD.TabIndex = 43;
+            this.byteFFUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // int100Label
+            // 
+            this.int100Label.AutoSize = true;
+            this.int100Label.Location = new System.Drawing.Point(469, 426);
+            this.int100Label.Name = "int100Label";
+            this.int100Label.Size = new System.Drawing.Size(42, 13);
+            this.int100Label.TabIndex = 42;
+            this.int100Label.Text = "int_100";
+            // 
+            // int100UD
+            // 
+            this.int100UD.Location = new System.Drawing.Point(472, 443);
+            this.int100UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.int100UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.int100UD.Name = "int100UD";
+            this.int100UD.Size = new System.Drawing.Size(67, 20);
+            this.int100UD.TabIndex = 43;
+            this.int100UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // int104Label
+            // 
+            this.int104Label.AutoSize = true;
+            this.int104Label.Location = new System.Drawing.Point(23, 467);
+            this.int104Label.Name = "int104Label";
+            this.int104Label.Size = new System.Drawing.Size(42, 13);
+            this.int104Label.TabIndex = 42;
+            this.int104Label.Text = "int_104";
+            // 
+            // int104UD
+            // 
+            this.int104UD.Location = new System.Drawing.Point(27, 484);
+            this.int104UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.int104UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.int104UD.Name = "int104UD";
+            this.int104UD.Size = new System.Drawing.Size(67, 20);
+            this.int104UD.TabIndex = 43;
+            this.int104UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // int108Label
+            // 
+            this.int108Label.AutoSize = true;
+            this.int108Label.Location = new System.Drawing.Point(100, 467);
+            this.int108Label.Name = "int108Label";
+            this.int108Label.Size = new System.Drawing.Size(42, 13);
+            this.int108Label.TabIndex = 42;
+            this.int108Label.Text = "int_108";
+            // 
+            // int108UD
+            // 
+            this.int108UD.Location = new System.Drawing.Point(104, 484);
+            this.int108UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.int108UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.int108UD.Name = "int108UD";
+            this.int108UD.Size = new System.Drawing.Size(67, 20);
+            this.int108UD.TabIndex = 43;
+            this.int108UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // short10CLabel
+            // 
+            this.short10CLabel.AutoSize = true;
+            this.short10CLabel.Location = new System.Drawing.Point(176, 467);
+            this.short10CLabel.Name = "short10CLabel";
+            this.short10CLabel.Size = new System.Drawing.Size(55, 13);
+            this.short10CLabel.TabIndex = 42;
+            this.short10CLabel.Text = "short_10C";
+            // 
+            // short10CUD
+            // 
+            this.short10CUD.Location = new System.Drawing.Point(180, 484);
+            this.short10CUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.short10CUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.short10CUD.Name = "short10CUD";
+            this.short10CUD.Size = new System.Drawing.Size(67, 20);
+            this.short10CUD.TabIndex = 43;
+            this.short10CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // short10Label
+            // 
+            this.short10Label.AutoSize = true;
+            this.short10Label.Location = new System.Drawing.Point(251, 467);
+            this.short10Label.Name = "short10Label";
+            this.short10Label.Size = new System.Drawing.Size(55, 13);
+            this.short10Label.TabIndex = 42;
+            this.short10Label.Text = "short_10E";
+            // 
+            // short10EUD
+            // 
+            this.short10EUD.Location = new System.Drawing.Point(253, 484);
+            this.short10EUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.short10EUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.short10EUD.Name = "short10EUD";
+            this.short10EUD.Size = new System.Drawing.Size(67, 20);
+            this.short10EUD.TabIndex = 43;
+            this.short10EUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // field110Label
+            // 
+            this.field110Label.AutoSize = true;
+            this.field110Label.Location = new System.Drawing.Point(324, 467);
+            this.field110Label.Name = "field110Label";
+            this.field110Label.Size = new System.Drawing.Size(50, 13);
+            this.field110Label.TabIndex = 42;
+            this.field110Label.Text = "field_110";
+            // 
+            // field110UD
+            // 
+            this.field110UD.Location = new System.Drawing.Point(326, 484);
+            this.field110UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.field110UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.field110UD.Name = "field110UD";
+            this.field110UD.Size = new System.Drawing.Size(67, 20);
+            this.field110UD.TabIndex = 43;
+            this.field110UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // field114Label
+            // 
+            this.field114Label.AutoSize = true;
+            this.field114Label.Location = new System.Drawing.Point(396, 467);
+            this.field114Label.Name = "field114Label";
+            this.field114Label.Size = new System.Drawing.Size(50, 13);
+            this.field114Label.TabIndex = 42;
+            this.field114Label.Text = "field_114";
+            // 
+            // field114UD
+            // 
+            this.field114UD.Location = new System.Drawing.Point(398, 484);
+            this.field114UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.field114UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.field114UD.Name = "field114UD";
+            this.field114UD.Size = new System.Drawing.Size(67, 20);
+            this.field114UD.TabIndex = 43;
+            this.field114UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // field118Label
+            // 
+            this.field118Label.AutoSize = true;
+            this.field118Label.Location = new System.Drawing.Point(470, 467);
+            this.field118Label.Name = "field118Label";
+            this.field118Label.Size = new System.Drawing.Size(50, 13);
+            this.field118Label.TabIndex = 42;
+            this.field118Label.Text = "field_118";
+            // 
+            // field118UD
+            // 
+            this.field118UD.Location = new System.Drawing.Point(472, 484);
+            this.field118UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.field118UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.field118UD.Name = "field118UD";
+            this.field118UD.Size = new System.Drawing.Size(67, 20);
+            this.field118UD.TabIndex = 43;
+            this.field118UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // field11CLabel
+            // 
+            this.field11CLabel.AutoSize = true;
+            this.field11CLabel.Location = new System.Drawing.Point(25, 507);
+            this.field11CLabel.Name = "field11CLabel";
+            this.field11CLabel.Size = new System.Drawing.Size(51, 13);
+            this.field11CLabel.TabIndex = 42;
+            this.field11CLabel.Text = "field_11C";
+            // 
+            // field11CUD
+            // 
+            this.field11CUD.Location = new System.Drawing.Point(27, 524);
+            this.field11CUD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.field11CUD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.field11CUD.Name = "field11CUD";
+            this.field11CUD.Size = new System.Drawing.Size(67, 20);
+            this.field11CUD.TabIndex = 43;
+            this.field11CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            // 
+            // field120
+            // 
+            this.field120.AutoSize = true;
+            this.field120.Location = new System.Drawing.Point(102, 507);
+            this.field120.Name = "field120";
+            this.field120.Size = new System.Drawing.Size(50, 13);
+            this.field120.TabIndex = 42;
+            this.field120.Text = "field_120";
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.DecimalPlaces = 6;
-            this.numericUpDown1.Location = new System.Drawing.Point(81, 144);
+            this.numericUpDown1.Location = new System.Drawing.Point(104, 524);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -609,754 +2246,397 @@
             0,
             -2147483648});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown1.TabIndex = 31;
-            this.numericUpDown1.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
+            this.numericUpDown1.Size = new System.Drawing.Size(67, 20);
+            this.numericUpDown1.TabIndex = 43;
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // label5
+            // field124Label
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(81, 167);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(64, 13);
-            this.label5.TabIndex = 24;
-            this.label5.Text = "Size RNG Y";
+            this.field124Label.AutoSize = true;
+            this.field124Label.Location = new System.Drawing.Point(178, 507);
+            this.field124Label.Name = "field124Label";
+            this.field124Label.Size = new System.Drawing.Size(50, 13);
+            this.field124Label.TabIndex = 42;
+            this.field124Label.Text = "field_124";
             // 
-            // label6
+            // field124UD
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 127);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(37, 13);
-            this.label6.TabIndex = 26;
-            this.label6.Text = "Size X";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(81, 207);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(57, 13);
-            this.label7.TabIndex = 24;
-            this.label7.Text = "Rotation Y";
-            // 
-            // numericUpDown2
-            // 
-            this.numericUpDown2.DecimalPlaces = 6;
-            this.numericUpDown2.Location = new System.Drawing.Point(81, 184);
-            this.numericUpDown2.Maximum = new decimal(new int[] {
+            this.field124UD.Location = new System.Drawing.Point(180, 524);
+            this.field124UD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown2.Minimum = new decimal(new int[] {
+            this.field124UD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown2.TabIndex = 31;
-            this.numericUpDown2.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            this.field124UD.Name = "field124UD";
+            this.field124UD.Size = new System.Drawing.Size(67, 20);
+            this.field124UD.TabIndex = 43;
+            this.field124UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // numericUpDown3
+            // field128Label
             // 
-            this.numericUpDown3.DecimalPlaces = 6;
-            this.numericUpDown3.Location = new System.Drawing.Point(3, 144);
-            this.numericUpDown3.Maximum = new decimal(new int[] {
+            this.field128Label.AutoSize = true;
+            this.field128Label.Location = new System.Drawing.Point(251, 507);
+            this.field128Label.Name = "field128Label";
+            this.field128Label.Size = new System.Drawing.Size(50, 13);
+            this.field128Label.TabIndex = 42;
+            this.field128Label.Text = "field_128";
+            // 
+            // field128UD
+            // 
+            this.field128UD.Location = new System.Drawing.Point(253, 524);
+            this.field128UD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown3.Minimum = new decimal(new int[] {
+            this.field128UD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown3.Name = "numericUpDown3";
-            this.numericUpDown3.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown3.TabIndex = 30;
-            this.numericUpDown3.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
+            this.field128UD.Name = "field128UD";
+            this.field128UD.Size = new System.Drawing.Size(67, 20);
+            this.field128UD.TabIndex = 43;
+            this.field128UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // numericUpDown4
+            // field12CLabel
             // 
-            this.numericUpDown4.DecimalPlaces = 6;
-            this.numericUpDown4.Location = new System.Drawing.Point(81, 224);
-            this.numericUpDown4.Maximum = new decimal(new int[] {
+            this.field12CLabel.AutoSize = true;
+            this.field12CLabel.Location = new System.Drawing.Point(324, 507);
+            this.field12CLabel.Name = "field12CLabel";
+            this.field12CLabel.Size = new System.Drawing.Size(51, 13);
+            this.field12CLabel.TabIndex = 42;
+            this.field12CLabel.Text = "field_12C";
+            // 
+            // field12CUD
+            // 
+            this.field12CUD.Location = new System.Drawing.Point(326, 524);
+            this.field12CUD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown4.Minimum = new decimal(new int[] {
+            this.field12CUD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown4.Name = "numericUpDown4";
-            this.numericUpDown4.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown4.TabIndex = 31;
-            this.numericUpDown4.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            this.field12CUD.Name = "field12CUD";
+            this.field12CUD.Size = new System.Drawing.Size(67, 20);
+            this.field12CUD.TabIndex = 43;
+            this.field12CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // label8
+            // field130Label
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 167);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(64, 13);
-            this.label8.TabIndex = 26;
-            this.label8.Text = "Size RNG X";
+            this.field130Label.AutoSize = true;
+            this.field130Label.Location = new System.Drawing.Point(396, 507);
+            this.field130Label.Name = "field130Label";
+            this.field130Label.Size = new System.Drawing.Size(50, 13);
+            this.field130Label.TabIndex = 42;
+            this.field130Label.Text = "field_130";
             // 
-            // numericUpDown5
+            // field130UD
             // 
-            this.numericUpDown5.DecimalPlaces = 6;
-            this.numericUpDown5.Location = new System.Drawing.Point(3, 184);
-            this.numericUpDown5.Maximum = new decimal(new int[] {
+            this.field130UD.Location = new System.Drawing.Point(398, 524);
+            this.field130UD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown5.Minimum = new decimal(new int[] {
+            this.field130UD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown5.Name = "numericUpDown5";
-            this.numericUpDown5.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown5.TabIndex = 30;
-            this.numericUpDown5.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            this.field130UD.Name = "field130UD";
+            this.field130UD.Size = new System.Drawing.Size(67, 20);
+            this.field130UD.TabIndex = 43;
+            this.field130UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // label9
+            // field134Label
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 207);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(57, 13);
-            this.label9.TabIndex = 26;
-            this.label9.Text = "Rotation X";
+            this.field134Label.AutoSize = true;
+            this.field134Label.Location = new System.Drawing.Point(470, 507);
+            this.field134Label.Name = "field134Label";
+            this.field134Label.Size = new System.Drawing.Size(50, 13);
+            this.field134Label.TabIndex = 42;
+            this.field134Label.Text = "field_134";
             // 
-            // numericUpDown6
+            // field
             // 
-            this.numericUpDown6.DecimalPlaces = 6;
-            this.numericUpDown6.Location = new System.Drawing.Point(3, 224);
-            this.numericUpDown6.Maximum = new decimal(new int[] {
+            this.field.Location = new System.Drawing.Point(472, 524);
+            this.field.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown6.Minimum = new decimal(new int[] {
+            this.field.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown6.Name = "numericUpDown6";
-            this.numericUpDown6.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown6.TabIndex = 30;
-            this.numericUpDown6.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            this.field.Name = "field";
+            this.field.Size = new System.Drawing.Size(67, 20);
+            this.field.TabIndex = 43;
+            this.field.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // label10
+            // field138Label
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(159, 127);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(37, 13);
-            this.label10.TabIndex = 28;
-            this.label10.Text = "Size Z";
+            this.field138Label.AutoSize = true;
+            this.field138Label.Location = new System.Drawing.Point(25, 547);
+            this.field138Label.Name = "field138Label";
+            this.field138Label.Size = new System.Drawing.Size(50, 13);
+            this.field138Label.TabIndex = 42;
+            this.field138Label.Text = "field_138";
             // 
-            // label11
+            // field138UD
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(159, 167);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(64, 13);
-            this.label11.TabIndex = 28;
-            this.label11.Text = "Size RNG Z";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(159, 207);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(57, 13);
-            this.label12.TabIndex = 28;
-            this.label12.Text = "Rotation Z";
-            // 
-            // numericUpDown7
-            // 
-            this.numericUpDown7.DecimalPlaces = 6;
-            this.numericUpDown7.Location = new System.Drawing.Point(159, 144);
-            this.numericUpDown7.Maximum = new decimal(new int[] {
+            this.field138UD.Location = new System.Drawing.Point(27, 564);
+            this.field138UD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown7.Minimum = new decimal(new int[] {
+            this.field138UD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown7.Name = "numericUpDown7";
-            this.numericUpDown7.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown7.TabIndex = 32;
-            this.numericUpDown7.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
+            this.field138UD.Name = "field138UD";
+            this.field138UD.Size = new System.Drawing.Size(67, 20);
+            this.field138UD.TabIndex = 43;
+            this.field138UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // numericUpDown8
+            // field13CLabel
             // 
-            this.numericUpDown8.DecimalPlaces = 6;
-            this.numericUpDown8.Location = new System.Drawing.Point(159, 184);
-            this.numericUpDown8.Maximum = new decimal(new int[] {
+            this.field13CLabel.AutoSize = true;
+            this.field13CLabel.Location = new System.Drawing.Point(100, 547);
+            this.field13CLabel.Name = "field13CLabel";
+            this.field13CLabel.Size = new System.Drawing.Size(51, 13);
+            this.field13CLabel.TabIndex = 42;
+            this.field13CLabel.Text = "field_13C";
+            // 
+            // field13CUD
+            // 
+            this.field13CUD.Location = new System.Drawing.Point(102, 564);
+            this.field13CUD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown8.Minimum = new decimal(new int[] {
+            this.field13CUD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown8.Name = "numericUpDown8";
-            this.numericUpDown8.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown8.TabIndex = 32;
-            this.numericUpDown8.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            this.field13CUD.Name = "field13CUD";
+            this.field13CUD.Size = new System.Drawing.Size(67, 20);
+            this.field13CUD.TabIndex = 43;
+            this.field13CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
-            // numericUpDown9
+            // field14CLabel
             // 
-            this.numericUpDown9.DecimalPlaces = 6;
-            this.numericUpDown9.Location = new System.Drawing.Point(159, 224);
-            this.numericUpDown9.Maximum = new decimal(new int[] {
+            this.field14CLabel.AutoSize = true;
+            this.field14CLabel.Location = new System.Drawing.Point(177, 547);
+            this.field14CLabel.Name = "field14CLabel";
+            this.field14CLabel.Size = new System.Drawing.Size(51, 13);
+            this.field14CLabel.TabIndex = 42;
+            this.field14CLabel.Text = "field_14C";
+            // 
+            // field14CUD
+            // 
+            this.field14CUD.Location = new System.Drawing.Point(179, 564);
+            this.field14CUD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.numericUpDown9.Minimum = new decimal(new int[] {
+            this.field14CUD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.numericUpDown9.Name = "numericUpDown9";
-            this.numericUpDown9.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown9.TabIndex = 32;
-            this.numericUpDown9.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(81, 246);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(37, 13);
-            this.label13.TabIndex = 24;
-            this.label13.Text = "Size Y";
-            // 
-            // numericUpDown10
-            // 
-            this.numericUpDown10.DecimalPlaces = 6;
-            this.numericUpDown10.Location = new System.Drawing.Point(81, 263);
-            this.numericUpDown10.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown10.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown10.Name = "numericUpDown10";
-            this.numericUpDown10.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown10.TabIndex = 31;
-            this.numericUpDown10.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(81, 286);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(64, 13);
-            this.label14.TabIndex = 24;
-            this.label14.Text = "Size RNG Y";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(3, 246);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(37, 13);
-            this.label15.TabIndex = 26;
-            this.label15.Text = "Size X";
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(81, 326);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(57, 13);
-            this.label16.TabIndex = 24;
-            this.label16.Text = "Rotation Y";
-            // 
-            // numericUpDown11
-            // 
-            this.numericUpDown11.DecimalPlaces = 6;
-            this.numericUpDown11.Location = new System.Drawing.Point(81, 303);
-            this.numericUpDown11.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown11.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown11.Name = "numericUpDown11";
-            this.numericUpDown11.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown11.TabIndex = 31;
-            this.numericUpDown11.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
-            // 
-            // numericUpDown12
-            // 
-            this.numericUpDown12.DecimalPlaces = 6;
-            this.numericUpDown12.Location = new System.Drawing.Point(3, 263);
-            this.numericUpDown12.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown12.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown12.Name = "numericUpDown12";
-            this.numericUpDown12.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown12.TabIndex = 30;
-            this.numericUpDown12.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
-            // 
-            // numericUpDown13
-            // 
-            this.numericUpDown13.DecimalPlaces = 6;
-            this.numericUpDown13.Location = new System.Drawing.Point(81, 343);
-            this.numericUpDown13.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown13.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown13.Name = "numericUpDown13";
-            this.numericUpDown13.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown13.TabIndex = 31;
-            this.numericUpDown13.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(3, 286);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(64, 13);
-            this.label17.TabIndex = 26;
-            this.label17.Text = "Size RNG X";
-            // 
-            // numericUpDown14
-            // 
-            this.numericUpDown14.DecimalPlaces = 6;
-            this.numericUpDown14.Location = new System.Drawing.Point(3, 303);
-            this.numericUpDown14.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown14.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown14.Name = "numericUpDown14";
-            this.numericUpDown14.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown14.TabIndex = 30;
-            this.numericUpDown14.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(3, 326);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(57, 13);
-            this.label18.TabIndex = 26;
-            this.label18.Text = "Rotation X";
-            // 
-            // numericUpDown15
-            // 
-            this.numericUpDown15.DecimalPlaces = 6;
-            this.numericUpDown15.Location = new System.Drawing.Point(3, 343);
-            this.numericUpDown15.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown15.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown15.Name = "numericUpDown15";
-            this.numericUpDown15.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown15.TabIndex = 30;
-            this.numericUpDown15.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(159, 246);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(37, 13);
-            this.label19.TabIndex = 28;
-            this.label19.Text = "Size Z";
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(159, 286);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(64, 13);
-            this.label20.TabIndex = 28;
-            this.label20.Text = "Size RNG Z";
-            // 
-            // label21
-            // 
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(159, 326);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(57, 13);
-            this.label21.TabIndex = 28;
-            this.label21.Text = "Rotation Z";
-            // 
-            // numericUpDown16
-            // 
-            this.numericUpDown16.DecimalPlaces = 6;
-            this.numericUpDown16.Location = new System.Drawing.Point(159, 263);
-            this.numericUpDown16.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown16.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown16.Name = "numericUpDown16";
-            this.numericUpDown16.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown16.TabIndex = 32;
-            this.numericUpDown16.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
-            // 
-            // numericUpDown17
-            // 
-            this.numericUpDown17.DecimalPlaces = 6;
-            this.numericUpDown17.Location = new System.Drawing.Point(159, 303);
-            this.numericUpDown17.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown17.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown17.Name = "numericUpDown17";
-            this.numericUpDown17.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown17.TabIndex = 32;
-            this.numericUpDown17.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
-            // 
-            // numericUpDown18
-            // 
-            this.numericUpDown18.DecimalPlaces = 6;
-            this.numericUpDown18.Location = new System.Drawing.Point(159, 343);
-            this.numericUpDown18.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown18.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown18.Name = "numericUpDown18";
-            this.numericUpDown18.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown18.TabIndex = 32;
-            this.numericUpDown18.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
-            // 
-            // label22
-            // 
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(81, 365);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(64, 13);
-            this.label22.TabIndex = 24;
-            this.label22.Text = "Size RNG Y";
-            // 
-            // label23
-            // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(81, 405);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(57, 13);
-            this.label23.TabIndex = 24;
-            this.label23.Text = "Rotation Y";
-            // 
-            // numericUpDown19
-            // 
-            this.numericUpDown19.DecimalPlaces = 6;
-            this.numericUpDown19.Location = new System.Drawing.Point(81, 382);
-            this.numericUpDown19.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown19.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown19.Name = "numericUpDown19";
-            this.numericUpDown19.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown19.TabIndex = 31;
-            this.numericUpDown19.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
-            // 
-            // numericUpDown20
-            // 
-            this.numericUpDown20.DecimalPlaces = 6;
-            this.numericUpDown20.Location = new System.Drawing.Point(81, 422);
-            this.numericUpDown20.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown20.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown20.Name = "numericUpDown20";
-            this.numericUpDown20.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown20.TabIndex = 31;
-            this.numericUpDown20.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
-            // 
-            // label24
-            // 
-            this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(3, 365);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(64, 13);
-            this.label24.TabIndex = 26;
-            this.label24.Text = "Size RNG X";
-            // 
-            // numericUpDown21
-            // 
-            this.numericUpDown21.DecimalPlaces = 6;
-            this.numericUpDown21.Location = new System.Drawing.Point(3, 382);
-            this.numericUpDown21.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown21.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown21.Name = "numericUpDown21";
-            this.numericUpDown21.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown21.TabIndex = 30;
-            this.numericUpDown21.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
-            // 
-            // label25
-            // 
-            this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(3, 405);
-            this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(57, 13);
-            this.label25.TabIndex = 26;
-            this.label25.Text = "Rotation X";
-            // 
-            // numericUpDown22
-            // 
-            this.numericUpDown22.DecimalPlaces = 6;
-            this.numericUpDown22.Location = new System.Drawing.Point(3, 422);
-            this.numericUpDown22.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown22.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown22.Name = "numericUpDown22";
-            this.numericUpDown22.Size = new System.Drawing.Size(72, 20);
-            this.numericUpDown22.TabIndex = 30;
-            this.numericUpDown22.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
-            // 
-            // label26
-            // 
-            this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(159, 365);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(64, 13);
-            this.label26.TabIndex = 28;
-            this.label26.Text = "Size RNG Z";
-            // 
-            // label27
-            // 
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(159, 405);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(57, 13);
-            this.label27.TabIndex = 28;
-            this.label27.Text = "Rotation Z";
-            // 
-            // numericUpDown23
-            // 
-            this.numericUpDown23.DecimalPlaces = 6;
-            this.numericUpDown23.Location = new System.Drawing.Point(159, 382);
-            this.numericUpDown23.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown23.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown23.Name = "numericUpDown23";
-            this.numericUpDown23.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown23.TabIndex = 32;
-            this.numericUpDown23.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
-            // 
-            // numericUpDown24
-            // 
-            this.numericUpDown24.DecimalPlaces = 6;
-            this.numericUpDown24.Location = new System.Drawing.Point(159, 422);
-            this.numericUpDown24.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.numericUpDown24.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.numericUpDown24.Name = "numericUpDown24";
-            this.numericUpDown24.Size = new System.Drawing.Size(66, 20);
-            this.numericUpDown24.TabIndex = 32;
-            this.numericUpDown24.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(405, 9);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 50;
-            this.button1.Text = "Animations";
-            this.button1.UseVisualStyleBackColor = true;
+            this.field14CUD.Name = "field14CUD";
+            this.field14CUD.Size = new System.Drawing.Size(67, 20);
+            this.field14CUD.TabIndex = 43;
+            this.field14CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
             // 
             // PtclEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.floatBCUD);
+            this.Controls.Add(this.floatB8UD);
+            this.Controls.Add(this.floatBCLabel);
+            this.Controls.Add(this.floatC4UD);
+            this.Controls.Add(this.floatB4UD);
+            this.Controls.Add(this.floatB8Label);
+            this.Controls.Add(this.floatC4Label);
+            this.Controls.Add(this.speedRandomUD);
+            this.Controls.Add(this.floatB4Label);
+            this.Controls.Add(this.speedRNGLabel);
+            this.Controls.Add(this.floatE8UD);
+            this.Controls.Add(this.floatE4UD);
+            this.Controls.Add(this.floatE8Label);
+            this.Controls.Add(this.floatE0UD);
+            this.Controls.Add(this.floatE4Label);
+            this.Controls.Add(this.floatDCUD);
+            this.Controls.Add(this.floatEULabel);
+            this.Controls.Add(this.floatD8UD);
+            this.Controls.Add(this.floatDCLabel);
+            this.Controls.Add(this.floatCCUD);
+            this.Controls.Add(this.floatD8Label);
+            this.Controls.Add(this.floatB0UD);
+            this.Controls.Add(this.floatCCLabel);
+            this.Controls.Add(this.floatB0Label);
+            this.Controls.Add(this.speedUD);
+            this.Controls.Add(this.speedLabel);
+            this.Controls.Add(this.animButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.opacityBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.diffuseBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.subDirBox);
-            this.Controls.Add(this.boolInt5CUD);
-            this.Controls.Add(this.boolInt5CLabel);
-            this.Controls.Add(this.boolInt58UD);
-            this.Controls.Add(this.boolInt58Label);
+            this.Controls.Add(this.byteCBUD);
+            this.Controls.Add(this.byteCBLabel);
+            this.Controls.Add(this.intF8UD);
+            this.Controls.Add(this.intF8Label);
+            this.Controls.Add(this.intF4UD);
+            this.Controls.Add(this.intF4Label);
+            this.Controls.Add(this.field14CUD);
+            this.Controls.Add(this.field13CUD);
+            this.Controls.Add(this.field138UD);
+            this.Controls.Add(this.field14CLabel);
+            this.Controls.Add(this.field);
+            this.Controls.Add(this.field13CLabel);
+            this.Controls.Add(this.field138Label);
+            this.Controls.Add(this.field130UD);
+            this.Controls.Add(this.field134Label);
+            this.Controls.Add(this.field12CUD);
+            this.Controls.Add(this.field130Label);
+            this.Controls.Add(this.field128UD);
+            this.Controls.Add(this.field12CLabel);
+            this.Controls.Add(this.field124UD);
+            this.Controls.Add(this.field128Label);
+            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.field124Label);
+            this.Controls.Add(this.field11CUD);
+            this.Controls.Add(this.field120);
+            this.Controls.Add(this.field118UD);
+            this.Controls.Add(this.field11CLabel);
+            this.Controls.Add(this.field114UD);
+            this.Controls.Add(this.field118Label);
+            this.Controls.Add(this.field110UD);
+            this.Controls.Add(this.field114Label);
+            this.Controls.Add(this.short10EUD);
+            this.Controls.Add(this.field110Label);
+            this.Controls.Add(this.short10CUD);
+            this.Controls.Add(this.short10Label);
+            this.Controls.Add(this.int108UD);
+            this.Controls.Add(this.short10CLabel);
+            this.Controls.Add(this.int104UD);
+            this.Controls.Add(this.int108Label);
+            this.Controls.Add(this.int104Label);
+            this.Controls.Add(this.int100UD);
+            this.Controls.Add(this.int100Label);
+            this.Controls.Add(this.intF0UD);
+            this.Controls.Add(this.intF0Label);
+            this.Controls.Add(this.byteFFUD);
+            this.Controls.Add(this.byteFFLabel);
+            this.Controls.Add(this.byteFEUD);
+            this.Controls.Add(this.byteFELabel);
+            this.Controls.Add(this.byteFDUD);
+            this.Controls.Add(this.byteFDLabel);
+            this.Controls.Add(this.byteFCUD);
+            this.Controls.Add(this.byteFCLabel);
+            this.Controls.Add(this.byteCAUD);
+            this.Controls.Add(this.byteCALabel);
+            this.Controls.Add(this.byteC9UD);
+            this.Controls.Add(this.byteC9Label);
+            this.Controls.Add(this.byteC8UD);
+            this.Controls.Add(this.byteC8Label);
             this.Controls.Add(this.boolInt54UD);
-            this.Controls.Add(this.boolInt54Label);
+            this.Controls.Add(this.intC0Label);
             this.Controls.Add(this.modelNameLabel);
             this.Controls.Add(this.modelNameBox);
             this.Controls.Add(this.diffuseUD);
             this.Controls.Add(this.diffuseRGBALabel);
             this.Controls.Add(this.diffuseRGBButton);
-            this.Controls.Add(this.numericUpDown24);
-            this.Controls.Add(this.numericUpDown18);
-            this.Controls.Add(this.numericUpDown9);
+            this.Controls.Add(this.externalAccelRandomZUD);
+            this.Controls.Add(this.gravitationalAccelZUD);
+            this.Controls.Add(this.rotationAddRandomZUD);
             this.Controls.Add(this.rotZUD);
-            this.Controls.Add(this.numericUpDown23);
-            this.Controls.Add(this.numericUpDown17);
-            this.Controls.Add(this.numericUpDown8);
+            this.Controls.Add(this.externalAccelZUD);
+            this.Controls.Add(this.directionRandomZUD);
+            this.Controls.Add(this.rotationAddZUD);
             this.Controls.Add(this.sizeRandomZUD);
-            this.Controls.Add(this.numericUpDown16);
-            this.Controls.Add(this.numericUpDown7);
+            this.Controls.Add(this.directionZUD);
+            this.Controls.Add(this.rotationRandomZUD);
             this.Controls.Add(this.sizeZUD);
-            this.Controls.Add(this.label27);
-            this.Controls.Add(this.label21);
-            this.Controls.Add(this.label12);
+            this.Controls.Add(this.externalAccelRandomZLabel);
+            this.Controls.Add(this.gravitationalAccelZLabel);
+            this.Controls.Add(this.rotationAddRandomZLabel);
             this.Controls.Add(this.rotZLabel);
-            this.Controls.Add(this.label26);
-            this.Controls.Add(this.label20);
-            this.Controls.Add(this.label11);
+            this.Controls.Add(this.externalAccelZLabel);
+            this.Controls.Add(this.directionRandomZLabel);
+            this.Controls.Add(this.rotAddZLabel);
             this.Controls.Add(this.sizeRandomZLabel);
-            this.Controls.Add(this.label19);
-            this.Controls.Add(this.label10);
+            this.Controls.Add(this.directionZLabel);
+            this.Controls.Add(this.rotRNGZLabel);
             this.Controls.Add(this.sizeZLabel);
-            this.Controls.Add(this.numericUpDown22);
-            this.Controls.Add(this.label25);
-            this.Controls.Add(this.numericUpDown15);
-            this.Controls.Add(this.label18);
-            this.Controls.Add(this.numericUpDown6);
-            this.Controls.Add(this.numericUpDown21);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.numericUpDown14);
+            this.Controls.Add(this.externalAccelRandomXUD);
+            this.Controls.Add(this.externalAccelRandomXLabel);
+            this.Controls.Add(this.gravitationalAccelXUD);
+            this.Controls.Add(this.gravitationalAccelXLabel);
+            this.Controls.Add(this.rotationAddRandomXUD);
+            this.Controls.Add(this.externalAccelXUD);
+            this.Controls.Add(this.rotationAddRandomXLabel);
+            this.Controls.Add(this.directionRandomXUD);
             this.Controls.Add(this.rotXUD);
-            this.Controls.Add(this.label24);
-            this.Controls.Add(this.numericUpDown5);
-            this.Controls.Add(this.label17);
+            this.Controls.Add(this.externalAccelXLabel);
+            this.Controls.Add(this.rotationAddXUD);
+            this.Controls.Add(this.directionRandomXLabel);
             this.Controls.Add(this.rotXLabel);
-            this.Controls.Add(this.numericUpDown20);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.numericUpDown13);
+            this.Controls.Add(this.externalAccelRandomYUD);
+            this.Controls.Add(this.rotAddXLabel);
+            this.Controls.Add(this.gravitationalAccelYUD);
             this.Controls.Add(this.sizeRandomXUD);
-            this.Controls.Add(this.numericUpDown4);
-            this.Controls.Add(this.numericUpDown12);
+            this.Controls.Add(this.rotationAddRandomYUD);
+            this.Controls.Add(this.directionXUD);
             this.Controls.Add(this.sizeRandomXLabel);
-            this.Controls.Add(this.numericUpDown19);
-            this.Controls.Add(this.numericUpDown3);
-            this.Controls.Add(this.numericUpDown11);
+            this.Controls.Add(this.externalAccelYUD);
+            this.Controls.Add(this.rotationRandomXUD);
+            this.Controls.Add(this.directionRandomYUD);
             this.Controls.Add(this.rotYUD);
-            this.Controls.Add(this.label23);
-            this.Controls.Add(this.numericUpDown2);
-            this.Controls.Add(this.label16);
+            this.Controls.Add(this.externalAccelRandomYLabel);
+            this.Controls.Add(this.rotationAddYUD);
+            this.Controls.Add(this.gravitationalAccelYLabel);
             this.Controls.Add(this.sizeXUD);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.label15);
+            this.Controls.Add(this.rotationAddRandomYLabel);
+            this.Controls.Add(this.directionXLabel);
             this.Controls.Add(this.sizeRandomYUD);
-            this.Controls.Add(this.label22);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label14);
+            this.Controls.Add(this.externalAccelYLabel);
+            this.Controls.Add(this.rotRNGXLabel);
+            this.Controls.Add(this.directionRandomYLabel);
             this.Controls.Add(this.rotYLabel);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.numericUpDown10);
+            this.Controls.Add(this.rotAddYLabel);
+            this.Controls.Add(this.directionYUD);
             this.Controls.Add(this.sizeXLabel);
-            this.Controls.Add(this.numericUpDown1);
-            this.Controls.Add(this.label13);
+            this.Controls.Add(this.rotationRandomYUD);
+            this.Controls.Add(this.directionYLabel);
             this.Controls.Add(this.sizeRandomYLabel);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.rotRNGYLabel);
             this.Controls.Add(this.sizeYUD);
             this.Controls.Add(this.sizeYLabel);
             this.Name = "PtclEditor";
-            this.Size = new System.Drawing.Size(542, 448);
+            this.Size = new System.Drawing.Size(542, 587);
             ((System.ComponentModel.ISupportInitialize)(this.sizeYUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sizeXUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sizeZUD)).EndInit();
@@ -1368,32 +2648,72 @@
             ((System.ComponentModel.ISupportInitialize)(this.rotXUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotZUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.boolInt54UD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.boolInt58UD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.boolInt5CUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationRandomYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationRandomXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddRandomYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddRandomXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationRandomZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.rotationAddRandomZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionRandomYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gravitationalAccelYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionRandomXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gravitationalAccelXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.directionRandomZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gravitationalAccelZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelRandomYUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelRandomXUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.externalAccelRandomZUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.speedRandomUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatB0UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatB4UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatB8UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatBCUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatC4UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteC8UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteC9UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteCAUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteCBUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatCCUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatD8UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatDCUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatE0UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatE4UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.floatE8UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intF0UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intF4UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intF8UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFCUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFDUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFEUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.byteFFUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int100UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int104UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int108UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.short10CUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.short10EUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field110UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field114UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field118UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field11CUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown7)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown8)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown9)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown10)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown11)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown12)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown13)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown14)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown15)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown16)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown17)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown18)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown19)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown20)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown21)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown22)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown23)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown24)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field124UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field128UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field12CUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field130UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field138UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field13CUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field14CUD)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1424,65 +2744,145 @@
         private System.Windows.Forms.Label rotZLabel;
         private System.Windows.Forms.NumericUpDown rotZUD;
         private System.Windows.Forms.NumericUpDown boolInt54UD;
-        private System.Windows.Forms.Label boolInt54Label;
-        private System.Windows.Forms.Label boolInt58Label;
-        private System.Windows.Forms.NumericUpDown boolInt58UD;
-        private System.Windows.Forms.Label boolInt5CLabel;
-        private System.Windows.Forms.NumericUpDown boolInt5CUD;
+        private System.Windows.Forms.Label intC0Label;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox subDirBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox diffuseBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox opacityBox;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label rotRNGYLabel;
+        private System.Windows.Forms.NumericUpDown rotationRandomYUD;
+        private System.Windows.Forms.Label rotAddYLabel;
+        private System.Windows.Forms.Label rotRNGXLabel;
+        private System.Windows.Forms.Label rotationAddRandomYLabel;
+        private System.Windows.Forms.NumericUpDown rotationAddYUD;
+        private System.Windows.Forms.NumericUpDown rotationRandomXUD;
+        private System.Windows.Forms.NumericUpDown rotationAddRandomYUD;
+        private System.Windows.Forms.Label rotAddXLabel;
+        private System.Windows.Forms.NumericUpDown rotationAddXUD;
+        private System.Windows.Forms.Label rotationAddRandomXLabel;
+        private System.Windows.Forms.NumericUpDown rotationAddRandomXUD;
+        private System.Windows.Forms.Label rotRNGZLabel;
+        private System.Windows.Forms.Label rotAddZLabel;
+        private System.Windows.Forms.Label rotationAddRandomZLabel;
+        private System.Windows.Forms.NumericUpDown rotationRandomZUD;
+        private System.Windows.Forms.NumericUpDown rotationAddZUD;
+        private System.Windows.Forms.NumericUpDown rotationAddRandomZUD;
+        private System.Windows.Forms.Label directionYLabel;
+        private System.Windows.Forms.NumericUpDown directionYUD;
+        private System.Windows.Forms.Label directionRandomYLabel;
+        private System.Windows.Forms.Label directionXLabel;
+        private System.Windows.Forms.Label gravitationalAccelYLabel;
+        private System.Windows.Forms.NumericUpDown directionRandomYUD;
+        private System.Windows.Forms.NumericUpDown directionXUD;
+        private System.Windows.Forms.NumericUpDown gravitationalAccelYUD;
+        private System.Windows.Forms.Label directionRandomXLabel;
+        private System.Windows.Forms.NumericUpDown directionRandomXUD;
+        private System.Windows.Forms.Label gravitationalAccelXLabel;
+        private System.Windows.Forms.NumericUpDown gravitationalAccelXUD;
+        private System.Windows.Forms.Label directionZLabel;
+        private System.Windows.Forms.Label directionRandomZLabel;
+        private System.Windows.Forms.Label gravitationalAccelZLabel;
+        private System.Windows.Forms.NumericUpDown directionZUD;
+        private System.Windows.Forms.NumericUpDown directionRandomZUD;
+        private System.Windows.Forms.NumericUpDown gravitationalAccelZUD;
+        private System.Windows.Forms.Label externalAccelYLabel;
+        private System.Windows.Forms.Label externalAccelRandomYLabel;
+        private System.Windows.Forms.NumericUpDown externalAccelYUD;
+        private System.Windows.Forms.NumericUpDown externalAccelRandomYUD;
+        private System.Windows.Forms.Label externalAccelXLabel;
+        private System.Windows.Forms.NumericUpDown externalAccelXUD;
+        private System.Windows.Forms.Label externalAccelRandomXLabel;
+        private System.Windows.Forms.NumericUpDown externalAccelRandomXUD;
+        private System.Windows.Forms.Label externalAccelZLabel;
+        private System.Windows.Forms.Label externalAccelRandomZLabel;
+        private System.Windows.Forms.NumericUpDown externalAccelZUD;
+        private System.Windows.Forms.NumericUpDown externalAccelRandomZUD;
+        private System.Windows.Forms.Button animButton;
+        private System.Windows.Forms.NumericUpDown speedUD;
+        private System.Windows.Forms.Label speedLabel;
+        private System.Windows.Forms.Label speedRNGLabel;
+        private System.Windows.Forms.NumericUpDown speedRandomUD;
+        private System.Windows.Forms.Label floatB0Label;
+        private System.Windows.Forms.NumericUpDown floatB0UD;
+        private System.Windows.Forms.Label floatB4Label;
+        private System.Windows.Forms.NumericUpDown floatB4UD;
+        private System.Windows.Forms.Label floatB8Label;
+        private System.Windows.Forms.NumericUpDown floatB8UD;
+        private System.Windows.Forms.Label floatBCLabel;
+        private System.Windows.Forms.NumericUpDown floatBCUD;
+        private System.Windows.Forms.Label floatC4Label;
+        private System.Windows.Forms.NumericUpDown floatC4UD;
+        private System.Windows.Forms.Label byteC8Label;
+        private System.Windows.Forms.NumericUpDown byteC8UD;
+        private System.Windows.Forms.Label byteC9Label;
+        private System.Windows.Forms.NumericUpDown byteC9UD;
+        private System.Windows.Forms.Label byteCALabel;
+        private System.Windows.Forms.NumericUpDown byteCAUD;
+        private System.Windows.Forms.Label byteCBLabel;
+        private System.Windows.Forms.NumericUpDown byteCBUD;
+        private System.Windows.Forms.Label floatCCLabel;
+        private System.Windows.Forms.NumericUpDown floatCCUD;
+        private System.Windows.Forms.Label floatD8Label;
+        private System.Windows.Forms.NumericUpDown floatD8UD;
+        private System.Windows.Forms.Label floatDCLabel;
+        private System.Windows.Forms.NumericUpDown floatDCUD;
+        private System.Windows.Forms.Label floatEULabel;
+        private System.Windows.Forms.NumericUpDown floatE0UD;
+        private System.Windows.Forms.Label floatE4Label;
+        private System.Windows.Forms.NumericUpDown floatE4UD;
+        private System.Windows.Forms.Label floatE8Label;
+        private System.Windows.Forms.NumericUpDown floatE8UD;
+        private System.Windows.Forms.Label intF0Label;
+        private System.Windows.Forms.NumericUpDown intF0UD;
+        private System.Windows.Forms.Label intF4Label;
+        private System.Windows.Forms.NumericUpDown intF4UD;
+        private System.Windows.Forms.Label intF8Label;
+        private System.Windows.Forms.NumericUpDown intF8UD;
+        private System.Windows.Forms.Label byteFCLabel;
+        private System.Windows.Forms.NumericUpDown byteFCUD;
+        private System.Windows.Forms.Label byteFDLabel;
+        private System.Windows.Forms.NumericUpDown byteFDUD;
+        private System.Windows.Forms.Label byteFELabel;
+        private System.Windows.Forms.NumericUpDown byteFEUD;
+        private System.Windows.Forms.Label byteFFLabel;
+        private System.Windows.Forms.NumericUpDown byteFFUD;
+        private System.Windows.Forms.Label int100Label;
+        private System.Windows.Forms.NumericUpDown int100UD;
+        private System.Windows.Forms.Label int104Label;
+        private System.Windows.Forms.NumericUpDown int104UD;
+        private System.Windows.Forms.Label int108Label;
+        private System.Windows.Forms.NumericUpDown int108UD;
+        private System.Windows.Forms.Label short10CLabel;
+        private System.Windows.Forms.NumericUpDown short10CUD;
+        private System.Windows.Forms.Label short10Label;
+        private System.Windows.Forms.NumericUpDown short10EUD;
+        private System.Windows.Forms.Label field110Label;
+        private System.Windows.Forms.NumericUpDown field110UD;
+        private System.Windows.Forms.Label field114Label;
+        private System.Windows.Forms.NumericUpDown field114UD;
+        private System.Windows.Forms.Label field118Label;
+        private System.Windows.Forms.NumericUpDown field118UD;
+        private System.Windows.Forms.Label field11CLabel;
+        private System.Windows.Forms.NumericUpDown field11CUD;
+        private System.Windows.Forms.Label field120;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
-        private System.Windows.Forms.NumericUpDown numericUpDown3;
-        private System.Windows.Forms.NumericUpDown numericUpDown4;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.NumericUpDown numericUpDown5;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.NumericUpDown numericUpDown6;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.NumericUpDown numericUpDown7;
-        private System.Windows.Forms.NumericUpDown numericUpDown8;
-        private System.Windows.Forms.NumericUpDown numericUpDown9;
-        private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.NumericUpDown numericUpDown10;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.NumericUpDown numericUpDown11;
-        private System.Windows.Forms.NumericUpDown numericUpDown12;
-        private System.Windows.Forms.NumericUpDown numericUpDown13;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.NumericUpDown numericUpDown14;
-        private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.NumericUpDown numericUpDown15;
-        private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.Label label21;
-        private System.Windows.Forms.NumericUpDown numericUpDown16;
-        private System.Windows.Forms.NumericUpDown numericUpDown17;
-        private System.Windows.Forms.NumericUpDown numericUpDown18;
-        private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.Label label23;
-        private System.Windows.Forms.NumericUpDown numericUpDown19;
-        private System.Windows.Forms.NumericUpDown numericUpDown20;
-        private System.Windows.Forms.Label label24;
-        private System.Windows.Forms.NumericUpDown numericUpDown21;
-        private System.Windows.Forms.Label label25;
-        private System.Windows.Forms.NumericUpDown numericUpDown22;
-        private System.Windows.Forms.Label label26;
-        private System.Windows.Forms.Label label27;
-        private System.Windows.Forms.NumericUpDown numericUpDown23;
-        private System.Windows.Forms.NumericUpDown numericUpDown24;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label field124Label;
+        private System.Windows.Forms.NumericUpDown field124UD;
+        private System.Windows.Forms.Label field128Label;
+        private System.Windows.Forms.NumericUpDown field128UD;
+        private System.Windows.Forms.Label field12CLabel;
+        private System.Windows.Forms.NumericUpDown field12CUD;
+        private System.Windows.Forms.Label field130Label;
+        private System.Windows.Forms.NumericUpDown field130UD;
+        private System.Windows.Forms.Label field134Label;
+        private System.Windows.Forms.NumericUpDown field;
+        private System.Windows.Forms.Label field138Label;
+        private System.Windows.Forms.NumericUpDown field138UD;
+        private System.Windows.Forms.Label field13CLabel;
+        private System.Windows.Forms.NumericUpDown field13CUD;
+        private System.Windows.Forms.Label field14CLabel;
+        private System.Windows.Forms.NumericUpDown field14CUD;
     }
 }
