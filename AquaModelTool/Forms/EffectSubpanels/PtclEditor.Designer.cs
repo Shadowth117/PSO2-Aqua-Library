@@ -51,7 +51,7 @@
             this.rotXUD = new System.Windows.Forms.NumericUpDown();
             this.rotZLabel = new System.Windows.Forms.Label();
             this.rotZUD = new System.Windows.Forms.NumericUpDown();
-            this.boolInt54UD = new System.Windows.Forms.NumericUpDown();
+            this.intC0UD = new System.Windows.Forms.NumericUpDown();
             this.intC0Label = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.subDirBox = new System.Windows.Forms.TextBox();
@@ -175,7 +175,7 @@
             this.field11CLabel = new System.Windows.Forms.Label();
             this.field11CUD = new System.Windows.Forms.NumericUpDown();
             this.field120 = new System.Windows.Forms.Label();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.float120UD = new System.Windows.Forms.NumericUpDown();
             this.field124Label = new System.Windows.Forms.Label();
             this.field124UD = new System.Windows.Forms.NumericUpDown();
             this.field128Label = new System.Windows.Forms.Label();
@@ -185,7 +185,7 @@
             this.field130Label = new System.Windows.Forms.Label();
             this.field130UD = new System.Windows.Forms.NumericUpDown();
             this.field134Label = new System.Windows.Forms.Label();
-            this.field = new System.Windows.Forms.NumericUpDown();
+            this.field134UD = new System.Windows.Forms.NumericUpDown();
             this.field138Label = new System.Windows.Forms.Label();
             this.field138UD = new System.Windows.Forms.NumericUpDown();
             this.field13CLabel = new System.Windows.Forms.Label();
@@ -202,7 +202,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.rotYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotXUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotZUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.boolInt54UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intC0UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationRandomYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationAddYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationRandomXUD)).BeginInit();
@@ -260,12 +260,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.field114UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field118UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field11CUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.float120UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field124UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field128UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field12CUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field130UD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.field)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field134UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field138UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field13CUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field14CUD)).BeginInit();
@@ -288,7 +288,7 @@
             this.sizeYUD.Name = "sizeYUD";
             this.sizeYUD.Size = new System.Drawing.Size(72, 20);
             this.sizeYUD.TabIndex = 31;
-            this.sizeYUD.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
+            this.sizeYUD.ValueChanged += new System.EventHandler(this.sizeYUDValue_Changed);
             // 
             // sizeYLabel
             // 
@@ -316,7 +316,7 @@
             this.sizeXUD.Name = "sizeXUD";
             this.sizeXUD.Size = new System.Drawing.Size(72, 20);
             this.sizeXUD.TabIndex = 30;
-            this.sizeXUD.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
+            this.sizeXUD.ValueChanged += new System.EventHandler(this.sizeXUDValue_Changed);
             // 
             // sizeXLabel
             // 
@@ -344,7 +344,7 @@
             this.sizeZUD.Name = "sizeZUD";
             this.sizeZUD.Size = new System.Drawing.Size(66, 20);
             this.sizeZUD.TabIndex = 32;
-            this.sizeZUD.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
+            this.sizeZUD.ValueChanged += new System.EventHandler(this.sizeZUDValue_Changed);
             // 
             // sizeZLabel
             // 
@@ -394,7 +394,7 @@
             this.modelNameBox.Name = "modelNameBox";
             this.modelNameBox.Size = new System.Drawing.Size(216, 20);
             this.modelNameBox.TabIndex = 38;
-            this.modelNameBox.TextChanged += new System.EventHandler(this.soundNameBox_TextChanged);
+            this.modelNameBox.TextChanged += new System.EventHandler(this.modelNameBoxValue_Changed);
             // 
             // modelNameLabel
             // 
@@ -431,7 +431,7 @@
             this.sizeRandomYUD.Name = "sizeRandomYUD";
             this.sizeRandomYUD.Size = new System.Drawing.Size(72, 20);
             this.sizeRandomYUD.TabIndex = 31;
-            this.sizeRandomYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            this.sizeRandomYUD.ValueChanged += new System.EventHandler(this.sizeRandomYUD_ValueChanged);
             // 
             // sizeRandomXLabel
             // 
@@ -459,7 +459,7 @@
             this.sizeRandomXUD.Name = "sizeRandomXUD";
             this.sizeRandomXUD.Size = new System.Drawing.Size(72, 20);
             this.sizeRandomXUD.TabIndex = 30;
-            this.sizeRandomXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            this.sizeRandomXUD.ValueChanged += new System.EventHandler(this.sizeRandomXUD_ValueChanged);
             // 
             // sizeRandomZLabel
             // 
@@ -487,7 +487,7 @@
             this.sizeRandomZUD.Name = "sizeRandomZUD";
             this.sizeRandomZUD.Size = new System.Drawing.Size(66, 20);
             this.sizeRandomZUD.TabIndex = 32;
-            this.sizeRandomZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            this.sizeRandomZUD.ValueChanged += new System.EventHandler(this.sizeRandomZUD_ValueChanged);
             // 
             // rotYLabel
             // 
@@ -515,7 +515,7 @@
             this.rotYUD.Name = "rotYUD";
             this.rotYUD.Size = new System.Drawing.Size(72, 20);
             this.rotYUD.TabIndex = 31;
-            this.rotYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            this.rotYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
             // 
             // rotXLabel
             // 
@@ -543,7 +543,7 @@
             this.rotXUD.Name = "rotXUD";
             this.rotXUD.Size = new System.Drawing.Size(72, 20);
             this.rotXUD.TabIndex = 30;
-            this.rotXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            this.rotXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
             // 
             // rotZLabel
             // 
@@ -571,25 +571,25 @@
             this.rotZUD.Name = "rotZUD";
             this.rotZUD.Size = new System.Drawing.Size(66, 20);
             this.rotZUD.TabIndex = 32;
-            this.rotZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            this.rotZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
             // 
-            // boolInt54UD
+            // intC0UD
             // 
-            this.boolInt54UD.Location = new System.Drawing.Point(253, 284);
-            this.boolInt54UD.Maximum = new decimal(new int[] {
-            10000000,
+            this.intC0UD.Location = new System.Drawing.Point(253, 284);
+            this.intC0UD.Maximum = new decimal(new int[] {
+            2147483647,
             0,
             0,
             0});
-            this.boolInt54UD.Minimum = new decimal(new int[] {
-            10000000,
+            this.intC0UD.Minimum = new decimal(new int[] {
+            2147483647,
             0,
             0,
             -2147483648});
-            this.boolInt54UD.Name = "boolInt54UD";
-            this.boolInt54UD.Size = new System.Drawing.Size(67, 20);
-            this.boolInt54UD.TabIndex = 43;
-            this.boolInt54UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.intC0UD.Name = "intC0UD";
+            this.intC0UD.Size = new System.Drawing.Size(67, 20);
+            this.intC0UD.TabIndex = 43;
+            this.intC0UD.ValueChanged += new System.EventHandler(this.intC0UD_ValueChanged);
             // 
             // intC0Label
             // 
@@ -616,6 +616,7 @@
             this.subDirBox.Name = "subDirBox";
             this.subDirBox.Size = new System.Drawing.Size(216, 20);
             this.subDirBox.TabIndex = 44;
+            this.subDirBox.TextChanged += new System.EventHandler(this.subDirBox_TextChanged);
             // 
             // label2
             // 
@@ -629,10 +630,11 @@
             // diffuseBox
             // 
             this.diffuseBox.Location = new System.Drawing.Point(264, 167);
-            this.diffuseBox.MaxLength = 48;
+            this.diffuseBox.MaxLength = 32;
             this.diffuseBox.Name = "diffuseBox";
             this.diffuseBox.Size = new System.Drawing.Size(216, 20);
             this.diffuseBox.TabIndex = 46;
+            this.diffuseBox.TextChanged += new System.EventHandler(this.diffuseBox_TextChanged);
             // 
             // label3
             // 
@@ -646,10 +648,11 @@
             // opacityBox
             // 
             this.opacityBox.Location = new System.Drawing.Point(264, 206);
-            this.opacityBox.MaxLength = 48;
+            this.opacityBox.MaxLength = 32;
             this.opacityBox.Name = "opacityBox";
             this.opacityBox.Size = new System.Drawing.Size(216, 20);
             this.opacityBox.TabIndex = 48;
+            this.opacityBox.TextChanged += new System.EventHandler(this.opacityBox_TextChanged);
             // 
             // rotRNGYLabel
             // 
@@ -677,7 +680,7 @@
             this.rotationRandomYUD.Name = "rotationRandomYUD";
             this.rotationRandomYUD.Size = new System.Drawing.Size(72, 20);
             this.rotationRandomYUD.TabIndex = 31;
-            this.rotationRandomYUD.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
+            this.rotationRandomYUD.ValueChanged += new System.EventHandler(this.rotationRandomYUD_ValueChanged);
             // 
             // rotAddYLabel
             // 
@@ -723,7 +726,7 @@
             this.rotationAddYUD.Name = "rotationAddYUD";
             this.rotationAddYUD.Size = new System.Drawing.Size(72, 20);
             this.rotationAddYUD.TabIndex = 31;
-            this.rotationAddYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            this.rotationAddYUD.ValueChanged += new System.EventHandler(this.rotationAddYUD_ValueChanged);
             // 
             // rotationRandomXUD
             // 
@@ -742,7 +745,7 @@
             this.rotationRandomXUD.Name = "rotationRandomXUD";
             this.rotationRandomXUD.Size = new System.Drawing.Size(72, 20);
             this.rotationRandomXUD.TabIndex = 30;
-            this.rotationRandomXUD.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
+            this.rotationRandomXUD.ValueChanged += new System.EventHandler(this.rotationRandomXUD_ValueChanged);
             // 
             // rotationAddRandomYUD
             // 
@@ -761,7 +764,7 @@
             this.rotationAddRandomYUD.Name = "rotationAddRandomYUD";
             this.rotationAddRandomYUD.Size = new System.Drawing.Size(72, 20);
             this.rotationAddRandomYUD.TabIndex = 31;
-            this.rotationAddRandomYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            this.rotationAddRandomYUD.ValueChanged += new System.EventHandler(this.rotationAddRandomYUD_ValueChanged);
             // 
             // rotAddXLabel
             // 
@@ -789,7 +792,7 @@
             this.rotationAddXUD.Name = "rotationAddXUD";
             this.rotationAddXUD.Size = new System.Drawing.Size(72, 20);
             this.rotationAddXUD.TabIndex = 30;
-            this.rotationAddXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            this.rotationAddXUD.ValueChanged += new System.EventHandler(this.rotationAddXUD_ValueChanged);
             // 
             // rotationAddRandomXLabel
             // 
@@ -817,7 +820,7 @@
             this.rotationAddRandomXUD.Name = "rotationAddRandomXUD";
             this.rotationAddRandomXUD.Size = new System.Drawing.Size(72, 20);
             this.rotationAddRandomXUD.TabIndex = 30;
-            this.rotationAddRandomXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            this.rotationAddRandomXUD.ValueChanged += new System.EventHandler(this.rotationAddRandomXUD_ValueChanged);
             // 
             // rotRNGZLabel
             // 
@@ -863,7 +866,7 @@
             this.rotationRandomZUD.Name = "rotationRandomZUD";
             this.rotationRandomZUD.Size = new System.Drawing.Size(66, 20);
             this.rotationRandomZUD.TabIndex = 32;
-            this.rotationRandomZUD.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
+            this.rotationRandomZUD.ValueChanged += new System.EventHandler(this.rotationRandomZUD_ValueChanged);
             // 
             // rotationAddZUD
             // 
@@ -882,7 +885,7 @@
             this.rotationAddZUD.Name = "rotationAddZUD";
             this.rotationAddZUD.Size = new System.Drawing.Size(66, 20);
             this.rotationAddZUD.TabIndex = 32;
-            this.rotationAddZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            this.rotationAddZUD.ValueChanged += new System.EventHandler(this.rotationAddZUD_ValueChanged);
             // 
             // rotationAddRandomZUD
             // 
@@ -901,7 +904,7 @@
             this.rotationAddRandomZUD.Name = "rotationAddRandomZUD";
             this.rotationAddRandomZUD.Size = new System.Drawing.Size(66, 20);
             this.rotationAddRandomZUD.TabIndex = 32;
-            this.rotationAddRandomZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            this.rotationAddRandomZUD.ValueChanged += new System.EventHandler(this.rotationAddRandomZUD_ValueChanged);
             // 
             // directionYLabel
             // 
@@ -929,7 +932,7 @@
             this.directionYUD.Name = "directionYUD";
             this.directionYUD.Size = new System.Drawing.Size(72, 20);
             this.directionYUD.TabIndex = 31;
-            this.directionYUD.ValueChanged += new System.EventHandler(this.posYUDValue_Changed);
+            this.directionYUD.ValueChanged += new System.EventHandler(this.directionYUD_ValueChanged);
             // 
             // directionRandomYLabel
             // 
@@ -975,7 +978,7 @@
             this.directionRandomYUD.Name = "directionRandomYUD";
             this.directionRandomYUD.Size = new System.Drawing.Size(72, 20);
             this.directionRandomYUD.TabIndex = 31;
-            this.directionRandomYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            this.directionRandomYUD.ValueChanged += new System.EventHandler(this.directionRandomYUD_ValueChanged);
             // 
             // directionXUD
             // 
@@ -994,7 +997,7 @@
             this.directionXUD.Name = "directionXUD";
             this.directionXUD.Size = new System.Drawing.Size(72, 20);
             this.directionXUD.TabIndex = 30;
-            this.directionXUD.ValueChanged += new System.EventHandler(this.posXUDValue_Changed);
+            this.directionXUD.ValueChanged += new System.EventHandler(this.directionXUD_ValueChanged);
             // 
             // gravitationalAccelYUD
             // 
@@ -1013,7 +1016,7 @@
             this.gravitationalAccelYUD.Name = "gravitationalAccelYUD";
             this.gravitationalAccelYUD.Size = new System.Drawing.Size(72, 20);
             this.gravitationalAccelYUD.TabIndex = 31;
-            this.gravitationalAccelYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            this.gravitationalAccelYUD.ValueChanged += new System.EventHandler(this.gravitationalAccelYUD_ValueChanged);
             // 
             // directionRandomXLabel
             // 
@@ -1041,7 +1044,7 @@
             this.directionRandomXUD.Name = "directionRandomXUD";
             this.directionRandomXUD.Size = new System.Drawing.Size(72, 20);
             this.directionRandomXUD.TabIndex = 30;
-            this.directionRandomXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            this.directionRandomXUD.ValueChanged += new System.EventHandler(this.directionRandomXUD_ValueChanged);
             // 
             // gravitationalAccelXLabel
             // 
@@ -1069,7 +1072,7 @@
             this.gravitationalAccelXUD.Name = "gravitationalAccelXUD";
             this.gravitationalAccelXUD.Size = new System.Drawing.Size(72, 20);
             this.gravitationalAccelXUD.TabIndex = 30;
-            this.gravitationalAccelXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            this.gravitationalAccelXUD.ValueChanged += new System.EventHandler(this.gravitationalAccelXUD_ValueChanged);
             // 
             // directionZLabel
             // 
@@ -1115,7 +1118,7 @@
             this.directionZUD.Name = "directionZUD";
             this.directionZUD.Size = new System.Drawing.Size(66, 20);
             this.directionZUD.TabIndex = 32;
-            this.directionZUD.ValueChanged += new System.EventHandler(this.posZUDValue_Changed);
+            this.directionZUD.ValueChanged += new System.EventHandler(this.directionZUD_ValueChanged);
             // 
             // directionRandomZUD
             // 
@@ -1134,7 +1137,7 @@
             this.directionRandomZUD.Name = "directionRandomZUD";
             this.directionRandomZUD.Size = new System.Drawing.Size(66, 20);
             this.directionRandomZUD.TabIndex = 32;
-            this.directionRandomZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            this.directionRandomZUD.ValueChanged += new System.EventHandler(this.directionRandomZUD_ValueChanged);
             // 
             // gravitationalAccelZUD
             // 
@@ -1153,7 +1156,7 @@
             this.gravitationalAccelZUD.Name = "gravitationalAccelZUD";
             this.gravitationalAccelZUD.Size = new System.Drawing.Size(66, 20);
             this.gravitationalAccelZUD.TabIndex = 32;
-            this.gravitationalAccelZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            this.gravitationalAccelZUD.ValueChanged += new System.EventHandler(this.gravitationalAccelZUD_ValueChanged);
             // 
             // externalAccelYLabel
             // 
@@ -1190,7 +1193,7 @@
             this.externalAccelYUD.Name = "externalAccelYUD";
             this.externalAccelYUD.Size = new System.Drawing.Size(72, 20);
             this.externalAccelYUD.TabIndex = 31;
-            this.externalAccelYUD.ValueChanged += new System.EventHandler(this.rotYUD_ValueChanged);
+            this.externalAccelYUD.ValueChanged += new System.EventHandler(this.externalAccelYUD_ValueChanged);
             // 
             // externalAccelRandomYUD
             // 
@@ -1209,7 +1212,7 @@
             this.externalAccelRandomYUD.Name = "externalAccelRandomYUD";
             this.externalAccelRandomYUD.Size = new System.Drawing.Size(72, 20);
             this.externalAccelRandomYUD.TabIndex = 31;
-            this.externalAccelRandomYUD.ValueChanged += new System.EventHandler(this.scaleYUD_ValueChanged);
+            this.externalAccelRandomYUD.ValueChanged += new System.EventHandler(this.externalAccelRandomYUD_ValueChanged);
             // 
             // externalAccelXLabel
             // 
@@ -1237,7 +1240,7 @@
             this.externalAccelXUD.Name = "externalAccelXUD";
             this.externalAccelXUD.Size = new System.Drawing.Size(72, 20);
             this.externalAccelXUD.TabIndex = 30;
-            this.externalAccelXUD.ValueChanged += new System.EventHandler(this.rotXUD_ValueChanged);
+            this.externalAccelXUD.ValueChanged += new System.EventHandler(this.externalAccelXUD_ValueChanged);
             // 
             // externalAccelRandomXLabel
             // 
@@ -1265,7 +1268,7 @@
             this.externalAccelRandomXUD.Name = "externalAccelRandomXUD";
             this.externalAccelRandomXUD.Size = new System.Drawing.Size(72, 20);
             this.externalAccelRandomXUD.TabIndex = 30;
-            this.externalAccelRandomXUD.ValueChanged += new System.EventHandler(this.scaleXUD_ValueChanged);
+            this.externalAccelRandomXUD.ValueChanged += new System.EventHandler(this.externalAccelRandomXUD_ValueChanged);
             // 
             // externalAccelZLabel
             // 
@@ -1302,7 +1305,7 @@
             this.externalAccelZUD.Name = "externalAccelZUD";
             this.externalAccelZUD.Size = new System.Drawing.Size(66, 20);
             this.externalAccelZUD.TabIndex = 32;
-            this.externalAccelZUD.ValueChanged += new System.EventHandler(this.rotZUD_ValueChanged);
+            this.externalAccelZUD.ValueChanged += new System.EventHandler(this.externalAccelZUD_ValueChanged);
             // 
             // externalAccelRandomZUD
             // 
@@ -1321,7 +1324,7 @@
             this.externalAccelRandomZUD.Name = "externalAccelRandomZUD";
             this.externalAccelRandomZUD.Size = new System.Drawing.Size(66, 20);
             this.externalAccelRandomZUD.TabIndex = 32;
-            this.externalAccelRandomZUD.ValueChanged += new System.EventHandler(this.scaleZUD_ValueChanged);
+            this.externalAccelRandomZUD.ValueChanged += new System.EventHandler(this.externalAccelRandomZUD_ValueChanged);
             // 
             // animButton
             // 
@@ -1349,6 +1352,7 @@
             this.speedUD.Name = "speedUD";
             this.speedUD.Size = new System.Drawing.Size(67, 20);
             this.speedUD.TabIndex = 52;
+            this.speedUD.ValueChanged += new System.EventHandler(this.speedUD_ValueChanged);
             // 
             // speedLabel
             // 
@@ -1385,6 +1389,7 @@
             this.speedRandomUD.Name = "speedRandomUD";
             this.speedRandomUD.Size = new System.Drawing.Size(67, 20);
             this.speedRandomUD.TabIndex = 52;
+            this.speedRandomUD.ValueChanged += new System.EventHandler(this.speedRandomUD_ValueChanged);
             // 
             // floatB0Label
             // 
@@ -1400,18 +1405,19 @@
             this.floatB0UD.DecimalPlaces = 6;
             this.floatB0UD.Location = new System.Drawing.Point(253, 246);
             this.floatB0UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatB0UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatB0UD.Name = "floatB0UD";
             this.floatB0UD.Size = new System.Drawing.Size(67, 20);
             this.floatB0UD.TabIndex = 52;
+            this.floatB0UD.ValueChanged += new System.EventHandler(this.floatB0UD_ValueChanged);
             // 
             // floatB4Label
             // 
@@ -1427,18 +1433,19 @@
             this.floatB4UD.DecimalPlaces = 6;
             this.floatB4UD.Location = new System.Drawing.Point(326, 246);
             this.floatB4UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatB4UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatB4UD.Name = "floatB4UD";
             this.floatB4UD.Size = new System.Drawing.Size(67, 20);
             this.floatB4UD.TabIndex = 52;
+            this.floatB4UD.ValueChanged += new System.EventHandler(this.floatB4UD_ValueChanged);
             // 
             // floatB8Label
             // 
@@ -1454,18 +1461,19 @@
             this.floatB8UD.DecimalPlaces = 6;
             this.floatB8UD.Location = new System.Drawing.Point(399, 246);
             this.floatB8UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatB8UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatB8UD.Name = "floatB8UD";
             this.floatB8UD.Size = new System.Drawing.Size(67, 20);
             this.floatB8UD.TabIndex = 52;
+            this.floatB8UD.ValueChanged += new System.EventHandler(this.floatB8UD_ValueChanged);
             // 
             // floatBCLabel
             // 
@@ -1481,18 +1489,19 @@
             this.floatBCUD.DecimalPlaces = 6;
             this.floatBCUD.Location = new System.Drawing.Point(472, 246);
             this.floatBCUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatBCUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatBCUD.Name = "floatBCUD";
             this.floatBCUD.Size = new System.Drawing.Size(67, 20);
             this.floatBCUD.TabIndex = 52;
+            this.floatBCUD.ValueChanged += new System.EventHandler(this.floatBCUD_ValueChanged);
             // 
             // floatC4Label
             // 
@@ -1508,18 +1517,19 @@
             this.floatC4UD.DecimalPlaces = 6;
             this.floatC4UD.Location = new System.Drawing.Point(326, 284);
             this.floatC4UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatC4UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatC4UD.Name = "floatC4UD";
             this.floatC4UD.Size = new System.Drawing.Size(67, 20);
             this.floatC4UD.TabIndex = 52;
+            this.floatC4UD.ValueChanged += new System.EventHandler(this.floatC4UD_ValueChanged);
             // 
             // byteC8Label
             // 
@@ -1546,7 +1556,7 @@
             this.byteC8UD.Name = "byteC8UD";
             this.byteC8UD.Size = new System.Drawing.Size(67, 20);
             this.byteC8UD.TabIndex = 43;
-            this.byteC8UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteC8UD.ValueChanged += new System.EventHandler(this.byteC8UD_ValueChanged);
             // 
             // byteC9Label
             // 
@@ -1573,7 +1583,7 @@
             this.byteC9UD.Name = "byteC9UD";
             this.byteC9UD.Size = new System.Drawing.Size(67, 20);
             this.byteC9UD.TabIndex = 43;
-            this.byteC9UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteC9UD.ValueChanged += new System.EventHandler(this.byteC9UD_ValueChanged);
             // 
             // byteCALabel
             // 
@@ -1600,7 +1610,7 @@
             this.byteCAUD.Name = "byteCAUD";
             this.byteCAUD.Size = new System.Drawing.Size(67, 20);
             this.byteCAUD.TabIndex = 43;
-            this.byteCAUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteCAUD.ValueChanged += new System.EventHandler(this.byteCAUD_ValueChanged);
             // 
             // byteCBLabel
             // 
@@ -1627,7 +1637,7 @@
             this.byteCBUD.Name = "byteCBUD";
             this.byteCBUD.Size = new System.Drawing.Size(67, 20);
             this.byteCBUD.TabIndex = 43;
-            this.byteCBUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteCBUD.ValueChanged += new System.EventHandler(this.byteCBUD_ValueChanged);
             // 
             // floatCCLabel
             // 
@@ -1643,18 +1653,19 @@
             this.floatCCUD.DecimalPlaces = 6;
             this.floatCCUD.Location = new System.Drawing.Point(398, 324);
             this.floatCCUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatCCUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatCCUD.Name = "floatCCUD";
             this.floatCCUD.Size = new System.Drawing.Size(67, 20);
             this.floatCCUD.TabIndex = 52;
+            this.floatCCUD.ValueChanged += new System.EventHandler(this.floatCCUD_ValueChanged);
             // 
             // floatD8Label
             // 
@@ -1670,18 +1681,19 @@
             this.floatD8UD.DecimalPlaces = 6;
             this.floatD8UD.Location = new System.Drawing.Point(472, 324);
             this.floatD8UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatD8UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.floatD8UD.Name = "floatD8UD";
             this.floatD8UD.Size = new System.Drawing.Size(67, 20);
             this.floatD8UD.TabIndex = 52;
+            this.floatD8UD.ValueChanged += new System.EventHandler(this.floatD8UD_ValueChanged);
             // 
             // floatDCLabel
             // 
@@ -1697,12 +1709,12 @@
             this.floatDCUD.DecimalPlaces = 6;
             this.floatDCUD.Location = new System.Drawing.Point(253, 363);
             this.floatDCUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatDCUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
@@ -1724,12 +1736,12 @@
             this.floatE0UD.DecimalPlaces = 6;
             this.floatE0UD.Location = new System.Drawing.Point(326, 363);
             this.floatE0UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatE0UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
@@ -1751,12 +1763,12 @@
             this.floatE4UD.DecimalPlaces = 6;
             this.floatE4UD.Location = new System.Drawing.Point(399, 363);
             this.floatE4UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatE4UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
@@ -1778,12 +1790,12 @@
             this.floatE8UD.DecimalPlaces = 6;
             this.floatE8UD.Location = new System.Drawing.Point(472, 363);
             this.floatE8UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.floatE8UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
@@ -1804,19 +1816,19 @@
             // 
             this.intF0UD.Location = new System.Drawing.Point(253, 403);
             this.intF0UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.intF0UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.intF0UD.Name = "intF0UD";
             this.intF0UD.Size = new System.Drawing.Size(67, 20);
             this.intF0UD.TabIndex = 43;
-            this.intF0UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.intF0UD.ValueChanged += new System.EventHandler(this.intF0UD_ValueChanged);
             // 
             // intF4Label
             // 
@@ -1831,19 +1843,19 @@
             // 
             this.intF4UD.Location = new System.Drawing.Point(326, 403);
             this.intF4UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.intF4UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.intF4UD.Name = "intF4UD";
             this.intF4UD.Size = new System.Drawing.Size(67, 20);
             this.intF4UD.TabIndex = 43;
-            this.intF4UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.intF4UD.ValueChanged += new System.EventHandler(this.intF4UD_ValueChanged);
             // 
             // intF8Label
             // 
@@ -1858,19 +1870,19 @@
             // 
             this.intF8UD.Location = new System.Drawing.Point(399, 403);
             this.intF8UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.intF8UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.intF8UD.Name = "intF8UD";
             this.intF8UD.Size = new System.Drawing.Size(67, 20);
             this.intF8UD.TabIndex = 43;
-            this.intF8UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.intF8UD.ValueChanged += new System.EventHandler(this.intF8UD_ValueChanged);
             // 
             // byteFCLabel
             // 
@@ -1897,7 +1909,7 @@
             this.byteFCUD.Name = "byteFCUD";
             this.byteFCUD.Size = new System.Drawing.Size(67, 20);
             this.byteFCUD.TabIndex = 43;
-            this.byteFCUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteFCUD.ValueChanged += new System.EventHandler(this.byteFCUD_ValueChanged);
             // 
             // byteFDLabel
             // 
@@ -1924,7 +1936,7 @@
             this.byteFDUD.Name = "byteFDUD";
             this.byteFDUD.Size = new System.Drawing.Size(67, 20);
             this.byteFDUD.TabIndex = 43;
-            this.byteFDUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteFDUD.ValueChanged += new System.EventHandler(this.byteFDUD_ValueChanged);
             // 
             // byteFELabel
             // 
@@ -1951,7 +1963,7 @@
             this.byteFEUD.Name = "byteFEUD";
             this.byteFEUD.Size = new System.Drawing.Size(67, 20);
             this.byteFEUD.TabIndex = 43;
-            this.byteFEUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteFEUD.ValueChanged += new System.EventHandler(this.byteFEUD_ValueChanged);
             // 
             // byteFFLabel
             // 
@@ -1978,7 +1990,7 @@
             this.byteFFUD.Name = "byteFFUD";
             this.byteFFUD.Size = new System.Drawing.Size(67, 20);
             this.byteFFUD.TabIndex = 43;
-            this.byteFFUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.byteFFUD.ValueChanged += new System.EventHandler(this.byteFFUD_ValueChanged);
             // 
             // int100Label
             // 
@@ -1993,19 +2005,19 @@
             // 
             this.int100UD.Location = new System.Drawing.Point(472, 443);
             this.int100UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.int100UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.int100UD.Name = "int100UD";
             this.int100UD.Size = new System.Drawing.Size(67, 20);
             this.int100UD.TabIndex = 43;
-            this.int100UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.int100UD.ValueChanged += new System.EventHandler(this.int100UD_ValueChanged);
             // 
             // int104Label
             // 
@@ -2020,19 +2032,19 @@
             // 
             this.int104UD.Location = new System.Drawing.Point(27, 484);
             this.int104UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.int104UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.int104UD.Name = "int104UD";
             this.int104UD.Size = new System.Drawing.Size(67, 20);
             this.int104UD.TabIndex = 43;
-            this.int104UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.int104UD.ValueChanged += new System.EventHandler(this.int104UD_ValueChanged);
             // 
             // int108Label
             // 
@@ -2047,19 +2059,19 @@
             // 
             this.int108UD.Location = new System.Drawing.Point(104, 484);
             this.int108UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.int108UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.int108UD.Name = "int108UD";
             this.int108UD.Size = new System.Drawing.Size(67, 20);
             this.int108UD.TabIndex = 43;
-            this.int108UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.int108UD.ValueChanged += new System.EventHandler(this.int108UD_ValueChanged);
             // 
             // short10CLabel
             // 
@@ -2086,7 +2098,7 @@
             this.short10CUD.Name = "short10CUD";
             this.short10CUD.Size = new System.Drawing.Size(67, 20);
             this.short10CUD.TabIndex = 43;
-            this.short10CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.short10CUD.ValueChanged += new System.EventHandler(this.short10CUD_ValueChanged);
             // 
             // short10Label
             // 
@@ -2113,7 +2125,7 @@
             this.short10EUD.Name = "short10EUD";
             this.short10EUD.Size = new System.Drawing.Size(67, 20);
             this.short10EUD.TabIndex = 43;
-            this.short10EUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.short10EUD.ValueChanged += new System.EventHandler(this.short10EUD_ValueChanged);
             // 
             // field110Label
             // 
@@ -2128,19 +2140,19 @@
             // 
             this.field110UD.Location = new System.Drawing.Point(326, 484);
             this.field110UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field110UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field110UD.Name = "field110UD";
             this.field110UD.Size = new System.Drawing.Size(67, 20);
             this.field110UD.TabIndex = 43;
-            this.field110UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field110UD.ValueChanged += new System.EventHandler(this.field110UD_ValueChanged);
             // 
             // field114Label
             // 
@@ -2155,19 +2167,19 @@
             // 
             this.field114UD.Location = new System.Drawing.Point(398, 484);
             this.field114UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field114UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field114UD.Name = "field114UD";
             this.field114UD.Size = new System.Drawing.Size(67, 20);
             this.field114UD.TabIndex = 43;
-            this.field114UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field114UD.ValueChanged += new System.EventHandler(this.field114UD_ValueChanged);
             // 
             // field118Label
             // 
@@ -2182,19 +2194,19 @@
             // 
             this.field118UD.Location = new System.Drawing.Point(472, 484);
             this.field118UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field118UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field118UD.Name = "field118UD";
             this.field118UD.Size = new System.Drawing.Size(67, 20);
             this.field118UD.TabIndex = 43;
-            this.field118UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field118UD.ValueChanged += new System.EventHandler(this.field118UD_ValueChanged);
             // 
             // field11CLabel
             // 
@@ -2209,127 +2221,127 @@
             // 
             this.field11CUD.Location = new System.Drawing.Point(27, 524);
             this.field11CUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field11CUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field11CUD.Name = "field11CUD";
             this.field11CUD.Size = new System.Drawing.Size(67, 20);
             this.field11CUD.TabIndex = 43;
-            this.field11CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field11CUD.ValueChanged += new System.EventHandler(this.field11CUD_ValueChanged);
             // 
             // field120
             // 
             this.field120.AutoSize = true;
             this.field120.Location = new System.Drawing.Point(102, 507);
             this.field120.Name = "field120";
-            this.field120.Size = new System.Drawing.Size(50, 13);
+            this.field120.Size = new System.Drawing.Size(51, 13);
             this.field120.TabIndex = 42;
-            this.field120.Text = "field_120";
+            this.field120.Text = "float_120";
             // 
-            // numericUpDown1
+            // float120UD
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(104, 524);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
-            10000000,
+            this.float120UD.Location = new System.Drawing.Point(104, 524);
+            this.float120UD.Maximum = new decimal(new int[] {
+            2147483647,
             0,
             0,
             0});
-            this.numericUpDown1.Minimum = new decimal(new int[] {
-            10000000,
+            this.float120UD.Minimum = new decimal(new int[] {
+            2147483647,
             0,
             0,
             -2147483648});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(67, 20);
-            this.numericUpDown1.TabIndex = 43;
-            this.numericUpDown1.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.float120UD.Name = "float120UD";
+            this.float120UD.Size = new System.Drawing.Size(67, 20);
+            this.float120UD.TabIndex = 43;
+            this.float120UD.ValueChanged += new System.EventHandler(this.float120UD_ValueChanged);
             // 
             // field124Label
             // 
             this.field124Label.AutoSize = true;
             this.field124Label.Location = new System.Drawing.Point(178, 507);
             this.field124Label.Name = "field124Label";
-            this.field124Label.Size = new System.Drawing.Size(50, 13);
+            this.field124Label.Size = new System.Drawing.Size(51, 13);
             this.field124Label.TabIndex = 42;
-            this.field124Label.Text = "field_124";
+            this.field124Label.Text = "float_124";
             // 
             // field124UD
             // 
             this.field124UD.Location = new System.Drawing.Point(180, 524);
             this.field124UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field124UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field124UD.Name = "field124UD";
             this.field124UD.Size = new System.Drawing.Size(67, 20);
             this.field124UD.TabIndex = 43;
-            this.field124UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field124UD.ValueChanged += new System.EventHandler(this.field124UD_ValueChanged);
             // 
             // field128Label
             // 
             this.field128Label.AutoSize = true;
             this.field128Label.Location = new System.Drawing.Point(251, 507);
             this.field128Label.Name = "field128Label";
-            this.field128Label.Size = new System.Drawing.Size(50, 13);
+            this.field128Label.Size = new System.Drawing.Size(51, 13);
             this.field128Label.TabIndex = 42;
-            this.field128Label.Text = "field_128";
+            this.field128Label.Text = "float_128";
             // 
             // field128UD
             // 
             this.field128UD.Location = new System.Drawing.Point(253, 524);
             this.field128UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field128UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field128UD.Name = "field128UD";
             this.field128UD.Size = new System.Drawing.Size(67, 20);
             this.field128UD.TabIndex = 43;
-            this.field128UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field128UD.ValueChanged += new System.EventHandler(this.field128UD_ValueChanged);
             // 
             // field12CLabel
             // 
             this.field12CLabel.AutoSize = true;
             this.field12CLabel.Location = new System.Drawing.Point(324, 507);
             this.field12CLabel.Name = "field12CLabel";
-            this.field12CLabel.Size = new System.Drawing.Size(51, 13);
+            this.field12CLabel.Size = new System.Drawing.Size(52, 13);
             this.field12CLabel.TabIndex = 42;
-            this.field12CLabel.Text = "field_12C";
+            this.field12CLabel.Text = "float_12C";
             // 
             // field12CUD
             // 
             this.field12CUD.Location = new System.Drawing.Point(326, 524);
             this.field12CUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field12CUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field12CUD.Name = "field12CUD";
             this.field12CUD.Size = new System.Drawing.Size(67, 20);
             this.field12CUD.TabIndex = 43;
-            this.field12CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field12CUD.ValueChanged += new System.EventHandler(this.field12CUD_ValueChanged);
             // 
             // field130Label
             // 
@@ -2344,19 +2356,19 @@
             // 
             this.field130UD.Location = new System.Drawing.Point(398, 524);
             this.field130UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field130UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field130UD.Name = "field130UD";
             this.field130UD.Size = new System.Drawing.Size(67, 20);
             this.field130UD.TabIndex = 43;
-            this.field130UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field130UD.ValueChanged += new System.EventHandler(this.field130UD_ValueChanged);
             // 
             // field134Label
             // 
@@ -2367,23 +2379,23 @@
             this.field134Label.TabIndex = 42;
             this.field134Label.Text = "field_134";
             // 
-            // field
+            // field134UD
             // 
-            this.field.Location = new System.Drawing.Point(472, 524);
-            this.field.Maximum = new decimal(new int[] {
-            10000000,
+            this.field134UD.Location = new System.Drawing.Point(472, 524);
+            this.field134UD.Maximum = new decimal(new int[] {
+            2147483647,
             0,
             0,
             0});
-            this.field.Minimum = new decimal(new int[] {
-            10000000,
+            this.field134UD.Minimum = new decimal(new int[] {
+            2147483647,
             0,
             0,
             -2147483648});
-            this.field.Name = "field";
-            this.field.Size = new System.Drawing.Size(67, 20);
-            this.field.TabIndex = 43;
-            this.field.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field134UD.Name = "field134UD";
+            this.field134UD.Size = new System.Drawing.Size(67, 20);
+            this.field134UD.TabIndex = 43;
+            this.field134UD.ValueChanged += new System.EventHandler(this.field134UD_ValueChanged);
             // 
             // field138Label
             // 
@@ -2398,19 +2410,19 @@
             // 
             this.field138UD.Location = new System.Drawing.Point(27, 564);
             this.field138UD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field138UD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field138UD.Name = "field138UD";
             this.field138UD.Size = new System.Drawing.Size(67, 20);
             this.field138UD.TabIndex = 43;
-            this.field138UD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field138UD.ValueChanged += new System.EventHandler(this.field138UD_ValueChanged);
             // 
             // field13CLabel
             // 
@@ -2425,19 +2437,19 @@
             // 
             this.field13CUD.Location = new System.Drawing.Point(102, 564);
             this.field13CUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field13CUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field13CUD.Name = "field13CUD";
             this.field13CUD.Size = new System.Drawing.Size(67, 20);
             this.field13CUD.TabIndex = 43;
-            this.field13CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field13CUD.ValueChanged += new System.EventHandler(this.field13CUD_ValueChanged);
             // 
             // field14CLabel
             // 
@@ -2452,19 +2464,19 @@
             // 
             this.field14CUD.Location = new System.Drawing.Point(179, 564);
             this.field14CUD.Maximum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             0});
             this.field14CUD.Minimum = new decimal(new int[] {
-            10000000,
+            2147483647,
             0,
             0,
             -2147483648});
             this.field14CUD.Name = "field14CUD";
             this.field14CUD.Size = new System.Drawing.Size(67, 20);
             this.field14CUD.TabIndex = 43;
-            this.field14CUD.ValueChanged += new System.EventHandler(this.boolInt54UD_ValueChanged);
+            this.field14CUD.ValueChanged += new System.EventHandler(this.field14CUD_ValueChanged);
             // 
             // PtclEditor
             // 
@@ -2514,7 +2526,7 @@
             this.Controls.Add(this.field13CUD);
             this.Controls.Add(this.field138UD);
             this.Controls.Add(this.field14CLabel);
-            this.Controls.Add(this.field);
+            this.Controls.Add(this.field134UD);
             this.Controls.Add(this.field13CLabel);
             this.Controls.Add(this.field138Label);
             this.Controls.Add(this.field130UD);
@@ -2525,7 +2537,7 @@
             this.Controls.Add(this.field12CLabel);
             this.Controls.Add(this.field124UD);
             this.Controls.Add(this.field128Label);
-            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.float120UD);
             this.Controls.Add(this.field124Label);
             this.Controls.Add(this.field11CUD);
             this.Controls.Add(this.field120);
@@ -2562,7 +2574,7 @@
             this.Controls.Add(this.byteC9Label);
             this.Controls.Add(this.byteC8UD);
             this.Controls.Add(this.byteC8Label);
-            this.Controls.Add(this.boolInt54UD);
+            this.Controls.Add(this.intC0UD);
             this.Controls.Add(this.intC0Label);
             this.Controls.Add(this.modelNameLabel);
             this.Controls.Add(this.modelNameBox);
@@ -2647,7 +2659,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.rotYUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotXUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotZUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.boolInt54UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.intC0UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationRandomYUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationAddYUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationRandomXUD)).EndInit();
@@ -2705,12 +2717,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.field114UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field118UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field11CUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.float120UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field124UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field128UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field12CUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field130UD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.field)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.field134UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field138UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field13CUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field14CUD)).EndInit();
@@ -2743,7 +2755,7 @@
         private System.Windows.Forms.NumericUpDown rotXUD;
         private System.Windows.Forms.Label rotZLabel;
         private System.Windows.Forms.NumericUpDown rotZUD;
-        private System.Windows.Forms.NumericUpDown boolInt54UD;
+        private System.Windows.Forms.NumericUpDown intC0UD;
         private System.Windows.Forms.Label intC0Label;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox subDirBox;
@@ -2867,7 +2879,7 @@
         private System.Windows.Forms.Label field11CLabel;
         private System.Windows.Forms.NumericUpDown field11CUD;
         private System.Windows.Forms.Label field120;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown float120UD;
         private System.Windows.Forms.Label field124Label;
         private System.Windows.Forms.NumericUpDown field124UD;
         private System.Windows.Forms.Label field128Label;
@@ -2877,7 +2889,7 @@
         private System.Windows.Forms.Label field130Label;
         private System.Windows.Forms.NumericUpDown field130UD;
         private System.Windows.Forms.Label field134Label;
-        private System.Windows.Forms.NumericUpDown field;
+        private System.Windows.Forms.NumericUpDown field134UD;
         private System.Windows.Forms.Label field138Label;
         private System.Windows.Forms.NumericUpDown field138UD;
         private System.Windows.Forms.Label field13CLabel;

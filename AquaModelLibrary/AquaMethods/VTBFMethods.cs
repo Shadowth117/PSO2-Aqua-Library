@@ -2335,9 +2335,9 @@ namespace AquaModelLibrary
             ptcl.field_110 = GetObject<int>(ptclRaw[0], 0x6);
             ptcl.field_114 = GetObject<short>(ptclRaw[0], 0x55);
 
-            ptcl.field_120 = GetObject<float>(ptclRaw[0], 0x54);
-            ptcl.field_124 = GetObject<float>(ptclRaw[0], 0x48);
-            ptcl.field_128 = GetObject<float>(ptclRaw[0], 0x49);
+            ptcl.float_120 = GetObject<float>(ptclRaw[0], 0x54);
+            ptcl.float_124 = GetObject<float>(ptclRaw[0], 0x48);
+            ptcl.float_128 = GetObject<float>(ptclRaw[0], 0x49);
             ptcl.float_12C = GetObject<float>(ptclRaw[0], 0x4A);
 
             ptcl.float_130 = GetObject<float>(ptclRaw[0], 0x88);

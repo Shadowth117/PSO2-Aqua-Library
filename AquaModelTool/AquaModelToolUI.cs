@@ -57,7 +57,7 @@ namespace AquaModelTool
                 saveFileDialog = new SaveFileDialog()
                 {
                     Title = "Save model file",
-                    Filter = "PSO2 VTBF Model (*.aqp)|*.aqp|PSO2 VTBF Terrain (*.trp)|*.trp|PSO2 NIFL Model (*.aqp)|*.aqp|PSO2 NIFL Terrain (*.trp)|*.trp"
+                    Filter = "PSO2 VTBF Model (*.aqp)|*.aqp|PSO2 VTBF Terrain (*.trp)|*.trp|PSO2 Classic NIFL Model (*.aqp)|*.aqp|PSO2 Classic NIFL Terrain (*.trp)|*.trp"
                 };
                 switch (ext)
                 {
@@ -125,6 +125,30 @@ namespace AquaModelTool
                     this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
                 }
 
+            } else if (effectExtensions.Contains(ext))
+            {
+                saveFileDialog = new SaveFileDialog()
+                {
+                    Title = "Save model file",
+                    Filter = $"PSO2 Classic NIFL Effect (*{ext})|*{ext}"
+                };
+                /*
+                if (isNIFL)
+                {
+                    saveFileDialog.FilterIndex += 1;
+                }*/
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    switch (saveFileDialog.FilterIndex)
+                    {
+                        case 1:
+                            aquaUI.aqua.WriteClassicNIFLEffect(saveFileDialog.FileName);
+                            break;
+                    }
+                    currentFile = saveFileDialog.FileName;
+                    AquaUIOpenFile(saveFileDialog.FileName);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                }
             }
         }
 
@@ -163,6 +187,11 @@ namespace AquaModelTool
                     }
                     AquaUIOpenFile(currentFile);
                     this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                } else if(effectExtensions.Contains(ext))
+                {
+                    aquaUI.aqua.WriteClassicNIFLEffect(currentFile);
+                    AquaUIOpenFile(currentFile);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
                 }
             }
         }
@@ -185,6 +214,7 @@ namespace AquaModelTool
                     case ".tro":
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
+                        aquaUI.aqua.aquaEffect.Clear();
                         aquaUI.aqua.ReadModel(file);
 
 #if DEBUG
@@ -200,6 +230,7 @@ namespace AquaModelTool
                         {
                             isNIFL = false;
                         }
+                        this.Size = new Size(400, 319);
                         setModelOptions(true);
                         break;
                     case ".aqm":
@@ -211,17 +242,41 @@ namespace AquaModelTool
                     case ".trw":
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
+                        aquaUI.aqua.aquaEffect.Clear();
                         aquaUI.aqua.ReadMotion(file);
 #if DEBUG
                         var test2 = aquaUI.aqua.aquaMotions[0].anims[0];
                         test2 = aquaUI.aqua.aquaMotions[0].anims[0];
 #endif
+                        this.Size = new Size(400, 319);
                         control = SetMotion();
+                        break;
+                    case ".aqe":
+                        aquaUI.aqua.aquaModels.Clear();
+                        aquaUI.aqua.aquaMotions.Clear();
+                        aquaUI.aqua.aquaEffect.Clear();
+                        aquaUI.aqua.ReadEffect(file);
+#if DEBUG
+                        var test3 = aquaUI.aqua.aquaEffect[0];
+                        test3 = aquaUI.aqua.aquaEffect[0];
+#endif
+                        if (aquaUI.aqua.aquaEffect[0].nifl.magic != 0)
+                        {
+                            isNIFL = true;
+                        }
+                        else
+                        {
+                            isNIFL = false;
+                        }
+                        control = new EffectEditor(aquaUI.aqua.aquaEffect[0]);
+                        this.Size = new Size(800, 660);
+                        setModelOptions(false);
                         break;
                     default:
                         MessageBox.Show("Invalid File");
                         return;
                 }
+                
                 filePanel.Controls.Add(control);
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();

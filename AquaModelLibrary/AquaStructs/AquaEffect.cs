@@ -4,7 +4,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
@@ -12,29 +11,25 @@ namespace AquaModelLibrary
     //May be entirely different than the NIFL variation 
     //Seemingly, the file seems to be an efct header followed by an emit nodes, their animations and particle nodes with their animations.
     //There should be at least one EFCT, one EMIT, and one PTCL per file while they must all have ANIMs, null or not.
-    public unsafe class AquaEffect
+    public unsafe class AquaEffect : AquaCommon
     {
-        public NIFL nifl;
-        public REL0 rel0;
         public EFCTObject efct;
-        public NOF0 nof0;
-        public NEND nend;
 
         public class AnimObject
         {
-            public List<CURVObject> curvs;
+            public List<CURVObject> curvs = new List<CURVObject>();
         }
 
         public class EFCTObject : AnimObject
         {
             public EFCT efct;
-            public List<EMITObject> emits;
+            public List<EMITObject> emits = new List<EMITObject>();
         }
 
         public class EMITObject : AnimObject
         {
             public EMIT emit;
-            public List<PTCLObject> ptcls;
+            public List<PTCLObject> ptcls = new List<PTCLObject>();
         }
 
         public class PTCLObject : AnimObject
@@ -46,8 +41,8 @@ namespace AquaModelLibrary
         public class CURVObject
         {
             public CURV curv;
-            public List<KEYS> keys;
-            public List<int> times;
+            public List<KEYS> keys = new List<KEYS>();
+            public List<float> times = new List<float>();
         }
 
         //In VTBF, the pointer int16 is the number of nodes in the file. Ie, the single EFCT + the EMIT count
@@ -224,9 +219,9 @@ namespace AquaModelLibrary
             public int field_118;
             public int field_11C;
 
-            public float field_120; //0x54, Type 0xA //Maybe??
-            public float field_124; //0x48, Type 0xA
-            public float field_128; //0x49, Type 0xA
+            public float float_120; //0x54, Type 0xA //Maybe??
+            public float float_124; //0x48, Type 0xA
+            public float float_128; //0x49, Type 0xA
             public float float_12C; //0x4A, Type 0xA
 
             public float float_130; //0x88, Type 0xA

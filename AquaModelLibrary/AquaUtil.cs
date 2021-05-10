@@ -2941,6 +2941,187 @@ namespace AquaModelLibrary
 
             }
         }
+        public void WriteClassicNIFLEffect(string outFileName)
+        {
+            List<byte> finalOutBytes = new List<byte>();
+
+            int rel0SizeOffset = 0;
+            int efctCurvOffset = 0;
+            int efctEmitOffset = 0;
+
+            List<int> emitCurvOffsets = new List<int>();
+            List<int> emitPtclOffsets = new List<int>();
+
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //EFCT
+            efctCurvOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, aquaEffect[0].efct.efct.curvCount);
+            efctEmitOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x98, aquaEffect[0].efct.efct.emitCount);
+
+            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.efct));
+
+            //Write anim
+            if (aquaEffect[0].efct.efct.curvCount > 0)
+            {
+                SetByteListInt(outBytes, efctCurvOffset, outBytes.Count);
+                WriteAQEAnim(outBytes, aquaEffect[0].efct, nof0PointerLocations);
+            }
+
+            //EMIT
+            if (aquaEffect[0].efct.emits.Count > 0)
+            {
+                SetByteListInt(outBytes, efctEmitOffset, outBytes.Count);
+                for(int emit = 0; emit < aquaEffect[0].efct.emits.Count; emit++)
+                {
+                    emitCurvOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, aquaEffect[0].efct.emits[emit].curvs.Count));
+                    emitPtclOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0xF0, aquaEffect[0].efct.emits[emit].ptcls.Count));
+                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.emits[emit].emit));
+                }
+
+                //The substructs are written after the set so we follow this here too
+                for(int emit = 0; emit < aquaEffect[0].efct.emits.Count; emit++)
+                {
+                    List<int> ptclCurvOffsets = new List<int>();
+                    List<int> ptclStringOffsets = new List<int>();
+
+                    //Write anim
+                    if (aquaEffect[0].efct.emits[emit].curvs.Count > 0)
+                    {
+                        SetByteListInt(outBytes, emitCurvOffsets[emit], outBytes.Count);
+                        WriteAQEAnim(outBytes, aquaEffect[0].efct.emits[emit], nof0PointerLocations);
+                    }
+
+                    //PTCL
+                    if (aquaEffect[0].efct.emits[emit].ptcls.Count > 0)
+                    {
+                        SetByteListInt(outBytes, emitPtclOffsets[emit], outBytes.Count);
+                        for (int ptcl = 0; ptcl < aquaEffect[0].efct.emits[emit].ptcls.Count; ptcl++)
+                        {
+                            ptclStringOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x140, aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl.ptclStringsOffset));
+                            ptclCurvOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x144, aquaEffect[0].efct.emits[emit].ptcls[ptcl].curvs.Count));
+                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl));
+                        }
+
+                        //The substructs are written after the set so we follow this here too
+                        for (int ptcl = 0; ptcl < aquaEffect[0].efct.emits[emit].ptcls.Count; ptcl++)
+                        {
+                            //Write strings
+                            if (aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl.ptclStringsOffset != 0)
+                            {
+                                SetByteListInt(outBytes, ptclStringOffsets[ptcl], outBytes.Count);
+                                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.emits[emit].ptcls[ptcl].strings));
+                            }
+
+                            //Write anim
+                            if (aquaEffect[0].efct.emits[emit].ptcls[ptcl].curvs.Count > 0)
+                            {
+                                SetByteListInt(outBytes, ptclCurvOffsets[ptcl], outBytes.Count);
+                                WriteAQEAnim(outBytes, aquaEffect[0].efct.emits[emit].ptcls[ptcl], nof0PointerLocations);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+
+            //Write REL0 Size
+            SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+            //NOF0
+            nof0PointerLocations.Sort();
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += AlignWriter(outBytes, 0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, ConvertStruct(nifl));
+            
+            finalOutBytes.AddRange(outBytes);
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
+        }
+
+        public void WriteAQEAnim(List<byte> outBytes, AquaEffect.AnimObject anim, List<int> nof0PointerLocations)
+        {
+            List<int> keysOffsets = new List<int>();
+            List<int> timeOffsets = new List<int>();
+            //CURV
+            for(int i = 0; i < anim.curvs.Count; i++)
+            {
+
+                keysOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x18, anim.curvs[i].curv.keysCount));
+                timeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x20, anim.curvs[i].curv.timeCount));
+                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(anim.curvs[i].curv));
+            }
+            AlignWriter(outBytes, 0x10);
+
+            //Write substructs
+            for (int i = 0; i < anim.curvs.Count; i++)
+            {
+                List<float> times = new List<float>();
+                //KEYS
+                if (anim.curvs[i].keys.Count > 0)
+                {
+                    SetByteListInt(outBytes, keysOffsets[i], outBytes.Count);
+                    for (int key = 0; key < anim.curvs[i].keys.Count; key++)
+                    {
+                        times.Add(anim.curvs[i].keys[key].time);
+                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(anim.curvs[i].keys[key]));
+                    }
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //NIFL Times
+                if (anim.curvs[i].keys.Count > 0)
+                {
+                    times.Sort();
+                    SetByteListInt(outBytes, timeOffsets[i], outBytes.Count);
+                    for (int time = 0; time < times.Count; time++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(times[time]));
+                    }
+                }
+                AlignWriter(outBytes, 0x10);
+            }
+        }
 
         public AquaEffect ReadNIFLEffect(BufferedStreamReader streamReader, int offset)
         {
@@ -2961,6 +3142,7 @@ namespace AquaModelLibrary
                 {
                     var emit = new AquaEffect.EMITObject();
                     emit.emit = streamReader.Read<AquaEffect.EMIT>();
+                    long emitBookMark = streamReader.Position();
                     ReadNIFLAQECurves(streamReader, emit, emit.emit.curvCount, emit.emit.curvOffset, offset);
 
                     if (emit.emit.ptclCount > 0)
@@ -2985,9 +3167,11 @@ namespace AquaModelLibrary
                         }
                     }
                     efct.emits.Add(emit);
+                    streamReader.Seek(emitBookMark, SeekOrigin.Begin);
                 }
             }
 
+            streamReader.Seek(effect.nifl.NOF0Offset + offset, SeekOrigin.Begin);
             effect.nof0 = AquaCommon.readNOF0(streamReader);
             effect.nend = streamReader.Read<AquaCommon.NEND>();
 
@@ -3007,7 +3191,7 @@ namespace AquaModelLibrary
                     curv.curv = streamReader.Read<AquaEffect.CURV>();
                     efct.curvs.Add(curv);
                 }
-                for (int i = 0; i < curvOffset; i++)
+                for (int i = 0; i < curvCount; i++)
                 {
                     if(efct.curvs[i].curv.keysCount > 0)
                     {
@@ -3022,7 +3206,7 @@ namespace AquaModelLibrary
                         streamReader.Seek(efct.curvs[i].curv.timeOffset + offset, SeekOrigin.Begin);
                         for (int key = 0; key < efct.curvs[i].curv.timeCount; key++)
                         {
-                            efct.curvs[i].keys.Add(streamReader.Read<AquaEffect.KEYS>());
+                            efct.curvs[i].times.Add(streamReader.Read<float>());
                         }
                     }
                 }
@@ -3062,6 +3246,8 @@ namespace AquaModelLibrary
                     case "PTCL":
                         obj = parsePTCL(data);
                         efct.emits[efct.emits.Count - 1].ptcls.Add((AquaEffect.PTCLObject)obj);
+                        break;
+                    case "ANIM":
                         break;
                     case "CURV":
                         obj.curvs.Add(parseCURV(data));

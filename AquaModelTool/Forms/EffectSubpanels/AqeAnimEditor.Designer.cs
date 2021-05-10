@@ -156,7 +156,6 @@
             this.int48UD.Name = "int48UD";
             this.int48UD.Size = new System.Drawing.Size(53, 20);
             this.int48UD.TabIndex = 41;
-            this.int48UD.ValueChanged += new System.EventHandler(this.int48UD_ValueChanged);
             // 
             // animButton
             // 
@@ -319,7 +318,6 @@
             this.keysTypeUD.Name = "keysTypeUD";
             this.keysTypeUD.Size = new System.Drawing.Size(53, 20);
             this.keysTypeUD.TabIndex = 41;
-            this.keysTypeUD.ValueChanged += new System.EventHandler(this.int48UD_ValueChanged);
             // 
             // field18Label
             // 
@@ -346,7 +344,6 @@
             this.field18UD.Name = "field18UD";
             this.field18UD.Size = new System.Drawing.Size(53, 20);
             this.field18UD.TabIndex = 41;
-            this.field18UD.ValueChanged += new System.EventHandler(this.int48UD_ValueChanged);
             // 
             // field1CLabel
             // 
@@ -373,7 +370,6 @@
             this.field1CUD.Name = "field1CUD";
             this.field1CUD.Size = new System.Drawing.Size(53, 20);
             this.field1CUD.TabIndex = 41;
-            this.field1CUD.ValueChanged += new System.EventHandler(this.int48UD_ValueChanged);
             // 
             // timeUD
             // 
