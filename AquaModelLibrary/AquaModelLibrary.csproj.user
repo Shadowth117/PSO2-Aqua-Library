@@ -4,4 +4,7 @@
     <StartAction>Project</StartAction>
     <StartProgram>E:\Autodesk\3ds Max 2017\3dsmax.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <StartProgram>E:\Autodesk\3ds Max 2017\3dsmax.exe</StartProgram>
+  </PropertyGroup>
 </Project>

@@ -874,10 +874,20 @@ namespace AquaModelLibrary
 
             //Load lac
             string lacPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicLobbyAction));
-
+            string lacPathRe = Path.Combine(pso2_binDir, dataReboot, GetFileHash(rebootLobbyAction));
+            string lacTruePath = null;
             if (File.Exists(lacPath))
             {
-                var strm = new MemoryStream(File.ReadAllBytes(lacPath));
+                lacTruePath = lacPath;
+            }
+            else if (File.Exists(lacPath))
+            {
+                //lacTruePath = lacPathRe;
+            }
+            if(lacTruePath != null)
+            {
+
+                var strm = new MemoryStream(File.ReadAllBytes(lacTruePath));
                 var fVarIce = IceFile.LoadIceFile(strm);
                 strm.Dispose();
 
@@ -2790,70 +2800,74 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "CasealVoices.csv", outputCasealVoices);
 
             //---------------------------Parse out Lobby Action files -- in lobby_action_setting.lac within defaa92bd5435c84af0da0302544b811 and common.text in a1d84c3c748cebdb6fc42f66b73d2e57
-            StringBuilder lobbyActions = new StringBuilder();
-            strNameDicts.Clear();
-            masterNameList.Clear();
-            List<string> iceTracker = new List<string>();
-            GatherTextIdsStringRef(commByCat, masterNameList, strNameDicts, "LobbyAction", true);
-
-            for (int i = 0; i < lac.dataBlocks.Count; i++)
+            if(lacTruePath != null)
             {
-                //There are sometimes multiple references to the same ice, but we're not interested in these entries
-                if (iceTracker.Contains(lac.dataBlocks[i].iceName))
-                {
-                    continue;
-                }
-                iceTracker.Add(lac.dataBlocks[i].iceName);
-                string output = "";
-                bool named = false;
+                StringBuilder lobbyActions = new StringBuilder();
+                strNameDicts.Clear();
+                masterNameList.Clear();
+                List<string> iceTracker = new List<string>();
+                GatherTextIdsStringRef(commByCat, masterNameList, strNameDicts, "LobbyAction", true);
 
-                output += lac.dataBlocks[i].chatCommand + ",";
-                foreach (var dict in strNameDicts)
+                for (int i = 0; i < lac.dataBlocks.Count; i++)
                 {
-                    if (dict.TryGetValue(lac.dataBlocks[i].commonReference1, out string str))
+                    //There are sometimes multiple references to the same ice, but we're not interested in these entries
+                    if (iceTracker.Contains(lac.dataBlocks[i].iceName))
                     {
-                        named = true;
-                        output += str + ",";
+                        continue;
                     }
-                    else
+                    iceTracker.Add(lac.dataBlocks[i].iceName);
+                    string output = "";
+                    bool named = false;
+
+                    output += lac.dataBlocks[i].chatCommand + ",";
+                    foreach (var dict in strNameDicts)
                     {
-                        output += ",";
+                        if (dict.TryGetValue(lac.dataBlocks[i].commonReference1, out string str))
+                        {
+                            named = true;
+                            output += str + ",";
+                        }
+                        else
+                        {
+                            output += ",";
+                        }
                     }
+
+                    //Account for lack of a name
+                    if (named == false)
+                    {
+                        output = $"[Unnamed {lac.dataBlocks[i].commonReference1}]" + output;
+                    }
+
+                    string classic = $"{lobbyActionStart}{lac.dataBlocks[i].iceName}";
+
+                    var classicHash = GetFileHash(classic);
+
+                    output += classicHash;
+
+                    if (lac.dataBlocks[i].iceName.Contains("_m.ice"))
+                    {
+                        output += (", Male");
+                    }
+                    else if (lac.dataBlocks[i].iceName.Contains("_f.ice"))
+                    {
+                        output += (", Female");
+                    }
+
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+
+                    output += "\n";
+
+                    lobbyActions.Append(output);
                 }
 
-                //Account for lack of a name
-                if (named == false)
-                {
-                    output = $"[Unnamed {lac.dataBlocks[i].commonReference1}]" + output;
-                }
+                WriteCSV(outputDirectory, "LobbyActions.csv", lobbyActions);
 
-                string classic = $"{lobbyActionStart}{lac.dataBlocks[i].iceName}";
 
-                var classicHash = GetFileHash(classic);
-
-                output += classicHash;
-
-                if (lac.dataBlocks[i].iceName.Contains("_m.ice"))
-                {
-                    output += (", Male");
-                }
-                else if (lac.dataBlocks[i].iceName.Contains("_f.ice"))
-                {
-                    output += (", Female");
-                }
-
-                if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                {
-                    output += ", (Not found)";
-                }
-
-                output += "\n";
-
-                lobbyActions.Append(output);
             }
-
-            WriteCSV(outputDirectory, "LobbyActions.csv", lobbyActions);
-
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
             StringBuilder outputNGSEars = new StringBuilder();
 

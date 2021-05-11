@@ -341,33 +341,38 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select a pso2 .text file",
-                Filter = "PSO2 Text (*.text) Files|*.text"
+                Filter = "PSO2 Text (*.text) Files|*.text",
+                Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                aquaUI.aqua.LoadPSO2Text(openFileDialog.FileName);
-
-                StringBuilder output = new StringBuilder();
-
-                for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
+                foreach(var fileName in openFileDialog.FileNames)
                 {
-                    output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
+                    aquaUI.aqua.LoadPSO2Text(fileName);
 
-                    for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
+                    StringBuilder output = new StringBuilder();
+
+                    for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
                     {
-                        output.AppendLine($"Group {j}");
+                        output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
 
-                        for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
+                        for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
                         {
-                            var pair = aquaUI.aqua.aquaText.text[i][j][k];
-                            output.AppendLine($"{pair.name} - {pair.str}");
+                            output.AppendLine($"Group {j}");
+
+                            for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
+                            {
+                                var pair = aquaUI.aqua.aquaText.text[i][j][k];
+                                output.AppendLine($"{pair.name} - {pair.str}");
+                            }
+                            output.AppendLine();
                         }
                         output.AppendLine();
                     }
-                    output.AppendLine();
+
+                    File.WriteAllText(fileName + ".txt", output.ToString());
                 }
 
-                File.WriteAllText(openFileDialog.FileName + ".txt", output.ToString());
             }
         }
 

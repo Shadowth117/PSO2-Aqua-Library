@@ -12,6 +12,8 @@ namespace AquaModelLibrary
     {
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
+        public static string dataReboot = $"data\\win32reboot\\";
+        public static string dataRebootNA = $"data\\win32reboot_na\\";
         public static string classicStart = $"character/making/pl_";
         public static string rebootStart = $"character/making_reboot/pl_";
         public static string rebootExStart = $"character/making_reboot_ex/pl_";
@@ -33,6 +35,7 @@ namespace AquaModelLibrary
         public static string classicCharCreate = $"ui_character_making.ice";
         public static string classicCommon = $"sy_common_text.ice";
         public static string classicLobbyAction = $"actor/lobby_action/pl_lobby_action_setting.ice";
+        public static string rebootLobbyAction = $"f94e8bfb6ee674e39fa6bc1aa697bf82";
 
         public static string partsTextName = "ui_charamake_parts.text";
         public static string acceTextName = "ui_accessories_text.text";
