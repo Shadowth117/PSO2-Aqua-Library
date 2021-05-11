@@ -2738,33 +2738,48 @@ namespace AquaModelLibrary
                 }
 
                 int voiceNum = -1;
+                string voiceNumStr = "";
                 if (str.Contains(voiceCman))
                 {
                     id = 0;
-                    voiceNum = Int32.Parse(str.Replace(voiceCman, ""));
+                    voiceNumStr = str.Replace(voiceCman, "");
                 }
                 else if (str.Contains(voiceCwoman))
                 {
                     id = 1;
-                    voiceNum = Int32.Parse(str.Replace(voiceCwoman, ""));
+                    voiceNumStr = str.Replace(voiceCwoman, "");
                 }
                 else if (str.Contains(voiceMan))
                 {
                     id = 2;
-                    voiceNum = Int32.Parse(str.Replace(voiceMan, ""));
+                    voiceNumStr = str.Replace(voiceMan, "");
                 }
                 else if (str.Contains(voiceWoman))
                 {
                     id = 3;
-                    voiceNum = Int32.Parse(str.Replace(voiceWoman, ""));
+                    voiceNumStr = str.Replace(voiceWoman, "");
+
                 }
+                voiceNum = Int32.Parse(voiceNumStr);
+
                 string conversion = "11_sound_voice_";
-                if (voiceNum > 31)
+                var semiFinalName = str;
+
+                //For some reason the non default voices are done in an odd way
+                //NGS defaults seem to be 900+ so far, unsure on its ac variants
+                if (voiceNum > 31 && voiceNum < 900)
                 {
                     conversion += "ac";
+                    voiceNum -= 50;
+                    string newVoiceNumStr = voiceNum.ToString();
+                    if(voiceNum < 10)
+                    {
+                        newVoiceNumStr = "0" + newVoiceNumStr;
+                    }
+                    semiFinalName = semiFinalName.Replace(voiceNumStr, newVoiceNumStr);
                 }
 
-                var finalName = str.Replace("11_voice_", conversion);
+                var finalName = semiFinalName.Replace("11_voice_", conversion);
 
                 string classic = $"{playerVoiceStart}{finalName}.ice";
 
@@ -2780,16 +2795,16 @@ namespace AquaModelLibrary
 
                 switch (id)
                 {
-                    case 0:
+                    case 2:
                         outputMaleVoices.Append(output);
                         break;
-                    case 1:
+                    case 3:
                         outputFemaleVoices.Append(output);
                         break;
-                    case 2:
+                    case 0:
                         outputCastVoices.Append(output);
                         break;
-                    case 3:
+                    case 1:
                         outputCasealVoices.Append(output);
                         break;
                 }
