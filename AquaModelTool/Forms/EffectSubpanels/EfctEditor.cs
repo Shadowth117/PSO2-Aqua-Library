@@ -16,6 +16,11 @@ namespace AquaModelTool
             InitializeComponent();
             node = thisNode;
             efct = efctObj;
+            animButton.Text += $" ({efct.curvs.Count})";
+            if (efct.curvs.Count == 0)
+            {
+                animButton.Enabled = false;
+            }
             startFrameUD.Value = (decimal)efct.efct.startFrame;
             endFrameUD.Value = (decimal)efct.efct.endFrame;
             soundNameBox.Text = efctObj.efct.soundName.GetString();
@@ -226,6 +231,11 @@ namespace AquaModelTool
             efct.efct.float_64 = (float)float64UD.Value;
 
             float64UD.Value = (decimal)efct.efct.float_64;
+        }
+
+        private void animButton_Click(object sender, EventArgs e)
+        {
+            ((EffectEditor)(this.Parent.Parent)).loadAnimEditor(efct, node);
         }
     }
 }

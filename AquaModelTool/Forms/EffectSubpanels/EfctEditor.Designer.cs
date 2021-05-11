@@ -675,10 +675,11 @@
             // 
             this.animButton.Location = new System.Drawing.Point(275, 9);
             this.animButton.Name = "animButton";
-            this.animButton.Size = new System.Drawing.Size(75, 23);
+            this.animButton.Size = new System.Drawing.Size(118, 23);
             this.animButton.TabIndex = 51;
             this.animButton.Text = "Animations";
             this.animButton.UseVisualStyleBackColor = true;
+            this.animButton.Click += new System.EventHandler(this.animButton_Click);
             // 
             // EfctEditor
             // 
@@ -731,7 +732,7 @@
             this.Controls.Add(this.startFrameUD);
             this.Controls.Add(this.startTimeLabel);
             this.Name = "EfctEditor";
-            this.Size = new System.Drawing.Size(375, 345);
+            this.Size = new System.Drawing.Size(396, 345);
             ((System.ComponentModel.ISupportInitialize)(this.startFrameUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.posYUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.posXUD)).EndInit();

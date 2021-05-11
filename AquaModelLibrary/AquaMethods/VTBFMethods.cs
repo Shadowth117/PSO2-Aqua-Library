@@ -2380,12 +2380,21 @@ namespace AquaModelLibrary
             {
                 var keys = new KEYS();
 
-                keys.type = GetObject<byte>(keysRaw[0], 0x72);
-                keys.time = GetObject<float>(keysRaw[0], 0x78);
-                keys.time = GetObject<float>(keysRaw[0], 0x79);
-                keys.time = GetObject<float>(keysRaw[0], 0x7A);
+                keys.type = GetObject<byte>(keysRaw[i], 0x72);
+                if(keysRaw[i].TryGetValue(0x78, out object value) == true)
+                {
+                    if(value is float)
+                    {
+                        keys.time = (float)value;
+                    } else if(value is short)
+                    {
+                        keys.time = (short)value;
+                    }
+                }
+                keys.value = GetObject<float>(keysRaw[i], 0x79);
+                keys.inParam = GetObject<float>(keysRaw[i], 0x7A);
 
-                keys.time = GetObject<float>(keysRaw[0], 0x7B);
+                keys.outParam = GetObject<float>(keysRaw[i], 0x7B);
 
                 keyList.Add(keys);
             }

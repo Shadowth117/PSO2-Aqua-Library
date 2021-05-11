@@ -16,6 +16,11 @@ namespace AquaModelTool
             InitializeComponent();
             node = thisNode;
             ptcl = ptclObj;
+            animButton.Text += $" ({ptclObj.curvs.Count})";
+            if(ptclObj.curvs.Count == 0)
+            {
+                animButton.Enabled = false;
+            }
             modelNameBox.Text = ptclObj.strings.assetName.GetString();
             subDirBox.Text = ptclObj.strings.subDirectory.GetString();
             diffuseBox.Text = ptclObj.strings.diffuseTex.GetString();
@@ -620,6 +625,11 @@ namespace AquaModelTool
             ptcl.ptcl.field_14C = (int)field14CUD.Value;
 
             field14CUD.Value = ptcl.ptcl.field_14C;
+        }
+
+        private void animButton_Click(object sender, EventArgs e)
+        {
+            ((EffectEditor)(this.Parent.Parent)).loadAnimEditor(ptcl, node);
         }
     }
 }

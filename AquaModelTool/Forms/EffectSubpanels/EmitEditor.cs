@@ -15,6 +15,11 @@ namespace AquaModelTool
             InitializeComponent();
             node = thisNode;
             emit = emitObj;
+            animButton.Text += $" ({emit.curvs.Count})";
+            if (emit.curvs.Count == 0)
+            {
+                animButton.Enabled = false;
+            }
             startFrameUD.Value = (decimal)emit.emit.startFrame;
             endFrameUD.Value = (decimal)emit.emit.endFrame;
 
@@ -495,6 +500,11 @@ namespace AquaModelTool
             emit.emit.int_84 = (int)int84UD.Value;
 
             int84UD.Value = emit.emit.int_84;
+        }
+
+        private void animButton_Click(object sender, EventArgs e)
+        {
+            ((EffectEditor)(this.Parent.Parent)).loadAnimEditor(emit, node);
         }
     }
 }

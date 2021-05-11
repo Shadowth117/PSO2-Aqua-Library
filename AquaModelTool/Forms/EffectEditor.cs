@@ -65,31 +65,48 @@ namespace AquaModelTool
             }
             else if (e.Button == MouseButtons.Left)
             {
-                selectedNode = node_here;
-                
-                for(int ctrl = 0; ctrl < mainPanel.Controls.Count; ctrl++)
-                {
-                    mainPanel.Controls[ctrl].Dispose();
-                }
-                mainPanel.Controls.Clear();
-
-                switch ((int)selectedNode.Tag)
-                {
-                    case 0:
-                        mainPanel.Controls.Add(new EfctEditor(effect.efct, selectedNode));
-                        break;
-                    case 1:
-                        mainPanel.Controls.Add(new EmitEditor(effect.efct.emits[selectedNode.Index], selectedNode));
-                        break;
-                    case 2:
-                        mainPanel.Controls.Add(new PtclEditor(effect.efct.emits[selectedNode.Parent.Index].ptcls[selectedNode.Index], selectedNode));
-                        break;
-                }
-                //Set up panel data
-                mainPanel.Controls[mainPanel.Controls.Count - 1].Dock = DockStyle.Fill;
-                mainPanel.Controls[mainPanel.Controls.Count - 1].BringToFront();
+                loadGeneralEditor(node_here);
             }
 
+        }
+
+        public void loadGeneralEditor(TreeNode node_here)
+        {
+            selectedNode = node_here;
+
+            for (int ctrl = 0; ctrl < mainPanel.Controls.Count; ctrl++)
+            {
+                mainPanel.Controls[ctrl].Dispose();
+            }
+            mainPanel.Controls.Clear();
+
+            switch ((int)selectedNode.Tag)
+            {
+                case 0:
+                    mainPanel.Controls.Add(new EfctEditor(effect.efct, selectedNode));
+                    break;
+                case 1:
+                    mainPanel.Controls.Add(new EmitEditor(effect.efct.emits[selectedNode.Index], selectedNode));
+                    break;
+                case 2:
+                    mainPanel.Controls.Add(new PtclEditor(effect.efct.emits[selectedNode.Parent.Index].ptcls[selectedNode.Index], selectedNode));
+                    break;
+            }
+            //Set up panel data
+            mainPanel.Controls[mainPanel.Controls.Count - 1].Dock = DockStyle.Fill;
+            mainPanel.Controls[mainPanel.Controls.Count - 1].BringToFront();
+        }
+
+        public void loadAnimEditor(AquaEffect.AnimObject animObj, TreeNode node)
+        {
+            for (int ctrl = 0; ctrl < mainPanel.Controls.Count; ctrl++)
+            {
+                mainPanel.Controls[ctrl].Dispose();
+            }
+            mainPanel.Controls.Clear();
+            mainPanel.Controls.Add(new AqeAnimEditor(animObj, selectedNode));
+            mainPanel.Controls[mainPanel.Controls.Count - 1].Dock = DockStyle.Fill;
+            mainPanel.Controls[mainPanel.Controls.Count - 1].BringToFront();
         }
 
     }

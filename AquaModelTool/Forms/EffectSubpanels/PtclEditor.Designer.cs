@@ -1330,10 +1330,11 @@
             // 
             this.animButton.Location = new System.Drawing.Point(393, 9);
             this.animButton.Name = "animButton";
-            this.animButton.Size = new System.Drawing.Size(75, 23);
+            this.animButton.Size = new System.Drawing.Size(118, 23);
             this.animButton.TabIndex = 50;
             this.animButton.Text = "Animations";
             this.animButton.UseVisualStyleBackColor = true;
+            this.animButton.Click += new System.EventHandler(this.animButton_Click);
             // 
             // speedUD
             // 

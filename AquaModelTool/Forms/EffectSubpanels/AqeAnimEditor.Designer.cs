@@ -33,17 +33,17 @@
             this.endFrameUD = new System.Windows.Forms.NumericUpDown();
             this.endFrameLabel = new System.Windows.Forms.Label();
             this.curvTypeLabel = new System.Windows.Forms.Label();
-            this.int48UD = new System.Windows.Forms.NumericUpDown();
+            this.curvTypeUD = new System.Windows.Forms.NumericUpDown();
             this.animButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.int0CUD = new System.Windows.Forms.NumericUpDown();
+            this.int14UD = new System.Windows.Forms.NumericUpDown();
+            this.int0CLabel = new System.Windows.Forms.Label();
+            this.int14Label = new System.Windows.Forms.Label();
             this.curvSetLabel = new System.Windows.Forms.Label();
             this.curvSetCB = new System.Windows.Forms.ComboBox();
-            this.int14UD = new System.Windows.Forms.NumericUpDown();
-            this.int14Label = new System.Windows.Forms.Label();
-            this.int0CLabel = new System.Windows.Forms.Label();
-            this.int0CUD = new System.Windows.Forms.NumericUpDown();
-            this.float10UD = new System.Windows.Forms.NumericUpDown();
             this.float10Label = new System.Windows.Forms.Label();
+            this.float10UD = new System.Windows.Forms.NumericUpDown();
             this.keysListBox = new System.Windows.Forms.ListBox();
             this.keysTypeLabel = new System.Windows.Forms.Label();
             this.keysTypeUD = new System.Windows.Forms.NumericUpDown();
@@ -61,10 +61,10 @@
             this.outParamLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.startFrameUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.endFrameUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.int48UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.curvTypeUD)).BeginInit();
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.int14UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.int0CUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int14UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.float10UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.keysTypeUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field18UD)).BeginInit();
@@ -140,22 +140,23 @@
             this.curvTypeLabel.TabIndex = 40;
             this.curvTypeLabel.Text = "CurvType";
             // 
-            // int48UD
+            // curvTypeUD
             // 
-            this.int48UD.Location = new System.Drawing.Point(60, 23);
-            this.int48UD.Maximum = new decimal(new int[] {
+            this.curvTypeUD.Location = new System.Drawing.Point(60, 23);
+            this.curvTypeUD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.int48UD.Minimum = new decimal(new int[] {
+            this.curvTypeUD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.int48UD.Name = "int48UD";
-            this.int48UD.Size = new System.Drawing.Size(53, 20);
-            this.int48UD.TabIndex = 41;
+            this.curvTypeUD.Name = "curvTypeUD";
+            this.curvTypeUD.Size = new System.Drawing.Size(53, 20);
+            this.curvTypeUD.TabIndex = 41;
+            this.curvTypeUD.ValueChanged += new System.EventHandler(this.curvTypeUDValue_Changed);
             // 
             // animButton
             // 
@@ -165,6 +166,7 @@
             this.animButton.TabIndex = 51;
             this.animButton.Text = "Parent Node";
             this.animButton.UseVisualStyleBackColor = true;
+            this.animButton.Click += new System.EventHandler(this.animButton_Click);
             // 
             // panel1
             // 
@@ -173,7 +175,7 @@
             this.panel1.Controls.Add(this.int0CLabel);
             this.panel1.Controls.Add(this.int14Label);
             this.panel1.Controls.Add(this.curvSetLabel);
-            this.panel1.Controls.Add(this.int48UD);
+            this.panel1.Controls.Add(this.curvTypeUD);
             this.panel1.Controls.Add(this.curvTypeLabel);
             this.panel1.Controls.Add(this.curvSetCB);
             this.panel1.Controls.Add(this.endFrameLabel);
@@ -187,58 +189,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(350, 91);
             this.panel1.TabIndex = 52;
-            // 
-            // curvSetLabel
-            // 
-            this.curvSetLabel.AutoSize = true;
-            this.curvSetLabel.Location = new System.Drawing.Point(0, 6);
-            this.curvSetLabel.Name = "curvSetLabel";
-            this.curvSetLabel.Size = new System.Drawing.Size(56, 13);
-            this.curvSetLabel.TabIndex = 53;
-            this.curvSetLabel.Text = "CURV Set";
-            // 
-            // curvSetCB
-            // 
-            this.curvSetCB.FormattingEnabled = true;
-            this.curvSetCB.Location = new System.Drawing.Point(3, 23);
-            this.curvSetCB.Name = "curvSetCB";
-            this.curvSetCB.Size = new System.Drawing.Size(43, 21);
-            this.curvSetCB.TabIndex = 52;
-            // 
-            // int14UD
-            // 
-            this.int14UD.Location = new System.Drawing.Point(151, 62);
-            this.int14UD.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            0});
-            this.int14UD.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
-            -2147483648});
-            this.int14UD.Name = "int14UD";
-            this.int14UD.Size = new System.Drawing.Size(67, 20);
-            this.int14UD.TabIndex = 55;
-            // 
-            // int14Label
-            // 
-            this.int14Label.AutoSize = true;
-            this.int14Label.Location = new System.Drawing.Point(148, 45);
-            this.int14Label.Name = "int14Label";
-            this.int14Label.Size = new System.Drawing.Size(36, 13);
-            this.int14Label.TabIndex = 54;
-            this.int14Label.Text = "int_14";
-            // 
-            // int0CLabel
-            // 
-            this.int0CLabel.AutoSize = true;
-            this.int0CLabel.Location = new System.Drawing.Point(0, 45);
-            this.int0CLabel.Name = "int0CLabel";
-            this.int0CLabel.Size = new System.Drawing.Size(37, 13);
-            this.int0CLabel.TabIndex = 54;
-            this.int0CLabel.Text = "int_0C";
             // 
             // int0CUD
             // 
@@ -256,6 +206,70 @@
             this.int0CUD.Name = "int0CUD";
             this.int0CUD.Size = new System.Drawing.Size(67, 20);
             this.int0CUD.TabIndex = 55;
+            this.int0CUD.ValueChanged += new System.EventHandler(this.int0CUD_ValueChanged);
+            // 
+            // int14UD
+            // 
+            this.int14UD.Location = new System.Drawing.Point(151, 62);
+            this.int14UD.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
+            this.int14UD.Minimum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            -2147483648});
+            this.int14UD.Name = "int14UD";
+            this.int14UD.Size = new System.Drawing.Size(67, 20);
+            this.int14UD.TabIndex = 55;
+            this.int14UD.ValueChanged += new System.EventHandler(this.int14UD_ValueChanged);
+            // 
+            // int0CLabel
+            // 
+            this.int0CLabel.AutoSize = true;
+            this.int0CLabel.Location = new System.Drawing.Point(0, 45);
+            this.int0CLabel.Name = "int0CLabel";
+            this.int0CLabel.Size = new System.Drawing.Size(37, 13);
+            this.int0CLabel.TabIndex = 54;
+            this.int0CLabel.Text = "int_0C";
+            // 
+            // int14Label
+            // 
+            this.int14Label.AutoSize = true;
+            this.int14Label.Location = new System.Drawing.Point(148, 45);
+            this.int14Label.Name = "int14Label";
+            this.int14Label.Size = new System.Drawing.Size(36, 13);
+            this.int14Label.TabIndex = 54;
+            this.int14Label.Text = "int_14";
+            // 
+            // curvSetLabel
+            // 
+            this.curvSetLabel.AutoSize = true;
+            this.curvSetLabel.Location = new System.Drawing.Point(0, 6);
+            this.curvSetLabel.Name = "curvSetLabel";
+            this.curvSetLabel.Size = new System.Drawing.Size(56, 13);
+            this.curvSetLabel.TabIndex = 53;
+            this.curvSetLabel.Text = "CURV Set";
+            // 
+            // curvSetCB
+            // 
+            this.curvSetCB.FormattingEnabled = true;
+            this.curvSetCB.Location = new System.Drawing.Point(3, 23);
+            this.curvSetCB.Name = "curvSetCB";
+            this.curvSetCB.Size = new System.Drawing.Size(43, 21);
+            this.curvSetCB.TabIndex = 52;
+            this.curvSetCB.SelectedIndexChanged += new System.EventHandler(this.curvSetCB_SelectedIndexChanged);
+            // 
+            // float10Label
+            // 
+            this.float10Label.AutoSize = true;
+            this.float10Label.Location = new System.Drawing.Point(73, 45);
+            this.float10Label.Name = "float10Label";
+            this.float10Label.Size = new System.Drawing.Size(45, 13);
+            this.float10Label.TabIndex = 0;
+            this.float10Label.Text = "float_10";
             // 
             // float10UD
             // 
@@ -274,16 +288,7 @@
             this.float10UD.Name = "float10UD";
             this.float10UD.Size = new System.Drawing.Size(69, 20);
             this.float10UD.TabIndex = 28;
-            this.float10UD.ValueChanged += new System.EventHandler(this.startFrameUDValue_Changed);
-            // 
-            // float10Label
-            // 
-            this.float10Label.AutoSize = true;
-            this.float10Label.Location = new System.Drawing.Point(73, 45);
-            this.float10Label.Name = "float10Label";
-            this.float10Label.Size = new System.Drawing.Size(45, 13);
-            this.float10Label.TabIndex = 0;
-            this.float10Label.Text = "float_10";
+            this.float10UD.ValueChanged += new System.EventHandler(this.float10UD_ValueChanged);
             // 
             // keysListBox
             // 
@@ -292,6 +297,7 @@
             this.keysListBox.Name = "keysListBox";
             this.keysListBox.Size = new System.Drawing.Size(129, 251);
             this.keysListBox.TabIndex = 53;
+            this.keysListBox.SelectedIndexChanged += new System.EventHandler(this.keysListBox_SelectedIndexChanged);
             // 
             // keysTypeLabel
             // 
@@ -318,6 +324,7 @@
             this.keysTypeUD.Name = "keysTypeUD";
             this.keysTypeUD.Size = new System.Drawing.Size(53, 20);
             this.keysTypeUD.TabIndex = 41;
+            this.keysTypeUD.ValueChanged += new System.EventHandler(this.keysTypeUD_ValueChanged);
             // 
             // field18Label
             // 
@@ -344,6 +351,7 @@
             this.field18UD.Name = "field18UD";
             this.field18UD.Size = new System.Drawing.Size(53, 20);
             this.field18UD.TabIndex = 41;
+            this.field18UD.ValueChanged += new System.EventHandler(this.field18UD_ValueChanged);
             // 
             // field1CLabel
             // 
@@ -370,6 +378,7 @@
             this.field1CUD.Name = "field1CUD";
             this.field1CUD.Size = new System.Drawing.Size(53, 20);
             this.field1CUD.TabIndex = 41;
+            this.field1CUD.ValueChanged += new System.EventHandler(this.field1CUD_ValueChanged);
             // 
             // timeUD
             // 
@@ -388,7 +397,7 @@
             this.timeUD.Name = "timeUD";
             this.timeUD.Size = new System.Drawing.Size(69, 20);
             this.timeUD.TabIndex = 28;
-            this.timeUD.ValueChanged += new System.EventHandler(this.startFrameUDValue_Changed);
+            this.timeUD.ValueChanged += new System.EventHandler(this.timeUD_ValueChanged);
             // 
             // timeLabel
             // 
@@ -416,7 +425,7 @@
             this.valueUD.Name = "valueUD";
             this.valueUD.Size = new System.Drawing.Size(69, 20);
             this.valueUD.TabIndex = 28;
-            this.valueUD.ValueChanged += new System.EventHandler(this.startFrameUDValue_Changed);
+            this.valueUD.ValueChanged += new System.EventHandler(this.valueUD_ValueChanged);
             // 
             // label1
             // 
@@ -444,7 +453,7 @@
             this.inParamUD.Name = "inParamUD";
             this.inParamUD.Size = new System.Drawing.Size(69, 20);
             this.inParamUD.TabIndex = 28;
-            this.inParamUD.ValueChanged += new System.EventHandler(this.startFrameUDValue_Changed);
+            this.inParamUD.ValueChanged += new System.EventHandler(this.inParamUD_ValueChanged);
             // 
             // inParamLabel
             // 
@@ -472,7 +481,7 @@
             this.outParamUD.Name = "outParamUD";
             this.outParamUD.Size = new System.Drawing.Size(69, 20);
             this.outParamUD.TabIndex = 28;
-            this.outParamUD.ValueChanged += new System.EventHandler(this.startFrameUDValue_Changed);
+            this.outParamUD.ValueChanged += new System.EventHandler(this.outParamUD_ValueChanged);
             // 
             // outParamLabel
             // 
@@ -508,11 +517,11 @@
             this.Size = new System.Drawing.Size(353, 344);
             ((System.ComponentModel.ISupportInitialize)(this.startFrameUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.endFrameUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.int48UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.curvTypeUD)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.int14UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.int0CUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.int14UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.float10UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.keysTypeUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.field18UD)).EndInit();
@@ -533,7 +542,7 @@
         private System.Windows.Forms.NumericUpDown endFrameUD;
         private System.Windows.Forms.Label endFrameLabel;
         private System.Windows.Forms.Label curvTypeLabel;
-        private System.Windows.Forms.NumericUpDown int48UD;
+        private System.Windows.Forms.NumericUpDown curvTypeUD;
         private System.Windows.Forms.Button animButton;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label curvSetLabel;
