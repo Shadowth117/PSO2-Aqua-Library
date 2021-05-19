@@ -2770,7 +2770,7 @@ namespace AquaModelLibrary
                 if (voiceNum > 31 && voiceNum < 900)
                 {
                     conversion += "ac";
-                    voiceNum -= 50;
+                    voiceNum -= 50; //Thanks to Selph!
                     string newVoiceNumStr = voiceNum.ToString();
                     if(voiceNum < 10)
                     {

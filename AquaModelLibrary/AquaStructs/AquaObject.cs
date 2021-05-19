@@ -242,6 +242,33 @@ namespace AquaModelLibrary
             public PSO2String alphaType; //0x3A, type 0x2 //Fixed length string for the alpha type of the mat. "opaque", "hollow", "blendalpha", and "add" are
                                          //all valid. Add is additive, and uses diffuse alpha for glow effects.
             public PSO2String matName;   //0x39, type 0x2 
+
+            public bool Equals(MATE c)
+            {
+
+                // Optimization for a common success case.
+                if (Object.ReferenceEquals(this, c))
+                {
+                    return true;
+                }
+
+                // If run-time types are not exactly the same, return false.
+                if (this.GetType() != c.GetType())
+                {
+                    return false;
+                }
+
+                return (reserve0 == c.reserve0) && (unkFloat0 == c.unkFloat0) && (unkFloat1 == c.unkFloat1) && (unkInt0 == c.unkInt0) && (unkInt1 == c.unkInt1)
+                    && (alphaType == c.alphaType) && (matName == c.matName) && isEqualVec4(diffuseRGBA, c.diffuseRGBA) && isEqualVec4(unkRGBA0, c.unkRGBA0)
+                    && isEqualVec4(_sRGBA, c._sRGBA) && isEqualVec4(unkRGBA1, c.unkRGBA1);
+            }
+
+            public static bool operator ==(MATE lhs, MATE rhs)
+            {
+                return lhs.Equals(rhs);
+            }
+
+            public static bool operator !=(MATE lhs, MATE rhs) => !(lhs == rhs);
         }
 
         public struct REND
@@ -263,7 +290,7 @@ namespace AquaModelLibrary
             public int unk8; //0x4B, type 0x9 //1 usually.
 
             public int unk9;  //0x4C, type 0x9 //5 usually
-            public int unk10; //0x4D, type 0x9 //0-256, opaque alpha setting? (Assumedly value of alpha at which a pixel is rendered invisible vs fully visible)
+            public int alphaCutoff; //0x4D, type 0x9 //0-256, (Assumedly value of alpha at which a pixel is rendered invisible vs fully visible)
             public int unk11; //0x4E, type 0x9 //1 usually
             public int unk12; //0x4F, type 0x9 //4 usually
 
@@ -285,7 +312,7 @@ namespace AquaModelLibrary
                 }
 
                 return (tag == c.tag) && (unk0 == c.unk0) && (twosided == c.twosided) && (int_0C == c.int_0C) && (unk1 == c.unk1) && (unk2 == c.unk2) && (unk3 == c.unk3) 
-                    && (unk4 == c.unk4) && (unk5 == c.unk5) && (unk6 == c.unk6) && (unk7 == c.unk7) && (unk8 == c.unk8) && (unk9 == c.unk9) && (unk10 == c.unk10) && (unk11 == c.unk11) 
+                    && (unk4 == c.unk4) && (unk5 == c.unk5) && (unk6 == c.unk6) && (unk7 == c.unk7) && (unk8 == c.unk8) && (unk9 == c.unk9) && (alphaCutoff == c.alphaCutoff) && (unk11 == c.unk11) 
                     && (unk12 == c.unk12) && (unk13 == c.unk13);
             }
 
@@ -971,6 +998,7 @@ namespace AquaModelLibrary
 
         public class stripData
         {
+            public bool psoTris = false;
             public bool format0xC33 = false;
             public int triIdCount; //0xB7, type 0x9 
             public int reserve0;
@@ -1001,10 +1029,9 @@ namespace AquaModelLibrary
                 triStrips = nvStrips[0].Indices.ToList();
             }
 
-            public List<Vector3> getTriangles(bool removeDegenFaces)
+            public List<Vector3> GetTriangles(bool removeDegenFaces = true)
             {
                 List<Vector3> tris = new List<Vector3>();
-
                 if (format0xC33 == false)
                 {
                     for (int vertIndex = 0; vertIndex < triStrips.Count - 2; vertIndex++)
@@ -1026,7 +1053,13 @@ namespace AquaModelLibrary
                         }
                         else
                         {
-                            tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 1], triStrips[vertIndex + 2]));
+                            if(psoTris == true)
+                            {
+                                tris.Add(new Vector3(triStrips[vertIndex + 1], triStrips[vertIndex + 2], triStrips[vertIndex]));
+                            } else
+                            {
+                                tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 1], triStrips[vertIndex + 2]));
+                            }
                         }
                     } 
 
@@ -1151,6 +1184,98 @@ namespace AquaModelLibrary
             public float unkFloat1 = 1;
             public int unkInt0 = 100;
             public int unkInt1 = 0;
+
+            public bool Equals(GenericMaterial c)
+            {
+
+                // Optimization for a common success case.
+                if (Object.ReferenceEquals(this, c))
+                {
+                    return true;
+                }
+
+                // If run-time types are not exactly the same, return false.
+                if (this.GetType() != c.GetType())
+                {
+                    return false;
+                }
+
+                //texNames
+                if (texNames == null || c.texNames == null)
+                {
+                    if (texNames != c.texNames)
+                    {
+                        return false;
+                    }
+                } else if (texNames.Count == c.texNames.Count)
+                {
+                    for (int i = 0; i < texNames.Count; i++)
+                    {
+                        if (texNames[i] != c.texNames[i])
+                        {
+                            return false;
+                        }
+                    }
+                } else
+                {
+                    return false;
+                }
+
+                //texUvSets
+                if (texUVSets == null || c.texUVSets == null)
+                {
+                    if (texUVSets != c.texUVSets)
+                    {
+                        return false;
+                    }
+                }
+                else if (texUVSets.Count == c.texUVSets.Count)
+                {
+                    for (int i = 0; i < texUVSets.Count; i++)
+                    {
+                        if (texUVSets[i] != c.texUVSets[i])
+                        {
+                            return false;
+                        }
+                    }
+                } else
+                {
+                    return false;
+                }
+
+                //shaderNames
+                if (shaderNames == null || c.shaderNames == null)
+                {
+                    if (shaderNames != c.shaderNames)
+                    {
+                        return false;
+                    }
+                }
+                else if(shaderNames.Count == c.shaderNames.Count)
+                {
+                    for (int i = 0; i < shaderNames.Count; i++)
+                    {
+                        if (shaderNames[i] != c.shaderNames[i])
+                        {
+                            return false;
+                        }
+                    }
+                }else
+                {
+                    return false;
+                }
+
+                return (reserve0 == c.reserve0) && (unkFloat0 == c.unkFloat0) && (unkFloat1 == c.unkFloat1) && (unkInt0 == c.unkInt0) && (unkInt1 == c.unkInt1)
+                    && (blendType == c.blendType) && (matName == c.matName) && isEqualVec4(diffuseRGBA, c.diffuseRGBA) && isEqualVec4(unkRGBA0, c.unkRGBA0)
+                    && (specialType == c.specialType) && (twoSided == c.twoSided) && isEqualVec4(_sRGBA, c._sRGBA) && isEqualVec4(unkRGBA1, c.unkRGBA1);
+            }
+
+            public static bool operator ==(GenericMaterial lhs, GenericMaterial rhs)
+            {
+                return lhs.Equals(rhs);
+            }
+
+            public static bool operator !=(GenericMaterial lhs, GenericMaterial rhs) => !(lhs == rhs);
         }
 
         //0xC33 variations of the format can recycle vtxl lists for multiple meshes. Neat, but not helpful for conversion purposes.

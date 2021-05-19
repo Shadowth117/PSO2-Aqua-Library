@@ -12,8 +12,6 @@ namespace AquaModelLibrary
 {
     public unsafe class NGSAquaObject : AquaObject
     {
-
-
         public enum NGSVertFlags : int
         {
             VertPosition = 0x0,

@@ -1,14 +1,15 @@
 ﻿using Reloaded.Memory.Streams;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows;
 using System.Numerics;
+using System.Text;
+using System.Windows;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.AquaObjectMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
+using static AquaModelLibrary.ModelExporter;
 using static AquaModelLibrary.VTBFMethods;
-using System;
-using System.Text;
 
 namespace AquaModelLibrary
 {
@@ -63,7 +64,7 @@ namespace AquaModelLibrary
                     set.afp = streamReader.Read<AquaPackage.AFPMain>();
                     type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += 0x40;
-                } else if(type.Equals("aqo\0") || type.Equals("tro\0"))
+                } else if (type.Equals("aqo\0") || type.Equals("tro\0"))
                 {
                     streamReader.Seek(0x4, SeekOrigin.Current);
                     type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
@@ -97,7 +98,7 @@ namespace AquaModelLibrary
             for (int modelIndex = 0; modelIndex < fileCount; modelIndex++)
             {
                 AquaPackage.AFPBase afp;
-                if(modelIndex > 0)
+                if (modelIndex > 0)
                 {
                     streamReader.Seek(0x10, SeekOrigin.Current);
                     afp = streamReader.Read<AquaPackage.AFPBase>();
@@ -128,7 +129,7 @@ namespace AquaModelLibrary
                             ReadClassicNIFLModel(streamReader, new ClassicAquaObject(), offset, aquaModels);
                             break;
                     }
-                    
+
                 }
             }
             return aquaModels;
@@ -684,10 +685,10 @@ namespace AquaModelLibrary
         public List<AquaObject> ReadVTBFModel(BufferedStreamReader streamReader, int fileCount, int firstFileSize)
         {
             List<AquaObject> aquaModels = new List<AquaObject>();
-            int fileSize = firstFileSize; 
-            
+            int fileSize = firstFileSize;
+
             //Handle .aqo/tro
-            if(fileSize == 0)
+            if (fileSize == 0)
             {
                 fileSize = (int)streamReader.BaseStream().Length;
 
@@ -699,7 +700,7 @@ namespace AquaModelLibrary
                 }
             }
 
-            for(int modelIndex = 0; modelIndex < fileCount; modelIndex++ )
+            for (int modelIndex = 0; modelIndex < fileCount; modelIndex++)
             {
                 AquaObject model = new ClassicAquaObject();
                 TPNTexturePattern tpn = new TPNTexturePattern();
@@ -710,7 +711,7 @@ namespace AquaModelLibrary
                 if (modelIndex > 0)
                 {
                     //There's 0x10 of padding present following the last model if it ends aligned to 0x10 already. Otherwise, padding to alignment.
-                    if(streamReader.Position() % 0x10 == 0)
+                    if (streamReader.Position() % 0x10 == 0)
                     {
                         streamReader.Seek(0x10, SeekOrigin.Current);
                     } else
@@ -722,7 +723,7 @@ namespace AquaModelLibrary
                     if (afp.fileTypeCString == 0x6E7074)
                     {
                         tpn.tpnAFPBase = afp;
-                    }  else if (afp.fileTypeCString == 0x6F7161 || afp.fileTypeCString == 0x6F7274)
+                    } else if (afp.fileTypeCString == 0x6F7161 || afp.fileTypeCString == 0x6F7274)
                     {
                         ((ClassicAquaObject)model).afp = afp;
                     } else
@@ -737,7 +738,7 @@ namespace AquaModelLibrary
                 if (tpn.tpnAFPBase.fileTypeCString == 0x6E7074)
                 {
                     tpn.header = streamReader.Read<TPNTexturePattern.tpnHeader>();
-                    for(int i = 0; i < tpn.header.count; i++)
+                    for (int i = 0; i < tpn.header.count; i++)
                     {
                         tpn.texSets.Add(streamReader.Read<TPNTexturePattern.texSet>());
                     }
@@ -745,7 +746,7 @@ namespace AquaModelLibrary
                 } else
                 {
                     streamReader.Seek(0x10, SeekOrigin.Current); //Skip the header and move to the tags
-                    while(streamReader.Position() < dataEnd)
+                    while (streamReader.Position() < dataEnd)
                     {
                         var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
 
@@ -754,14 +755,14 @@ namespace AquaModelLibrary
                         {
                             break;
                         }
-                        switch(tagType)
+                        switch (tagType)
                         {
                             case "ROOT":
                                 //We don't do anything with this right now.
                                 break;
                             case "OBJC":
                                 objcCount++;
-                                if(objcCount > 1)
+                                if (objcCount > 1)
                                 {
                                     throw new System.Exception("More than one OBJC! Weird things are going on!");
                                 }
@@ -774,7 +775,7 @@ namespace AquaModelLibrary
                                 break;
                             case "VTXE":
                                 var data2 = ReadVTBFTag(streamReader, out string tagType2, out int ptrCount2, out int entryCount2);
-                                if(tagType2 != "VTXL")
+                                if (tagType2 != "VTXL")
                                 {
                                     throw new System.Exception("VTXE without paired VTXL! Please report!");
                                 }
@@ -813,7 +814,7 @@ namespace AquaModelLibrary
                                 break;
                             case "SHAP":
                                 //Poor SHAP. It's empty and useless. If it's not, we should probably do something though.
-                                if(entryCount > 2)
+                                if (entryCount > 2)
                                 {
                                     throw new System.Exception("SHAP has more than 2 entries! Please report!");
                                 }
@@ -851,11 +852,11 @@ namespace AquaModelLibrary
         }
 
         //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
-        public void ConvertToClassicPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds)
+        public void ConvertToClassicPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool splitVerts = true)
         {
-            for (int msI = 0; msI < aquaModels.Count;  msI++)
+            for (int msI = 0; msI < aquaModels.Count; msI++)
             {
-                for(int aqI = 0; aqI < aquaModels[msI].models.Count; aqI++)
+                for (int aqI = 0; aqI < aquaModels[msI].models.Count; aqI++)
                 {
                     int totalStripsShorts = 0;
                     int totalVerts = 0;
@@ -866,21 +867,20 @@ namespace AquaModelLibrary
                     if (aquaModels[msI].models[aqI].vtxlList == null || aquaModels[msI].models[aqI].vtxlList.Count == 0)
                     {
                         VTXLFromFaceVerts(aquaModels[msI].models[aqI]);
-
-                        //Fix weights
-                        foreach(var vtxl in aquaModels[msI].models[aqI].vtxlList)
-                        {
-                            vtxl.processToPSO2Weights();
-                        }
+                    }
+                    //Fix weights
+                    foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
+                    {
+                        vtxl.processToPSO2Weights();
                     }
 
                     //Reindex materials if needed
-                    for(int mesh = 0; mesh < aquaModels[msI].models[aqI].tempTris.Count; mesh++)
+                    for (int mesh = 0; mesh < aquaModels[msI].models[aqI].tempTris.Count; mesh++)
                     {
                         var tempMesh = aquaModels[msI].models[aqI].tempTris[mesh];
                         if (tempMesh.matIdDict.Count > 0)
                         {
-                            for(int face = 0; face < tempMesh.matIdList.Count; face++)
+                            for (int face = 0; face < tempMesh.matIdList.Count; face++)
                             {
                                 tempMesh.matIdList[face] = tempMesh.matIdDict[tempMesh.matIdList[face]];
                             }
@@ -890,19 +890,22 @@ namespace AquaModelLibrary
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
                     BatchSplitByBoneCount(matModelSplit, outModel, 16);
                     RemoveAllUnusedBones(outModel);
-                    CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
+                    if (splitVerts)
+                    {
+                        CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
+                    }
 
                     //Set up materials and related data
-                    for(int mat = 0; mat < aquaModels[msI].models[aqI].tempMats.Count; mat++)
+                    for (int mat = 0; mat < aquaModels[msI].models[aqI].tempMats.Count; mat++)
                     {
                         GenerateMaterial(outModel, aquaModels[msI].models[aqI].tempMats[mat]);
                     }
 
                     //Set up PSETs and strips, and other per mesh data
-                    for(int i = 0; i < outModel.tempTris.Count; i++)
+                    for (int i = 0; i < outModel.tempTris.Count; i++)
                     {
                         //strips
-                        var strips = new AquaObject.stripData(outModel.tempTris[i].toUshortArray()); 
+                        var strips = new AquaObject.stripData(outModel.tempTris[i].toUshortArray());
                         outModel.strips.Add(strips);
                         totalStripsShorts += strips.triIdCount;
 
@@ -924,7 +927,7 @@ namespace AquaModelLibrary
                         mesh.rendIndex = mesh.mateIndex;
                         mesh.shadIndex = mesh.mateIndex;
                         mesh.tsetIndex = mesh.mateIndex;
-                        if(baHack)
+                        if (baHack)
                         {
                             mesh.baseMeshNodeId = 0;
                         } else
@@ -945,7 +948,7 @@ namespace AquaModelLibrary
                         outModel.meshList.Add(mesh);
                     }
 
-                    if(useBiTangent)
+                    if (useBiTangent)
                     {
                         //Generate Binormals and Tangents
                         computeTangentSpace(outModel, useFaceNormals);
@@ -992,7 +995,7 @@ namespace AquaModelLibrary
                     objc.tstaCount = outModel.tstaList.Count;
                     objc.tsetCount = outModel.tsetList.Count;
                     objc.texfCount = outModel.texfList.Count;
-                    if(!zeroBounds)
+                    if (!zeroBounds)
                     {
                         objc.bounds = GenerateBounding(outModel.vtxlList);
                     }
@@ -1124,7 +1127,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public void WriteClassicNIFLModel(string ogFileName, string outFileName)
+        public void WriteC33NIFLModel(string ogFileName, string outFileName)
         {
             bool package = outFileName.Contains(".aqp") || outFileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
             int modelCount = aquaModels[0].models.Count;
@@ -1135,7 +1138,8 @@ namespace AquaModelLibrary
                 finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
-            } else
+            }
+            else
             {
                 modelCount = 1;
             }
@@ -1145,7 +1149,7 @@ namespace AquaModelLibrary
             {
                 int bonusBytes = 0; //Should be 0 for NIFL
                 ClassicAquaObject model = (ClassicAquaObject)aquaModels[0].models[modelId];
-                
+
                 //Pointer data offsets for filling in later
                 int rel0SizeOffset;
 
@@ -1162,6 +1166,16 @@ namespace AquaModelLibrary
 
                 int objcTexfOffset;
                 int objcUnrmOffset;
+                int objcVtxeOffset;
+                int objcBonePaletteOffset;
+
+                int objcUnkOffset1;
+                int objcPset2Offset;
+                int objcMesh2Offset;
+                int objcUnkOffset2;
+
+                int objcUnkOffset3;
+                int objcUnkOffset4;
 
                 List<int> vsetVtxeOffsets = new List<int>();
                 List<int> vsetVtxlOffsets = new List<int>();
@@ -1194,13 +1208,18 @@ namespace AquaModelLibrary
                 objcTsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x60, model.objc.tsetCount);
 
                 objcTexfOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x68, model.objc.texfCount);
-                if(model.unrms != null)
+                if (model.unrms != null)
                 {
                     objcUnrmOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xA0, 1);
-                } else
+                }
+                else
                 {
                     objcUnrmOffset = -1;
                 }
+                objcVtxeOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xA8, model.objc.vtxeCount);
+                objcBonePaletteOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xAC, model.bonePalette.Count);
+                objcPset2Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xCC, model.pset2List.Count);
+                objcMesh2Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xD4, model.mesh2List.Count);
 
                 //Write OBJC block
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.type));
@@ -1236,11 +1255,53 @@ namespace AquaModelLibrary
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.tsetOffset));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.texfCount));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.texfOffset));
-                
+
                 outBytes.AddRange(ConvertStruct(model.objc.bounds));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount0));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.unrmOffset));
 
+                //0xC33 sections
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.vtxeCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.vtxeOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.bonePaletteOffset));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.fBlock0));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.fBlock1));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.fBlock2));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.fBlock3));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount1));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset1));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.pset2Count));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.pset2Offset));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Count));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Offset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkInt0));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount2));   //Default to 1?
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset2));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset3));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset4));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount3));   //Default to 1?
+
+                AlignWriter(outBytes, 0x10);
+
+                //Write triangles. NGS doesn't use tristrips anymore
+                for(int i = 0; i < model.strips.Count; i++)
+                {
+                    foreach(var id in model.strips[i].triStrips)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(id));
+                    }
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //Write NGS VTXL
+                for (int i = 0; i < model.vtxlList.Count; i++)
+                {
+
+                }
                 AlignWriter(outBytes, 0x10);
 
                 //VSET
@@ -1265,7 +1326,7 @@ namespace AquaModelLibrary
                     //Write VTXE pointer
                     SetByteListInt(outBytes, vsetVtxeOffsets[vertListId], outBytes.Count);
                     //Write current VTXE array
-                    for(int vtxeId = 0; vtxeId < model.vtxeList[vertListId].vertDataTypes.Count; vtxeId++)
+                    for (int vtxeId = 0; vtxeId < model.vtxeList[vertListId].vertDataTypes.Count; vtxeId++)
                     {
                         outBytes.AddRange(ConvertStruct(model.vtxeList[vertListId].vertDataTypes[vtxeId]));
                     }
@@ -1276,7 +1337,7 @@ namespace AquaModelLibrary
                     WriteClassicVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
                     AlignWriter(outBytes, 0x10);
 
-                    if(model.vtxlList[vertListId].bonePalette != null)
+                    if (model.vtxlList[vertListId].bonePalette != null)
                     {
                         //Write bone palette pointer
                         SetByteListInt(outBytes, vsetBonePaletteOffsets[vertListId], outBytes.Count);
@@ -1307,7 +1368,7 @@ namespace AquaModelLibrary
                 SetByteListInt(outBytes, objcPsetOffset, outBytes.Count);
 
                 //Write PSET
-                for(int psetId = 0; psetId < model.psetList.Count; psetId++)
+                for (int psetId = 0; psetId < model.psetList.Count; psetId++)
                 {
                     psetfirstOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
                     nof0PointerLocations.Add(outBytes.Count + 0x10);
@@ -1326,7 +1387,7 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve1));
                     outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve2));
 
-                    for(int faceId = 0; faceId < model.strips[stripId].triStrips.Count; faceId++)
+                    for (int faceId = 0; faceId < model.strips[stripId].triStrips.Count; faceId++)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triStrips[faceId]));
                     }
@@ -1386,7 +1447,7 @@ namespace AquaModelLibrary
                 AlignWriter(outBytes, 0x10);
 
                 //TSTA
-                if(model.tstaList.Count > 0)
+                if (model.tstaList.Count > 0)
                 {
                     //Write TSTA pointer
                     SetByteListInt(outBytes, objcTstaOffset, outBytes.Count);
@@ -1413,9 +1474,442 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].unkInt2));
 
                     outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].unkInt3));
-                    
+
                     //Do as bytes for greater than 4, ints if 4 or less. Remainder of the 0x10 area should be 0xFF.
-                    if(model.tsetList[tsetId].texCount > 4)
+                    if (model.tsetList[tsetId].texCount > 4)
+                    {
+                        for (int i = 0; i < model.tsetList[tsetId].texCount; i++)
+                        {
+                            outBytes.Add((byte)model.tsetList[tsetId].tstaTexIDs[i]);
+                        }
+                        for (int i = 0; i < (0x10 - model.tsetList[tsetId].texCount); i++)
+                        {
+                            outBytes.Add(0xFF);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < model.tsetList[tsetId].texCount; i++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].tstaTexIDs[i]));
+                        }
+                        for (int i = 0; i < (0x10 - (model.tsetList[tsetId].texCount * sizeof(int))); i++)
+                        {
+                            outBytes.Add(0xFF);
+                        }
+                    }
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //TEXF
+                if (model.tstaList.Count > 0)
+                {
+                    //Write TEXF pointer
+                    SetByteListInt(outBytes, objcTexfOffset, outBytes.Count);
+
+                    //Write TEXF
+                    for (int texfId = 0; texfId < model.texfList.Count; texfId++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.texfList[texfId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //UNRM
+                if (model.unrms != null)
+                {
+                    int meshIDPointerOffset = 0;
+                    int vertIDPointerOffset = 0;
+
+                    //Write UNRM pointer
+                    SetByteListInt(outBytes, objcUnrmOffset, outBytes.Count);
+
+                    //Write UNRM
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertGroupCountCount));
+                    NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                    outBytes.AddRange(BitConverter.GetBytes(outBytes.Count + 0x1C)); //Should always start a set amount after here
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertCount));
+                    meshIDPointerOffset = NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.meshIdOffset));
+                    vertIDPointerOffset = NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.vertIDOffset));
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.padding0));
+                    outBytes.AddRange(BitConverter.GetBytes(model.unrms.padding1));
+
+                    //Write group counts
+                    for (int i = 0; i < model.unrms.unrmVertGroups.Count; i++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmVertGroups[i]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write Mesh Ids
+                    SetByteListInt(outBytes, meshIDPointerOffset, outBytes.Count);
+                    for (int i = 0; i < model.unrms.unrmMeshIds.Count; i++)
+                    {
+                        for (int j = 0; j < model.unrms.unrmMeshIds[i].Count; j++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmMeshIds[i][j]));
+                        }
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write Vert Ids
+                    SetByteListInt(outBytes, vertIDPointerOffset, outBytes.Count);
+                    for (int i = 0; i < model.unrms.unrmMeshIds.Count; i++)
+                    {
+                        for (int j = 0; j < model.unrms.unrmMeshIds[i].Count; j++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmVertIds[i][j]));
+                        }
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //Write REL0 Size
+                SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+                //NOF0
+                int NOF0Offset = outBytes.Count;
+                int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+                int NOF0FullSize = NOF0Size + 0x8;
+                outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+                outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //Write pointer offsets
+                for (int i = 0; i < nof0PointerLocations.Count; i++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+                }
+                NOF0FullSize += AlignWriter(outBytes, 0x10);
+
+                //NEND
+                outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+                outBytes.AddRange(BitConverter.GetBytes(0x8));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //Generate NIFL
+                AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+                nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+                nifl.NIFLLength = 0x18;
+                nifl.unkInt0 = 1;
+                nifl.offsetAddition = 0x20;
+
+                nifl.NOF0Offset = NOF0Offset;
+                nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+                nifl.NOF0BlockSize = NOF0FullSize;
+                nifl.padding0 = 0;
+
+                //Write NIFL
+                outBytes.InsertRange(0, ConvertStruct(nifl));
+                AlignFileEndWrite(outBytes, 0x10);
+
+                //Write AFP Base
+                int size = outBytes.Count - 0x10; //Size is 0x10 less than what it would be for VTBF afp headers for some reason
+                WriteAFPBase(ogFileName, package, modelId, bonusBytes, outBytes, size);
+
+                finalOutBytes.AddRange(outBytes);
+            }
+            WriteTPN(package, finalOutBytes);
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
+        }
+
+        public void WriteClassicNIFLModel(string ogFileName, string outFileName)
+        {
+            bool package = outFileName.Contains(".aqp") || outFileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
+            int modelCount = aquaModels[0].models.Count;
+            List<byte> finalOutBytes = new List<byte>();
+            if (package)
+            {
+                finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
+                finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
+                finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
+            } else
+            {
+                modelCount = 1;
+            }
+
+            //Write model data out
+            for (int modelId = 0; modelId < modelCount; modelId++)
+            {
+                int bonusBytes = 0; //Should be 0 for NIFL
+                ClassicAquaObject model = (ClassicAquaObject)aquaModels[0].models[modelId];
+
+                //Pointer data offsets for filling in later
+                int rel0SizeOffset;
+
+                //OBJC Offsets
+                int objcVsetOffset;
+                int objcPsetOffset;
+                int objcMeshOffset;
+                int objcMateOffset;
+
+                int objcRendOffset;
+                int objcShadOffset;
+                int objcTstaOffset;
+                int objcTsetOffset;
+
+                int objcTexfOffset;
+                int objcUnrmOffset;
+
+                List<int> vsetVtxeOffsets = new List<int>();
+                List<int> vsetVtxlOffsets = new List<int>();
+                List<int> vsetBonePaletteOffsets = new List<int>();
+                List<int> vsetEdgeVertOffsets = new List<int>();
+
+                List<int> psetfirstOffsets = new List<int>();
+
+                List<byte> outBytes = new List<byte>();
+                List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+                //REL0
+                outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+                rel0SizeOffset = outBytes.Count; //We'll fill this later
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0x10));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+
+                //OBJC
+
+                //Set up OBJC pointers
+                objcVsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x28, model.objc.vsetCount);
+                objcPsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, model.objc.psetCount);
+                objcMeshOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x38, model.objc.meshCount);
+                objcMateOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x40, model.objc.mateCount);
+
+                objcRendOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x48, model.objc.rendCount);
+                objcShadOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x50, model.objc.shadCount);
+                objcTstaOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x58, model.objc.tstaCount);
+                objcTsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x60, model.objc.tsetCount);
+
+                objcTexfOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x68, model.objc.texfCount);
+                if (model.unrms != null)
+                {
+                    objcUnrmOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xA0, 1);
+                } else
+                {
+                    objcUnrmOffset = -1;
+                }
+
+                //Write OBJC block
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.type));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.size));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkMeshValue));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.largetsVtxl));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.totalStripFaces));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStripOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.totalVTXLCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.vtxlStartOffset));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkStructCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.vsetCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.vsetOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.psetCount));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.psetOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.meshCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.meshOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.mateCount));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.mateOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.rendCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.rendOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.shadCount));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.shadOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.tstaCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.tstaOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.tsetCount));
+
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.tsetOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.texfCount));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.texfOffset));
+
+                outBytes.AddRange(ConvertStruct(model.objc.bounds));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount0));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unrmOffset));
+
+                AlignWriter(outBytes, 0x10);
+
+                //VSET
+                //Write VSET pointer
+                SetByteListInt(outBytes, objcVsetOffset, outBytes.Count);
+
+                //Write VSET
+                for (int vsetId = 0; vsetId < model.vsetList.Count; vsetId++)
+                {
+                    vsetVtxeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8, model.vsetList[vsetId].vtxeCount));
+                    vsetVtxlOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x10, model.vsetList[vsetId].vtxlCount));
+                    vsetBonePaletteOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, model.vsetList[vsetId].bonePaletteCount));
+                    vsetEdgeVertOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, model.vsetList[vsetId].edgeVertsCount));
+
+                    outBytes.AddRange(ConvertStruct(model.vsetList[vsetId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //VTXE + VTXL
+                for (int vertListId = 0; vertListId < model.vtxlList.Count; vertListId++)
+                {
+                    //Write VTXE pointer
+                    SetByteListInt(outBytes, vsetVtxeOffsets[vertListId], outBytes.Count);
+                    //Write current VTXE array
+                    for (int vtxeId = 0; vtxeId < model.vtxeList[vertListId].vertDataTypes.Count; vtxeId++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.vtxeList[vertListId].vertDataTypes[vtxeId]));
+                    }
+
+                    //Write VTXL pointer
+                    SetByteListInt(outBytes, vsetVtxlOffsets[vertListId], outBytes.Count);
+                    //Write current VTXL array
+                    WriteClassicVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
+                    AlignWriter(outBytes, 0x10);
+
+                    if (model.vtxlList[vertListId].bonePalette != null)
+                    {
+                        //Write bone palette pointer
+                        SetByteListInt(outBytes, vsetBonePaletteOffsets[vertListId], outBytes.Count);
+                        //Write bone palette
+                        for (int bpId = 0; bpId < model.vtxlList[vertListId].bonePalette.Count; bpId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].bonePalette[bpId]));
+                        }
+                        AlignWriter(outBytes, 0x10);
+                    }
+
+                    if (model.vtxlList[vertListId].edgeVerts != null)
+                    {
+                        //Write edge verts pointer
+                        SetByteListInt(outBytes, vsetEdgeVertOffsets[vertListId], outBytes.Count);
+                        //Write edge verts
+                        for (int evId = 0; evId < model.vtxlList[vertListId].edgeVerts.Count; evId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].edgeVerts[evId]));
+                        }
+                        AlignWriter(outBytes, 0x10);
+                    }
+                }
+
+                //PSET
+
+                //Write PSET pointer
+                SetByteListInt(outBytes, objcPsetOffset, outBytes.Count);
+
+                //Write PSET
+                for (int psetId = 0; psetId < model.psetList.Count; psetId++)
+                {
+                    psetfirstOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
+                    nof0PointerLocations.Add(outBytes.Count + 0x10);
+                    outBytes.AddRange(ConvertStruct(model.psetList[psetId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //Write tristrip data
+                for (int stripId = 0; stripId < model.strips.Count; stripId++)
+                {
+                    SetByteListInt(outBytes, psetfirstOffsets[stripId], outBytes.Count);
+                    SetByteListInt(outBytes, psetfirstOffsets[stripId] + 0x8, outBytes.Count + 0x10); //Strip indices offset; always a set distance
+
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triIdCount));
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve0));
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve1));
+                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve2));
+
+                    for (int faceId = 0; faceId < model.strips[stripId].triStrips.Count; faceId++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triStrips[faceId]));
+                    }
+                    AlignWriter(outBytes, 0x10); //Intentionally aligned inside, unlike the basic PSET array's alignment
+                }
+
+                //MESH
+
+                //Write MESH pointer
+                SetByteListInt(outBytes, objcMeshOffset, outBytes.Count);
+
+                //Write MESH
+                for (int meshId = 0; meshId < model.meshList.Count; meshId++)
+                {
+                    outBytes.AddRange(ConvertStruct(model.meshList[meshId]));
+                }
+
+                //MATE
+
+                //Write MATE pointer
+                SetByteListInt(outBytes, objcMateOffset, outBytes.Count);
+
+                //Write MATE
+                for (int mateId = 0; mateId < model.mateList.Count; mateId++)
+                {
+                    outBytes.AddRange(ConvertStruct(model.mateList[mateId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //REND
+
+                //Write REND pointer
+                SetByteListInt(outBytes, objcRendOffset, outBytes.Count);
+
+                //Write REND
+                for (int rendId = 0; rendId < model.rendList.Count; rendId++)
+                {
+                    outBytes.AddRange(ConvertStruct(model.rendList[rendId]));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //SHAD
+
+                //Write SHAD pointer
+                SetByteListInt(outBytes, objcShadOffset, outBytes.Count);
+
+                //Write SHAD
+                for (int shadId = 0; shadId < model.shadList.Count; shadId++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(model.shadList[shadId].unk0));
+                    outBytes.AddRange(model.shadList[shadId].pixelShader.GetBytes());
+                    outBytes.AddRange(model.shadList[shadId].vertexShader.GetBytes());
+
+                    outBytes.AddRange(BitConverter.GetBytes(model.shadList[shadId].shadDetailOffset));
+                    outBytes.AddRange(BitConverter.GetBytes(model.shadList[shadId].shadExtraOffset));
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //TSTA
+                if (model.tstaList.Count > 0)
+                {
+                    //Write TSTA pointer
+                    SetByteListInt(outBytes, objcTstaOffset, outBytes.Count);
+
+                    //Write TSTA
+                    for (int tstaId = 0; tstaId < model.tstaList.Count; tstaId++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.tstaList[tstaId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //TSET
+
+                //Write TSET pointer
+                SetByteListInt(outBytes, objcTsetOffset, outBytes.Count);
+
+                //Write TSET
+                for (int tsetId = 0; tsetId < model.tsetList.Count; tsetId++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].unkInt0));
+                    outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].texCount));
+                    outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].unkInt1));
+                    outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].unkInt2));
+
+                    outBytes.AddRange(BitConverter.GetBytes(model.tsetList[tsetId].unkInt3));
+
+                    //Do as bytes for greater than 4, ints if 4 or less. Remainder of the 0x10 area should be 0xFF.
+                    if (model.tsetList[tsetId].texCount > 4)
                     {
                         for (int i = 0; i < model.tsetList[tsetId].texCount; i++)
                         {
@@ -1475,7 +1969,7 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes(model.unrms.padding1));
 
                     //Write group counts
-                    for(int i = 0; i < model.unrms.unrmVertGroups.Count; i++)
+                    for (int i = 0; i < model.unrms.unrmVertGroups.Count; i++)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmVertGroups[i]));
                     }
@@ -1485,7 +1979,7 @@ namespace AquaModelLibrary
                     SetByteListInt(outBytes, meshIDPointerOffset, outBytes.Count);
                     for (int i = 0; i < model.unrms.unrmMeshIds.Count; i++)
                     {
-                        for(int j = 0; j < model.unrms.unrmMeshIds[i].Count; j++)
+                        for (int j = 0; j < model.unrms.unrmMeshIds[i].Count; j++)
                         {
                             outBytes.AddRange(BitConverter.GetBytes(model.unrms.unrmMeshIds[i][j]));
                         }
@@ -1600,7 +2094,7 @@ namespace AquaModelLibrary
             bones.nifl = streamReader.Read<AquaCommon.NIFL>();
             bones.rel0 = streamReader.Read<AquaCommon.REL0>();
             bones.ndtr = streamReader.Read<AquaNode.NDTR>();
-            for(int i = 0; i < bones.ndtr.boneCount; i++)
+            for (int i = 0; i < bones.ndtr.boneCount; i++)
             {
                 bones.nodeList.Add(streamReader.Read<AquaNode.NODE>());
             }
@@ -1743,7 +2237,7 @@ namespace AquaModelLibrary
                     //Decide whether this is a tpn or not
                     var afp = streamReader.Read<AquaPackage.AFPBase>();
                     motion.afp = afp;
-                    
+
                     fileSize = motion.afp.paddingOffset;
                 }
                 int dataEnd = (int)streamReader.Position() + fileSize;
@@ -1846,7 +2340,7 @@ namespace AquaModelLibrary
                     {
                         streamReader.Seek(motion.motionKeys[i].keyData[j].timeAddress + offset, SeekOrigin.Begin);
 
-                        if(motion.motionKeys[i].keyData[j].keyCount > 1)
+                        if (motion.motionKeys[i].keyData[j].keyCount > 1)
                         {
                             for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
                             {
@@ -1932,7 +2426,7 @@ namespace AquaModelLibrary
                 AquaMotion motion = aquaMotions[0].anims[i];
                 outBytes.AddRange(toAQGFVTBF());
                 outBytes.AddRange(toROOT());
-                switch(motion.moHeader.variant)
+                switch (motion.moHeader.variant)
                 {
                     case AquaMotion.stdAnim:
                     case AquaMotion.stdPlayerAnim:
@@ -1945,16 +2439,16 @@ namespace AquaModelLibrary
                         outBytes.AddRange(toCAMO(motion.moHeader));
                         break;
                 }
-                for(int mseg = 0; mseg < motion.motionKeys.Count; mseg++)
+                for (int mseg = 0; mseg < motion.motionKeys.Count; mseg++)
                 {
                     outBytes.AddRange(toMSEG(motion.motionKeys[mseg].mseg));
-                    for(int keys = 0; keys < motion.motionKeys[mseg].keyData.Count; keys++)
+                    for (int keys = 0; keys < motion.motionKeys[mseg].keyData.Count; keys++)
                     {
                         outBytes.AddRange(toMKEY(motion.motionKeys[mseg].keyData[keys]));
                     }
                 }
 
-                if(package)
+                if (package)
                 {
                     //Header info
                     int size = outBytes.Count;
@@ -2021,7 +2515,7 @@ namespace AquaModelLibrary
                 outBytes.AddRange(BitConverter.GetBytes((int)0x0));
 
                 //Bonelist
-                for(int i = 0; i < motion.motionKeys.Count; i++)
+                for (int i = 0; i < motion.motionKeys.Count; i++)
                 {
                     boneOffAddresses.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
                     outBytes.AddRange(ConvertStruct(motion.motionKeys[i].mseg));
@@ -2035,10 +2529,10 @@ namespace AquaModelLibrary
 
                     SetByteListInt(outBytes, boneOffAddresses[i], outBytes.Count);
                     //Write keyset info
-                    for(int keySet = 0; keySet < motion.motionKeys[i].keyData.Count; keySet++)
+                    for (int keySet = 0; keySet < motion.motionKeys[i].keyData.Count; keySet++)
                     {
                         dataOffsets[keySet] = NOF0Append(nof0PointerLocations, outBytes.Count + 0x10);
-                        if(motion.motionKeys[i].keyData[keySet].keyCount > 1)
+                        if (motion.motionKeys[i].keyData[keySet].keyCount > 1)
                         {
                             timeOffsets[keySet] = NOF0Append(nof0PointerLocations, outBytes.Count + 0x14);
                         }
@@ -2058,7 +2552,7 @@ namespace AquaModelLibrary
                         if (motion.motionKeys[i].keyData[keySet].keyCount > 1)
                         {
                             SetByteListInt(outBytes, timeOffsets[keySet], outBytes.Count);
-                            for(int time = 0; time < motion.motionKeys[i].keyData[keySet].keyCount; time++)
+                            for (int time = 0; time < motion.motionKeys[i].keyData[keySet].keyCount; time++)
                             {
                                 //Beginning time should internally be 0x1 while ending time should have a 2 in the ones decimal place
                                 outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].frameTimings[time]));
@@ -2069,7 +2563,7 @@ namespace AquaModelLibrary
                         SetByteListInt(outBytes, dataOffsets[keySet], outBytes.Count);
                         for (int data = 0; data < motion.motionKeys[i].keyData[keySet].keyCount; data++)
                         {
-                            switch(motion.motionKeys[i].keyData[keySet].dataType)
+                            switch (motion.motionKeys[i].keyData[keySet].dataType)
                             {
                                 //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                                 case 0x1:
@@ -2185,7 +2679,7 @@ namespace AquaModelLibrary
                     //Read main TCB verts
                     streamReader.Seek(tcbModel.tcbInfo.vertexDataOffset + offset, SeekOrigin.Begin);
                     List<Vector3> verts = new List<Vector3>();
-                    for(int i = 0; i < tcbModel.tcbInfo.vertexCount; i++)
+                    for (int i = 0; i < tcbModel.tcbInfo.vertexCount; i++)
                     {
                         verts.Add(streamReader.Read<Vector3>());
                     }
@@ -2237,7 +2731,7 @@ namespace AquaModelLibrary
 
             //Write vertices
             tcbModel.tcbInfo.vertexDataOffset = outBytes.Count + 0x10;
-            for(int i = 0; i < tcbModel.vertices.Count; i++)
+            for (int i = 0; i < tcbModel.vertices.Count; i++)
             {
                 outBytes.AddRange(ConvertStruct(tcbModel.vertices[i]));
             }
@@ -2251,7 +2745,7 @@ namespace AquaModelLibrary
 
             //Write materials
             tcbModel.tcbInfo.materialDataOFfset = outBytes.Count + 0x10;
-            for(int i = 0; i < tcbModel.materials.Count; i++)
+            for (int i = 0; i < tcbModel.materials.Count; i++)
             {
                 outBytes.AddRange(ConvertStruct(tcbModel.materials[i]));
             }
@@ -2308,7 +2802,7 @@ namespace AquaModelLibrary
                             prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType01Vert>()));
                         }
 
-                        if(prmModel.header.groupIndexCount > 0)
+                        if (prmModel.header.groupIndexCount > 0)
                         {
                             faceCount = prmModel.header.groupIndexCount / 3;
 
@@ -2320,7 +2814,7 @@ namespace AquaModelLibrary
                         } else
                         {
                             faceCount = prmModel.header.entryCount;
-                            for (int i = 0; i < faceCount; i+= 3)
+                            for (int i = 0; i < faceCount; i += 3)
                             {
                                 prmModel.faces.Add(new Vector3(i, i + 1, i + 2));
                             }
@@ -2330,7 +2824,7 @@ namespace AquaModelLibrary
                         MessageBox.Show("Unimplemented PRM version! Please report if found!");
                         return;
                     case 3:
-                        for(int i = 0; i < prmModel.header.entryCount; i++)
+                        for (int i = 0; i < prmModel.header.entryCount; i++)
                         {
                             prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
                         }
@@ -2387,9 +2881,9 @@ namespace AquaModelLibrary
             }
             finalOutBytes.AddRange(BitConverter.GetBytes(version));
 
-            for(int i = 0; i < prmModels[0].vertices.Count; i++)
+            for (int i = 0; i < prmModels[0].vertices.Count; i++)
             {
-                switch(version)
+                switch (version)
                 {
                     case 3:
                         var vert3 = prmModels[0].vertices[i].GetType03Vert();
@@ -2427,7 +2921,7 @@ namespace AquaModelLibrary
                 }
             }
 
-            for(int i = 0; i < prmModels[0].faces.Count; i++)
+            for (int i = 0; i < prmModels[0].faces.Count; i++)
             {
                 finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].X));
                 finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].Y));
@@ -2451,7 +2945,7 @@ namespace AquaModelLibrary
             }
 
             PRMModel prmModel = new PRMModel();
-            for(int i = 0; i < aquaModels[0].models[0].vtxlList[0].vertPositions.Count; i++)
+            for (int i = 0; i < aquaModels[0].models[0].vtxlList[0].vertPositions.Count; i++)
             {
                 PRMModel.PRMVert prmVert = new PRMModel.PRMVert();
 
@@ -2485,7 +2979,7 @@ namespace AquaModelLibrary
         public byte[] returnModelType(string fileName)
         {
             string ext = Path.GetExtension(fileName);
-            if(ext.Equals(".aqp") || ext.Equals(".aqo"))
+            if (ext.Equals(".aqp") || ext.Equals(".aqo"))
             {
                 return new byte[] { 0x61, 0x71, 0x6F, 0 };
             }
@@ -2558,7 +3052,7 @@ namespace AquaModelLibrary
 
         public int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
         {
-            if(countToCheck < 1)
+            if (countToCheck < 1)
             {
                 return -1;
             }
@@ -2603,7 +3097,7 @@ namespace AquaModelLibrary
                     streamReader.Seek(0x8, SeekOrigin.Current);          //VTBF 
                     output.AppendLine(Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>())) + ":"); //Type
                     streamReader.Seek(0x4, SeekOrigin.Current); //0x1 short and 0x4C00 short. Seem to be constants.
-                    
+
                     while (streamReader.Position() < dataEnd)
                     {
                         var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
@@ -2617,7 +3111,7 @@ namespace AquaModelLibrary
                                     goto FINISH;
                                 } else
                                 {
-                                    if(!tagTracker.ContainsKey(tagType))
+                                    if (!tagTracker.ContainsKey(tagType))
                                     {
                                         tagTracker.Add(tagType, new List<int>());
                                     }
@@ -2625,12 +3119,12 @@ namespace AquaModelLibrary
                                     output.AppendLine($"{tagType} Pointers: {ptrCount} # of entries: {entryCount}");
 
                                     //Loop through data
-                                    for(int dictId = 0; dictId < data.Count; dictId++)
+                                    for (int dictId = 0; dictId < data.Count; dictId++)
                                     {
                                         var dict = data[dictId];
 
                                         //Many VTBF tags contain arrays of their data, but many don't. If it does we want to count those ids. We store both as a list here either way.
-                                        if(data.Count > 1)
+                                        if (data.Count > 1)
                                         {
                                             output.AppendLine("");
                                             output.AppendLine($"Set {dictId}:");
@@ -2639,11 +3133,11 @@ namespace AquaModelLibrary
                                         //Loop through values
                                         foreach (var pair in dict)
                                         {
-                                            if(!tagTracker[tagType].Contains(pair.Key))
+                                            if (!tagTracker[tagType].Contains(pair.Key))
                                             {
                                                 tagTracker[tagType].Add(pair.Key);
                                             }
-                                            
+
                                             output.Append(pair.Key.ToString("X") + ": ");
 
                                             //VTBF data here can be either an array or a value of an arbitrary type. We check here if we have to iterate or not.
@@ -2676,7 +3170,7 @@ namespace AquaModelLibrary
                                                         for (int num = 0; num < obj.Length; num++)
                                                         {
                                                             line += obj[num];
-                                                            if(num + 1 != obj.Length)
+                                                            if (num + 1 != obj.Length)
                                                             {
                                                                 line += ", ";
                                                             }
@@ -2719,7 +3213,7 @@ namespace AquaModelLibrary
                         }
                     }
 
-                    FINISH:
+                FINISH:
                     output.AppendLine("");
                     output.AppendLine("*******************************");
                     output.AppendLine("Sub tag tracking per tag");
@@ -2737,7 +3231,7 @@ namespace AquaModelLibrary
                             }
                             else
                             {
-                                if(line == "")
+                                if (line == "")
                                 {
                                     output.AppendLine(",");
                                 } else
@@ -2838,7 +3332,7 @@ namespace AquaModelLibrary
             streamReader.Seek(streamReader.Read<int>() + offset, SeekOrigin.Begin);
 
             StringBuilder output = new StringBuilder();
-            while(true)
+            while (true)
             {
                 int category = streamReader.Read<int>(); //Category?
                 int id = streamReader.Read<int>(); //id
@@ -2979,7 +3473,7 @@ namespace AquaModelLibrary
             if (aquaEffect[0].efct.emits.Count > 0)
             {
                 SetByteListInt(outBytes, efctEmitOffset, outBytes.Count);
-                for(int emit = 0; emit < aquaEffect[0].efct.emits.Count; emit++)
+                for (int emit = 0; emit < aquaEffect[0].efct.emits.Count; emit++)
                 {
                     emitCurvOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, aquaEffect[0].efct.emits[emit].curvs.Count));
                     emitPtclOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0xF0, aquaEffect[0].efct.emits[emit].ptcls.Count));
@@ -2987,7 +3481,7 @@ namespace AquaModelLibrary
                 }
 
                 //The substructs are written after the set so we follow this here too
-                for(int emit = 0; emit < aquaEffect[0].efct.emits.Count; emit++)
+                for (int emit = 0; emit < aquaEffect[0].efct.emits.Count; emit++)
                 {
                     List<int> ptclCurvOffsets = new List<int>();
                     List<int> ptclStringOffsets = new List<int>();
@@ -3073,7 +3567,7 @@ namespace AquaModelLibrary
 
             //Write NIFL
             outBytes.InsertRange(0, ConvertStruct(nifl));
-            
+
             finalOutBytes.AddRange(outBytes);
 
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
@@ -3084,7 +3578,7 @@ namespace AquaModelLibrary
             List<int> keysOffsets = new List<int>();
             List<int> timeOffsets = new List<int>();
             //CURV
-            for(int i = 0; i < anim.curvs.Count; i++)
+            for (int i = 0; i < anim.curvs.Count; i++)
             {
 
                 keysOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x18, anim.curvs[i].curv.keysCount));
@@ -3133,8 +3627,8 @@ namespace AquaModelLibrary
             efct.efct = streamReader.Read<AquaEffect.EFCT>();
             effect.efct = efct;
             ReadNIFLAQECurves(streamReader, efct, efct.efct.curvCount, efct.efct.curvOffset, offset);
-            
-            if(efct.efct.emitCount > 0)
+
+            if (efct.efct.emitCount > 0)
             {
                 streamReader.Seek(efct.efct.emitOffset + offset, SeekOrigin.Begin);
 
@@ -3156,7 +3650,7 @@ namespace AquaModelLibrary
                             ReadNIFLAQECurves(streamReader, ptcl, ptcl.ptcl.curvCount, ptcl.ptcl.curvOffset, offset);
 
                             long bookmark = streamReader.Position();
-                            if(ptcl.ptcl.ptclStringsOffset > 0)
+                            if (ptcl.ptcl.ptclStringsOffset > 0)
                             {
                                 streamReader.Seek(ptcl.ptcl.ptclStringsOffset + offset, SeekOrigin.Begin);
                                 ptcl.strings = streamReader.Read<AquaEffect.PTCLStrings>();
@@ -3193,7 +3687,7 @@ namespace AquaModelLibrary
                 }
                 for (int i = 0; i < curvCount; i++)
                 {
-                    if(efct.curvs[i].curv.keysCount > 0)
+                    if (efct.curvs[i].curv.keysCount > 0)
                     {
                         streamReader.Seek(efct.curvs[i].curv.keysOffset + offset, SeekOrigin.Begin);
                         for (int key = 0; key < efct.curvs[i].curv.keysCount; key++)
@@ -3201,7 +3695,7 @@ namespace AquaModelLibrary
                             efct.curvs[i].keys.Add(streamReader.Read<AquaEffect.KEYS>());
                         }
                     }
-                    if(efct.curvs[i].curv.timeCount > 0)
+                    if (efct.curvs[i].curv.timeCount > 0)
                     {
                         streamReader.Seek(efct.curvs[i].curv.timeOffset + offset, SeekOrigin.Begin);
                         for (int key = 0; key < efct.curvs[i].curv.timeCount; key++)
@@ -3271,52 +3765,40 @@ namespace AquaModelLibrary
             return effect;
         }
 
-        //For now, we'll just assume we don't care about LOD models and export the first model stored
-        /*
-        public void ExportToDae(string filePath)
+        public void ExportToGLTF(string filePath)
         {
-            if(aquaModels.Count == 0 || aquaBones.Count == 0)
+            var model = aquaModels[0].models[0];
+            var bones = aquaBones[0];
+
+            ToGLTF(filePath, model);
+        }
+
+        public void ReadNN(string filePath)
+        {
+            using (Stream stream = (Stream)new FileStream(filePath, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                MessageBox.Show("You can't export a model without a skeleton!");
-                return;
-            }
+                int dataEnd = (int)streamReader.BaseStream().Length;
 
-            Assimp.Scene scene = new Assimp.Scene();
-
-            if(aquaBones.Count != 0)
-            {
-                //Assign bones
-                foreach (AquaNode.NODE bn in aquaBones[0].nodeList)
+                while (streamReader.Position() < dataEnd)
                 {
+                    string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>()));
 
-                }
+                    switch(type)
+                    {
 
-                foreach (AquaNode.NODO bn in aquaBones[0].nodoList)
-                {
-                    //NODOs are a bit more primitive. We need to generate the matrix for these ones.
+                        case NNObject.NXIF:
+                            streamReader.Seek(streamReader.Read<int>(), SeekOrigin.Current);
+                            break;
+                        case NNObject.NXTL:
+
+                            break;
+                    }
                 }
+                
             }
+        }
 
-            //Assign meshes and materials
-            foreach (AquaObject.MESH msh in aquaModels[0].models[0].meshList)
-            {
-                //Mesh
-
-
-                //Material
-                var mat = aquaModels[0].models[0].mateList[msh.mateIndex];
-                Assimp.Material mate = new Assimp.Material();
-
-                mate.ColorDiffuse = new Assimp.Color4D(mat.diffuseRGBA.X, mat.diffuseRGBA.Y, mat.diffuseRGBA.Z, mat.diffuseRGBA.W);
-                if (mat.alphaType.GetString().Equals("add"))
-                {
-                    mate.BlendMode = Assimp.BlendMode.Additive;
-                }
-                mate.Name = mat.matName.GetString();
-                mate.TextureDiffuse = 
-            }
-
-        }*/
     }
 }
  

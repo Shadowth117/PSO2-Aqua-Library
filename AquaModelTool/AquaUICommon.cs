@@ -51,7 +51,7 @@ namespace AquaModelTool
                             
                             rend.int_0C = 0;
                             rend.unk8 = 1;
-                            rend.unk10 = 0;
+                            rend.alphaCutoff = 0;
                             aqua.aquaModels[i].models[j].rendList[r] = rend;
                         }
                         for (int m = 0; m < aqua.aquaModels[i].models[j].mateList.Count; m++)

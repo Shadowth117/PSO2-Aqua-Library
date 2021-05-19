@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AquaModelLibrary;
 using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace AquaModelTool
@@ -323,19 +324,6 @@ namespace AquaModelTool
             
         }
 
-        private void readCMXToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select a cmx file",
-                Filter = "Character Making IndeX (*.cmx) Files|*.cmx"
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                aquaUI.aqua.LoadCMX(openFileDialog.FileName);
-            }
-        }
-
         private void parsePSO2TextToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -373,19 +361,6 @@ namespace AquaModelTool
                     File.WriteAllText(fileName + ".txt", output.ToString());
                 }
 
-            }
-        }
-
-        private void parseIncaToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select item_name_cache_appendix.inca",
-                Filter = "(item_name_cache_appendix.inca)|item_name_cache_appendix.inca"
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                aquaUI.aqua.ReadItNameCacheAppendix(openFileDialog.FileName);
             }
         }
 
@@ -469,5 +444,53 @@ namespace AquaModelTool
             }
 
         }
+
+        private void pSOnrelTotrpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO1 n.rel map file",
+                Filter = "PSO1 Map (*n.rel)|*n.rel"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var rel = new PSONRelConvert(File.ReadAllBytes(openFileDialog.FileName));
+                var aqua = new AquaUtil();
+                var set = new AquaUtil.ModelSet();
+                set.models.Add(rel.aqObj);
+                aqua.aquaModels.Add(set);
+                aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false);
+
+                var fname = openFileDialog.FileName.Replace(".rel", ".trp");
+                aqua.WriteClassicNIFLModel(fname, fname);
+            }
+        }
+
+        private void exportToGLTFToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var exportDialog = new SaveFileDialog()
+            {
+                Title = "Export model file",
+                Filter = "GLB model (*.glb)|*.glb"
+            };
+            if(exportDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.ExportToGLTF(exportDialog.FileName);
+            }
+        }
+
+        private void importFromGLTFToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select gltf/glb model file",
+                Filter = "GLTF model (*.glb, *.gltf)|*.glb;*.gltf"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                ModelExporter.getGLTF(openFileDialog.FileName);
+            }
+        }
+
     }
 }

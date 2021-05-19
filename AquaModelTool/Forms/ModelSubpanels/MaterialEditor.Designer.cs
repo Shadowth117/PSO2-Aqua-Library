@@ -189,15 +189,15 @@
             65536});
             this.diffuseUD.Location = new System.Drawing.Point(45, 84);
             this.diffuseUD.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
+            -402653184,
+            -1613725636,
+            54210108,
             0});
             this.diffuseUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147418112});
+            -402653184,
+            -1613725636,
+            54210108,
+            -2147483648});
             this.diffuseUD.Name = "diffuseUD";
             this.diffuseUD.Size = new System.Drawing.Size(45, 20);
             this.diffuseUD.TabIndex = 12;
@@ -213,15 +213,15 @@
             65536});
             this.tex2UD.Location = new System.Drawing.Point(136, 84);
             this.tex2UD.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
+            -402653184,
+            -1613725636,
+            54210108,
             0});
             this.tex2UD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147418112});
+            -402653184,
+            -1613725636,
+            54210108,
+            -2147483648});
             this.tex2UD.Name = "tex2UD";
             this.tex2UD.Size = new System.Drawing.Size(45, 20);
             this.tex2UD.TabIndex = 15;
@@ -256,15 +256,15 @@
             65536});
             this.tex3SpecUD.Location = new System.Drawing.Point(225, 84);
             this.tex3SpecUD.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
+            -402653184,
+            -1613725636,
+            54210108,
             0});
             this.tex3SpecUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147418112});
+            -402653184,
+            -1613725636,
+            54210108,
+            -2147483648});
             this.tex3SpecUD.Name = "tex3SpecUD";
             this.tex3SpecUD.Size = new System.Drawing.Size(45, 20);
             this.tex3SpecUD.TabIndex = 18;
@@ -299,15 +299,15 @@
             65536});
             this.tex4UD.Location = new System.Drawing.Point(315, 84);
             this.tex4UD.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
+            -402653184,
+            -1613725636,
+            54210108,
             0});
             this.tex4UD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147418112});
+            -402653184,
+            -1613725636,
+            54210108,
+            -2147483648});
             this.tex4UD.Name = "tex4UD";
             this.tex4UD.Size = new System.Drawing.Size(45, 20);
             this.tex4UD.TabIndex = 21;
@@ -365,14 +365,14 @@
             this.unkF32UD.DecimalPlaces = 6;
             this.unkF32UD.Location = new System.Drawing.Point(5, 169);
             this.unkF32UD.Maximum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
+            -402653184,
+            -1613725636,
+            54210108,
             0});
             this.unkF32UD.Minimum = new decimal(new int[] {
-            10000000,
-            0,
-            0,
+            -402653184,
+            -1613725636,
+            54210108,
             -2147483648});
             this.unkF32UD.Name = "unkF32UD";
             this.unkF32UD.Size = new System.Drawing.Size(74, 20);

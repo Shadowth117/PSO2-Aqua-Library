@@ -7,9 +7,55 @@ using System.Threading.Tasks;
 
 namespace AquaModelLibrary
 {
-    //Naming based primarily on variable namings in Sonic 06 via an exported text file leftover from development
+    //Naming based primarily on variable namings in Sonic 06 via an exported text file leftover from development.
+    //Some changes may be made for clarity
     public class NNObject
     {
+        public const string NXIF = "NXIF";
+        public const string NXTL = "NXTL"; //NX Texture List
+        public const string NXEF = "NXEF"; //NX Effect List
+        public const string NXNN = "NXNN"; //NX Node Names
+        public const string NXOB = "NXOB"; //NX Object
+
+        /*
+        public enum NODE_TYPE : uint
+        {
+            NND_NODETYPE_ROTATE_TYPE_XZY,
+            NND_NODETYPE_UNIT_TRANSLATION,
+            NND_NODETYPE_UNIT_ROTATION,
+            NND_NODETYPE_UNIT_SCALING,
+            NND_NODETYPE_UNIT_INIT_MATRIX,
+            NND_NODETYPE_UNIT33_INIT_MATRIX,
+            NND_NODETYPE_ORTHO33_INIT_MATRIX
+        }*/
+
+        public struct NN_NODE
+        {
+            public uint type;
+            public short weightUsed;
+            public short NODE_PARENT;
+            public short NODE_CHILD;
+            public short NODE_SIBLING;
+
+            public Vector3 NODE_TRN;
+            public Vector3 NODE_ROT;
+            public Vector3 NODE_SCL;
+            // 4x4 Matrix NODE_INVINIT_MTX     
+            public Vector4 m1;
+            public Vector4 m2;
+            public Vector4 m3;
+            public Vector4 m4;
+
+            //Next variables are usually left 0
+            public Vector3 NODE_CENTER;
+            public float NODE_RADIUS;
+
+            public int NODE_USER;
+            public int NODE_BBXSIZE;
+            public int NODE_BBYSIZE;
+            public int NODE_BBZSIZE;
+        }
+
         public struct NNS_MESHSET
         {
             public Vector3 MSST_CENTER; 
@@ -22,6 +68,16 @@ namespace AquaModelLibrary
             public int MSST_PRIMLIST;    //ID in tristrip list list
             public int MSST_SHADERLIST;  //ID in shader list list
         }
+
+        public struct NNS_MATERIAL_COLOR
+        {
+            public Vector4 MAT_DIFFUSE;
+            public Vector4 MAT_AMBIENT;
+            public Vector4 MAT_SPECULAR;
+            public Vector4 MAT_EMISSIVE;
+            public float MAT_POWER;
+        }
+
 
         //NNS Xbox vertex data. Also used for PC and PS3? In text data, type name is appended by vertex data type abbreviations of those that are used.
         /*

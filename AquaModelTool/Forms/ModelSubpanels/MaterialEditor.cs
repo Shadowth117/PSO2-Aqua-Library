@@ -167,7 +167,7 @@ namespace AquaModelTool
                 {
                     var rend = model.rendList[rendIds[i]];
                     rend.unk8 = 1;
-                    rend.unk10 = 0;
+                    rend.alphaCutoff = 0;
                     model.rendList[rendIds[i]] = rend;
                 }
             }
@@ -188,11 +188,7 @@ namespace AquaModelTool
             {
                 vec4.Z = 1.0f;
             }
-            if (vec4.W > 1.0f)
-            {
-                vec4.W = 1.0f;
-            }
-            return Color.FromArgb((int)(vec4.W * 255), (int)(vec4.X * 255), (int)(vec4.Y * 255), (int)(vec4.Z * 255));
+            return Color.FromArgb(1, (int)(vec4.X * 255), (int)(vec4.Y * 255), (int)(vec4.Z * 255));
         }
 
         private void matNameTextBox_TextChanged(object sender, EventArgs e)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using static AquaModelLibrary.AquaObjectMethods;
@@ -168,6 +169,39 @@ namespace AquaModelLibrary
                 return str;
             }
 
+            public bool Equals(PSO2String c)
+            {
+                var cArr = c.GetBytes();
+                // Optimization for a common success case.
+                if (Object.ReferenceEquals(this, c))
+                {
+                    return true;
+                }
+
+                // If run-time types are not exactly the same, return false.
+                if (this.GetType() != c.GetType())
+                {
+                    return false;
+                }
+
+                for(int i = 0; i < 0x20; i++)
+                {
+                    if(stringArray[i] != cArr[i])
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public static bool operator ==(PSO2String lhs, PSO2String rhs)
+            {
+                return lhs.Equals(rhs);
+            }
+
+            public static bool operator !=(PSO2String lhs, PSO2String rhs) => !(lhs == rhs);
+
             //Sometimes strings don't convert to the expected character set (Possibly sega setting in Unicode chars without warning?) This can help deal with that
             public int GetLength()
             {
@@ -260,13 +294,46 @@ namespace AquaModelLibrary
                 return str;
             }
 
-            public static PSO2String GeneratePSO2String(string newString)
+            public static PSO2Stringx30 GeneratePSO2String(string newString)
             {
-                var str = new PSO2String();
+                var str = new PSO2Stringx30();
                 str.SetString(newString);
 
                 return str;
             }
+
+            public bool Equals(PSO2Stringx30 c)
+            {
+                var cArr = c.GetBytes();
+                // Optimization for a common success case.
+                if (Object.ReferenceEquals(this, c))
+                {
+                    return true;
+                }
+
+                // If run-time types are not exactly the same, return false.
+                if (this.GetType() != c.GetType())
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < 0x30; i++)
+                {
+                    if (stringArray[i] != cArr[i])
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public static bool operator ==(PSO2Stringx30 lhs, PSO2Stringx30 rhs)
+            {
+                return lhs.Equals(rhs);
+            }
+
+            public static bool operator !=(PSO2Stringx30 lhs, PSO2Stringx30 rhs) => !(lhs == rhs);
 
             //Sometimes strings don't convert to the expected character set (Possibly sega setting in Unicode chars without warning?) This can help deal with that
             public int GetLength()
@@ -347,6 +414,28 @@ namespace AquaModelLibrary
                     }
                 }
             }
+        }
+
+        public static bool isEqualVec4(Vector4 a, Vector4 b)
+        {
+            if (a.X != b.X)
+            {
+                return false;
+            }
+            if (a.Y != b.Y)
+            {
+                return false;
+            }
+            if (a.Z != b.Z)
+            {
+                return false;
+            }
+            if (a.W != b.W)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public static NOF0 readNOF0(BufferedStreamReader streamReader)

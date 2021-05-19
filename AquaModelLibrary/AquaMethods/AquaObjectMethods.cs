@@ -749,7 +749,7 @@ namespace AquaModelLibrary
             {
                 foreach(var tris in model.strips)
                 {
-                    faces.Add(tris.getTriangles(true));
+                    faces.Add(tris.GetTriangles(true));
                 }
             } else
             {
@@ -947,7 +947,7 @@ namespace AquaModelLibrary
                     Vector3[] vertBinormalArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
                     Vector3[] vertTangentArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
                     Vector3[] vertFaceNormalArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
-                    List<Vector3> faces = model.strips[psetIndex].getTriangles(true);
+                    List<Vector3> faces = model.strips[psetIndex].GetTriangles(true);
 
                     for (int f = 0; f < faces.Count; f++)
                     {
@@ -1060,11 +1060,15 @@ namespace AquaModelLibrary
                             {
                                 faceVertDict.Add(face.X, vertIndex++);
                                 faceVertIds.Add((int)face.X);
-                                for(int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.X].Length; bi++)
+
+                                if(model.vtxlList[modelId].vertWeightIndices.Count > 0)
                                 {
-                                    if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.X][bi]))
+                                    for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.X].Length; bi++)
                                     {
-                                        boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.X][bi]);
+                                        if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.X][bi]))
+                                        {
+                                            boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.X][bi]);
+                                        }
                                     }
                                 }
                             }
@@ -1072,11 +1076,14 @@ namespace AquaModelLibrary
                             {
                                 faceVertDict.Add(face.Y, vertIndex++);
                                 faceVertIds.Add((int)face.Y);
-                                for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.Y].Length; bi++)
+                                if (model.vtxlList[modelId].vertWeightIndices.Count > 0)
                                 {
-                                    if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.Y][bi]))
+                                    for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.Y].Length; bi++)
                                     {
-                                        boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.Y][bi]);
+                                        if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.Y][bi]))
+                                        {
+                                            boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.Y][bi]);
+                                        }
                                     }
                                 }
                             }
@@ -1084,11 +1091,14 @@ namespace AquaModelLibrary
                             {
                                 faceVertDict.Add(face.Z, vertIndex++);
                                 faceVertIds.Add((int)face.Z);
-                                for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.Z].Length; bi++)
+                                if (model.vtxlList[modelId].vertWeightIndices.Count > 0)
                                 {
-                                    if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.Z][bi]))
+                                    for (int bi = 0; bi < model.vtxlList[modelId].vertWeightIndices[(int)face.Z].Length; bi++)
                                     {
-                                        boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.Z][bi]);
+                                        if (!boneIds.Contains(model.vtxlList[modelId].vertWeightIndices[(int)face.Z][bi]))
+                                        {
+                                            boneIds.Add(model.vtxlList[modelId].vertWeightIndices[(int)face.Z][bi]);
+                                        }
                                     }
                                 }
                             }
@@ -1330,7 +1340,7 @@ namespace AquaModelLibrary
         {
             for(int i = 0; i < model.strips.Count; i++)
             {
-                List<Vector3> tris = model.strips[i].getTriangles(true);
+                List<Vector3> tris = model.strips[i].GetTriangles(true);
 
                 if(tris.Count > faceLimit)
                 {
@@ -1760,11 +1770,13 @@ namespace AquaModelLibrary
             {
                 case "opaque":
                     rend.int_0C = 0;
-                    rend.unk10 = 0;
+                    rend.unk8 = 0;
+                    rend.alphaCutoff = 0;
                     break;
                 default:
-                    rend.int_0C = 1;
-                    rend.unk10 = 0;
+                    rend.int_0C = 0;
+                    rend.unk8 = 1;
+                    rend.alphaCutoff = 0;
                     break;
             }
 
