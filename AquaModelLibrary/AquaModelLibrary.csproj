@@ -129,6 +129,7 @@
     <Compile Include="Extra\ModelExporter.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
+    <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />

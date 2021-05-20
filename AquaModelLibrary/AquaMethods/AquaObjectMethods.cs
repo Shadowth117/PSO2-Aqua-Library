@@ -1703,7 +1703,7 @@ namespace AquaModelLibrary
                 tsta.texUsageOrder = texArrayStartIndex + i;
                 if (mat.texUVSets == null)
                 {
-                    tsta.modelUVSet = 1;
+                    tsta.modelUVSet = 0;
                 } else
                 {
                     tsta.modelUVSet = mat.texUVSets[i];

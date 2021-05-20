@@ -1266,7 +1266,7 @@ namespace AquaModelLibrary
                 }
 
                 return (reserve0 == c.reserve0) && (unkFloat0 == c.unkFloat0) && (unkFloat1 == c.unkFloat1) && (unkInt0 == c.unkInt0) && (unkInt1 == c.unkInt1)
-                    && (blendType == c.blendType) && (matName == c.matName) && isEqualVec4(diffuseRGBA, c.diffuseRGBA) && isEqualVec4(unkRGBA0, c.unkRGBA0)
+                    && (blendType == c.blendType) && isEqualVec4(diffuseRGBA, c.diffuseRGBA) && isEqualVec4(unkRGBA0, c.unkRGBA0)
                     && (specialType == c.specialType) && (twoSided == c.twoSided) && isEqualVec4(_sRGBA, c._sRGBA) && isEqualVec4(unkRGBA1, c.unkRGBA1);
             }
 

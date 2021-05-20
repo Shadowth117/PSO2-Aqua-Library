@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.AquaObject;
 using Reloaded.Memory;
-using static AquaModelLibrary.BigEndianHelper;
+using static AquaModelLibrary.PSOXVMConvert;
 using System.Windows;
 
 namespace AquaModelLibrary
@@ -243,7 +243,7 @@ namespace AquaModelLibrary
 
         //Takes in bytes of a *n.rel file from PSO
         //To convert to PSO2's units, we set the scale to 1/10th scale
-        public PSONRelConvert(byte[] file, float scale = 0.1f)
+        public PSONRelConvert(byte[] file, string fileName = null, float scale = 0.1f, string outFolder = null)
         {
             rootScale = scale;
             List<dSection> dSections = new List<dSection>();
@@ -311,6 +311,27 @@ namespace AquaModelLibrary
                 streamReader.Seek(offset, SeekOrigin.Begin);
                 texNames.Add(AquaObjectMethods.ReadCString(streamReader));
             }
+
+            //If there's an .xvm, dump that too with texture names from the .rel
+            if(fileName != null)
+            {
+                //Naming patterns for *n.rel files are *_12n.rel for example or *n.rel  vs *.xvm. We can determine which we have, edit, and proceed
+                var basename = fileName.Substring(0, fileName.Length - 5);
+                string xvmName = null;
+
+                if (basename.ElementAt(basename.Length - 3) == '_')
+                {
+                    xvmName = basename.Substring(0, basename.Length - 3) + ".xvm";
+                }
+                else
+                {
+                    xvmName = basename + ".xvm";
+                }
+
+                ExtractXVM(xvmName, texNames, outFolder);
+            }
+
+
 
             //Create root AQN node
             NODE aqNode = new NODE();
@@ -486,7 +507,6 @@ namespace AquaModelLibrary
                 triCountB = mesh.triangleStripListBCount;
             }
             
-            Console.WriteLine($"Position: {(streamReader.Position() - 0x2C).ToString("X")}");
             streamReader.Seek(vertOffset, SeekOrigin.Begin);
             readVertexList(mat);
 
@@ -507,7 +527,6 @@ namespace AquaModelLibrary
 
         public void readVertexList(Matrix4x4 mat)
         {
-            Console.WriteLine($"NJVtxe Position: {(streamReader.Position()).ToString("X")}");
             var vtxe = ReadNjVtxe(streamReader, be);
             streamReader.Seek(vtxe.vertexListOffset, SeekOrigin.Begin);
             var vtxl = new VTXL();
@@ -588,15 +607,18 @@ namespace AquaModelLibrary
             {
                 info.Add(ReadStripInfo(streamReader, be));
             }
+            int materialId = 0;
 
             foreach(var strip in info)
             {
                 //Read material
-                streamReader.Seek(strip.materialPropertyListOffset, SeekOrigin.Begin);
-                int materialId = readMaterial(strip.materialPropertyListSize, useAlpha);
+                if (strip.materialPropertyListOffset > 0)
+                {
+                    streamReader.Seek(strip.materialPropertyListOffset, SeekOrigin.Begin);
+                    materialId = readMaterial(strip.materialPropertyListSize, useAlpha);
+                }
 
                 //Read strips
-                //Console.WriteLine(strip.indexListOffset);
                 streamReader.Seek(strip.indexListOffset, SeekOrigin.Begin);
                 var triStrip = new stripData();
                 triStrip.psoTris = true;
@@ -604,7 +626,6 @@ namespace AquaModelLibrary
                 {
                     var id = streamReader.ReadBE<ushort>(be);
                     triStrip.triStrips.Add(id);
-                    //Console.WriteLine(id);
                 }
 
                 //Set triangles
@@ -628,20 +649,30 @@ namespace AquaModelLibrary
             {
                 genMat.blendType = "opaque";
             }
+            genMat.shaderNames = new List<string>();
+            genMat.shaderNames.Add("0002p");
+            genMat.shaderNames.Add("0002");
             genMat.texNames = new List<string>();
+
+            int def0;
+            int def1;
+            int def2;
             for (int i = 0; i < propertyCount; i++)
             {
                 uint type = streamReader.ReadBE<uint>(be);
                 switch(type)
                 {
                     case 2:
+                        var dstAlpha = streamReader.Read<uint>();
+                        var srcAlpha = streamReader.Read<uint>();
+                        var unk = streamReader.Read<uint>();
                         break;
                     case 3:
                         //Texture id. Use this to read from the list of names.
                         var id = streamReader.ReadBE<uint>(be);
-                        streamReader.ReadBEV2(be);
+                        var idUnk = streamReader.ReadBEV2(be);
 
-                        genMat.texNames.Add(texNames[(int)id]);
+                        genMat.texNames.Add(texNames[(int)id] + ".dds");
                         break;
                     case 4:
                         genMat.twoSided = true;
@@ -653,24 +684,26 @@ namespace AquaModelLibrary
                         color[1] = streamReader.Read<byte>();
                         color[2] = streamReader.Read<byte>();
                         color[3] = streamReader.Read<byte>();
+                        var colorUnk = streamReader.ReadBEV2(be);
 
                         genMat.diffuseRGBA = new Vector4(((float)color[0]) / 255, ((float)color[1]) / 255, ((float)color[2]) / 255, ((float)color[3]) / 255);
                         break;
                     case 6:
                         //Console.WriteLine($"ambient?");
-                        streamReader.ReadBEV3(be);
+                        var amb = streamReader.ReadBEV3(be);
                         break;
                     case 7:
                         //Console.WriteLine($"Specular?");
-                        streamReader.ReadBEV3(be);
+                        var spec = streamReader.ReadBEV3(be);
                         break;
                     default:
                         Console.WriteLine($"Unexpected mat type {type}");
-                        streamReader.ReadBEV3(be);
+                        def0 = streamReader.Read<int>();
+                        def1 = streamReader.Read<int>();
+                        def2 = streamReader.Read<int>();
                         break;
                 }
             }
-
             //Compare against existing materials and only add if different
             for(int i = 0; i < aqObj.tempMats.Count; i++)
             {
@@ -680,6 +713,11 @@ namespace AquaModelLibrary
                 }
             }
             aqObj.tempMats.Add(genMat);
+
+            if (genMat.texNames.Count == 0)
+            {
+                Console.WriteLine("No texture name on mat " + (aqObj.tempMats.Count - 1) + " at: " + streamReader.Position() );
+            }
 
             return (aqObj.tempMats.Count - 1);
         }

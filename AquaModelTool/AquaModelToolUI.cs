@@ -454,14 +454,26 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                var rel = new PSONRelConvert(File.ReadAllBytes(openFileDialog.FileName));
+                bool useSubPath = true;
+                string subPath = "";
+                string fname = openFileDialog.FileName;
+                string outFolder = null;
+                if (useSubPath == true)
+                {
+                    subPath = Path.GetFileNameWithoutExtension(openFileDialog.FileName) + "\\";
+                    var info = Directory.CreateDirectory(Path.GetDirectoryName(openFileDialog.FileName) + "\\" + subPath);
+                    fname = info.FullName + Path.GetFileName(openFileDialog.FileName);
+                    outFolder = info.FullName;
+                }
+
+                var rel = new PSONRelConvert(File.ReadAllBytes(openFileDialog.FileName), openFileDialog.FileName, 0.1f, outFolder);
                 var aqua = new AquaUtil();
                 var set = new AquaUtil.ModelSet();
                 set.models.Add(rel.aqObj);
                 aqua.aquaModels.Add(set);
                 aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false);
 
-                var fname = openFileDialog.FileName.Replace(".rel", ".trp");
+                fname = fname.Replace(".rel", ".trp");
                 aqua.WriteClassicNIFLModel(fname, fname);
             }
         }
