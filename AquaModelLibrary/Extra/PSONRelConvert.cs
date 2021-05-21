@@ -27,6 +27,7 @@ namespace AquaModelLibrary
         private BufferedStreamReader streamReader;
         private bool be; //Stores if we're reading big endian or not. Gamecube variants appear to be different as well.
         private float rootScale = 0.1f;
+        private long fileSize;
 
         public struct relHeader
         {
@@ -245,10 +246,11 @@ namespace AquaModelLibrary
         //To convert to PSO2's units, we set the scale to 1/10th scale
         public PSONRelConvert(byte[] file, string fileName = null, float scale = 0.1f, string outFolder = null)
         {
+            fileSize = file.Length;
             rootScale = scale;
             List<dSection> dSections = new List<dSection>();
             streamReader = new BufferedStreamReader(new MemoryStream(file), 8192);
-
+            
             //Get header offset
             streamReader.Seek(file.Length - 0x10, SeekOrigin.Begin);
 
@@ -456,6 +458,12 @@ namespace AquaModelLibrary
             aqNode.boneName.SetString("Node " + nodes.Count);
             nodes.Add(aqNode);
 
+            //Not sure what it means when these happen, but sometimes they do. Maybe hardcoded logic?
+            if(node.meshOffset > fileSize || node.siblingOffset > fileSize || node.childOffset > fileSize)
+            {
+                return;
+            }
+
             //Read the attached Mesh
             if (node.meshOffset != 0)
             {
@@ -578,9 +586,9 @@ namespace AquaModelLibrary
                 if(readColor)
                 {
                     byte[] color = new byte[4];
-                    color[0] = streamReader.Read<byte>();
-                    color[1] = streamReader.Read<byte>();
                     color[2] = streamReader.Read<byte>();
+                    color[1] = streamReader.Read<byte>();
+                    color[0] = streamReader.Read<byte>();
                     color[3] = streamReader.Read<byte>();
 
                     vtxl.vertColors.Add(color);
