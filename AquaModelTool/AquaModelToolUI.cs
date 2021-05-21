@@ -650,9 +650,13 @@ namespace AquaModelTool
                     aquaUI.aqua.aquaModels.Clear();
                 }
 
+                //Sort the list so we don't get a mess
+                var keys = shaderCombinations.Keys.ToList();
+                keys.Sort();
+
                 StringBuilder simpleOutput = new StringBuilder();
                 StringBuilder advancedOutput = new StringBuilder();
-                foreach (var key in shaderCombinations.Keys)
+                foreach (var key in keys)
                 {
                     simpleOutput.AppendLine(key + "," + shaderCombinations[key][0]);
 
