@@ -1805,6 +1805,11 @@ namespace AquaModelLibrary
         {
             List<string> textureList = new List<string>();
             
+            //Don't try to read what's not there
+            if(model.tstaList.Count == 0 || model.tstaList == null)
+            {
+                return textureList;
+            }
             TSET tset = model.tsetList[tsetIndex];
 
             for (int index = 0; index < tset.tstaTexIDs.Count; index++) 

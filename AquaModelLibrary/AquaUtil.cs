@@ -97,7 +97,7 @@ namespace AquaModelLibrary
             List<AquaObject> aquaModels = new List<AquaObject>();
             for (int modelIndex = 0; modelIndex < fileCount; modelIndex++)
             {
-                AquaPackage.AFPBase afp;
+                AquaPackage.AFPBase afp = new AquaPackage.AFPBase();
                 if (modelIndex > 0)
                 {
                     streamReader.Seek(0x10, SeekOrigin.Current);
@@ -105,7 +105,7 @@ namespace AquaModelLibrary
                     offset = (int)streamReader.Position() + 0x20;
                 }
 
-                string tpnCheck = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                string tpnCheck = Encoding.UTF8.GetString(BitConverter.GetBytes(afp.fileTypeCString));
                 if (tpnCheck == "tpn\0")
                 {
                     TPNTexturePattern tpn = new TPNTexturePattern();
@@ -144,7 +144,6 @@ namespace AquaModelLibrary
             if (model.objc.vsetOffset > 0)
             {
                 streamReader.Seek(model.objc.vsetOffset + offset, SeekOrigin.Begin);
-                Console.WriteLine(streamReader.Position().ToString("X"));
                 //Read VSETs
                 for (int vsetIndex = 0; vsetIndex < model.objc.vsetCount; vsetIndex++)
                 {
@@ -448,7 +447,7 @@ namespace AquaModelLibrary
              */
 
             //Read NOF0
-            streamReader.Seek(model.rel0.REL0Size + 0x8 + offset, SeekOrigin.Begin); Console.WriteLine($"{model.rel0.REL0Size} {streamReader.Position().ToString("X")}");
+            streamReader.Seek(model.rel0.REL0Size + 0x8 + offset, SeekOrigin.Begin);
             model.nof0 = AquaCommon.readNOF0(streamReader);
             AlignReader(streamReader, 0x10);
 
@@ -672,7 +671,7 @@ namespace AquaModelLibrary
             }
 
             //NOF0
-            streamReader.Seek(model.rel0.REL0Size + 0x8 + offset, SeekOrigin.Begin); Console.WriteLine($"{model.rel0.REL0Size} {streamReader.Position().ToString("X")}");
+            streamReader.Seek(model.rel0.REL0Size + 0x8 + offset, SeekOrigin.Begin);
             model.nof0 = AquaCommon.readNOF0(streamReader);
             AlignReader(streamReader, 0x10);
 

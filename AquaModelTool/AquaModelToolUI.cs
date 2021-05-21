@@ -504,5 +504,169 @@ namespace AquaModelTool
             }
         }
 
+        private void getShadTexSheetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select a folder containing pso2 models (PRM has no shader and will not be read)",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                Dictionary<string, List<string>> shaderCombinations = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderModelFiles = new Dictionary<string, List<string>>();
+                List<string> files = new List<string>();
+                string[] extensions = new string[]{ "*.aqp", "*.aqo", "*.trp", "*.tro" };
+                foreach(string s in extensions)
+                {
+                    files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
+                } 
+
+                //Go through models we gathered
+                foreach(string file in files)
+                {
+                    try
+                    {
+                        aquaUI.aqua.ReadModel(file);
+                    }
+                    catch 
+                    {
+                        Console.WriteLine("Could not read file: " + file);
+                        continue;
+                    }
+
+                    var model = aquaUI.aqua.aquaModels[0].models[0];
+
+                    //Go through all meshes in each model
+                    foreach (var mesh in model.meshList)
+                    {
+                        var shad = model.shadList[mesh.shadIndex];
+                        string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
+                        var textures = AquaObjectMethods.GetTexListNames(model, mesh.tsetIndex);
+
+                        if(textures.Count == 0 || textures == null)
+                        {
+                            continue;
+                        }
+
+                        string combination = "";
+                        foreach (var tex in textures)
+                        {
+                            if (tex.Contains("_d.dds") || tex.Contains("_d_") || tex.Contains("_diffuse")) //diffuse
+                            {
+                                combination += "d";
+                            }
+                            else if(tex.Contains("_s.dds") || tex.Contains("_s_") || tex.Contains("_multi")) //specular composite
+                            {
+                                combination += "s";
+                            }
+                            else if (tex.Contains("_m.dds") || tex.Contains("_m_")) //mask
+                            {
+                                combination += "m";
+                            }
+                            else if (tex.Contains("_n.dds") || tex.Contains("_n_") || tex.Contains("_normal")) //normal
+                            {
+                                combination += "n";
+                            }
+                            else if (tex.Contains("_t.dds") || tex.Contains("_t_"))
+                            {
+                                combination += "t";
+                            }
+                            else if (tex.Contains("_k.dds") || tex.Contains("_k_")) //glow thing
+                            {
+                                combination += "k";
+                            }
+                            else if (tex.Contains("_p.dds") || tex.Contains("_p_")) //another glow thing
+                            {
+                                combination += "p";
+                            }
+                            else if (tex.Contains("_a.dds") || tex.Contains("_a_"))
+                            {
+                                combination += "a";
+                            }
+                            else if (tex.Contains("_b.dds") || tex.Contains("_b_"))
+                            {
+                                combination += "b";
+                            }
+                            else if (tex.Contains("_c.dds") || tex.Contains("_c_"))
+                            {
+                                combination += "c";
+                            }
+                            else if (tex.Contains("_e.dds") || tex.Contains("_e_") || tex.Contains("_env.dds")) //environment map
+                            {
+                                combination += "e";
+                            }
+                            else if (tex.Contains("_f.dds") || tex.Contains("_f_")) //feather map? Mostly for rappies
+                            {
+                                combination += "f";
+                            }
+                            else if (tex.Contains("_r.dds") || tex.Contains("_r_"))
+                            {
+                                combination += "r";
+                            }
+                            else if (tex.Contains("_decal"))
+                            {
+                                combination += "decal";
+                            }
+                            else if (tex.Contains("_noise"))
+                            {
+                                combination += "noise";
+                            }
+                            else if (tex.Contains("_subnormal_01"))
+                            {
+                                combination += "subnormal_01";
+                            }
+                            else if (tex.Contains("_subnormal_02"))
+                            {
+                                combination += "subnormal_02";
+                            }
+                            else if (tex.Contains("_subnormal_03"))
+                            {
+                                combination += "subnormal_03";
+                            }
+                            else if (tex.Contains("_mask"))
+                            {
+                                combination += "mask";
+                            }
+                            else //Add the full name if we absolutely cannot figure this out from these
+                            {
+                                combination += tex;
+                            }
+                            combination += " ";
+                        }
+
+                        //Add them to the list
+                        if(!shaderCombinations.ContainsKey(key))
+                        {
+                            shaderCombinations[key] = new List<string>() { combination };
+                            shaderModelFiles[key] = new List<string>() { Path.GetFileName(file)};
+                        } else
+                        {
+                            shaderCombinations[key].Add(combination);
+                            shaderModelFiles[key].Add(Path.GetFileName(file));
+                        }
+                    }
+                    model = null;
+                    aquaUI.aqua.aquaModels.Clear();
+                }
+
+                StringBuilder simpleOutput = new StringBuilder();
+                StringBuilder advancedOutput = new StringBuilder();
+                foreach (var key in shaderCombinations.Keys)
+                {
+                    simpleOutput.AppendLine(key + "," + shaderCombinations[key][0]);
+
+                    advancedOutput.AppendLine(key + "," + shaderCombinations[key][0] + "," + shaderModelFiles[key][0]);
+                    for (int i = 1; i < shaderCombinations[key].Count; i++)
+                    {
+                        advancedOutput.AppendLine("," + shaderCombinations[key][i] + "," + shaderModelFiles[key][i]);
+                    }
+                    advancedOutput.AppendLine();
+                }
+
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleOutput.csv", simpleOutput.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutput.csv", advancedOutput.ToString());
+            }
+        }
     }
 }

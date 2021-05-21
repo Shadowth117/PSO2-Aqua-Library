@@ -45,9 +45,10 @@
             this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.getToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -154,7 +155,8 @@
             this.parsePSO2TextToolStripMenuItem,
             this.readBonesToolStripMenuItem,
             this.exportToGLTFToolStripMenuItem,
-            this.importFromGLTFToolStripMenuItem});
+            this.importFromGLTFToolStripMenuItem,
+            this.getToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -162,30 +164,44 @@
             // parseVTBFToTextToolStripMenuItem
             // 
             this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
-            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.parseVTBFToTextToolStripMenuItem.Text = "Parse VTBF To Text";
             this.parseVTBFToTextToolStripMenuItem.Click += new System.EventHandler(this.parseVTBFToTextToolStripMenuItem_Click);
             // 
             // parsePSO2TextToolStripMenuItem
             // 
             this.parsePSO2TextToolStripMenuItem.Name = "parsePSO2TextToolStripMenuItem";
-            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
+            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.parsePSO2TextToolStripMenuItem.Text = "Parse PSO2 Text";
             this.parsePSO2TextToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextToolStripMenuItem_Click);
             // 
             // readBonesToolStripMenuItem
             // 
             this.readBonesToolStripMenuItem.Name = "readBonesToolStripMenuItem";
-            this.readBonesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.readBonesToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.readBonesToolStripMenuItem.Text = "Read Bones";
             this.readBonesToolStripMenuItem.Click += new System.EventHandler(this.readBonesToolStripMenuItem_Click);
             // 
             // exportToGLTFToolStripMenuItem
             // 
             this.exportToGLTFToolStripMenuItem.Name = "exportToGLTFToolStripMenuItem";
-            this.exportToGLTFToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.exportToGLTFToolStripMenuItem.Text = "Expor tTo GLTF";
+            this.exportToGLTFToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.exportToGLTFToolStripMenuItem.Text = "Export To GLTF";
             this.exportToGLTFToolStripMenuItem.Click += new System.EventHandler(this.exportToGLTFToolStripMenuItem_Click);
+            // 
+            // importFromGLTFToolStripMenuItem
+            // 
+            this.importFromGLTFToolStripMenuItem.Name = "importFromGLTFToolStripMenuItem";
+            this.importFromGLTFToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.importFromGLTFToolStripMenuItem.Text = "Import From GLTF";
+            this.importFromGLTFToolStripMenuItem.Click += new System.EventHandler(this.importFromGLTFToolStripMenuItem_Click);
+            // 
+            // getToolStripMenuItem
+            // 
+            this.getToolStripMenuItem.Name = "getToolStripMenuItem";
+            this.getToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.getToolStripMenuItem.Text = "Compile Shader Texture Sheet";
+            this.getToolStripMenuItem.Click += new System.EventHandler(this.getShadTexSheetToolStripMenuItem_Click);
             // 
             // filePanel
             // 
@@ -204,13 +220,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 256);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // importFromGLTFToolStripMenuItem
-            // 
-            this.importFromGLTFToolStripMenuItem.Name = "importFromGLTFToolStripMenuItem";
-            this.importFromGLTFToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.importFromGLTFToolStripMenuItem.Text = "Import From GLTF";
-            this.importFromGLTFToolStripMenuItem.Click += new System.EventHandler(this.importFromGLTFToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -253,6 +262,7 @@
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.ToolStripMenuItem exportToGLTFToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importFromGLTFToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem getToolStripMenuItem;
     }
 }
 
