@@ -672,5 +672,83 @@ namespace AquaModelTool
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutput.csv", advancedOutput.ToString());
             }
         }
+
+        private void batchParsePSO2SetToTextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select a folder containing pso2 .sets",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                List<string> files = new List<string>();
+                string[] extensions = new string[] { "*.set" };
+                foreach (string s in extensions)
+                {
+                    files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
+                }
+
+                //Go through models we gathered
+                foreach (string file in files)
+                {
+                    aquaUI.aqua.ReadSet(file);
+                }
+
+                //Gather from .set files. This is subject to change because I'm really just checking things for now.
+                StringBuilder allSetOutput = new StringBuilder();
+                StringBuilder objSetOutput = new StringBuilder();
+                for (int i = 0; i < aquaUI.aqua.aquaSets.Count; i++)
+                {
+                    StringBuilder setString = new StringBuilder();
+
+                    var set = aquaUI.aqua.aquaSets[i];
+                    setString.AppendLine(set.fileName);
+
+                    //Strings
+                    foreach (var entityString in set.entityStrings)
+                    {
+                        for(int sub = 0; sub < entityString.subStrings.Count; sub++)
+                        {
+                            var subStr = entityString.subStrings[sub];
+                            setString.Append(subStr);
+                            if(sub != (entityString.subStrings.Count - 1))
+                            {
+                                setString.Append(",");
+                            }
+                        }
+                        setString.AppendLine();
+                    }
+
+                    //Objects
+                    foreach (var obj in set.setEntities)
+                    {
+                        StringBuilder objString = new StringBuilder();
+                        objString.AppendLine(obj.entity_variant_string0.GetString());
+                        objString.AppendLine(obj.entity_variant_string1);
+                        objString.AppendLine(obj.entity_variant_stringJP);
+                        foreach(var variable in obj.variables)
+                        {
+                            objString.AppendLine(variable.Key + " - " + variable.Value.ToString());
+                        }
+                        setString.Append(objString);
+
+                        if (obj.variables.ContainsKey("object_name"))
+                        {
+                            objSetOutput.AppendLine(set.fileName);
+                            objSetOutput.Append(objString);
+                        }
+                    }
+
+                    allSetOutput.Append(setString);
+                    allSetOutput.AppendLine();
+                }
+
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "allSetOutput.txt", allSetOutput.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "objects.txt", objSetOutput.ToString());
+
+                aquaUI.aqua.aquaSets.Clear();
+            }
+        }
     }
 }

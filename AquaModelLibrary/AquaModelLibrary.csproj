@@ -141,6 +141,7 @@
     <Compile Include="AquaStructs\AquaNode.cs" />
     <Compile Include="AquaStructs\ClassicAquaObject.cs" />
     <Compile Include="AquaStructs\AquaPackage.cs" />
+    <Compile Include="OtherStructs\SetLayout.cs" />
     <Compile Include="OtherStructs\TCBTerrainConvex.cs" />
     <Compile Include="OtherStructs\TPNTexturePattern.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

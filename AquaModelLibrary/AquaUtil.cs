@@ -25,6 +25,7 @@ namespace AquaModelLibrary
         public List<AquaNode> aquaBones = new List<AquaNode>();
         public List<AquaEffect> aquaEffect = new List<AquaEffect>();
         public List<AnimSet> aquaMotions = new List<AnimSet>();
+        public List<SetLayout> aquaSets = new List<SetLayout>();
         public class ModelSet
         {
             public AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
@@ -3795,6 +3796,126 @@ namespace AquaModelLibrary
                     }
                 }
                 
+            }
+        }
+
+        public void ReadSet(string fileName)
+        {
+            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                var end = stream.Length;
+                var set = new SetLayout();
+                set.fileName = Path.GetFileNameWithoutExtension(fileName);
+                set.header = streamReader.Read<SetLayout.SetHeader>();
+
+                //Read strings
+                for(int i = 0; i < set.header.entityStringCount; i++)
+                {
+                    var entityStr = new SetLayout.EntityString();
+                    entityStr.size = streamReader.Read<int>();
+                    var rawStr = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), entityStr.size - 4));
+                    rawStr = rawStr.Remove(rawStr.IndexOf(char.MinValue));
+
+                    //Entity strings are comma delimited
+                    var rawArray = rawStr.Split(',');
+                    for (int sub = 0; sub < rawArray.Length; sub++)
+                    {
+                        entityStr.subStrings.Add(rawArray[sub]);
+                    }
+
+                    set.entityStrings.Add(entityStr);
+                    streamReader.Seek(entityStr.size - 4, SeekOrigin.Current);
+                }
+
+                //Read entities
+                for(int i = 0; i < set.header.entityCount; i++)
+                {
+                    var entityStart = streamReader.Position();
+
+                    var entity = new SetLayout.SetEntity();
+                    entity.size = streamReader.Read<int>();
+                    entity.entity_variant_string0 = streamReader.Read<AquaCommon.PSO2String>();
+                    entity.int_str1Sum = streamReader.Read<int>();
+
+                    var strCount = streamReader.Read<int>();
+                    entity.entity_variant_string1 = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), strCount));
+                    streamReader.Seek(strCount, SeekOrigin.Current);
+
+                    strCount = streamReader.Read<int>();
+                    entity.entity_variant_stringJP = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), strCount));
+                    streamReader.Seek(strCount, SeekOrigin.Current);
+
+                    entity.subObjectCount = streamReader.Read<int>();
+
+                    int trueCount = entity.subObjectCount;
+                    //Gather variables
+                    for (int obj = 0; obj < trueCount; obj++)
+                    {
+                        var type = streamReader.Read<int>();
+                        int length; //Used for some types
+                        object data;
+                        switch(type)
+                        {
+                            case 0: //Int
+                                data = streamReader.Read<int>();
+                                break;
+                            case 1: //Float
+                                data = streamReader.Read<float>();
+                                break;
+                            case 2: //Utf8 String with size
+                                length = streamReader.Read<int>();
+                                data = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), length));
+                                streamReader.Seek(length, SeekOrigin.Current);
+                                break;
+                            case 3: //Unicode-16 String with size
+                                length = streamReader.Read<int>();
+                                data = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), length));
+                                streamReader.Seek(length, SeekOrigin.Current);
+                                break;
+                            case 4: //Null terminated, comma delimited string list
+                                string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Yeah idk if this has a limit. I tried.
+                                length = str.IndexOf(char.MinValue);
+                                data = str.Remove(length);
+                                streamReader.Seek(length + 1, SeekOrigin.Current);
+                                break;
+                            default:
+                                Console.WriteLine($"Unknown set type: {type} at position {streamReader.Position().ToString("X")}");
+                                throw new Exception();
+                                break;
+                        }
+
+                        //Name is always a utf8 string right after with a predefined length
+                        int nameLength = streamReader.Read<int>();
+                        string name = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), nameLength));
+                        streamReader.Seek(nameLength, SeekOrigin.Current);
+
+                        //Some things can denote further objects
+                        if(name == "edit")
+                        {
+                            trueCount += streamReader.Read<int>();
+                        }
+                        
+                        //I don't know if it's possible for there to be a dupe within these, but if it is, we'll check for it and note it
+                        if(entity.variables.ContainsKey(name))
+                        {
+                            Console.WriteLine($"Duplicate key: {name} at position {streamReader.Position().ToString("X")}");
+                            entity.variables.Add(name + $"({obj})", data);
+                        } else
+                        {
+                            entity.variables.Add(name, data);
+                        }
+                        
+                    }
+                    set.setEntities.Add(entity);
+                    //Make sure we move to the end properly
+                    if (streamReader.Position() != entityStart + entity.size)
+                    {
+                        streamReader.Seek(entityStart + entity.size, SeekOrigin.Begin);
+                    }
+                }
+
+                aquaSets.Add(set);
             }
         }
 
