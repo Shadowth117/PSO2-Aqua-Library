@@ -126,7 +126,8 @@ namespace AquaModelTool
                     this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
                 }
 
-            } else if (effectExtensions.Contains(ext))
+            }
+            else if (effectExtensions.Contains(ext))
             {
                 saveFileDialog = new SaveFileDialog()
                 {
@@ -155,7 +156,7 @@ namespace AquaModelTool
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(currentFile != null)
+            if (currentFile != null)
             {
                 string ext = Path.GetExtension(currentFile);
 
@@ -188,7 +189,8 @@ namespace AquaModelTool
                     }
                     AquaUIOpenFile(currentFile);
                     this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
-                } else if(effectExtensions.Contains(ext))
+                }
+                else if (effectExtensions.Contains(ext))
                 {
                     aquaUI.aqua.WriteClassicNIFLEffect(currentFile);
                     AquaUIOpenFile(currentFile);
@@ -196,7 +198,7 @@ namespace AquaModelTool
                 }
             }
         }
-        
+
         public void AquaUIOpenFile(string str = null)
         {
             string file = aquaUI.confirmFile(str);
@@ -224,10 +226,11 @@ namespace AquaModelTool
                         test = aquaUI.aqua.aquaModels[0].models[0];
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
-                        if(aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
+                        if (aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
                         {
                             isNIFL = true;
-                        } else
+                        }
+                        else
                         {
                             isNIFL = false;
                         }
@@ -277,7 +280,7 @@ namespace AquaModelTool
                         MessageBox.Show("Invalid File");
                         return;
                 }
-                
+
                 filePanel.Controls.Add(control);
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();
@@ -321,7 +324,7 @@ namespace AquaModelTool
             {
                 AquaModelLibrary.AquaUtil.AnalyzeVTBF(openFileDialog.FileName);
             }
-            
+
         }
 
         private void parsePSO2TextToolStripMenuItem_Click(object sender, EventArgs e)
@@ -334,7 +337,7 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                foreach(var fileName in openFileDialog.FileNames)
+                foreach (var fileName in openFileDialog.FileNames)
                 {
                     aquaUI.aqua.LoadPSO2Text(fileName);
 
@@ -384,7 +387,7 @@ namespace AquaModelTool
                 Title = "Select NGS PSO2 Bones",
                 Filter = "PSO2 Bones (*.aqn)|*.aqn"
             };
-            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 aquaUI.aqua.aquaBones.Clear();
                 aquaUI.aqua.ReadBones(openFileDialog.FileName);
@@ -403,7 +406,7 @@ namespace AquaModelTool
                     Filter = "PSO2 Player Animation (*.aqm)|*.aqm",
                     FileName = ""
                 };
-                if(openFileDialog.ShowDialog() == DialogResult.OK)
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     aquaUI.aqua.aquaBones.Clear();
                     aquaUI.aqua.aquaMotions.Clear();
@@ -485,7 +488,7 @@ namespace AquaModelTool
                 Title = "Export model file",
                 Filter = "GLB model (*.glb)|*.glb"
             };
-            if(exportDialog.ShowDialog() == DialogResult.OK)
+            if (exportDialog.ShowDialog() == DialogResult.OK)
             {
                 aquaUI.aqua.ExportToGLTF(exportDialog.FileName);
             }
@@ -516,20 +519,20 @@ namespace AquaModelTool
                 Dictionary<string, List<string>> shaderCombinations = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderModelFiles = new Dictionary<string, List<string>>();
                 List<string> files = new List<string>();
-                string[] extensions = new string[]{ "*.aqp", "*.aqo", "*.trp", "*.tro" };
-                foreach(string s in extensions)
+                string[] extensions = new string[] { "*.aqp", "*.aqo", "*.trp", "*.tro" };
+                foreach (string s in extensions)
                 {
                     files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
-                } 
+                }
 
                 //Go through models we gathered
-                foreach(string file in files)
+                foreach (string file in files)
                 {
                     try
                     {
                         aquaUI.aqua.ReadModel(file);
                     }
-                    catch 
+                    catch
                     {
                         Console.WriteLine("Could not read file: " + file);
                         continue;
@@ -544,7 +547,7 @@ namespace AquaModelTool
                         string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
                         var textures = AquaObjectMethods.GetTexListNames(model, mesh.tsetIndex);
 
-                        if(textures.Count == 0 || textures == null)
+                        if (textures.Count == 0 || textures == null)
                         {
                             continue;
                         }
@@ -556,7 +559,7 @@ namespace AquaModelTool
                             {
                                 combination += "d";
                             }
-                            else if(tex.Contains("_s.dds") || tex.Contains("_s_") || tex.Contains("_multi")) //specular composite
+                            else if (tex.Contains("_s.dds") || tex.Contains("_s_") || tex.Contains("_multi")) //specular composite
                             {
                                 combination += "s";
                             }
@@ -636,11 +639,12 @@ namespace AquaModelTool
                         }
 
                         //Add them to the list
-                        if(!shaderCombinations.ContainsKey(key))
+                        if (!shaderCombinations.ContainsKey(key))
                         {
                             shaderCombinations[key] = new List<string>() { combination };
-                            shaderModelFiles[key] = new List<string>() { Path.GetFileName(file)};
-                        } else
+                            shaderModelFiles[key] = new List<string>() { Path.GetFileName(file) };
+                        }
+                        else
                         {
                             shaderCombinations[key].Add(combination);
                             shaderModelFiles[key].Add(Path.GetFileName(file));
@@ -708,11 +712,11 @@ namespace AquaModelTool
                     //Strings
                     foreach (var entityString in set.entityStrings)
                     {
-                        for(int sub = 0; sub < entityString.subStrings.Count; sub++)
+                        for (int sub = 0; sub < entityString.subStrings.Count; sub++)
                         {
                             var subStr = entityString.subStrings[sub];
                             setString.Append(subStr);
-                            if(sub != (entityString.subStrings.Count - 1))
+                            if (sub != (entityString.subStrings.Count - 1))
                             {
                                 setString.Append(",");
                             }
@@ -727,7 +731,7 @@ namespace AquaModelTool
                         objString.AppendLine(obj.entity_variant_string0.GetString());
                         objString.AppendLine(obj.entity_variant_string1);
                         objString.AppendLine(obj.entity_variant_stringJP);
-                        foreach(var variable in obj.variables)
+                        foreach (var variable in obj.variables)
                         {
                             objString.AppendLine(variable.Key + " - " + variable.Value.ToString());
                         }
@@ -749,6 +753,141 @@ namespace AquaModelTool
 
                 aquaUI.aqua.aquaSets.Clear();
             }
+        }
+
+        private void checkAllShaderExtrasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select a folder containing pso2 models (PRM has no shader and will not be read)",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                Dictionary<string, List<string>> shaderCombinations = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderModelFiles = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderDetails = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderExtras = new Dictionary<string, List<string>>();
+                List<string> files = new List<string>();
+                string[] extensions = new string[] { "*.aqp", "*.aqo", "*.trp", "*.tro" };
+                foreach (string s in extensions)
+                {
+                    files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
+                }
+
+                //Go through models we gathered
+                foreach (string file in files)
+                {
+                    try
+                    {
+                        aquaUI.aqua.ReadModel(file);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Could not read file: " + file);
+                        continue;
+                    }
+
+                    var model = aquaUI.aqua.aquaModels[0].models[0];
+
+                    //Go through all meshes in each model
+                    if(model.objc.type > 0xC2A)
+                    {
+                        foreach (var shad in model.shadList)
+                        {
+                            if(shad is NGSAquaObject.NGSSHAD && (((NGSAquaObject.NGSSHAD)shad).shadDetailOffset != 0 || ((NGSAquaObject.NGSSHAD)shad).shadExtraOffset != 0))
+                            {
+                                NGSAquaObject.NGSSHAD ngsShad = (NGSAquaObject.NGSSHAD)shad;
+                                string key = ngsShad.pixelShader.GetString() + " " + ngsShad.vertexShader.GetString();
+
+                                string data = "";
+                                string detData = "";
+                                string extData = "";
+                                if (ngsShad.shadDetailOffset != 0)
+                                {
+                                    data = $"Detail : \n unk0:{ngsShad.shadDetail.unk0} Extra Count:{ngsShad.shadDetail.shadExtraCount} unk1:{ngsShad.shadDetail.unk1} unkCount0:{ngsShad.shadDetail.unkCount0}\n" +
+                                        $" unk2:{ngsShad.shadDetail.unk2} unkCount1:{ngsShad.shadDetail.unkCount1} unk3:{ngsShad.shadDetail.unk3} unk4:{ngsShad.shadDetail.unk4}\n";
+                                    detData = "{" + $"\"{key}\", CreateDetail({ngsShad.shadDetail.unk0}, {ngsShad.shadDetail.shadExtraCount}, {ngsShad.shadDetail.unk1}, " +
+                                        $"{ngsShad.shadDetail.unkCount0}, {ngsShad.shadDetail.unk2}, {ngsShad.shadDetail.unkCount1}, {ngsShad.shadDetail.unk3}, " +
+                                        $"{ngsShad.shadDetail.unk4})" + "},\n";
+                                }
+                                if(ngsShad.shadExtraOffset != 0)
+                                {
+                                    data += "Extra :\n";
+                                    extData = "{" + $"\"{key}\", new List<SHADExtraEntry>()" + "{";
+                                    foreach (var extra in ngsShad.shadExtra)
+                                    {
+                                        data += $"{extra.entryString.GetString()} {extra.entryFlag0} {extra.entryFlag1} {extra.entryFlag2}\n" +
+                                            $"{extra.entryFloats.X} {extra.entryFloats.Y} {extra.entryFloats.Z} {extra.entryFloats.W}\n";
+                                        extData += " CreateExtra(" + $"{extra.entryFlag0}, \"{extra.entryString.GetString()}\"," +
+                                            $" {extra.entryFlag1}, {extra.entryFlag2}, new Vector4({extra.entryFloats.X}f, {extra.entryFloats.Y}f, {extra.entryFloats.Z}f, " +
+                                            $"{extra.entryFloats.W}f)),";
+                                    }
+                                    extData += "}},\n";
+                                }
+
+                                //Add them to the list
+                                if (!shaderCombinations.ContainsKey(key))
+                                {
+                                    shaderCombinations[key] = new List<string>() { data };
+                                    shaderModelFiles[key] = new List<string>() { Path.GetFileName(file) };
+                                    shaderDetails[key] = new List<string>() { detData };
+                                    shaderExtras[key] = new List<string>() { extData };
+                                }
+                                else
+                                {
+                                    shaderCombinations[key].Add(data);
+                                    shaderModelFiles[key].Add(Path.GetFileName(file));
+                                    shaderDetails[key].Add(detData);
+                                    shaderExtras[key].Add(extData);
+                                }
+                            } else
+                            {
+                                continue;
+                            }
+                        }
+
+                    }
+                    model = null;
+                    aquaUI.aqua.aquaModels.Clear();
+                }
+
+                //Sort the list so we don't get a mess
+                var keys = shaderCombinations.Keys.ToList();
+                keys.Sort();
+
+                StringBuilder simpleOutput = new StringBuilder();
+                StringBuilder advancedOutput = new StringBuilder();
+                StringBuilder detailDictOutput = new StringBuilder();
+                StringBuilder extraDictOutput = new StringBuilder();
+
+                detailDictOutput.Append("public static Dictionary<string, SHADDetail> NGSShaderDetailPresets = new Dictionary<string, SHADDetail>(){\n");
+                extraDictOutput.Append("public static Dictionary<string, List<SHADExtraEntry>> NGSShaderExtraPresets = new Dictionary<string, List<SHADExtraEntry>>(){\n");
+
+                foreach (var key in keys)
+                {
+                    simpleOutput.Append("\n" + key + "\n" + shaderCombinations[key][0]);
+                    detailDictOutput.Append(shaderDetails[key][0]);
+                    extraDictOutput.Append(shaderExtras[key][0]);
+
+                    advancedOutput.Append("\n" + key + "\n" + shaderCombinations[key][0] + "," + shaderModelFiles[key][0]);
+                    for (int i = 1; i < shaderCombinations[key].Count; i++)
+                    {
+                        advancedOutput.AppendLine("," + shaderCombinations[key][i] + "," + shaderModelFiles[key][i]);
+                        advancedOutput.AppendLine();
+                    }
+                    advancedOutput.AppendLine();
+                }
+                detailDictOutput.Append("};\n");
+                extraDictOutput.Append("};");
+
+                detailDictOutput.Append(extraDictOutput);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleNGSOutput.csv", simpleOutput.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedNGSOutput.csv", advancedOutput.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "presetDictionary.cs", detailDictOutput.ToString());
+            }
+
+            aquaUI.aqua.aquaModels.Clear();
         }
     }
 }

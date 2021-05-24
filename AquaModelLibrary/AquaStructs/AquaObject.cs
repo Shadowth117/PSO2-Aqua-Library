@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using static AquaModelLibrary.NGSAquaObject;
 
 namespace AquaModelLibrary
 
@@ -33,9 +34,16 @@ namespace AquaModelLibrary
         public List<List<ushort>> edgeVerts = new List<List<ushort>>();
 
         //Unclear the purpose of these, but when present they have a smaller count than initial mesh and psets. 
+        public List<unkStruct1> unkStruct1List = new List<unkStruct1>();
         public List<MESH> mesh2List = new List<MESH>();
         public List<PSET> pset2List = new List<PSET>();
         public List<stripData> strips2 = new List<stripData>();
+
+        public List<int> strips3StartIndices = new List<int>();
+        public List<stripData> strips3 = new List<stripData>();
+        public List<Vector3> unk20PointArray1 = new List<Vector3>(); //Noooooooo idea what these are
+        public List<Vector3> unk20PointArray2 = new List<Vector3>();
+        public List<int> unkCountList = new List<int>(); //Strip related?
         //***
 
         public bool applyNormalAveraging = false;
@@ -103,23 +111,23 @@ namespace AquaModelLibrary
             public int bonePaletteOffset; //0xC33 only uses a single bone palette
 
             public int fBlock0; //These 4 seemingly do nothing in normal models, but have values in some trp/tro variations of the format.
-            public int fBlock1;
+            public int fBlock1; //Maybe these are all shorts?
             public int fBlock2;
             public int fBlock3;
 
-            public int unkCount1;
-            public int unkOffset1;
+            public int unkStruct1Count;
+            public int unkStruct1Offset;
             public int pset2Count;
             public int pset2Offset;
 
             public int mesh2Count;
             public int mesh2Offset;
-            public int unkInt0;
-            public int unkCount2;
+            public int globalStrip2Offset;
+            public int globalStrip2StartIndexCount;
 
-            public int unkOffset2;
-            public int unkOffset3;
-            public int unkOffset4;
+            public int globalStrip2StartIndexOffset;
+            public int unk20PointArray1Offset;
+            public int unk20PointArray2Offset;
             public int unkCount3;
         }
 
@@ -177,8 +185,8 @@ namespace AquaModelLibrary
                 objc.fBlock2 = streamReader.Read<int>();
                 objc.fBlock3 = streamReader.Read<int>();
 
-                objc.unkCount1 = streamReader.Read<int>();
-                objc.unkOffset1 = streamReader.Read<int>();
+                objc.unkStruct1Count = streamReader.Read<int>();
+                objc.unkStruct1Offset = streamReader.Read<int>();
                 objc.pset2Count = streamReader.Read<int>();
                 objc.pset2Offset = streamReader.Read<int>();
 
@@ -186,12 +194,12 @@ namespace AquaModelLibrary
                 {
                     objc.mesh2Count = streamReader.Read<int>();
                     objc.mesh2Offset = streamReader.Read<int>();
-                    objc.unkInt0 = streamReader.Read<int>();
-                    objc.unkCount2 = streamReader.Read<int>();
+                    objc.globalStrip2Offset = streamReader.Read<int>();
+                    objc.globalStrip2StartIndexCount = streamReader.Read<int>();
 
-                    objc.unkOffset2 = streamReader.Read<int>();
-                    objc.unkOffset3 = streamReader.Read<int>();
-                    objc.unkOffset4 = streamReader.Read<int>();
+                    objc.globalStrip2StartIndexOffset = streamReader.Read<int>();
+                    objc.unk20PointArray1Offset = streamReader.Read<int>();
+                    objc.unk20PointArray2Offset = streamReader.Read<int>();
                     objc.unkCount3 = streamReader.Read<int>();
                 }
                 objc.type = 0xC33; //0xC33 is essentially the same so we can treat it as that from here. Its objc just doesn't have those last 2 fields or the associated arrays.

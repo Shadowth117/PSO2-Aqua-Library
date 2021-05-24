@@ -121,9 +121,11 @@
     <Compile Include="AquaStructs\AquaObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingOffsets.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />
+    <Compile Include="AquaStructs\LHIObjectDetailLayout.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\MusicFile.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
+    <Compile Include="AquaStructs\NGSShaderPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\ModelExporter.cs" />

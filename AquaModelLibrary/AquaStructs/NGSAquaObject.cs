@@ -6,7 +6,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary
 {
@@ -47,6 +46,14 @@ namespace AquaModelLibrary
             { (int)NGSVertFlags.Vert0x22, 0xC}, //(0x22 VertUnk0)
             { (int)NGSVertFlags.Vert0x23, 0xC}  //(0x23 VertUnk1)
         };
+
+        public struct unkStruct1
+        {
+            public int int_00;
+            public int int_04;
+            public int int_08;
+            public int int_0C;
+        }
 
         //Same as pso2 equivalent, but the 2 parts at the end are actually used for offsets to 2 new structs
         public class NGSSHAD : SHAD
@@ -109,6 +116,33 @@ namespace AquaModelLibrary
             public short entryFlag2;
 
             public Vector4 entryFloats;
+        }
+
+        public static SHADDetail CreateDetail(int unk0, int shadExtraCount, int unk1, int unkCount0, int unk2, int unkCount1, int unk3, int unk4)
+        {
+            SHADDetail det = new SHADDetail();
+            det.unk0 = unk0;
+            det.shadExtraCount = shadExtraCount;
+            det.unk1 = unk1;
+            det.unkCount0 = unkCount0;
+            det.unk2 = unk2;
+            det.unkCount1 = unkCount1;
+            det.unk3 = unk3;
+            det.unk4 = unk4;
+
+            return det;
+        }
+
+        public static SHADExtraEntry CreateExtra(short entryFlag0, string entryString, short entryFlag1, short entryFlag2, Vector4 entryFloats)
+        {
+            SHADExtraEntry ext = new SHADExtraEntry();
+            ext.entryFlag0 = entryFlag0;
+            ext.entryString.SetString(entryString);
+            ext.entryFlag1 = entryFlag1;
+            ext.entryFlag2 = entryFlag2;
+            ext.entryFloats = entryFloats;
+
+            return ext;
         }
     }
 }

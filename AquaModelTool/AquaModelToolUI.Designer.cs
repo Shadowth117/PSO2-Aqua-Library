@@ -50,6 +50,7 @@
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkAllShaderExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -158,6 +159,7 @@
             this.exportToGLTFToolStripMenuItem,
             this.importFromGLTFToolStripMenuItem,
             this.getToolStripMenuItem,
+            this.checkAllShaderExtrasToolStripMenuItem,
             this.batchParsePSO2SetToTextToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
@@ -230,6 +232,13 @@
             this.batchParsePSO2SetToTextToolStripMenuItem.Text = "Batch Parse PSO2 Set to Text";
             this.batchParsePSO2SetToTextToolStripMenuItem.Click += new System.EventHandler(this.batchParsePSO2SetToTextToolStripMenuItem_Click);
             // 
+            // checkAllShaderExtrasToolStripMenuItem
+            // 
+            this.checkAllShaderExtrasToolStripMenuItem.Name = "checkAllShaderExtrasToolStripMenuItem";
+            this.checkAllShaderExtrasToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.checkAllShaderExtrasToolStripMenuItem.Text = "Check All Shader Extras";
+            this.checkAllShaderExtrasToolStripMenuItem.Click += new System.EventHandler(this.checkAllShaderExtrasToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -273,6 +282,7 @@
         private System.Windows.Forms.ToolStripMenuItem importFromGLTFToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem batchParsePSO2SetToTextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkAllShaderExtrasToolStripMenuItem;
     }
 }
 

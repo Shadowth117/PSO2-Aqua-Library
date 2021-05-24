@@ -1270,19 +1270,19 @@ namespace AquaModelLibrary
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.fBlock2));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.fBlock3));
 
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount1));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset1));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkStruct1Count));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkStruct1Offset));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.pset2Count));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.pset2Offset));
 
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Count));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Offset));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkInt0));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount2));   //Default to 1?
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip2Offset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip2StartIndexCount));   //Default to 1?
 
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset2));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset3));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkOffset4));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip2StartIndexOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unk20PointArray1Offset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unk20PointArray2Offset));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount3));   //Default to 1?
 
                 AlignWriter(outBytes, 0x10);
