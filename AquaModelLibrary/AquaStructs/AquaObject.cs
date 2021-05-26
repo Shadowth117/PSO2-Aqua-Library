@@ -37,13 +37,12 @@ namespace AquaModelLibrary
         public List<unkStruct1> unkStruct1List = new List<unkStruct1>();
         public List<MESH> mesh2List = new List<MESH>();
         public List<PSET> pset2List = new List<PSET>();
-        public List<stripData> strips2 = new List<stripData>();
+        public List<stripData> strips2 = new List<stripData>(); //Strip set 2 is from the same array as the first, just split differently, potentially.
 
-        public List<int> strips3StartIndices = new List<int>();
+        public List<int> strips3Lengths = new List<int>();
         public List<stripData> strips3 = new List<stripData>();
-        public List<Vector3> unk20PointArray1 = new List<Vector3>(); //Noooooooo idea what these are
-        public List<Vector3> unk20PointArray2 = new List<Vector3>();
-        public List<int> unkCountList = new List<int>(); //Strip related?
+        public List<Vector3> unkPointArray1 = new List<Vector3>(); //Noooooooo idea what these are. Count matches the strips3Lengths count
+        public List<Vector3> unkPointArray2 = new List<Vector3>();
         //***
 
         public bool applyNormalAveraging = false;
@@ -122,12 +121,12 @@ namespace AquaModelLibrary
 
             public int mesh2Count;
             public int mesh2Offset;
-            public int globalStrip2Offset;
-            public int globalStrip2StartIndexCount;
+            public int globalStrip3Offset;
+            public int globalStrip3LengthCount;
 
-            public int globalStrip2StartIndexOffset;
-            public int unk20PointArray1Offset;
-            public int unk20PointArray2Offset;
+            public int globalStrip3LengthOffset;
+            public int unkPointArray1Offset;
+            public int unkPointArray2Offset;
             public int unkCount3;
         }
 
@@ -194,12 +193,12 @@ namespace AquaModelLibrary
                 {
                     objc.mesh2Count = streamReader.Read<int>();
                     objc.mesh2Offset = streamReader.Read<int>();
-                    objc.globalStrip2Offset = streamReader.Read<int>();
-                    objc.globalStrip2StartIndexCount = streamReader.Read<int>();
+                    objc.globalStrip3Offset = streamReader.Read<int>();
+                    objc.globalStrip3LengthCount = streamReader.Read<int>();
 
-                    objc.globalStrip2StartIndexOffset = streamReader.Read<int>();
-                    objc.unk20PointArray1Offset = streamReader.Read<int>();
-                    objc.unk20PointArray2Offset = streamReader.Read<int>();
+                    objc.globalStrip3LengthOffset = streamReader.Read<int>();
+                    objc.unkPointArray1Offset = streamReader.Read<int>();
+                    objc.unkPointArray2Offset = streamReader.Read<int>();
                     objc.unkCount3 = streamReader.Read<int>();
                 }
                 objc.type = 0xC33; //0xC33 is essentially the same so we can treat it as that from here. Its objc just doesn't have those last 2 fields or the associated arrays.
@@ -335,8 +334,10 @@ namespace AquaModelLibrary
         //Contains information about the triangle strip sets
         public struct PSET
         {
-            public int tag; //0xC6, type 0x9 //0x2100 in classic, 0x1000 always in 0xC33
-            public int faceType; //0xBB, type 0x9 //Assumedly facetype. Aqua models may support more standard polygons, but it's unclear whether that's a true feature or not. In any case, this value is 1 in all observed cases
+            public int tag; //0xC6, type 0x9 //0x2100 in classic, 0x1000 in aqp 0xC33. May actually be two int16s since it's 0x140 for the second two bytes in .trp. May not mean much
+            public int faceGroupCount; //0xBB, type 0x9 //Number of face groups. In classic, this seems to ALWAYS be 0x1. However in NGS, this seems to be used. These groups seem to link
+                                       //faces to specific groups for some purpose. Notably, the weird Vector3 arrays linked in objc.
+
             public int faceCountOffset; //Offset for the beginning of the correlating face data structure. 
             public int psetFaceCount; //0xBC, type 0x9 //This is actually the same count as the one at the offset above. Perhaps one would be used for triangle count and one would be used for true face count with another faceType above?
 
@@ -481,7 +482,10 @@ namespace AquaModelLibrary
 
             public int vtxlOffset;     //Unused in 0xC33
             public int vtxlStartVert;       //0xC4, Type 0x9 //Unused in classic. In 0xC33, specifies starting vertex for VSET within global VTXL list
-            public int bonePaletteCount; //0xBD, Type 0x8 //Vertex groups can't have more than 15 bones. //Unknown value in 0xC33. Replaces bone palette count and seems to be 0x??FFFFFF always. Perhaps a negative bonecount?
+            public int bonePaletteCount; //0xBD, Type 0x8 //Vertex groups can't have more than 15 bones. 
+                                        //Unknown value in 0xC33. Replaces bone palette count and seems to be 0x??FFFFFF always. Perhaps a negative bonecount?
+                                        //Still set to 0 if model does not use bones in 0xC33
+
             public int bonePaletteOffset;
             //In VTBF, VSET also contains bonePalette. 
             //0xBE. Entire entry omitted if count was 0. Type is 06 if single bone, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
@@ -553,6 +557,14 @@ namespace AquaModelLibrary
                 {
                     uv2ListNGS = new List<short[]>(new short[vertCount][]);
                 }
+                if (modelVtxl.uv3ListNGS.Count > 0)
+                {
+                    uv3ListNGS = new List<short[]>(new short[vertCount][]);
+                }
+                if (modelVtxl.uv4ListNGS.Count > 0)
+                {
+                    uv4ListNGS = new List<short[]>(new short[vertCount][]);
+                }
                 if (modelVtxl.uv2List.Count > 0)
                 {
                     uv2List = new List<Vector2>(new Vector2[vertCount]);
@@ -594,6 +606,8 @@ namespace AquaModelLibrary
             public List<byte[]> vertWeightIndices = new List<byte[]>(); //4 bytes
             public List<short[]> uv1ListNGS = new List<short[]>(); //2 16 bit values. UVs probably need to be vertically flipped for most software. I usually just import v as -v.
             public List<short[]> uv2ListNGS = new List<short[]>(); //Uncommon NGS uv2 variation
+            public List<short[]> uv3ListNGS = new List<short[]>();
+            public List<short[]> uv4ListNGS = new List<short[]>();
             public List<Vector2> uv2List = new List<Vector2>(); //For some reason 0xC33 seemingly retained vector2 data types for these.
             public List<Vector2> uv3List = new List<Vector2>();
             public List<Vector2> uv4List = new List<Vector2>();
@@ -668,6 +682,22 @@ namespace AquaModelLibrary
                     uv2ListNGS.Add(new short[2]);
                     uv2ListNGS[i][0] = ((short)(uv2List[i].X * short.MaxValue)); if (uv2ListNGS[i][0] == -short.MaxValue) { uv2ListNGS[i][0]--; }
                     uv2ListNGS[i][1] = ((short)(uv2List[i].Y * short.MaxValue)); if (uv2ListNGS[i][1] == -short.MaxValue) { uv2ListNGS[i][1]--; }
+                }
+
+                uv3ListNGS.Clear();
+                for (int i = 0; i < uv2List.Count; i++)
+                {
+                    uv3ListNGS.Add(new short[2]);
+                    uv3ListNGS[i][0] = ((short)(uv3List[i].X * short.MaxValue)); if (uv3ListNGS[i][0] == -short.MaxValue) { uv3ListNGS[i][0]--; }
+                    uv3ListNGS[i][1] = ((short)(uv3List[i].Y * short.MaxValue)); if (uv3ListNGS[i][1] == -short.MaxValue) { uv3ListNGS[i][1]--; }
+                }
+
+                uv4ListNGS.Clear();
+                for (int i = 0; i < uv2List.Count; i++)
+                {
+                    uv4ListNGS.Add(new short[2]);
+                    uv4ListNGS[i][0] = ((short)(uv4List[i].X * short.MaxValue)); if (uv4ListNGS[i][0] == -short.MaxValue) { uv4ListNGS[i][0]--; }
+                    uv4ListNGS[i][1] = ((short)(uv4List[i].Y * short.MaxValue)); if (uv4ListNGS[i][1] == -short.MaxValue) { uv4ListNGS[i][1]--; }
                 }
 
                 //Tangents
@@ -748,6 +778,32 @@ namespace AquaModelLibrary
                         var uv = new Vector2();
                         uv.X = ((float)((float)uv2ListNGS[i][0] / short.MaxValue));
                         uv.Y = ((float)((float)uv2ListNGS[i][1] / short.MaxValue));
+                        uv2List.Add(uv);
+                    }
+                }
+
+                if (force || uv3List.Count == 0)
+                {
+                    //UV2List
+                    uv3List.Clear();
+                    for (int i = 0; i < uv3ListNGS.Count; i++)
+                    {
+                        var uv = new Vector2();
+                        uv.X = ((float)((float)uv3ListNGS[i][0] / short.MaxValue));
+                        uv.Y = ((float)((float)uv3ListNGS[i][1] / short.MaxValue));
+                        uv2List.Add(uv);
+                    }
+                }
+
+                if (force || uv4List.Count == 0)
+                {
+                    //UV2List
+                    uv4List.Clear();
+                    for (int i = 0; i < uv4ListNGS.Count; i++)
+                    {
+                        var uv = new Vector2();
+                        uv.X = ((float)((float)uv4ListNGS[i][0] / short.MaxValue));
+                        uv.Y = ((float)((float)uv4ListNGS[i][1] / short.MaxValue));
                         uv2List.Add(uv);
                     }
                 }
@@ -1013,19 +1069,20 @@ namespace AquaModelLibrary
             public int reserve1;
             public int reserve2;
 
+            //The strip data is in a separate place in 0xC33, but will be placed here for convenience
+            //Triangles should be interpreted as 0, 1, 2 followed by 0, 2, 1. While this results in degenerate faces, wireframe views ingame show they are rendered with these.
+            public List<ushort> triStrips = new List<ushort>(); //0xB8, type 0x86 
+
+            public List<int> faceGroups = new List<int>(); //Count should match parent PSET's faceGroupCount. Unknown use. Seemingly groups sets of faces by order.
+
             public stripData()
             {
-
             }
 
             public stripData(ushort[] indices)
             {
                 toStrips(indices);
             }
-
-            //The strip data is in a separate place in 0xC33, but will be placed here for convenience
-            //Triangles should be interpreted as 0, 1, 2 followed by 0, 2, 1. While this results in degenerate faces, wireframe views ingame show they are rendered with these.
-            public List<ushort> triStrips = new List<ushort>(); //0xB8, type 0x86 
 
             public void toStrips(ushort[] indices)
             {

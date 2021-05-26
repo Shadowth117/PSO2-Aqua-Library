@@ -10,10 +10,11 @@ namespace AquaModelTool
         {
             modelset = aquaModelset;
 
+            /*
             if(modelset.models[0].objc.type == 0xC33 || modelset.models[0].objc.type == 0xC32)
             {
                 MessageBox.Show("NGS era models are not properly supported. Saving will probably give unexpected results.");
-            }
+            }*/
 
             InitializeComponent();
 

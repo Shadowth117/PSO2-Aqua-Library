@@ -687,7 +687,7 @@ namespace AquaModelTool
             if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 List<string> files = new List<string>();
-                string[] extensions = new string[] { "*.set" };
+                string[] extensions = new string[] { "*.set", "*.usd"};
                 foreach (string s in extensions)
                 {
                     files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));

@@ -82,7 +82,13 @@ namespace AquaModelTool
             str = str.Replace(".aqo", ".aqp");
             str = str.Replace(".tro", ".trp");
             
-            aqua.WriteClassicNIFLModel(str, str);
+            if(aqua.aquaModels[0].models[0].objc.type > 0xC2A)
+            {
+                aqua.WriteNGSNIFLModel(str, str);
+            } else
+            {
+                aqua.WriteClassicNIFLModel(str, str);
+            }
         }
 
         public void toVTBFModel(string str)

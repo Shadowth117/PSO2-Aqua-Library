@@ -250,10 +250,13 @@ namespace AquaModelLibrary
                 {
                     streamReader.Seek(model.psetList[psetIndex].faceCountOffset + offset, SeekOrigin.Begin);
                     AquaObject.stripData stripData = new AquaObject.stripData();
-                    stripData.triIdCount = streamReader.Read<int>();
-                    stripData.reserve0 = streamReader.Read<int>();
-                    stripData.reserve1 = streamReader.Read<int>();
-                    stripData.reserve2 = streamReader.Read<int>();
+                    stripData.triIdCount = model.psetList[psetIndex].psetFaceCount;
+
+                    //Read face groups. For most models, this will be 1
+                    for (int i = 0; i < model.psetList[psetIndex].faceGroupCount; i++)
+                    {
+                        stripData.faceGroups.Add(streamReader.Read<int>());
+                    }
 
                     streamReader.Seek(model.objc.globalStripOffset + (model.psetList[psetIndex].stripStartCount * 2) + offset, SeekOrigin.Begin);
                     //Read strip vert indices
@@ -264,7 +267,6 @@ namespace AquaModelLibrary
                     stripData.format0xC33 = true;
 
                     model.strips.Add(stripData);
-
                 }
             }
 
@@ -416,21 +418,23 @@ namespace AquaModelLibrary
                 {
                     streamReader.Seek(model.pset2List[psetIndex].faceCountOffset + offset, SeekOrigin.Begin);
                     AquaObject.stripData stripData = new AquaObject.stripData();
-                    stripData.triIdCount = streamReader.Read<int>();
-                    stripData.reserve0 = streamReader.Read<int>();
-                    stripData.reserve1 = streamReader.Read<int>();
-                    stripData.reserve2 = streamReader.Read<int>();
+                    stripData.triIdCount = model.pset2List[psetIndex].psetFaceCount;
+
+                    //Read face groups. For most models, this will be 1
+                    for (int i = 0; i < model.pset2List[psetIndex].faceGroupCount; i++)
+                    {
+                        stripData.faceGroups.Add(streamReader.Read<int>());
+                    }
 
                     streamReader.Seek(model.objc.globalStripOffset + (model.pset2List[psetIndex].stripStartCount * 2) + offset, SeekOrigin.Begin);
                     //Read strip vert indices
-                    for (int triId = 0; triId < stripData.triIdCount; triId++)
+                    for (int triId = 0; triId < model.pset2List[psetIndex].psetFaceCount; triId++)
                     {
                         stripData.triStrips.Add(streamReader.Read<ushort>());
                     }
                     stripData.format0xC33 = true;
 
                     model.strips2.Add(stripData);
-
                 }
             }
 
@@ -444,8 +448,75 @@ namespace AquaModelLibrary
                 }
             }
 
-            /* Weird trp nonsense can be here. Review later...
-             */
+            // Weird trp nonsense from here
+            if (model.objc.unkStruct1Count > 0)
+            {
+                streamReader.Seek(model.objc.unkStruct1Offset + offset, SeekOrigin.Begin);
+                for (int strIndex = 0; strIndex < model.objc.unkStruct1Count; strIndex++)
+                {
+                    model.unkStruct1List.Add(streamReader.Read<NGSAquaObject.unkStruct1>());
+                }
+            }
+
+            //Get 3rd strip set. This actually has its own separate strip array... for some reason. The count seems to always be 1 regardless, but doesn't always have anything at the offset. Quite odd.
+            if (model.objc.globalStrip3LengthCount > 0 && model.objc.globalStrip3LengthOffset != 0 && model.objc.globalStrip3Offset != 0)
+            {
+                //Get the lengths
+                streamReader.Seek(model.objc.globalStrip3LengthOffset + offset, SeekOrigin.Begin);
+                for(int id = 0; id < model.objc.globalStrip3LengthCount; id++)
+                {
+                    model.strips3Lengths.Add(streamReader.Read<int>());
+                }
+
+                streamReader.Seek(model.objc.globalStrip3Offset + offset, SeekOrigin.Begin);
+                //Read strip vert indices
+                for (int id = 0; id < model.strips3Lengths.Count; id++)
+                {
+                    AquaObject.stripData stripData = new AquaObject.stripData();
+                    stripData.format0xC33 = true;
+                    stripData.triIdCount = model.strips3Lengths[id];
+
+                    //These can potentially be 0 sometimes
+                    for (int triId = 0; triId < model.strips3Lengths[id]; triId++)
+                    {
+                        stripData.triStrips.Add(streamReader.Read<ushort>());
+                    }
+
+                    model.strips3.Add(stripData);
+                }
+            }
+            
+            if(model.objc.unkPointArray1Offset != 0)
+            {
+                if(model.objc.unkPointArray2Offset == 0)
+                {
+                    Console.WriteLine("unkPointArray2 was null. Cannot reliably calculate size");
+                    throw new Exception();
+                }
+                int point1Count = (model.objc.unkPointArray2Offset - model.objc.unkPointArray1Offset) / 0xC;
+
+                streamReader.Seek(model.objc.unkPointArray1Offset + offset, SeekOrigin.Begin);
+                for(int i = 0; i < point1Count; i++)
+                {
+                    model.unkPointArray1.Add(streamReader.Read<Vector3>());
+                }
+            }
+
+            if(model.objc.unkPointArray2Offset != 0)
+            {
+                if (model.objc.unkPointArray1Offset == 0)
+                {
+                    Console.WriteLine("unkPointArray1 was null. Cannot reliably calculate size");
+                    throw new Exception();
+                }
+                int point2Count = (model.objc.unkPointArray2Offset - model.objc.unkPointArray1Offset) / 0xC;
+
+                streamReader.Seek(model.objc.unkPointArray2Offset + offset, SeekOrigin.Begin);
+                for (int i = 0; i < point2Count; i++)
+                {
+                    model.unkPointArray2.Add(streamReader.Read<Vector3>());
+                }
+            }
 
             //Read NOF0
             streamReader.Seek(model.rel0.REL0Size + 0x8 + offset, SeekOrigin.Begin);
@@ -912,7 +983,7 @@ namespace AquaModelLibrary
                         //PSET
                         var pset = new AquaObject.PSET();
                         pset.tag = 0x2100;
-                        pset.faceType = 0x1;
+                        pset.faceGroupCount = 0x1;
                         pset.psetFaceCount = strips.triIdCount;
                         outModel.psetList.Add(pset);
 
@@ -1127,7 +1198,8 @@ namespace AquaModelLibrary
             }
         }
 
-        public void WriteC33NIFLModel(string ogFileName, string outFileName)
+        //Note, this method assumes the data has already been processed to work with this format
+        public void WriteNGSNIFLModel(string ogFileName, string outFileName)
         {
             bool package = outFileName.Contains(".aqp") || outFileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
             int modelCount = aquaModels[0].models.Count;
@@ -1148,12 +1220,14 @@ namespace AquaModelLibrary
             for (int modelId = 0; modelId < modelCount; modelId++)
             {
                 int bonusBytes = 0; //Should be 0 for NIFL
-                ClassicAquaObject model = (ClassicAquaObject)aquaModels[0].models[modelId];
+                NGSAquaObject model = (NGSAquaObject)aquaModels[0].models[modelId];
 
                 //Pointer data offsets for filling in later
                 int rel0SizeOffset;
 
                 //OBJC Offsets
+                int objcGlobalTriOffset;
+                int objcGlobalVtxlOffset;
                 int objcVsetOffset;
                 int objcPsetOffset;
                 int objcMeshOffset;
@@ -1169,20 +1243,22 @@ namespace AquaModelLibrary
                 int objcVtxeOffset;
                 int objcBonePaletteOffset;
 
-                int objcUnkOffset1;
+                int objcUnkStruct1Offset;
                 int objcPset2Offset;
                 int objcMesh2Offset;
-                int objcUnkOffset2;
+                int objcGlobalStrip3Offset;
 
-                int objcUnkOffset3;
-                int objcUnkOffset4;
+                int objcGlobalStrip3LengthOffset3;
+                int objcUnkPointArray1Offset;
+                int objcUnkPointArray2Offset;
 
-                List<int> vsetVtxeOffsets = new List<int>();
-                List<int> vsetVtxlOffsets = new List<int>();
-                List<int> vsetBonePaletteOffsets = new List<int>();
                 List<int> vsetEdgeVertOffsets = new List<int>();
-
                 List<int> psetfirstOffsets = new List<int>();
+                List<int> pset2firstOffsets = new List<int>();
+                List<int> shadDetailOffsets = new List<int>();
+                List<int> shadExtraOffsets = new List<int>();
+
+                List<int> vtxeOffsets = new List<int>();
 
                 List<byte> outBytes = new List<byte>();
                 List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
@@ -1197,6 +1273,8 @@ namespace AquaModelLibrary
                 //OBJC
 
                 //Set up OBJC pointers
+                objcGlobalTriOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x14, model.strips.Count);
+                objcGlobalVtxlOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, model.vtxlList.Count);
                 objcVsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x28, model.objc.vsetCount);
                 objcPsetOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, model.objc.psetCount);
                 objcMeshOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x38, model.objc.meshCount);
@@ -1218,8 +1296,15 @@ namespace AquaModelLibrary
                 }
                 objcVtxeOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xA8, model.objc.vtxeCount);
                 objcBonePaletteOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xAC, model.bonePalette.Count);
+
+                objcUnkStruct1Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xC4, model.unkStruct1List.Count);
                 objcPset2Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xCC, model.pset2List.Count);
                 objcMesh2Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xD4, model.mesh2List.Count);
+                objcGlobalStrip3Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xD8, model.strips3.Count);
+
+                objcGlobalStrip3LengthOffset3 = NOF0Append(nof0PointerLocations, outBytes.Count + 0xE0, model.strips3Lengths.Count);
+                objcUnkPointArray1Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xE4, model.unkPointArray1.Count);
+                objcUnkPointArray2Offset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xE8, model.unkPointArray2.Count);
 
                 //Write OBJC block
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.type));
@@ -1277,18 +1362,20 @@ namespace AquaModelLibrary
 
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Count));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Offset));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip2Offset));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip2StartIndexCount));   //Default to 1?
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3Offset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3LengthCount));   //The count for all 3 of the following offsets
 
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip2StartIndexOffset));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unk20PointArray1Offset));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.unk20PointArray2Offset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3LengthOffset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkPointArray1Offset));
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.unkPointArray2Offset));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.unkCount3));   //Default to 1?
 
                 AlignWriter(outBytes, 0x10);
 
                 //Write triangles. NGS doesn't use tristrips anymore
-                for(int i = 0; i < model.strips.Count; i++)
+                //Assumes the ushorts are already laid out as triangles
+                SetByteListInt(outBytes, objcGlobalTriOffset, outBytes.Count);
+                for (int i = 0; i < model.strips.Count; i++)
                 {
                     foreach(var id in model.strips[i].triStrips)
                     {
@@ -1298,9 +1385,10 @@ namespace AquaModelLibrary
                 AlignWriter(outBytes, 0x10);
 
                 //Write NGS VTXL
+                SetByteListInt(outBytes, objcGlobalVtxlOffset, outBytes.Count);
                 for (int i = 0; i < model.vtxlList.Count; i++)
                 {
-
+                    WriteVTXL(model.vtxeList[model.vsetList[i].vtxeCount], model.vtxlList[i], outBytes, model.objc.largetsVtxl);
                 }
                 AlignWriter(outBytes, 0x10);
 
@@ -1311,55 +1399,21 @@ namespace AquaModelLibrary
                 //Write VSET
                 for (int vsetId = 0; vsetId < model.vsetList.Count; vsetId++)
                 {
-                    vsetVtxeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8, model.vsetList[vsetId].vtxeCount));
-                    vsetVtxlOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x10, model.vsetList[vsetId].vtxlCount));
-                    vsetBonePaletteOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, model.vsetList[vsetId].bonePaletteCount));
                     vsetEdgeVertOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, model.vsetList[vsetId].edgeVertsCount));
 
                     outBytes.AddRange(ConvertStruct(model.vsetList[vsetId]));
                 }
                 AlignWriter(outBytes, 0x10);
 
-                //VTXE + VTXL
-                for (int vertListId = 0; vertListId < model.vtxlList.Count; vertListId++)
+                //Write Edge Verts
+                for (int vsetId = 0; vsetId < model.vsetList.Count; vsetId++)
                 {
-                    //Write VTXE pointer
-                    SetByteListInt(outBytes, vsetVtxeOffsets[vertListId], outBytes.Count);
-                    //Write current VTXE array
-                    for (int vtxeId = 0; vtxeId < model.vtxeList[vertListId].vertDataTypes.Count; vtxeId++)
+                    SetByteListInt(outBytes, vsetEdgeVertOffsets[vsetId], outBytes.Count);
+                    for (int ev = 0; ev < model.edgeVerts[vsetId].Count; ev++)
                     {
-                        outBytes.AddRange(ConvertStruct(model.vtxeList[vertListId].vertDataTypes[vtxeId]));
+                        outBytes.AddRange(BitConverter.GetBytes(model.edgeVerts[vsetId][ev]));
                     }
-
-                    //Write VTXL pointer
-                    SetByteListInt(outBytes, vsetVtxlOffsets[vertListId], outBytes.Count);
-                    //Write current VTXL array
-                    WriteClassicVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
                     AlignWriter(outBytes, 0x10);
-
-                    if (model.vtxlList[vertListId].bonePalette != null)
-                    {
-                        //Write bone palette pointer
-                        SetByteListInt(outBytes, vsetBonePaletteOffsets[vertListId], outBytes.Count);
-                        //Write bone palette
-                        for (int bpId = 0; bpId < model.vtxlList[vertListId].bonePalette.Count; bpId++)
-                        {
-                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].bonePalette[bpId]));
-                        }
-                        AlignWriter(outBytes, 0x10);
-                    }
-
-                    if (model.vtxlList[vertListId].edgeVerts != null)
-                    {
-                        //Write edge verts pointer
-                        SetByteListInt(outBytes, vsetEdgeVertOffsets[vertListId], outBytes.Count);
-                        //Write edge verts
-                        for (int evId = 0; evId < model.vtxlList[vertListId].edgeVerts.Count; evId++)
-                        {
-                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vertListId].edgeVerts[evId]));
-                        }
-                        AlignWriter(outBytes, 0x10);
-                    }
                 }
 
                 //PSET
@@ -1371,27 +1425,20 @@ namespace AquaModelLibrary
                 for (int psetId = 0; psetId < model.psetList.Count; psetId++)
                 {
                     psetfirstOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
-                    nof0PointerLocations.Add(outBytes.Count + 0x10);
                     outBytes.AddRange(ConvertStruct(model.psetList[psetId]));
                 }
                 AlignWriter(outBytes, 0x10);
 
-                //Write tristrip data
+                //Write triangle groups
                 for (int stripId = 0; stripId < model.strips.Count; stripId++)
                 {
                     SetByteListInt(outBytes, psetfirstOffsets[stripId], outBytes.Count);
-                    SetByteListInt(outBytes, psetfirstOffsets[stripId] + 0x8, outBytes.Count + 0x10); //Strip indices offset; always a set distance
 
-                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triIdCount));
-                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve0));
-                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve1));
-                    outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].reserve2));
-
-                    for (int faceId = 0; faceId < model.strips[stripId].triStrips.Count; faceId++)
+                    for(int id = 0; id < model.strips[stripId].faceGroups.Count; id++)
                     {
-                        outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].triStrips[faceId]));
+                        outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].faceGroups[id]));
                     }
-                    AlignWriter(outBytes, 0x10); //Intentionally aligned inside, unlike the basic PSET array's alignment
+                    AlignWriter(outBytes, 0x10); //These should all align already, but just in case
                 }
 
                 //MESH
@@ -1441,10 +1488,33 @@ namespace AquaModelLibrary
                     outBytes.AddRange(model.shadList[shadId].pixelShader.GetBytes());
                     outBytes.AddRange(model.shadList[shadId].vertexShader.GetBytes());
 
+                    shadDetailOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count, model.shadList[shadId].shadDetailOffset));
+                    shadExtraOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 4, model.shadList[shadId].shadExtraOffset));
                     outBytes.AddRange(BitConverter.GetBytes(model.shadList[shadId].shadDetailOffset));
                     outBytes.AddRange(BitConverter.GetBytes(model.shadList[shadId].shadExtraOffset));
                 }
                 AlignWriter(outBytes, 0x10);
+
+                //Write SHAD sub structs
+                for (int shadId = 0; shadId < model.shadList.Count; shadId++)
+                {
+                    var shad = (NGSAquaObject.NGSSHAD)model.shadList[shadId];
+
+                    if(shad.shadDetailOffset != 0) 
+                    {
+                        SetByteListInt(outBytes, shadDetailOffsets[shadId], outBytes.Count);
+                        outBytes.AddRange(ConvertStruct(shad.shadDetail));
+                    }
+
+                    if(shad.shadExtra.Count > 0)
+                    {
+                        SetByteListInt(outBytes, shadExtraOffsets[shadId], outBytes.Count);
+                        foreach (var extra in shad.shadExtra)
+                        {
+                            outBytes.AddRange(ConvertStruct(extra));
+                        }
+                    }
+                }
 
                 //TSTA
                 if (model.tstaList.Count > 0)
@@ -1564,6 +1634,141 @@ namespace AquaModelLibrary
                         }
                     }
                     AlignWriter(outBytes, 0x10);
+                }
+
+                //VTXE
+                if(model.vtxeList.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcVtxeOffset, outBytes.Count);
+                    for (int vt = 0; vt < model.vtxeList.Count; vt++)
+                    {
+                        vtxeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 4));
+                        outBytes.AddRange(BitConverter.GetBytes(model.vtxeList[vt].vertDataTypes.Count));
+                        outBytes.AddRange(BitConverter.GetBytes(0));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                    for (int vt = 0; vt < model.vtxeList.Count; vt++)
+                    {
+                        SetByteListInt(outBytes, vtxeOffsets[vt], outBytes.Count);
+                        for (int xe = 0; xe < model.vtxeList[vt].vertDataTypes.Count; xe++)
+                        {
+                            outBytes.AddRange(ConvertStruct(model.vtxeList[vt].vertDataTypes[xe]));
+                        }
+                    }
+                }
+
+                //BonePalette
+                if(model.bonePalette.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcBonePaletteOffset, outBytes.Count);
+                    NOF0Append(nof0PointerLocations, outBytes.Count + 4);
+                    outBytes.AddRange(BitConverter.GetBytes(model.bonePalette.Count));
+                    outBytes.AddRange(BitConverter.GetBytes(outBytes.Count + 4));
+
+                    //Write bones
+                    for (int bn = 0; bn < model.bonePalette.Count; bn++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.bonePalette[bn]));
+                    }
+                }
+                AlignWriter(outBytes, 0x10);
+
+                //UnkStruct1
+                if (model.unkStruct1List.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcUnkStruct1Offset, outBytes.Count);
+                    for(int unk = 0; unk < model.unkStruct1List.Count; unk++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.unkStruct1List[unk]));
+                    }
+                }
+
+                //PSET 2
+
+                if(model.pset2List.Count > 0)
+                {                
+                    //Write PSET 2 pointer
+                    SetByteListInt(outBytes, objcPset2Offset, outBytes.Count);
+
+                    //Write PSET 2
+                    for (int psetId = 0; psetId < model.pset2List.Count; psetId++)
+                    {
+                        pset2firstOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
+                        outBytes.AddRange(ConvertStruct(model.pset2List[psetId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+
+                    //Write triangle groups
+                    for (int stripId = 0; stripId < model.strips2.Count; stripId++)
+                    {
+                        SetByteListInt(outBytes, pset2firstOffsets[stripId], outBytes.Count);
+
+                        for (int id = 0; id < model.strips2[stripId].faceGroups.Count; id++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.strips2[stripId].faceGroups[id]));
+                        }
+                        AlignWriter(outBytes, 0x10); //These should all align already, but just in case
+                    }
+                }
+
+                //MESH 2
+                if (model.mesh2List.Count > 0)
+                {
+                    //Write MESH 2 pointer
+                    SetByteListInt(outBytes, objcMesh2Offset, outBytes.Count);
+
+                    //Write MESH 2
+                    for (int meshId = 0; meshId < model.mesh2List.Count; meshId++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.mesh2List[meshId]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //Strip data 2, used for strip set 3 (strip set 2 pulls from the main index set)
+                if(model.strips3.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcGlobalStrip3Offset, outBytes.Count);
+
+                    //Write triangles. NGS doesn't use tristrips anymore
+                    //Assumes the ushorts are already laid out as triangles
+                    for (int i = 0; i < model.strips3.Count; i++)
+                    {
+                        foreach (var id in model.strips3[i].triStrips)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(id));
+                        }
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //Strip lengths (Strip set 3 seemingly uses a simplified method for storing these)
+                if(model.strips3Lengths.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcGlobalStrip3LengthOffset3, outBytes.Count);
+                    for(int i = 0; i < model.strips3Lengths.Count; i++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(model.strips3Lengths[i]));
+                    }
+                    AlignWriter(outBytes, 0x10);
+                }
+
+                //Point arrays
+                if(model.unkPointArray1.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcUnkPointArray1Offset, outBytes.Count);
+                    for(int i = 0; i < model.unkPointArray1.Count; i++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.unkPointArray1[i]));
+                    }
+                }
+                if (model.unkPointArray2.Count > 0)
+                {
+                    SetByteListInt(outBytes, objcUnkPointArray2Offset, outBytes.Count);
+                    for (int i = 0; i < model.unkPointArray2.Count; i++)
+                    {
+                        outBytes.AddRange(ConvertStruct(model.unkPointArray2[i]));
+                    }
                 }
 
                 //Write REL0 Size
@@ -1767,7 +1972,7 @@ namespace AquaModelLibrary
                     //Write VTXL pointer
                     SetByteListInt(outBytes, vsetVtxlOffsets[vertListId], outBytes.Count);
                     //Write current VTXL array
-                    WriteClassicVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
+                    WriteVTXL(model.vtxeList[vertListId], model.vtxlList[vertListId], outBytes);
                     AlignWriter(outBytes, 0x10);
 
                     if (model.vtxlList[vertListId].bonePalette != null)
@@ -2994,7 +3199,7 @@ namespace AquaModelLibrary
 
         private static void AlignReader(BufferedStreamReader streamReader, int align)
         {
-            //Align to 0x10
+            //Align to int align
             while (streamReader.Position() % align > 0)
             {
                 streamReader.Read<byte>();
@@ -3003,7 +3208,7 @@ namespace AquaModelLibrary
 
         public int AlignWriter(List<byte> outBytes, int align)
         {
-            //Align to 0x10
+            //Align to int align
             int additions = 0;
             while (outBytes.Count % align > 0)
             {

@@ -721,7 +721,7 @@ namespace AquaModelLibrary
             outBytes2.Add(0xBA);
             outBytes2.Add(0x89);
             int vtxlSizeArea = outBytes2.Count;
-            WriteClassicVTXL(vtxe, vtxl, outBytes2);
+            WriteVTXL(vtxe, vtxl, outBytes2);
 
             //Calc and insert the vert data counts in post due to the way sega does it.
             int vertDataCount = ((outBytes2.Count - vtxlSizeArea) / 4) - 1;
@@ -763,7 +763,7 @@ namespace AquaModelLibrary
                 stripData strip = new stripData();
 
                 pset.tag = (int)psetRaw[i][0xC6];
-                pset.faceType = (int)psetRaw[i][0xBB];
+                pset.faceGroupCount = (int)psetRaw[i][0xBB];
                 pset.psetFaceCount = (int)psetRaw[i][0xBC];
                 strip.triIdCount = (int)psetRaw[i][0xB7];
                 strip.triStrips = ((ushort[])psetRaw[i][0xB8]).ToList();
@@ -788,7 +788,7 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
                 addBytes(outBytes, 0xC6, 0x9, BitConverter.GetBytes(psets[i].tag));
-                addBytes(outBytes, 0xBB, 0x9, BitConverter.GetBytes(psets[i].faceType));
+                addBytes(outBytes, 0xBB, 0x9, BitConverter.GetBytes(psets[i].faceGroupCount));
                 addBytes(outBytes, 0xBC, 0x9, BitConverter.GetBytes(psets[i].psetFaceCount));
                 addBytes(outBytes, 0xB7, 0x9, BitConverter.GetBytes(strips[i].triIdCount));
 

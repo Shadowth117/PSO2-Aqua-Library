@@ -97,6 +97,14 @@ namespace AquaModelLibrary
                     {
                         vtxl.uv2ListNGS[i] = new short[2];
                     }
+                    if (vtxl.uv3ListNGS.Count > 0 && vtxl.uv3ListNGS[i] == null)
+                    {
+                        vtxl.uv3ListNGS[i] = new short[2];
+                    }
+                    if (vtxl.uv4ListNGS.Count > 0 && vtxl.uv4ListNGS[i] == null)
+                    {
+                        vtxl.uv4ListNGS[i] = new short[2];
+                    }
                     if (vtxl.uv2List.Count > 0 && vtxl.uv2List[i] == null)
                     {
                         vtxl.uv2List[i] = new Vector2();
@@ -213,6 +221,14 @@ namespace AquaModelLibrary
             {
                 destinationVTXL.uv2ListNGS[destinationIndex] = (short[])sourceVTXL.uv2ListNGS[sourceIndex].Clone();
             }
+            if (sourceVTXL.uv3ListNGS.Count > sourceIndex)
+            {
+                destinationVTXL.uv3ListNGS[destinationIndex] = (short[])sourceVTXL.uv3ListNGS[sourceIndex].Clone();
+            }
+            if (sourceVTXL.uv4ListNGS.Count > sourceIndex)
+            {
+                destinationVTXL.uv4ListNGS[destinationIndex] = (short[])sourceVTXL.uv4ListNGS[sourceIndex].Clone();
+            }
             if (sourceVTXL.uv1List.Count > sourceIndex)
             {
                 destinationVTXL.uv1List[destinationIndex] = sourceVTXL.uv1List[sourceIndex];
@@ -317,6 +333,14 @@ namespace AquaModelLibrary
             {
                 destinationVTXL.uv2ListNGS.Add((short[])sourceVTXL.uv2ListNGS[sourceIndex].Clone());
             }
+            if (sourceVTXL.uv3ListNGS.Count > sourceIndex)
+            {
+                destinationVTXL.uv3ListNGS.Add((short[])sourceVTXL.uv3ListNGS[sourceIndex].Clone());
+            }
+            if (sourceVTXL.uv4ListNGS.Count > sourceIndex)
+            {
+                destinationVTXL.uv4ListNGS.Add((short[])sourceVTXL.uv4ListNGS[sourceIndex].Clone());
+            }
             if (sourceVTXL.uv1List.Count > sourceIndex)
             {
                 destinationVTXL.uv1List.Add(sourceVTXL.uv1List[sourceIndex]);
@@ -406,6 +430,14 @@ namespace AquaModelLibrary
                 return false;
             }
             if (vtxl.uv2ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv2ListNGS[vertIndex], vtxl2.uv2ListNGS[faceVertIndex]))
+            {
+                return false;
+            }
+            if (vtxl.uv3ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv3ListNGS[vertIndex], vtxl2.uv3ListNGS[faceVertIndex]))
+            {
+                return false;
+            }
+            if (vtxl.uv4ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv4ListNGS[vertIndex], vtxl2.uv4ListNGS[faceVertIndex]))
             {
                 return false;
             }
@@ -594,14 +626,34 @@ namespace AquaModelLibrary
                                     vtxl.uv2ListNGS.Add(Read2Shorts(streamReader));
                                     break;
                                 default:
-                                    throw new Exception($"Unexpected vert uv1 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
+                                    throw new Exception($"Unexpected vert uv2 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
                             }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV3:
-                            vtxl.uv3List.Add(streamReader.Read<Vector2>());
+                            switch (vtxeSet.vertDataTypes[vtxeIndex].structVariation)
+                            {
+                                case 0x2:
+                                    vtxl.uv3List.Add(streamReader.Read<Vector2>());
+                                    break;
+                                case 0xE:
+                                    vtxl.uv3ListNGS.Add(Read2Shorts(streamReader));
+                                    break;
+                                default:
+                                    throw new Exception($"Unexpected vert uv3 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
+                            }
                             break;
                         case (int)NGSAquaObject.NGSVertFlags.VertUV4:
-                            vtxl.uv4List.Add(streamReader.Read<Vector2>());
+                            switch (vtxeSet.vertDataTypes[vtxeIndex].structVariation)
+                            {
+                                case 0x2:
+                                    vtxl.uv4List.Add(streamReader.Read<Vector2>());
+                                    break;
+                                case 0xE:
+                                    vtxl.uv4ListNGS.Add(Read2Shorts(streamReader));
+                                    break;
+                                default:
+                                    throw new Exception($"Unexpected vert uv4 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertTangent:
                             switch (vtxeSet.vertDataTypes[vtxeIndex].structVariation)
@@ -1144,8 +1196,8 @@ namespace AquaModelLibrary
         public static void SplitByBoneCount(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
         {
             List<List<int>> faceLists = new List<List<int>>();
- /*  Debug*/List<List<int>> usedVertsMaster = new List<List<int>>();
- /*  Debug*/List<List<int>> objBonesList = new List<List<int>>();
+ /*  Debug*///List<List<int>> usedVertsMaster = new List<List<int>>();
+ /*  Debug*///List<List<int>> objBonesList = new List<List<int>>();
 
             bool[] usedFaceIds = new bool[model.tempTris[modelId].triList.Count];
             int startFace = 0;
@@ -1248,8 +1300,8 @@ namespace AquaModelLibrary
                 }
                 faceLists.Add(faceArray);
                 
-/*     Debug  */usedVertsMaster.Add(usedVerts);
- /*    Debug  */objBonesList.Add(objBones);
+/*     Debug  *///usedVertsMaster.Add(usedVerts);
+ /*    Debug  *///objBonesList.Add(objBones);
 
 
                 bool breakFromLoop = true;
@@ -1478,8 +1530,17 @@ namespace AquaModelLibrary
             vtxl.bonePalette = newBonePalette;
         }
 
-        public static void WriteClassicVTXL(VTXE vtxe, VTXL vtxl, List<byte> outBytes2)
+        public static void WriteVTXL(VTXE vtxe, VTXL vtxl, List<byte> outBytes2, int sizeToFill = -1)
         {
+            int padding = 0;
+            if(sizeToFill != -1)
+            {
+                padding = sizeToFill - GetVTXESize(vtxe);
+            } else
+            {
+                padding = 0;
+            }
+
             for (int i = 0; i < vtxl.vertPositions.Count; i++)
             {
                 for (int j = 0; j < vtxe.vertDataTypes.Count; j++)
@@ -1490,10 +1551,32 @@ namespace AquaModelLibrary
                             outBytes2.AddRange(ConvertStruct(vtxl.vertPositions[i]));
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertWeight:
-                            outBytes2.AddRange(ConvertStruct(vtxl.vertWeights[i]));
+                            switch(vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x4:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.vertWeights[i]));
+                                    break;
+                                case 0x11:
+                                    for (int id = 0; id < 4; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.vertWeightsNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertNormal:
-                            outBytes2.AddRange(ConvertStruct(vtxl.vertNormals[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x3:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.vertNormals[i]));
+                                    break;
+                                case 0xF:
+                                    for (int id = 0; id < 4; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.vertNormalsNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertColor:
                             for (int color = 0; color < 4; color++)
@@ -1514,22 +1597,88 @@ namespace AquaModelLibrary
                             }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV1:
-                            outBytes2.AddRange(ConvertStruct(vtxl.uv1List[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x2:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.uv1List[i]));
+                                    break;
+                                case 0xE:
+                                    for (int id = 0; id < 2; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.uv1ListNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV2:
-                            outBytes2.AddRange(ConvertStruct(vtxl.uv2List[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x2:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.uv2List[i]));
+                                    break;
+                                case 0xE:
+                                    for (int id = 0; id < 2; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.uv2ListNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV3:
-                            outBytes2.AddRange(ConvertStruct(vtxl.uv3List[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x2:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.uv3List[i]));
+                                    break;
+                                case 0xE:
+                                    for (int id = 0; id < 2; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.uv3ListNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV4:
-                            outBytes2.AddRange(ConvertStruct(vtxl.uv4List[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x2:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.uv4List[i]));
+                                    break;
+                                case 0xE:
+                                    for (int id = 0; id < 2; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.uv4ListNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertTangent:
-                            outBytes2.AddRange(ConvertStruct(vtxl.vertTangentList[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x3:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.vertTangentList[i]));
+                                    break;
+                                case 0xF:
+                                    for (int id = 0; id < 4; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.vertTangentListNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertBinormal:
-                            outBytes2.AddRange(ConvertStruct(vtxl.vertBinormalList[i]));
+                            switch (vtxe.vertDataTypes[j].structVariation)
+                            {
+                                case 0x3:
+                                    outBytes2.AddRange(ConvertStruct(vtxl.vertBinormalList[i]));
+                                    break;
+                                case 0xF:
+                                    for (int id = 0; id < 4; id++)
+                                    {
+                                        outBytes2.AddRange(BitConverter.GetBytes(vtxl.vertBinormalListNGS[i][id]));
+                                    }
+                                    break;
+                            }
                             break;
                         case (int)NGSAquaObject.NGSVertFlags.Vert0x22:
                             for (int id = 0; id < 2; id++)
@@ -1547,10 +1696,135 @@ namespace AquaModelLibrary
                             MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
                             throw new Exception("Not implemented!");
                     }
-
-
+                }
+                for(int pad = 0; pad < padding; pad++)
+                {
+                    outBytes2.Add(0);
                 }
             }
+        }
+
+        public static int GetVTXESize(VTXE vtxe)
+        {
+            int size = 0;
+            for (int j = 0; j < vtxe.vertDataTypes.Count; j++)
+            {
+                switch (vtxe.vertDataTypes[j].dataType)
+                {
+                    case (int)ClassicAquaObject.VertFlags.VertPosition:
+                        size += 0xC;
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertWeight:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x4:
+                                size += 0x10;
+                                break;
+                            case 0x11:
+                                size += 0x8;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertNormal:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x3:
+                                size += 0xC;
+                                break;
+                            case 0xF:
+                                size += 0x8;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertColor:
+                        size += 0x4;
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertColor2:
+                        size += 0x4;
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertWeightIndex:
+                        size += 0x4;
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertUV1:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x2:
+                                size += 0x8;
+                                break;
+                            case 0xE:
+                                size += 0x4;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertUV2:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x2:
+                                size += 0x8;
+                                break;
+                            case 0xE:
+                                size += 0x4;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertUV3:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x2:
+                                size += 0x8;
+                                break;
+                            case 0xE:
+                                size += 0x4;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertUV4:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x2:
+                                size += 0x8;
+                                break;
+                            case 0xE:
+                                size += 0x4;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertTangent:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x3:
+                                size += 0xC;
+                                break;
+                            case 0xF:
+                                size += 0x8;
+                                break;
+                        }
+                        break;
+                    case (int)ClassicAquaObject.VertFlags.VertBinormal:
+                        switch (vtxe.vertDataTypes[j].structVariation)
+                        {
+                            case 0x3:
+                                size += 0xC;
+                                break;
+                            case 0xF:
+                                size += 0x8;
+                                break;
+                        }
+                        break;
+                    case (int)NGSAquaObject.NGSVertFlags.Vert0x22:
+                        size += 0x4;
+                        break;
+                    case (int)NGSAquaObject.NGSVertFlags.Vert0x23:
+                        size += 0x4;
+                        break;
+                    default:
+                        MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
+                        throw new Exception("Not implemented!");
+                }
+
+
+            }
+            return size;
         }
 
         public static string GetPSO2String(byte* str)
