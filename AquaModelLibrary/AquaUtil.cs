@@ -923,6 +923,181 @@ namespace AquaModelLibrary
         }
 
         //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
+        public void ConvertToNGSPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool splitVerts = true)
+        {
+            for (int msI = 0; msI < aquaModels.Count; msI++)
+            {
+                for (int aqI = 0; aqI < aquaModels[msI].models.Count; aqI++)
+                {
+                    int totalStripsShorts = 0;
+                    int totalVerts = 0;
+                    AquaObject matModelSplit = new NGSAquaObject();
+                    AquaObject outModel = new NGSAquaObject();
+
+                    //Assemble vtxlList
+                    if (aquaModels[msI].models[aqI].vtxlList == null || aquaModels[msI].models[aqI].vtxlList.Count == 0)
+                    {
+                        VTXLFromFaceVerts(aquaModels[msI].models[aqI]);
+                    }
+                    //Fix weights
+                    foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
+                    {
+                        vtxl.processToPSO2Weights();
+                    }
+
+                    //Reindex materials if needed
+                    for (int mesh = 0; mesh < aquaModels[msI].models[aqI].tempTris.Count; mesh++)
+                    {
+                        var tempMesh = aquaModels[msI].models[aqI].tempTris[mesh];
+                        if (tempMesh.matIdDict.Count > 0)
+                        {
+                            for (int face = 0; face < tempMesh.matIdList.Count; face++)
+                            {
+                                tempMesh.matIdList[face] = tempMesh.matIdDict[tempMesh.matIdList[face]];
+                            }
+                        }
+                    }
+
+                    SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit); 
+                    BatchSplitByBoneCount(matModelSplit, outModel, 255);
+                    RemoveAllUnusedBones(outModel);
+                    GenerateGlobalBonePalette(outModel);
+                    if (splitVerts)
+                    {
+                        CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
+                    }
+
+                    //Set up materials and related data
+                    for (int mat = 0; mat < aquaModels[msI].models[aqI].tempMats.Count; mat++)
+                    {
+                        GenerateMaterial(outModel, aquaModels[msI].models[aqI].tempMats[mat], true);
+                    }
+
+                    //Set up PSETs and strips, and other per mesh data
+                    for (int i = 0; i < outModel.tempTris.Count; i++)
+                    {
+                        //strips
+                        var strips = new AquaObject.stripData();
+                        strips.format0xC33 = true;
+                        strips.triStrips = new List<ushort>(outModel.tempTris[i].toUshortArray());
+                        strips.triIdCount = strips.triStrips.Count;
+                        strips.faceGroups.Add(strips.triStrips.Count);
+                        outModel.strips.Add(strips);
+
+                        //PSET
+                        var pset = new AquaObject.PSET();
+                        pset.tag = 0x1000;
+                        pset.faceGroupCount = 0x1;
+                        pset.psetFaceCount = strips.triIdCount;
+                        pset.stripStartCount = totalStripsShorts;
+                        totalStripsShorts += strips.triIdCount;
+                        outModel.psetList.Add(pset);
+
+                        //MESH
+                        var mesh = new AquaObject.MESH();
+                        mesh.tag = 0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
+                        mesh.unkShort0 = 0x0;
+                        mesh.unkByte0 = 0x80;
+                        mesh.unkByte1 = 0x64;
+                        mesh.unkShort1 = 0;
+                        mesh.mateIndex = outModel.tempTris[i].matIdList[0];
+                        mesh.rendIndex = mesh.mateIndex;
+                        mesh.shadIndex = mesh.mateIndex;
+                        mesh.tsetIndex = mesh.mateIndex;
+                        mesh.baseMeshNodeId = -1;
+                        /*if (baHack)
+                        {
+                            mesh.baseMeshNodeId = 0;
+                        }
+                        else
+                        {
+                            mesh.baseMeshNodeId = outModel.tempTris[i].baseMeshNodeId;
+                        }*/
+                        mesh.vsetIndex = i;
+                        mesh.psetIndex = i;
+                        if (baHack)
+                        {
+                            mesh.baseMeshDummyId = 0;
+                        }
+                        else
+                        {
+                            mesh.baseMeshDummyId = outModel.tempTris[i].baseMeshDummyId;
+                        }
+                        mesh.unkInt0 = 0;
+                        mesh.reserve0 = 0;
+                        outModel.meshList.Add(mesh);
+                    }
+
+                    if (useBiTangent)
+                    {
+                        //Generate Binormals and Tangents
+                        computeTangentSpace(outModel, useFaceNormals);
+                    }
+
+                    //Generate VTXEs and VSETs
+                    int largestVertSize = 0;
+                    int vertCounter = 0;
+                    for (int i = 0; i < outModel.vtxlList.Count; i++)
+                    {
+                        totalVerts += outModel.vtxlList[i].vertPositions.Count;
+                        AquaObject.VTXE vtxe = ConstructClassicVTXE(outModel.vtxlList[i], out int size);
+                        outModel.vtxeList.Add(vtxe);
+
+                        //Track this for objc
+                        if (size > largestVertSize)
+                        {
+                            largestVertSize = size;
+                        }
+
+                        AquaObject.VSET vset = new AquaObject.VSET();
+                        vset.vertDataSize = size;
+                        vset.vtxeCount = outModel.vtxeList.Count -  1;
+                        vset.vtxlCount = outModel.vtxlList[i].vertPositions.Count;
+                        vset.vtxlStartVert = vertCounter;
+                        vertCounter += vset.vtxlCount;
+                        outModel.vtxlList[i].bonePalette.Sort();
+                        vset.bonePaletteCount = -(outModel.vtxlList[i].bonePalette[outModel.vtxlList[i].bonePalette.Count - 1] + 1); //This value seems to be the largest index in the used indices + 1 and then made negative.
+                        vset.edgeVertsCount = outModel.vtxlList[i].edgeVerts.Count;
+                        outModel.vsetList.Add(vset);
+                    }
+
+                    //Generate OBJC
+                    AquaObject.OBJC objc = new AquaObject.OBJC();
+                    objc.type = 0xC33;
+                    objc.size = 0xF0;
+                    objc.unkMeshValue = 0x30053; //Taken from pl_rbd_100000
+                    objc.largetsVtxl = largestVertSize;
+                    objc.totalStripFaces = totalStripsShorts;
+                    objc.totalVTXLCount = totalVerts;
+                    objc.unkStructCount = outModel.vtxlList.Count;
+                    objc.vsetCount = outModel.vsetList.Count;
+                    objc.psetCount = outModel.psetList.Count;
+                    objc.meshCount = outModel.meshList.Count;
+                    objc.mateCount = outModel.mateList.Count;
+                    objc.rendCount = outModel.rendList.Count;
+                    objc.shadCount = outModel.shadList.Count;
+                    objc.tstaCount = outModel.tstaList.Count;
+                    objc.tsetCount = outModel.tsetList.Count;
+                    objc.texfCount = outModel.texfList.Count;
+                    objc.vtxeCount = outModel.vtxeList.Count;
+                    objc.fBlock0 = -1;
+                    objc.fBlock1 = -1;
+                    objc.fBlock2 = -1;
+                    objc.fBlock3 = -1;
+                    objc.globalStrip3LengthCount = 1;
+                    objc.unkCount3 = 1;
+                    if (!zeroBounds)
+                    {
+                        objc.bounds = GenerateBounding(outModel.vtxlList);
+                    }
+                    outModel.objc = objc;
+
+                    aquaModels[msI].models[aqI] = outModel;
+                }
+            }
+        }
+
+        //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
         public void ConvertToClassicPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool splitVerts = true)
         {
             for (int msI = 0; msI < aquaModels.Count; msI++)
@@ -1408,12 +1583,17 @@ namespace AquaModelLibrary
                 //Write Edge Verts
                 for (int vsetId = 0; vsetId < model.vsetList.Count; vsetId++)
                 {
-                    SetByteListInt(outBytes, vsetEdgeVertOffsets[vsetId], outBytes.Count);
-                    for (int ev = 0; ev < model.edgeVerts[vsetId].Count; ev++)
+                    if (model.vtxlList[vsetId].edgeVerts != null && model.vtxlList[vsetId].edgeVerts.Count > 0)
                     {
-                        outBytes.AddRange(BitConverter.GetBytes(model.edgeVerts[vsetId][ev]));
+                        //Write edge verts pointer
+                        SetByteListInt(outBytes, vsetEdgeVertOffsets[vsetId], outBytes.Count);
+                        //Write edge verts
+                        for (int evId = 0; evId < model.vtxlList[vsetId].edgeVerts.Count; evId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(model.vtxlList[vsetId].edgeVerts[evId]));
+                        }
+                        AlignWriter(outBytes, 0x10);
                     }
-                    AlignWriter(outBytes, 0x10);
                 }
 
                 //PSET

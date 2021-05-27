@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using static AquaModelLibrary.AquaObject;
+using static AquaModelLibrary.NGSShaderPresets;
 
 namespace AquaModelLibrary
 {
@@ -1416,6 +1417,47 @@ namespace AquaModelLibrary
 
         }*/
 
+        public static void GenerateGlobalBonePalette(AquaObject model)
+        {
+            List<uint> newBonePalette = new List<uint>();
+            //Construct the bone palette
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                if (model.vtxlList[i].bonePalette.Count > 0)
+                {
+                    for (int j = 0; j < model.vtxlList[i].bonePalette.Count; j++)
+                    {
+                        if (!newBonePalette.Contains(model.vtxlList[i].bonePalette[j]))
+                        {
+                            newBonePalette.Add(model.vtxlList[i].bonePalette[j]);
+                        }
+                    }
+                }
+            }
+
+            //Reassign indices
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                for(int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
+                {
+                    List<int> usedIds = new List<int>();
+                    for (int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
+                    {
+                        if(usedIds.Contains(model.vtxlList[i].vertWeightIndices[j][k]))
+                        {
+                            model.vtxlList[i].vertWeightIndices[j][k] = 0;
+                        } else
+                        {
+                            usedIds.Add(model.vtxlList[i].vertWeightIndices[j][k]);
+                            model.vtxlList[i].vertWeightIndices[j][k] = (byte)newBonePalette.IndexOf(model.vtxlList[i].bonePalette[model.vtxlList[i].vertWeightIndices[j][k]]);
+                        }
+                    }
+                }
+            }
+
+            model.bonePalette = newBonePalette;
+        }
+
         public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
             outModel.vtxlList.Add(model.vtxlList[meshId]);
@@ -1697,10 +1739,7 @@ namespace AquaModelLibrary
                             throw new Exception("Not implemented!");
                     }
                 }
-                for(int pad = 0; pad < padding; pad++)
-                {
-                    outBytes2.Add(0);
-                }
+                outBytes2.AddRange(new byte[padding]);
             }
         }
 
@@ -1953,7 +1992,7 @@ namespace AquaModelLibrary
         }
 
         //Used to generate standard materials in which the texture names are used. 
-        public static void GenerateMaterial(AquaObject model, GenericMaterial mat)
+        public static void GenerateMaterial(AquaObject model, GenericMaterial mat, bool ngsMat = false)
         {
             if(mat.specialType != null)
             {
@@ -1962,7 +2001,14 @@ namespace AquaModelLibrary
             int texArrayStartIndex = model.tstaList.Count;
             TSET tset = new TSET();
             MATE mate = new MATE();
-            SHAD shad = new SHAD();
+            SHAD shad;
+            if(ngsMat)
+            {
+                shad = new NGSAquaObject.NGSSHAD();
+            } else
+            {
+                shad = new SHAD();
+            }
             REND rend = new REND();
 
             //Set up textures
@@ -2027,6 +2073,20 @@ namespace AquaModelLibrary
             //Set up SHAD
             shad.pixelShader.SetString(mat.shaderNames[0]);
             shad.vertexShader.SetString(mat.shaderNames[1]);
+            if(ngsMat)
+            {
+                var ngsShad = (NGSAquaObject.NGSSHAD)shad;
+                string key = ngsShad.pixelShader.GetString() + " " + ngsShad.vertexShader.GetString();
+                if(NGSShaderDetailPresets.ContainsKey(key))
+                {
+                    ngsShad.shadDetail = NGSShaderDetailPresets[key];
+                    ngsShad.shadDetailOffset = 1; //There's no count on this so we mark it this way in case shadDetail were ever to be all 0s.
+                }
+                if (NGSShaderExtraPresets.ContainsKey(key))
+                {
+                    ngsShad.shadExtra = NGSShaderExtraPresets[key];
+                }
+            }
 
             //Set up REND
             rend.tag = 0x1FF;
