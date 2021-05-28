@@ -31,7 +31,6 @@ namespace AquaModelLibrary
 
         //*** 0xC33 only
         public List<uint> bonePalette = new List<uint>();
-        public List<List<ushort>> edgeVerts = new List<List<ushort>>();
 
         //Unclear the purpose of these, but when present they have a smaller count than initial mesh and psets. 
         public List<unkStruct1> unkStruct1List = new List<unkStruct1>();

@@ -138,6 +138,8 @@ namespace AquaModelLibrary
 
         private static void ReadNGSNIFLModel(BufferedStreamReader streamReader, NGSAquaObject model, int offset, List<AquaObject> aquaModels)
         {
+            List<List<ushort>> edgeVertsTemp = new List<List<ushort>>();
+
             model.nifl = streamReader.Read<AquaCommon.NIFL>();
             model.rel0 = streamReader.Read<AquaCommon.REL0>();
             model.objc = AquaObject.ReadOBJC(streamReader);
@@ -162,7 +164,7 @@ namespace AquaModelLibrary
                         }
                         streamReader.Seek(bookmark, SeekOrigin.Begin);
                     }
-                    model.edgeVerts.Add(edgeVerts);
+                    edgeVertsTemp.Add(edgeVerts);
                 }
             }
 
@@ -231,6 +233,7 @@ namespace AquaModelLibrary
                         AquaObject.VTXL vtxl = new AquaObject.VTXL();
                         ReadVTXL(streamReader, model.vtxeList[model.vsetList[vset].vtxeCount], vtxl, model.vsetList[vset].vtxlCount,
                             model.vtxeList[model.vsetList[vset].vtxeCount].vertDataTypes.Count, model.vsetList[vset].vertDataSize);
+                        vtxl.edgeVerts = edgeVertsTemp[vset];
                         model.vtxlList.Add(vtxl);
                     }
                 }
