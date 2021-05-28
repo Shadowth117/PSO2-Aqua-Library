@@ -37,19 +37,20 @@
             this.extraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.getToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.getToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkAllShaderExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -59,6 +60,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.extraToolStripMenuItem,
+            this.toolsToolStripMenuItem,
             this.debugToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -109,10 +111,7 @@
             // 
             this.extraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.generateCharacterFileSheetToolStripMenuItem,
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
-            this.pSOnrelTotrpToolStripMenuItem});
+            this.toolStripSeparator1});
             this.extraToolStripMenuItem.Name = "extraToolStripMenuItem";
             this.extraToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.extraToolStripMenuItem.Text = "Extra";
@@ -129,55 +128,15 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(306, 6);
             // 
-            // generateCharacterFileSheetToolStripMenuItem
-            // 
-            this.generateCharacterFileSheetToolStripMenuItem.Name = "generateCharacterFileSheetToolStripMenuItem";
-            this.generateCharacterFileSheetToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
-            this.generateCharacterFileSheetToolStripMenuItem.Text = "Generate Character FileSheet";
-            this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateCharacterFileSheetToolStripMenuItem_Click_1);
-            // 
-            // updateClassicPlayerAnimToNGSAnimToolStripMenuItem
-            // 
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Name = "updateClassicPlayerAnimToNGSAnimToolStripMenuItem";
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Text = "Update classic player anim to NGS anim";
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Click += new System.EventHandler(this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem_Click);
-            // 
-            // pSOnrelTotrpToolStripMenuItem
-            // 
-            this.pSOnrelTotrpToolStripMenuItem.Name = "pSOnrelTotrpToolStripMenuItem";
-            this.pSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
-            this.pSOnrelTotrpToolStripMenuItem.Text = "PSO *n.rel to .trp";
-            this.pSOnrelTotrpToolStripMenuItem.Click += new System.EventHandler(this.pSOnrelTotrpToolStripMenuItem_Click);
-            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.parseVTBFToTextToolStripMenuItem,
-            this.parsePSO2TextToolStripMenuItem,
             this.readBonesToolStripMenuItem,
             this.exportToGLTFToolStripMenuItem,
-            this.importFromGLTFToolStripMenuItem,
-            this.getToolStripMenuItem,
-            this.checkAllShaderExtrasToolStripMenuItem,
-            this.batchParsePSO2SetToTextToolStripMenuItem});
+            this.importFromGLTFToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
-            // 
-            // parseVTBFToTextToolStripMenuItem
-            // 
-            this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
-            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.parseVTBFToTextToolStripMenuItem.Text = "Parse VTBF To Text";
-            this.parseVTBFToTextToolStripMenuItem.Click += new System.EventHandler(this.parseVTBFToTextToolStripMenuItem_Click);
-            // 
-            // parsePSO2TextToolStripMenuItem
-            // 
-            this.parsePSO2TextToolStripMenuItem.Name = "parsePSO2TextToolStripMenuItem";
-            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.parsePSO2TextToolStripMenuItem.Text = "Parse PSO2 Text";
-            this.parsePSO2TextToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextToolStripMenuItem_Click);
             // 
             // readBonesToolStripMenuItem
             // 
@@ -200,13 +159,6 @@
             this.importFromGLTFToolStripMenuItem.Text = "Import From GLTF";
             this.importFromGLTFToolStripMenuItem.Click += new System.EventHandler(this.importFromGLTFToolStripMenuItem_Click);
             // 
-            // getToolStripMenuItem
-            // 
-            this.getToolStripMenuItem.Name = "getToolStripMenuItem";
-            this.getToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.getToolStripMenuItem.Text = "Compile Shader Texture Sheet";
-            this.getToolStripMenuItem.Click += new System.EventHandler(this.getShadTexSheetToolStripMenuItem_Click);
-            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -225,19 +177,68 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.batchParsePSO2SetToTextToolStripMenuItem,
+            this.getToolStripMenuItem,
+            this.checkAllShaderExtrasToolStripMenuItem,
+            this.generateCharacterFileSheetToolStripMenuItem,
+            this.pSOnrelTotrpToolStripMenuItem,
+            this.parsePSO2TextToolStripMenuItem,
+            this.parseVTBFToTextToolStripMenuItem,
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+            this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // generateCharacterFileSheetToolStripMenuItem
+            // 
+            this.generateCharacterFileSheetToolStripMenuItem.Name = "generateCharacterFileSheetToolStripMenuItem";
+            this.generateCharacterFileSheetToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.generateCharacterFileSheetToolStripMenuItem.Text = "Generate Character FileSheet";
+            // 
+            // updateClassicPlayerAnimToNGSAnimToolStripMenuItem
+            // 
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Name = "updateClassicPlayerAnimToNGSAnimToolStripMenuItem";
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Text = "Update classic player anim to NGS anim";
+            // 
+            // pSOnrelTotrpToolStripMenuItem
+            // 
+            this.pSOnrelTotrpToolStripMenuItem.Name = "pSOnrelTotrpToolStripMenuItem";
+            this.pSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.pSOnrelTotrpToolStripMenuItem.Text = "PSO *n.rel to .trp";
+            // 
+            // parsePSO2TextToolStripMenuItem
+            // 
+            this.parsePSO2TextToolStripMenuItem.Name = "parsePSO2TextToolStripMenuItem";
+            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.parsePSO2TextToolStripMenuItem.Text = "Parse PSO2 Text";
+            // 
+            // parseVTBFToTextToolStripMenuItem
+            // 
+            this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
+            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.parseVTBFToTextToolStripMenuItem.Text = "Parse VTBF To Text";
+            // 
             // batchParsePSO2SetToTextToolStripMenuItem
             // 
             this.batchParsePSO2SetToTextToolStripMenuItem.Name = "batchParsePSO2SetToTextToolStripMenuItem";
-            this.batchParsePSO2SetToTextToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.batchParsePSO2SetToTextToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
             this.batchParsePSO2SetToTextToolStripMenuItem.Text = "Batch Parse PSO2 Set to Text";
-            this.batchParsePSO2SetToTextToolStripMenuItem.Click += new System.EventHandler(this.batchParsePSO2SetToTextToolStripMenuItem_Click);
+            // 
+            // getToolStripMenuItem
+            // 
+            this.getToolStripMenuItem.Name = "getToolStripMenuItem";
+            this.getToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.getToolStripMenuItem.Text = "Compile Shader Texture Sheet";
             // 
             // checkAllShaderExtrasToolStripMenuItem
             // 
             this.checkAllShaderExtrasToolStripMenuItem.Name = "checkAllShaderExtrasToolStripMenuItem";
-            this.checkAllShaderExtrasToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.checkAllShaderExtrasToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
             this.checkAllShaderExtrasToolStripMenuItem.Text = "Check All Shader Extras";
-            this.checkAllShaderExtrasToolStripMenuItem.Click += new System.EventHandler(this.checkAllShaderExtrasToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -270,18 +271,19 @@
         private System.Windows.Forms.ToolStripMenuItem extraToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem averageNormalsOnSharedPositionVerticesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem parseVTBFToTextToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem parsePSO2TextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readBonesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem updateClassicPlayerAnimToNGSAnimToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem generateCharacterFileSheetToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem pSOnrelTotrpToolStripMenuItem;
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.ToolStripMenuItem exportToGLTFToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importFromGLTFToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem getToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem generateCharacterFileSheetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateClassicPlayerAnimToNGSAnimToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pSOnrelTotrpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parsePSO2TextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parseVTBFToTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem batchParsePSO2SetToTextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem getToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkAllShaderExtrasToolStripMenuItem;
     }
 }

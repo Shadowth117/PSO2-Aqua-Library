@@ -342,7 +342,9 @@ namespace AquaModelTool
                     aquaUI.aqua.LoadPSO2Text(fileName);
 
                     StringBuilder output = new StringBuilder();
-
+                    output.AppendLine(Path.GetFileName(fileName) + " was created: " + File.GetCreationTime(fileName).ToString());
+                    output.AppendLine("Filesize is: " + new FileInfo(fileName).Length.ToString() + " bytes");
+                    output.AppendLine();
                     for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
                     {
                         output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
@@ -687,7 +689,7 @@ namespace AquaModelTool
             if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 List<string> files = new List<string>();
-                string[] extensions = new string[] { "*.set", "*.usd"};
+                string[] extensions = new string[] { "*.set"};
                 foreach (string s in extensions)
                 {
                     files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
