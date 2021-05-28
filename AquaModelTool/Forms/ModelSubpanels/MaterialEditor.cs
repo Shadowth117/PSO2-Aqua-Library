@@ -63,7 +63,8 @@ namespace AquaModelTool
             diffuseUD.Value = (decimal)mat.diffuseRGBA.W;
             tex2UD.Value = (decimal)mat.unkRGBA0.W;
             tex3SpecUD.Value = (decimal)mat._sRGBA.W;
-            tex4UD.Value = (decimal)mat.unkRGBA1.W;
+            //tex4UD.Value = (decimal)mat.unkRGBA1.W; Seems like a real float, but waaaaay too extreme in value. Unsure how to properly deal with it.
+            tex4UD.Value = BitConverter.ToUInt32(BitConverter.GetBytes(mat.unkRGBA1.W), 0);
             specLevelUD.Value = (decimal)mat.unkFloat0;
             unkF32UD.Value = (decimal)mat.unkFloat1;
             unkInt0UD.Value = mat.unkInt0;
@@ -227,7 +228,7 @@ namespace AquaModelTool
         private void tex4UD_ValueChanged(object sender, EventArgs e)
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.unkRGBA1 = new Vector4(mate.unkRGBA1.X, mate.unkRGBA1.Y, mate.unkRGBA1.Z, (float)tex4UD.Value);
+            mate.unkRGBA1 = new Vector4(mate.unkRGBA1.X, mate.unkRGBA1.Y, mate.unkRGBA1.Z, (float)BitConverter.ToSingle(BitConverter.GetBytes((uint)tex4UD.Value), 0));
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 

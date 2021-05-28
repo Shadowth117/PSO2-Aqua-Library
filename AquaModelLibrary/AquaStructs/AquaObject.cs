@@ -238,7 +238,7 @@ namespace AquaModelLibrary
             public Vector4 unkRGBA0;    //0x31, type 0x4A, variant 0x2 //Defaults are .9 .9 .9 1.0
             public Vector4 _sRGBA;      //0x32, type 0x4A, variant 0x2 //Seemingly RGBA for the specular map. 
                                         //Value 3 affects self illum, just as blue, the third RGBA section, affects this in the _s map. A always observed as 1.
-            public Vector4 unkRGBA1;    //0x33, type 0x4A, variant 0x2 //Works same as above? A always observed as 1.
+            public Vector4 unkRGBA1;    //0x33, type 0x4A, variant 0x2 //Works same as above? A always observed as 1. In NGS, this seems different.
 
             public int reserve0;        //0x34, type 0x9
             public float unkFloat0;     //0x35, type 0xA //Typically 8 or 32. I default it to 8. Possibly one of the 0-100 material values in max.

@@ -3328,7 +3328,7 @@ namespace AquaModelLibrary
             {
                 VTXLFromFaceVerts(aquaModels[0].models[0]);
             }
-
+            
             PRMModel prmModel = new PRMModel();
             for (int i = 0; i < aquaModels[0].models[0].vtxlList[0].vertPositions.Count; i++)
             {
