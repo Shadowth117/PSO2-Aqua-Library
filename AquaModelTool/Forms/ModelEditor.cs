@@ -30,6 +30,7 @@ namespace AquaModelTool
             {
                 modelIDCB.Enabled = false;
             }
+            SetDropdown();
         }
 
         public bool GetAllTransparentChecked()
@@ -39,10 +40,48 @@ namespace AquaModelTool
 
         private void modelIDCB_SelectedIndexChanged(object sender, EventArgs e)
         {
-            modelPanel.Controls.Clear();
+            SetDropdown();
+            UdpateEditor();
+        }
 
-            //Default to material editor until other things are able to go here.
-            var control = new MaterialEditor(modelset.models[modelIDCB.SelectedIndex]);
+        public void SetDropdown()
+        {
+            editorCB.Items.Clear();
+            if(modelset.models[modelIDCB.SelectedIndex].mateList.Count > 0)
+            {
+                editorCB.Items.Add("Materials");
+            }
+            if(modelset.models[modelIDCB.SelectedIndex].shadList.Count > 0)
+            {
+                editorCB.Items.Add("Shaders");
+            }
+            editorCB.SelectedIndex = 0;
+        }
+
+        private void editorCB_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UdpateEditor();
+        }
+
+        private void UdpateEditor()
+        {
+            //Default to material editor
+            modelPanel.Controls.Clear();
+            UserControl control;
+
+            switch (editorCB.Items[editorCB.SelectedIndex].ToString())
+            {
+                case "Materials":
+                    control = new MaterialEditor(modelset.models[modelIDCB.SelectedIndex]);
+                    break;
+                case "Shaders":
+                    control = new ShaderEditor(modelset.models[modelIDCB.SelectedIndex]);
+                    break;
+                default:
+                    throw new Exception("Unexpected selection!");
+                    break;
+            }
+
             modelPanel.Controls.Add(control);
             control.Dock = DockStyle.Fill;
         }

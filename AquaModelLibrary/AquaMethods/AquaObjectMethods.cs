@@ -1866,33 +1866,15 @@ namespace AquaModelLibrary
             return size;
         }
 
-        public static string GetPSO2String(byte* str)
+        public static string GetPSO2String(byte* str, int end)
         {
             string finalText;
-
-            //Lazily determine string end
-            int end = GetPSO2StringLength(str);
 
             byte[] text = new byte[end];
             Marshal.Copy(new IntPtr(str), text, 0, end);
             finalText = System.Text.Encoding.UTF8.GetString(text);
 
             return finalText;
-        }
-
-        public static int GetPSO2StringLength(byte* str)
-        {
-            int end = 0;
-            for (int j = 0; j < 0x20; j++)
-            {
-                if (str[j] == 0)
-                {
-                    end = j;
-                    break;
-                }
-            }
-
-            return end;
         }
 
         //Used to generate materials like the various player materials in which the actual texture names are not used.
@@ -2080,11 +2062,12 @@ namespace AquaModelLibrary
                 if(NGSShaderDetailPresets.ContainsKey(key))
                 {
                     ngsShad.shadDetail = NGSShaderDetailPresets[key];
-                    ngsShad.shadDetailOffset = 1; //There's no count on this so we mark it this way in case shadDetail were ever to be all 0s.
+                    ngsShad.shadDetailOffset = 1; 
                 }
                 if (NGSShaderExtraPresets.ContainsKey(key))
                 {
                     ngsShad.shadExtra = NGSShaderExtraPresets[key];
+                    ngsShad.shadExtraOffset = 1;
                 }
             }
 

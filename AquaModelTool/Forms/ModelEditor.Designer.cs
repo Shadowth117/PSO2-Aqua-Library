@@ -31,8 +31,8 @@
             this.modelIDCB = new System.Windows.Forms.ComboBox();
             this.modelIDLabel = new System.Windows.Forms.Label();
             this.allAlphaCheckBox = new System.Windows.Forms.CheckBox();
-            this.materialRadio = new System.Windows.Forms.RadioButton();
             this.modelPanel = new System.Windows.Forms.Panel();
+            this.editorCB = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // modelIDCB
@@ -63,18 +63,6 @@
             this.allAlphaCheckBox.Text = "Make All Materials Transparent";
             this.allAlphaCheckBox.UseVisualStyleBackColor = true;
             // 
-            // materialRadio
-            // 
-            this.materialRadio.AutoSize = true;
-            this.materialRadio.Checked = true;
-            this.materialRadio.Location = new System.Drawing.Point(237, 3);
-            this.materialRadio.Name = "materialRadio";
-            this.materialRadio.Size = new System.Drawing.Size(67, 17);
-            this.materialRadio.TabIndex = 6;
-            this.materialRadio.TabStop = true;
-            this.materialRadio.Text = "Materials";
-            this.materialRadio.UseVisualStyleBackColor = true;
-            // 
             // modelPanel
             // 
             this.modelPanel.Location = new System.Drawing.Point(4, 43);
@@ -82,12 +70,21 @@
             this.modelPanel.Size = new System.Drawing.Size(378, 204);
             this.modelPanel.TabIndex = 7;
             // 
+            // editorCB
+            // 
+            this.editorCB.FormattingEnabled = true;
+            this.editorCB.Location = new System.Drawing.Point(237, 5);
+            this.editorCB.Name = "editorCB";
+            this.editorCB.Size = new System.Drawing.Size(121, 21);
+            this.editorCB.TabIndex = 8;
+            this.editorCB.SelectedIndexChanged += new System.EventHandler(this.editorCB_SelectedIndexChanged);
+            // 
             // ModelEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.editorCB);
             this.Controls.Add(this.modelPanel);
-            this.Controls.Add(this.materialRadio);
             this.Controls.Add(this.allAlphaCheckBox);
             this.Controls.Add(this.modelIDLabel);
             this.Controls.Add(this.modelIDCB);
@@ -102,7 +99,7 @@
         private System.Windows.Forms.ComboBox modelIDCB;
         private System.Windows.Forms.Label modelIDLabel;
         private System.Windows.Forms.CheckBox allAlphaCheckBox;
-        private System.Windows.Forms.RadioButton materialRadio;
         private System.Windows.Forms.Panel modelPanel;
+        private System.Windows.Forms.ComboBox editorCB;
     }
 }

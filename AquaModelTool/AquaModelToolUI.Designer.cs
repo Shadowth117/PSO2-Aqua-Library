@@ -52,6 +52,7 @@
             this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.parsePSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -137,6 +138,7 @@
             this.generateCharacterFileSheetToolStripMenuItem,
             this.pSOnrelTotrpToolStripMenuItem,
             this.parsePSO2TextToolStripMenuItem,
+            this.parsePSO2TextFolderSelectToolStripMenuItem,
             this.parseVTBFToTextToolStripMenuItem,
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
@@ -248,6 +250,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // parsePSO2TextFolderSelectToolStripMenuItem
+            // 
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Name = "parsePSO2TextFolderSelectToolStripMenuItem";
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Text = "Parse PSO2 Text (Folder Select)";
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextFolderSelectToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -293,6 +302,7 @@
         private System.Windows.Forms.ToolStripMenuItem batchParsePSO2SetToTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkAllShaderExtrasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parsePSO2TextFolderSelectToolStripMenuItem;
     }
 }
 

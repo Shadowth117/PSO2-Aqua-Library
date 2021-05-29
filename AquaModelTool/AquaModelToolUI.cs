@@ -58,7 +58,7 @@ namespace AquaModelTool
                 saveFileDialog = new SaveFileDialog()
                 {
                     Title = "Save model file",
-                    Filter = "PSO2 VTBF Model (*.aqp)|*.aqp|PSO2 VTBF Terrain (*.trp)|*.trp|PSO2 Classic NIFL Model (*.aqp)|*.aqp|PSO2 Classic NIFL Terrain (*.trp)|*.trp"
+                    Filter = "PSO2 VTBF Model (*.aqp)|*.aqp|PSO2 VTBF Terrain (*.trp)|*.trp|PSO2 NIFL Model (*.aqp)|*.aqp|PSO2 NIFL Terrain (*.trp)|*.trp"
                 };
                 switch (ext)
                 {
@@ -337,35 +337,39 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                foreach (var fileName in openFileDialog.FileNames)
+                DumpTextFiles(openFileDialog.FileNames);
+            }
+        }
+
+        private void DumpTextFiles(string[] fileNames)
+        {
+            foreach (var fileName in fileNames)
+            {
+                aquaUI.aqua.LoadPSO2Text(fileName);
+
+                StringBuilder output = new StringBuilder();
+                output.AppendLine(Path.GetFileName(fileName) + " was created: " + File.GetCreationTime(fileName).ToString());
+                output.AppendLine("Filesize is: " + new FileInfo(fileName).Length.ToString() + " bytes");
+                output.AppendLine();
+                for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
                 {
-                    aquaUI.aqua.LoadPSO2Text(fileName);
+                    output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
 
-                    StringBuilder output = new StringBuilder();
-                    output.AppendLine(Path.GetFileName(fileName) + " was created: " + File.GetCreationTime(fileName).ToString());
-                    output.AppendLine("Filesize is: " + new FileInfo(fileName).Length.ToString() + " bytes");
-                    output.AppendLine();
-                    for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
+                    for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
                     {
-                        output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
+                        output.AppendLine($"Group {j}");
 
-                        for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
+                        for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
                         {
-                            output.AppendLine($"Group {j}");
-
-                            for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
-                            {
-                                var pair = aquaUI.aqua.aquaText.text[i][j][k];
-                                output.AppendLine($"{pair.name} - {pair.str}");
-                            }
-                            output.AppendLine();
+                            var pair = aquaUI.aqua.aquaText.text[i][j][k];
+                            output.AppendLine($"{pair.name} - {pair.str}");
                         }
                         output.AppendLine();
                     }
-
-                    File.WriteAllText(fileName + ".txt", output.ToString());
+                    output.AppendLine();
                 }
 
+                File.WriteAllText(fileName + ".txt", output.ToString());
             }
         }
 
@@ -890,6 +894,19 @@ namespace AquaModelTool
             }
 
             aquaUI.aqua.aquaModels.Clear();
+        }
+
+        private void parsePSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                DumpTextFiles(Directory.GetFiles(goodFolderDialog.FileName, "*.text"));
+            }
         }
     }
 }

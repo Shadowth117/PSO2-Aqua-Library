@@ -141,6 +141,12 @@
     <Compile Include="Forms\ModelEditor.Designer.cs">
       <DependentUpon>ModelEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ModelSubpanels\ShaderEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\ShaderEditor.Designer.cs">
+      <DependentUpon>ShaderEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AquaModelToolUI.resx">
@@ -178,6 +184,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\MaterialEditor.resx">
       <DependentUpon>MaterialEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\ShaderEditor.resx">
+      <DependentUpon>ShaderEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -113,7 +113,7 @@ namespace AquaModelLibrary
                         text[i] = stringArray[i];
                     }
                     finalText = System.Text.Encoding.UTF8.GetString(text);
-                    return GetPSO2String(arr);
+                    return GetPSO2String(arr, GetLength());
                 }
             }
 
@@ -239,7 +239,7 @@ namespace AquaModelLibrary
                         text[i] = stringArray[i];
                     }
                     finalText = System.Text.Encoding.UTF8.GetString(text);
-                    return GetPSO2String(arr);
+                    return GetPSO2String(arr, GetLength());
                 }
             }
 
@@ -372,7 +372,7 @@ namespace AquaModelLibrary
                         text[i] = stringArray[i];
                     }
                     finalText = System.Text.Encoding.UTF8.GetString(text);
-                    return GetPSO2String(arr);
+                    return GetPSO2String(arr, GetLength());
                 }
             }
 
