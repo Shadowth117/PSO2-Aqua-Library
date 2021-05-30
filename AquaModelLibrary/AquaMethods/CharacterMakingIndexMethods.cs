@@ -539,6 +539,7 @@ namespace AquaModelLibrary
             {
                 FCPObject fcp = new FCPObject();
                 fcp.fcp = streamReader.Read<FCP>();
+
                 long temp = streamReader.Position();
 
                 streamReader.Seek(fcp.fcp.texString1Ptr + offset, SeekOrigin.Begin);
@@ -2455,7 +2456,6 @@ namespace AquaModelLibrary
                     output += "\n";
 
                 }
-
                 if (id <= 100000)
                 {
                     outputFCP1.Append(output);
@@ -2512,8 +2512,8 @@ namespace AquaModelLibrary
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{rebootStart}f1_{id}.ice";
-                    string rebEx = $"{rebootExStart}f1_{id}_ex.ice";
+                    string reb = $"{rebootStart}f2_{id}.ice";
+                    string rebEx = $"{rebootExStart}f2_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
@@ -2537,7 +2537,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(id);
-                    string classic = $"{classicStart}f1_{finalId}.ice";
+                    string classic = $"{classicStart}f2_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
 
