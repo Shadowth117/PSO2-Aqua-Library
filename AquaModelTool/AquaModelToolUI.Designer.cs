@@ -44,15 +44,17 @@
             this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parsePSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.parsePSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -187,6 +189,13 @@
             this.parsePSO2TextToolStripMenuItem.Text = "Parse PSO2 Text";
             this.parsePSO2TextToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextToolStripMenuItem_Click);
             // 
+            // parsePSO2TextFolderSelectToolStripMenuItem
+            // 
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Name = "parsePSO2TextFolderSelectToolStripMenuItem";
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Text = "Parse PSO2 Text (Folder Select)";
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextFolderSelectToolStripMenuItem_Click);
+            // 
             // parseVTBFToTextToolStripMenuItem
             // 
             this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
@@ -206,7 +215,9 @@
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.readBonesToolStripMenuItem,
             this.exportToGLTFToolStripMenuItem,
-            this.importFromGLTFToolStripMenuItem});
+            this.importFromGLTFToolStripMenuItem,
+            this.computeTangentSpaceTestToolStripMenuItem,
+            this.cloneBoneTransformsToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -214,23 +225,30 @@
             // readBonesToolStripMenuItem
             // 
             this.readBonesToolStripMenuItem.Name = "readBonesToolStripMenuItem";
-            this.readBonesToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.readBonesToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
             this.readBonesToolStripMenuItem.Text = "Read Bones";
             this.readBonesToolStripMenuItem.Click += new System.EventHandler(this.readBonesToolStripMenuItem_Click);
             // 
             // exportToGLTFToolStripMenuItem
             // 
             this.exportToGLTFToolStripMenuItem.Name = "exportToGLTFToolStripMenuItem";
-            this.exportToGLTFToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.exportToGLTFToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
             this.exportToGLTFToolStripMenuItem.Text = "Export To GLTF";
             this.exportToGLTFToolStripMenuItem.Click += new System.EventHandler(this.exportToGLTFToolStripMenuItem_Click);
             // 
             // importFromGLTFToolStripMenuItem
             // 
             this.importFromGLTFToolStripMenuItem.Name = "importFromGLTFToolStripMenuItem";
-            this.importFromGLTFToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.importFromGLTFToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
             this.importFromGLTFToolStripMenuItem.Text = "Import From GLTF";
             this.importFromGLTFToolStripMenuItem.Click += new System.EventHandler(this.importFromGLTFToolStripMenuItem_Click);
+            // 
+            // computeTangentSpaceTestToolStripMenuItem
+            // 
+            this.computeTangentSpaceTestToolStripMenuItem.Name = "computeTangentSpaceTestToolStripMenuItem";
+            this.computeTangentSpaceTestToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.computeTangentSpaceTestToolStripMenuItem.Text = "Compute Tangent Space Test";
+            this.computeTangentSpaceTestToolStripMenuItem.Click += new System.EventHandler(this.computeTangentSpaceTestToolStripMenuItem_Click);
             // 
             // filePanel
             // 
@@ -250,12 +268,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // parsePSO2TextFolderSelectToolStripMenuItem
+            // cloneBoneTransformsToolStripMenuItem
             // 
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Name = "parsePSO2TextFolderSelectToolStripMenuItem";
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Text = "Parse PSO2 Text (Folder Select)";
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextFolderSelectToolStripMenuItem_Click);
+            this.cloneBoneTransformsToolStripMenuItem.Name = "cloneBoneTransformsToolStripMenuItem";
+            this.cloneBoneTransformsToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.cloneBoneTransformsToolStripMenuItem.Text = "Clone Bone Transforms";
+            this.cloneBoneTransformsToolStripMenuItem.Click += new System.EventHandler(this.cloneBoneTransformsToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -303,6 +321,8 @@
         private System.Windows.Forms.ToolStripMenuItem getToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkAllShaderExtrasToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parsePSO2TextFolderSelectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem computeTangentSpaceTestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cloneBoneTransformsToolStripMenuItem;
     }
 }
 

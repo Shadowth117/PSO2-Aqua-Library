@@ -837,7 +837,7 @@ namespace AquaModelLibrary
 
                 byte[] c7 = BitConverter.GetBytes((int)meshRaw[i][0xC7]);
 
-                mesh.tag = (short)((int)meshRaw[i][0xB0] % 0x10000);
+                mesh.flags = (short)((int)meshRaw[i][0xB0] % 0x10000);
                 mesh.unkShort0 = (short)((int)meshRaw[i][0xB0] / 0x10000);
                 mesh.unkByte0 = c7[0];
                 mesh.unkByte1 = c7[1];
@@ -875,7 +875,7 @@ namespace AquaModelLibrary
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
-                int shorts = meshList[i].tag + (meshList[i].unkShort0 * 0x10000);
+                int shorts = meshList[i].flags + (meshList[i].unkShort0 * 0x10000);
                 int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 * 0x100) + (meshList[i].unkShort1 * 0x10000);
                 addBytes(outBytes, 0xB0, 0x9, BitConverter.GetBytes(shorts));
                 addBytes(outBytes, 0xC7, 0x9, BitConverter.GetBytes(bytes));
@@ -1142,9 +1142,9 @@ namespace AquaModelLibrary
                     tsta.texUsageOrder = (int)tstaRaw[i][0x61];
                     tsta.modelUVSet = (int)tstaRaw[i][0x62];
                     tsta.unkVector0 = (Vector3)tstaRaw[i][0x63];
-                    tsta.unkInt0 = (int)tstaRaw[i][0x64];
-                    tsta.unkInt1 = (int)tstaRaw[i][0x65];
-                    tsta.unkInt2 = (int)tstaRaw[i][0x66];
+                    tsta.unkFloat2 = (int)tstaRaw[i][0x64];
+                    tsta.unkFloat3 = (int)tstaRaw[i][0x65];
+                    tsta.unkFloat4 = (int)tstaRaw[i][0x66];
                     tsta.unkInt3 = (int)tstaRaw[i][0x67];
                     tsta.unkInt4 = (int)tstaRaw[i][0x68];
                     tsta.unkInt5 = (int)tstaRaw[i][0x69];
@@ -1184,9 +1184,9 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x61, 0x9, BitConverter.GetBytes(tstaList[i].texUsageOrder));
                 addBytes(outBytes, 0x62, 0x9, BitConverter.GetBytes(tstaList[i].modelUVSet));
                 addBytes(outBytes, 0x63, 0x4A, 0x1, ConvertStruct(tstaList[i].unkVector0));
-                addBytes(outBytes, 0x64, 0x9, BitConverter.GetBytes(tstaList[i].unkInt0));
-                addBytes(outBytes, 0x65, 0x9, BitConverter.GetBytes(tstaList[i].unkInt1));
-                addBytes(outBytes, 0x66, 0x9, BitConverter.GetBytes(tstaList[i].unkInt2));
+                addBytes(outBytes, 0x64, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat2));
+                addBytes(outBytes, 0x65, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat3));
+                addBytes(outBytes, 0x66, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat4));
                 addBytes(outBytes, 0x67, 0x9, BitConverter.GetBytes(tstaList[i].unkInt3));
                 addBytes(outBytes, 0x68, 0x9, BitConverter.GetBytes(tstaList[i].unkInt4));
                 addBytes(outBytes, 0x69, 0x9, BitConverter.GetBytes(tstaList[i].unkInt5));

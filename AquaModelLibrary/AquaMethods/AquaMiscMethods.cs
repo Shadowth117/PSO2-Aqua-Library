@@ -104,7 +104,6 @@ namespace AquaModelLibrary
 
                 for (int sub = 0; sub < subCategoryCount; sub++)
                 {
-
                     var categoryIndexOffset = streamReader.Read<int>();
                     var unkValue = streamReader.Read<int>();
                     var categoryIndexCount = streamReader.Read<int>();

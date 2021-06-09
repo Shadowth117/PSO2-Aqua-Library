@@ -476,7 +476,11 @@ namespace AquaModelLibrary
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x0, 0x3, curLength));
                 curLength += 0xC;
             }
-            if (vtxl.vertWeights.Count > 0)
+            if(vtxl.vertWeightsNGS.Count > 0)
+            {
+                vtxe.vertDataTypes.Add(vtxeElementGenerator(0x1, 0x11, curLength));
+                curLength += 0x8;
+            } else if (vtxl.vertWeights.Count > 0)
             {
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x1, 0x4, curLength));
                 curLength += 0x10;
@@ -790,12 +794,17 @@ namespace AquaModelLibrary
         //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
         //This function expects that binormals and tangents have both either not been populated or both have been populated in particular vertex sets. The game always does both or neither.
         //Normals will also be generated if non existent because it needs those too
-        public static void computeTangentSpace(AquaObject model, bool useFaceNormals)
+        public static void ComputeTangentSpace(AquaObject model, bool useFaceNormals, bool flipUv = false)
         {
             List<List<Vector3>> faces = new List<List<Vector3>>();
             Vector3[][] vertBinormalArrays = new Vector3[model.vtxlList.Count][];
             Vector3[][] vertTangentArrays = new Vector3[model.vtxlList.Count][];
             Vector3[][] vertFaceNormalArrays = new Vector3[model.vtxlList.Count][];
+            int uvSign = 1;
+            if(flipUv == true)
+            {
+                uvSign = -1;
+            }
 
             //Get faces depending on model state
             if (model.strips.Count > 0)
@@ -812,25 +821,40 @@ namespace AquaModelLibrary
                 }
             }
 
+            //Clear before calcing
+            for(int i = 0; i <  model.vtxlList.Count; i++)
+            {
+                model.vtxlList[i].vertTangentList.Clear();
+                model.vtxlList[i].vertTangentListNGS.Clear();
+                model.vtxlList[i].vertBinormalList.Clear();
+                model.vtxlList[i].vertBinormalListNGS.Clear();
+            }
+
             //Loop through faces and sum the calculated data for each vertice's faces
             for(int meshIndex = 0; meshIndex < faces.Count; meshIndex++)
             {
                 int vsetIndex;
-                
+                int psetIndex;
                 //Unlike older aqo variants, NGS models can have a different vsetIndex than their
                 if(model.objc != null && (model.objc.type == 0xC33 || model.objc.type == 0xc32) && model.meshList.Count > 0)
                 {
                     vsetIndex = model.meshList[meshIndex].vsetIndex;
+                    psetIndex = model.meshList[meshIndex].psetIndex;
                 } else
                 {
                     vsetIndex = meshIndex;
+                    psetIndex = meshIndex;
                 }
 
-                vertBinormalArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
-                vertTangentArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
-                vertFaceNormalArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                //Check if it's null or not since we don't want to overwrite what's there. NGS meshes can share vertex sets
+                if(vertBinormalArrays[vsetIndex] == null)
+                {
+                    vertBinormalArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                    vertTangentArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                    vertFaceNormalArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
+                }
 
-                foreach (var face in faces[vsetIndex])
+                foreach (var face in faces[psetIndex])
                 {
                     List<int> faceIndices = new List<int>()
                         {
@@ -847,28 +871,25 @@ namespace AquaModelLibrary
                         };
                     List<Vector2> uvs = new List<Vector2>()
                         {
-                          model.vtxlList[vsetIndex].uv1List[(int)face.X],
-                          model.vtxlList[vsetIndex].uv1List[(int)face.Y],
-                          model.vtxlList[vsetIndex].uv1List[(int)face.Z]
+                          new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.X].X, uvSign * model.vtxlList[vsetIndex].uv1List[(int)face.X].Y),
+                          new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.Y].X, uvSign * model.vtxlList[vsetIndex].uv1List[(int)face.Y].Y),
+                          new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.Z].X, uvSign * model.vtxlList[vsetIndex].uv1List[(int)face.Z].Y)
                         };
 
                     Vector3 dV1 = verts[0] - verts[1];
                     Vector3 dV2 = verts[0] - verts[2];
+
                     Vector2 dUV1 = uvs[0] - uvs[1];
                     Vector2 dUV2 = uvs[0] - uvs[2];
 
                     float area = dUV1.X * dUV2.Y - dUV1.Y * dUV2.X;
-                    int sign;
+                    int sign = 1;
                     if (area < 0)
                     {
                         sign = -1;
                     }
-                    else
-                    {
-                        sign = 1;
-                    }
 
-                    Vector3 tangent = new Vector3();
+                    Vector3 tangent = new Vector3(0, 0, 1);
                     tangent.X = dV1.X * dUV2.Y - dUV1.Y * dV2.X;
                     tangent.Y = dV1.Y * dUV2.Y - dUV1.Y * dV2.Y;
                     tangent.Z = dV1.Z * dUV2.Y - dUV1.Y * dV2.Z;
@@ -924,19 +945,34 @@ namespace AquaModelLibrary
                 }
                 for(int vert = 0; vert < vertBinormalArrays[vsetIndex].Length; vert++)
                 {
-                    model.vtxlList[vsetIndex].vertBinormalList[vert] = vertBinormalArrays[vsetIndex][vert];
-                    model.vtxlList[vsetIndex].vertTangentList[vert] = vertTangentArrays[vsetIndex][vert];
+                    model.vtxlList[vsetIndex].vertBinormalList[vert] = Vector3.Normalize(vertBinormalArrays[vsetIndex][vert]);
+                    model.vtxlList[vsetIndex].vertTangentList[vert] = Vector3.Normalize(vertTangentArrays[vsetIndex][vert]);
 
                     if(vertNormalsCheck[vsetIndex] == false || useFaceNormals == true)
                     {
-                        model.vtxlList[vsetIndex].vertNormals[vert] = vertFaceNormalArrays[vsetIndex][vert];
+                        model.vtxlList[vsetIndex].vertNormals[vert] = Vector3.Normalize(vertFaceNormalArrays[vsetIndex][vert]);
                     }
                 }
             }
 
+            //Hack since for now we don't convert back from legacy types properly
+            int biggest = 0;
+            for (int i = 0; i < model.vsetList.Count; i++)
+            {
+                model.vtxeList[model.vsetList[i].vtxeCount] = ConstructClassicVTXE(model.vtxlList[i], out int vertSize);
+                var vset = model.vsetList[i];
+                vset.vertDataSize = vertSize;
+                model.vsetList[i] = vset;
+                if (vertSize > biggest)
+                {
+                    biggest = vertSize;
+                }
+            }
+            model.objc.largetsVtxl = biggest;
+
             //UNRMs link vertices that were split in the export process in both official and unofficial exports.
             //Loop through them and sum the Vector3s of all linked vertices. Normalize this value and assign it to the respective data of each linked vertex.
-
+            /*
             for (int unrm = 0; unrm < model.unrms.unrmVertGroups.Count; unrm++)
             {
                 var binormal = new Vector3();
@@ -984,17 +1020,118 @@ namespace AquaModelLibrary
                         model.vtxlList[vsetIndex].vertNormals[vertIndex] = Vector3.Normalize(tangent);
                     }
                 }
+            }*/
+        }
+
+        //Calculates tangent space using tempMesh data
+        public static void ComputeTangentSpaceTempMesh(AquaObject model, bool useFaceNormals)
+        {
+            for (int mesh = 0; mesh < model.tempTris.Count; mesh++)
+            {
+                var vertBinormalArray = new Vector3[model.vtxlList[mesh].vertPositions.Count];
+                var vertTangentArray = new Vector3[model.vtxlList[mesh].vertPositions.Count];
+                var vertFaceNormalArray = new Vector3[model.vtxlList[mesh].vertPositions.Count];
+                var faces = model.tempTris[mesh].triList;
+
+                foreach (var face in faces)
+                {
+                    List<int> faceIndices = new List<int>()
+                        {
+                            (int)face.X,
+                            (int)face.Y,
+                            (int)face.Z
+                        };
+
+                    List<Vector3> verts = new List<Vector3>()
+                        {
+                          model.vtxlList[mesh].vertPositions[(int)face.X],
+                          model.vtxlList[mesh].vertPositions[(int)face.Y],
+                          model.vtxlList[mesh].vertPositions[(int)face.Z]
+                        };
+                    //We expect model UVs to be flipped when brought into .NET. But we have to flip them back for these calculations...
+                    List<Vector2> uvs = new List<Vector2>()
+                        {
+                          new Vector2(model.vtxlList[mesh].uv1List[(int)face.X].X, -model.vtxlList[mesh].uv1List[(int)face.X].Y),
+                          new Vector2(model.vtxlList[mesh].uv1List[(int)face.Y].X, -model.vtxlList[mesh].uv1List[(int)face.Y].Y),
+                          new Vector2(model.vtxlList[mesh].uv1List[(int)face.Z].X, -model.vtxlList[mesh].uv1List[(int)face.Z].Y)
+                        };
+
+                    Vector3 dV1 = verts[0] - verts[1];
+                    Vector3 dV2 = verts[0] - verts[2];
+
+                    Vector2 dUV1 = uvs[0] - uvs[1];
+                    Vector2 dUV2 = uvs[0] - uvs[2];
+
+                    float area = dUV1.X * dUV2.Y - dUV1.Y * dUV2.X;
+                    int sign = 1;
+                    if (area < 0)
+                    {
+                        sign = -1;
+                    }
+
+                    Vector3 tangent = new Vector3(0, 0, 1);
+                    tangent.X = dV1.X * dUV2.Y - dUV1.Y * dV2.X;
+                    tangent.Y = dV1.Y * dUV2.Y - dUV1.Y * dV2.Y;
+                    tangent.Z = dV1.Z * dUV2.Y - dUV1.Y * dV2.Z;
+                    tangent = Vector3.Normalize(tangent) * sign;
+
+                    //Calculate face normal
+                    Vector3 u = verts[1] - verts[0];
+                    Vector3 v = verts[2] - verts[0];
+
+                    Vector3 normal = Vector3.Normalize(Vector3.Cross(u, v));
+                    Vector3 binormal = Vector3.Normalize(Vector3.Cross(normal, tangent)) * sign;
+
+                    //Create or add vectors to the collections
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (vertBinormalArray[faceIndices[i]] == null)
+                        {
+                            vertBinormalArray[faceIndices[i]] = binormal;
+                            vertTangentArray[faceIndices[i]] = tangent;
+                            vertFaceNormalArray[faceIndices[i]] = normal;
+                        }
+                        else
+                        {
+                            vertBinormalArray[faceIndices[i]] += binormal;
+                            vertTangentArray[faceIndices[i]] += tangent;
+                            vertFaceNormalArray[faceIndices[i]] += normal;
+                        }
+                    }
+                }
+
+                //Normalize and assign values
+                for(int i = 0; i < vertBinormalArray.Length; i++)
+                {
+                    vertBinormalArray[i] = Vector3.Normalize(vertBinormalArray[i]);
+                    vertTangentArray[i] = Vector3.Normalize(vertTangentArray[i]);
+
+                    model.vtxlList[mesh].vertBinormalList.Add(vertBinormalArray[i]);
+                    model.vtxlList[mesh].vertTangentList.Add(vertTangentArray[i]);
+
+                    if(useFaceNormals)
+                    {
+                        vertFaceNormalArray[i] = Vector3.Normalize(vertFaceNormalArray[i]);
+
+                        model.vtxlList[mesh].vertNormals.Add(vertFaceNormalArray[i]);
+                    }
+                }
             }
         }
 
         //Requires a fully assigned model
-        public static void computeTangentSpaceOld(AquaObject model, bool useFaceNormals)
+        public static void ComputeTangentSpaceOld(AquaObject model, bool useFaceNormals)
         {
             for (int mesh = 0; mesh < model.vsetList.Count; mesh++)
             {
                 //Verify that there are vertices and with valid UVs
                 int vsetIndex = model.meshList[mesh].vsetIndex;
                 int psetIndex = model.meshList[mesh].psetIndex;
+
+                model.vtxlList[vsetIndex].vertTangentList.Clear();
+                model.vtxlList[vsetIndex].vertTangentListNGS.Clear();
+                model.vtxlList[vsetIndex].vertBinormalList.Clear();
+                model.vtxlList[vsetIndex].vertBinormalListNGS.Clear();
                 if (model.vtxlList[vsetIndex].uv1List.Count > 0 && model.vtxlList[vsetIndex].vertPositions.Count > 0)
                 {
                     Vector3[] vertBinormalArray = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
@@ -1020,9 +1157,9 @@ namespace AquaModelLibrary
                         };
                         List<Vector2> uvs = new List<Vector2>()
                         {
-                          model.vtxlList[vsetIndex].uv1List[(int)face.X],
-                          model.vtxlList[vsetIndex].uv1List[(int)face.Y],
-                          model.vtxlList[vsetIndex].uv1List[(int)face.Z]
+                          new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.X].X, -model.vtxlList[vsetIndex].uv1List[(int)face.X].Y),
+                          new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.Y].X, -model.vtxlList[vsetIndex].uv1List[(int)face.Y].Y),
+                          new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.Z].X, -model.vtxlList[vsetIndex].uv1List[(int)face.Z].Y)
                         };
 
                         Vector3 dV1 = verts[0] - verts[1];
@@ -1089,7 +1226,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void splitMesh(AquaObject model, AquaObject outModel, int modelId, List<List<int>> facesToClone)
+        public static void SplitMesh(AquaObject model, AquaObject outModel, int modelId, List<List<int>> facesToClone)
         {
             List<List<int>> boneIdList = new List<List<int>>();
             if (facesToClone.Count > 0)
@@ -1320,7 +1457,7 @@ namespace AquaModelLibrary
             }
 
             //Split the meshes
-            splitMesh(model, outModel, modelId, faceLists);
+            SplitMesh(model, outModel, modelId, faceLists);
             /*
 #if DEBUG
             for(int i = 0; i < objBonesList.Count; i++)
@@ -1367,7 +1504,7 @@ namespace AquaModelLibrary
         {
             for (int i = 0; i < model.tempTris.Count; i++)
             {
-                splitMesh(model, outModel, i, GetAllMaterialFaceGroups(model, i));
+                SplitMesh(model, outModel, i, GetAllMaterialFaceGroups(model, i));
             }
             outModel.tempMats = model.tempMats;
         }
@@ -2002,7 +2139,14 @@ namespace AquaModelLibrary
                 texf.texName.SetString(mat.texNames[i]);
 
                 tsta.tag = 0x16; //Reexamine this one when possible, these actually vary a bit in 0xC33 variants.
-                tsta.texUsageOrder = texArrayStartIndex + i;
+                //NGS does some funny things with the tex usage order int
+                if(mat.texNames[i].Contains("_subnormal_"))
+                {
+                    tsta.texUsageOrder = 0xA;
+                } else
+                {
+                    tsta.texUsageOrder = texArrayStartIndex + i;
+                }
                 if (mat.texUVSets == null)
                 {
                     tsta.modelUVSet = 0;
@@ -2010,10 +2154,16 @@ namespace AquaModelLibrary
                 {
                     tsta.modelUVSet = mat.texUVSets[i];
                 }
-                tsta.unkVector0 = new Vector3();
-                tsta.unkInt0 = 0;
-                tsta.unkInt1 = 0;
-                tsta.unkInt2 = 0;
+                var unkVector0 = new Vector3();
+                if (ngsMat == true)
+                {
+                    unkVector0.Z = 1;
+                }
+
+                tsta.unkVector0 = unkVector0;
+                tsta.unkFloat2 = 0;
+                tsta.unkFloat3 = 0;
+                tsta.unkFloat4 = 0;
                 tsta.unkInt3 = 1;
                 tsta.unkInt4 = 1;
                 tsta.unkInt5 = 1;

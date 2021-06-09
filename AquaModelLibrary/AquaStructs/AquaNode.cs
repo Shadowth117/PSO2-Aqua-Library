@@ -20,6 +20,7 @@ namespace AquaModelLibrary
             public int boneAddress; 
             public int unknownCount; //0x2, type 0x8
             public int unknownAddress;
+
             public int effCount;     //0xFA, type 0x8
             public int effAddress;
             public int const0_3;
@@ -38,7 +39,7 @@ namespace AquaModelLibrary
             public int firstChild;    //0x5, type 0x8
             public int nextSibling;   //0x6, type 0x8
             public int const0_2;      //0xC, type 0x9? Ordering and nebulous usage makes this unclear. Observed only 0.
-            public int const0_3;
+            public int ngsSibling;    //Counts up in the case of an NGS bone sibling for player models.
 
             public Vector3 pos;       //0x7, type 0x4A, 0x1
             public int const0_4;

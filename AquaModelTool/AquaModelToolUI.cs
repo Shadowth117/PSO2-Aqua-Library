@@ -224,6 +224,10 @@ namespace AquaModelTool
                         //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
                         var test = aquaUI.aqua.aquaModels[0].models[0];
                         test = aquaUI.aqua.aquaModels[0].models[0];
+                        for(int i = 0; i < test.tstaList.Count; i++)
+                        {
+                            Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
+                        }
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if (aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
@@ -383,6 +387,13 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 aquaUI.aqua.ReadBones(openFileDialog.FileName);
+#if DEBUG
+                for(int i = 0; i < aquaUI.aqua.aquaBones[0].nodeList.Count; i++)
+                {
+                    var bone = aquaUI.aqua.aquaBones[0].nodeList[i];
+                    Console.WriteLine($"{bone.boneName.GetString()} {bone.boneShort1.ToString("X")} {bone.boneShort2.ToString("X")}  {bone.eulRot.X.ToString()} {bone.eulRot.Y.ToString()} {bone.eulRot.Z.ToString()} ");
+                }
+#endif
             }
         }
 
@@ -906,6 +917,55 @@ namespace AquaModelTool
             if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 DumpTextFiles(Directory.GetFiles(goodFolderDialog.FileName, "*.text"));
+            }
+        }
+
+        private void computeTangentSpaceTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AquaObjectMethods.ComputeTangentSpace(aquaUI.aqua.aquaModels[0].models[0], false, true);
+        }
+
+        private void cloneBoneTransformsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            aquaUI.aqua.aquaBones.Clear();
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 Bones",
+                Filter = "PSO2 Bones (*.aqn, *.trn)|*.aqn;*.trn"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                OpenFileDialog openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select PSO2 Bones",
+                    Filter = "PSO2 Bones (*.aqn, *.trn)|*.aqn;*.trn"
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    aquaUI.aqua.ReadBones(openFileDialog.FileName);
+                    aquaUI.aqua.ReadBones(openFileDialog2.FileName);
+
+                    var bone1 = aquaUI.aqua.aquaBones[0];
+                    var bone2 = aquaUI.aqua.aquaBones[1];
+                    for (int i = 0; i < bone1.nodeList.Count; i++)
+                    {
+                        var bone = bone1.nodeList[i];
+                        //bone.firstChild = bone2.nodeList[i].firstChild;
+                        bone.eulRot = bone2.nodeList[i].eulRot;
+                        /*
+                        bone.nextSibling = bone2.nodeList[i].nextSibling;
+                        bone.ngsSibling = bone2.nodeList[i].ngsSibling;
+                        bone.pos = bone2.nodeList[i].pos;
+                        bone.scale = bone2.nodeList[i].scale;
+                        bone.m1 = bone2.nodeList[i].m1;
+                        bone.m2 = bone2.nodeList[i].m2;
+                        bone.m3 = bone2.nodeList[i].m3;
+                        bone.m4 = bone2.nodeList[i].m4;*/
+                        bone1.nodeList[i] = bone;
+                    }
+
+                    AquaUtil.WriteBones(openFileDialog.FileName + "_out", bone1);
+                }
             }
         }
     }

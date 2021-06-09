@@ -50,6 +50,19 @@ namespace AquaModelLibrary
         public List<GenericTriangles> tempTris = new List<GenericTriangles>();
         public List<GenericMaterial> tempMats = new List<GenericMaterial>();
 
+        //Credit to MiscellaneousModder for this list:
+        public enum baseWearIds : int
+        {
+            costume = 0x0,
+            breastNeck = 0x1,
+            front = 0x2,
+            accessory1 = 0x3,
+            back = 0x4,
+            shoulder = 0x5,
+            foreArm = 0x6,
+            leg = 0x7,
+            accessory2 = 0x8
+        }
 
         public struct BoundingVolume
         {
@@ -208,7 +221,7 @@ namespace AquaModelLibrary
 
         public struct MESH
         {
-            public short tag; //0xB0, type 0x9, byte 0 and byte 1 //0x17 usually, 0x11 usually in 0xC33
+            public short flags; //0xB0, type 0x9, byte 0 and byte 1 //0x17 usually, 0x11 usually in 0xC33
             public short unkShort0; //0xB0, type 0x9, byte 2 and byte 3 //0, 0x9, sometimes 0x10
             public byte unkByte0; //0xC7, type 0x9, byte 0 //0x80 or very close. Unknown what it affects
             public byte unkByte1; //0xC7, type 0x9, byte 1 //0x64 or sometimes 0x63
@@ -435,10 +448,10 @@ namespace AquaModelLibrary
             public int texUsageOrder; //0x61, type 0x9  //0,1,2, 3 etc. PSO2 TSETs (Texture sets) require specific textures in specfic places. There should be a new TSTA if using a texture in a different slot for some reason.
             public int modelUVSet;    //0x62, type 0x9  //Observed as -1, 1, and 2. 3 and maybe more theoretically usable. 0 is default, -1 is for _t maps or any map that doesn't use UVs. 1 is for _k maps.
             public Vector3 unkVector0; //0x63, type 0x4A, 0x1 //0, -0, 0, often.
-            public int unkInt0; //0x64, type 0x9 //0
-            public int unkInt1; //0x65, type 0x9 //0
+            public float unkFloat2; //0x64, type 0x9 //0
+            public float unkFloat3; //0x65, type 0x9 //0
 
-            public int unkInt2; //0x66, type 0x9 //0
+            public float unkFloat4; //0x66, type 0x9 //0
             public int unkInt3; //0x67, type 0x9 //1 or sometimes 3
             public int unkInt4; //0x68, type 0x9 //1 or sometimes 3
             public int unkInt5; //0x69, type 0x9 //1
@@ -684,7 +697,7 @@ namespace AquaModelLibrary
                 }
 
                 uv3ListNGS.Clear();
-                for (int i = 0; i < uv2List.Count; i++)
+                for (int i = 0; i < uv3List.Count; i++)
                 {
                     uv3ListNGS.Add(new short[2]);
                     uv3ListNGS[i][0] = ((short)(uv3List[i].X * short.MaxValue)); if (uv3ListNGS[i][0] == -short.MaxValue) { uv3ListNGS[i][0]--; }
@@ -692,7 +705,7 @@ namespace AquaModelLibrary
                 }
 
                 uv4ListNGS.Clear();
-                for (int i = 0; i < uv2List.Count; i++)
+                for (int i = 0; i < uv4List.Count; i++)
                 {
                     uv4ListNGS.Add(new short[2]);
                     uv4ListNGS[i][0] = ((short)(uv4List[i].X * short.MaxValue)); if (uv4ListNGS[i][0] == -short.MaxValue) { uv4ListNGS[i][0]--; }
@@ -970,7 +983,7 @@ namespace AquaModelLibrary
                 return trueWeight;
             }
 
-            public void processToPSO2Weights()
+            public void processToPSO2Weights(bool useNGSWeights = false)
             {
                 //Should be the same count for both lists, go through and populate as needed to cull weight counts that are too large
                 for (int wt = 0; wt < rawVertWeights.Count; wt++)
@@ -1033,6 +1046,12 @@ namespace AquaModelLibrary
 
                     vertWeightIndices.Add(vertIds);
                     vertWeights.Add(vertWts);
+                    if(useNGSWeights)
+                    {
+                        ushort[] shortWeights = new ushort[] { (ushort)(vertWts.X * ushort.MaxValue), (ushort)(vertWts.Y * ushort.MaxValue), 
+                            (ushort)(vertWts.Z * ushort.MaxValue), (ushort)(vertWts.W * ushort.MaxValue), };
+                        vertWeightsNGS.Add(shortWeights);
+                    }
                 }
             }
 

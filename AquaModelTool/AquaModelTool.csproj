@@ -141,6 +141,12 @@
     <Compile Include="Forms\ModelEditor.Designer.cs">
       <DependentUpon>ModelEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ModelSubpanels\MeshStructEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\MeshStructEditor.Designer.cs">
+      <DependentUpon>MeshStructEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ModelSubpanels\ShaderEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -184,6 +190,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\MaterialEditor.resx">
       <DependentUpon>MaterialEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\MeshStructEditor.resx">
+      <DependentUpon>MeshStructEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\ShaderEditor.resx">
       <DependentUpon>ShaderEditor.cs</DependentUpon>

@@ -945,7 +945,7 @@ namespace AquaModelLibrary
                     //Fix weights
                     foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
                     {
-                        vtxl.processToPSO2Weights();
+                        vtxl.processToPSO2Weights(true);
                     }
 
                     //Reindex materials if needed
@@ -998,7 +998,7 @@ namespace AquaModelLibrary
 
                         //MESH
                         var mesh = new AquaObject.MESH();
-                        mesh.tag = 0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
+                        mesh.flags = 0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
                         mesh.unkShort0 = 0x0;
                         mesh.unkByte0 = 0x80;
                         mesh.unkByte1 = 0x64;
@@ -1029,12 +1029,6 @@ namespace AquaModelLibrary
                         mesh.unkInt0 = 0;
                         mesh.reserve0 = 0;
                         outModel.meshList.Add(mesh);
-                    }
-
-                    if (useBiTangent)
-                    {
-                        //Generate Binormals and Tangents
-                        computeTangentSpace(outModel, useFaceNormals);
                     }
 
                     //Generate VTXEs and VSETs
@@ -1095,6 +1089,10 @@ namespace AquaModelLibrary
                     }
                     outModel.objc = objc;
 
+                    if(useBiTangent)
+                    {
+                        ComputeTangentSpace(outModel, false, true);
+                    }
                     aquaModels[msI].models[aqI] = outModel;
                 }
             }
@@ -1167,7 +1165,7 @@ namespace AquaModelLibrary
 
                         //MESH
                         var mesh = new AquaObject.MESH();
-                        mesh.tag = 0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
+                        mesh.flags = 0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
                         mesh.unkShort0 = 0x0;
                         mesh.unkByte0 = 0x80;
                         mesh.unkByte1 = 0x64;
@@ -1195,12 +1193,6 @@ namespace AquaModelLibrary
                         mesh.unkInt0 = 0;
                         mesh.reserve0 = 0;
                         outModel.meshList.Add(mesh);
-                    }
-
-                    if (useBiTangent)
-                    {
-                        //Generate Binormals and Tangents
-                        computeTangentSpace(outModel, useFaceNormals);
                     }
 
                     //Generate VTXEs and VSETs
@@ -1250,6 +1242,10 @@ namespace AquaModelLibrary
                     }
                     outModel.objc = objc;
 
+                    if (useBiTangent)
+                    {
+                        ComputeTangentSpace(outModel, false, true);
+                    }
                     aquaModels[msI].models[aqI] = outModel;
                 }
             }
@@ -2438,6 +2434,85 @@ namespace AquaModelLibrary
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
 
+        public static void WriteBones(string outFileName, AquaNode bones)
+        {
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+            int rel0SizeOffset;
+            int nodeOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x14, bones.nodeList.Count);
+            int effOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x24, bones.nodoList.Count);
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            outBytes.AddRange(ConvertStruct(bones.ndtr));
+            //Write nodes
+            if(bones.nodeList.Count > 0)
+            {
+                SetByteListInt(outBytes, nodeOffset, outBytes.Count);
+                for (int i = 0; i < bones.nodeList.Count; i++)
+                {
+                    outBytes.AddRange(ConvertStruct(bones.nodeList[i]));
+                }
+            }
+
+            //Write effect nodes
+            if (bones.nodoList.Count > 0)
+            {
+                SetByteListInt(outBytes, effOffset, outBytes.Count);
+                for (int i = 0; i < bones.nodoList.Count; i++)
+                {
+                    outBytes.AddRange(ConvertStruct(bones.nodoList[i]));
+                }
+            }
+
+            //Write REL0 Size
+            SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+            //NOF0
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += AlignWriter(outBytes, 0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, ConvertStruct(nifl));
+
+            File.WriteAllBytes(outFileName, outBytes.ToArray());
+        }
+
         public void ReadBones(string inFilename)
         {
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
@@ -3389,7 +3464,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public int AlignWriter(List<byte> outBytes, int align)
+        public static int AlignWriter(List<byte> outBytes, int align)
         {
             //Align to int align
             int additions = 0;
@@ -3402,7 +3477,7 @@ namespace AquaModelLibrary
             return additions;
         }
 
-        public void AlignFileEndWrite(List<byte> outBytes, int align)
+        public static void AlignFileEndWrite(List<byte> outBytes, int align)
         {
             if (outBytes.Count % align == 0)
             {
@@ -3422,7 +3497,7 @@ namespace AquaModelLibrary
         }
 
         //Mainly for handling pointer offsets
-        public int SetByteListInt(List<byte> outBytes, int offset, int value)
+        public static int SetByteListInt(List<byte> outBytes, int offset, int value)
         {
             if (offset != -1)
             {
@@ -3438,7 +3513,7 @@ namespace AquaModelLibrary
             return -1;
         }
 
-        public int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
+        public static int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
         {
             if (countToCheck < 1)
             {

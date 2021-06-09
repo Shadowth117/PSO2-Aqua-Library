@@ -1018,6 +1018,18 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + costumeIcon + adjustedId + ".ice");
+                    var iconStr2 = GetFileHash(icon + castPartIcon + adjustedId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += "," + iconStr;
+                    }
+                    else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
+                    {
+                        output += "," + iconStr2;
+                    }
+
                     output += "\n";
                     output = AddBodyExtraFiles(output, reb, pso2_binDir, "_" + typeString, false);
 
@@ -1027,6 +1039,7 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+
                     output += "\n";
                     output = AddBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
 
@@ -1043,6 +1056,17 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + costumeIcon + finalId + ".ice");
+                    var iconStr2 = GetFileHash(icon + castPartIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += "," + iconStr;
+                    } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
+                    {
+                        output += "," + iconStr2;
+                    }
+
                     output += "\n";
                     output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
                 }
@@ -1172,6 +1196,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + baseWearIcon + GetIconGender(adjustedId) + adjustedId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
                     output = AddBasewearExtraFiles(output, reb, pso2_binDir, false);
@@ -1195,6 +1226,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + baseWearIcon + GetIconGender(adjustedId) + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -1295,6 +1333,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + innerwearIcon + GetIconGender(adjustedId) + adjustedId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -1316,6 +1361,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + innerwearIcon + GetIconGender(adjustedId) + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -1410,6 +1462,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + castPartIcon + castArmIcon + adjustedId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -1431,6 +1490,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + castPartIcon + castArmIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -1525,6 +1591,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + castPartIcon + castLegIcon + adjustedId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -1546,6 +1619,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + castPartIcon + castLegIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -1639,6 +1719,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + bodyPaintIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -1660,6 +1747,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + bodyPaintIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -1778,6 +1872,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + stickerIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -1791,6 +1892,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + stickerIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -1856,19 +1964,24 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
-
-                    //Not used?
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    //Set icon string
+                    var maleIconStr = GetFileHash(icon + hairIcon + iconMale + id + ".ice");
+                    var femaleIconStr = GetFileHash(icon + hairIcon + iconFemale + id + ".ice");
+                    var castIconStr = GetFileHash(icon + hairIcon + iconCast + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStr)))
                     {
-                        output += ", (Not found)";
+                        output += "," + maleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStr)))
+                    {
+                        output += "," + femaleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStr)))
+                    {
+                        output += "," + castIconStr;
                     }
 
-                    output += "\n"; */
-
+                    output += "\n";
                 }
                 else
                 {
@@ -1881,6 +1994,22 @@ namespace AquaModelLibrary
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var maleIconStr = GetFileHash(icon + hairIcon + iconMale + finalId + ".ice");
+                    var femaleIconStr = GetFileHash(icon + hairIcon + iconFemale + finalId + ".ice");
+                    var castIconStr = GetFileHash(icon + hairIcon + iconCast + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStr)))
+                    {
+                        output += "," + maleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStr)))
+                    {
+                        output += "," + femaleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStr)))
+                    {
+                        output += "," + castIconStr;
                     }
 
                     output += "\n";
@@ -1961,19 +2090,15 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
-
-                    //No hq used?
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyeIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
 
                     output += "\n";
-                    */
                 }
                 else
                 {
@@ -1984,6 +2109,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyeIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -2048,26 +2180,21 @@ namespace AquaModelLibrary
                     string reb = $"{rebootStart}eb_{id}.ice";
                     string rebEx = $"{rebootExStart}eb_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
-
-                    //Not used?
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyebrowsIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
 
                     output += "\n";
-                    */
                 }
                 else
                 {
@@ -2078,6 +2205,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyebrowsIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -2142,26 +2276,21 @@ namespace AquaModelLibrary
                     string reb = $"{rebootStart}el_{id}.ice";
                     string rebEx = $"{rebootExStart}el_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
-
-                    //Not used?
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyelashesIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
 
                     output += "\n";
-                    */
                 }
                 else
                 {
@@ -2172,6 +2301,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyelashesIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -2242,17 +2378,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-
-                    //No HQ Accessories?
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + accessoryIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";*/
-
                 }
                 else
                 {
@@ -2263,6 +2395,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + accessoryIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -2359,8 +2498,7 @@ namespace AquaModelLibrary
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
-                    }
-
+                    }      
                     output += "\n";
 
                 }
@@ -2428,6 +2566,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + faceIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -2449,6 +2594,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + faceIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -2522,6 +2674,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + facepainticon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -2543,6 +2702,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + facepainticon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -2926,25 +3092,22 @@ namespace AquaModelLibrary
                     string reb = $"{rebootStart}ea_{id}.ice";
                     string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
-
-                    /*
-                    output += ",[HQ Texture Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + earIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
 
                     output += "\n";
-                    */
+
                 }
                 else
                 {
@@ -2955,6 +3118,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + earIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -3018,6 +3188,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + teethIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
                 }
@@ -3030,6 +3207,13 @@ namespace AquaModelLibrary
 
                     output += classicHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + teethIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
                         output += ", (Not found)";
                     }
@@ -3098,6 +3282,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + hornIcon + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
                 }
@@ -3113,6 +3304,13 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + hornIcon + finalId + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
 
                     output += "\n";
 
@@ -3123,6 +3321,48 @@ namespace AquaModelLibrary
             }
             WriteCSV(outputDirectory, "NGSHorns.csv", outputNGSHorns);
 
+        }
+
+        private static string GetIconGender(int id)
+        {
+            //NGS ids
+            if(id >= 100000)
+            {
+                switch (id /= 100000)
+                {
+                    case 1:
+                        return iconMale;
+                    case 2:
+                        return iconFemale;
+                    case 3:
+                        return iconMale;
+                    case 4:
+                        return iconFemale;
+                    case 5:
+                        return iconMale;
+                }
+
+            } else //Classic ids
+            {
+                switch (id /= 100000)
+                {
+                    case 0:
+                        return iconMale;
+                    case 1:
+                        return iconFemale;
+                    case 2:
+                        return iconMale;
+                    case 3:
+                        return iconFemale;
+                    case 4:
+                        return iconMale;
+                    case 5:
+                        return iconFemale;
+                }
+            }
+
+            MessageBox.Show($"Unexpected id: {id}");
+            throw new Exception();
         }
 
         private static void WriteCSV(string outputDirectory, string fileName, StringBuilder output)
