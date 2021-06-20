@@ -926,7 +926,7 @@ namespace AquaModelLibrary
         }
 
         //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
-        public void ConvertToNGSPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool splitVerts = true)
+        public void ConvertToNGSPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true)
         {
             for (int msI = 0; msI < aquaModels.Count; msI++)
             {
@@ -943,9 +943,22 @@ namespace AquaModelLibrary
                         VTXLFromFaceVerts(aquaModels[msI].models[aqI]);
                     }
                     //Fix weights
-                    foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
+                    if(useRigid == false)
                     {
-                        vtxl.processToPSO2Weights(true);
+                        foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
+                        {
+                            vtxl.processToPSO2Weights(true);
+                        }
+                    } else
+                    {
+                        aquaModels[msI].models[aqI].bonePalette.Clear();
+                        for (int v = 0; v < aquaModels[msI].models[aqI].vtxlList.Count; v++)
+                        {
+                            aquaModels[msI].models[aqI].vtxlList[v].bonePalette.Clear();
+                            aquaModels[msI].models[aqI].vtxlList[v].vertWeights.Clear();
+                            aquaModels[msI].models[aqI].vtxlList[v].vertWeightsNGS.Clear();
+                            aquaModels[msI].models[aqI].vtxlList[v].vertWeightIndices.Clear();
+                        }
                     }
 
                     //Reindex materials if needed
@@ -961,10 +974,16 @@ namespace AquaModelLibrary
                         }
                     }
 
-                    SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit); 
-                    BatchSplitByBoneCount(matModelSplit, outModel, 255);
-                    RemoveAllUnusedBones(outModel);
-                    GenerateGlobalBonePalette(outModel);
+                    SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
+                    if (useRigid == false)
+                    {
+                        //BatchSplitByBoneCount(matModelSplit, outModel, 255);
+                        //RemoveAllUnusedBones(outModel);
+                        GenerateGlobalBonePalette(outModel);
+                    } else
+                    {
+                        outModel = matModelSplit;
+                    }
                     if (splitVerts)
                     {
                         CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
@@ -993,8 +1012,8 @@ namespace AquaModelLibrary
                         pset.faceGroupCount = 0x1;
                         pset.psetFaceCount = strips.triIdCount;
                         pset.stripStartCount = totalStripsShorts;
-                        totalStripsShorts += strips.triIdCount;
                         outModel.psetList.Add(pset);
+                        totalStripsShorts += strips.triIdCount;   //Update this *after* setting the strip start count so that we don't direct to bad data.
 
                         //MESH
                         var mesh = new AquaObject.MESH();
@@ -1007,15 +1026,7 @@ namespace AquaModelLibrary
                         mesh.rendIndex = mesh.mateIndex;
                         mesh.shadIndex = mesh.mateIndex;
                         mesh.tsetIndex = mesh.mateIndex;
-                        mesh.baseMeshNodeId = -1;
-                        /*if (baHack)
-                        {
-                            mesh.baseMeshNodeId = 0;
-                        }
-                        else
-                        {
-                            mesh.baseMeshNodeId = outModel.tempTris[i].baseMeshNodeId;
-                        }*/
+                        mesh.baseMeshNodeId = outModel.tempTris[i].baseMeshNodeId;
                         mesh.vsetIndex = i;
                         mesh.psetIndex = i;
                         if (baHack)
@@ -1053,7 +1064,14 @@ namespace AquaModelLibrary
                         vset.vtxlStartVert = vertCounter;
                         vertCounter += vset.vtxlCount;
                         outModel.vtxlList[i].bonePalette.Sort();
-                        vset.bonePaletteCount = -(outModel.vtxlList[i].bonePalette[outModel.vtxlList[i].bonePalette.Count - 1] + 1); //This value seems to be the largest index in the used indices + 1 and then made negative.
+                        if(useRigid == true)
+                        {
+                            vset.bonePaletteCount = 0;
+                        } else
+                        {
+                            vset.bonePaletteCount = -1; //Needs more research. This maybe works as a catch all for now?
+                            //vset.bonePaletteCount = -(outModel.vtxlList[i].bonePalette[outModel.vtxlList[i].bonePalette.Count - 1] + 1); //This value seems to be the largest index in the used indices + 1 and then made negative.
+                        }
                         vset.edgeVertsCount = outModel.vtxlList[i].edgeVerts.Count;
                         outModel.vsetList.Add(vset);
                     }
@@ -1099,7 +1117,7 @@ namespace AquaModelLibrary
         }
 
         //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
-        public void ConvertToClassicPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool splitVerts = true)
+        public void ConvertToClassicPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true)
         {
             for (int msI = 0; msI < aquaModels.Count; msI++)
             {
@@ -1116,9 +1134,24 @@ namespace AquaModelLibrary
                         VTXLFromFaceVerts(aquaModels[msI].models[aqI]);
                     }
                     //Fix weights
-                    foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
+                    //Fix weights
+                    if (useRigid == false)
                     {
-                        vtxl.processToPSO2Weights();
+                        foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
+                        {
+                            vtxl.processToPSO2Weights(true);
+                        }
+                    }
+                    else
+                    {
+                        aquaModels[msI].models[aqI].bonePalette.Clear();
+                        for (int v = 0; v < aquaModels[msI].models[aqI].vtxlList.Count; v++)
+                        {
+                            aquaModels[msI].models[aqI].vtxlList[v].bonePalette.Clear();
+                            aquaModels[msI].models[aqI].vtxlList[v].vertWeights.Clear();
+                            aquaModels[msI].models[aqI].vtxlList[v].vertWeightsNGS.Clear();
+                            aquaModels[msI].models[aqI].vtxlList[v].vertWeightIndices.Clear();
+                        }
                     }
 
                     //Reindex materials if needed
@@ -1135,8 +1168,14 @@ namespace AquaModelLibrary
                     }
 
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
-                    BatchSplitByBoneCount(matModelSplit, outModel, 16);
-                    RemoveAllUnusedBones(outModel);
+                    if (useRigid == false)
+                    {
+                        BatchSplitByBoneCount(matModelSplit, outModel, 16);
+                        RemoveAllUnusedBones(outModel);
+                    } else
+                    {
+                        outModel = matModelSplit;
+                    }
                     if (splitVerts)
                     {
                         CalcUNRMs(outModel, aquaModels[msI].models[aqI].applyNormalAveraging, useUnrms);
@@ -1154,7 +1193,6 @@ namespace AquaModelLibrary
                         //strips
                         var strips = new AquaObject.stripData(outModel.tempTris[i].toUshortArray());
                         outModel.strips.Add(strips);
-                        totalStripsShorts += strips.triIdCount;
 
                         //PSET
                         var pset = new AquaObject.PSET();
@@ -1162,6 +1200,7 @@ namespace AquaModelLibrary
                         pset.faceGroupCount = 0x1;
                         pset.psetFaceCount = strips.triIdCount;
                         outModel.psetList.Add(pset);
+                        totalStripsShorts += strips.triIdCount;
 
                         //MESH
                         var mesh = new AquaObject.MESH();
@@ -1213,7 +1252,14 @@ namespace AquaModelLibrary
                         vset.vertDataSize = size;
                         vset.vtxeCount = vtxe.vertDataTypes.Count;
                         vset.vtxlCount = outModel.vtxlList[i].vertPositions.Count;
-                        vset.bonePaletteCount = outModel.vtxlList[i].bonePalette.Count;
+                        if (useRigid == true)
+                        {
+                            vset.bonePaletteCount = 0;
+                        }
+                        else
+                        {
+                            vset.bonePaletteCount = outModel.vtxlList[i].bonePalette.Count;
+                        }
                         vset.edgeVertsCount = outModel.vtxlList[i].edgeVerts.Count;
                         outModel.vsetList.Add(vset);
                     }
@@ -1537,7 +1583,7 @@ namespace AquaModelLibrary
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Count));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.mesh2Offset));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3Offset));
-                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3LengthCount));   //The count for all 3 of the following offsets
+                outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3LengthCount));   //At least 1
 
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.globalStrip3LengthOffset));
                 outBytes.AddRange(BitConverter.GetBytes(model.objc.unkPointArray1Offset));
@@ -3726,7 +3772,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    MessageBox.Show("Improper File Format!");
+                    File.WriteAllText(fileName + ".txt", $"{fileName} was not a VTBF...");
                 }
             }
 

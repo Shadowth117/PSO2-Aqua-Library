@@ -938,6 +938,7 @@ namespace AquaModelLibrary
                     model.vtxlList[vsetIndex].vertBinormalList = new List<Vector3>(new Vector3[vertCount]);
                     model.vtxlList[vsetIndex].vertTangentList = new List<Vector3>(new Vector3[vertCount]);
                 }
+                //Add normals if they aren't there or if we want to regenerate them
                 if (model.vtxlList[vsetIndex].vertNormals == null || model.vtxlList[vsetIndex].vertNormals.Count == 0)
                 {
                     vertNormalsCheck[vsetIndex] = false;
@@ -959,8 +960,16 @@ namespace AquaModelLibrary
             int biggest = 0;
             for (int i = 0; i < model.vsetList.Count; i++)
             {
-                model.vtxeList[model.vsetList[i].vtxeCount] = ConstructClassicVTXE(model.vtxlList[i], out int vertSize);
+                int vertSize;
                 var vset = model.vsetList[i];
+                if (model.objc.type >= 0xC32)
+                {
+                    model.vtxeList[model.vsetList[i].vtxeCount] = ConstructClassicVTXE(model.vtxlList[i], out vertSize);
+                } else
+                {
+                    model.vtxeList[i] = ConstructClassicVTXE(model.vtxlList[i], out vertSize);
+                    vset.vtxeCount = model.vtxeList[i].vertDataTypes.Count;
+                }
                 vset.vertDataSize = vertSize;
                 model.vsetList[i] = vset;
                 if (vertSize > biggest)
@@ -969,58 +978,6 @@ namespace AquaModelLibrary
                 }
             }
             model.objc.largetsVtxl = biggest;
-
-            //UNRMs link vertices that were split in the export process in both official and unofficial exports.
-            //Loop through them and sum the Vector3s of all linked vertices. Normalize this value and assign it to the respective data of each linked vertex.
-            /*
-            for (int unrm = 0; unrm < model.unrms.unrmVertGroups.Count; unrm++)
-            {
-                var binormal = new Vector3();
-                var tangent = new Vector3();
-                var faceNormal = new Vector3();
-                for(int group = 0; group < model.unrms.unrmMeshIds[unrm].Count; group++)
-                {
-                    int meshIndex = model.unrms.unrmMeshIds[unrm][group];
-                    int vsetIndex;
-                    if (model.objc != null && (model.objc.type == 0xC33 || model.objc.type == 0xc32) && model.meshList.Count > 0)
-                    {
-                        vsetIndex = model.meshList[meshIndex].vsetIndex;
-                    }
-                    else
-                    {
-                        vsetIndex = meshIndex;
-                    }
-                    int vertIndex = model.unrms.unrmVertIds[unrm][group];
-
-                    binormal += vertBinormalArrays[vsetIndex][vertIndex];
-                    tangent += vertTangentArrays[vsetIndex][vertIndex];
-                    faceNormal += vertFaceNormalArrays[vsetIndex][vertIndex];
-                }
-
-                //Assign the newly calced values
-                for (int group = 0; group < model.unrms.unrmMeshIds[unrm].Count; group++)
-                {
-                    int meshIndex = model.unrms.unrmMeshIds[unrm][group];
-                    int vsetIndex;
-                    if (model.objc != null && (model.objc.type == 0xC33 || model.objc.type == 0xc32) && model.meshList.Count > 0)
-                    {
-                        vsetIndex = model.meshList[meshIndex].vsetIndex;
-                    }
-                    else
-                    {
-                        vsetIndex = meshIndex;
-                    }
-                    int vertIndex = model.unrms.unrmVertIds[unrm][group];
-
-                    model.vtxlList[vsetIndex].vertBinormalList[vertIndex] = Vector3.Normalize(binormal);
-                    model.vtxlList[vsetIndex].vertTangentList[vertIndex] = Vector3.Normalize(tangent);
-
-                    if(vertNormalsCheck[vsetIndex] == false || useFaceNormals == true)
-                    {
-                        model.vtxlList[vsetIndex].vertNormals[vertIndex] = Vector3.Normalize(tangent);
-                    }
-                }
-            }*/
         }
 
         //Calculates tangent space using tempMesh data
@@ -1307,6 +1264,7 @@ namespace AquaModelLibrary
                         var newTris = new GenericTriangles(tempFaces, tempFaceMatIds);
                         newTris.baseMeshDummyId = model.tempTris[modelId].baseMeshDummyId;
                         newTris.baseMeshNodeId = model.tempTris[modelId].baseMeshNodeId;
+                        newTris.name = model.tempTris[modelId].name;
                         outModel.tempTris.Add(newTris);
 
                         //Copy vertex data based on faceVertIds ordering
@@ -1571,7 +1529,12 @@ namespace AquaModelLibrary
                     }
                 }
             }
-
+            newBonePalette.Sort();
+            if(newBonePalette.Count == 0)
+            {
+                Console.WriteLine("No bones to set up");
+                return;
+            }
             //Reassign indices
             for (int i = 0; i < model.vtxlList.Count; i++)
             {

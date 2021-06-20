@@ -606,6 +606,14 @@ namespace AquaModelLibrary
                         rawVertWeights.Add(new List<float>());
                         rawVertWeightIds.Add(new List<int>());
                     }
+                } else if(modelVtxl.vertWeights.Count > 0)
+                {
+                    vertWeights = new List<Vector4>(new Vector4[vertCount]);
+                    vertWeightIndices = new List<byte[]>(new byte[vertCount][]);
+                    for(int i = 0; i < vertCount; i++)
+                    {
+                        vertWeightIndices[i] = new byte[4];
+                    }
                 }
 
             }
@@ -1171,7 +1179,7 @@ namespace AquaModelLibrary
             public int baseMeshNodeId;
             public int baseMeshDummyId;
             public int vertCount;
-            
+            public string name;
             public GenericTriangles()
             {
             }

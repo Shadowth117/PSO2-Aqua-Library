@@ -17,20 +17,24 @@ namespace AquaModelTool
             }*/
 
             InitializeComponent();
+            PopulateModelDropdown();
+            SetDropdown();
+        }
 
-            //Populate models dropdown 
+        public void PopulateModelDropdown()
+        {
             modelIDCB.BeginUpdate();
-            for(int i = 0; i < modelset.models.Count; i++)
+            modelIDCB.Items.Clear();
+            for (int i = 0; i < modelset.models.Count; i++)
             {
                 modelIDCB.Items.Add(i);
             }
             modelIDCB.EndUpdate();
             modelIDCB.SelectedIndex = 0;
-            if(modelIDCB.Items.Count < 2)
+            if (modelIDCB.Items.Count < 2)
             {
                 modelIDCB.Enabled = false;
             }
-            SetDropdown();
         }
 
         public bool GetAllTransparentChecked()

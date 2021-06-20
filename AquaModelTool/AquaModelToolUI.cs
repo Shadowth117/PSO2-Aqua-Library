@@ -228,6 +228,18 @@ namespace AquaModelTool
                         {
                             Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
                         }
+                        /*
+                        for(int j = 0; j < test.vtxlList[0].vertPositions.Count; j++)
+                        {
+                            var vec3 = test.vtxlList[0].vertPositions[j];
+                            if (vec3.Y > 0.5)
+                            {
+                                vec3.Y *= 10000;
+                                test.vtxlList[0].vertPositions[j] = vec3;
+                            }
+                        }
+                        
+                        test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);*/
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if (aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
@@ -322,11 +334,15 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select a VTBF PSO2 file",
-                Filter = "All Files|*"
+                Filter = "All Files|*",
+                Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                AquaModelLibrary.AquaUtil.AnalyzeVTBF(openFileDialog.FileName);
+                foreach(string file in openFileDialog.FileNames)
+                {
+                    AquaModelLibrary.AquaUtil.AnalyzeVTBF(file);
+                }
             }
 
         }
@@ -491,7 +507,7 @@ namespace AquaModelTool
                 var set = new AquaUtil.ModelSet();
                 set.models.Add(rel.aqObj);
                 aqua.aquaModels.Add(set);
-                aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false);
+                aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false, false);
 
                 fname = fname.Replace(".rel", ".trp");
                 aqua.WriteClassicNIFLModel(fname, fname);
@@ -966,6 +982,43 @@ namespace AquaModelTool
 
                     AquaUtil.WriteBones(openFileDialog.FileName + "_out", bone1);
                 }
+            }
+        }
+
+        private void legacyAqp2objObjExportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (aquaUI.aqua.aquaModels.Count > 0)
+            {
+                var exportDialog = new SaveFileDialog()
+                {
+                    Title = "Export obj file for basic editing",
+                    Filter = "Object model (*.obj)|*.obj"
+                };
+                if (exportDialog.ShowDialog() == DialogResult.OK)
+                {
+                    LegacyObj.LegacyObjIO.ExportObj(exportDialog.FileName, aquaUI.aqua.aquaModels[0].models[0]);
+                }
+            }
+        }
+
+        private void legacyAqp2objObjImportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Import obj geometry to current file. Make sure to remove LOD models.
+            if(aquaUI.aqua.aquaModels.Count > 0)
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog()
+                {
+                    Title = "Select PSO2 .obj",
+                    Filter = "PSO2 .obj (*.obj)|*.obj"
+                };
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var newObj = LegacyObj.LegacyObjIO.ImportObj(openFileDialog.FileName, aquaUI.aqua.aquaModels[0].models[0]);
+                    aquaUI.aqua.aquaModels[0].models.Clear();
+                    aquaUI.aqua.aquaModels[0].models.Add(newObj);
+                    ((ModelEditor)filePanel.Controls[0]).PopulateModelDropdown();
+                }
+
             }
         }
     }

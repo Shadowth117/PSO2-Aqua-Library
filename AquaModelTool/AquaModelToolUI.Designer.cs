@@ -52,9 +52,11 @@
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.legacyAqp2objObjExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -142,7 +144,9 @@
             this.parsePSO2TextToolStripMenuItem,
             this.parsePSO2TextFolderSelectToolStripMenuItem,
             this.parseVTBFToTextToolStripMenuItem,
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem});
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
+            this.legacyAqp2objObjExportToolStripMenuItem,
+            this.legacyAqp2objObjImportToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -250,6 +254,13 @@
             this.computeTangentSpaceTestToolStripMenuItem.Text = "Compute Tangent Space Test";
             this.computeTangentSpaceTestToolStripMenuItem.Click += new System.EventHandler(this.computeTangentSpaceTestToolStripMenuItem_Click);
             // 
+            // cloneBoneTransformsToolStripMenuItem
+            // 
+            this.cloneBoneTransformsToolStripMenuItem.Name = "cloneBoneTransformsToolStripMenuItem";
+            this.cloneBoneTransformsToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.cloneBoneTransformsToolStripMenuItem.Text = "Clone Bone Transforms";
+            this.cloneBoneTransformsToolStripMenuItem.Click += new System.EventHandler(this.cloneBoneTransformsToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -268,12 +279,19 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // cloneBoneTransformsToolStripMenuItem
+            // legacyAqp2objObjExportToolStripMenuItem
             // 
-            this.cloneBoneTransformsToolStripMenuItem.Name = "cloneBoneTransformsToolStripMenuItem";
-            this.cloneBoneTransformsToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.cloneBoneTransformsToolStripMenuItem.Text = "Clone Bone Transforms";
-            this.cloneBoneTransformsToolStripMenuItem.Click += new System.EventHandler(this.cloneBoneTransformsToolStripMenuItem_Click);
+            this.legacyAqp2objObjExportToolStripMenuItem.Name = "legacyAqp2objObjExportToolStripMenuItem";
+            this.legacyAqp2objObjExportToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.legacyAqp2objObjExportToolStripMenuItem.Text = "(Legacy) aqp2obj obj export";
+            this.legacyAqp2objObjExportToolStripMenuItem.Click += new System.EventHandler(this.legacyAqp2objObjExportToolStripMenuItem_Click);
+            // 
+            // legacyAqp2objObjImportToolStripMenuItem
+            // 
+            this.legacyAqp2objObjImportToolStripMenuItem.Name = "legacyAqp2objObjImportToolStripMenuItem";
+            this.legacyAqp2objObjImportToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.legacyAqp2objObjImportToolStripMenuItem.Text = "(Legacy) aqp2obj obj import";
+            this.legacyAqp2objObjImportToolStripMenuItem.Click += new System.EventHandler(this.legacyAqp2objObjImportToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -323,6 +341,8 @@
         private System.Windows.Forms.ToolStripMenuItem parsePSO2TextFolderSelectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem computeTangentSpaceTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cloneBoneTransformsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem legacyAqp2objObjExportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem legacyAqp2objObjImportToolStripMenuItem;
     }
 }
 

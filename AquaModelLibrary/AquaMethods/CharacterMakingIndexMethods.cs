@@ -3344,7 +3344,7 @@ namespace AquaModelLibrary
 
             } else //Classic ids
             {
-                switch (id /= 100000)
+                switch (id /= 10000)
                 {
                     case 0:
                         return iconMale;
