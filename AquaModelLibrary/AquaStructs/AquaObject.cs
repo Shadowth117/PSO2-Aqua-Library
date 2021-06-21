@@ -615,6 +615,14 @@ namespace AquaModelLibrary
                         vertWeightIndices[i] = new byte[4];
                     }
                 }
+                if(modelVtxl.vertWeightsNGS.Count > 0)
+                {
+                    vertWeightsNGS = new List<ushort[]>(new ushort[vertCount][]);
+                    for (int i = 0; i < vertCount; i++)
+                    {
+                        vertWeightsNGS[i] = new ushort[4];
+                    }
+                }
 
             }
 
@@ -981,7 +989,7 @@ namespace AquaModelLibrary
 
             }
 
-            private static Vector4 SumWeightsTo1(Vector4 trueWeight)
+            public static Vector4 SumWeightsTo1(Vector4 trueWeight)
             {
                 double sum = trueWeight.X + trueWeight.Y + trueWeight.Z + trueWeight.W;
                 trueWeight.X = (float)(trueWeight.X / sum);

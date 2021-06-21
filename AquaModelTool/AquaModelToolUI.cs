@@ -228,18 +228,19 @@ namespace AquaModelTool
                         {
                             Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
                         }
+                        
                         /*
                         for(int j = 0; j < test.vtxlList[0].vertPositions.Count; j++)
                         {
                             var vec3 = test.vtxlList[0].vertPositions[j];
-                            if (vec3.Y > 0.5)
+                            if (vec3.Y > 0.2)
                             {
                                 vec3.Y *= 10000;
                                 test.vtxlList[0].vertPositions[j] = vec3;
                             }
-                        }
+                        }*/
                         
-                        test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);*/
+                        test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if (aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)

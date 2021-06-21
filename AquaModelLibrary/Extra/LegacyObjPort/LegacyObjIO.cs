@@ -26,9 +26,10 @@ namespace LegacyObj
         //Import obj data, gather and reconstruct weighting data, reconstruct model with new geometry data, delete LOD models loaded
         public static AquaObject ImportObj(string fileName, AquaObject aqo)
         {
+            bool doBitangent = false;
             List<SkinData> skinData = new List<SkinData>();
             AquaObjectMethods.GenerateGlobalBonePalette(aqo);
-            
+
             //Add a local version of the global bonepalette. We're reworking things so we need to do this.
             for(int i = 0; i < aqo.vtxlList.Count; i++)
             {
@@ -59,10 +60,15 @@ namespace LegacyObj
                             indices[id] = temp;
                         }
                         skin.indices = indices.ToArray();
-                        skin.weights = vtxl.vertWeights[i];
+                        skin.weights = AquaObject.VTXL.SumWeightsTo1(vtxl.vertWeights[i]);
                         skinData.Add(skin);
                     }
                 }
+            }
+
+            if(aqo.vtxlList[0].vertBinormalList.Count > 0)
+            {
+                doBitangent = true;
             }
 
             //House cleaning since we can't really redo these this way
@@ -79,7 +85,7 @@ namespace LegacyObj
             var obj = ObjFile.FromFile(fileName);
             var subMeshes = obj.Meshes.SelectMany(i => i.SubMeshes).ToArray();
             var oldMESHList = aqo.meshList;
-            aqo.meshList.Clear();
+            aqo.meshList = new List<AquaObject.MESH>();
             int totalStripsShorts = 0;
             int totalVerts = 0;
             int boneLimit;
@@ -135,7 +141,7 @@ namespace LegacyObj
                         new Vector3(obj.Normals[nf.B].X, obj.Normals[nf.B].Z, -obj.Normals[nf.B].Y), 
                         new Vector3(obj.Normals[nf.C].X, obj.Normals[nf.C].Z, -obj.Normals[nf.C].Y)};
 
-                    vtxl.uv1List = new List<Vector2>() { new Vector2(obj.TexCoords[tf.A].X, obj.TexCoords[tf.A].Y), new Vector2(obj.TexCoords[tf.B].X, obj.TexCoords[tf.B].Y),
+                    vtxl.uv1List = new List<Vector2>() { new Vector2(obj.TexCoords[tf.A].X, -obj.TexCoords[tf.A].Y), new Vector2(obj.TexCoords[tf.B].X, -obj.TexCoords[tf.B].Y),
                         new Vector2(obj.TexCoords[tf.C].X, -obj.TexCoords[tf.C].Y),};
 
                     if(aqo.vtxlList[0].vertWeights.Count > 0)
@@ -165,6 +171,13 @@ namespace LegacyObj
                             }
                             vtxl.vertWeights[vt] = tempWeight.weights;
                             vtxl.vertWeightIndices[vt] = tempWeight.indices;
+
+                            if (aqo.vtxlList[0].vertWeightsNGS.Count > 0)
+                            {
+                                ushort[] shortWeights = new ushort[] { (ushort)(tempWeight.weights.X * ushort.MaxValue), (ushort)(tempWeight.weights.Y * ushort.MaxValue),
+                                    (ushort)(tempWeight.weights.Z * ushort.MaxValue), (ushort)(tempWeight.weights.W * ushort.MaxValue), };
+                                vtxl.vertWeightsNGS.Add(shortWeights);
+                            }
                         }
                     }
                     tempMesh.faceVerts.Add(vtxl);
@@ -276,7 +289,7 @@ namespace LegacyObj
                     mesh.rendIndex = idx_REND;
                     mesh.shadIndex = idx_SHAD;
                     mesh.tsetIndex = idx_TSET;
-                    mesh.baseMeshNodeId = -1;
+                    mesh.baseMeshNodeId = 0;
                     mesh.baseMeshDummyId = 0;
                     mesh.unkInt0 = 0;
                 } else
@@ -361,7 +374,10 @@ namespace LegacyObj
             aqo.objc.globalStrip3LengthCount = 1;
             aqo.objc.unkCount3 = 1;
             aqo.objc.bounds = AquaObjectMethods.GenerateBounding(aqo.vtxlList);
-            AquaObjectMethods.ComputeTangentSpace(aqo, false, true);
+            if(doBitangent)
+            {
+                AquaObjectMethods.ComputeTangentSpace(aqo, false, true);
+            }
 
             return aqo;
         }

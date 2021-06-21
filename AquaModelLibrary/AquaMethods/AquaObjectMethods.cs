@@ -1532,7 +1532,9 @@ namespace AquaModelLibrary
             newBonePalette.Sort();
             if(newBonePalette.Count == 0)
             {
+#if DEBUG
                 Console.WriteLine("No bones to set up");
+#endif
                 return;
             }
             //Reassign indices
