@@ -90,6 +90,7 @@ namespace LegacyObj
             int totalVerts = 0;
             int boneLimit;
             AquaObject tempModel;
+
             if(aqo.objc.type >= 0xC32)
             {
                 tempModel = new NGSAquaObject();
@@ -188,7 +189,7 @@ namespace LegacyObj
                 aqo.tempTris.Add(tempMesh);
             }
             AquaObjectMethods.VTXLFromFaceVerts(aqo);
-            if(aqo.objc.type < 0xC32)
+            if (aqo.objc.type < 0xC32)
             {
                 AquaObjectMethods.BatchSplitByBoneCount(aqo, tempModel, boneLimit);
                 aqo.tempTris = tempModel.tempTris;
@@ -267,6 +268,8 @@ namespace LegacyObj
                 var mesh = new AquaObject.MESH();
                 AquaObject.MESH oldMesh = new AquaObject.MESH(); 
                 bool oldMeshFound = false;
+
+                //Compare
                 for(int msh = 0; msh < oldMESHList.Count; msh++)
                 {
                     var tempMesh = oldMESHList[msh];

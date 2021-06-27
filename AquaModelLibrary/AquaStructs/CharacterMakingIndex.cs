@@ -20,6 +20,7 @@ namespace AquaModelLibrary
         public static string playerVoiceStart = $"player_voice/";
         public static string icon = $"large_icon/ui_making_";
         public static string lobbyActionStart = $"actor/lobby_action/";
+        public static string lobbyActionStartReboot = $"character/motion/lobby_action/";
 
         public static string baseWearIcon = $"basewear01_";
         public static string bodyPaintIcon = $"bodypaint01_";
@@ -54,6 +55,11 @@ namespace AquaModelLibrary
         public static string rebootHornDataStr = "pl_rhn_";
         public static string rebootTeethDataStr = "pl_rdt_";
         public static string rebootEarDataStr = "pl_rea_";
+
+        public static string rebootLAHuman = "_std";
+        public static string rebootLACastMale = "_cam";
+        public static string rebootLACastFemale = "_caf";
+        public static string rebootFig = "_base";
 
         public static string classicCMX = $"character/making/pl_system.ice";
         public static string classicPartText = $"ui_charamake_text.ice";

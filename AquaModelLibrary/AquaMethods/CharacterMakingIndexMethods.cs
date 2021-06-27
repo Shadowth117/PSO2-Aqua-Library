@@ -2989,6 +2989,10 @@ namespace AquaModelLibrary
                 List<string> iceTracker = new List<string>();
                 GatherTextIdsStringRef(commByCat, masterNameList, strNameDicts, "LobbyAction", true);
 
+                lobbyActions.AppendLine("Files are layed out as: PSO2File NGSfile NGSCastFile NGSCasealFile NGSFigFile");
+                lobbyActions.AppendLine("NGS Lobby Actions are in win32reboot, unlike most NGS player files");
+                lobbyActions.AppendLine("");
+
                 for (int i = 0; i < lac.dataBlocks.Count; i++)
                 {
                     //There are sometimes multiple references to the same ice, but we're not interested in these entries
@@ -3021,10 +3025,24 @@ namespace AquaModelLibrary
                     }
 
                     string classic = $"{lobbyActionStart}{lac.dataBlocks[i].iceName}";
+                    string reboot = $"{lobbyActionStartReboot}{lac.dataBlocks[i].iceName}";
 
                     var classicHash = GetFileHash(classic);
+                    var rebootHumanHash = GetFileHash(reboot.Replace(".ice", rebootLAHuman + ".ice"));
+                    var rebootCastMalehash = GetFileHash(reboot.Replace(".ice", rebootLACastMale + ".ice"));
+                    var rebootCastFemaleHash = GetFileHash(reboot.Replace(".ice", rebootLACastFemale + ".ice"));
+                    var rebootFigHash = GetFileHash(reboot.Replace(".ice", rebootFig + ".ice"));
 
                     output += classicHash;
+
+                    //Some things apparently don't have reboot versions for some reason.
+                    if(File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootHumanHash.Substring(0, 2) + "\\", rebootHumanHash.Substring(2, rebootHumanHash.Length - 2))))
+                    {
+                        output += ", " + rebootHumanHash;
+                        output += ", " + rebootCastMalehash;
+                        output += ", " + rebootCastFemaleHash;
+                        output += ", " + rebootFigHash;
+                    }
 
                     if (lac.dataBlocks[i].iceName.Contains("_m.ice"))
                     {

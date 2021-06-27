@@ -1022,5 +1022,14 @@ namespace AquaModelTool
 
             }
         }
+
+        private void testVTXEToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var model = aquaUI.aqua.aquaModels[0].models[0];
+            for(int i = 0; i < model.vtxlList.Count; i++)
+            {
+                model.vtxeList[i] = AquaObjectMethods.ConstructClassicVTXE(model.vtxlList[i], out int vertSize);
+            }
+        }
     }
 }
