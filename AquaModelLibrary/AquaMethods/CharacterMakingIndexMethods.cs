@@ -14,7 +14,7 @@ using static AquaModelLibrary.AquaMiscMethods;
 
 namespace AquaModelLibrary
 {
-    public class CharacterMakingIndexMethods
+    public static class CharacterMakingIndexMethods
     {
         public static CharacterMakingIndex ReadCMX(string fileName, CharacterMakingIndex cmx = null)
         {
@@ -804,74 +804,15 @@ namespace AquaModelLibrary
             PSO2Text partsText = null;
             PSO2Text acceText = null;
             PSO2Text commonText = null;
+            PSO2Text commonTextReboot = null;
             LobbyActionCommon lac = null;
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
 
-            //Load CMX
-            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
+            aquaCMX = ExtractCMX(pso2_binDir, aquaCMX);
 
-            if (File.Exists(cmxPath))
-            {
-                var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
-                var cmxIce = IceFile.LoadIceFile(strm);
-                strm.Dispose();
+            ReadCMXText(pso2_binDir, out partsText, out acceText, out commonText, out commonTextReboot);
 
-                List<byte[]> files = (new List<byte[]>(cmxIce.groupOneFiles));
-                files.AddRange(cmxIce.groupTwoFiles);
-
-                //Loop through files to get what we need
-                foreach (byte[] file in files)
-                {
-                    if (IceFile.getFileName(file).ToLower().Contains(".cmx"))
-                    {
-                        aquaCMX = ReadCMX(file, aquaCMX);
-                    }
-                }
-
-                cmxIce = null;
-            }
-
-            //Load partsText
-            string partsTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicPartText));
-            string partsTextPathNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicPartText));
-
-            partsText = GetTextConditional(partsTextPath, partsTextPathNA, partsTextName);
-
-            //Load acceText
-            string acceTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicAcceText));
-            string acceTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicAcceText));
-
-            acceText = GetTextConditional(acceTextPath, acceTextPathhNA, acceTextName);
-
-            //Load commonText
-            string commonTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCommon));
-            string commonTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicCommon));
-
-            commonText = GetTextConditional(commonTextPath, commonTextPathhNA, commonTextName);
-
-            //Load faceVariationLua
-            string faceVarPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCharCreate));
-
-            if (File.Exists(faceVarPath))
-            {
-                var strm = new MemoryStream(File.ReadAllBytes(faceVarPath));
-                var fVarIce = IceFile.LoadIceFile(strm);
-                strm.Dispose();
-
-                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
-                files.AddRange(fVarIce.groupTwoFiles);
-
-                //Loop through files to get what we need
-                foreach (byte[] file in files)
-                {
-                    if (IceFile.getFileName(file).ToLower().Contains(faceVarName))
-                    {
-                        faceIds = ReadFaceVariationLua(file);
-                    }
-                }
-
-                fVarIce = null;
-            }
+            faceIds = GetFaceVariationLuaNameDict(pso2_binDir, faceIds);
 
             //Load lac
             string lacPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicLobbyAction));
@@ -885,7 +826,7 @@ namespace AquaModelLibrary
             {
                 //lacTruePath = lacPathRe;
             }
-            if(lacTruePath != null)
+            if (lacTruePath != null)
             {
 
                 var strm = new MemoryStream(File.ReadAllBytes(lacTruePath));
@@ -910,6 +851,7 @@ namespace AquaModelLibrary
             //Since we have an idea of what should be there and what we're interested in parsing out, throw these into a dictionary and go
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             for (int i = 0; i < partsText.text.Count; i++)
             {
                 textByCat.Add(partsText.categoryNames[i], partsText.text[i]);
@@ -929,6 +871,13 @@ namespace AquaModelLibrary
             for (int i = 0; i < commonText.text.Count; i++)
             {
                 commByCat.Add(commonText.categoryNames[i], commonText.text[i]);
+            }
+            if(commonTextReboot != null)
+            {
+                for (int i = 0; i < commonTextReboot.text.Count; i++)
+                {
+                    commRebootByCat.Add(commonTextReboot.categoryNames[i], commonTextReboot.text[i]);
+                }
             }
 
             //---------------------------Parse out costume and body (includes outers and cast bodies)
@@ -1019,16 +968,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + costumeIcon + adjustedId + ".ice");
-                    var iconStr2 = GetFileHash(icon + castPartIcon + adjustedId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += "," + iconStr;
-                    }
-                    else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
-                    {
-                        output += "," + iconStr2;
-                    }
+                    output += "," + GetCostumeOuterIconString(pso2_binDir, id.ToString());
 
                     output += "\n";
                     output = AddBodyExtraFiles(output, reb, pso2_binDir, "_" + typeString, false);
@@ -1047,6 +987,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
+                    string finalIdIcon = ToFive(id);
                     string classic = $"{classicStart}{typeString}{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
@@ -1057,15 +998,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + costumeIcon + finalId + ".ice");
-                    var iconStr2 = GetFileHash(icon + castPartIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += "," + iconStr;
-                    } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
-                    {
-                        output += "," + iconStr2;
-                    }
+                    output += "," + GetCostumeOuterIconString(pso2_binDir, finalIdIcon);
 
                     output += "\n";
                     output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
@@ -1119,12 +1052,12 @@ namespace AquaModelLibrary
             }
             WriteCSV(outputDirectory, "MaleCostumes.csv", outputCostumeMale);
             WriteCSV(outputDirectory, "FemaleCostumes.csv", outputCostumeFemale);
-            WriteCSV(outputDirectory, "MaleOuters.csv", outputOuterMale);
-            WriteCSV(outputDirectory, "FemaleOuters.csv", outputOuterFemale);
+            WriteCSV(outputDirectory, "MaleOuters.csv", outputOuterMale); 
+            WriteCSV(outputDirectory, "FemaleOuters.csv", outputOuterFemale); 
             WriteCSV(outputDirectory, "CastBodies.csv", outputCastBody);
-            WriteCSV(outputDirectory, "CasealBodies.csv", outputCasealBody);
+            WriteCSV(outputDirectory, "CasealBodies.csv", outputCasealBody); 
             WriteCSV(outputDirectory, "MaleNGSOuters.csv", outputNGSOuterMale);
-            WriteCSV(outputDirectory, "FemaleNGSOuters.csv", outputNGSOuterFemale);
+            WriteCSV(outputDirectory, "FemaleNGSOuters.csv", outputNGSOuterFemale); 
             WriteCSV(outputDirectory, "CastNGSBodies.csv", outputNGSCastBody);
             WriteCSV(outputDirectory, "CasealNGSBodies.csv", outputNGSCasealBody);
             //WriteCSV(outputDirectory, "MaleNGSCostumes.csv", outputNGSCostumeMale);
@@ -1133,7 +1066,7 @@ namespace AquaModelLibrary
             {
                 WriteCSV(outputDirectory, "UnknownOutfits.csv", outputUnknownWearables);
             }
-
+            
             //---------------------------Parse out basewear
             StringBuilder outputBasewearMale = new StringBuilder();
             StringBuilder outputBasewearFemale = new StringBuilder();
@@ -1197,7 +1130,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + baseWearIcon + GetIconGender(adjustedId) + adjustedId + ".ice");
+                    var iconStr = GetBasewearIconString(id.ToString());
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1220,6 +1153,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
+                    string finalIdIcon = ToFive(id);
                     string classic = $"{classicStart}bw_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
@@ -1230,7 +1164,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + baseWearIcon + GetIconGender(adjustedId) + finalId + ".ice");
+                    var iconStr = GetBasewearIconString(finalIdIcon);
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1333,8 +1267,7 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + innerwearIcon + GetIconGender(adjustedId) + adjustedId + ".ice");
+                    string iconStr = GetInnerwearIconString(id.ToString());
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1355,6 +1288,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
+                    string finalIdIcon = ToFive(id);
                     string classic = $"{classicStart}iw_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
@@ -1365,7 +1299,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + innerwearIcon + GetIconGender(adjustedId) + finalId + ".ice");
+                    var iconStr = GetInnerwearIconString(finalIdIcon);
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1462,8 +1396,7 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + castPartIcon + castArmIcon + adjustedId + ".ice");
+                    string iconStr = GetCastArmIconString(id.ToString());
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1484,6 +1417,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
+                    string finalIdIcon = ToFive(id);
                     string classic = $"{classicStart}am_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
@@ -1494,7 +1428,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + castPartIcon + castArmIcon + finalId + ".ice");
+                    var iconStr = GetCastArmIconString(finalIdIcon);
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1591,8 +1525,7 @@ namespace AquaModelLibrary
                     {
                         output += ", (Not found)";
                     }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + castPartIcon + castLegIcon + adjustedId + ".ice");
+                    string iconStr = GetCastLegIconString(id.ToString());
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -1613,6 +1546,7 @@ namespace AquaModelLibrary
                 else
                 {
                     string finalId = ToFive(adjustedId);
+                    string finalIdIcon = ToFive(id);
                     string classic = $"{classicStart}lg_{finalId}.ice";
 
                     var classicHash = GetFileHash(classic);
@@ -1623,7 +1557,7 @@ namespace AquaModelLibrary
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + castPartIcon + castLegIcon + finalId + ".ice");
+                    var iconStr = GetCastLegIconString(finalIdIcon);
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -2498,7 +2432,7 @@ namespace AquaModelLibrary
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
                         output += ", (Not found)";
-                    }      
+                    }
                     output += "\n";
 
                 }
@@ -2938,7 +2872,7 @@ namespace AquaModelLibrary
                     conversion += "ac";
                     voiceNum -= 50; //Thanks to Selph!
                     string newVoiceNumStr = voiceNum.ToString();
-                    if(voiceNum < 10)
+                    if (voiceNum < 10)
                     {
                         newVoiceNumStr = "0" + newVoiceNumStr;
                     }
@@ -2981,7 +2915,7 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "CasealVoices.csv", outputCasealVoices);
 
             //---------------------------Parse out Lobby Action files -- in lobby_action_setting.lac within defaa92bd5435c84af0da0302544b811 and common.text in a1d84c3c748cebdb6fc42f66b73d2e57
-            if(lacTruePath != null)
+            if (lacTruePath != null)
             {
                 StringBuilder lobbyActions = new StringBuilder();
                 strNameDicts.Clear();
@@ -3036,7 +2970,7 @@ namespace AquaModelLibrary
                     output += classicHash;
 
                     //Some things apparently don't have reboot versions for some reason.
-                    if(File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootHumanHash.Substring(0, 2) + "\\", rebootHumanHash.Substring(2, rebootHumanHash.Length - 2))))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
                     {
                         output += ", " + rebootHumanHash;
                         output += ", " + rebootCastMalehash;
@@ -3064,8 +2998,6 @@ namespace AquaModelLibrary
                 }
 
                 WriteCSV(outputDirectory, "LobbyActions.csv", lobbyActions);
-
-
             }
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
             StringBuilder outputNGSEars = new StringBuilder();
@@ -3339,6 +3271,234 @@ namespace AquaModelLibrary
             }
             WriteCSV(outputDirectory, "NGSHorns.csv", outputNGSHorns);
 
+            //---------------------------Get Substitute Motion files -- 
+            if (commonTextReboot != null)
+            {
+                List<string> subCatList = new List<string>() { subSwim, subGlide, subJump, subLanding, subMove, subSprint, subIdle };
+                List<StringBuilder> subMotions = new List<StringBuilder>();
+                for(int i = 0; i < subCatList.Count; i++)
+                {
+                    subMotions.Add(new StringBuilder());
+                }
+                Dictionary<string, Dictionary<int, List<string>>> subByCat = GatherSubCategories(commRebootByCat);
+
+                //Substitute motions seem to not have an obvious "control" file clientside. However they only go to 999
+                for (int i = 0; i < 1000; i++)
+                {
+                    for (int cat = 0; cat < subCatList.Count; cat++)
+                    {
+                        //Keep going if this doesn't exist
+                        string humanHash = $"{substituteMotion}{subCatList[cat]}{ToThree(i)}{rebootLAHuman}.ice";
+                        humanHash = GetFileHash(humanHash);
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(humanHash))))
+                        {
+                            continue;
+                        }
+
+                        //These should all exist if humanHash does
+                        string castHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastMale + ".ice"));
+                        string casealHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastFemale + ".ice"));
+                        string figHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootFig + ".ice"));
+
+                        Dictionary<int, List<string>> sub = subByCat[subCatList[cat]];
+                        string output = "";
+                        bool named = false;
+
+                        if (sub.TryGetValue(i, out List<string> dict))
+                        {
+                            named = true;
+                            foreach (string str in dict)
+                            {
+                                output += str + ",";
+                            }
+                        }
+                        else
+                        {
+                            output += ",";
+                        }
+
+                        //Account for lack of a name
+                        if (named == false)
+                        {
+                            output = $"[Unnamed {i}]" + output;
+                        }
+
+                        output += ToThree(i) + ",";
+                        output += ", " + humanHash;
+                        output += ", " + castHash;
+                        output += ", " + casealHash;
+                        output += ", " + figHash;
+
+                        output += "\n";
+
+                        subMotions[cat].Append(output);
+                    }
+                }
+
+                //Write CSVs
+                for (int cat = 0; cat < subCatList.Count; cat++)
+                {
+                    string sub;
+                    switch (subCatList[cat])
+                    {
+                        case "swim_":
+                            sub = "Swim";
+                            break;
+                        case "glide_":
+                            sub = "Glide";
+                            break;
+                        case "jump_":
+                            sub = "Jump";
+                            break;
+                        case "landing_":
+                            sub = "Landing";
+                            break;
+                        case "mov_":
+                            sub = "Run";
+                            break;
+                        case "sprint_":
+                            sub = "PhotonDash";
+                            break;
+                        case "idle_":
+                            sub = "Standby";
+                            break;
+                        default:
+                            throw new Exception();
+                    }
+
+                    WriteCSV(outputDirectory, $"SubstituteMotion{sub}.csv", subMotions[cat]);
+                }
+
+            }
+        }
+
+        public static string GetCastLegIconString(string id)
+        {
+            //Set icon string
+            return GetFileHash(icon + castPartIcon + castLegIcon + id + ".ice");
+        }
+
+        public static string GetCastArmIconString(string id)
+        {
+            //Set icon string
+            return GetFileHash(icon + castPartIcon + castArmIcon + id + ".ice");
+        }
+
+        public static string GetInnerwearIconString(string id)
+        {
+            return GetFileHash(icon + innerwearIcon + GetIconGender(Int32.Parse(id)) + id + ".ice");
+        }
+
+        public static string GetBasewearIconString(string id)
+        {
+            return GetFileHash(icon + basewearIcon + GetIconGender(Int32.Parse(id)) + id + ".ice");
+        }
+
+        public static string GetCostumeOuterIconString(string pso2_binDir, string finalId)
+        {
+            var iconStr = GetFileHash(icon + costumeIcon + finalId + ".ice");
+            var iconStr2 = GetFileHash(icon + castPartIcon + finalId + ".ice");
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+            {
+                return iconStr;
+            }
+            else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
+            {
+                return iconStr2;
+            }
+
+            return "";
+        }
+
+        public static Dictionary<int, string> GetFaceVariationLuaNameDict(string pso2_binDir, Dictionary<int, string> faceIds)
+        {
+            //Load faceVariationLua
+            string faceVarPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCharCreate));
+
+            if (File.Exists(faceVarPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(faceVarPath));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
+                files.AddRange(fVarIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(faceVarName))
+                    {
+                        faceIds = ReadFaceVariationLua(file);
+                    }
+                }
+
+                fVarIce = null;
+            }
+
+            return faceIds;
+        }
+
+        public static void ReadCMXText(string pso2_binDir, out PSO2Text partsText, out PSO2Text acceText, out PSO2Text commonText, out PSO2Text commonTextReboot)
+        {
+            //Load partsText
+            string partsTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicPartText));
+            string partsTextPathNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicPartText));
+
+            partsText = GetTextConditional(partsTextPath, partsTextPathNA, partsTextName);
+
+            //Load acceText
+            string acceTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicAcceText));
+            string acceTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicAcceText));
+
+            acceText = GetTextConditional(acceTextPath, acceTextPathhNA, acceTextName);
+
+            //Load commonText
+            string commonTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCommon));
+            string commonTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicCommon));
+
+            commonText = GetTextConditional(commonTextPath, commonTextPathhNA, commonTextName);
+
+            //Load commonText from reboot
+            if(Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
+            {
+                string commonTextRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(classicCommon)));
+                string commonTextRebootPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(classicCommon)));
+
+                commonTextReboot = GetTextConditional(commonTextRebootPath, commonTextRebootPathhNA, commonTextName);
+            } else
+            {
+                commonTextReboot = null;
+            }
+        }
+
+        public static CharacterMakingIndex ExtractCMX(string pso2_binDir, CharacterMakingIndex aquaCMX = null)
+        {
+            //Load CMX
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
+
+            if (File.Exists(cmxPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
+                var cmxIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(cmxIce.groupOneFiles));
+                files.AddRange(cmxIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(".cmx"))
+                    {
+                        aquaCMX = ReadCMX(file, aquaCMX);
+                    }
+                }
+
+                cmxIce = null;
+            }
+
+            return aquaCMX;
         }
 
         private static string GetIconGender(int id)
@@ -3383,11 +3543,15 @@ namespace AquaModelLibrary
             throw new Exception();
         }
 
-        private static void WriteCSV(string outputDirectory, string fileName, StringBuilder output)
+        private static void WriteCSV(string outputDirectory, string fileName, StringBuilder output, bool nullSB = true)
         {
             if (output.Length != 0)
             {
                 File.WriteAllText(Path.Combine(outputDirectory, fileName), output.ToString());
+            }
+            if(nullSB == true)
+            {
+                output = null;
             }
         }
 
@@ -3445,7 +3609,7 @@ namespace AquaModelLibrary
             return output;
         }
 
-        private static void GatherDictKeys<T>(List<int> masterIdList, Dictionary<int, T>.KeyCollection keys)
+        public static void GatherDictKeys<T>(List<int> masterIdList, Dictionary<int, T>.KeyCollection keys)
         {
             foreach (int key in keys)
             {
@@ -3456,7 +3620,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void GatherTextIds(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, string category, bool firstDictSet)
+        public static void GatherTextIds(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, string category, bool firstDictSet, int subStart = 0, int subStop = -1)
         {
             if(textByCat.ContainsKey(category))
             {
@@ -3501,7 +3665,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void GatherTextIdsStringRef(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<string> masterNameList, List<Dictionary<string, string>> nameDicts, string category, bool firstDictSet)
+        public static void GatherTextIdsStringRef(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<string> masterNameList, List<Dictionary<string, string>> nameDicts, string category, bool firstDictSet)
         {
             for (int sub = 0; sub < textByCat[category].Count; sub++)
             {
@@ -3521,6 +3685,68 @@ namespace AquaModelLibrary
                     }
                 }
             }
+        }
+
+        public static Dictionary<string, Dictionary<int, List<string>>> GatherSubCategories(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat)
+        {
+            Dictionary<string, Dictionary<int, List<string>>> subCats = new Dictionary<string, Dictionary<int, List<string>>>();
+            subCats.Add(subGlide, new Dictionary<int, List<string>>());
+            subCats.Add(subIdle, new Dictionary<int, List<string>>());
+            subCats.Add(subJump, new Dictionary<int, List<string>>());
+            subCats.Add(subLanding, new Dictionary<int, List<string>>());
+            subCats.Add(subMove, new Dictionary<int, List<string>>());
+            subCats.Add(subSprint, new Dictionary<int, List<string>>());
+            subCats.Add(subSwim, new Dictionary<int, List<string>>());
+
+            for(int sub = 0; sub < textByCat["Substitute"].Count; sub++)
+            {
+                foreach (var pair in textByCat["Substitute"][sub])
+                {
+                    var split = pair.name.Split('_');
+                    var id = Int32.Parse(split[2]);
+                    string cat;
+
+                    //Check category of motion and add based on that
+                    switch (split[1])
+                    {
+                        case "Idle":
+                            cat = subIdle;
+                            break;
+                        case "Jump":
+                            cat = subJump;
+                            break;
+                        case "Landing":
+                            cat = subLanding;
+                            break;
+                        case "Move":
+                            cat = subMove;
+                            break;
+                        case "Sprint":
+                            cat = subSprint;
+                            break;
+                        case "Glide":
+                            cat = subGlide;
+                            break;
+                        case "Swim":
+                            cat = subSwim;
+                            break;
+                        default:
+                            MessageBox.Show($"Unknown substitution type: {split[1]} ... halting generation");
+                            throw new Exception();
+                    }
+
+                    if (subCats[cat].ContainsKey(id))
+                    {
+                        subCats[cat][id].Add(pair.str);
+                    }
+                    else
+                    {
+                        subCats[cat][id] = new List<string>() { pair.str };
+                    }
+                }
+            }
+
+            return subCats;
         }
 
         public static Dictionary<int, string> ReadFaceVariationLua(string face_variationFileName)
@@ -3580,6 +3806,22 @@ namespace AquaModelLibrary
             return numString;
         }
 
+        public static string ToThree(string numString)
+        {
+            while (numString.Length < 3)
+            {
+                numString = numString.Insert(0, "0");
+            }
+
+            return numString;
+        }
+
+        public static string ToThree(int num)
+        {
+            string numString = num.ToString();
+            return ToThree(numString);
+        }
+
         public static string GetFileHash(string str)
         {
             if (str == null)
@@ -3588,6 +3830,21 @@ namespace AquaModelLibrary
             }
             byte[] hash = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(new UTF8Encoding().GetBytes(str));
             return BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
+        }
+
+        public static string GetFileDataHash(string fileName)
+        {
+            if (fileName == null)
+            {
+                return "";
+            }
+            byte[] hash = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(File.ReadAllBytes(fileName));
+            return BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
+        }
+
+        public static string GetRebootHash(string fileName)
+        {
+            return fileName.Substring(0, 2) + "\\" + fileName.Substring(2, fileName.Length - 2);
         }
     }
 }

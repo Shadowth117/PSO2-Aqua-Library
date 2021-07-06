@@ -21,8 +21,9 @@ namespace AquaModelLibrary
         public static string icon = $"large_icon/ui_making_";
         public static string lobbyActionStart = $"actor/lobby_action/";
         public static string lobbyActionStartReboot = $"character/motion/lobby_action/";
+        public static string substituteMotion = $"character/motion/substitute_motion/pl_sb_";
 
-        public static string baseWearIcon = $"basewear01_";
+        public static string basewearIcon = $"basewear01_";
         public static string bodyPaintIcon = $"bodypaint01_";
         public static string stickerIcon = $"bodypaint02_";
         public static string costumeIcon = $"costume01_";
@@ -60,6 +61,14 @@ namespace AquaModelLibrary
         public static string rebootLACastMale = "_cam";
         public static string rebootLACastFemale = "_caf";
         public static string rebootFig = "_base";
+
+        public static string subSwim = "swim_";
+        public static string subGlide = "glide_";
+        public static string subJump = "jump_";
+        public static string subLanding = "landing_";
+        public static string subMove = "mov_";
+        public static string subSprint = "sprint_";
+        public static string subIdle = "idle_";
 
         public static string classicCMX = $"character/making/pl_system.ice";
         public static string classicPartText = $"ui_charamake_text.ice";
