@@ -2925,7 +2925,7 @@ namespace AquaModelLibrary
 
                 lobbyActions.AppendLine("Files are layed out as: PSO2File NGSfile NGSCastFile NGSCasealFile NGSFigFile");
                 lobbyActions.AppendLine("NGS Lobby Actions are in win32reboot, unlike most NGS player files");
-                lobbyActions.AppendLine("");
+                lobbyActions.AppendLine("The first two characters of each filename are the folder name");
 
                 for (int i = 0; i < lac.dataBlocks.Count; i++)
                 {
@@ -3365,6 +3365,11 @@ namespace AquaModelLibrary
                         default:
                             throw new Exception();
                     }
+
+
+                    subMotions[cat].Insert(0, "Files are layed out as: NGSHumanfile NGSCastFile NGSCasealFile NGSFigFile\n" +
+                        "Substitute Motions are in win32reboot, unlike most NGS player files\n" +
+                        "The first two characters of each filename are the folder name\n");
 
                     WriteCSV(outputDirectory, $"SubstituteMotion{sub}.csv", subMotions[cat]);
                 }
