@@ -26,6 +26,9 @@ namespace AquaModelTool
             InitializeComponent();
             this.DragEnter += new DragEventHandler(AquaUI_DragEnter);
             this.DragDrop += new DragEventHandler(AquaUI_DragDrop);
+#if !DEBUG
+            debugToolStripMenuItem.Visible = false;        
+#endif
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)

@@ -3323,11 +3323,11 @@ namespace AquaModelLibrary
                             output = $"[Unnamed {i}]" + output;
                         }
 
-                        output += ToThree(i) + ",";
-                        output += ", " + humanHash;
-                        output += ", " + castHash;
-                        output += ", " + casealHash;
-                        output += ", " + figHash;
+                        output += ToThree(i);
+                        output += "," + humanHash;
+                        output += "," + castHash;
+                        output += "," + casealHash;
+                        output += "," + figHash;
 
                         output += "\n";
 
@@ -3369,7 +3369,7 @@ namespace AquaModelLibrary
 
                     subMotions[cat].Insert(0, "Files are layed out as: NGSHumanfile NGSCastFile NGSCasealFile NGSFigFile\n" +
                         "Substitute Motions are in win32reboot, unlike most NGS player files\n" +
-                        "The first two characters of each filename are the folder name\n");
+                        "The first two characters of each filename are the folder name\n\n");
 
                     WriteCSV(outputDirectory, $"SubstituteMotion{sub}.csv", subMotions[cat]);
                 }
@@ -3379,13 +3379,11 @@ namespace AquaModelLibrary
 
         public static string GetCastLegIconString(string id)
         {
-            //Set icon string
             return GetFileHash(icon + castPartIcon + castLegIcon + id + ".ice");
         }
 
         public static string GetCastArmIconString(string id)
         {
-            //Set icon string
             return GetFileHash(icon + castPartIcon + castArmIcon + id + ".ice");
         }
 
