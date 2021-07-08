@@ -3289,16 +3289,17 @@ namespace AquaModelLibrary
                     {
                         //Keep going if this doesn't exist
                         string humanHash = $"{substituteMotion}{subCatList[cat]}{ToThree(i)}{rebootLAHuman}.ice";
-                        humanHash = GetFileHash(humanHash);
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(humanHash))))
-                        {
-                            continue;
-                        }
 
                         //These should all exist if humanHash does
                         string castHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastMale + ".ice"));
                         string casealHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastFemale + ".ice"));
                         string figHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootFig + ".ice"));
+
+                        humanHash = GetFileHash(humanHash);
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(humanHash))))
+                        {
+                            continue;
+                        }
 
                         Dictionary<int, List<string>> sub = subByCat[subCatList[cat]];
                         string output = "";
