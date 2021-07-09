@@ -3969,7 +3969,7 @@ namespace AquaModelLibrary
             efctCurvOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, aquaEffect[0].efct.efct.curvCount);
             efctEmitOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0x98, aquaEffect[0].efct.efct.emitCount);
 
-            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.efct));
+            outBytes.AddRange(ConvertStruct(aquaEffect[0].efct.efct));
 
             //Write anim
             if (aquaEffect[0].efct.efct.curvCount > 0)
@@ -3986,7 +3986,7 @@ namespace AquaModelLibrary
                 {
                     emitCurvOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, aquaEffect[0].efct.emits[emit].curvs.Count));
                     emitPtclOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0xF0, aquaEffect[0].efct.emits[emit].ptcls.Count));
-                    outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.emits[emit].emit));
+                    outBytes.AddRange(ConvertStruct(aquaEffect[0].efct.emits[emit].emit));
                 }
 
                 //The substructs are written after the set so we follow this here too
@@ -4010,7 +4010,7 @@ namespace AquaModelLibrary
                         {
                             ptclStringOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x140, aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl.ptclStringsOffset));
                             ptclCurvOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x144, aquaEffect[0].efct.emits[emit].ptcls[ptcl].curvs.Count));
-                            outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl));
+                            outBytes.AddRange(ConvertStruct(aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl));
                         }
 
                         //The substructs are written after the set so we follow this here too
@@ -4020,7 +4020,7 @@ namespace AquaModelLibrary
                             if (aquaEffect[0].efct.emits[emit].ptcls[ptcl].ptcl.ptclStringsOffset != 0)
                             {
                                 SetByteListInt(outBytes, ptclStringOffsets[ptcl], outBytes.Count);
-                                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(aquaEffect[0].efct.emits[emit].ptcls[ptcl].strings));
+                                outBytes.AddRange(ConvertStruct(aquaEffect[0].efct.emits[emit].ptcls[ptcl].strings));
                             }
 
                             //Write anim
@@ -4092,7 +4092,7 @@ namespace AquaModelLibrary
 
                 keysOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x18, anim.curvs[i].curv.keysCount));
                 timeOffsets.Add(NOF0Append(nof0PointerLocations, outBytes.Count + 0x20, anim.curvs[i].curv.timeCount));
-                outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(anim.curvs[i].curv));
+                outBytes.AddRange(ConvertStruct(anim.curvs[i].curv));
             }
             AlignWriter(outBytes, 0x10);
 
@@ -4107,7 +4107,7 @@ namespace AquaModelLibrary
                     for (int key = 0; key < anim.curvs[i].keys.Count; key++)
                     {
                         times.Add(anim.curvs[i].keys[key].time);
-                        outBytes.AddRange(Reloaded.Memory.Struct.GetBytes(anim.curvs[i].keys[key]));
+                        outBytes.AddRange(ConvertStruct(anim.curvs[i].keys[key]));
                     }
                 }
                 AlignWriter(outBytes, 0x10);

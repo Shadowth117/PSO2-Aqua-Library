@@ -869,12 +869,25 @@ namespace AquaModelLibrary
                           model.vtxlList[vsetIndex].vertPositions[(int)face.Y],
                           model.vtxlList[vsetIndex].vertPositions[(int)face.Z]
                         };
-                    List<Vector2> uvs = new List<Vector2>()
+                    List<Vector2> uvs;
+                    if (model.vtxlList[vsetIndex].uv1List.Count > 0)
+                    {
+                        uvs = new List<Vector2>()
                         {
                           new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.X].X, uvSign * model.vtxlList[vsetIndex].uv1List[(int)face.X].Y),
                           new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.Y].X, uvSign * model.vtxlList[vsetIndex].uv1List[(int)face.Y].Y),
                           new Vector2(model.vtxlList[vsetIndex].uv1List[(int)face.Z].X, uvSign * model.vtxlList[vsetIndex].uv1List[(int)face.Z].Y)
                         };
+                    }
+                    else
+                    {
+                        uvs = new List<Vector2>()
+                        {
+                            new Vector2(0, 0),
+                            new Vector2(0, 0),
+                            new Vector2(0, 0)
+                        };
+                    }
 
                     Vector3 dV1 = verts[0] - verts[1];
                     Vector3 dV2 = verts[0] - verts[2];
