@@ -232,7 +232,7 @@ namespace AquaModelLibrary
                     {
                         AquaObject.VTXL vtxl = new AquaObject.VTXL();
                         ReadVTXL(streamReader, model.vtxeList[model.vsetList[vset].vtxeCount], vtxl, model.vsetList[vset].vtxlCount,
-                            model.vtxeList[model.vsetList[vset].vtxeCount].vertDataTypes.Count, model.vsetList[vset].vertDataSize);
+                            model.vtxeList[model.vsetList[vset].vtxeCount].vertDataTypes.Count, model.objc.largetsVtxl);
                         vtxl.edgeVerts = edgeVertsTemp[vset];
                         model.vtxlList.Add(vtxl);
                     }
@@ -977,6 +977,7 @@ namespace AquaModelLibrary
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
                     if (useRigid == false)
                     {
+                        outModel = matModelSplit;
                         //BatchSplitByBoneCount(matModelSplit, outModel, 255);
                         //RemoveAllUnusedBones(outModel);
                         GenerateGlobalBonePalette(outModel);
@@ -1058,7 +1059,6 @@ namespace AquaModelLibrary
                         }
 
                         AquaObject.VSET vset = new AquaObject.VSET();
-                        vset.vertDataSize = size;
                         vset.vtxeCount = outModel.vtxeList.Count -  1;
                         vset.vtxlCount = outModel.vtxlList[i].vertPositions.Count;
                         vset.vtxlStartVert = vertCounter;
@@ -1074,6 +1074,14 @@ namespace AquaModelLibrary
                         }
                         vset.edgeVertsCount = outModel.vtxlList[i].edgeVerts.Count;
                         outModel.vsetList.Add(vset);
+                    }
+
+                    //Set sizes based on VTXE results
+                    for(int i = 0; i < outModel.vsetList.Count; i++)
+                    {
+                        var vset = outModel.vsetList[i];
+                        vset.vertDataSize = largestVertSize;
+                        outModel.vsetList[i] = vset;
                     }
 
                     //Generate OBJC
@@ -3218,7 +3226,7 @@ namespace AquaModelLibrary
         //tcbModel components should be written before this
         public void WriteCollision(string outFilename)
         {
-            int offset = 0x20;
+            //int offset = 0x20; Needed for NXSMesh part
             TCBTerrainConvex tcbModel = tcbModels[0];
             List<byte> outBytes = new List<byte>();
 

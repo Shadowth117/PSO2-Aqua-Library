@@ -24,7 +24,7 @@ namespace AquaModelLibrary
                 //Set up a new VTXL based on an existing sample in order to figure optimize a bit for later.
                 //For the sake of simplicity, we assume that vertex IDs for this start from 0 and end at the vertex count - 1. 
                 VTXL vtxl = new VTXL(model.tempTris[mesh].vertCount, model.tempTris[mesh].faceVerts[0]);
-                bool[] vtxlCheck = new bool[model.tempTris[mesh].vertCount];
+                List<bool> vtxlCheck = new List<bool>(new bool[model.tempTris[mesh].vertCount]);
 
                 //Set up classic bone palette
                 for(int b = 0; b < model.tempTris[mesh].bonePalette.Count; b++)
@@ -38,6 +38,13 @@ namespace AquaModelLibrary
                     for(int faceVert = 0; faceVert < 3; faceVert++)
                     {
                         int vertIndex = model.tempTris[mesh].faceVerts[face].rawVertId[faceVert];
+
+                        //Handle if for whatever reason we have more vertices than expected
+                        if(vertIndex > vtxlCheck.Count - 1)
+                        {
+                            vtxlCheck.AddRange(new bool[vertIndex - (vtxlCheck.Count - 1)]);
+                            vtxl.AddRange(vertIndex - (vtxlCheck.Count - 1), vtxl);
+                        }
                         if (vtxlCheck[vertIndex] == true && !IsSameVertex(vtxl, vertIndex, model.tempTris[mesh].faceVerts[face], faceVert))
                         {
                             //If this really needs to be split to a new vertex, add it to the end of the new VTXL list

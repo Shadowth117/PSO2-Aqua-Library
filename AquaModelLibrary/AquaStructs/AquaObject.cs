@@ -1092,6 +1092,97 @@ namespace AquaModelLibrary
                 return vec4;
             }
 
+            public void AddRange(int vertCount, VTXL modelVtxl)
+            {
+                vertPositions.AddRange(new Vector3[vertCount]); //Any vert should honestly have this if it's a proper vertex.
+                if (modelVtxl.vertNormals.Count > 0)
+                {
+                    vertNormals.AddRange(new Vector3[vertCount]);
+                }
+                if (modelVtxl.vertNormalsNGS.Count > 0)
+                {
+                    vertNormalsNGS.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.vertColors.Count > 0)
+                {
+                    vertColors.AddRange(new byte[vertCount][]);
+                }
+                if (modelVtxl.vertColor2s.Count > 0)
+                {
+                    vertColor2s.AddRange(new byte[vertCount][]);
+                }
+                if (modelVtxl.uv1List.Count > 0)
+                {
+                    uv1List.AddRange(new Vector2[vertCount]);
+                }
+                if (modelVtxl.uv1ListNGS.Count > 0)
+                {
+                    uv1ListNGS.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.uv2ListNGS.Count > 0)
+                {
+                    uv2ListNGS.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.uv3ListNGS.Count > 0)
+                {
+                    uv3ListNGS.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.uv4ListNGS.Count > 0)
+                {
+                    uv4ListNGS.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.uv2List.Count > 0)
+                {
+                    uv2List.AddRange(new Vector2[vertCount]);
+                }
+                if (modelVtxl.uv3List.Count > 0)
+                {
+                    uv3List.AddRange(new Vector2[vertCount]);
+                }
+                if (modelVtxl.uv4List.Count > 0)
+                {
+                    uv4List.AddRange(new Vector2[vertCount]);
+                }
+                if (modelVtxl.vert0x22.Count > 0)
+                {
+                    vert0x22.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.vert0x23.Count > 0)
+                {
+                    vert0x23.AddRange(new short[vertCount][]);
+                }
+
+                //These can... potentially be mutually exclusive, but the use cases for that are kind of limited and I don't and am not interested in handling them.
+                if (modelVtxl.rawVertWeights.Count > 0)
+                {
+                    for (int i = rawVertWeights.Count; i < vertCount; i++)
+                    {
+                        rawVertWeights.Add(new List<float>());
+                        rawVertWeightIds.Add(new List<int>());
+                    }
+                }
+                else if (modelVtxl.vertWeights.Count > 0)
+                {
+                    int start = vertWeights.Count;
+                    vertWeights.AddRange(new Vector4[vertCount]);
+                    vertWeightIndices.AddRange(new byte[vertCount][]);
+                    for (int i = start; i < vertCount; i++)
+                    {
+                        vertWeightIndices[i] = new byte[4];
+                    }
+                }
+                if (modelVtxl.vertWeightsNGS.Count > 0)
+                {
+                    int start = vertWeightsNGS.Count;
+                    vertWeightsNGS.AddRange(new ushort[vertCount][]);
+                    for (int i = start; i < vertCount; i++)
+                    {
+                        vertWeightsNGS[i] = new ushort[4];
+                    }
+                }
+
+            }
+
         }
 
         public class stripData
