@@ -397,6 +397,53 @@ namespace AquaModelTool
             }
         }
 
+        private void convertTxtToPSO2TextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a .txt file (Must follow parsed pso2 .text formatting)",
+                Filter = "txt (*.txt) Files|*.txt",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                ConvertTxtFiles(openFileDialog.FileNames);
+            }
+        }
+
+        private void ConvertTxtFiles(string[] fileNames)
+        {
+            foreach (var fileName in fileNames)
+            {
+                AquaUtil.ConvertPSO2Text(fileName.Split('.')[0] + ".text", fileName);
+            }
+        }
+        private void parsePSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select pso2 .text folder",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                DumpTextFiles(Directory.GetFiles(goodFolderDialog.FileName, "*.text"));
+            }
+        }
+        private void convertTxtToPSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select .txt folder",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                ConvertTxtFiles(Directory.GetFiles(goodFolderDialog.FileName, "*.txt"));
+            }
+        }
+
         private void readBonesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -926,20 +973,6 @@ namespace AquaModelTool
 
             aquaUI.aqua.aquaModels.Clear();
         }
-
-        private void parsePSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
-            {
-                IsFolderPicker = true,
-                Title = "Select pso2_bin",
-            };
-            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                DumpTextFiles(Directory.GetFiles(goodFolderDialog.FileName, "*.text"));
-            }
-        }
-
         private void computeTangentSpaceTestToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AquaObjectMethods.ComputeTangentSpace(aquaUI.aqua.aquaModels[0].models[0], false, true);

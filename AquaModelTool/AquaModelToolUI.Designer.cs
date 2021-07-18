@@ -55,9 +55,11 @@
             this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testVTXEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.testVTXEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertTxtToPSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -144,6 +146,8 @@
             this.pSOnrelTotrpToolStripMenuItem,
             this.parsePSO2TextToolStripMenuItem,
             this.parsePSO2TextFolderSelectToolStripMenuItem,
+            this.convertTxtToPSO2TextToolStripMenuItem,
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem,
             this.parseVTBFToTextToolStripMenuItem,
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
             this.legacyAqp2objObjExportToolStripMenuItem,
@@ -277,6 +281,13 @@
             this.cloneBoneTransformsToolStripMenuItem.Text = "Clone Bone Transforms";
             this.cloneBoneTransformsToolStripMenuItem.Click += new System.EventHandler(this.cloneBoneTransformsToolStripMenuItem_Click);
             // 
+            // testVTXEToolStripMenuItem
+            // 
+            this.testVTXEToolStripMenuItem.Name = "testVTXEToolStripMenuItem";
+            this.testVTXEToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.testVTXEToolStripMenuItem.Text = "TestVTXE";
+            this.testVTXEToolStripMenuItem.Click += new System.EventHandler(this.testVTXEToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -295,12 +306,19 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // testVTXEToolStripMenuItem
+            // convertTxtToPSO2TextToolStripMenuItem
             // 
-            this.testVTXEToolStripMenuItem.Name = "testVTXEToolStripMenuItem";
-            this.testVTXEToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.testVTXEToolStripMenuItem.Text = "TestVTXE";
-            this.testVTXEToolStripMenuItem.Click += new System.EventHandler(this.testVTXEToolStripMenuItem_Click);
+            this.convertTxtToPSO2TextToolStripMenuItem.Name = "convertTxtToPSO2TextToolStripMenuItem";
+            this.convertTxtToPSO2TextToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.convertTxtToPSO2TextToolStripMenuItem.Text = "Convert txt to PSO2 Text";
+            this.convertTxtToPSO2TextToolStripMenuItem.Click += new System.EventHandler(this.convertTxtToPSO2TextToolStripMenuItem_Click);
+            // 
+            // convertTxtToPSO2TextFolderSelectToolStripMenuItem
+            // 
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Name = "convertTxtToPSO2TextFolderSelectToolStripMenuItem";
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Text = "Convert txt to PSO2 Text (Folder Select)";
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.convertTxtToPSO2TextFolderSelectToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -353,6 +371,8 @@
         private System.Windows.Forms.ToolStripMenuItem legacyAqp2objObjExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem legacyAqp2objObjImportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testVTXEToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertTxtToPSO2TextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertTxtToPSO2TextFolderSelectToolStripMenuItem;
     }
 }
 

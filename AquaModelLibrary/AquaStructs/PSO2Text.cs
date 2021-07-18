@@ -22,6 +22,7 @@ namespace AquaModelLibrary
         {
             public int address;
             public textPair text;
+            public int category;
         }
 
         public struct textLocation

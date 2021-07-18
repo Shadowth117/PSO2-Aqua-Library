@@ -216,7 +216,7 @@ namespace AquaModelLibrary
 
                             if(line[0][line[0].Length - 1] == ' ')
                             {
-                                pair.name = line[0].Substring(0, line[0].Length - 2); //Get rid of the space
+                                pair.name = line[0].Substring(0, line[0].Length - 1); //Get rid of the space
                             }
 
                             string schrodingersSpace = "";
@@ -250,14 +250,17 @@ namespace AquaModelLibrary
             List<byte> outBytes = new List<byte>();
             List<PSO2Text.textPairLocation> textPairs = new List<PSO2Text.textPairLocation>();
             List<PSO2Text.textLocation> texts = new List<PSO2Text.textLocation>();
+            List<Dictionary<string, int>> namePointers = new List<Dictionary<string, int>>();
             List<List<int>> textAddresses = new List<List<int>>();
+            List<int> subCategoryAddress = new List<int>();
+            List<List<int>> subCategoryNullAddresses = new List<List<int>>();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
             
             //REL0
             outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
             rel0SizeOffset = outBytes.Count; //We'll fill this later
             outBytes.AddRange(BitConverter.GetBytes(0));
-            outBytes.AddRange(BitConverter.GetBytes(0x14));
+            outBytes.AddRange(BitConverter.GetBytes(0));
             outBytes.AddRange(BitConverter.GetBytes(0));
 
             outBytes.AddRange(BitConverter.GetBytes(-1));
@@ -266,6 +269,7 @@ namespace AquaModelLibrary
             //Iterate through each category
             for(int cat = 0; cat < pso2Text.text.Count; cat++)
             {
+                namePointers.Add(new Dictionary<string, int>());
                 textAddresses.Add(new List<int>());
                 for(int sub = 0; sub < pso2Text.text[cat].Count; sub++)
                 {
@@ -274,9 +278,13 @@ namespace AquaModelLibrary
 
                     for(int pair = 0; pair < pso2Text.text[cat][sub].Count; pair++)
                     {
+                        NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                        NOF0Append(nof0PointerLocations, outBytes.Count + 4, 1);
                         var pairLoc = new PSO2Text.textPairLocation();
                         pairLoc.address = outBytes.Count;
                         pairLoc.text = pso2Text.text[cat][sub][pair];
+                        pairLoc.category = cat;
+                        textPairs.Add(pairLoc);
 
                         //Add in placeholder values to fill later
                         outBytes.AddRange(new byte[8]);
@@ -285,20 +293,145 @@ namespace AquaModelLibrary
             }
 
             //Write the subcategory data
+            for (int cat = 0; cat < pso2Text.text.Count; cat++)
+            {
+                subCategoryAddress.Add(outBytes.Count);
+                for (int sub = 0; sub < pso2Text.text[cat].Count; sub++)
+                {
+                    NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                    if (subCategoryNullAddresses.Count - 1 < sub)
+                    {
+                        subCategoryNullAddresses.Add(new List<int>());
+                    }
+
+                    if(pso2Text.text[cat][sub].Count > 0)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(textAddresses[cat][sub]));
+                    } else
+                    {
+                        subCategoryNullAddresses[sub].Add(outBytes.Count);
+                        outBytes.AddRange(BitConverter.GetBytes(0));
+                    }
+                    outBytes.AddRange(BitConverter.GetBytes(sub));
+                    outBytes.AddRange(BitConverter.GetBytes(pso2Text.text[cat][sub].Count));
+                }
+            }
 
             //Write the category data
+            categoryOffset = outBytes.Count;
+            for (int cat = 0; cat < pso2Text.text.Count; cat++)
+            {
+                var categoryName = new PSO2Text.textLocation();
+                categoryName.address = outBytes.Count;
+                categoryName.str = pso2Text.categoryNames[cat];
+                texts.Add(categoryName);
+
+                NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                NOF0Append(nof0PointerLocations, outBytes.Count + 4, 1);
+                outBytes.AddRange(new byte[4]);
+                outBytes.AddRange(BitConverter.GetBytes(subCategoryAddress[cat]));
+                outBytes.AddRange(BitConverter.GetBytes(pso2Text.text[cat].Count));
+            }
 
             //Write header data
+            SetByteListInt(outBytes, rel0SizeOffset + 4, outBytes.Count);
+            NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(categoryOffset));
+            outBytes.AddRange(BitConverter.GetBytes(pso2Text.text.Count));
 
-            //Write main text
+            //Write main text as null terminated strings
+            for(int i = 0; i < textPairs.Count; i++)
+            {
+                //Write the internal name
+                if (namePointers[textPairs[i].category].ContainsKey(textPairs[i].text.name))
+                {
+                    SetByteListInt(outBytes, textPairs[i].address, namePointers[textPairs[i].category][textPairs[i].text.name]);
+                } else
+                {
+                    SetByteListInt(outBytes, textPairs[i].address, outBytes.Count);
+                    namePointers[textPairs[i].category].Add(textPairs[i].text.name, outBytes.Count);
+                    outBytes.AddRange(Encoding.UTF8.GetBytes(textPairs[i].text.name));
+                    outBytes.Add(0);
+                    AlignWriter(outBytes, 0x4);
+                }
+
+                //Write the text
+                SetByteListInt(outBytes, textPairs[i].address + 4, outBytes.Count);
+                outBytes.AddRange(Encoding.Unicode.GetBytes(textPairs[i].text.str));
+                outBytes.AddRange(BitConverter.GetBytes((ushort)0));
+                AlignWriter(outBytes, 0x4);
+            }
 
             //Write category text
+            for (int i = 0; i < texts.Count; i++)
+            {
+                //Write the internal name
+                SetByteListInt(outBytes, texts[i].address, outBytes.Count);
+                outBytes.AddRange(Encoding.UTF8.GetBytes(texts[i].str));
+                outBytes.Add(0);
+                AlignWriter(outBytes, 0x4);
+            }
 
-            //Unknown data? Don't write if it's not needed. May just be debug related. Sometimes pointed to by empty structures
+            //Unknown data? Don't write if it's not needed. May just be debug related. Empty groups/subcategories point here, but it's possible you could direct them to a general 0.
+            //NA .text files seem to write this slightly differently, writing only one of these while JP .text files write one for every category, seemingly.
+            //For the sake of sanity and space, NA's style will be used for custom .text
+            for(int i = 0; i < pso2Text.text[0].Count; i++)
+            {
+                if (pso2Text.text[0][0].Count > 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(i));
+                } else
+                {
+                    for(int groupCounter = 0; groupCounter < subCategoryNullAddresses[i].Count; groupCounter++)
+                    {
+                        SetByteListInt(outBytes, subCategoryNullAddresses[i][groupCounter], outBytes.Count);
+                    }
+                    outBytes.AddRange(BitConverter.GetBytes(0));
+                }
+            }
+            AlignWriter(outBytes, 0x10);
+
+            //Write REL0 Size
+            SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
 
             //Write NOF0
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
 
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += AlignWriter(outBytes, 0x10);
 
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, ConvertStruct(nifl));
+
+            File.WriteAllBytes(outname, outBytes.ToArray());
         }
 
         public static PSO2Text GetTextConditional(string normalPath, string overridePath, string textFileName)
@@ -443,6 +576,64 @@ namespace AquaModelLibrary
                 return text;
             }
             return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+        }
+
+        //Mainly for handling pointer offsets
+        public static int SetByteListInt(List<byte> outBytes, int offset, int value)
+        {
+            if (offset != -1)
+            {
+                var newBytes = BitConverter.GetBytes(value);
+                for (int i = 0; i < 4; i++)
+                {
+                    outBytes[offset + i] = newBytes[i];
+                }
+
+                return value;
+            }
+
+            return -1;
+        }
+
+        public static void AlignReader(BufferedStreamReader streamReader, int align)
+        {
+            //Align to int align
+            while (streamReader.Position() % align > 0)
+            {
+                streamReader.Read<byte>();
+            }
+        }
+
+        public static int AlignWriter(List<byte> outBytes, int align)
+        {
+            //Align to int align
+            int additions = 0;
+            while (outBytes.Count % align > 0)
+            {
+                additions++;
+                outBytes.Add(0);
+            }
+
+            return additions;
+        }
+
+        public static void AlignFileEndWrite(List<byte> outBytes, int align)
+        {
+            if (outBytes.Count % align == 0)
+            {
+                for (int i = 0; i < 0x10; i++)
+                {
+                    outBytes.Add(0);
+                }
+            }
+            else
+            {
+                //Align to 0x10
+                while (outBytes.Count % align > 0)
+                {
+                    outBytes.Add(0);
+                }
+            }
         }
     }
 }

@@ -3509,64 +3509,6 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void AlignReader(BufferedStreamReader streamReader, int align)
-        {
-            //Align to int align
-            while (streamReader.Position() % align > 0)
-            {
-                streamReader.Read<byte>();
-            }
-        }
-
-        public static int AlignWriter(List<byte> outBytes, int align)
-        {
-            //Align to int align
-            int additions = 0;
-            while (outBytes.Count % align > 0)
-            {
-                additions++;
-                outBytes.Add(0);
-            }
-
-            return additions;
-        }
-
-        public static void AlignFileEndWrite(List<byte> outBytes, int align)
-        {
-            if (outBytes.Count % align == 0)
-            {
-                for (int i = 0; i < 0x10; i++)
-                {
-                    outBytes.Add(0);
-                }
-            }
-            else
-            {
-                //Align to 0x10
-                while (outBytes.Count % align > 0)
-                {
-                    outBytes.Add(0);
-                }
-            }
-        }
-
-        //Mainly for handling pointer offsets
-        public static int SetByteListInt(List<byte> outBytes, int offset, int value)
-        {
-            if (offset != -1)
-            {
-                var newBytes = BitConverter.GetBytes(value);
-                for (int i = 0; i < 4; i++)
-                {
-                    outBytes[offset + i] = newBytes[i];
-                }
-
-                return value;
-            }
-
-            return -1;
-        }
-
         public static void AnalyzeVTBF(string fileName)
         {
             using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
@@ -3782,6 +3724,11 @@ namespace AquaModelLibrary
         public void LoadPSO2Text(string fileName)
         {
             aquaText = ReadPSO2Text(fileName);
+        }
+
+        public static void ConvertPSO2Text(string outName, string fileName)
+        {
+            WritePSO2Text(outName, fileName);
         }
 
         public void GenerateCharacterFileList(string pso2_binDir, string outputDirectory)
