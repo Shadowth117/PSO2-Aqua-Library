@@ -105,7 +105,7 @@ namespace AquaModelLibrary
                 for (int sub = 0; sub < subCategoryCount; sub++)
                 {
                     var categoryIndexOffset = streamReader.Read<int>();
-                    var unkValue = streamReader.Read<int>();
+                    var subCategoryId = streamReader.Read<int>();
                     var categoryIndexCount = streamReader.Read<int>();
                     var bookMarkSub = streamReader.Position();
 
@@ -123,7 +123,7 @@ namespace AquaModelLibrary
                         streamReader.Seek(textLoc + offset, SeekOrigin.Begin);
                         pair.str = ReadUTF16String(streamReader, end);
 
-                        txt.text[i][sub].Add(pair);
+                        txt.text[i][subCategoryId].Add(pair);
                         streamReader.Seek(bookmarkLocal, SeekOrigin.Begin);
                     }
                     streamReader.Seek(bookMarkSub, SeekOrigin.Begin);
@@ -161,6 +161,145 @@ namespace AquaModelLibrary
             return txt;
         }
 
+        public static void WritePSO2Text(string outname, string pso2TextTxtFile)
+        {
+            WritePSO2TextNIFL(outname, ReadPSO2TextFromTxt(pso2TextTxtFile));
+        }
+        public static void WritePSO2Text(string outname, PSO2Text pso2Text)
+        {
+            WritePSO2TextNIFL(outname, pso2Text);
+        }
+
+        //Expects somewhat strict formatting, but reads this from a .text file
+        public static PSO2Text ReadPSO2TextFromTxt(string filename)
+        {
+            var lines = File.ReadAllLines(filename);
+            PSO2Text text = new PSO2Text();
+
+            //We start on line 3 to avoid the metadata text
+            if(lines.Length < 4)
+            {
+                return null;
+            }
+            int mode = 0;
+            for(int i = 3; i < lines.Length; i++)
+            {
+                switch (mode)
+                {
+                    case 0: //Category
+                        if (lines[i] == "")
+                        {
+                            return text;
+                        }
+                        text.categoryNames.Add(lines[i]);
+                        text.text.Add(new List<List<PSO2Text.textPair>>());
+                        mode = 1;
+                        break;
+                    case 1: //Group
+                        if (lines[i] == "")
+                        {
+                            mode = 0;
+                        } else if (lines[i].Contains("Group"))
+                        {
+                            text.text[text.text.Count - 1].Add(new List<PSO2Text.textPair>());
+                            mode = 2;
+                        }
+                        break;
+                    case 2: //Text
+                        if(lines[i] == "")
+                        {
+                            mode = 1;
+                        } else if(lines[i].Contains('-'))
+                        {
+                            PSO2Text.textPair pair = new PSO2Text.textPair();
+                            string[] line = lines[i].Split('-');
+
+                            if(line[0][line[0].Length - 1] == ' ')
+                            {
+                                pair.name = line[0].Substring(0, line[0].Length - 2); //Get rid of the space
+                            }
+
+                            string schrodingersSpace = "";
+                            if(line[1][0].ToString() == " ")
+                            {
+                                schrodingersSpace = " ";
+                            }
+                            pair.str = ReplaceFirst(lines[i], line[0] + "-" + schrodingersSpace, ""); //Safely get the next part, in theory.
+
+                            text.text[text.text.Count - 1][text.text[text.text.Count - 1].Count - 1].Add(pair);
+                        }
+                        break;
+                }
+
+            }
+
+            return text;
+        }
+
+        public static void WritePSO2TextNIFL(string outname, PSO2Text pso2Text)
+        {
+            if(pso2Text == null)
+            {
+                return;
+            }
+            List<byte> finalOutBytes = new List<byte>();
+
+            int rel0SizeOffset = 0;
+            int categoryOffset = 0;
+
+            List<byte> outBytes = new List<byte>();
+            List<PSO2Text.textPairLocation> textPairs = new List<PSO2Text.textPairLocation>();
+            List<PSO2Text.textLocation> texts = new List<PSO2Text.textLocation>();
+            List<List<int>> textAddresses = new List<List<int>>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+            
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0x14));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            outBytes.AddRange(BitConverter.GetBytes(-1));
+
+            //Write placeholders for the text pointers
+            //Iterate through each category
+            for(int cat = 0; cat < pso2Text.text.Count; cat++)
+            {
+                textAddresses.Add(new List<int>());
+                for(int sub = 0; sub < pso2Text.text[cat].Count; sub++)
+                {
+                    //Add this for when we write it later
+                    textAddresses[cat].Add(outBytes.Count);
+
+                    for(int pair = 0; pair < pso2Text.text[cat][sub].Count; pair++)
+                    {
+                        var pairLoc = new PSO2Text.textPairLocation();
+                        pairLoc.address = outBytes.Count;
+                        pairLoc.text = pso2Text.text[cat][sub][pair];
+
+                        //Add in placeholder values to fill later
+                        outBytes.AddRange(new byte[8]);
+                    }
+                }
+            }
+
+            //Write the subcategory data
+
+            //Write the category data
+
+            //Write header data
+
+            //Write main text
+
+            //Write category text
+
+            //Unknown data? Don't write if it's not needed. May just be debug related. Sometimes pointed to by empty structures
+
+            //Write NOF0
+
+
+        }
 
         public static PSO2Text GetTextConditional(string normalPath, string overridePath, string textFileName)
         {
@@ -281,6 +420,29 @@ namespace AquaModelLibrary
             }
 
             return lac;
+        }
+
+        public static int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
+        {
+            if (countToCheck < 1)
+            {
+                return -1;
+            }
+            int newAddress = currentOffset - subtractedOffset;
+            nof0.Add(newAddress);
+
+            return newAddress;
+        }
+
+        //https://stackoverflow.com/questions/8809354/replace-first-occurrence-of-pattern-in-a-string
+        public static string ReplaceFirst(string text, string search, string replace)
+        {
+            int pos = text.IndexOf(search);
+            if (pos < 0)
+            {
+                return text;
+            }
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
         }
     }
 }

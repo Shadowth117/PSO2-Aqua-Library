@@ -9,11 +9,24 @@ namespace AquaModelLibrary
     public class PSO2Text : AquaCommon
     {
         public List<string> categoryNames = new List<string>();
-        public List<List<List<PSO2Text.textPair>>> text = new List<List<List<PSO2Text.textPair>>>(); //Category, subCategory, id
+        public List<List<List<textPair>>> text = new List<List<List<textPair>>>(); //Category, subCategory, id
 
         public struct textPair
         {
             public string name;
+            public string str;
+        }
+        
+        //For helping with writing
+        public struct textPairLocation
+        {
+            public int address;
+            public textPair text;
+        }
+
+        public struct textLocation
+        {
+            public int address;
             public string str;
         }
     }
