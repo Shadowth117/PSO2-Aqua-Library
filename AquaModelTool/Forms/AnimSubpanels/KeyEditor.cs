@@ -233,21 +233,21 @@ namespace AquaModelTool
         private void Data1UDChanged(object sender, EventArgs e)
         {
             var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
-            vec.Y = (float)data0UD.Value;
+            vec.Y = (float)data1UD.Value;
             motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
         }
 
         private void Data2UDChanged(object sender, EventArgs e)
         {
             var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
-            vec.Z = (float)data0UD.Value;
+            vec.Z = (float)data2UD.Value;
             motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
         }
 
         private void Data3UDChanged(object sender, EventArgs e)
         {
             var vec = motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId];
-            vec.W = (float)data0UD.Value;
+            vec.W = (float)data3UD.Value;
             motion.motionKeys[keyNodeId].keyData[keyDataId].vector4Keys[keyId] = vec;
         }
 

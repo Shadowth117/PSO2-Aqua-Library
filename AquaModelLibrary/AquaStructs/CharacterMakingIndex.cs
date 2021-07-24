@@ -124,16 +124,22 @@ namespace AquaModelLibrary
 
         public CMXTable cmxTable;
 
-        public class BODYObject
+        public class BaseCMXObject
+        {
+            public int num;
+            public long originalOffset;
+        }
+
+        public class BODYObject : BaseCMXObject
         {
             public BODY body;
-            public PSO2String dataString;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
-            public PSO2String texString4;
-            public PSO2String texString5;
-            public PSO2String texString6;
+            public string dataString;
+            public string texString1;
+            public string texString2;
+            public string texString3;
+            public string texString4;
+            public string texString5;
+            public string texString6;
         }
 
         //Used for BODY, CARM, CLEG, Outer Wear (BODY), BCLN
@@ -154,34 +160,34 @@ namespace AquaModelLibrary
             public int unkInt1;
             public int unkInt2;
 
-            public int int_0xA_0x8;   //0xA, 0x8
+            public int costumeSoundId;   //0xA, 0x8
             public int reference_id;  //0xD, 0x8
             public int fSet0;
             public int fSet1;
 
             public int fSet2;
             public int fSet3;
-            public float flt_0x8;   //0x8, 0xA
-            public float flt_0xB;   //0xB, 0xA
+            public float legLength;   //0x8, 0xA
+            public float float_4C_0xB;   //0xB, 0xA
 
-            public int unkInt3;
-            public float unkFloat0;
-            public float unkFloat1;
-            public float unkFloat2;
+            public int float_50;
+            public float float_54;
+            public float float_58;
+            public float float_5C;
 
-            public float unkFloat3;
-            public int unkInt4;
+            public float float_60;
+            public int int_64;
         }
 
-        public class BBLYObject
+        public class BBLYObject : BaseCMXObject
         {
             public BBLY bbly;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
-            public PSO2String texString5;
+            public string texString4;
+            public string texString5;
         }
 
         //BBLY, BDP1
@@ -212,10 +218,10 @@ namespace AquaModelLibrary
         }
 
         //BDP2(stickers)
-        public class StickerObject
+        public class StickerObject : BaseCMXObject
         {
             public Sticker sticker;
-            public PSO2String texString;
+            public string texString;
         }
 
         public struct Sticker
@@ -225,17 +231,17 @@ namespace AquaModelLibrary
             public int reserve0;
         }
 
-        public class FACEObject
+        public class FACEObject : BaseCMXObject
         {
             public FACE face;
-            public PSO2String dataString;
-            public PSO2String texString1;
-            public PSO2String texString2;
+            public string dataString;
+            public string texString1;
+            public string texString2;
 
-            public PSO2String texString3;
-            public PSO2String texString4;
-            public PSO2String texString5;
-            public PSO2String texString6;
+            public string texString3;
+            public string texString4;
+            public string texString5;
+            public string texString6;
         }
 
         public struct FACE
@@ -271,22 +277,22 @@ namespace AquaModelLibrary
             public int unkInt11;
         }
 
-        public class FCMNObject
+        public class FCMNObject : BaseCMXObject
         {
             public FCMN fcmn;
-            public PSO2String proportionAnim;
-            public PSO2String faceAnim1;
-            public PSO2String faceAnim2;
+            public string proportionAnim;
+            public string faceAnim1;
+            public string faceAnim2;
 
-            public PSO2String faceAnim3;
-            public PSO2String faceAnim4;
-            public PSO2String faceAnim5;
-            public PSO2String faceAnim6;
+            public string faceAnim3;
+            public string faceAnim4;
+            public string faceAnim5;
+            public string faceAnim6;
 
-            public PSO2String faceAnim7;
-            public PSO2String faceAnim8;
-            public PSO2String faceAnim9;
-            public PSO2String faceAnim10;
+            public string faceAnim7;
+            public string faceAnim8;
+            public string faceAnim9;
+            public string faceAnim10;
         }
 
         public struct FCMN
@@ -307,14 +313,14 @@ namespace AquaModelLibrary
             public int faceAnim10Ptr;
         }
 
-        public class NGS_FACEObject
+        public class NGS_FACEObject : BaseCMXObject
         {
             public NGS_FACE ngsFace;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
+            public string texString4;
         }
 
         public struct NGS_FACE
@@ -327,14 +333,14 @@ namespace AquaModelLibrary
             public int texString4Ptr;
         }
 
-        public class FCPObject
+        public class FCPObject : BaseCMXObject
         {
             public FCP fcp;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
+            public string texString4;
         }
 
         public struct FCP
@@ -354,20 +360,20 @@ namespace AquaModelLibrary
             public int unkInt5;
         }
 
-        public class ACCEObject
+        public class ACCEObject : BaseCMXObject
         {
             public ACCE acce;
-            public PSO2String dataString;
-            public PSO2String nodeAttach1;
-            public PSO2String nodeAttach2;
+            public string dataString;
+            public string nodeAttach1;
+            public string nodeAttach2;
 
-            public PSO2String nodeAttach3;
-            public PSO2String nodeAttach4;
-            public PSO2String nodeAttach5;
-            public PSO2String nodeAttach6;
+            public string nodeAttach3;
+            public string nodeAttach4;
+            public string nodeAttach5;
+            public string nodeAttach6;
 
-            public PSO2String nodeAttach7;
-            public PSO2String nodeAttach8;
+            public string nodeAttach7;
+            public string nodeAttach8;
         }
 
         public struct ACCE
@@ -437,15 +443,15 @@ namespace AquaModelLibrary
             public short unkShort13;
         }
 
-        public class EYEObject
+        public class EYEObject : BaseCMXObject
         {
             public EYE eye;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
-            public PSO2String texString5;
+            public string texString4;
+            public string texString5;
         }
 
         public struct EYE
@@ -461,18 +467,18 @@ namespace AquaModelLibrary
             public float unkFloat1;
         }
 
-        public class NGS_EarObject
+        public class NGS_EarObject : BaseCMXObject
         {
             public NGS_Ear ngsEar;
             public NGS_Unk_Substruct subStruct;
 
-            public PSO2String dataString;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string dataString;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
-            public PSO2String texString5;
+            public string texString4;
+            public string texString5;
         }
 
         public struct NGS_Ear
@@ -503,17 +509,17 @@ namespace AquaModelLibrary
             public short unkShort4;
         }
 
-        public class NGS_TeethObject
+        public class NGS_TeethObject : BaseCMXObject
         {
             public NGS_Teeth ngsTeeth;
             public NGS_Unk_Substruct substruct;
 
-            public PSO2String dataString;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string dataString;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
+            public string texString4;
         }
 
         public struct NGS_Teeth
@@ -527,12 +533,12 @@ namespace AquaModelLibrary
             public int texString4Ptr;
         }
 
-        public class NGS_HornObject
+        public class NGS_HornObject : BaseCMXObject
         {
             public NGS_Horn ngsHorn;
             public NGS_Unk_Substruct substruct;
 
-            public PSO2String dataString;
+            public string dataString;
         }
 
         public struct NGS_Horn
@@ -542,17 +548,17 @@ namespace AquaModelLibrary
             public int reserve0;      //Always 0 so far.
         }
 
-        public class NGS_SKINObject
+        public class NGS_SKINObject : BaseCMXObject
         {
             public NGS_Skin ngsSkin;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
-            public PSO2String texString5;
-            public PSO2String texString6;
-            public PSO2String texString7;
+            public string texString4;
+            public string texString5;
+            public string texString6;
+            public string texString7;
         }
 
         public struct NGS_Skin
@@ -576,14 +582,14 @@ namespace AquaModelLibrary
             public byte unkByte3;
         }
 
-        public class EYEBObject
+        public class EYEBObject : BaseCMXObject
         {
             public EYEB eyeb;
-            public PSO2String texString1;
-            public PSO2String texString2;
-            public PSO2String texString3;
+            public string texString1;
+            public string texString2;
+            public string texString3;
 
-            public PSO2String texString4;
+            public string texString4;
         }
 
         //Also for EYEL
@@ -597,19 +603,19 @@ namespace AquaModelLibrary
             public int texString4Ptr;
         }
 
-        public class HAIRObject
+        public class HAIRObject : BaseCMXObject
         {
             public HAIR hair;
-            public PSO2String dataString;
-            public PSO2String texString1;
-            public PSO2String texString2;
+            public string dataString;
+            public string texString1;
+            public string texString2;
 
-            public PSO2String texString3;
-            public PSO2String texString4;
-            public PSO2String texString5;
-            public PSO2String texString6;
+            public string texString3;
+            public string texString4;
+            public string texString5;
+            public string texString6;
 
-            public PSO2String texString7;
+            public string texString7;
         }
 
         public struct HAIR
@@ -670,10 +676,10 @@ namespace AquaModelLibrary
             public short unkShort0;
         }
 
-        public class NIFL_COLObject
+        public class NIFL_COLObject : BaseCMXObject
         {
             public NIFL_COL niflCol;
-            public PSO2String textString;
+            public string textString;
         }
 
         //The color data here seems to be totally different than before so data just won't be compatible with the old format, not that we understood it before.

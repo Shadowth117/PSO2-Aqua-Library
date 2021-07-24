@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZamboniLib", "ZamboniLib\Za
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaAutoRig", "AquaAutoRig\AquaAutoRig.csproj", "{B1AE95F0-1AA7-44F3-87E4-0FAE1EEDC09D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMXPatcher", "CMXPatcher\CMXPatcher.csproj", "{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{B1AE95F0-1AA7-44F3-87E4-0FAE1EEDC09D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1AE95F0-1AA7-44F3-87E4-0FAE1EEDC09D}.Release|x64.ActiveCfg = Release|Any CPU
 		{B1AE95F0-1AA7-44F3-87E4-0FAE1EEDC09D}.Release|x64.Build.0 = Release|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Debug|x64.Build.0 = Debug|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Release|x64.ActiveCfg = Release|Any CPU
+		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

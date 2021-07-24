@@ -415,7 +415,14 @@ namespace AquaModelTool
         {
             foreach (var fileName in fileNames)
             {
-                AquaUtil.ConvertPSO2Text(fileName.Split('.')[0] + ".text", fileName);
+                try
+                {
+                    AquaUtil.ConvertPSO2Text(fileName.Split('.')[0] + ".text", fileName);
+                }
+                catch
+                {
+
+                }
             }
         }
         private void parsePSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)

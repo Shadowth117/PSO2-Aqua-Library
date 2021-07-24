@@ -1919,19 +1919,19 @@ namespace AquaModelLibrary
             BODYObject body = new BODYObject();
             body.body.id = (int)bodyRaw[0][0xFF];
 
-            body.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 0));
-            body.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 1));
-            body.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 2));
-            body.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 3));
-            body.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 4));
-            body.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 5));
+            body.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 0)).GetString();
+            body.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 1)).GetString();
+            body.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 2)).GetString();
+            body.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 3)).GetString();
+            body.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 4)).GetString();
+            body.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 5)).GetString();
             //TexString6 seemingly isn't stored in vtbf? Might correct later if that's not really the case.
 
             body.body.int_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
-            body.body.int_0xA_0x8 = GetObject<int>(bodyRaw[0], 0xA);
+            body.body.costumeSoundId = GetObject<int>(bodyRaw[0], 0xA);
             body.body.reference_id = GetObject<int>(bodyRaw[0], 0xD);
-            body.body.flt_0x8 = GetObject<float>(bodyRaw[0], 0x8);
-            body.body.flt_0xB = GetObject<float>(bodyRaw[0], 0xB);
+            body.body.legLength = GetObject<float>(bodyRaw[0], 0x8);
+            body.body.float_4C_0xB = GetObject<float>(bodyRaw[0], 0xB);
 
             //Todo, handle default junk data added with NIFL
 
@@ -1954,25 +1954,25 @@ namespace AquaModelLibrary
 
             addBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(body.body.id));
 
-            string dataStr = body.dataString.GetString();
+            string dataStr = body.dataString;
             addBytes(outBytes, 0x00, 0x2, (byte)dataStr.Length, Encoding.UTF8.GetBytes(dataStr));
-            string texStr1 = body.texString1.GetString();
+            string texStr1 = body.texString1;
             addBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
-            string texStr2 = body.texString2.GetString();
+            string texStr2 = body.texString2;
             addBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
-            string texStr3 = body.texString3.GetString();
+            string texStr3 = body.texString3;
             addBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
-            string texStr4 = body.texString4.GetString();
+            string texStr4 = body.texString4;
             addBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
-            string texStr5 = body.texString5.GetString();
+            string texStr5 = body.texString5;
             addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
 
-            addBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body.int_0xA_0x8));
-            addBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body.flt_0xB));
+            addBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body.costumeSoundId));
+            addBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body.float_4C_0xB));
             addBytes(outBytes, 0xC, 0x9, BitConverter.GetBytes((int)0));
             addBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
             addBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
-            addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body.flt_0x8));
+            addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body.legLength));
             addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body.int_0x9_0x9));
 
             WriteTagHeader(outBytes, "BODY", 0x0, 0xE);
@@ -1985,10 +1985,10 @@ namespace AquaModelLibrary
             BBLYObject bbly = new BBLYObject();
             bbly.bbly.id = (int)bblyRaw[0][0xFF];
 
-            bbly.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x10));
-            bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11));
-            bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12));
-            bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13));
+            bbly.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x10)).GetString();
+            bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11)).GetString();
+            bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12)).GetString();
+            bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13)).GetString();
 
             //Todo, handle default junk data added with NIFL
 
@@ -2001,15 +2001,15 @@ namespace AquaModelLibrary
 
             addBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(bbly.bbly.id));
 
-            string texStr1 = bbly.texString1.GetString();
+            string texStr1 = bbly.texString1;
             addBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
-            string texStr2 = bbly.texString2.GetString();
+            string texStr2 = bbly.texString2;
             addBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
-            string texStr3 = bbly.texString3.GetString();
+            string texStr3 = bbly.texString3;
             addBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
-            string texStr4 = bbly.texString4.GetString();
+            string texStr4 = bbly.texString4;
             addBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
-            string texStr5 = bbly.texString5.GetString();
+            string texStr5 = bbly.texString5;
             addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
 
             WriteTagHeader(outBytes, "BBLY", 0x0, 0xE);
@@ -2023,10 +2023,10 @@ namespace AquaModelLibrary
             BBLYObject bbly = new BBLYObject();
             bbly.bbly.id = (int)bblyRaw[0][0xFF];
 
-            bbly.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x10));
-            bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11));
-            bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12));
-            bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13));
+            bbly.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x10)).GetString();
+            bbly.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x11)).GetString();
+            bbly.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x12)).GetString();
+            bbly.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bblyRaw[0], 0x13)).GetString();
 
             //Todo, handle default junk data added with NIFL
 
@@ -2038,7 +2038,7 @@ namespace AquaModelLibrary
             StickerObject bdp2 = new StickerObject();
             bdp2.sticker.id = (int)bdp2Raw[0][0xFF];
 
-            bdp2.texString = PSO2String.GeneratePSO2String(GetObject<byte[]>(bdp2Raw[0], 0x20));
+            bdp2.texString = PSO2String.GeneratePSO2String(GetObject<byte[]>(bdp2Raw[0], 0x20)).GetString();
             bdp2.sticker.reserve0 = GetObject<int>(bdp2Raw[0], 0x21);
 
             return bdp2;
@@ -2049,13 +2049,13 @@ namespace AquaModelLibrary
             FACEObject face = new FACEObject();
             face.face.id = (int)faceRaw[0][0xFF];
 
-            face.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x70));
+            face.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x70)).GetString();
             face.face.unkInt3 = GetObject<int>(faceRaw[0], 0x71);
-            face.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x72));
-            face.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x73));
-            face.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x74));
-            face.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x75));
-            face.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x76));
+            face.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x72)).GetString();
+            face.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x73)).GetString();
+            face.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x74)).GetString();
+            face.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x75)).GetString();
+            face.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x76)).GetString();
 
             //0x77 seemingly isn't parsed
             //0x78 seemingly isn't parsed
@@ -2068,8 +2068,8 @@ namespace AquaModelLibrary
         {
             FCMNObject fcmn = new FCMNObject();
             fcmn.fcmn.id = (int)fcmnRaw[0][0xFF];
-            fcmn.proportionAnim = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC0));
-            fcmn.faceAnim1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC1));
+            fcmn.proportionAnim = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC0)).GetString();
+            fcmn.faceAnim1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC1)).GetString();
 
             PSO2String[] faceAnims = new PSO2String[8];
             if(fcmnRaw.Count > 1)
@@ -2079,14 +2079,14 @@ namespace AquaModelLibrary
                     faceAnims[i - 1] = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC1));
                 }
             }
-            fcmn.faceAnim2 = faceAnims[0];
-            fcmn.faceAnim3 = faceAnims[1];
-            fcmn.faceAnim4 = faceAnims[2];
-            fcmn.faceAnim5 = faceAnims[3];
-            fcmn.faceAnim6 = faceAnims[4];
-            fcmn.faceAnim7 = faceAnims[5];
-            fcmn.faceAnim8 = faceAnims[6];
-            fcmn.faceAnim9 = faceAnims[7];
+            fcmn.faceAnim2 = faceAnims[0].GetString();
+            fcmn.faceAnim3 = faceAnims[1].GetString();
+            fcmn.faceAnim4 = faceAnims[2].GetString();
+            fcmn.faceAnim5 = faceAnims[3].GetString();
+            fcmn.faceAnim6 = faceAnims[4].GetString();
+            fcmn.faceAnim7 = faceAnims[5].GetString();
+            fcmn.faceAnim8 = faceAnims[6].GetString();
+            fcmn.faceAnim9 = faceAnims[7].GetString();
 
             return fcmn;
         }
@@ -2096,10 +2096,10 @@ namespace AquaModelLibrary
             FCPObject fcp = new FCPObject();
             fcp.fcp.id = (int)fcp1Raw[0][0xFF];
             
-            fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x80));
-            fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x81));
-            fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x82));
-            fcp.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x83));
+            fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x80)).GetString();
+            fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x81)).GetString();
+            fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x82)).GetString();
+            fcp.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x83)).GetString();
 
             return fcp;
         }
@@ -2109,9 +2109,9 @@ namespace AquaModelLibrary
             FCPObject fcp = new FCPObject();
             fcp.fcp.id = (int)fcp2Raw[0][0xFF];
 
-            fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x90));
-            fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x92));
-            fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x93));
+            fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x90)).GetString();
+            fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x92)).GetString();
+            fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x93)).GetString();
             
             return fcp;
         }
@@ -2121,10 +2121,10 @@ namespace AquaModelLibrary
             EYEObject eye = new EYEObject();
             eye.eye.id = (int)eyeRaw[0][0xFF];
 
-            eye.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x40));
-            eye.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x42));
-            eye.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x43));
-            eye.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x44));
+            eye.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x40)).GetString();
+            eye.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x42)).GetString();
+            eye.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x43)).GetString();
+            eye.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyeRaw[0], 0x44)).GetString();
 
             return eye;
         }
@@ -2134,7 +2134,7 @@ namespace AquaModelLibrary
             EYEBObject eyeb = new EYEBObject();
             eyeb.eyeb.id = (int)eyebRaw[0][0xFF];
 
-            eyeb.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyebRaw[0], 0x50));
+            eyeb.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyebRaw[0], 0x50)).GetString();
 
             return eyeb;
         }
@@ -2144,7 +2144,7 @@ namespace AquaModelLibrary
             EYEBObject eyel = new EYEBObject();
             eyel.eyeb.id = (int)eyelRaw[0][0xFF];
 
-            eyel.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyelRaw[0], 0x60));
+            eyel.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(eyelRaw[0], 0x60)).GetString();
 
             return eyel;
         }
@@ -2154,12 +2154,12 @@ namespace AquaModelLibrary
             HAIRObject hair = new HAIRObject();
             hair.hair.id = (int)hairRaw[0][0xFF];
 
-            hair.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA0));
-            hair.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA1));
-            hair.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA2));
-            hair.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA3));
-            hair.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA4));
-            hair.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA5));
+            hair.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA0)).GetString();
+            hair.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA1)).GetString();
+            hair.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA2)).GetString();
+            hair.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA3)).GetString();
+            hair.texString4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA4)).GetString();
+            hair.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(hairRaw[0], 0xA5)).GetString();
             //A8, A9, and AA don't seem to be stored in the NIFL 
 
             return hair;
@@ -2183,14 +2183,14 @@ namespace AquaModelLibrary
             acce.acce.unkShort_C7 = GetObject<short>(acceRaw[0], 0xC7);
             acce.acce.unkShort_D7 = GetObject<short>(acceRaw[0], 0xD7);
 
-            acce.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF0));
-            acce.nodeAttach1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF1));
-            acce.nodeAttach2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF2));
-            acce.nodeAttach3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF3));
-            acce.nodeAttach4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF4));
-            acce.nodeAttach5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF5));
-            acce.nodeAttach6 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF6));
-            acce.nodeAttach7 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF7));
+            acce.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF0)).GetString();
+            acce.nodeAttach1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF1)).GetString();
+            acce.nodeAttach2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF2)).GetString();
+            acce.nodeAttach3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF3)).GetString();
+            acce.nodeAttach4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF4)).GetString();
+            acce.nodeAttach5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF5)).GetString();
+            acce.nodeAttach6 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF6)).GetString();
+            acce.nodeAttach7 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF7)).GetString();
 
             return acce;
         }
