@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CMXPatcher"
         mc:Ignorable="d"
-        Title="CMX Patcher" Height="286" Width="446">
+        Title="CMX Patcher" Height="179" Width="190">
     <Grid Margin="0,0,0,0" VerticalAlignment="Top">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="133*"/>
@@ -14,12 +14,18 @@
         <Grid Margin="0,0,0,0" Height="18" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <Menu x:Name="menu" Height="18" Margin="0,0,0,0" VerticalAlignment="Top">
                 <MenuItem Header="File">
-                    <MenuItem Header="Open"/>
                     <MenuItem Header="Set pso2_bin directory" Click="SetPSO2Bin"/>
-                    <MenuItem Header="Save As"/>
-                    <MenuItem Header="Close"/>
+                </MenuItem>
+                <MenuItem Name ="ExtractMenu" Header="Extract" IsEnabled="False">
+                    <MenuItem Header="Extract Costume entry" Click="ExtractCostumeEntry"/>
+                    <MenuItem Header="Extract Basewear entry" Click="ExtractBasewearEntry"/>
+                    <MenuItem Header="Extract Outerwear entry" Click="ExtractOuterWearEntry"/>
+                    <MenuItem Header="Extract Cast Arms entry" Click="ExtractCarmEntry"/>
+                    <MenuItem Header="Extract Cast Legs entry" Click="ExtractClegEntry"/>
                 </MenuItem>
             </Menu>
         </Grid>
+        <Button x:Name="patchCmxButton" Content="Patch CMX" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="73" Click="cmxPatchClick"/>
+        <Button x:Name="restoreCmxButton" Content="Restore CMX" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="73" Click="cmxRestoreClick"/>
     </Grid>
 </Window>

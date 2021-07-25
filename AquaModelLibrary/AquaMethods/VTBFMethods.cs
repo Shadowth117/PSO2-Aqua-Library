@@ -1927,7 +1927,7 @@ namespace AquaModelLibrary
             body.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 5)).GetString();
             //TexString6 seemingly isn't stored in vtbf? Might correct later if that's not really the case.
 
-            body.body.int_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
+            body.body.int_24_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
             body.body.costumeSoundId = GetObject<int>(bodyRaw[0], 0xA);
             body.body.reference_id = GetObject<int>(bodyRaw[0], 0xD);
             body.body.legLength = GetObject<float>(bodyRaw[0], 0x8);
@@ -1973,7 +1973,7 @@ namespace AquaModelLibrary
             addBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
             addBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
             addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body.legLength));
-            addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body.int_0x9_0x9));
+            addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body.int_24_0x9_0x9));
 
             WriteTagHeader(outBytes, "BODY", 0x0, 0xE);
 

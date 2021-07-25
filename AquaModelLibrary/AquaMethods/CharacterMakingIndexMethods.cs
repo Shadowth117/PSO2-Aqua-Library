@@ -3408,6 +3408,12 @@ namespace AquaModelLibrary
                 }
 
             }
+
+            //---------------------------Generate General Animation Lists
+            List<StringBuilder> genAnimList = new List<StringBuilder>();
+            //List<StringBuilder> genAnimList = new List<StringBuilder>();
+
+
         }
 
         public static string GetCastLegIconString(string id)

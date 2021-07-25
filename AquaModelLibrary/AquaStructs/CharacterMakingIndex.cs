@@ -155,22 +155,22 @@ namespace AquaModelLibrary
             public int texString5Ptr;
             public int texString6Ptr;
 
-            public int unkInt0;
-            public int int_0x9_0x9;   //0x9, 0x9
-            public int unkInt1;
-            public int unkInt2;
+            public int int_20;
+            public int int_24_0x9_0x9;   //0x9, 0x9
+            public int int_28;
+            public int int_2C;
 
             public int costumeSoundId;   //0xA, 0x8
             public int reference_id;  //0xD, 0x8
-            public int fSet0;
-            public int fSet1;
+            public int int_38;         //Usually -1
+            public int int_3C;         //Usually -1
 
-            public int fSet2;
-            public int fSet3;
+            public int int_40;         //Usually -1
+            public int int_44;         //Usually -1
             public float legLength;   //0x8, 0xA
             public float float_4C_0xB;   //0xB, 0xA
 
-            public int float_50;
+            public float float_50;
             public float float_54;
             public float float_58;
             public float float_5C;
