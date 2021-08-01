@@ -2,15 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using zamboni;
+using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.VTBFMethods;
-using static AquaModelLibrary.AquaMiscMethods;
 
 namespace AquaModelLibrary
 {
@@ -838,6 +836,7 @@ namespace AquaModelLibrary
             PSO2Text commonText = null;
             PSO2Text commonTextReboot = null;
             LobbyActionCommon lac = null;
+            List<int> magIds = null;
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
 
             aquaCMX = ExtractCMX(pso2_binDir, aquaCMX);
@@ -860,7 +859,6 @@ namespace AquaModelLibrary
             }
             if (lacTruePath != null)
             {
-
                 var strm = new MemoryStream(File.ReadAllBytes(lacTruePath));
                 var fVarIce = IceFile.LoadIceFile(strm);
                 strm.Dispose();
@@ -874,6 +872,29 @@ namespace AquaModelLibrary
                     if (IceFile.getFileName(file).ToLower().Contains(lacName))
                     {
                         lac = ReadLAC(file);
+                    }
+                }
+
+                fVarIce = null;
+            }
+
+            //Load mag settings file
+            string mgxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(magSetting));
+            if (File.Exists(mgxPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(mgxPath));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
+                files.AddRange(fVarIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(mgxName))
+                    {
+                        magIds = ReadMGX(file);
                     }
                 }
 
@@ -2956,6 +2977,7 @@ namespace AquaModelLibrary
                 GatherTextIdsStringRef(commByCat, masterNameList, strNameDicts, "LobbyAction", true);
 
                 lobbyActions.AppendLine("Files are layed out as: PSO2File NGSfile NGSCastFile NGSCasealFile NGSFigFile");
+                lobbyActions.AppendLine("There may also be a VFX ice and reboot VFX ice, which will be appended last when applicable");
                 lobbyActions.AppendLine("NGS Lobby Actions are in win32reboot, unlike most NGS player files");
                 lobbyActions.AppendLine("The first two characters of each filename are the folder name");
 
@@ -3008,6 +3030,21 @@ namespace AquaModelLibrary
                         output += ", " + rebootCastMalehash;
                         output += ", " + rebootCastFemaleHash;
                         output += ", " + rebootFigHash;
+                    }
+
+                    //Handle vfx output
+                    var vfxHash = GetFileHash(lobbyActionStart + lac.dataBlocks[i].vfxIce);
+                    var rebootVfxHash = GetFileHash(lobbyActionStartReboot + lac.dataBlocks[i].vfxIce);
+
+                    if (lac.dataBlocks[i].vfxIce != "" && lac.dataBlocks[i].vfxIce != null 
+                        && File.Exists(Path.Combine(pso2_binDir, dataDir, vfxHash)))
+                    {
+                        output += ", " + vfxHash;
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
+                        {
+                            output += ", " + rebootVfxHash;
+                        }
                     }
 
                     if (lac.dataBlocks[i].iceName.Contains("_m.ice"))
@@ -3308,6 +3345,8 @@ namespace AquaModelLibrary
             {
                 List<string> subCatList = new List<string>() { subSwim, subGlide, subJump, subLanding, subMove, subSprint, subIdle };
                 List<StringBuilder> subMotions = new List<StringBuilder>();
+                List<string> subMotionsDebug = new List<string>();
+
                 for(int i = 0; i < subCatList.Count; i++)
                 {
                     subMotions.Add(new StringBuilder());
@@ -3326,6 +3365,13 @@ namespace AquaModelLibrary
                         string castHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastMale + ".ice"));
                         string casealHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastFemale + ".ice"));
                         string figHash = GetFileHash(humanHash.Replace($"{rebootLAHuman}.ice", rebootFig + ".ice"));
+
+#if DEBUG
+                        subMotionsDebug.Add(GetFileHash(humanHash) + " " + humanHash);
+                        subMotionsDebug.Add(castHash + " " + humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastMale + ".ice"));
+                        subMotionsDebug.Add(casealHash + " " + humanHash.Replace($"{rebootLAHuman}.ice", rebootLACastFemale + ".ice"));
+                        subMotionsDebug.Add(figHash + " " + humanHash.Replace($"{rebootLAHuman}.ice", rebootFig + ".ice"));
+#endif
 
                         humanHash = GetFileHash(humanHash);
                         if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(humanHash))))
@@ -3406,14 +3452,248 @@ namespace AquaModelLibrary
 
                     WriteCSV(outputDirectory, $"SubstituteMotion{sub}.csv", subMotions[cat]);
                 }
+#if DEBUG
+               // File.WriteAllLines(Path.Combine(outputDirectory, "motionSubs_md5.txt"), subMotionsDebug);
+#endif
 
             }
 
             //---------------------------Generate General Animation Lists
-            List<StringBuilder> genAnimList = new List<StringBuilder>();
-            //List<StringBuilder> genAnimList = new List<StringBuilder>();
+            var genAnimList = new List<string>();
+            var genAnimListNGS = new List<string>();
+            genAnimListNGS.Add("All files listed will be in win32reboot");
 
+            //Special character anims
+            var loadDollAnims = characterStart + "apc_loaddoll_citizen.ice";
+            var npcAnims = characterStart + "np_npc_object.ice";
+            var supportPartnerAnims = characterStart + "np_support_partner.ice";
+            var npcDelicious = characterStart + "npc_delicious.ice";
+            var tpdAnims = characterStart + "pl_bodel.ice";
+            var plLightLooks = characterStart + "pl_light_looks_basnet.ice";
+            var laconiumAnims = characterStart + "pl_object_rgrs.ice";
+            var playerRideRoidAnims = characterStart + "pl_object_rideroid.ice";
+            var dashPanelAnims = characterStart + "pl_object_dashpanel.ice";
+            var monHunAnim = characterStart + "pl_volcano.ice";
+            var monHunCarve = characterStart + "pl_volcano_pickup.ice";
+            genAnimList.Add("," + loadDollAnims + "," + GetFileHash(loadDollAnims));
+            genAnimList.Add("NPC Anims," + npcAnims + "," + GetFileHash(npcAnims));
+            genAnimList.Add("Support Partner Anims," + supportPartnerAnims + "," + GetFileHash(supportPartnerAnims));
+            genAnimList.Add("," + npcDelicious + "," + GetFileHash(npcDelicious));
+            genAnimList.Add("True Profound Darkness Anims," + tpdAnims + "," + GetFileHash(tpdAnims));
+            genAnimList.Add("," + plLightLooks + "," + GetFileHash(plLightLooks));
+            genAnimList.Add("Laconium Sword Anims," + laconiumAnims + "," + GetFileHash(laconiumAnims));
+            genAnimList.Add("Rideroid Plalyer Anims," + playerRideRoidAnims + "," + GetFileHash(playerRideRoidAnims));
+            genAnimList.Add("Dash Panel Anims," + dashPanelAnims + "," + GetFileHash(dashPanelAnims));
+            genAnimList.Add("Monster Hunter Anim," + monHunAnim + "," + GetFileHash(monHunAnim));
+            genAnimList.Add("Monster Hunter Curve Anim," + monHunCarve + "," + GetFileHash(monHunCarve));
 
+            //Player Anims
+            var plCommon = characterStart + "pl_common";
+            //pl_common.ice is equivalent to the _base anims, but appears without it.
+            genAnimList.Add("," + plCommon + ".ice" + "," + GetFileHash(plCommon + ".ice"));
+            genAnimList.Add("," + plCommon + "_act.ice" + "," + GetFileHash(plCommon + "_act.ice"));
+            genAnimList.Add("," + plCommon + "_caf_cf00.ice" + "," + GetFileHash(plCommon + "_caf_cf00.ice"));
+            genAnimList.Add("," + plCommon + "_caf_cf50.ice" + "," + GetFileHash(plCommon + "_caf_cf50.ice"));
+            genAnimList.Add("," + plCommon + "_cam_cm00.ice" + "," + GetFileHash(plCommon + "_cam_cm00.ice"));
+            genAnimList.Add("," + plCommon + "_cam_cm50.ice" + "," + GetFileHash(plCommon + "_cam_cm50.ice"));
+            genAnimList.Add("," + plCommon + "_std_cf00.ice" + "," + GetFileHash(plCommon + "_std_cf00.ice"));
+            genAnimList.Add("," + plCommon + "_std_cm00.ice" + "," + GetFileHash(plCommon + "_std_cm00.ice"));
+
+            var plBattle = characterStart + "pl_battle";
+            genAnimListNGS.Add("," + characterStart + "np_common_human_reboot.ice" + "," + GetFileHash(characterStart + "np_common_human_reboot.ice"));
+            genAnimListNGS.Add("," + plBattle + ".ice" + "," + GetFileHash(plBattle + ".ice"));
+            genAnimListNGS.Add("," + plBattle + "_sdt.ice" + "," + GetFileHash(plBattle + "_std.ice"));
+            genAnimListNGS.Add("," + plBattle + "_cam.ice" + "," + GetFileHash(plBattle + "_cam.ice"));
+            genAnimListNGS.Add("," + plBattle + "_act.ice" + "," + GetFileHash(plBattle + "_act.ice"));
+            genAnimListNGS.Add("," + plCommon + ".ice" + "," + GetFileHash(plCommon + ".ice"));
+            genAnimListNGS.Add("," + plCommon + "_bti.ice" + "," + GetFileHash(plCommon + "_bti.ice"));
+            genAnimListNGS.Add("," + plCommon + "_cam.ice" + "," + GetFileHash(plCommon + "_cam.ice"));
+            genAnimListNGS.Add("," + plCommon + "_std.ice" + "," + GetFileHash(plCommon + "_std.ice"));
+
+            var wepTypeList = new List<string>() { "compoundbow", "doublesaber", "dualblade", "gunslash", "jetboots", "katana", "knuckle", "launcher", "master_doublesaber",
+            "master_dualblade", "master_wand", "partisan", "poka_compoundbow", "rifle", "rod", "slayer_gunslash", "sword", "takt", "talis", "twindagger", "twinsubmachinegun",
+            "unarmed", "villain_katana", "villain_rifle", "villain_rod", "wand", "wiredlance", "wpnman_sword", "wpnman_talis", "wpnman_twinsubmachinegun"};
+            foreach(var wep in wepTypeList)
+            {
+                string entry = "";
+                if(wep == "poka_compoundbow")
+                {
+                    entry = "(Yes, there is a duplicate PVP weapon among regular character weapons)";
+                }
+                genAnimList.Add(entry + "," + characterStart + "pl_" + wep + "_act.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_act.ice"));
+                genAnimList.Add("," + characterStart + "pl_" + wep + "_base.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_base.ice"));
+                genAnimList.Add("," + characterStart + "pl_" + wep + "_caf.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_caf.ice"));
+                genAnimList.Add("," + characterStart + "pl_" + wep + "_cam.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_cam.ice"));
+                genAnimList.Add("," + characterStart + "pl_" + wep + "_std.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_std.ice"));
+            }
+
+            //PVP Anims
+            var pvpWepList = new List<string>() { "compoundbow", "doublesaber", "dualblade", "gunslash", "jetboots", "katana", "knuckle", "launcher", "partisan", "rifle", "rod",
+                "unarmed", "wand", "wiredlance"};
+            foreach (var wep in wepTypeList)
+            {
+                genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_act.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_act.ice"));
+                genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_base.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_base.ice"));
+                genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_caf.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_caf.ice"));
+                genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_cam.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_cam.ice"));
+                genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_std.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_std.ice"));
+            }
+
+            var wepTypeListNGS = new List<string>() { "compoundbow", "doublesaber", "dualblade", "gunslash", "jetboots", "katana", "knuckle", "launcher",
+                "partisan", "rifle", "rod", "sword", "takt", "talis", "twindagger", "twinsubmachinegun",
+            "unarmed", "wand", "wiredlance"};
+            foreach (var wep in wepTypeListNGS)
+            {
+                //We know most of the list above should be in and probably the same name, but we only want to list them if they exist at present
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_std.ice")))))
+                {
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_act.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_act.ice"));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_base.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_base.ice"));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_cam.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_cam.ice"));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_std.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_std.ice"));
+                }
+            }
+
+            //Write animations later in order to get other anim archives like Dark Blast stuff
+
+            //---------------------------Generate General Player effect List
+            var effOut = new List<string>();
+            var effList = playerEffects;
+
+            foreach(var eff in effList)
+            {
+                string entryStart = "";
+                switch(eff)
+                {
+                    default:
+                        break;
+                }
+                effOut.Add(entryStart + "," + eff + "," + GetFileHash(eff));
+            }
+
+            File.WriteAllLines(Path.Combine(outputDirectory, $"General Character Effects.csv"), effOut);
+
+            //---------------------------Generate Mag list
+
+            if(magIds != null)
+            {
+                var magOut = new List<string>();
+
+                foreach(var id in magIds)
+                {
+                    string names;
+                    if(magNames.ContainsKey(id))
+                    {
+                        names = magNames[id] + ",";
+                    } else
+                    {
+                        names = $",Unknown {id},";
+                    }
+
+                    string mgFileName = magItem + ToFive(id) + ".ice";
+                    string exists = "";
+
+                    if(!File.Exists(Path.Combine(pso2_binDir, dataDir, GetFileHash(mgFileName))))
+                    {
+                        exists = ",(Not found)";
+                    }
+
+                    magOut.Add(names + mgFileName + "," + GetFileHash(mgFileName) + exists);
+                }
+                File.WriteAllLines(Path.Combine(outputDirectory, $"Mags.csv"), magOut);
+            }
+
+            //---------------------------Generate Photon Blast Creature List
+            var pbList = new List<string>();
+            char letter = 'a';
+            for(int i = 0; i < 5; i++)
+            {
+                string pbName = "";
+                switch(i)
+                {
+                    case 0:
+                        pbName = "ヘリクス,Helix,";
+                        break;
+                    case 1:
+                        pbName = "アイアス,Ajax";
+                        break;
+                    case 2:
+                        pbName = "ケートス,Cetus";
+                        break;
+                    case 3:
+                        pbName = "ユリウス,Julius";
+                        break;
+                    case 4:
+                        pbName = "イリオス,Troy/Ilios";
+                        break;
+                    default:
+                        break;
+                }
+                pbList.Add(pbName + GetFileHash(pbCreatures + letter++ + ".ice"));
+            }
+            File.WriteAllLines(Path.Combine(outputDirectory, "PhotonBlastCreatures.csv"), pbList);
+
+            //---------------------------Generate Dark Blast/Vehicle List
+            var dbList = new List<string>();
+            dbList.Add("A.I.S モデル,A.I.S Models," + GetFileHash(db_vehicle + "vc_robot_a.ice"));
+            dbList.Add("A.I.S モーション,A.I.S Animations," + GetFileHash(db_vehicle + "vc_robot.ice"));
+            dbList.Add("A.I.Sヴェガ モデル,A.I.S VEGAModels," + GetFileHash(db_vehicle + "vc_robot_armd_a.ice"));
+            dbList.Add("A.I.Sヴェガ モーション,A.I.S Vega Animations," + GetFileHash(db_vehicle + "vc_robot_armd.ice"));
+            dbList.Add("ライドロイド,Rideroid," + GetFileHash(db_vehicle + "vc_rideroid.ice"));
+            dbList.Add("ダークブラスト　エフェクト,Dark Blast Effect," + GetFileHash(db_vehicle + "dh_effect_common.ice"));
+            for (int i = 1; i < 5; i++)
+            {
+                string dbJP = "";
+                string dbNA = "";
+                string dbInternal = "";
+                switch (i)
+                {
+                    case 1:
+                        dbJP = "エルダー"; 
+                        dbNA = "Elder";
+                        dbInternal = "ak";
+                        break;
+                    case 2:
+                        dbJP = "ルーサー";
+                        dbNA = "Loser";
+                        dbInternal = "te";
+                        break;
+                    case 3:
+                        dbJP = "アプレンティス";
+                        dbNA = "Apprentice";
+                        dbInternal = "de";
+                        break;
+                    case 4:
+                        dbJP = "ダブル"; 
+                        dbNA = "Double/Gemini";
+                        dbInternal = "ma";
+                        break;
+                    default:
+                        break;
+                }
+                genAnimList.Add($"{dbJP} オーラモーション,{dbNA} Aura Animations," + GetFileHash(db_vehicle + $"pl_dh{i}{dbInternal}_ht.ice"));
+                dbList.Add($"{dbJP} トランスフォームエフェクト,{dbNA} Transform Effects," + GetFileHash(db_vehicle + $"dh_se_transform_dh{i}{dbInternal}.ice"));
+                dbList.Add($"{dbJP} モーション,{dbNA} Animations," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}.ice"));
+                dbList.Add($"{dbJP} モデル,{dbNA} Model," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}_a.ice"));
+                dbList.Add($"{dbJP} オーラモデル,{dbNA} Aura Model," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}_ht.ice"));
+                dbList.Add($"{dbJP} LD モデル,{dbNA} Low Detail Model," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}_low.ice"));
+                dbList.Add($"{dbJP} エフェクト,{dbNA} Effects," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}_eff.ice"));
+                dbList.Add($"{dbJP} レベル,{dbNA} Levels," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}_level.ice"));
+            }
+
+            File.WriteAllLines(Path.Combine(outputDirectory, $"General Character Animations NGS.csv"), genAnimListNGS);
+            File.WriteAllLines(Path.Combine(outputDirectory, $"General Character Animations.csv"), genAnimList);
+            File.WriteAllLines(Path.Combine(outputDirectory, "DarkBlasts_DrivableVehicles.csv"), dbList);
+
+            //---------------------------Generate Enemy List
+
+            //---------------------------Generate NGS Enemy List
+
+            //---------------------------Generate Weapon list 
+
+            //---------------------------Generate Unit List
+
+            //---------------------------Generate 
         }
 
         public static string GetCastLegIconString(string id)
@@ -3887,6 +4167,41 @@ namespace AquaModelLibrary
         public static string GetRebootHash(string fileName)
         {
             return fileName.Substring(0, 2) + "\\" + fileName.Substring(2, fileName.Length - 2);
+        }
+
+        public static void DumpLACInfo(string fileName, LobbyActionCommon lac)
+        {
+            var lacInfo = new List<string>();
+
+            for(int i = 0; i < lac.dataBlocks.Count; i++)
+            {
+                var block = lac.dataBlocks[i];
+
+                lacInfo.Add("Block " + i);
+                lacInfo.Add("UnkInt0 -" + block.unkInt0);
+                lacInfo.Add("internalName0 -" + block.internalName0);
+                lacInfo.Add("chatCommand -" + block.chatCommand);
+                lacInfo.Add("internalName1 -" + block.internalName1);
+
+                lacInfo.Add("LobbyActionID -" + block.lobbyActionId);
+                lacInfo.Add("commonReference0 -" + block.commonReference0);
+                lacInfo.Add("commonReference1 -" + block.commonReference1);
+                lacInfo.Add("unkOffsetInt0 -" + block.unkOffsetInt0);
+
+                lacInfo.Add("unkOffsetInt1 -" + block.unkOffsetInt1);
+                lacInfo.Add("unkOffsetInt2 -" + block.unkOffsetInt2);
+                lacInfo.Add("iceName -" + block.iceName);
+                lacInfo.Add("humanAqm -" + block.humanAqm);
+
+                lacInfo.Add("castAqm1 -" + block.castAqm1);
+                lacInfo.Add("castAqm2 -" + block.castAqm2);
+                lacInfo.Add("kmnAqm -" + block.kmnAqm);
+                lacInfo.Add("vfxIce -" + block.vfxIce);
+
+                lacInfo.Add("");
+            }
+
+            File.WriteAllLines(fileName, lacInfo);
         }
     }
 }
