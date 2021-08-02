@@ -3518,7 +3518,7 @@ namespace AquaModelLibrary
                 string entry = "";
                 if(wep == "poka_compoundbow")
                 {
-                    entry = "(Yes, there is a duplicate PVP weapon among regular character weapons)";
+                    entry = "(Yes, there is a duplicate PVP weapon among regular character weapons)\n";
                 }
                 genAnimList.Add(entry + "," + characterStart + "pl_" + wep + "_act.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_act.ice"));
                 genAnimList.Add("," + characterStart + "pl_" + wep + "_base.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_base.ice"));
@@ -3615,16 +3615,16 @@ namespace AquaModelLibrary
                         pbName = "ヘリクス,Helix,";
                         break;
                     case 1:
-                        pbName = "アイアス,Ajax";
+                        pbName = "アイアス,Ajax,";
                         break;
                     case 2:
-                        pbName = "ケートス,Cetus";
+                        pbName = "ケートス,Cetus,";
                         break;
                     case 3:
-                        pbName = "ユリウス,Julius";
+                        pbName = "ユリウス,Julius,";
                         break;
                     case 4:
-                        pbName = "イリオス,Troy/Ilios";
+                        pbName = "イリオス,Troy/Ilios,";
                         break;
                     default:
                         break;

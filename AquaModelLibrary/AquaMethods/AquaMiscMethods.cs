@@ -622,7 +622,7 @@ namespace AquaModelLibrary
                 var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
                 switch (tagType)
                 {
-                    case "DOC":
+                    case "DOC ":
                         break;
                     case "MAGR":
                         mgxIds.Add((int)data[0][0xFF]);

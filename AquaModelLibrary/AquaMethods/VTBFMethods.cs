@@ -92,6 +92,7 @@ namespace AquaModelLibrary
                         }
                         streamReader.Seek(strLen, SeekOrigin.Current);
                         break;
+                    case 0x3: 
                     case 0x4: //byte
                         data = streamReader.Read<byte>();
                         break;
