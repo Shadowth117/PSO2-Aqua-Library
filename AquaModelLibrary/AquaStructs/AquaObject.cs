@@ -1499,7 +1499,7 @@ namespace AquaModelLibrary
                         foreach (int meshId in vsetTracker[key])
                         {
                             Dictionary<int, int> usedVerts = new Dictionary<int, int>();
-                            VSET newVset = new VSET();
+                            VSET newVset = vsetList[key];
                             VTXL newVtxl = new VTXL();
 
                             int counter = 0;
@@ -1531,6 +1531,18 @@ namespace AquaModelLibrary
                         meshList[meshId] = tempMesh;
                     }
                 }
+
+                //Set up VSETs
+                int vertCounter = 0;
+                for(int i = 0; i < newVsetArray.Length; i++)
+                {
+                    VSET vset = newVsetArray[i];
+                    vset.vtxlCount = newVtxlArray[i].vertPositions.Count;
+                    vset.vtxlStartVert = vertCounter;
+                    vertCounter += vset.vtxlCount;
+                    newVsetArray[i] = vset;
+                }
+
                 vsetList = newVsetArray.ToList();
                 vtxlList = newVtxlArray.ToList();
             }
@@ -1559,6 +1571,7 @@ namespace AquaModelLibrary
             return vertCount;
         }
 
+        public abstract AquaObject getShallowCopy();
         /*
         public int getBiggestVertSize()
         {

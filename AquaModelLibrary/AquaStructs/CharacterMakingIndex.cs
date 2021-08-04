@@ -671,6 +671,8 @@ namespace AquaModelLibrary
         public class ACCEObject : BaseCMXObject
         {
             public ACCE acce;
+            public int int_54;
+            public ACCE2 acce2;
             public string dataString;
             public string nodeAttach1;
             public string nodeAttach2;
@@ -707,6 +709,10 @@ namespace AquaModelLibrary
             public int unkInt5;
 
             public int unkInt6;
+        }
+
+        public struct ACCE2
+        {
             public int unkInt7;
             public float unkFloat0;
             public float unkFloat1;

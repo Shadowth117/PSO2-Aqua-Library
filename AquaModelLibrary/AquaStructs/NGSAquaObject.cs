@@ -144,5 +144,48 @@ namespace AquaModelLibrary
 
             return ext;
         }
+
+        public override AquaObject getShallowCopy()
+        {
+            ClassicAquaObject aqp = new ClassicAquaObject();
+            aqp.afp = afp;
+            aqp.objc = objc;
+            aqp.vsetList = vsetList;
+            aqp.vtxeList = vtxeList;
+            aqp.vtxlList = vtxlList;
+            aqp.psetList = psetList;
+            aqp.meshList = meshList;
+            aqp.mateList = mateList;
+            aqp.rendList = rendList;
+            aqp.shadList = shadList;
+            aqp.tstaList = tstaList;
+            aqp.tsetList = tsetList;
+            aqp.texfList = texfList;
+            aqp.unrms = unrms;
+            aqp.strips = strips;
+
+            //*** 0xC33 only
+            aqp.bonePalette = bonePalette;
+
+            //Unclear the purpose of these, but when present they have a smaller count than initial mesh and psets. 
+            aqp.unkStruct1List = unkStruct1List;
+            aqp.mesh2List = mesh2List;
+            aqp.pset2List = pset2List;
+            aqp.strips2 = strips2; //Strip set 2 is from the same array as the first, just split differently, potentially.
+
+            aqp.strips3Lengths = strips3Lengths;
+            aqp.strips3 = strips3;
+            aqp.unkPointArray1 = unkPointArray1; //Noooooooo idea what these are. Count matches the strips3Lengths count
+            aqp.unkPointArray2 = unkPointArray2;
+            //***
+
+            aqp.applyNormalAveraging = applyNormalAveraging;
+
+            //Custom model related data
+            aqp.tempTris = tempTris;
+            aqp.tempMats = tempMats;
+
+            return aqp;
+        }
     }
 }

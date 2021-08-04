@@ -586,9 +586,9 @@ namespace AquaModelLibrary
                 if(readColor)
                 {
                     byte[] color = new byte[4];
-                    color[2] = streamReader.Read<byte>();
-                    color[1] = streamReader.Read<byte>();
                     color[0] = streamReader.Read<byte>();
+                    color[1] = streamReader.Read<byte>();
+                    color[2] = streamReader.Read<byte>();
                     color[3] = streamReader.Read<byte>();
 
                     vtxl.vertColors.Add(color);

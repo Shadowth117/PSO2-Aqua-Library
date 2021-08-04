@@ -466,6 +466,7 @@ namespace AquaModelTool
                 {
                     var bone = aquaUI.aqua.aquaBones[0].nodeList[i];
                     Console.WriteLine($"{bone.boneName.GetString()} {bone.boneShort1.ToString("X")} {bone.boneShort2.ToString("X")}  {bone.eulRot.X.ToString()} {bone.eulRot.Y.ToString()} {bone.eulRot.Z.ToString()} ");
+                    Console.WriteLine((bone.parentId == -1) + "");
                 }
 #endif
             }
@@ -1074,5 +1075,96 @@ namespace AquaModelTool
                 model.vtxeList[i] = AquaObjectMethods.ConstructClassicVTXE(model.vtxlList[i], out int vertSize);
             }
         }
+
+        private void exportModelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string ext = Path.GetExtension(currentFile);
+            //Model saving
+            if (modelExtensions.Contains(ext))
+            {
+                using (var ctx = new Assimp.AssimpContext())
+                {
+                    var formats = ctx.GetSupportedExportFormats();
+                    List<(string ext,string desc)> filterKeys = new List<(string ext,string desc)>();
+                    foreach(var format in formats)
+                    {
+                        filterKeys.Add((format.FileExtension,format.Description));
+                    }
+                    filterKeys.Sort();
+                
+                    SaveFileDialog saveFileDialog;
+                    saveFileDialog = new SaveFileDialog()
+                    {
+                        Title = "Export model file",
+                        Filter = ""
+                    };
+                    string tempFilter = "";
+                    foreach(var fileExt in filterKeys)
+                    {
+                        tempFilter += $"{fileExt.desc} (*.{fileExt.ext})|*.{fileExt.ext}|";
+                    }
+                    tempFilter = tempFilter.Remove(tempFilter.Length - 1, 1);
+                    saveFileDialog.Filter = tempFilter;
+
+                    //Get bone ext
+                    string boneExt = "";
+                    switch(ext)
+                    {
+                        case ".aqo":
+                        case ".aqp":
+                            boneExt = ".aqn";
+                            break;
+                        case ".tro":
+                        case ".trp":
+                            boneExt = ".trn";
+                            break;
+                        default:
+                            break;
+                    }
+                    var bonePath = currentFile.Replace(ext,boneExt);
+                    if (!File.Exists(bonePath))
+                    {
+                        OpenFileDialog openFileDialog = new OpenFileDialog() 
+                        { 
+                            Title = "Select PSO2 bones",
+                            Filter = "PSO2 Bones (*.aqn,*.trn)|*.aqn;*.trn"
+                        };
+                        if(openFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            bonePath = openFileDialog.FileName;
+                        } else
+                        {
+                            MessageBox.Show("Must be able to read bones to export!");
+                            return;
+                        }
+                    }
+                    aquaUI.aqua.aquaBones.Clear();
+                    aquaUI.aqua.ReadBones(bonePath);
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var id = saveFileDialog.FilterIndex - 1;
+                        var scene = ModelExporter.AssimpExport(saveFileDialog.FileName, aquaUI.aqua.aquaModels[0].models[0], aquaUI.aqua.aquaBones[0]);
+                        Assimp.ExportFormatDescription exportFormat = null;
+                        for(int i = 0; i < formats.Length; i++)
+                        {
+                            if(formats[i].Description == filterKeys[id].desc && formats[i].FileExtension == filterKeys[id].ext)
+                            {
+                                exportFormat = formats[i];
+                                break;
+                            }
+                        }
+                        if(exportFormat  == null)
+                        {
+                            return;
+                        }
+
+                        ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
+                    }
+                }
+
+            }
+        }
     }
 }
+

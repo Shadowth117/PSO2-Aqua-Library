@@ -614,6 +614,12 @@ namespace AquaModelLibrary
                 acce.num = i;
                 acce.originalOffset = streamReader.Position();
                 acce.acce = streamReader.Read<ACCE>();
+                //This int was added to the middle of these in the Aug_3_2021 patch
+                if(count >= 5977)
+                {
+                    acce.int_54 = streamReader.Read<int>();
+                }
+                acce.acce2 = streamReader.Read<ACCE2>();
                 long temp = streamReader.Position();
 
                 streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
@@ -645,7 +651,13 @@ namespace AquaModelLibrary
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
-                dict.Add(acce.acce.id, acce); //Set like this so we can access it by id later if we want. 
+                if(!dict.ContainsKey(acce.acce.id))
+                {
+                    dict.Add(acce.acce.id, acce); //Set like this so we can access it by id later if we want. 
+                } else
+                {
+                    Console.WriteLine($"Duplicate acce id: {acce.acce.id}");
+                }
             }
         }
 
@@ -905,25 +917,35 @@ namespace AquaModelLibrary
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            for (int i = 0; i < partsText.text.Count; i++)
+
+            if(partsText != null)
             {
-                textByCat.Add(partsText.categoryNames[i], partsText.text[i]);
-            }
-            for (int i = 0; i < acceText.text.Count; i++)
-            {
-                //Handle dummy decoy entry in old versions
-                if (textByCat.ContainsKey(acceText.categoryNames[i]) && textByCat[acceText.categoryNames[i]][0].Count == 0)
+                for (int i = 0; i < partsText.text.Count; i++)
                 {
-                    textByCat[acceText.categoryNames[i]] = acceText.text[i];
-                }
-                else
-                {
-                    textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
+                    textByCat.Add(partsText.categoryNames[i], partsText.text[i]);
                 }
             }
-            for (int i = 0; i < commonText.text.Count; i++)
+            if(acceText != null)
             {
-                commByCat.Add(commonText.categoryNames[i], commonText.text[i]);
+                for (int i = 0; i < acceText.text.Count; i++)
+                {
+                    //Handle dummy decoy entry in old versions
+                    if (textByCat.ContainsKey(acceText.categoryNames[i]) && textByCat[acceText.categoryNames[i]][0].Count == 0)
+                    {
+                        textByCat[acceText.categoryNames[i]] = acceText.text[i];
+                    }
+                    else
+                    {
+                        textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
+                    }
+                }
+            }
+            if(commonText != null)
+            {
+                for (int i = 0; i < commonText.text.Count; i++)
+                {
+                    commByCat.Add(commonText.categoryNames[i], commonText.text[i]);
+                }
             }
             if(commonTextReboot != null)
             {
