@@ -121,5 +121,11 @@ namespace CMXPatcher
             patcher.InjectCMXMods(true);
             MessageBox.Show("CMX successfully restored.");
         }
+
+        private void cmxDowngradeClick(object sender, RoutedEventArgs e)
+        {
+            patcher.DowngradeCmx();
+            MessageBox.Show("CMX successfully downgraded. Output ice written CMXPatcher BenchmarkCMX subfolder.");
+        }
     }
 }

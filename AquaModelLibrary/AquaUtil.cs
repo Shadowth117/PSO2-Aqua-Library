@@ -4217,14 +4217,6 @@ namespace AquaModelLibrary
             return effect;
         }
 
-        public void ExportToGLTF(string filePath)
-        {
-            var model = aquaModels[0].models[0];
-            var bones = aquaBones[0];
-
-            ToGLTF(filePath, model);
-        }
-
         public void ReadNN(string filePath)
         {
             using (Stream stream = (Stream)new FileStream(filePath, FileMode.Open))

@@ -26,6 +26,7 @@
             </Menu>
         </Grid>
         <Button x:Name="patchCmxButton" Content="Patch CMX" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="73" Click="cmxPatchClick"/>
+        <Button x:Name="downgradeButton" Content="Create benchmark CMX" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Width="133" Click="cmxDowngradeClick" Grid.ColumnSpan="2"/>
         <Button x:Name="restoreCmxButton" Content="Restore CMX" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="73" Click="cmxRestoreClick"/>
     </Grid>
 </Window>

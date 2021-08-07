@@ -582,7 +582,7 @@ namespace AquaModelTool
             };
             if (exportDialog.ShowDialog() == DialogResult.OK)
             {
-                aquaUI.aqua.ExportToGLTF(exportDialog.FileName);
+                //aquaUI.aqua.ExportToGLTF(exportDialog.FileName);
             }
         }
 
@@ -595,7 +595,7 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                ModelExporter.getGLTF(openFileDialog.FileName);
+                //ModelExporter.getGLTF(openFileDialog.FileName);
             }
         }
 

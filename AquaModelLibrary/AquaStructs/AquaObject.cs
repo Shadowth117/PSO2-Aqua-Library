@@ -1471,6 +1471,12 @@ namespace AquaModelLibrary
         //0xC33 variations of the format can recycle vtxl lists for multiple meshes. Neat, but not helpful for conversion purposes.
         public int splitVSETPerMesh()
         {
+            //Return if an invalid type
+            if(!(objc.type > 0xC2A))
+            {
+                return -1;
+            }
+
             bool continueSplitting = false;
             Dictionary<int, List<int>> vsetTracker = new Dictionary<int, List<int>>(); //Key int is a VSET, value is a list of indices for each mesh that uses said VSET
             for(int meshId = 0; meshId < meshList.Count; meshId++)
@@ -1489,6 +1495,7 @@ namespace AquaModelLibrary
             {
                 VSET[] newVsetArray = new VSET[meshList.Count];
                 VTXL[] newVtxlArray = new VTXL[meshList.Count];
+                stripData[] newStripArray = new stripData[meshList.Count];
 
                 //Handle instances in which there are multiple of the same VSET used.
                 //VTXL and VSETs should be cloned and updated as necessary while strips should be updated to match new vertex ids (strips using the same VTXL continue from old Ids, typically)
@@ -1502,6 +1509,13 @@ namespace AquaModelLibrary
                             VSET newVset = vsetList[key];
                             VTXL newVtxl = new VTXL();
 
+                            //Set up strips
+                            stripData strip = new stripData();
+                            strip.format0xC33 = true;
+                            strip.faceGroups = new List<int>(strips[meshId].faceGroups);
+                            strip.triIdCount = strips[meshId].triIdCount;
+                            strip.triStrips = new List<ushort>(strips[meshId].triStrips);
+
                             int counter = 0;
                             for(int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
                             {
@@ -1512,13 +1526,15 @@ namespace AquaModelLibrary
                                     usedVerts.Add(id, counter);
                                     counter++;
                                 }
-                                strips[meshId].triStrips[stripIndex] = (ushort)usedVerts[id];
+                                strip.triStrips[stripIndex] = (ushort)usedVerts[id];
                             }
+
                             var tempMesh = meshList[meshId];
                             tempMesh.vsetIndex = meshId;
                             meshList[meshId] = tempMesh;
                             newVsetArray[meshId] = newVset;
                             newVtxlArray[meshId] = newVtxl;
+                            newStripArray[meshId] = strip;
                         }
                     }
                     else
@@ -1526,6 +1542,7 @@ namespace AquaModelLibrary
                         int meshId = vsetTracker[key][0];
                         newVsetArray[meshId] = vsetList[meshList[meshId].vsetIndex];
                         newVtxlArray[meshId] = vtxlList[meshList[meshId].vsetIndex];
+                        newStripArray[meshId] = strips[meshList[meshId].vsetIndex];
                         var tempMesh = meshList[meshId];
                         tempMesh.vsetIndex = meshId;
                         meshList[meshId] = tempMesh;
@@ -1542,9 +1559,10 @@ namespace AquaModelLibrary
                     vertCounter += vset.vtxlCount;
                     newVsetArray[i] = vset;
                 }
-
+                objc.totalVTXLCount = vertCounter;
                 vsetList = newVsetArray.ToList();
                 vtxlList = newVtxlArray.ToList();
+                strips = newStripArray.ToList();
             }
             objc.vsetCount = vsetList.Count;
 

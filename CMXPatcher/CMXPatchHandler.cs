@@ -17,6 +17,7 @@ namespace CMXPatcher
         public string settingsPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\";
         public string backupPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\BackupCMX\\";
         public string moddedCMXPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\ModdedCMX\\";
+        public string downgradeCMXPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\BenchmarkCMX\\";
         public string modPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Mods\\";
         public string pso2_binDir;
         public IceFile cmxIce;
@@ -120,6 +121,60 @@ namespace CMXPatcher
                     break;
                 }
             }
+        }
+
+        public void DowngradeCmx()
+        {
+            if (readyToMod == false)
+            {
+                MessageBox.Show("Please set all paths properly and attempt this again.");
+            }
+
+            //Reload backup cmx
+            if (File.Exists(backupPath + "\\pl_data_info.cmx"))
+            {
+                cmx = CharacterMakingIndexMethods.ReadCMX(backupPath + "\\pl_data_info.cmx");
+                cmxRaw = File.ReadAllBytes(backupPath + "\\pl_data_info.cmx");
+            }
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, CharacterMakingIndexMethods.GetFileHash(classicCMX));
+            if (File.Exists(cmxPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
+                cmxIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                InjectCmxToIceGroup(cmxIce.groupOneFiles, cmxRaw);
+                InjectCmxToIceGroup(cmxIce.groupTwoFiles, cmxRaw);
+            }
+
+            //ACCE replacement
+            PatchACCE(cmx, cmxRaw);
+
+            //Write ice - We recreate the file in case for some strange reason it was something other than a v4 ice
+            byte[] rawData = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), cmxIce.groupOneFiles, cmxIce.groupTwoFiles).getRawData(false, false);
+
+            try
+            {
+                Directory.CreateDirectory(downgradeCMXPath);
+                File.WriteAllBytes(downgradeCMXPath + CharacterMakingIndexMethods.GetFileHash(classicCMX), rawData);
+            }
+            catch
+            {
+                MessageBox.Show("Unable to write cmx to patcher directory. Check file permissions.");
+            }
+        }
+
+        public byte[] PatchACCE(CharacterMakingIndex cmx, byte[] cmxRaw)
+        {
+            List<byte> acceBytes = new List<byte>();
+            foreach(var acceKey in cmx.accessoryDict.Keys)
+            {
+                acceBytes.AddRange(AquaObjectMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce));
+                acceBytes.AddRange(AquaObjectMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce2));
+            }
+            Array.Copy(acceBytes.ToArray(), 0, cmxRaw, cmx.cmxTable.accessoryAddress, acceBytes.Count);
+
+            return cmxRaw;
         }
 
         public void BackupCMX()

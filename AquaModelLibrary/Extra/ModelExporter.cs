@@ -3,165 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Numerics;
-using SharpGLTF.Schema2;
-using SharpGLTF.Geometry;
-using SharpGLTF.Geometry.VertexTypes;
-using SharpGLTF.Materials;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AquaModelLibrary
 {
     public static class ModelExporter
     {
-        public static void getGLTF(string filePath)
-        {
-            var model = ModelRoot.Load(filePath);
-
-            var a = model;
-        }
-
-        public static void ToGLTF(string filePath, AquaObject model)
-        {
-            var gltfModel = ModelRoot.CreateModel();
-            var scene = gltfModel.UseScene(Path.GetFileName(filePath));
-
-            //gltfModel.
-
-            //Handle NGS models
-            //We can leave this alone, but if we do, we get isolated vertices.
-            if (model.objc.type > 0xC2A)
-            {
-                model.splitVSETPerMesh();
-            }
-
-            var mesh = gltfModel.CreateMeshes(ConvertToGLTFMeshes(model)).First();
-
-            gltfModel.SaveGLB(filePath);
-        }
-
-        public static MeshBuilder<VertexPositionNormal, VertexColor2Texture2, VertexJoints4>[] ConvertToGLTFMeshes(AquaObject model)
-        {
-            var gltfMeshes = new MeshBuilder<VertexPositionNormal, VertexColor2Texture2, VertexJoints4>[model.meshList.Count];
-            for (int i = 0; i < model.meshList.Count; i++)
-            {
-                var gltfMesh = new MeshBuilder<VertexPositionNormal, VertexColor2Texture2, VertexJoints4>();
-
-                var mesh = model.meshList[i];
-                var mate = model.mateList[mesh.mateIndex];
-                var rend = model.rendList[mesh.rendIndex];
-                var shad = model.shadList[mesh.shadIndex];
-                var tris = model.strips[mesh.psetIndex].GetTriangles(true);
-                var vset = model.vsetList[mesh.vsetIndex];
-                var vtxl = model.vtxlList[mesh.vsetIndex];
-
-                string meshName = "mesh" + "[" + i + "]" + "_" + model.meshList[i].mateIndex + "_" + model.meshList[i].rendIndex
-                    + "_" + model.meshList[i].shadIndex + "_" + model.meshList[i].tsetIndex + "@" + mesh.baseMeshNodeId;
-                gltfMesh.Name = meshName;
-
-                var matName = $"({shad.pixelShader.GetString()},{shad.vertexShader.GetString()})"
-                    + "{" + mate.alphaType.GetString() + "}" + $"{mate.matName.GetString()}";
-                var material = new MaterialBuilder(matName).WithDoubleSide(rend.twosided > 0)
-                    .WithAlpha(SharpGLTF.Materials.AlphaMode.BLEND, rend.alphaCutoff).WithChannelParam("BaseColor", mate.diffuseRGBA);
-
-
-                var meshData = gltfMesh.UsePrimitive(material);
-
-                //Gather vertexData
-                var verts = new List<VertexBuilder<VertexPositionNormal, VertexColor2Texture2, VertexJoints4>>();
-                for (int v = 0; v < vtxl.vertPositions.Count; v++)
-                {
-                    IVertexGeometry posNrm;
-                    VertexColor2Texture2 colorUv;
-                    VertexJoints4 weights;
-
-                    //Conditionally combine these attributes
-
-                    //Check for normals
-                    if (vtxl.vertNormals.Count > 0)
-                    {
-                        posNrm = new VertexPositionNormal(vtxl.vertPositions[v], vtxl.vertNormals[v]);
-                    }
-                    else
-                    {
-                        posNrm = new VertexPosition(vtxl.vertPositions[v]);
-                    }
-
-                    //Check vert colors and UVs. Unfortunately, we're limited to 2 of each type here and NGS models may suffer
-                    Vector2 uv1 = new Vector2();
-                    Vector2 uv2 = new Vector2();
-                    Vector4 color = new Vector4();
-                    Vector4 color2 = new Vector4();
-                    if (vtxl.uv1List.Count > 0)
-                    {
-                        uv1 = vtxl.uv1List[v];
-                    }
-                    if (vtxl.uv2List.Count > 0)
-                    {
-                        uv2 = vtxl.uv2List[v];
-                    }
-                    if (vtxl.vertColors.Count > 0)
-                    {
-                        //PSO2 colors are BGRA bytes for vertices
-                        var vc = vtxl.vertColors[v];
-                        color.X = ((float)vc[2]) / 255;
-                        color.Y = ((float)vc[1]) / 255;
-                        color.Z = ((float)vc[0]) / 255;
-                        color.W = ((float)vc[3]) / 255;
-                    }
-                    if (vtxl.vertColor2s.Count > 0)
-                    {
-                        //PSO2 colors are BGRA bytes for vertices
-                        var vc = vtxl.vertColor2s[v];
-                        color2.X = ((float)vc[2]) / 255;
-                        color2.Y = ((float)vc[1]) / 255;
-                        color2.Z = ((float)vc[0]) / 255;
-                        color2.W = ((float)vc[3]) / 255;
-                    }
-                    colorUv = new VertexColor2Texture2(color, color2, uv1, uv2);
-
-                    //Check for weights
-                    var tupleSkin = new List<(int, float)>();
-                    if (vtxl.trueVertWeights.Count > 0)
-                    {
-                        for (int w = 0; w < vtxl.trueVertWeightIndices[v].Length && w < 4; w++)
-                        {
-                            float weight = 0;
-                            switch (w)
-                            {
-                                case 0:
-                                    weight = vtxl.trueVertWeights[v].X;
-                                    break;
-                                case 1:
-                                    weight = vtxl.trueVertWeights[v].Y;
-                                    break;
-                                case 2:
-                                    weight = vtxl.trueVertWeights[v].Z;
-                                    break;
-                                case 3:
-                                    weight = vtxl.trueVertWeights[v].W;
-                                    break;
-                            }
-                            tupleSkin.Add((vtxl.trueVertWeightIndices[v][w], weight));
-                        }
-                    }
-                    weights = new VertexJoints4(tupleSkin.ToArray());
-
-                    var vert = new VertexBuilder<VertexPositionNormal, VertexColor2Texture2, VertexJoints4>(
-                        new VertexPositionNormal(vtxl.vertPositions[v], vtxl.vertNormals[v]), colorUv, weights);
-                    verts.Add(vert);
-                }
-
-                //Set triangles
-                for (var t = 0; t < tris.Count; t++)
-                {
-                    meshData.AddTriangle(verts[(int)tris[t].X], verts[(int)tris[t].Y], verts[(int)tris[t].Z]);
-                }
-                gltfMeshes[i] = gltfMesh;
-            }
-
-            return gltfMeshes;
-        }
-
         public static Assimp.Scene AssimpExport(string filePath, AquaObject aqp, AquaNode aqn)
         {
             if(aqp is NGSAquaObject)
@@ -179,29 +27,41 @@ namespace AquaModelLibrary
 
             //Set up root node
             var root = aqn.nodeList[0];
-            var aiRootNode = new Assimp.Node("({0})" + root.boneName.GetString(), null);
-            aiRootNode.Transform = new Assimp.Matrix4x4(root.m1.X, root.m1.Y, root.m1.Z, root.m1.W,
-                                                         root.m2.X, root.m2.Y, root.m2.Z, root.m2.W,
-                                                         root.m3.X, root.m3.Y, root.m3.Z, root.m3.W,
-                                                         root.m4.X, root.m4.Y, root.m4.Z, root.m4.W);
+            var aiRootNode = new Assimp.Node("RootNode", null);
+            aiRootNode.Transform = Assimp.Matrix4x4.Identity;
 
             aiScene.RootNode = aiRootNode;
-            boneArray[0] = aiRootNode;
 
             //Assign bones
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 var bn = aqn.nodeList[i];
-                if(bn.parentId == -1)
+                Assimp.Node parentNode;
+                var parentTfm = Matrix4x4.Identity;
+                if (bn.parentId == -1)
                 {
-                    continue;
+                    parentNode = aiRootNode;
+                } else
+                {
+                    parentNode = boneArray[bn.parentId];
+                    var pn = aqn.nodeList[bn.parentId];
+                    parentTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
+                                            pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
+                                            pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
+                                            pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
                 }
-                var parentNode = boneArray[bn.parentId];
                 var aiNode = new Assimp.Node($"({i})" + bn.boneName.GetString(), parentNode);
-                aiNode.Transform = new Assimp.Matrix4x4(bn.m1.X, bn.m1.Y, bn.m1.Z, bn.m1.W,
-                                                         bn.m2.X, bn.m2.Y, bn.m2.Z, bn.m2.W,
-                                                         bn.m3.X, bn.m3.Y, bn.m3.Z, bn.m3.W,
-                                                         bn.m4.X, bn.m4.Y, bn.m4.Z, bn.m4.W);
+
+                //Use inverse bind matrix as base
+                var bnMat = new Matrix4x4(bn.m1.X, bn.m1.Y, bn.m1.Z, bn.m1.W,
+                                            bn.m2.X, bn.m2.Y, bn.m2.Z, bn.m2.W,
+                                            bn.m3.X, bn.m3.Y, bn.m3.Z, bn.m3.W,
+                                            bn.m4.X, bn.m4.Y, bn.m4.Z, bn.m4.W);
+                Matrix4x4.Invert(bnMat, out bnMat);
+
+                //Get local transform
+                aiNode.Transform = GetAssimpMat4(bnMat * parentTfm);
+
                 parentNode.Children.Add(aiNode);
                 boneArray[i] = aiNode;
             }
@@ -223,101 +83,91 @@ namespace AquaModelLibrary
 
                 parentNodo.Children.Add(aiNode);
             }
-
+            
             //Assign meshes and materials
             foreach (AquaObject.MESH msh in aqp.meshList)
             {
                 var vtxl = aqp.vtxlList[msh.vsetIndex];
 
                 //Mesh
-                var aiMeshName = string.Format("mesh_{0}_{1}_{2}_{3}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex);
+                var aiMeshName = string.Format("mesh[{4}]_{0}_{1}_{2}_{3}_mesh", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, aiScene.Meshes.Count);
                 bool hasVertexWeights = aqp.vtxlList[msh.vsetIndex].vertWeightIndices.Count > 0;
 
                 var aiMesh = new Assimp.Mesh(aiMeshName, Assimp.PrimitiveType.Triangle);
 
-                //Faces
-                foreach(var face in aqp.strips[msh.psetIndex].GetTriangles(true))
-                {
-                    aiMesh.Faces.Add(new Assimp.Face(new int[] { (int)face.X, (int)face.Y, (int)face.Z }));
-                }
-
                 //Vertex face data - PSO2 Actually doesn't do this, it just has per vertex data so we can just map a vertice's data to each face using it
                 //It may actually be possible to add this to the previous loop, but my reference didn't so I'm doing it in a separate loop for safety
                 //Reference: https://github.com/TGEnigma/Amicitia/blob/master/Source/AmicitiaLibrary/Graphics/RenderWare/RWClumpNode.cs
-                foreach (var face in aqp.strips[msh.psetIndex].GetTriangles(true))
+                for(int vertId = 0; vertId < vtxl.vertPositions.Count; vertId++)
                 {
-                    var faceVerts = new int[] { (int)face.X, (int)face.Y, (int)face.Z};
-                    foreach(var vertId in faceVerts)
+                    if (vtxl.vertPositions.Count > 0)
                     {
-                        if(vtxl.vertPositions.Count > 0)
-                        {
-                            var pos = vtxl.vertPositions[vertId];
-                            aiMesh.Vertices.Add(new Assimp.Vector3D(pos.X, pos.Y, pos.Z));
-                        }
+                        var pos = vtxl.vertPositions[vertId];
+                        aiMesh.Vertices.Add(new Assimp.Vector3D(pos.X, pos.Y, pos.Z));
+                    }
 
-                        if(vtxl.vertNormals.Count > 0)
-                        {
-                            var nrm = vtxl.vertNormals[vertId];
-                            aiMesh.Vertices.Add(new Assimp.Vector3D(nrm.X, nrm.Y, nrm.Z));
-                        }
+                    if (vtxl.vertNormals.Count > 0)
+                    {
+                        var nrm = vtxl.vertNormals[vertId];
+                        aiMesh.Normals.Add(new Assimp.Vector3D(nrm.X, nrm.Y, nrm.Z));
+                    }
 
-                        if (vtxl.vertColors.Count > 0)
-                        {
-                            //Vert colors are bgra
-                            var rawClr = vtxl.vertColors[vertId];
-                            var clr = new Assimp.Color4D(clrToFloat(rawClr[2]), clrToFloat(rawClr[1]), clrToFloat(rawClr[0]), clrToFloat(rawClr[3]));
-                            aiMesh.VertexColorChannels[0].Add(clr);
-                        }
+                    if (vtxl.vertColors.Count > 0)
+                    {
+                        //Vert colors are bgra
+                        var rawClr = vtxl.vertColors[vertId];
+                        var clr = new Assimp.Color4D(clrToFloat(rawClr[2]), clrToFloat(rawClr[1]), clrToFloat(rawClr[0]), clrToFloat(rawClr[3]));
+                        aiMesh.VertexColorChannels[0].Add(clr);
+                    }
 
-                        if (vtxl.vertColor2s.Count > 0)
-                        {
-                            //Vert colors are bgra
-                            var rawClr = vtxl.vertColor2s[vertId];
-                            var clr = new Assimp.Color4D(clrToFloat(rawClr[2]), clrToFloat(rawClr[1]), clrToFloat(rawClr[0]), clrToFloat(rawClr[3]));
-                            aiMesh.VertexColorChannels[1].Add(clr);
-                        }
+                    if (vtxl.vertColor2s.Count > 0)
+                    {
+                        //Vert colors are bgra
+                        var rawClr = vtxl.vertColor2s[vertId];
+                        var clr = new Assimp.Color4D(clrToFloat(rawClr[2]), clrToFloat(rawClr[1]), clrToFloat(rawClr[0]), clrToFloat(rawClr[3]));
+                        aiMesh.VertexColorChannels[1].Add(clr);
+                    }
 
-                        if(vtxl.uv1List.Count > 0)
-                        {
-                            var textureCoordinate = vtxl.uv1List[vertId];
-                            var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
-                            aiMesh.TextureCoordinateChannels[0].Add(aiTextureCoordinate);
-                        }
+                    if (vtxl.uv1List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv1List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
+                        aiMesh.TextureCoordinateChannels[0].Add(aiTextureCoordinate);
+                    }
 
-                        if (vtxl.uv2List.Count > 0)
-                        {
-                            var textureCoordinate = vtxl.uv2List[vertId];
-                            var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
-                            aiMesh.TextureCoordinateChannels[1].Add(aiTextureCoordinate);
-                        }
+                    if (vtxl.uv2List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv2List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
+                        aiMesh.TextureCoordinateChannels[1].Add(aiTextureCoordinate);
+                    }
 
-                        if (vtxl.uv3List.Count > 0)
-                        {
-                            var textureCoordinate = vtxl.uv3List[vertId];
-                            var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
-                            aiMesh.TextureCoordinateChannels[2].Add(aiTextureCoordinate);
-                        }
+                    if (vtxl.uv3List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv3List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
+                        aiMesh.TextureCoordinateChannels[2].Add(aiTextureCoordinate);
+                    }
 
-                        if (vtxl.uv4List.Count > 0)
-                        {
-                            var textureCoordinate = vtxl.uv4List[vertId];
-                            var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
-                            aiMesh.TextureCoordinateChannels[3].Add(aiTextureCoordinate);
-                        }
+                    if (vtxl.uv4List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv4List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
+                        aiMesh.TextureCoordinateChannels[3].Add(aiTextureCoordinate);
+                    }
 
-                        if (vtxl.vert0x22.Count > 0)
-                        {
-                            var textureCoordinate = vtxl.vert0x22[vertId];
-                            var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
-                            aiMesh.TextureCoordinateChannels[4].Add(aiTextureCoordinate);
-                        }
+                    if (vtxl.vert0x22.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.vert0x22[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
+                        aiMesh.TextureCoordinateChannels[4].Add(aiTextureCoordinate);
+                    }
 
-                        if (vtxl.vert0x23.Count > 0)
-                        {
-                            var textureCoordinate = vtxl.vert0x23[vertId];
-                            var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
-                            aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
-                        }
+                    if (vtxl.vert0x23.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.vert0x23[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
+                        aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
                     }
                 }
 
@@ -358,16 +208,17 @@ namespace AquaModelLibrary
                             {
                                 var aiBone = new Assimp.Bone();
                                 var aqnBone = boneArray[bonePalette[boneIndex]];
+                                var rawBone = aqn.nodeList[(int)bonePalette[boneIndex]];
 
                                 aiBone.Name = aqnBone.Name;
                                 aiBone.VertexWeights.Add(new Assimp.VertexWeight(vertId, boneWeight));
 
-                                var transform = new Assimp.Matrix4x4(aqnBone.Transform.A1, aqnBone.Transform.A2, aqnBone.Transform.A3, aqnBone.Transform.A4,
-                                    aqnBone.Transform.B1, aqnBone.Transform.B2, aqnBone.Transform.B3, aqnBone.Transform.B4,
-                                    aqnBone.Transform.C1, aqnBone.Transform.C2, aqnBone.Transform.C3, aqnBone.Transform.C4,
-                                    aqnBone.Transform.D1, aqnBone.Transform.D2, aqnBone.Transform.D3, aqnBone.Transform.D4);
-                                transform.Inverse();
-                                aiBone.OffsetMatrix = transform;
+                                var invWorldTransform = new Matrix4x4(rawBone.m1.X, rawBone.m1.Y, rawBone.m1.Z, rawBone.m1.W,
+                                                                rawBone.m2.X, rawBone.m2.Y, rawBone.m2.Z, rawBone.m2.W,
+                                                                rawBone.m3.X, rawBone.m3.Y, rawBone.m3.Z, rawBone.m3.W,
+                                                                rawBone.m4.X, rawBone.m4.Y, rawBone.m4.Z, rawBone.m4.W);
+
+                                aiBone.OffsetMatrix = GetAssimpMat4(invWorldTransform);
 
                                 aiBoneMap[boneIndex] = aiBone;
                             }
@@ -397,6 +248,12 @@ namespace AquaModelLibrary
                     aiBone.OffsetMatrix = Assimp.Matrix4x4.Identity;
 
                     aiMesh.Bones.Add(aiBone);
+                }
+
+                //Faces
+                foreach (var face in aqp.strips[msh.vsetIndex].GetTriangles(true))
+                {
+                    aiMesh.Faces.Add(new Assimp.Face(new int[] { (int)face.X, (int)face.Y, (int)face.Z }));
                 }
 
                 //Material
@@ -483,11 +340,34 @@ namespace AquaModelLibrary
                 // MaterialIndex
                 aiMesh.MaterialIndex = aiScene.Materials.Count - 1;
 
-                // Add mesh index to node
-                aiRootNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
-            }
+                // Set up mesh node and add this mesh's index to it (This tells assimp to export it as a mesh for various formats)
+                var meshNodeName = string.Format("mesh[{4}]_{0}_{1}_{2}_{3}_{5}_{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, aiScene.Meshes.Count - 1, 
+                    msh.baseMeshNodeId, msh.baseMeshDummyId);
+                var meshNode = new Assimp.Node(meshNodeName, aiScene.RootNode);
+                meshNode.Transform = Assimp.Matrix4x4.Identity;
 
+                aiScene.RootNode.Children.Add(meshNode);
+
+                meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
+            }
+            
             return aiScene;
+        }
+
+        public static Assimp.Matrix4x4 GetAssimpMat4(Matrix4x4 mat4)
+        {
+            return new Assimp.Matrix4x4(mat4.M11, mat4.M21, mat4.M31, mat4.M41,
+                                        mat4.M12, mat4.M22, mat4.M32, mat4.M42,
+                                        mat4.M13, mat4.M23, mat4.M33, mat4.M43,
+                                        mat4.M14, mat4.M24, mat4.M34, mat4.M44);
+        }
+
+        public static Matrix4x4 GetMat4FromAssimpMat4(Assimp.Matrix4x4 mat4)
+        {
+            return new Matrix4x4(mat4.A1, mat4.A2, mat4.A3, mat4.A4,
+                                 mat4.B1, mat4.B2, mat4.B3, mat4.B4,
+                                 mat4.C1, mat4.C2, mat4.C3, mat4.C4,
+                                 mat4.D1, mat4.D2, mat4.D3, mat4.D4);
         }
 
         public static float[] Vector4ToFloatArray(Vector4 vector4)
