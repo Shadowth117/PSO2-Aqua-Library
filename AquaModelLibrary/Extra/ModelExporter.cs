@@ -12,23 +12,18 @@ namespace AquaModelLibrary
     {
         public static Assimp.Scene AssimpExport(string filePath, AquaObject aqp, AquaNode aqn)
         {
-            if(aqp is NGSAquaObject)
+            if (aqp is NGSAquaObject)
             {
                 //NGS aqps will give lots of isolated vertices if we don't handle them
                 //Since we're not actually altering the data so much as rearranging references, we can just do this
-                aqp = aqp.Clone();
+                aqp = aqp.getShallowCopy();
                 aqp.splitVSETPerMesh();
             }
             Assimp.Scene aiScene = new Assimp.Scene();
 
-#if DEBUG
-            //LegacyObj.LegacyObjIO.ExportObj(filePath + "_obj.obj", aqp);
-#endif
             //Create an array to hold references to these since Assimp lacks a way to grab these by order or id
             //We don't need the nodo count in this since they can't be parents
             Assimp.Node[] boneArray = new Assimp.Node[aqn.nodeList.Count];
-            Assimp.Node[] effectBoneArray = new Assimp.Node[aqn.nodoList.Count];
-            bool[] boneCheck = new bool[aqn.nodeList.Count];
 
             //Set up root node
             var root = aqn.nodeList[0];
@@ -46,7 +41,8 @@ namespace AquaModelLibrary
                 if (bn.parentId == -1)
                 {
                     parentNode = aiRootNode;
-                } else
+                }
+                else
                 {
                     parentNode = boneArray[bn.parentId];
                     var pn = aqn.nodeList[bn.parentId];
@@ -71,9 +67,8 @@ namespace AquaModelLibrary
                 boneArray[i] = aiNode;
             }
 
-            for (int i = 0; i < aqn.nodoList.Count; i++)
+            foreach (AquaNode.NODO bn in aqn.nodoList)
             {
-                var bn = aqn.nodoList[i];
                 var parentNodo = boneArray[bn.parentId];
                 var aiNode = new Assimp.Node(bn.boneName.GetString(), parentNodo);
 
@@ -88,9 +83,8 @@ namespace AquaModelLibrary
                 aiNode.Transform = matrix;
 
                 parentNodo.Children.Add(aiNode);
-                effectBoneArray[i] = aiNode;
             }
-            
+
             //Assign meshes and materials
             foreach (AquaObject.MESH msh in aqp.meshList)
             {
@@ -105,7 +99,7 @@ namespace AquaModelLibrary
                 //Vertex face data - PSO2 Actually doesn't do this, it just has per vertex data so we can just map a vertice's data to each face using it
                 //It may actually be possible to add this to the previous loop, but my reference didn't so I'm doing it in a separate loop for safety
                 //Reference: https://github.com/TGEnigma/Amicitia/blob/master/Source/AmicitiaLibrary/Graphics/RenderWare/RWClumpNode.cs
-                for(int vertId = 0; vertId < vtxl.vertPositions.Count; vertId++)
+                for (int vertId = 0; vertId < vtxl.vertPositions.Count; vertId++)
                 {
                     if (vtxl.vertPositions.Count > 0)
                     {
@@ -179,17 +173,18 @@ namespace AquaModelLibrary
                 }
 
                 //Assimp Bones - Assimp likes to store vertex weights in bones and bones references in meshes
-                if(hasVertexWeights)
+                if (hasVertexWeights)
                 {
                     //Get bone palette
                     List<uint> bonePalette;
                     if (aqp.objc.bonePaletteOffset > 0)
                     {
                         bonePalette = aqp.bonePalette;
-                    } else
+                    }
+                    else
                     {
                         bonePalette = new List<uint>();
-                        for(int bn = 0; bn < vtxl.bonePalette.Count; bn++)
+                        for (int bn = 0; bn < vtxl.bonePalette.Count; bn++)
                         {
                             bonePalette.Add(vtxl.bonePalette[bn]);
                         }
@@ -197,7 +192,7 @@ namespace AquaModelLibrary
                     var aiBoneMap = new Dictionary<int, Assimp.Bone>();
 
                     //Iterate through vertices
-                    for(int vertId = 0; vertId < vtxl.vertWeightIndices.Count; vertId++)
+                    for (int vertId = 0; vertId < vtxl.vertWeightIndices.Count; vertId++)
                     {
                         var boneIndices = vtxl.vertWeightIndices[vertId];
                         var boneWeights = Vector4ToFloatArray(vtxl.vertWeights[vertId]);
@@ -213,10 +208,19 @@ namespace AquaModelLibrary
 
                             if (!aiBoneMap.Keys.Contains(boneIndex))
                             {
-                                Assimp.Bone aiBone = NewMethod(aqn, boneArray, bonePalette, boneIndex);
+                                var aiBone = new Assimp.Bone();
+                                var aqnBone = boneArray[bonePalette[boneIndex]];
+                                var rawBone = aqn.nodeList[(int)bonePalette[boneIndex]];
 
+                                aiBone.Name = aqnBone.Name;
                                 aiBone.VertexWeights.Add(new Assimp.VertexWeight(vertId, boneWeight));
-                                boneCheck[bonePalette[boneIndex]] = true;
+
+                                var invTransform = new Assimp.Matrix4x4(rawBone.m1.X, rawBone.m1.Y, rawBone.m1.Z, rawBone.m1.W,
+                                                                     rawBone.m2.X, rawBone.m2.Y, rawBone.m2.Z, rawBone.m2.W,
+                                                                     rawBone.m3.X, rawBone.m3.Y, rawBone.m3.Z, rawBone.m3.W,
+                                                                     rawBone.m4.X, rawBone.m4.Y, rawBone.m4.Z, rawBone.m4.W);
+
+                                aiBone.OffsetMatrix = invTransform;
 
                                 aiBoneMap[boneIndex] = aiBone;
                             }
@@ -228,7 +232,8 @@ namespace AquaModelLibrary
 
                     //Add the bones to the mesh
                     aiMesh.Bones.AddRange(aiBoneMap.Values);
-                } else //Handle rigid meshes
+                }
+                else //Handle rigid meshes
                 {
                     var aiBone = new Assimp.Bone();
                     var aqnBone = boneArray[msh.baseMeshNodeId];
@@ -266,15 +271,15 @@ namespace AquaModelLibrary
                     mate.BlendMode = Assimp.BlendMode.Additive;
                 }
                 mate.Name = "(" + shaderSet[0] + "," + shaderSet[1] + ")" + "{" + mat.alphaType.GetString() + "}" + mat.matName.GetString();
-                
+
                 //Set textures - PSO2 Texture slots are NOT consistent and depend entirely on the selected shader. As such, slots will be somewhat arbitrary after albedo/diffuse
-                for(int i = 0; i < textureSet.Count; i++)
+                for (int i = 0; i < textureSet.Count; i++)
                 {
                     switch (i)
                     {
                         case 0:
                             mate.TextureDiffuse = new Assimp.TextureSlot(
-                                textureSet[i], Assimp.TextureType.Diffuse, i, Assimp.TextureMapping.FromUV, aqp.tstaList[aqp.tsetList[msh.tsetIndex].tstaTexIDs[i]].modelUVSet, 0, 
+                                textureSet[i], Assimp.TextureType.Diffuse, i, Assimp.TextureMapping.FromUV, aqp.tstaList[aqp.tsetList[msh.tsetIndex].tstaTexIDs[i]].modelUVSet, 0,
                                 Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0);
                             break;
                         case 1:
@@ -339,7 +344,7 @@ namespace AquaModelLibrary
                 aiMesh.MaterialIndex = aiScene.Materials.Count - 1;
 
                 // Set up mesh node and add this mesh's index to it (This tells assimp to export it as a mesh for various formats)
-                var meshNodeName = string.Format("mesh[{4}]_{0}_{1}_{2}_{3}_{5}_{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, aiScene.Meshes.Count - 1, 
+                var meshNodeName = string.Format("mesh[{4}]_{0}_{1}_{2}_{3}_{5}_{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, aiScene.Meshes.Count - 1,
                     msh.baseMeshNodeId, msh.baseMeshDummyId);
                 var meshNode = new Assimp.Node(meshNodeName, aiScene.RootNode);
                 meshNode.Transform = Assimp.Matrix4x4.Identity;
@@ -348,33 +353,8 @@ namespace AquaModelLibrary
 
                 meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
             }
-            
-            for(int i = 0; i < boneArray.Length; i++)
-            {
-                if(boneCheck[i] == false)
-                {
-                    aiScene.Meshes[0].Bones
-                }
-            }
 
             return aiScene;
-        }
-
-        private static Assimp.Bone NewMethod(AquaNode aqn, Assimp.Node[] boneArray, List<uint> bonePalette, byte boneIndex)
-        {
-            var aiBone = new Assimp.Bone();
-            var aqnBone = boneArray[bonePalette[boneIndex]];
-            var rawBone = aqn.nodeList[(int)bonePalette[boneIndex]];
-
-            aiBone.Name = aqnBone.Name;
-
-            var invWorldTransform = new Assimp.Matrix4x4(rawBone.m1.X, rawBone.m1.Y, rawBone.m1.Z, rawBone.m1.W,
-                                            rawBone.m2.X, rawBone.m2.Y, rawBone.m2.Z, rawBone.m2.W,
-                                            rawBone.m3.X, rawBone.m3.Y, rawBone.m3.Z, rawBone.m3.W,
-                                            rawBone.m4.X, rawBone.m4.Y, rawBone.m4.Z, rawBone.m4.W);
-
-            aiBone.OffsetMatrix = invWorldTransform;
-            return aiBone;
         }
 
         public static Assimp.Matrix4x4 GetAssimpMat4(Matrix4x4 mat4)
