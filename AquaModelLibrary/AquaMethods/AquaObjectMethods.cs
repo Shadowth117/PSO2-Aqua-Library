@@ -843,7 +843,7 @@ namespace AquaModelLibrary
                 int vsetIndex;
                 int psetIndex;
                 //Unlike older aqo variants, NGS models can have a different vsetIndex than their
-                if(model.objc != null && (model.objc.type == 0xC33 || model.objc.type == 0xc32) && model.meshList.Count > 0)
+                if((model.objc.type == 0xC33 || model.objc.type == 0xc32) && model.meshList.Count > 0)
                 {
                     vsetIndex = model.meshList[meshIndex].vsetIndex;
                     psetIndex = model.meshList[meshIndex].psetIndex;

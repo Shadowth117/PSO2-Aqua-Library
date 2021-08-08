@@ -74,7 +74,7 @@ namespace AquaModelLibrary
             public Vector3 halfExtents; //0x21, Type 0x4A, Count 0x1 //Distance between max/min of x, y and z divided by 2
         }
 
-        public class OBJC
+        public struct OBJC
         {
             public int type;           //0x10, Type 0x8
             public int size;           //0x11, Type 0x8
@@ -371,6 +371,18 @@ namespace AquaModelLibrary
             public int shadDetailOffset; //0x93, type 0x9 //Unused in classic. //Offset to struct containing details for the shadExtra area, including a count needed to read it.
             public int shadExtraOffset; //Unused in classic. Not read in some versions of NIFL Tool, causing misalignments. Doesn't exist in VTBF, so perhaps added later on.
                                         //Offset to struct containing extra shader info with areas for some int16s and floats.
+
+            public virtual SHAD Clone()
+            {
+                SHAD newShad = new SHAD();
+                newShad.unk0 = unk0;
+                newShad.pixelShader = PSO2String.GeneratePSO2String(pixelShader.GetBytes());
+                newShad.vertexShader = PSO2String.GeneratePSO2String(vertexShader.GetBytes());
+                newShad.shadDetailOffset = shadDetailOffset;
+                newShad.shadExtraOffset = shadExtraOffset;
+
+                return newShad;
+            }
         }
 
         public static SHAD ReadSHAD(BufferedStreamReader streamReader)
@@ -399,6 +411,21 @@ namespace AquaModelLibrary
 
             public TSET()
             {
+            }
+
+            public TSET Clone()
+            {
+                TSET newTset = new TSET();
+                newTset.unkInt0 = unkInt0;
+                newTset.texCount = texCount;
+                newTset.unkInt1 = unkInt1;
+                newTset.unkInt2 = unkInt2;
+
+                newTset.unkInt3 = unkInt3;
+
+                newTset.tstaTexIDs = new List<int>(tstaTexIDs);
+
+                return newTset;
             }
         }
 
@@ -484,6 +511,23 @@ namespace AquaModelLibrary
             //Align to 0x10
             public List<List<int>> unrmVertIds = new List<List<int>>(); //0xDE, type 0x89
             //Align to 0x10
+
+            public UNRM Clone()
+            {
+                UNRM newUnrm = new UNRM();
+                newUnrm.vertGroupCountCount = vertGroupCountCount;
+                newUnrm.vertGroupCountOffset = vertGroupCountOffset;
+                newUnrm.vertCount = vertCount;
+                newUnrm.meshIdOffset = meshIdOffset;
+                newUnrm.vertIDOffset = vertIDOffset;
+                newUnrm.padding0 = padding0;
+                newUnrm.padding1 = padding1;
+                newUnrm.unrmVertGroups = new List<int>(unrmVertGroups);
+                newUnrm.unrmMeshIds = unrmMeshIds.ConvertAll(id => new List<int>( (int[])id.ToArray().Clone() )).ToList();
+                newUnrm.unrmVertIds = unrmVertIds.ConvertAll(id => new List<int>((int[])id.ToArray().Clone())).ToList();
+
+                return newUnrm;
+            }
         }
         public struct VSET
         {
@@ -521,6 +565,14 @@ namespace AquaModelLibrary
         public class VTXE
         {
             public List<VTXEElement> vertDataTypes = new List<VTXEElement>();
+
+            public VTXE Clone()
+            {
+                VTXE newVtxe = new VTXE();
+                newVtxe.vertDataTypes = new List<VTXEElement>(vertDataTypes);
+
+                return newVtxe;
+            }
         }
 
         public struct VTXEElement
@@ -636,11 +688,11 @@ namespace AquaModelLibrary
             public List<short[]> uv2ListNGS = new List<short[]>(); //Uncommon NGS uv2 variation
             public List<short[]> uv3ListNGS = new List<short[]>();
             public List<short[]> uv4ListNGS = new List<short[]>();
-            public List<Vector2> uv2List = new List<Vector2>(); //For some reason 0xC33 seemingly retained vector2 data types for these.
+            public List<Vector2> uv2List = new List<Vector2>(); //For some reason 0xC33 seemingly retained vector2 data types for these, though only in some cases.
             public List<Vector2> uv3List = new List<Vector2>();
             public List<Vector2> uv4List = new List<Vector2>();
             public List<short[]> vert0x22 = new List<short[]>(); //This and the following type are 2 shorts seemingly that do... something. Only observed in 0xC33 player models at this time. 
-            public List<short[]> vert0x23 = new List<short[]>();
+            public List<short[]> vert0x23 = new List<short[]>(); //Possibly UV channels 5 and 6? Typically values are the same for every vertex in a mesh though.
 
             //Binormals and tangents for each face are calculated and each face's values for a particular vertex are summed and averaged for the result before being normalized
             //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
@@ -1183,6 +1235,43 @@ namespace AquaModelLibrary
 
             }
 
+            public VTXL Clone()
+            {
+                VTXL newVTXL = new VTXL();
+
+                newVTXL.vertPositions = new List<Vector3>(vertPositions);
+                newVTXL.vertWeightsNGS = vertWeightsNGS.ConvertAll(wt => (ushort[])wt.Clone()).ToList();
+                newVTXL.vertNormalsNGS = vertNormalsNGS.ConvertAll(nrm => (short[])nrm.Clone()).ToList();
+                newVTXL.vertColors = vertColors.ConvertAll(clr => (byte[])clr.Clone()).ToList();
+                newVTXL.vertColor2s = vertColor2s.ConvertAll(clr => (byte[])clr.Clone()).ToList();
+                newVTXL.vertWeightIndices = vertWeightIndices.ConvertAll(wt => (byte[])wt.Clone()).ToList();
+                newVTXL.uv1ListNGS = uv1ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.uv2ListNGS = uv2ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.uv3ListNGS = uv3ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.uv4ListNGS = uv4ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.uv1List = new List<Vector2>(uv1List);
+                newVTXL.uv2List = new List<Vector2>(uv2List);
+                newVTXL.uv3List = new List<Vector2>(uv3List);
+                newVTXL.uv4List = new List<Vector2>(uv4List);
+                newVTXL.vert0x22 = vert0x22.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.vert0x23 = vert0x23.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.vertTangentListNGS = vertTangentListNGS.ConvertAll(nrm => (short[])nrm.Clone()).ToList();
+                newVTXL.vertBinormalListNGS = vertBinormalListNGS.ConvertAll(nrm => (short[])nrm.Clone()).ToList();
+                newVTXL.vertWeights = new List<Vector4>(vertWeights);
+                newVTXL.vertNormals = new List<Vector3>(vertNormals);
+                newVTXL.vertTangentList = new List<Vector3>(vertTangentList);
+                newVTXL.vertBinormalList = new List<Vector3>(vertBinormalList);
+                newVTXL.bonePalette = new List<ushort>(bonePalette);
+                newVTXL.edgeVerts = new List<ushort>(edgeVerts);
+                newVTXL.rawVertWeights = rawVertWeights.ConvertAll(wt => new List<float>( (float[])wt.ToArray().Clone() )).ToList();
+                newVTXL.rawVertWeightIds = rawVertWeightIds.ConvertAll(wt => new List<int>((int[])wt.ToArray().Clone())).ToList();
+                newVTXL.rawVertId = new List<int>(rawVertId);
+                newVTXL.rawFaceId = new List<int>(rawFaceId);
+                newVTXL.trueVertWeights = new List<Vector4>(trueVertWeights);
+                newVTXL.trueVertWeightIndices = trueVertWeightIndices.ConvertAll(wt => (byte[])wt.Clone()).ToList();
+
+                return newVTXL;
+            }
         }
 
         public class stripData
@@ -1263,6 +1352,21 @@ namespace AquaModelLibrary
                 }
 
                 return tris;
+            }
+
+            public stripData Clone()
+            {
+                stripData newStrip = new stripData();
+                newStrip.psoTris = psoTris;
+                newStrip.format0xC33 = format0xC33;
+                newStrip.triIdCount = triIdCount;
+                newStrip.reserve0 = reserve0;
+                newStrip.reserve1 = reserve1;
+                newStrip.reserve2 = reserve2;
+                newStrip.triStrips = new List<ushort>(triStrips);
+                newStrip.faceGroups = new List<int>(faceGroups);
+
+                return newStrip;
             }
         }
 
@@ -1352,6 +1456,22 @@ namespace AquaModelLibrary
                 }
 
                 return false;
+            }
+
+            public GenericTriangles Clone()
+            {
+                GenericTriangles genTri = new GenericTriangles();
+                genTri.faceVerts = faceVerts.ConvertAll(vtxl => vtxl.Clone()).ToList();
+                genTri.triList = new List<Vector3>(triList);
+                genTri.matIdList = new List<int>(matIdList);
+                genTri.matIdDict = matIdDict.Keys.ToDictionary(x => x, x => matIdDict[x]);
+                genTri.bonePalette = new List<uint>(bonePalette);
+                genTri.baseMeshNodeId = baseMeshNodeId;
+                genTri.baseMeshDummyId = baseMeshDummyId;
+                genTri.vertCount = vertCount;
+                genTri.name = name;
+
+                return genTri;
             }
         }
         public class GenericMaterial
@@ -1466,36 +1586,55 @@ namespace AquaModelLibrary
             }
 
             public static bool operator !=(GenericMaterial lhs, GenericMaterial rhs) => !(lhs == rhs);
+
+            public GenericMaterial Clone()
+            {
+                GenericMaterial genMat = new GenericMaterial();
+                genMat.texNames = new List<string>(texNames);
+                genMat.texUVSets = new List<int>(texUVSets);
+                genMat.shaderNames = new List<string>(shaderNames);
+                genMat.blendType = blendType;
+                genMat.specialType = specialType;
+                genMat.matName = matName;
+                genMat.twoSided = twoSided;
+
+                genMat.diffuseRGBA = diffuseRGBA;
+                genMat.unkRGBA0 = unkRGBA0;
+                genMat._sRGBA = _sRGBA;
+                genMat.unkRGBA1 = unkRGBA1;
+
+                genMat.reserve0 = reserve0;
+                genMat.unkFloat0 = unkFloat0;
+                genMat.unkFloat1 = unkFloat1;
+                genMat.unkInt0 = unkInt0;
+                genMat.unkInt1 = unkInt1;
+
+                return genMat;
+            }
         }
 
         //0xC33 variations of the format can recycle vtxl lists for multiple meshes. Neat, but not helpful for conversion purposes.
         public int splitVSETPerMesh()
         {
-            //Return if an invalid type
-            if(!(objc.type > 0xC2A))
-            {
-                return -1;
-            }
-
             bool continueSplitting = false;
             Dictionary<int, List<int>> vsetTracker = new Dictionary<int, List<int>>(); //Key int is a VSET, value is a list of indices for each mesh that uses said VSET
-            for(int meshId = 0; meshId < meshList.Count; meshId++)
+            for (int meshId = 0; meshId < meshList.Count; meshId++)
             {
-                if(!vsetTracker.ContainsKey(meshList[meshId].vsetIndex))
+                if (!vsetTracker.ContainsKey(meshList[meshId].vsetIndex))
                 {
-                    vsetTracker.Add(meshList[meshId].vsetIndex, new List<int>(){ meshId } );
-                } else
+                    vsetTracker.Add(meshList[meshId].vsetIndex, new List<int>() { meshId });
+                }
+                else
                 {
                     continueSplitting = true;
                     vsetTracker[meshList[meshId].vsetIndex].Add(meshId);
                 }
             }
 
-            if(continueSplitting)
+            if (continueSplitting)
             {
                 VSET[] newVsetArray = new VSET[meshList.Count];
                 VTXL[] newVtxlArray = new VTXL[meshList.Count];
-                stripData[] newStripArray = new stripData[meshList.Count];
 
                 //Handle instances in which there are multiple of the same VSET used.
                 //VTXL and VSETs should be cloned and updated as necessary while strips should be updated to match new vertex ids (strips using the same VTXL continue from old Ids, typically)
@@ -1506,18 +1645,11 @@ namespace AquaModelLibrary
                         foreach (int meshId in vsetTracker[key])
                         {
                             Dictionary<int, int> usedVerts = new Dictionary<int, int>();
-                            VSET newVset = vsetList[key];
+                            VSET newVset = new VSET();
                             VTXL newVtxl = new VTXL();
 
-                            //Set up strips
-                            stripData strip = new stripData();
-                            strip.format0xC33 = true;
-                            strip.faceGroups = new List<int>(strips[meshId].faceGroups);
-                            strip.triIdCount = strips[meshId].triIdCount;
-                            strip.triStrips = new List<ushort>(strips[meshId].triStrips);
-
                             int counter = 0;
-                            for(int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
+                            for (int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
                             {
                                 ushort id = strips[meshId].triStrips[stripIndex];
                                 if (!usedVerts.ContainsKey(id))
@@ -1526,15 +1658,13 @@ namespace AquaModelLibrary
                                     usedVerts.Add(id, counter);
                                     counter++;
                                 }
-                                strip.triStrips[stripIndex] = (ushort)usedVerts[id];
+                                strips[meshId].triStrips[stripIndex] = (ushort)usedVerts[id];
                             }
-
                             var tempMesh = meshList[meshId];
                             tempMesh.vsetIndex = meshId;
                             meshList[meshId] = tempMesh;
                             newVsetArray[meshId] = newVset;
                             newVtxlArray[meshId] = newVtxl;
-                            newStripArray[meshId] = strip;
                         }
                     }
                     else
@@ -1542,27 +1672,84 @@ namespace AquaModelLibrary
                         int meshId = vsetTracker[key][0];
                         newVsetArray[meshId] = vsetList[meshList[meshId].vsetIndex];
                         newVtxlArray[meshId] = vtxlList[meshList[meshId].vsetIndex];
-                        newStripArray[meshId] = strips[meshList[meshId].vsetIndex];
                         var tempMesh = meshList[meshId];
                         tempMesh.vsetIndex = meshId;
                         meshList[meshId] = tempMesh;
                     }
                 }
-
-                //Set up VSETs
-                int vertCounter = 0;
-                for(int i = 0; i < newVsetArray.Length; i++)
-                {
-                    VSET vset = newVsetArray[i];
-                    vset.vtxlCount = newVtxlArray[i].vertPositions.Count;
-                    vset.vtxlStartVert = vertCounter;
-                    vertCounter += vset.vtxlCount;
-                    newVsetArray[i] = vset;
-                }
-                objc.totalVTXLCount = vertCounter;
                 vsetList = newVsetArray.ToList();
                 vtxlList = newVtxlArray.ToList();
-                strips = newStripArray.ToList();
+            }
+            objc.vsetCount = vsetList.Count;
+
+            return vsetList.Count;
+        }
+
+        public int splitVSETPerMeshNew()
+        {
+            bool continueSplitting = false;
+            Dictionary<int, List<int>> vsetTracker = new Dictionary<int, List<int>>(); //Key int is a VSET, value is a list of indices for each mesh that uses said VSET
+            for (int meshId = 0; meshId < meshList.Count; meshId++)
+            {
+                if (!vsetTracker.ContainsKey(meshList[meshId].vsetIndex))
+                {
+                    vsetTracker.Add(meshList[meshId].vsetIndex, new List<int>() { meshId });
+                }
+                else
+                {
+                    continueSplitting = true;
+                    vsetTracker[meshList[meshId].vsetIndex].Add(meshId);
+                }
+            }
+
+            if (continueSplitting)
+            {
+                VSET[] newVsetArray = new VSET[meshList.Count];
+                VTXL[] newVtxlArray = new VTXL[meshList.Count];
+
+                //Handle instances in which there are multiple of the same VSET used.
+                //VTXL and VSETs should be cloned and updated as necessary while strips should be updated to match new vertex ids (strips using the same VTXL continue from old Ids, typically)
+                foreach (var key in vsetTracker.Keys)
+                {
+                    if (vsetTracker[key].Count > 1)
+                    {
+                        foreach (int meshId in vsetTracker[key])
+                        {
+                            Dictionary<int, int> usedVerts = new Dictionary<int, int>();
+                            VSET newVset = new VSET();
+                            VTXL newVtxl = new VTXL();
+
+                            int counter = 0;
+                            for (int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
+                            {
+                                ushort id = strips[meshId].triStrips[stripIndex];
+                                if (!usedVerts.ContainsKey(id))
+                                {
+                                    AquaObjectMethods.appendVertex(vtxlList[meshList[meshId].vsetIndex], newVtxl, id);
+                                    usedVerts.Add(id, counter);
+                                    counter++;
+                                }
+                                strips[meshId].triStrips[stripIndex] = (ushort)usedVerts[id];
+                            }
+                            var tempMesh = meshList[meshId];
+                            tempMesh.vsetIndex = meshId;
+                            meshList[meshId] = tempMesh;
+                            newVsetArray[meshId] = newVset;
+                            newVtxlArray[meshId] = newVtxl;
+                        }
+                    }
+                    else
+                    {
+                        int meshId = vsetTracker[key][0];
+                        newVsetArray[meshId] = vsetList[meshList[meshId].vsetIndex];
+                        newVtxlArray[meshId] = vtxlList[meshList[meshId].vsetIndex];
+                        var tempMesh = meshList[meshId];
+                        tempMesh.vsetIndex = meshId;
+                        meshList[meshId] = tempMesh;
+                    }
+                }
+                vsetList = newVsetArray.ToList();
+                vtxlList = newVtxlArray.ToList();
             }
             objc.vsetCount = vsetList.Count;
 
@@ -1589,7 +1776,7 @@ namespace AquaModelLibrary
             return vertCount;
         }
 
-        public abstract AquaObject getShallowCopy();
+        public abstract AquaObject Clone();
         /*
         public int getBiggestVertSize()
         {

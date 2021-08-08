@@ -16,14 +16,19 @@ namespace AquaModelLibrary
             {
                 //NGS aqps will give lots of isolated vertices if we don't handle them
                 //Since we're not actually altering the data so much as rearranging references, we can just do this
-                aqp = aqp.getShallowCopy();
+                aqp = aqp.Clone();
                 aqp.splitVSETPerMesh();
             }
             Assimp.Scene aiScene = new Assimp.Scene();
 
+#if DEBUG
+            //LegacyObj.LegacyObjIO.ExportObj(filePath + "_obj.obj", aqp);
+#endif
             //Create an array to hold references to these since Assimp lacks a way to grab these by order or id
             //We don't need the nodo count in this since they can't be parents
-            Assimp.Node[] boneArray = new Assimp.Node[aqn.nodeList.Count]; 
+            Assimp.Node[] boneArray = new Assimp.Node[aqn.nodeList.Count];
+            Assimp.Node[] effectBoneArray = new Assimp.Node[aqn.nodoList.Count];
+            bool[] boneCheck = new bool[aqn.nodeList.Count];
 
             //Set up root node
             var root = aqn.nodeList[0];
@@ -66,8 +71,9 @@ namespace AquaModelLibrary
                 boneArray[i] = aiNode;
             }
 
-            foreach (AquaNode.NODO bn in aqn.nodoList)
+            for (int i = 0; i < aqn.nodoList.Count; i++)
             {
+                var bn = aqn.nodoList[i];
                 var parentNodo = boneArray[bn.parentId];
                 var aiNode = new Assimp.Node(bn.boneName.GetString(), parentNodo);
 
@@ -82,6 +88,7 @@ namespace AquaModelLibrary
                 aiNode.Transform = matrix;
 
                 parentNodo.Children.Add(aiNode);
+                effectBoneArray[i] = aiNode;
             }
             
             //Assign meshes and materials
@@ -206,19 +213,10 @@ namespace AquaModelLibrary
 
                             if (!aiBoneMap.Keys.Contains(boneIndex))
                             {
-                                var aiBone = new Assimp.Bone();
-                                var aqnBone = boneArray[bonePalette[boneIndex]];
-                                var rawBone = aqn.nodeList[(int)bonePalette[boneIndex]];
+                                Assimp.Bone aiBone = NewMethod(aqn, boneArray, bonePalette, boneIndex);
 
-                                aiBone.Name = aqnBone.Name;
                                 aiBone.VertexWeights.Add(new Assimp.VertexWeight(vertId, boneWeight));
-
-                                var invWorldTransform = new Matrix4x4(rawBone.m1.X, rawBone.m1.Y, rawBone.m1.Z, rawBone.m1.W,
-                                                                rawBone.m2.X, rawBone.m2.Y, rawBone.m2.Z, rawBone.m2.W,
-                                                                rawBone.m3.X, rawBone.m3.Y, rawBone.m3.Z, rawBone.m3.W,
-                                                                rawBone.m4.X, rawBone.m4.Y, rawBone.m4.Z, rawBone.m4.W);
-
-                                aiBone.OffsetMatrix = GetAssimpMat4(invWorldTransform);
+                                boneCheck[bonePalette[boneIndex]] = true;
 
                                 aiBoneMap[boneIndex] = aiBone;
                             }
@@ -351,7 +349,32 @@ namespace AquaModelLibrary
                 meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
             }
             
+            for(int i = 0; i < boneArray.Length; i++)
+            {
+                if(boneCheck[i] == false)
+                {
+                    aiScene.Meshes[0].Bones
+                }
+            }
+
             return aiScene;
+        }
+
+        private static Assimp.Bone NewMethod(AquaNode aqn, Assimp.Node[] boneArray, List<uint> bonePalette, byte boneIndex)
+        {
+            var aiBone = new Assimp.Bone();
+            var aqnBone = boneArray[bonePalette[boneIndex]];
+            var rawBone = aqn.nodeList[(int)bonePalette[boneIndex]];
+
+            aiBone.Name = aqnBone.Name;
+
+            var invWorldTransform = new Assimp.Matrix4x4(rawBone.m1.X, rawBone.m1.Y, rawBone.m1.Z, rawBone.m1.W,
+                                            rawBone.m2.X, rawBone.m2.Y, rawBone.m2.Z, rawBone.m2.W,
+                                            rawBone.m3.X, rawBone.m3.Y, rawBone.m3.Z, rawBone.m3.W,
+                                            rawBone.m4.X, rawBone.m4.Y, rawBone.m4.Z, rawBone.m4.W);
+
+            aiBone.OffsetMatrix = invWorldTransform;
+            return aiBone;
         }
 
         public static Assimp.Matrix4x4 GetAssimpMat4(Matrix4x4 mat4)

@@ -60,6 +60,20 @@ namespace AquaModelLibrary
         {
             public SHADDetail shadDetail;
             public List<SHADExtraEntry> shadExtra = new List<SHADExtraEntry>();
+
+            public override SHAD Clone()
+            {
+                NGSSHAD newShad = new NGSSHAD();
+                newShad.unk0 = unk0;
+                newShad.pixelShader = PSO2String.GeneratePSO2String(pixelShader.GetBytes());
+                newShad.vertexShader = PSO2String.GeneratePSO2String(vertexShader.GetBytes());
+                newShad.shadDetailOffset = shadDetailOffset;
+                newShad.shadExtraOffset = shadExtraOffset;
+                newShad.shadDetail = shadDetail;
+                newShad.shadExtra = new List<SHADExtraEntry>(shadExtra);
+
+                return newShad;
+            }
         }
 
         public static NGSSHAD ReadNGSSHAD(BufferedStreamReader streamReader, int offset)
@@ -145,45 +159,45 @@ namespace AquaModelLibrary
             return ext;
         }
 
-        public override AquaObject getShallowCopy()
+        public override AquaObject Clone()
         {
-            ClassicAquaObject aqp = new ClassicAquaObject();
+            NGSAquaObject aqp = new NGSAquaObject();
             aqp.afp = afp;
             aqp.objc = objc;
-            aqp.vsetList = vsetList;
-            aqp.vtxeList = vtxeList;
-            aqp.vtxlList = vtxlList;
-            aqp.psetList = psetList;
-            aqp.meshList = meshList;
-            aqp.mateList = mateList;
-            aqp.rendList = rendList;
-            aqp.shadList = shadList;
-            aqp.tstaList = tstaList;
-            aqp.tsetList = tsetList;
-            aqp.texfList = texfList;
-            aqp.unrms = unrms;
-            aqp.strips = strips;
+            aqp.vsetList = new List<VSET>(vsetList);
+            aqp.vtxeList = vtxeList.ConvertAll(vtxe => vtxe.Clone()).ToList();
+            aqp.vtxlList = vtxlList.ConvertAll(vtxl => vtxl.Clone()).ToList();
+            aqp.psetList = new List<PSET>(psetList);
+            aqp.meshList = new List<MESH>(meshList);
+            aqp.mateList = new List<MATE>(mateList);
+            aqp.rendList = new List<REND>(rendList);
+            aqp.shadList = shadList.ConvertAll(shad => shad.Clone()).ToList();
+            aqp.tstaList = new List<TSTA>(tstaList);
+            aqp.tsetList = tsetList.ConvertAll(tset => tset.Clone()).ToList();
+            aqp.texfList = new List<TEXF>(texfList);
+            aqp.unrms = unrms.Clone();
+            aqp.strips = strips.ConvertAll(stp => stp.Clone()).ToList();
 
             //*** 0xC33 only
-            aqp.bonePalette = bonePalette;
+            aqp.bonePalette = new List<uint>(bonePalette);
 
             //Unclear the purpose of these, but when present they have a smaller count than initial mesh and psets. 
-            aqp.unkStruct1List = unkStruct1List;
-            aqp.mesh2List = mesh2List;
-            aqp.pset2List = pset2List;
-            aqp.strips2 = strips2; //Strip set 2 is from the same array as the first, just split differently, potentially.
+            aqp.unkStruct1List = new List<unkStruct1>(unkStruct1List);
+            aqp.mesh2List = new List<MESH>(mesh2List);
+            aqp.pset2List = new List<PSET>(pset2List);
+            aqp.strips2 = strips2.ConvertAll(stp => stp.Clone()).ToList();
 
-            aqp.strips3Lengths = strips3Lengths;
-            aqp.strips3 = strips3;
-            aqp.unkPointArray1 = unkPointArray1; //Noooooooo idea what these are. Count matches the strips3Lengths count
-            aqp.unkPointArray2 = unkPointArray2;
+            aqp.strips3Lengths = new List<int>(strips3Lengths);
+            aqp.strips3 = strips3.ConvertAll(stp => stp.Clone()).ToList();
+            aqp.unkPointArray1 = new List<Vector3>(unkPointArray1); //Noooooooo idea what these are. Count matches the strips3Lengths count
+            aqp.unkPointArray2 = new List<Vector3>(unkPointArray2);
             //***
 
             aqp.applyNormalAveraging = applyNormalAveraging;
 
             //Custom model related data
-            aqp.tempTris = tempTris;
-            aqp.tempMats = tempMats;
+            aqp.tempTris = tempTris.ConvertAll(tri => tri.Clone()).ToList();
+            aqp.tempMats = tempMats.ConvertAll(mat => mat.Clone()).ToList();
 
             return aqp;
         }
