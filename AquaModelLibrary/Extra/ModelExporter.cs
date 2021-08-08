@@ -16,7 +16,7 @@ namespace AquaModelLibrary
             {
                 //NGS aqps will give lots of isolated vertices if we don't handle them
                 //Since we're not actually altering the data so much as rearranging references, we can just do this
-                aqp = aqp.getShallowCopy();
+                aqp = aqp.Clone();
                 aqp.splitVSETPerMesh();
             }
             Assimp.Scene aiScene = new Assimp.Scene();
