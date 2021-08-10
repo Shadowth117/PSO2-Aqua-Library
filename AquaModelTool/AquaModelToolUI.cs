@@ -226,7 +226,6 @@ namespace AquaModelTool
 #if DEBUG
                         //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
                         var test = aquaUI.aqua.aquaModels[0].models[0];
-                        test = aquaUI.aqua.aquaModels[0].models[0];
                         for(int i = 0; i < test.tstaList.Count; i++)
                         {
                             Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
@@ -1159,7 +1158,31 @@ namespace AquaModelTool
                             return;
                         }
 
-                        ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
+                        try
+                        {
+                            ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
+
+                            //Dae fix because Assimp 4 and 5.X can't seem to properly get a root node.
+                            if (Path.GetExtension(saveFileDialog.FileName) == ".dae")
+                            {
+                                string replacementLine = $"<skeleton>(0)#" + aquaUI.aqua.aquaBones[0].nodeList[0].boneName.GetString() + "</skeleton>";
+
+                                var dae = File.ReadAllLines(saveFileDialog.FileName);
+                                for (int i = 0; i < dae.Length; i++)
+                                {
+                                    if (dae[i].Contains("<skeleton>"))
+                                    {
+                                        dae[i] = replacementLine;
+                                    }
+                                }
+                                File.WriteAllLines(saveFileDialog.FileName, dae);
+                            }
+                        }
+                        catch (Win32Exception w)
+                        {
+                            MessageBox.Show($"Exception encountered: {w.Message}");
+                        }
+
                     }
                 }
 
