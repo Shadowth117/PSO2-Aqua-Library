@@ -1218,7 +1218,7 @@ namespace AquaModelLibrary
                     int start = vertWeights.Count;
                     vertWeights.AddRange(new Vector4[vertCount]);
                     vertWeightIndices.AddRange(new byte[vertCount][]);
-                    for (int i = start; i < vertCount; i++)
+                    for (int i = start; i < start + vertCount; i++)
                     {
                         vertWeightIndices[i] = new byte[4];
                     }
@@ -1227,7 +1227,7 @@ namespace AquaModelLibrary
                 {
                     int start = vertWeightsNGS.Count;
                     vertWeightsNGS.AddRange(new ushort[vertCount][]);
-                    for (int i = start; i < vertCount; i++)
+                    for (int i = start; i < start + vertCount; i++)
                     {
                         vertWeightsNGS[i] = new ushort[4];
                     }

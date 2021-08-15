@@ -158,6 +158,7 @@
     <Compile Include="AquaStructs\NGSShaderPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
+    <Compile Include="Extra\EnemyData.cs" />
     <Compile Include="Extra\LegacyObjPort\LegacyObjIO.cs" />
     <Compile Include="Extra\LegacyObjPort\MtlFile.cs" />
     <Compile Include="Extra\LegacyObjPort\ObjFile.cs" />

@@ -44,7 +44,8 @@ namespace AquaModelLibrary
                         {
                             vtxlCheck.AddRange(new bool[vertIndex - (vtxlCheck.Count - 1)]);
                             vtxl.AddRange(vertIndex - (vtxlCheck.Count - 1), vtxl);
-                        }
+                        } 
+
                         if (vtxlCheck[vertIndex] == true && !IsSameVertex(vtxl, vertIndex, model.tempTris[mesh].faceVerts[face], faceVert))
                         {
                             //If this really needs to be split to a new vertex, add it to the end of the new VTXL list

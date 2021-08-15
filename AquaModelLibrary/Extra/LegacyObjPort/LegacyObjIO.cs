@@ -72,6 +72,7 @@ namespace LegacyObj
             }
 
             //House cleaning since we can't really redo these this way
+            aqo.tempTris.Clear();
             aqo.strips3.Clear();
             aqo.strips2.Clear();
             aqo.strips.Clear();
@@ -108,6 +109,8 @@ namespace LegacyObj
                 tempMesh.name = mesh.Name;
                 tempMesh.bonePalette = aqo.bonePalette;
                 List<int> vertIds = new List<int>();
+                Dictionary<int, int> vertIdRemap = new Dictionary<int, int>();
+                int greatestId = 0;
 
                 for (int f = 0; f < mesh.PositionFaces.Count; ++f)
                 {
@@ -115,23 +118,26 @@ namespace LegacyObj
                     var nf = mesh.NormalFaces[f];
                     var tf = mesh.TexCoordFaces[f];
 
-                    tempMesh.triList.Add(new Vector3(pf.A - totalVerts, pf.B - totalVerts, pf.C - totalVerts)); //faces are 1 based
+                    tempMesh.triList.Add(new Vector3(pf.A, pf.B, pf.C)); //faces are 1 based
                     if(!vertIds.Contains(pf.A))
                     {
+                        greatestId = pf.A > greatestId ? pf.A : greatestId;
                         vertIds.Add(pf.A);
                     }
                     if(!vertIds.Contains(pf.B))
                     {
+                        greatestId = pf.B > greatestId ? pf.B : greatestId;
                         vertIds.Add(pf.B);
                     }
                     if(!vertIds.Contains(pf.C))
                     {
+                        greatestId = pf.C > greatestId ? pf.C : greatestId;
                         vertIds.Add(pf.C);
                     }
                     tempMesh.matIdList.Add(0);
 
                     var vtxl = new AquaObject.VTXL();
-                    vtxl.rawVertId = new List<int>() { pf.A - totalVerts, pf.B - totalVerts, pf.C - totalVerts };
+                    vtxl.rawVertId = new List<int>() { pf.A, pf.B, pf.C };
                     vtxl.rawFaceId = new List<int>() { f, f, f};
 
                     //Undo scaling and rotate to Y up
@@ -183,6 +189,43 @@ namespace LegacyObj
                     }
                     tempMesh.faceVerts.Add(vtxl);
                 }
+
+                //Set up remapp ids
+                for(int i = 0; i < vertIds.Count; i++)
+                {
+                    var id = vertIds[i];
+                    vertIdRemap.Add(id, i);
+                }
+
+                //Remap Ids to verts
+                for(int f = 0; f < tempMesh.faceVerts.Count; f++)
+                {
+                    for(int v = 0; v < tempMesh.faceVerts[f].rawVertId.Count; v++)
+                    {
+                        tempMesh.faceVerts[f].rawVertId[v] = vertIdRemap[tempMesh.faceVerts[f].rawVertId[v]];
+                    }
+                }
+
+                //Remap Ids to face ids
+                for (int f = 0; f < tempMesh.triList.Count; f++)
+                {
+                    var tri = tempMesh.triList[f];
+                    if(vertIdRemap.ContainsKey((int)tri.X))
+                    {
+                        tri.X = vertIdRemap[(int)tri.X];
+                    }
+                    if (vertIdRemap.ContainsKey((int)tri.Y))
+                    {
+                        tri.Y = vertIdRemap[(int)tri.Y];
+                    }
+                    if (vertIdRemap.ContainsKey((int)tri.Z))
+                    {
+                        tri.Z = vertIdRemap[(int)tri.Z];
+                    }
+
+                    tempMesh.triList[f] = tri;
+                }
+
                 tempMesh.vertCount = vertIds.Count;
                 totalVerts += vertIds.Count;
 
@@ -199,7 +242,7 @@ namespace LegacyObj
                 AquaObjectMethods.RemoveAllUnusedBones(aqo);
             }
 
-            AquaObjectMethods.CalcUNRMs(aqo, aqo.applyNormalAveraging, aqo.objc.unrmOffset != 0);
+            //AquaObjectMethods.CalcUNRMs(aqo, aqo.applyNormalAveraging, aqo.objc.unrmOffset != 0);
 
             //Set up PSETs and strips, and other per mesh data
             for (int i = 0; i < aqo.tempTris.Count; i++)

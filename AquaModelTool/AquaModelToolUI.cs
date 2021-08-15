@@ -1161,7 +1161,7 @@ namespace AquaModelTool
                         try
                         {
                             ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
-
+                            
                             //Dae fix because Assimp 4 and 5.X can't seem to properly get a root node.
                             if (Path.GetExtension(saveFileDialog.FileName) == ".dae")
                             {
