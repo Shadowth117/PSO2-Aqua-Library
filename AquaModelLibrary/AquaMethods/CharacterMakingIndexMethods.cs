@@ -3707,7 +3707,25 @@ namespace AquaModelLibrary
             File.WriteAllLines(Path.Combine(outputDirectory, $"General Character Animations.csv"), genAnimList);
             File.WriteAllLines(Path.Combine(outputDirectory, "DarkBlasts_DrivableVehicles.csv"), dbList);
 
+            //---------------------------Generate Pet List
+            List<string> classicPetOutput = new List<string>();
+            foreach (var str in EnemyData.classicPetNames)
+            {
+                classicPetOutput.Add(str + $",{ GetFileHash("enemy/" + str.Split(',')[2]) }");
+            }
+            File.WriteAllLines(Path.Combine(outputDirectory, "PetsClassic.csv"), classicPetOutput);
+
+            //---------------------------Generate NGS Pet List
+
+            //Placeholder until NGS pets are released
+
             //---------------------------Generate Enemy List
+            List<string> classicEnemyOutput = new List<string>();
+            foreach(var str in EnemyData.classicEnemyNames)
+            {
+                classicEnemyOutput.Add(str + $",{ GetFileHash("enemy/" + str.Split(',')[2]) }");
+            }
+            File.WriteAllLines(Path.Combine(outputDirectory, "EnemiesClassic.csv"), classicEnemyOutput);
 
             //---------------------------Generate NGS Enemy List
 
