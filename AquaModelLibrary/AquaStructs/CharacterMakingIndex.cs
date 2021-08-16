@@ -79,12 +79,14 @@ namespace AquaModelLibrary
         public static string classicCharCreate = $"ui_character_making.ice";
         public static string classicCommon = $"sy_common_text.ice";
         public static string classicLobbyAction = $"actor/lobby_action/pl_lobby_action_setting.ice";
+        public static string rebootActorName = $"actor/ac_name_text.ice";
         public static string rebootLobbyAction = $"f94e8bfb6ee674e39fa6bc1aa697bf82";
         public static string magSetting = "item/mag/it_mg_setting.ice";
 
         public static string partsTextName = "ui_charamake_parts.text";
         public static string acceTextName = "ui_accessories_text.text";
         public static string commonTextName = "common.text";
+        public static string actorNameName = "actor_name.text";
         public static string faceVarName = "face_variation.cmp.lua";
         public static string lacName = "lobby_action_setting.lac";
         public static string mgxName = "setting.mgx";

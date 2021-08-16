@@ -8,6 +8,171 @@ namespace AquaModelLibrary
 {
     public class EnemyData
     {
+        public static string rebootEnemy = "enemy/en_";
+        public static string[] rebootRegions = new string[] 
+        {
+            "r00",
+            "r01",
+            "r02",
+            "r03",
+            "r04",
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "",
+        };
+        public static string[] rebootFaction = new string[]
+        {
+            "gd",
+            "nat",
+            "unk",
+            "alt",
+            "ani",
+            "non",
+            "dbg",
+            "",
+        };
+        public static string[] rebootEnNames = new string[]
+        {
+            "9av",
+            "armma",
+            "bea",
+            "bir",
+            "bis",
+            "boa",
+            "bra",
+            "brs",
+            "box",
+            "cam",
+            "cas",
+            "cli",
+            "der",
+            "dks",
+            "dra",
+            "dro",
+            "dwf",
+            "dvs",
+            "fan",
+            "flg",
+            "flo",
+            "for",
+            "gia",
+            "gor",
+            "gos",
+            "hip",
+            "hog",
+            "hpo",
+            "hrp",
+            "ins",
+            "kic",
+            "kit",
+            "ktn",
+            "lzd",
+            "mag",
+            "monki",
+            "month",
+            "moo",
+            "MoveOnly",
+            "moveupdown",
+            "mtl",
+            "phe",
+            "pyc",
+            "rap",
+            "rbt",
+            "ShotL",
+            "ShotS",
+            "sin",
+            "sip",
+            "sli",
+            "sna",
+            "snk",
+            "sol",
+            "tao",
+            "tig",
+            "tis",
+            "tkm",
+            "ush",
+            "VerificationEnemy",
+            "wlf",
+            "wol",
+            "",
+        };
+
+        public static string[] rebootEnemyEnd = new string[]
+        {
+            "0",
+            "00",
+            "1",
+            "01",
+            "2",
+            "02",
+            "3",
+            "03",
+            "4",
+            "04",
+            "a",
+            "ax",
+            "axld",
+            "b",
+            "ba",
+            "bald",
+            "bi",
+            "c",
+            "d",
+            "e",
+            "ea",
+            "el",
+            "f",
+            "fl",
+            "hm",
+            "gs",
+            "lu",
+            "luld",
+            "m",
+            "mi",
+            "rai",
+            "ri",
+            "ribo",
+            "rild",
+            "sm",
+            "sn",
+            "sw",
+            "swbo",
+            "swld",
+            "th",
+            "thum",
+            "thuf",
+            "w",
+            "wi",
+            "yz",
+            "",
+        };
+
+        public static string[] rebootEndOther = new string[]
+        {
+            "common",
+            "eff",
+        };
+
+        public static string[] rebootEnemyMisc = new string[]
+        {
+            "en_common_boost_eff.ice",
+            "enemy/en_common_boost1.ice",
+            "enemy/en_common_boost2.ice",
+            "enemy/en_common_boost3.ice",
+            "enemy/en_common_boost4.ice",
+            "enemy/en_common_boost5.ice",
+            "enemy/en_common_boost1_rgn.ice",
+            "enemy/en_common_boost2_rgn.ice",
+            "enemy/en_common_boost3_rgn.ice",
+            "enemy/en_common_boost4_rgn.ice",
+            "enemy/en_common_boost5_rgn.ice",
+            "enemy/en_common_se.ice",
+            "enemy/en_effect_dead.ice"
+        };
+
+
         public static List<string> classicPetNames = new List<string>()
         {
             "Synchro Animations,シンクロウ モショーン,en_pe_anubis_g.ice",
@@ -86,6 +251,14 @@ namespace AquaModelLibrary
             "Popple aqn 2,ポップル aqn 2,en_pe_wiz_o02.ice",
             "Popple Model 2,ポップル モデル 2,en_pe_wiz_o02_mesh.ice",
             "Popple Effects,ポップル エフェクト,en_pe_wiz_o_eff.ice",
+        };
+
+        public static List<string> classicBaseStats = new List<string>()
+        {
+
+            "Base Stats Enemies,レベル　ベース,en_level_base.ice",
+            "Base Stats Masquerader (1-999),レベル　ベース マスカレーダ,en_level_base_masquerade.ice",
+            "Base Stats Sodam (1-200),レベル　ベース ソダム,en_level_base_bodelfoots.ice.",
         };
 
         public static List<string> classicEnemyNames = new List<string>(){
@@ -247,6 +420,7 @@ namespace AquaModelLibrary
             "Gommorus Primordial Darkness Animations 3,【原初の闇】ゴモルス モショーン 3,en_bodelfoot_common_god.ice",
             "Sodam Primordial Darkness Effects,【原初の闇】ソダム エフェクト,en_bodelfoot_eff.ice",
             "Sodam Primordial Darkness Model 2,【原初の闇】ソダム モデル 2,en_bodelfoot_u.ice",
+            "Sodam Primordial Darkness Model (4 man),【原初の闇】ソダム モデル (4人),en_bodelfoot_s.ice",
             "Magatsu Choopga Model,マガツ・レタルガ モデル,en_bohvn.ice",
             "Magatsu Choopga Animations,マガツ・レタルガ モショーン,en_bohvn_common.ice",
             "Magatsu Choopga Effect,マガツ・レタルガ エフェクト,en_bohvn_eff.ice",
@@ -621,8 +795,6 @@ namespace AquaModelLibrary
             "Grana Gwanahda Animations,グラナグワナーダ モショーン,en_id2doo_common.ice",
             "Lilipan,リリーパ族,en_kobito_a.ice",
             "Elder Lilipan,リリーパ族 (長),en_kobito_b.ice",
-            "Base Levels(?),レベル　ベース,en_level_base.ice",
-            "Base Levels Masquerader(?),レベル　ベース マスカレーダ,en_level_base_masquerade.ice",
             "Vardersoma Model,ヴァーダーソーマ モデル,en_little_mecha_a.ice",
             "Vardersoma Animations,ヴァーダーソーマ モショーン,en_little_mecha_common.ice",
             "Embryo Varder Model,エンブリオヴァーダー モデル,en_little_mecha_rare.ice",

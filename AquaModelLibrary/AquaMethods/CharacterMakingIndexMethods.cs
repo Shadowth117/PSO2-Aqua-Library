@@ -847,13 +847,14 @@ namespace AquaModelLibrary
             PSO2Text acceText = null;
             PSO2Text commonText = null;
             PSO2Text commonTextReboot = null;
+            PSO2Text actorNameTextReboot = null;
             LobbyActionCommon lac = null;
             List<int> magIds = null;
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
 
             aquaCMX = ExtractCMX(pso2_binDir, aquaCMX);
 
-            ReadCMXText(pso2_binDir, out partsText, out acceText, out commonText, out commonTextReboot);
+            ReadCMXText(pso2_binDir, out partsText, out acceText, out commonText, out commonTextReboot, out actorNameTextReboot);
 
             faceIds = GetFaceVariationLuaNameDict(pso2_binDir, faceIds);
 
@@ -917,8 +918,9 @@ namespace AquaModelLibrary
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
 
-            if(partsText != null)
+            if (partsText != null)
             {
                 for (int i = 0; i < partsText.text.Count; i++)
                 {
@@ -952,6 +954,13 @@ namespace AquaModelLibrary
                 for (int i = 0; i < commonTextReboot.text.Count; i++)
                 {
                     commRebootByCat.Add(commonTextReboot.categoryNames[i], commonTextReboot.text[i]);
+                }
+            }
+            if (actorNameTextReboot != null)
+            {
+                for (int i = 0; i < actorNameTextReboot.text.Count; i++)
+                {
+                    actorNameRebootByCat.Add(actorNameTextReboot.categoryNames[i], actorNameTextReboot.text[i]);
                 }
             }
 
@@ -3719,6 +3728,14 @@ namespace AquaModelLibrary
 
             //Placeholder until NGS pets are released
 
+            //---------------------------Generate Enemy Base Stats List
+            List<string> classicEnemyStatOutput = new List<string>();
+            foreach (var str in EnemyData.classicBaseStats)
+            {
+                classicEnemyStatOutput.Add(str + $",{ GetFileHash("enemy/" + str.Split(',')[2]) }");
+            }
+            File.WriteAllLines(Path.Combine(outputDirectory, "EnemyBaseStats.csv"), classicEnemyStatOutput);
+
             //---------------------------Generate Enemy List
             List<string> classicEnemyOutput = new List<string>();
             foreach(var str in EnemyData.classicEnemyNames)
@@ -3728,6 +3745,154 @@ namespace AquaModelLibrary
             File.WriteAllLines(Path.Combine(outputDirectory, "EnemiesClassic.csv"), classicEnemyOutput);
 
             //---------------------------Generate NGS Enemy List
+            List<string> ngsEnemyOutput = new List<string>();
+            Dictionary<string, string> processedMotions = new Dictionary<string, string>();
+            Dictionary<string, string> processedEffects = new Dictionary<string, string>();
+            List<string> usedMotions = new List<string>();
+            List<string> usedEffects = new List<string>();
+
+            masterNameList = new List<string>();
+            strNameDicts = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(actorNameRebootByCat, masterNameList, strNameDicts, "Enemy", true);
+
+            foreach (var rg in EnemyData.rebootRegions)
+            {
+                foreach(var fc in EnemyData.rebootFaction)
+                {
+                    foreach (var nm in EnemyData.rebootEnNames)
+                    {
+                        bool enemyFound = false;
+                        foreach (var ed in EnemyData.rebootEnemyEnd)
+                        {
+                            string _0 = "_";
+                            string _1 = "_";
+                            string _2 = "_";
+                            
+                            //Handle name underscoring in the case of null segments
+                            if(rg == "")
+                            {
+                                _0 = "";
+                            }
+                            if(fc == "")
+                            {
+                                _1 = "";
+                            }
+                            if(nm == "" || ed == "")
+                            {
+                                _2 = "";
+                            }
+
+                            string actorName = $"{rg}{_0}{fc}{_1}{nm}{_2}{ed}";
+                            string file = $"{EnemyData.rebootEnemy}{actorName}.ice";
+                            string fileHash = GetFileHash(file);
+                            string nameString = "";
+
+                            //Fix for cases where the internal name for actor_name.text uses the r01 designator, but not the file proper
+                            if(rg == "")
+                            {
+                                actorName = "r01_" + actorName;
+                            }
+
+                            foreach (var dict in strNameDicts)
+                            {
+                                if (dict.TryGetValue(actorName, out string str) && str != null && str != "" && str.Length > 0)
+                                {
+                                    nameString += str + ",";
+                                }
+                                else
+                                {
+                                    nameString += ",";
+                                }
+                            }
+
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(fileHash))))
+                            {
+                                ngsEnemyOutput.Add(nameString + file.Replace("enemy/", "") + "," + fileHash);
+                                enemyFound = true;
+                            }
+                        }
+
+                        //Check animations and effects
+                        string motion = $"{EnemyData.rebootEnemy}{fc}_{nm}_{EnemyData.rebootEndOther[0]}.ice";
+
+                        //Duplicates are fine if it makes sense for an enemy, but otherwise avoid them
+                        if (!processedMotions.ContainsKey(motion))
+                        {
+                            string motionHash = GetFileHash(motion);
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(motionHash))))
+                            {
+                                string motString = motion.Replace("enemy/", "") + "," + motionHash;
+                                processedMotions.Add(motion, motString);
+                            }
+                        }
+                        string effect = $"{EnemyData.rebootEnemy}{fc}_{nm}_{EnemyData.rebootEndOther[1]}.ice";
+                        if (!processedEffects.ContainsKey(effect))
+                        {
+                            string effectHash = GetFileHash(effect);
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(effectHash))))
+                            {
+                                string effString = effect.Replace("enemy/", "") + "," + effectHash;
+                                processedEffects.Add(effect, effString);
+                            }
+                        }
+
+                        //Add to output if there's a linked enemy
+                        if(enemyFound)
+                        {
+                            if(processedMotions.ContainsKey(motion))
+                            {
+                                ngsEnemyOutput.Add(processedMotions[motion]);
+                                usedMotions.Add(motion);
+                            }
+
+                            if(processedEffects.ContainsKey(effect))
+                            {
+                                ngsEnemyOutput.Add(processedEffects[effect]);
+                                usedEffects.Add(effect);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Add unused animations and effects
+            foreach(var key in processedMotions.Keys)
+            {
+                if(usedMotions.Contains(key))
+                {
+                    continue;
+                } else
+                {
+                    ngsEnemyOutput.Add(processedMotions[key]);
+                }
+            }
+            foreach (var key in processedEffects.Keys)
+            {
+                if (usedEffects.Contains(key))
+                {
+                    continue;
+                }
+                else
+                {
+                    ngsEnemyOutput.Add(processedEffects[key]);
+                }
+            }
+
+            File.WriteAllLines(Path.Combine(outputDirectory, "EnemiesNGS.csv"), ngsEnemyOutput);
+
+            //---------------------------Generate Miscellaneous NGS Enemy List
+            List<string> ngsMiscOutput = new List<string>();
+
+            foreach(var file in EnemyData.rebootEnemyMisc)
+            {
+                var hash = GetFileHash(file);
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(hash))))
+                {
+                    ngsMiscOutput.Add(file + "," + hash);
+                }
+            }
+
+            File.WriteAllLines(Path.Combine(outputDirectory, "EnemiesNGS Miscellaneous.csv"), ngsMiscOutput);
 
             //---------------------------Generate Weapon list 
 
@@ -3801,7 +3966,8 @@ namespace AquaModelLibrary
             return faceIds;
         }
 
-        public static void ReadCMXText(string pso2_binDir, out PSO2Text partsText, out PSO2Text acceText, out PSO2Text commonText, out PSO2Text commonTextReboot)
+        public static void ReadCMXText(string pso2_binDir, out PSO2Text partsText, out PSO2Text acceText, out PSO2Text commonText, out PSO2Text commonTextReboot, 
+            out PSO2Text actorNameText)
         {
             //Load partsText
             string partsTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicPartText));
@@ -3822,15 +3988,29 @@ namespace AquaModelLibrary
             commonText = GetTextConditional(commonTextPath, commonTextPathhNA, commonTextName);
 
             //Load commonText from reboot
-            if(Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
+            if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
             {
                 string commonTextRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(classicCommon)));
                 string commonTextRebootPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(classicCommon)));
 
                 commonTextReboot = GetTextConditional(commonTextRebootPath, commonTextRebootPathhNA, commonTextName);
-            } else
+            }
+            else
             {
                 commonTextReboot = null;
+            }
+
+            //Load reboot actor name text
+            if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
+            {
+                string actorNameTextRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootActorName)));
+                string actorNameTextRebootPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(rebootActorName)));
+
+                actorNameText = GetTextConditional(actorNameTextRebootPath, actorNameTextRebootPathhNA, actorNameName);
+            }
+            else
+            {
+                actorNameText = null;
             }
         }
 
