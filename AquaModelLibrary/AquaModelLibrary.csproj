@@ -187,7 +187,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Libraries\AssimpNet.dll" />
     <Content Include="Libraries\NvTriStripDotNet.dll" />
   </ItemGroup>
   <ItemGroup>
