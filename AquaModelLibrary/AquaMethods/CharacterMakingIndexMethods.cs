@@ -3785,6 +3785,8 @@ namespace AquaModelLibrary
                             string actorName = $"{rg}{_0}{fc}{_1}{nm}{_2}{ed}";
                             string file = $"{EnemyData.rebootEnemy}{actorName}.ice";
                             string fileHash = GetFileHash(file);
+                            string vetFile = file.Replace(".ice", "_ag.ice");
+                            string vetFileHash = GetFileHash(vetFile);
                             string nameString = "";
 
                             //Fix for cases where the internal name for actor_name.text uses the r01 designator, but not the file proper
@@ -3808,6 +3810,11 @@ namespace AquaModelLibrary
                             if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(fileHash))))
                             {
                                 ngsEnemyOutput.Add(nameString + file.Replace("enemy/", "") + "," + fileHash);
+                                enemyFound = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(vetFileHash))))
+                            {
+                                ngsEnemyOutput.Add(nameString + vetFile.Replace("enemy/", "") + "," + vetFileHash + ",ベテラン/金/銀,Veteran/Gold/Silver");
                                 enemyFound = true;
                             }
                         }

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AquaModelLibrary;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelTool
 {
@@ -224,8 +225,21 @@ namespace AquaModelTool
                         aquaUI.aqua.ReadModel(file);
 
 #if DEBUG
-                        //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
                         var test = aquaUI.aqua.aquaModels[0].models[0];
+
+                        for (int i = 0; i < test.tstaList.Count; i++)
+                        {
+                            string tex = test.texfList[i].texName.GetString();
+                            string tex2 = tex.Replace(".dds", "_d.dds");
+                            var texf = test.texfList[i];
+                            var tsta = test.tstaList[i];
+                            texf.texName = PSO2String.GeneratePSO2String(tex2);
+
+                            tsta.texName = PSO2String.GeneratePSO2String(tex2);
+                            test.texfList[i] = texf;
+                            test.tstaList[i] = tsta;
+                        }
+                        //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
                         for(int i = 0; i < test.tstaList.Count; i++)
                         {
                             Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
@@ -241,7 +255,7 @@ namespace AquaModelTool
                                 test.vtxlList[0].vertPositions[j] = vec3;
                             }
                         }*/
-                        
+
                         test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);

@@ -1684,7 +1684,7 @@ namespace AquaModelLibrary
 
             return vsetList.Count;
         }
-
+        /*
         public int splitVSETPerMeshNew()
         {
             bool continueSplitting = false;
@@ -1754,7 +1754,7 @@ namespace AquaModelLibrary
             objc.vsetCount = vsetList.Count;
 
             return vsetList.Count;
-        }
+        }*/
 
         public int getStripIndexCount()
         {

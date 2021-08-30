@@ -975,15 +975,12 @@ namespace AquaModelLibrary
                     }
 
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
+                    outModel = matModelSplit;
                     if (useRigid == false)
                     {
-                        outModel = matModelSplit;
                         //BatchSplitByBoneCount(matModelSplit, outModel, 255);
                         //RemoveAllUnusedBones(outModel);
                         GenerateGlobalBonePalette(outModel);
-                    } else
-                    {
-                        outModel = matModelSplit;
                     }
                     if (splitVerts)
                     {
@@ -995,7 +992,7 @@ namespace AquaModelLibrary
                     {
                         GenerateMaterial(outModel, aquaModels[msI].models[aqI].tempMats[mat], true);
                     }
-
+                                            outModel = matModelSplit;
                     //Set up PSETs and strips, and other per mesh data
                     for (int i = 0; i < outModel.tempTris.Count; i++)
                     {

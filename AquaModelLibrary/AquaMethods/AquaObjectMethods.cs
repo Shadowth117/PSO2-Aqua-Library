@@ -13,7 +13,7 @@ namespace AquaModelLibrary
 {
     public unsafe static class AquaObjectMethods
     {
-        public static readonly List<string> DefaultShaderNames = new List<string>() { "0301p", "0301" };
+        public static readonly List<string> DefaultShaderNames = new List<string>() { "0398p", "0398" };
 
         public static void VTXLFromFaceVerts(AquaObject model)
         {
@@ -2104,6 +2104,7 @@ namespace AquaModelLibrary
                 GenerateSpecialMaterialParameters(mat);
             }
             int texArrayStartIndex = model.tstaList.Count;
+            List<int> tempTexIds = new List<int>();
             TSET tset = new TSET();
             MATE mate = new MATE();
             SHAD shad;
@@ -2119,6 +2120,22 @@ namespace AquaModelLibrary
             //Set up textures
             for (int i = 0; i < mat.texNames.Count; i++)
             {
+                bool foundCopy = false;
+                for(int texIndex = 0; texIndex < model.texfList.Count; texIndex++)
+                {
+                    if(mat.texNames[i].Equals(model.texfList[texIndex].texName.GetString()))
+                    {
+                        tempTexIds.Add(texIndex);
+                        foundCopy = true;
+                        break;
+                    }
+                }
+
+                if(foundCopy == true)
+                {
+                    continue;
+                }
+
                 TEXF texf = new TEXF();
                 TSTA tsta = new TSTA();
 
@@ -2159,17 +2176,12 @@ namespace AquaModelLibrary
 
                 model.texfList.Add(texf);
                 model.tstaList.Add(tsta);
+                tempTexIds.Add(model.texfList.Count - 1);
             }
 
-            //Set up texture set. If 0, we leave it all default
-            if (mat.texNames.Count > 0)
-            {
-                tset.texCount = mat.texNames.Count;
-                for(int tex = 0; tex < mat.texNames.Count; tex++ )
-                {
-                    tset.tstaTexIDs.Add(texArrayStartIndex + tex);
-                }
-            }
+            //Set up texture set.
+            tset.tstaTexIDs = tempTexIds;
+            tset.texCount = tempTexIds.Count;
 
             //Set up material
             if (mat.shaderNames == null)
@@ -2330,7 +2342,7 @@ namespace AquaModelLibrary
 
         //This shouldn't be necessary, but library binding issues in maxscript necessitated it over the Reloaded.Memory implementation. System.Runtime.CompilerServices.Unsafe causes errors otherwise.
         //Borrowed from: https://stackoverflow.com/questions/42154908/cannot-take-the-address-of-get-the-size-of-or-declare-a-pointer-to-a-managed-t
-        public static byte[] ConvertStruct<T>(ref T str) where T : struct
+        private static byte[] ConvertStruct<T>(ref T str) where T : struct
         {
             int size = Marshal.SizeOf(str);
             IntPtr arrPtr = Marshal.AllocHGlobal(size);

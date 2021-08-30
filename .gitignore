@@ -347,3 +347,9 @@ CMXPatcher/obj/
 .vs/AquaModelLibrary/v16/TestStore/0/000.testlog
 
 .vs/AquaModelLibrary/v16/TestStore/0/testlog.manifest
+
+x64/
+
+AMLNoesisPlugin/
+
+.vs/
