@@ -2365,9 +2365,22 @@ namespace AquaModelLibrary
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
-        public static string ReadUTF16String(BufferedStreamReader streamReader, long end)
+        public static string ReadUTF16String(BufferedStreamReader streamReader, long end, bool quickMode = true)
         {
-            string str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Come up with a better way handling sometime because I hate this.
+            string str;
+            // There's really no string limit, but it takes a long time to read these accurately. To avoid this attempt reading a short amount first. Then, go to failsafe if needed.
+            if(quickMode == true)
+            {
+                str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), 0x60));
+                int strEnd = str.IndexOf(char.MinValue);
+
+                //Return the string if the buffer is valid
+                if(strEnd != -1)
+                {
+                    return str.Remove(strEnd);
+                }
+            }
+            str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Come up with a better way handling sometime because I hate this.
             return str.Remove(str.IndexOf(char.MinValue));
         }
 

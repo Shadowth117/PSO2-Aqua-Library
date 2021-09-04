@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,7 +13,7 @@ using static AquaModelLibrary.VTBFMethods;
 
 namespace AquaModelLibrary
 {
-    public static class CharacterMakingIndexMethods
+    public unsafe static class CharacterMakingIndexMethods
     {
         public static CharacterMakingIndex ReadCMX(string fileName, CharacterMakingIndex cmx = null)
         {
@@ -149,8 +150,7 @@ namespace AquaModelLibrary
                         cmx.hairDict.Add((int)data[0][0xFF], parseHAIR(data));
                         break;
                     case "COL ":
-                        //These are entirely different for VTBF. Not really sure what to do with them for now.
-                        //parts.colTags.Add((int)data[0][0xFF], data);
+                        cmx.legacyColDict.Add((int)data[0][0xFF], parseCOL(data));
                         break;
                     case "BBLY":
                         cmx.innerWearDict.Add((int)data[0][0xFF], parseBBLY(data));
@@ -964,6 +964,36 @@ namespace AquaModelLibrary
                 }
             }
 
+            //---------------------------Dump character palette data to .png
+            if(aquaCMX.colDict.Count > 0 || aquaCMX.legacyColDict.Count > 0)
+            {
+                string paletteOut = Path.Combine(outputDirectory, colorPaletteOut);
+                Directory.CreateDirectory(paletteOut);
+
+                foreach (int id in aquaCMX.colDict.Keys)
+                {
+                    var col = aquaCMX.colDict[id];
+                    fixed (byte* ptr = col.niflCol.colorData)
+                    {
+                        using (Bitmap image = new Bitmap(7, 6, 7 * 4, System.Drawing.Imaging.PixelFormat.Format32bppRgb, new IntPtr(ptr)))
+                        {
+                            image.Save(Path.Combine(paletteOut, $"{col.textString.Replace("\0", "")}_{id}.png"));
+                        }
+                    }
+                }
+                foreach (int id in aquaCMX.legacyColDict.Keys)
+                {
+                    var col = aquaCMX.legacyColDict[id];
+                    fixed (byte* ptr = col.vtbfCol.colorData)
+                    {
+                        using (Bitmap image = new Bitmap(21, 6, 21 * 4, System.Drawing.Imaging.PixelFormat.Format32bppRgb, new IntPtr(ptr)))
+                        {
+                            image.Save(Path.Combine(paletteOut, $"{col.utf8Name.Replace("\0", "")}_{id}_{col.utf16Name.Replace("\0","")}.png"));
+                        }
+                    }
+                }
+            }
+
             //---------------------------Parse out costume and body (includes outers and cast bodies)
             StringBuilder outputCostumeMale = new StringBuilder();
             StringBuilder outputCostumeFemale = new StringBuilder();
@@ -1030,12 +1060,23 @@ namespace AquaModelLibrary
                 }
 
                 //Decide if bd or ow
+                int soundId = -1;
                 string typeString = "bd_";
                 bool classicOwCheck = id >= 20000 && id < 40000;
                 bool rebootOwCheck = id >= 100000 && id < 300000;
                 if (classicOwCheck == true || rebootOwCheck == true)
                 {
                     typeString = "ow_";
+                    if (aquaCMX.outerDict.ContainsKey(id))
+                    {
+                        soundId = aquaCMX.outerDict[id].body.costumeSoundId;
+                    }
+                } else
+                {
+                    if (aquaCMX.costumeDict.ContainsKey(id))
+                    {
+                        soundId = aquaCMX.costumeDict[id].body.costumeSoundId;
+                    }
                 }
 
                 //Decide if it needs to be handled as a reboot file or not
@@ -1045,6 +1086,9 @@ namespace AquaModelLibrary
                     string rebEx = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{(id + 50000)}.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInner.Replace(".ice", "_ex.ice"));
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
@@ -1066,7 +1110,12 @@ namespace AquaModelLibrary
 
                     output += "\n";
                     output = AddBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
+                    if(File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                    }
 
+                    output += AddOutfitSound(pso2_binDir, $"{rebootStart}bs_", soundId);
                 }
                 else
                 {
@@ -1086,6 +1135,7 @@ namespace AquaModelLibrary
 
                     output += "\n";
                     output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
+                    output += AddOutfitSound(pso2_binDir, $"{classicStart}bs_", soundId);
                 }
 
                 //Decide which type this is
@@ -1194,6 +1244,13 @@ namespace AquaModelLibrary
                     output = $"[Unnamed {id}]" + output;
                 }
 
+                //Get SoundID
+                int soundId = -1;
+                if (aquaCMX.baseWearDict.ContainsKey(id))
+                {
+                    soundId = aquaCMX.baseWearDict[id].body.costumeSoundId;
+                }
+
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
                 if (aquaCMX.baseWearIdLink.ContainsKey(id))
@@ -1207,6 +1264,9 @@ namespace AquaModelLibrary
                     string rebEx = $"{rebootExStart}bw_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{(id + 50000)}.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInner.Replace(".ice", "_ex.ice"));
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
@@ -1232,7 +1292,11 @@ namespace AquaModelLibrary
 
                     output += "\n";
                     output = AddBasewearExtraFiles(output, rebEx, pso2_binDir, false);
-
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                    }
+                    output += AddOutfitSound(pso2_binDir, $"{rebootStart}bs_", soundId);
                 }
                 else
                 {
@@ -1257,7 +1321,7 @@ namespace AquaModelLibrary
 
                     output += "\n";
                     output = AddBasewearExtraFiles(output, classic, pso2_binDir, true);
-
+                    output += AddOutfitSound(pso2_binDir, $"{classicStart}bs_", soundId);
                 }
 
                 //Decide which type this is
@@ -1547,8 +1611,8 @@ namespace AquaModelLibrary
             }
             WriteCSV(outputDirectory, "CastArms.csv", outputCastArmMale);
             WriteCSV(outputDirectory, "CasealArms.csv", outputCastArmFemale);
-            WriteCSV(outputDirectory, "NGSCastArms.csv", outputNGSCastArmMale);
-            WriteCSV(outputDirectory, "NGSCasealArms.csv", outputNGSCastArmFemale);
+            WriteCSV(outputDirectory, "CastArmsNGS.csv", outputNGSCastArmMale);
+            WriteCSV(outputDirectory, "CasealArmsNGS.csv", outputNGSCastArmFemale);
 
             //---------------------------Parse out cast legs
             StringBuilder outputCastLegMale = new StringBuilder();
@@ -1676,8 +1740,8 @@ namespace AquaModelLibrary
             }
             WriteCSV(outputDirectory, "CastLegs.csv", outputCastLegMale);
             WriteCSV(outputDirectory, "CasealLegs.csv", outputCastLegFemale);
-            WriteCSV(outputDirectory, "NGSCastLegs.csv", outputNGSCastLegMale);
-            WriteCSV(outputDirectory, "NGSCasealLegs.csv", outputNGSCastLegFemale);
+            WriteCSV(outputDirectory, "CastLegsNGS.csv", outputNGSCastLegMale);
+            WriteCSV(outputDirectory, "CasealLegsNGS.csv", outputNGSCastLegFemale);
 
             //---------------------------Parse out body paint
             StringBuilder outputMaleBodyPaint = new StringBuilder();
@@ -1826,11 +1890,11 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "FemaleBodyPaint.csv", outputFemaleBodyPaint);
             WriteCSV(outputDirectory, "MaleLayeredBodyPaint.csv", outputMaleLayeredBodyPaint);
             WriteCSV(outputDirectory, "FemaleLayeredBodyPaint.csv", outputFemaleLayeredBodyPaint);
-            WriteCSV(outputDirectory, "NGSMaleBodyPaint.csv", outputNGSMaleBodyPaint);
-            WriteCSV(outputDirectory, "NGSFemaleBodyPaint.csv", outputNGSFemaleBodyPaint);
-            WriteCSV(outputDirectory, "NGSCastBodyPaint.csv", outputNGSCastMaleBodyPaint);
-            WriteCSV(outputDirectory, "NGSCasealBodyPaint.csv", outputNGSCastFemaleBodyPaint);
-            WriteCSV(outputDirectory, "NGSGenderlessBodyPaint.csv", outputNGSGenderlessBodyPaint);
+            WriteCSV(outputDirectory, "MaleNGSBodyPaint.csv", outputNGSMaleBodyPaint);
+            WriteCSV(outputDirectory, "FemaleNGSBodyPaint.csv", outputNGSFemaleBodyPaint);
+            WriteCSV(outputDirectory, "CastNGSBodyPaint.csv", outputNGSCastMaleBodyPaint);
+            WriteCSV(outputDirectory, "CasealNGSBodyPaint.csv", outputNGSCastFemaleBodyPaint);
+            WriteCSV(outputDirectory, "GenderlessNGSBodyPaint.csv", outputNGSGenderlessBodyPaint);
 
             //---------------------------Parse out stickers
             StringBuilder outputStickers = new StringBuilder();
@@ -2055,7 +2119,7 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "MaleHair.csv", outputMaleHair);
             WriteCSV(outputDirectory, "FemaleHair.csv", outputFemaleHair);
             WriteCSV(outputDirectory, "CasealHair.csv", outputCasealHair);
-            WriteCSV(outputDirectory, "NGSHair.csv", outputNGSHair);
+            WriteCSV(outputDirectory, "AllHairNGS.csv", outputNGSHair);
 
             //---------------------------Parse out Eye
             StringBuilder outputEyes = new StringBuilder();
@@ -2152,7 +2216,7 @@ namespace AquaModelLibrary
                 }
             }
             WriteCSV(outputDirectory, "Eyes.csv", outputEyes);
-            WriteCSV(outputDirectory, "NGSEyes.csv", outputNGSEyes);
+            WriteCSV(outputDirectory, "EyesNGS.csv", outputNGSEyes);
 
             //---------------------------Parse out EYEB
             StringBuilder outputEyebrows = new StringBuilder();
@@ -2248,7 +2312,7 @@ namespace AquaModelLibrary
                 }
             }
             WriteCSV(outputDirectory, "Eyebrows.csv", outputEyebrows);
-            WriteCSV(outputDirectory, "NGSEyebrows.csv", outputNGSEyebrows);
+            WriteCSV(outputDirectory, "EyebrowsNGS.csv", outputNGSEyebrows);
 
             //---------------------------Parse out EYEL
             StringBuilder outputEyelashes = new StringBuilder();
@@ -2344,7 +2408,7 @@ namespace AquaModelLibrary
                 }
             }
             WriteCSV(outputDirectory, "Eyelashes.csv", outputEyelashes);
-            WriteCSV(outputDirectory, "NGSEyelashes.csv", outputNGSEyelashes);
+            WriteCSV(outputDirectory, "EyelashesNGS.csv", outputNGSEyelashes);
 
             //---------------------------Parse out ACCE //Stored under decoy in a99be286e3a7e1b45d88a3ea4d6c18c4
             StringBuilder outputAccessories = new StringBuilder();
@@ -2531,7 +2595,7 @@ namespace AquaModelLibrary
                 }
             }
             WriteCSV(outputDirectory, "Skins.csv", outputSkin);
-            WriteCSV(outputDirectory, "NGSSkins.csv", outputNGSSkin);
+            WriteCSV(outputDirectory, "SkinsNGS.csv", outputNGSSkin);
 
             //---------------------------Parse out FCP1, Face Textures
             StringBuilder outputFCP1 = new StringBuilder();
@@ -2638,7 +2702,7 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "FaceTextures.csv", outputFCP1);
             if (outputNGSFCP1.Length > 0)
             {
-                WriteCSV(outputDirectory, "NGSFaceTextures.csv", outputNGSFCP1);
+                WriteCSV(outputDirectory, "FaceTexturesNGS.csv", outputNGSFCP1);
             }
 
             //---------------------------Parse out FCP2
@@ -2747,7 +2811,7 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "FacePaint.csv", outputFCP2);
             if (outputNGSFCP2.Length > 0)
             {
-                WriteCSV(outputDirectory, "NGSFacePaint.csv", outputNGSFCP2);
+                WriteCSV(outputDirectory, "FacePaintNGS.csv", outputNGSFCP2);
             }
 
             //---------------------------Parse out FACE //face_variation.cmp.lua in 75b1632526cd6a1039625349df6ee8dd used to map file face ids to .text ids
@@ -2801,7 +2865,7 @@ namespace AquaModelLibrary
                 }
                 output += $"{id},";
 
-                //Account for lack of a name on an outfit
+                //Account for lack of a name for a face
                 if (named == false)
                 {
                     output = $"[Unnamed {id}]" + output;
@@ -2894,8 +2958,287 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "CasealFaces_Heads.csv", outputCastFemaleFace);
             WriteCSV(outputDirectory, "MaleDeumanFaces.csv", outputDewmanMaleFace);
             WriteCSV(outputDirectory, "FemaleDeumanFaces.csv", outputDewmanFemaleFace);
-            WriteCSV(outputDirectory, "NGSFaces.csv", outputNGSFace);
+            WriteCSV(outputDirectory, "AllFacesNGS.csv", outputNGSFace);
+            //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "ears", true);
 
+            if (aquaCMX.ngsEarDict.Count > 0 || masterIdList.Count > 0)
+            {
+                StringBuilder outputNGSEars = new StringBuilder();
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    string output = "";
+                    bool named = false;
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            named = true;
+                            output += str + ",";
+                        }
+                        else
+                        {
+                            output += ",";
+                        }
+                    }
+                    output += $"{id},";
+
+                    //Account for lack of a name on an outfit
+                    if (named == false)
+                    {
+                        output = $"[Unnamed {id}]" + output;
+                    }
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    if (id >= 100000)
+                    {
+                        string reb = $"{rebootStart}ea_{id}.ice";
+                        string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
+                        string rebHash = GetFileHash(reb);
+
+                        output += rebHash;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            output += ", (Not found)";
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + earIcon + id + ".ice");
+                        output += "," + iconStr;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+
+                    }
+                    else
+                    {
+                        string finalId = ToFive(id);
+                        string classic = $"{classicStart}ea_{finalId}.ice";
+
+                        var classicHash = GetFileHash(classic);
+
+                        output += classicHash;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            output += ", (Not found)";
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + earIcon + finalId + ".ice");
+                        output += "," + iconStr;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+
+                    }
+
+                    outputNGSEars.Append(output);
+
+                }
+                WriteCSV(outputDirectory, "EarsNGS.csv", outputNGSEars);
+            }
+
+            //---------------------------Parse out NGS teeth 
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
+
+            if (aquaCMX.ngsTeethDict.Count > 0 || masterIdList.Count > 0)
+            {
+                StringBuilder outputNGSTeeth = new StringBuilder();
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    string output = "";
+                    bool named = false;
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            named = true;
+                            output += str + ",";
+                        }
+                        else
+                        {
+                            output += ",";
+                        }
+                    }
+                    output += $"{id},";
+
+                    //Account for lack of a name on an outfit
+                    if (named == false)
+                    {
+                        output = $"[Unnamed {id}]" + output;
+                    }
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    if (id >= 100000)
+                    {
+                        string reb = $"{rebootStart}de_{id}.ice";
+                        string rebEx = $"{rebootExStart}de_{id}_ex.ice";
+                        string rebHash = GetFileHash(reb);
+                        string rebExHash = GetFileHash(rebEx);
+
+                        output += rebHash;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            output += ", (Not found)";
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + teethIcon + id + ".ice");
+                        output += "," + iconStr;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+                    }
+                    else
+                    {
+                        string finalId = ToFive(id);
+                        string classic = $"{classicStart}de_{finalId}.ice";
+
+                        var classicHash = GetFileHash(classic);
+
+                        output += classicHash;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            output += ", (Not found)";
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + teethIcon + finalId + ".ice");
+                        output += "," + iconStr;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+
+                    }
+
+                    outputNGSTeeth.Append(output);
+
+                }
+                WriteCSV(outputDirectory, "TeethNGS.csv", outputNGSTeeth);
+            }
+
+            //---------------------------Parse out NGS horns 
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
+
+            if (aquaCMX.ngsHornDict.Count > 0 || masterIdList.Count > 0)
+            {
+                StringBuilder outputNGSHorns = new StringBuilder();
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsHornDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    //Skip the なし horn entry. I'm not even sure why that's in there.
+                    if (id == 0)
+                    {
+                        continue;
+                    }
+                    string output = "";
+                    bool named = false;
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            named = true;
+                            output += str + ",";
+                        }
+                        else
+                        {
+                            output += ",";
+                        }
+                    }
+                    output += $"{id},";
+
+                    //Account for lack of a name on an outfit
+                    if (named == false)
+                    {
+                        output = $"[Unnamed {id}]" + output;
+                    }
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    if (id >= 100000)
+                    {
+                        string reb = $"{rebootStart}hn_{id}.ice";
+                        string rebEx = $"{rebootExStart}hn_{id}_ex.ice";
+                        string rebHash = GetFileHash(reb);
+                        string rebExHash = GetFileHash(rebEx);
+
+                        output += rebHash;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            output += ", (Not found)";
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + hornIcon + id + ".ice");
+                        output += "," + iconStr;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+                    }
+                    else
+                    {
+                        string finalId = ToFive(id);
+                        string classic = $"{classicStart}hn_{finalId}.ice";
+
+                        var classicHash = GetFileHash(classic);
+
+                        output += classicHash;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            output += ", (Not found)";
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + hornIcon + finalId + ".ice");
+                        output += "," + iconStr;
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+
+                    }
+
+                    outputNGSHorns.Append(output);
+
+                }
+                WriteCSV(outputDirectory, "HornsNGS.csv", outputNGSHorns);
+            }
             //---------------------------------------------------------------------------------------//End CMX related ids
 
             //---------------------------Parse out voices 
@@ -3099,277 +3442,6 @@ namespace AquaModelLibrary
 
                 WriteCSV(outputDirectory, "LobbyActions.csv", lobbyActions);
             }
-            //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
-            StringBuilder outputNGSEars = new StringBuilder();
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "ears", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                string output = "";
-                bool named = false;
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
-                    }
-                }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}ea_{id}.ice";
-                    string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + earIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-
-                }
-                else
-                {
-                    string finalId = ToFive(id);
-                    string classic = $"{classicStart}ea_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + earIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-
-                }
-
-                outputNGSEars.Append(output);
-
-            }
-            WriteCSV(outputDirectory, "NGSEars.csv", outputNGSEars);
-
-            //---------------------------Parse out NGS teeth 
-            StringBuilder outputNGSTeeth = new StringBuilder();
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                string output = "";
-                bool named = false;
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
-                    }
-                }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}de_{id}.ice";
-                    string rebEx = $"{rebootExStart}de_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + teethIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-                }
-                else
-                {
-                    string finalId = ToFive(id);
-                    string classic = $"{classicStart}de_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + teethIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-
-                }
-
-                outputNGSTeeth.Append(output);
-
-            }
-            WriteCSV(outputDirectory, "NGSTeeth.csv", outputNGSTeeth);
-
-            //---------------------------Parse out NGS horns 
-            StringBuilder outputNGSHorns = new StringBuilder();
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                //Skip the なし horn entry. I'm not even sure why that's in there.
-                if (id == 0)
-                {
-                    continue;
-                }
-                string output = "";
-                bool named = false;
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
-                    }
-                }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}hn_{id}.ice";
-                    string rebEx = $"{rebootExStart}hn_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + hornIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-                }
-                else
-                {
-                    string finalId = ToFive(id);
-                    string classic = $"{classicStart}hn_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + hornIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
-
-                }
-
-                outputNGSHorns.Append(output);
-
-            }
-            WriteCSV(outputDirectory, "NGSHorns.csv", outputNGSHorns);
 
             //---------------------------Get Substitute Motion files -- 
             if (commonTextReboot != null)
@@ -4113,12 +4185,12 @@ namespace AquaModelLibrary
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
-                output += ",[Alt Model]," + rpCheck + "\n";
+                output += $",[Alt Model],{rpCheck}\n";
             }
             //Aqv archive
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
             {
-                output += ",[Aqv]," + bmCheck + "\n";
+                output += $",[Aqv],{bmCheck}\n";
             }
 
             //NGS doesn't have these sorts of files
@@ -4127,7 +4199,7 @@ namespace AquaModelLibrary
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
-                    output += ",[Hand Textures]," + hnCheck + "\n";
+                    output += $",[Hand Textures],{hnCheck}\n";
                 }
             }
 
@@ -4142,7 +4214,7 @@ namespace AquaModelLibrary
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
-                output += ",[Alt Model]," + rpCheck + "\n";
+                output += $",[Alt Model],{rpCheck}\n";
             }
 
             //NGS doesn't have these sorts of files
@@ -4151,11 +4223,26 @@ namespace AquaModelLibrary
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
-                    output += ",[Hand Textures]," + hnCheck + "\n";
+                    output += $",[Hand Textures],{hnCheck}\n";
                 }
             }
 
             return output;
+        }
+
+        private static string AddOutfitSound(string pso2_binDir, string partialFilename, int soundId)
+        {
+            if(soundId != -1)
+            {
+                var soundFileUnhash = partialFilename + ToFive(soundId) + ".ice";
+                string soundFile = GetFileHash(partialFilename + ToFive(soundId) + ".ice");
+                if(File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
+                {
+                    return $",[Footstep sounds],{soundFile}\n";
+                }
+            }
+
+            return "";
         }
 
         public static void GatherDictKeys<T>(List<int> masterIdList, Dictionary<int, T>.KeyCollection keys)

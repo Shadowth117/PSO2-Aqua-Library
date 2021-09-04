@@ -2176,6 +2176,36 @@ namespace AquaModelLibrary
             return bcln;
         }
 
+        public static VTBF_COLObject parseCOL(List<Dictionary<int, object>> colRaw)
+        {
+            VTBF_COLObject vtbfCol = new VTBF_COLObject();
+            vtbfCol.vtbfCol = new VTBF_COL();
+            if(colRaw[0].ContainsKey(0xFF))
+            {
+                vtbfCol.vtbfCol.id = (int)colRaw[0][0xFF];
+            } else
+            {
+                vtbfCol.vtbfCol.id = -1;
+            }
+            vtbfCol.vtbfCol.utf8String = (byte[])colRaw[0][0x31];
+
+            //Convert shorts to be read as utf16 string
+            if(colRaw[0].ContainsKey(0x32))
+            {
+                var shorts = (short[])colRaw[0][0x32];
+                var bytes = new byte[shorts.Length * 2];
+                Buffer.BlockCopy(shorts, 0, bytes, 0, shorts.Length * 2);
+
+                vtbfCol.vtbfCol.utf16String = bytes;
+                vtbfCol.utf16Name = Encoding.Unicode.GetString(vtbfCol.vtbfCol.utf16String);
+            }
+
+            vtbfCol.vtbfCol.colorData = (byte[])colRaw[0][0x30];
+            vtbfCol.utf8Name = Encoding.UTF8.GetString(vtbfCol.vtbfCol.utf8String);
+
+            return vtbfCol;
+        }
+
         public static ACCEObject parseACCE(List<Dictionary<int, object>> acceRaw)
         {
             ACCEObject acce = new ACCEObject();

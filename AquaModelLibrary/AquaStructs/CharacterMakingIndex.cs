@@ -94,6 +94,8 @@ namespace AquaModelLibrary
         public static string pbCreatures = "photon_blast/photon_blast_";
         public static string db_vehicle = "vehicle/";
 
+        public static string colorPaletteOut = @"colorPalettes\";
+
         public static List<string> playerEffects =  new List<string>()
             {
                 "actor/shot/effect_2dg.ice",
@@ -422,6 +424,8 @@ namespace AquaModelLibrary
 
         public Dictionary<int, HAIRObject> hairDict = new Dictionary<int, HAIRObject>();
         public Dictionary<int, NIFL_COLObject> colDict = new Dictionary<int, NIFL_COLObject>();
+        public Dictionary<int, VTBF_COLObject> legacyColDict = new Dictionary<int, VTBF_COLObject>();
+
         public List<Unk_IntField> unkList = new List<Unk_IntField>();
         public Dictionary<int, BCLN> costumeIdLink = new Dictionary<int, BCLN>();
 
@@ -992,18 +996,35 @@ namespace AquaModelLibrary
             public short unkShort0;
         }
 
+        public class VTBF_COLObject : BaseCMXObject
+        {
+            public VTBF_COL vtbfCol;
+            public string utf8Name;
+            public string utf16Name;
+        }
+
+        //Character color data ranges as PixelFormat.Format32bppRgb. 21 x 6 pixels. Every 3 columns is one area, but only the middle column seems used ingame.
+        //Left and right columns seem like they may have been related to either ingame shading, as the deuman one does not go nearly as dark as the others, but it's hard to say.
+        public class VTBF_COL
+        {
+            public int id;
+            public byte[] utf8String;
+            public byte[] utf16String;
+            public byte[] colorData;   //Should be 0x1F8 bytes. 
+        }
+
         public class NIFL_COLObject : BaseCMXObject
         {
             public NIFL_COL niflCol;
             public string textString;
         }
 
-        //The color data here seems to be totally different than before so data just won't be compatible with the old format, not that we understood it before.
+        //Character color data ranges as PixelFormat.Format32bppRgb. 7 x 6 pixels. Same main data as old VTBF_COL, just without the vestigial ranges.
         public unsafe struct NIFL_COL
         {
             public int id;
             public int textStringPtr;
-            public fixed int colorData[42];
+            public fixed byte colorData[0xA8];
         }
 
         //This maybe color related. But I have no idea what it's supposed to do.

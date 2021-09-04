@@ -226,7 +226,7 @@ namespace AquaModelTool
 
 #if DEBUG
                         var test = aquaUI.aqua.aquaModels[0].models[0];
-
+                        /*
                         for (int i = 0; i < test.tstaList.Count; i++)
                         {
                             string tex = test.texfList[i].texName.GetString();
@@ -238,7 +238,7 @@ namespace AquaModelTool
                             tsta.texName = PSO2String.GeneratePSO2String(tex2);
                             test.texfList[i] = texf;
                             test.tstaList[i] = tsta;
-                        }
+                        }*/
                         //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
                         for(int i = 0; i < test.tstaList.Count; i++)
                         {
