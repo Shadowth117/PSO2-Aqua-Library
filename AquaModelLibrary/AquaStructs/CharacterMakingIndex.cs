@@ -408,7 +408,7 @@ namespace AquaModelLibrary
 
         public Dictionary<int, FACEObject> faceDict = new Dictionary<int, FACEObject>();
         public Dictionary<int, FCMNObject> fcmnDict = new Dictionary<int, FCMNObject>();
-        public Dictionary<int, NGS_FACEObject> ngsFaceDict = new Dictionary<int, NGS_FACEObject>();
+        public Dictionary<int, FaceTextureObject> faceTextureDict = new Dictionary<int, FaceTextureObject>();
         public Dictionary<int, FCPObject> fcpDict = new Dictionary<int, FCPObject>();
 
         public Dictionary<int, ACCEObject> accessoryDict = new Dictionary<int, ACCEObject>();
@@ -627,9 +627,9 @@ namespace AquaModelLibrary
             public int faceAnim10Ptr;
         }
 
-        public class NGS_FACEObject : BaseCMXObject
+        public class FaceTextureObject : BaseCMXObject
         {
-            public NGS_FACE ngsFace;
+            public FaceTextures ngsFace;
             public string texString1;
             public string texString2;
             public string texString3;
@@ -637,7 +637,7 @@ namespace AquaModelLibrary
             public string texString4;
         }
 
-        public struct NGS_FACE
+        public struct FaceTextures
         {
             public int id;
             public int texString1Ptr;
@@ -1055,7 +1055,7 @@ namespace AquaModelLibrary
 
             public int faceAddress; //FACE All heads
             public int faceMotionAddress; //Face motions
-            public int rebootFaceAddress; //NGS Faces?
+            public int faceTextureAddress; //NGS Faces?
             public int faceTexturesAddress; //Face textures and face paint
 
             public int accessoryAddress; //ACCE Accessories
@@ -1092,7 +1092,7 @@ namespace AquaModelLibrary
 
             public int faceCount;
             public int faceMotionCount;
-            public int rebootFaceCount;
+            public int faceTextureCount;
             public int faceTexturesCount;
 
             public int accessoryCount;

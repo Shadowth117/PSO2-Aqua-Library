@@ -204,7 +204,7 @@ namespace AquaModelLibrary
 
             ReadFACE(streamReader, offset, cmx.cmxTable.faceAddress, cmx.cmxTable.faceCount, cmx.faceDict);
             ReadFCMN(streamReader, offset, cmx.cmxTable.faceMotionAddress, cmx.cmxTable.faceMotionCount, cmx.fcmnDict);
-            ReadNGSFACE(streamReader, offset, cmx.cmxTable.rebootFaceAddress, cmx.cmxTable.rebootFaceCount, cmx.ngsFaceDict);
+            ReadFaceTextures(streamReader, offset, cmx.cmxTable.faceTextureAddress, cmx.cmxTable.faceTextureCount, cmx.faceTextureDict);
             ReadFCP(streamReader, offset, cmx.cmxTable.faceTexturesAddress, cmx.cmxTable.faceTexturesCount, cmx.fcpDict);
 
             ReadACCE(streamReader, offset, cmx.cmxTable.accessoryAddress, cmx.cmxTable.accessoryCount, cmx.accessoryDict);
@@ -571,20 +571,23 @@ namespace AquaModelLibrary
                 fcp.texString4 = (AquaObjectMethods.ReadCString(streamReader));
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
-
+                if(dict.ContainsKey(fcp.fcp.id))
+                {
+                    Console.WriteLine(fcp.fcp.id);
+                }
                 dict.Add(fcp.fcp.id, fcp); //Set like this so we can access it by id later if we want. 
             }
         }
 
-        private static void ReadNGSFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, NGS_FACEObject> dict)
+        private static void ReadFaceTextures(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, FaceTextureObject> dict)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
             {
-                NGS_FACEObject ngsFace = new NGS_FACEObject();
+                FaceTextureObject ngsFace = new FaceTextureObject();
                 ngsFace.num = i;
                 ngsFace.originalOffset = streamReader.Position();
-                ngsFace.ngsFace = streamReader.Read<NGS_FACE>();
+                ngsFace.ngsFace = streamReader.Read<FaceTextures>();
                 long temp = streamReader.Position();
 
                 streamReader.Seek(ngsFace.ngsFace.texString1Ptr + offset, SeekOrigin.Begin);
@@ -2959,6 +2962,7 @@ namespace AquaModelLibrary
             WriteCSV(outputDirectory, "MaleDeumanFaces.csv", outputDewmanMaleFace);
             WriteCSV(outputDirectory, "FemaleDeumanFaces.csv", outputDewmanFemaleFace);
             WriteCSV(outputDirectory, "AllFacesNGS.csv", outputNGSFace);
+
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
             masterIdList.Clear();
             nameDicts.Clear();
@@ -3998,6 +4002,76 @@ namespace AquaModelLibrary
         public static string GetBasewearIconString(string id)
         {
             return GetFileHash(icon + basewearIcon + GetIconGender(Int32.Parse(id)) + id + ".ice");
+        }
+
+        public static string GetBodyPaintIconString(string id)
+        {
+            return GetFileHash(icon + bodyPaintIcon + id + ".ice");
+        }
+
+        public static string GetStickerIconString(string id)
+        {
+            return GetFileHash(icon + stickerIcon + id + ".ice");
+        }
+
+        public static string GetAccessoryIconString(string id)
+        {
+            return GetFileHash(icon + accessoryIcon + id + ".ice");
+        }
+
+        public static string GetEyeIconString(string id)
+        {
+            return GetFileHash(icon + eyeIcon + id + ".ice");
+        }
+
+        public static string GetEyebrowsIconString(string id)
+        {
+            return GetFileHash(icon + eyebrowsIcon + id + ".ice");
+        }
+
+        public static string GetEyelashesIconString(string id)
+        {
+            return GetFileHash(icon + eyelashesIcon + id + ".ice");
+        }
+
+        public static string GetFaceIconString(string id)
+        {
+            return GetFileHash(icon + faceIcon + id + ".ice");
+        }
+
+        public static string GetFacePaintIconString(string id)
+        {
+            return GetFileHash(icon + facepainticon + id + ".ice");
+        }
+
+        public static string GetHairCastIconString(string id)
+        {
+            return GetFileHash(icon + hairIcon + "cast_" + id + ".ice");
+        }
+
+        public static string GetHairManIconString(string id)
+        {
+            return GetFileHash(icon + hairIcon + "man_" + id + ".ice");
+        }
+
+        public static string GetHairWomanIconString(string id)
+        {
+            return GetFileHash(icon + hairIcon + "woman_" + id + ".ice");
+        }
+
+        public static string GetHornIconString(string id)
+        {
+            return GetFileHash(icon + hornIcon + id + ".ice");
+        }
+
+        public static string GetTeethIconString(string id)
+        {
+            return GetFileHash(icon + teethIcon + id + ".ice");
+        }
+
+        public static string GetEarIconString(string id)
+        {
+            return GetFileHash(icon + earIcon + id + ".ice");
         }
 
         public static string GetCostumeOuterIconString(string pso2_binDir, string finalId)
