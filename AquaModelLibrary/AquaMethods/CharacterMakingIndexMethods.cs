@@ -2209,7 +2209,7 @@ namespace AquaModelLibrary
 
                 }
 
-                if (id <= 100000)
+                if (id < 100000)
                 {
                     outputEyes.Append(output);
                 }

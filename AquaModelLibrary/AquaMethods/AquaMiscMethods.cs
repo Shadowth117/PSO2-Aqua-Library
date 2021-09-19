@@ -215,7 +215,13 @@ namespace AquaModelLibrary
                             PSO2Text.textPair pair = new PSO2Text.textPair();
                             string[] line = lines[i].Split('-');
 
-                            if(line[0][line[0].Length - 1] == ' ')
+                            //Handle - being used as the name for whatever reason. Should be an uncommon issue
+                            if(line[0] == "")
+                            {
+                                pair.name = "-";
+                                lines[i] = ReplaceFirst(lines[i], "- ", "");
+                            } 
+                            else if(line[0][line[0].Length - 1] == ' ')
                             {
                                 pair.name = line[0].Substring(0, line[0].Length - 1); //Get rid of the space
                             }

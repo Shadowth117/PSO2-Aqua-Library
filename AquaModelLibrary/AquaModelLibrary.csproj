@@ -148,6 +148,7 @@
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
+    <Compile Include="AquaStructs\AquaBTI_MotionConfig.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingOffsets.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />

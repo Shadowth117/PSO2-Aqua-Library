@@ -428,14 +428,7 @@ namespace AquaModelTool
         {
             foreach (var fileName in fileNames)
             {
-                try
-                {
                     AquaUtil.ConvertPSO2Text(fileName.Split('.')[0] + ".text", fileName);
-                }
-                catch
-                {
-
-                }
             }
         }
         private void parsePSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1200,6 +1193,32 @@ namespace AquaModelTool
                     }
                 }
 
+            }
+        }
+
+        private void dumpNOF0ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 NIFL file",
+                Filter = "PSO2 NIFL File (*)|*"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil.DumpNOF0(openFileDialog.FileName);
+            }
+        }
+
+        private void readBTIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 NIFL file",
+                Filter = "PSO2 NIFL File (*.bti)|*.bti"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.ReadBTI(openFileDialog.FileName);
             }
         }
     }

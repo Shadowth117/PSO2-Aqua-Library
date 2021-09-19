@@ -31,6 +31,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,9 +59,10 @@
             this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testVTXEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpNOF0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.exportModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readBTIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -92,28 +94,36 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // exportModelToolStripMenuItem
+            // 
+            this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.exportModelToolStripMenuItem.Text = "Export Model (Buggy)";
+            this.exportModelToolStripMenuItem.ToolTipText = "May produce strange results or crash on some models.";
+            this.exportModelToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.saveAsToolStripMenuItem.Text = "Save As";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -257,7 +267,9 @@
             this.importFromGLTFToolStripMenuItem,
             this.computeTangentSpaceTestToolStripMenuItem,
             this.cloneBoneTransformsToolStripMenuItem,
-            this.testVTXEToolStripMenuItem});
+            this.testVTXEToolStripMenuItem,
+            this.dumpNOF0ToolStripMenuItem,
+            this.readBTIToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -304,6 +316,13 @@
             this.testVTXEToolStripMenuItem.Text = "TestVTXE";
             this.testVTXEToolStripMenuItem.Click += new System.EventHandler(this.testVTXEToolStripMenuItem_Click);
             // 
+            // dumpNOF0ToolStripMenuItem
+            // 
+            this.dumpNOF0ToolStripMenuItem.Name = "dumpNOF0ToolStripMenuItem";
+            this.dumpNOF0ToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.dumpNOF0ToolStripMenuItem.Text = "DumpNOF0";
+            this.dumpNOF0ToolStripMenuItem.Click += new System.EventHandler(this.dumpNOF0ToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -322,12 +341,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // exportModelToolStripMenuItem
+            // readBTIToolStripMenuItem
             // 
-            this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.exportModelToolStripMenuItem.Text = "Export Model";
-            this.exportModelToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
+            this.readBTIToolStripMenuItem.Name = "readBTIToolStripMenuItem";
+            this.readBTIToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readBTIToolStripMenuItem.Text = "ReadBTI";
+            this.readBTIToolStripMenuItem.Click += new System.EventHandler(this.readBTIToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -383,6 +402,8 @@
         private System.Windows.Forms.ToolStripMenuItem convertTxtToPSO2TextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertTxtToPSO2TextFolderSelectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportModelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dumpNOF0ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readBTIToolStripMenuItem;
     }
 }
 

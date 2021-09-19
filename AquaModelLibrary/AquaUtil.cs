@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -26,6 +27,8 @@ namespace AquaModelLibrary
         public List<AquaEffect> aquaEffect = new List<AquaEffect>();
         public List<AnimSet> aquaMotions = new List<AnimSet>();
         public List<SetLayout> aquaSets = new List<SetLayout>();
+        public List<AquaBTI_MotionConfig> aquaMotionConfigs = new List<AquaBTI_MotionConfig>();
+
         public class ModelSet
         {
             public AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
@@ -4360,6 +4363,156 @@ namespace AquaModelLibrary
             }
         }
 
+        public void ReadBTI(string inFilename)
+        {
+            aquaMotionConfigs.Add(LoadBTI(inFilename));
+        }
+
+        public static AquaBTI_MotionConfig LoadBTI(string inFilename)
+        {
+            AquaBTI_MotionConfig bti = new AquaBTI_MotionConfig();
+
+            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 4)
+            {
+                ext = ext.Substring(0, 4);
+            }
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    bti.header = streamReader.Read<AquaBTI_MotionConfig.BTIHeader>();
+
+                    for (int i = 0; i < bti.header.entryCount; i++)
+                    {
+                        streamReader.Seek(offset + bti.header.entryPtr + AquaBTI_MotionConfig.btiEntrySize * i, SeekOrigin.Begin);
+
+                        AquaBTI_MotionConfig.BTIEntryObject btiEntry = new AquaBTI_MotionConfig.BTIEntryObject();
+                        btiEntry.entry = streamReader.Read<AquaBTI_MotionConfig.BTIEntry>();
+
+                        //Get strings
+                        streamReader.Seek(offset + btiEntry.entry.additionPtr, SeekOrigin.Begin);
+                        btiEntry.addition = ReadCString(streamReader);
+
+                        streamReader.Seek(offset + btiEntry.entry.nodePtr, SeekOrigin.Begin);
+                        btiEntry.node = ReadCString(streamReader);
+
+                        streamReader.Seek(offset + btiEntry.entry.unkStringPtr, SeekOrigin.Begin);
+                        btiEntry.unkString = ReadCString(streamReader);
+
+                        bti.btiEntries.Add(btiEntry);
+                    }
+                }
+            }
+
+            return bti;
+        }
+
+        public static void DumpNOF0(string inFilename)
+        {
+            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 4)
+            {
+                ext = ext.Substring(0, 4);
+            }
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0Size, SeekOrigin.Begin);
+                    Trace.WriteLine(streamReader.Position());
+                    AlignReader(streamReader, 0x10);
+                    var nof0 = AquaCommon.readNOF0(streamReader);
+
+                    List<string> output = new List<string>();
+                    output.Add(Path.GetFileName(inFilename));
+                    output.Add("");
+                    output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(rel.magic))} {rel.REL0Size:X} {rel.REL0DataStart:X} {rel.padding0:X}");
+                    output.Add("");
+                    output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(nof0.magic))} {nof0.NOF0Size:X} {nof0.NOF0EntryCount:X} {nof0.NOF0DataSizeStart:X}");
+                    foreach(var entry in nof0.relAddresses)
+                    {
+                        streamReader.Seek(entry + offset, SeekOrigin.Begin);
+                        int ptr = streamReader.Read<int>();
+                        output.Add($"{entry:X} - {ptr:X}");
+                    }
+
+                    File.WriteAllLines(inFilename + "_nof0.txt",output);
+                }
+            }
+        }
+
+        public static string ReadAquaHeader(BufferedStreamReader streamReader, string ext, string variant, out int offset, AquaPackage.AFPMain afp = new AquaPackage.AFPMain())
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals(ext))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Deal with afp header or aqo. prefixing as needed
+            if (type.Equals("afp\0"))
+            {
+                afp = streamReader.Read<AquaPackage.AFPMain>();
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += 0x40;
+            }
+            else if (type.Equals("aqo\0") || type.Equals("tro\0"))
+            {
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += 0x4;
+            }
+
+            if (afp.fileCount == 0)
+            {
+                afp.fileCount = 1;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                variant = "NIFL";
+            }
+            else if (type.Equals("VTBF"))
+            {
+                variant = "VTBF";
+            }
+            else
+            {
+                MessageBox.Show("Improper File Format!");
+            }
+
+            return variant;
+        }
     }
 }
  

@@ -92,7 +92,7 @@ namespace AquaModelLibrary
                         }
                         streamReader.Seek(strLen, SeekOrigin.Current);
                         break;
-                    case 0x3: 
+                    case 0x3: //sbyte
                     case 0x4: //byte
                         data = streamReader.Read<byte>();
                         break;
@@ -2445,7 +2445,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void WriteTagHeader(List<byte> outBytes, string tagString, ushort pointerCount, ushort subtagCount)
+        public static void WriteTagHeader(List<byte> outBytes, string tagString, ushort pointerCount, ushort subtagCount)
         {
             outBytes.InsertRange(0, Encoding.UTF8.GetBytes(tagString));
             outBytes.InsertRange(0x4, BitConverter.GetBytes(pointerCount));  //Pointer count
