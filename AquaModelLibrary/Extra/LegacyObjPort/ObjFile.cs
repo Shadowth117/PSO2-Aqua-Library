@@ -77,15 +77,16 @@ namespace LegacyObj
             case "vn":      AddVector3(Normals,   t);           break;
             case "vt":      AddVector3(TexCoords, t);           break;
 
-          //case "g":       NewMesh(t[1]);                      break;
             case "o":       CurrentName = t[1];                 break;
             case "g":       CurrentName = t[1];                 break;
 
             case "usemtl":  NewMesh("").Material= MtlData == null ? null : MtlData.Get(t[1]);    break;  // usemtl mat0
 
-          //case "s":       NewSubMesh(int.Parse(t[1]));        break;  // s 1
             case "s":       NewSubMesh(0).Name  = CurrentName;  break;  // s 1
             case "f":       GetCurrentSubMesh().AddFace(t);     break;  // f 1/1/1 2/2/2 3/3/3 
+
+            //Account for blender line output
+            case "l":       break;
 
             default:    throw new FormatException();
             }
