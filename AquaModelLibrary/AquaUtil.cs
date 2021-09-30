@@ -3289,87 +3289,97 @@ namespace AquaModelLibrary
             outBytes.AddRange(nxsMesh);
         }
 
-        public void ReadPRM(string inFilename)
+        public void LoadPRM(string inFilename)
         {
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                int offset = 0x0; //No NIFL header
-                prmModels = new List<PRMModel>();
-                PRMModel prmModel = new PRMModel();
-                streamReader.Seek(0xC, SeekOrigin.Begin);
-                int type = streamReader.Peek<int>();
-
-                //Deal with deicer's extra header nonsense
-                if (type > 0x10)
+                PRMModel prmModel;
+                ReadPRM(streamReader, out prmModel);
+                if(prmModel == null)
                 {
-                    streamReader.Seek(0x60, SeekOrigin.Begin);
-                    offset += 0x60;
-                }
-                streamReader.Seek(0x0 + offset, SeekOrigin.Begin);
-
-                prmModel.header = streamReader.Read<PRMModel.PRMHeader>();
-
-                int faceCount;
-                switch (prmModel.header.entryVersion)
-                {
-                    case 1:
-                        for (int i = 0; i < prmModel.header.entryCount; i++)
-                        {
-                            prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType01Vert>()));
-                        }
-
-                        if (prmModel.header.groupIndexCount > 0)
-                        {
-                            faceCount = prmModel.header.groupIndexCount / 3;
-
-                            for (int i = 0; i < faceCount; i++)
-                            {
-
-                                prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
-                            }
-                        } else
-                        {
-                            faceCount = prmModel.header.entryCount;
-                            for (int i = 0; i < faceCount; i += 3)
-                            {
-                                prmModel.faces.Add(new Vector3(i, i + 1, i + 2));
-                            }
-                        }
-                        break;
-                    case 2:
-                        MessageBox.Show("Unimplemented PRM version! Please report if found!");
-                        return;
-                    case 3:
-                        for (int i = 0; i < prmModel.header.entryCount; i++)
-                        {
-                            prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
-                        }
-
-                        faceCount = prmModel.header.groupIndexCount / 3;
-                        for (int i = 0; i < faceCount; i++)
-                        {
-                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
-                        }
-                        break;
-                    case 4:
-                        for (int i = 0; i < prmModel.header.entryCount; i++)
-                        {
-                            prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType04Vert>()));
-                        }
-
-                        faceCount = prmModel.header.groupIndexCount / 3;
-                        for (int i = 0; i < faceCount; i++)
-                        {
-                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
-                        }
-                        break;
-                    default:
-                        MessageBox.Show("Unknown PRM version! Please report!");
-                        return;
+                    return;
                 }
 
                 prmModels.Add(prmModel);
+            }
+        }
+
+        public static void ReadPRM(BufferedStreamReader streamReader, out PRMModel prmModel)
+        {
+            int offset = 0x0; //No NIFL header
+            prmModel = new PRMModel();
+            streamReader.Seek(0xC, SeekOrigin.Begin);
+            int type = streamReader.Peek<int>();
+            string prmText = "prm\0";
+
+            //Deal with deicer's extra header nonsense
+            if (type > 0x10)
+            {
+                ReadIceEnvelope(streamReader, Encoding.UTF8.GetString(BitConverter.GetBytes(type)), ref offset, ref prmText);
+            }
+            streamReader.Seek(0x0 + offset, SeekOrigin.Begin);
+
+            prmModel.header = streamReader.Read<PRMModel.PRMHeader>();
+
+            int faceCount;
+            switch (prmModel.header.entryVersion)
+            {
+                case 1:
+                    for (int i = 0; i < prmModel.header.entryCount; i++)
+                    {
+                        prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType01Vert>()));
+                    }
+
+                    if (prmModel.header.groupIndexCount > 0)
+                    {
+                        faceCount = prmModel.header.groupIndexCount / 3;
+
+                        for (int i = 0; i < faceCount; i++)
+                        {
+
+                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        }
+                    }
+                    else
+                    {
+                        faceCount = prmModel.header.entryCount;
+                        for (int i = 0; i < faceCount; i += 3)
+                        {
+                            prmModel.faces.Add(new Vector3(i, i + 1, i + 2));
+                        }
+                    }
+                    break;
+                case 2:
+                    MessageBox.Show("Unimplemented PRM version! Please report if found!");
+                    return;
+                case 3:
+                    for (int i = 0; i < prmModel.header.entryCount; i++)
+                    {
+                        prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
+                    }
+
+                    faceCount = prmModel.header.groupIndexCount / 3;
+                    for (int i = 0; i < faceCount; i++)
+                    {
+                        prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                    }
+                    break;
+                case 4:
+                    for (int i = 0; i < prmModel.header.entryCount; i++)
+                    {
+                        prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType04Vert>()));
+                    }
+
+                    faceCount = prmModel.header.groupIndexCount / 3;
+                    for (int i = 0; i < faceCount; i++)
+                    {
+                        prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                    }
+                    break;
+                default:
+                    MessageBox.Show("Unknown PRM version! Please report!");
+                    break;
             }
         }
 
@@ -4466,17 +4476,7 @@ namespace AquaModelLibrary
             string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
             offset = 0x20; //Base offset due to NIFL header
 
-            //Deal with deicer's extra header nonsense
-            if (type.Equals(ext))
-            {
-                streamReader.Seek(0xC, SeekOrigin.Begin);
-                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
-                int headJunkSize = streamReader.Read<int>();
-
-                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                offset += headJunkSize;
-            }
+            ReadIceEnvelope(streamReader, ext, ref offset, ref type);
 
             //Deal with afp header or aqo. prefixing as needed
             if (type.Equals("afp\0"))
@@ -4512,6 +4512,21 @@ namespace AquaModelLibrary
             }
 
             return variant;
+        }
+
+        public static void ReadIceEnvelope(BufferedStreamReader streamReader, string ext, ref int offset, ref string type)
+        {
+            //Deal with deicer's extra header nonsense
+            if (type.Equals(ext))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
         }
     }
 }

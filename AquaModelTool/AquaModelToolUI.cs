@@ -1221,6 +1221,74 @@ namespace AquaModelTool
                 aquaUI.aqua.ReadBTI(openFileDialog.FileName);
             }
         }
+
+        private void prmEffectModelExportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 prm file",
+                Filter = "PSO2 Effect Model File (*.prm)|*.prm"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                aquaUI.aqua.LoadPRM(openFileDialog.FileName);
+
+                using (var ctx = new Assimp.AssimpContext())
+                {
+                    var formats = ctx.GetSupportedExportFormats();
+                    List<(string ext, string desc)> filterKeys = new List<(string ext, string desc)>();
+                    foreach (var format in formats)
+                    {
+                        filterKeys.Add((format.FileExtension, format.Description));
+                    }
+                    filterKeys.Sort();
+
+                    SaveFileDialog saveFileDialog;
+                    saveFileDialog = new SaveFileDialog()
+                    {
+                        Title = "Export model file",
+                        Filter = ""
+                    };
+                    string tempFilter = "";
+                    foreach (var fileExt in filterKeys)
+                    {
+                        tempFilter += $"{fileExt.desc} (*.{fileExt.ext})|*.{fileExt.ext}|";
+                    }
+                    tempFilter = tempFilter.Remove(tempFilter.Length - 1, 1);
+                    saveFileDialog.Filter = tempFilter;
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var id = saveFileDialog.FilterIndex - 1;
+                        var scene = ModelExporter.AssimpPRMExport(saveFileDialog.FileName, aquaUI.aqua.prmModels[0]);
+                        Assimp.ExportFormatDescription exportFormat = null;
+                        for (int i = 0; i < formats.Length; i++)
+                        {
+                            if (formats[i].Description == filterKeys[id].desc && formats[i].FileExtension == filterKeys[id].ext)
+                            {
+                                exportFormat = formats[i];
+                                break;
+                            }
+                        }
+                        if (exportFormat == null)
+                        {
+                            return;
+                        }
+
+                        try
+                        {
+                            ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
+                        }
+                        catch (Win32Exception w)
+                        {
+                            MessageBox.Show($"Exception encountered: {w.Message}");
+                        }
+
+                    }
+                }
+                aquaUI.aqua.prmModels.Clear();
+            }
+        }
     }
 }
 

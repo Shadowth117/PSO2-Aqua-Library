@@ -355,6 +355,113 @@ namespace AquaModelLibrary
             return aiScene;
         }
 
+        public static Assimp.Scene AssimpPRMExport(string filePath, PRMModel prm)
+        {
+            Assimp.Scene aiScene = new Assimp.Scene();
+
+            //Create an array to hold references to these since Assimp lacks a way to grab these by order or id
+            //We don't need the nodo count in this since they can't be parents
+            Assimp.Node[] boneArray = new Assimp.Node[1];
+
+            //Set up root node
+            var aiRootNode = new Assimp.Node("RootNode", null);
+            aiRootNode.Transform = Assimp.Matrix4x4.Identity;
+
+            boneArray[0] = aiRootNode;
+            aiScene.RootNode = aiRootNode;
+
+            //Mesh
+            var aiMeshName = Path.GetFileNameWithoutExtension(filePath);
+
+            var aiMesh = new Assimp.Mesh(aiMeshName, Assimp.PrimitiveType.Triangle);
+
+            //Vertex face data - PSO2 Actually doesn't do this, it just has per vertex data so we can just map a vertice's data to each face using it
+            //It may actually be possible to add this to the previous loop, but my reference didn't so I'm doing it in a separate loop for safety
+            //Reference: https://github.com/TGEnigma/Amicitia/blob/master/Source/AmicitiaLibrary/Graphics/RenderWare/RWClumpNode.cs
+            for (int vertId = 0; vertId < prm.vertices.Count; vertId++)
+            {
+                var prmVert = prm.vertices[vertId];
+
+                var pos = prmVert.pos;
+                aiMesh.Vertices.Add(new Assimp.Vector3D(pos.X, pos.Y, pos.Z));
+                
+                var nrm = prmVert.normal;
+                aiMesh.Normals.Add(new Assimp.Vector3D(nrm.X, nrm.Y, nrm.Z));
+                
+
+                //Vert colors are bgra
+                var rawClr = prmVert.color;
+                var clr = new Assimp.Color4D(clrToFloat(rawClr[2]), clrToFloat(rawClr[1]), clrToFloat(rawClr[0]), clrToFloat(rawClr[3]));
+                aiMesh.VertexColorChannels[0].Add(clr);
+
+                var uv1 = prmVert.uv1;
+                var aiUV1 = new Assimp.Vector3D(uv1.X, uv1.Y, 0f);
+                aiMesh.TextureCoordinateChannels[0].Add(aiUV1);
+
+
+                var uv2 = prmVert.uv2;
+                var aiUV2 = new Assimp.Vector3D(uv2.X, uv2.Y, 0f);
+                aiMesh.TextureCoordinateChannels[1].Add(aiUV2);
+                
+            }
+            
+            //Handle rigid meshes
+            {
+                var aiBone = new Assimp.Bone();
+                var aqnBone = boneArray[0];
+
+                // Name
+                aiBone.Name = aqnBone.Name;
+
+                // VertexWeights
+                for (int i = 0; i < aiMesh.Vertices.Count; i++)
+                {
+                    var aiVertexWeight = new Assimp.VertexWeight(i, 1f);
+                    aiBone.VertexWeights.Add(aiVertexWeight);
+                }
+
+                aiBone.OffsetMatrix = Assimp.Matrix4x4.Identity;
+
+                aiMesh.Bones.Add(aiBone);
+            }
+
+            //Faces
+            foreach (var face in prm.faces)
+            {
+                aiMesh.Faces.Add(new Assimp.Face(new int[] { (int)face.X, (int)face.Y, (int)face.Z }));
+            }
+
+            //Material
+            Assimp.Material mate = new Assimp.Material();
+
+            mate.ColorDiffuse = new Assimp.Color4D(1, 1, 1, 1);
+            mate.Name = aiMeshName + "_material";
+
+            mate.ShadingMode = Assimp.ShadingMode.Phong;
+
+            var meshNodeName = string.Format($"mesh_node_{aiScene.Meshes.Count}");
+
+            // Add mesh to meshes
+            aiScene.Meshes.Add(aiMesh);
+
+            // Add material to materials
+            aiScene.Materials.Add(mate);
+
+            // MaterialIndex
+            aiMesh.MaterialIndex = aiScene.Materials.Count - 1;
+
+            // Set up mesh node and add this mesh's index to it (This tells assimp to export it as a mesh for various formats)
+            var meshNode = new Assimp.Node(meshNodeName, aiScene.RootNode);
+            meshNode.Transform = Assimp.Matrix4x4.Identity;
+
+            aiScene.RootNode.Children.Add(meshNode);
+
+            meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
+            
+
+            return aiScene;
+        }
+
         public static Assimp.Matrix4x4 GetAssimpMat4(Matrix4x4 mat4)
         {
             return new Assimp.Matrix4x4(mat4.M11, mat4.M21, mat4.M31, mat4.M41,

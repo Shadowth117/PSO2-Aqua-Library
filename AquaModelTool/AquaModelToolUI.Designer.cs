@@ -60,9 +60,10 @@
             this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testVTXEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dumpNOF0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readBTIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readBTIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -163,7 +164,8 @@
             this.parseVTBFToTextToolStripMenuItem,
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
             this.legacyAqp2objObjExportToolStripMenuItem,
-            this.legacyAqp2objObjImportToolStripMenuItem});
+            this.legacyAqp2objObjImportToolStripMenuItem,
+            this.prmEffectModelExportToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -323,6 +325,13 @@
             this.dumpNOF0ToolStripMenuItem.Text = "DumpNOF0";
             this.dumpNOF0ToolStripMenuItem.Click += new System.EventHandler(this.dumpNOF0ToolStripMenuItem_Click);
             // 
+            // readBTIToolStripMenuItem
+            // 
+            this.readBTIToolStripMenuItem.Name = "readBTIToolStripMenuItem";
+            this.readBTIToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readBTIToolStripMenuItem.Text = "ReadBTI";
+            this.readBTIToolStripMenuItem.Click += new System.EventHandler(this.readBTIToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -341,12 +350,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readBTIToolStripMenuItem
+            // prmEffectModelExportToolStripMenuItem
             // 
-            this.readBTIToolStripMenuItem.Name = "readBTIToolStripMenuItem";
-            this.readBTIToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.readBTIToolStripMenuItem.Text = "ReadBTI";
-            this.readBTIToolStripMenuItem.Click += new System.EventHandler(this.readBTIToolStripMenuItem_Click);
+            this.prmEffectModelExportToolStripMenuItem.Name = "prmEffectModelExportToolStripMenuItem";
+            this.prmEffectModelExportToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.prmEffectModelExportToolStripMenuItem.Text = "prm effect model export";
+            this.prmEffectModelExportToolStripMenuItem.Click += new System.EventHandler(this.prmEffectModelExportToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -404,6 +413,7 @@
         private System.Windows.Forms.ToolStripMenuItem exportModelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpNOF0ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readBTIToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem prmEffectModelExportToolStripMenuItem;
     }
 }
 
