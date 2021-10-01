@@ -1227,12 +1227,18 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select PSO2 prm file",
-                Filter = "PSO2 Effect Model File (*.prm)|*.prm"
+                Filter = "PSO2 Effect Model File (*.prm)|*.prm",
+                Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                aquaUI.aqua.LoadPRM(openFileDialog.FileName);
+                //Read prms
+                foreach(var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.LoadPRM(file);
+                }
 
+                //Set up export
                 using (var ctx = new Assimp.AssimpContext())
                 {
                     var formats = ctx.GetSupportedExportFormats();
@@ -1256,11 +1262,12 @@ namespace AquaModelTool
                     }
                     tempFilter = tempFilter.Remove(tempFilter.Length - 1, 1);
                     saveFileDialog.Filter = tempFilter;
+                    saveFileDialog.FileName = Path.GetFileName(Path.ChangeExtension(openFileDialog.FileName, formats[0].FileExtension));
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         var id = saveFileDialog.FilterIndex - 1;
-                        var scene = ModelExporter.AssimpPRMExport(saveFileDialog.FileName, aquaUI.aqua.prmModels[0]);
+
                         Assimp.ExportFormatDescription exportFormat = null;
                         for (int i = 0; i < formats.Length; i++)
                         {
@@ -1275,14 +1282,31 @@ namespace AquaModelTool
                             return;
                         }
 
-                        try
+                        //Iterate through each selected model and use the selected type.
+                        var finalExtension = Path.GetExtension(saveFileDialog.FileName);
+                        for(int i = 0; i < aquaUI.aqua.prmModels.Count; i++)
                         {
-                            ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
+                            string finalName;
+                            if(i == 0)
+                            {
+                                finalName = saveFileDialog.FileName;
+                            } else
+                            {
+                                finalName = Path.ChangeExtension(openFileDialog.FileNames[i], finalExtension);
+                            }
+
+                            var scene = ModelExporter.AssimpPRMExport(finalName, aquaUI.aqua.prmModels[i]);
+
+                            try
+                            {
+                                ctx.ExportFile(scene, finalName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
+                            }
+                            catch (Win32Exception w)
+                            {
+                                MessageBox.Show($"Exception encountered: {w.Message}");
+                            }
                         }
-                        catch (Win32Exception w)
-                        {
-                            MessageBox.Show($"Exception encountered: {w.Message}");
-                        }
+
 
                     }
                 }
