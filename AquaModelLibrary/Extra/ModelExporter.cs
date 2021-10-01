@@ -439,7 +439,7 @@ namespace AquaModelLibrary
 
             mate.ShadingMode = Assimp.ShadingMode.Phong;
 
-            var meshNodeName = string.Format($"mesh_node_{aiScene.Meshes.Count}");
+            var meshNodeName = Path.GetFileNameWithoutExtension(filePath);
 
             // Add mesh to meshes
             aiScene.Meshes.Add(aiMesh);
