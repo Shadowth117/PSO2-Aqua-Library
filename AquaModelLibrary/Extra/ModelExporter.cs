@@ -102,7 +102,7 @@ namespace AquaModelLibrary
                 {
                     if (vtxl.vertPositions.Count > 0)
                     {
-                        var pos = vtxl.vertPositions[vertId];
+                        var pos = vtxl.vertPositions[vertId] * 100;
                         aiMesh.Vertices.Add(new Assimp.Vector3D(pos.X, pos.Y, pos.Z));
                     }
 
@@ -361,7 +361,7 @@ namespace AquaModelLibrary
 
             //Create an array to hold references to these since Assimp lacks a way to grab these by order or id
             //We don't need the nodo count in this since they can't be parents
-            Assimp.Node[] boneArray = new Assimp.Node[1];
+            Assimp.Node[] boneArray = new Assimp.Node[2];
 
             //Set up root node
             var aiRootNode = new Assimp.Node("RootNode", null);
@@ -370,8 +370,19 @@ namespace AquaModelLibrary
             boneArray[0] = aiRootNode;
             aiScene.RootNode = aiRootNode;
 
+            //Set up single child node
+            var aiNode = new Assimp.Node(Path.GetFileNameWithoutExtension(filePath) + "_node", aiRootNode);
+
+            //Use inverse bind matrix as base
+
+            //Get local transform
+            aiNode.Transform = aiRootNode.Transform;
+
+            aiRootNode.Children.Add(aiNode);
+            boneArray[1] = aiNode;
+
             //Mesh
-            var aiMeshName = Path.GetFileNameWithoutExtension(filePath);
+            string aiMeshName = Path.GetFileNameWithoutExtension(filePath);
 
             var aiMesh = new Assimp.Mesh(aiMeshName, Assimp.PrimitiveType.Triangle);
 
@@ -382,12 +393,11 @@ namespace AquaModelLibrary
             {
                 var prmVert = prm.vertices[vertId];
 
-                var pos = prmVert.pos;
+                var pos = prmVert.pos * 100;
                 aiMesh.Vertices.Add(new Assimp.Vector3D(pos.X, pos.Y, pos.Z));
                 
                 var nrm = prmVert.normal;
                 aiMesh.Normals.Add(new Assimp.Vector3D(nrm.X, nrm.Y, nrm.Z));
-                
 
                 //Vert colors are bgra
                 var rawClr = prmVert.color;
@@ -411,7 +421,7 @@ namespace AquaModelLibrary
                 var aqnBone = boneArray[0];
 
                 // Name
-                aiBone.Name = aqnBone.Name;
+                aiBone.Name = aiNode.Name;
 
                 // VertexWeights
                 for (int i = 0; i < aiMesh.Vertices.Count; i++)
@@ -468,14 +478,6 @@ namespace AquaModelLibrary
                                         mat4.M12, mat4.M22, mat4.M32, mat4.M42,
                                         mat4.M13, mat4.M23, mat4.M33, mat4.M43,
                                         mat4.M14, mat4.M24, mat4.M34, mat4.M44);
-        }
-
-        public static Matrix4x4 GetMat4FromAssimpMat4(Assimp.Matrix4x4 mat4)
-        {
-            return new Matrix4x4(mat4.A1, mat4.A2, mat4.A3, mat4.A4,
-                                 mat4.B1, mat4.B2, mat4.B3, mat4.B4,
-                                 mat4.C1, mat4.C2, mat4.C3, mat4.C4,
-                                 mat4.D1, mat4.D2, mat4.D3, mat4.D4);
         }
 
         public static float[] Vector4ToFloatArray(Vector4 vector4)

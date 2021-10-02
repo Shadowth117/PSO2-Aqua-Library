@@ -52,6 +52,7 @@
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,7 +64,7 @@
             this.readBTIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -165,7 +166,8 @@
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
             this.legacyAqp2objObjExportToolStripMenuItem,
             this.legacyAqp2objObjImportToolStripMenuItem,
-            this.prmEffectModelExportToolStripMenuItem});
+            this.prmEffectModelExportToolStripMenuItem,
+            this.prmEffectFromModelToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -261,6 +263,13 @@
             this.legacyAqp2objObjImportToolStripMenuItem.Text = "(Legacy) aqp2obj obj import";
             this.legacyAqp2objObjImportToolStripMenuItem.Click += new System.EventHandler(this.legacyAqp2objObjImportToolStripMenuItem_Click);
             // 
+            // prmEffectModelExportToolStripMenuItem
+            // 
+            this.prmEffectModelExportToolStripMenuItem.Name = "prmEffectModelExportToolStripMenuItem";
+            this.prmEffectModelExportToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.prmEffectModelExportToolStripMenuItem.Text = "prm Effect Model Export";
+            this.prmEffectModelExportToolStripMenuItem.Click += new System.EventHandler(this.prmEffectModelExportToolStripMenuItem_Click);
+            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -350,12 +359,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // prmEffectModelExportToolStripMenuItem
+            // prmEffectFromModelToolStripMenuItem
             // 
-            this.prmEffectModelExportToolStripMenuItem.Name = "prmEffectModelExportToolStripMenuItem";
-            this.prmEffectModelExportToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
-            this.prmEffectModelExportToolStripMenuItem.Text = "prm effect model export";
-            this.prmEffectModelExportToolStripMenuItem.Click += new System.EventHandler(this.prmEffectModelExportToolStripMenuItem_Click);
+            this.prmEffectFromModelToolStripMenuItem.Name = "prmEffectFromModelToolStripMenuItem";
+            this.prmEffectFromModelToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.prmEffectFromModelToolStripMenuItem.Text = "prm Effect From Model";
+            this.prmEffectFromModelToolStripMenuItem.Click += new System.EventHandler(this.prmEffectFromModelToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -414,6 +423,7 @@
         private System.Windows.Forms.ToolStripMenuItem dumpNOF0ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readBTIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prmEffectModelExportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem prmEffectFromModelToolStripMenuItem;
     }
 }
 

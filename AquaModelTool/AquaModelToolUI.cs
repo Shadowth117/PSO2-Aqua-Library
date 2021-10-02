@@ -1111,6 +1111,7 @@ namespace AquaModelTool
                     }
                     tempFilter = tempFilter.Remove(tempFilter.Length - 1, 1);
                     saveFileDialog.Filter = tempFilter;
+                    saveFileDialog.FileName = "";
 
                     //Get bone ext
                     string boneExt = "";
@@ -1262,7 +1263,7 @@ namespace AquaModelTool
                     }
                     tempFilter = tempFilter.Remove(tempFilter.Length - 1, 1);
                     saveFileDialog.Filter = tempFilter;
-                    saveFileDialog.FileName = Path.GetFileName(Path.ChangeExtension(openFileDialog.FileName, formats[0].FileExtension));
+                    saveFileDialog.FileName = Path.GetFileName(Path.ChangeExtension(openFileDialog.FileName, "." + filterKeys[0].ext));
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
@@ -1311,6 +1312,55 @@ namespace AquaModelTool
                     }
                 }
                 aquaUI.aqua.prmModels.Clear();
+            }
+        }
+
+        private void prmEffectFromModelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select Model file",
+                Filter = "Assimp Model Files (*.*)|*.*"
+            };
+            List<string> filters = new List<string>();
+            using (var ctx = new Assimp.AssimpContext())
+            {
+                foreach (var format in ctx.GetSupportedExportFormats())
+                {
+                    if (!filters.Contains(format.FileExtension))
+                    {
+                        filters.Add(format.FileExtension);
+                    }
+                }
+            }
+            filters.Sort();
+
+            StringBuilder filterString = new StringBuilder("Assimp Model Files(");
+            StringBuilder filterStringTypes = new StringBuilder("|");
+            StringBuilder filterStringSections = new StringBuilder();
+            foreach (var filter in filters)
+            {
+                filterString.Append($"*.{filter},");
+                filterStringTypes.Append($"*.{filter};");
+                filterStringSections.Append($"|{filter} Files ({filter})|*.{filter}");
+            }
+
+            //Get rid of comma, add parenthesis 
+            filterString.Remove(filterString.Length - 1, 1);
+            filterString.Append(")");
+
+            //Get rid of unneeded semicolon
+            filterStringTypes.Remove(filterStringTypes.Length - 1, 1);
+            filterString.Append(filterStringTypes);
+
+            //Add final section
+            filterString.Append(filterStringSections);
+
+            openFileDialog.Filter = filterString.ToString();
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                ModelImporter.AssimpPRMConvert(openFileDialog.FileName, Path.ChangeExtension(openFileDialog.FileName, ".prm"));
             }
         }
     }

@@ -3383,83 +3383,6 @@ namespace AquaModelLibrary
             }
         }
 
-        //Version 1 is the most basic and was seen in alpha pso2. Version 3 was used in PSO2 Classic for most of its life. Version 4 was used some in PSO2 and in NGS.
-        //Version 1 requires some extra work to convert to since it doesn't have a face array and so is not supported at this time.
-        public unsafe void WritePRM(string outFileName, int version)
-        {
-            List<byte> finalOutBytes = new List<byte>();
-            finalOutBytes.AddRange(Encoding.UTF8.GetBytes("prm\0"));
-            finalOutBytes.AddRange(BitConverter.GetBytes(prmModels[0].vertices.Count));
-            switch (version)
-            {
-                case 1:
-                    MessageBox.Show("Version 1 unsupported at this time!");
-                    return;
-                case 2:
-                    MessageBox.Show("Version 2 unsupported at this time!");
-                    return;
-                case 3:
-                case 4:
-                    finalOutBytes.AddRange(BitConverter.GetBytes(prmModels[0].faces.Count * 3));
-                    break;
-                default:
-                    MessageBox.Show($"Version {version} unsupported at this time!");
-                    return;
-            }
-            finalOutBytes.AddRange(BitConverter.GetBytes(version));
-
-            for (int i = 0; i < prmModels[0].vertices.Count; i++)
-            {
-                switch (version)
-                {
-                    case 3:
-                        var vert3 = prmModels[0].vertices[i].GetType03Vert();
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.Y));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.Z));
-                        finalOutBytes.Add(vert3.color[0]);
-                        finalOutBytes.Add(vert3.color[1]);
-                        finalOutBytes.Add(vert3.color[2]);
-                        finalOutBytes.Add(vert3.color[3]);
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv1.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv1.Y));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv2.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv2.Y));
-                        break;
-                    case 4:
-                        var vert4 = prmModels[0].vertices[i].GetType04Vert();
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.Y));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.Z));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.Y));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.Z));
-                        finalOutBytes.Add(vert4.color[0]);
-                        finalOutBytes.Add(vert4.color[1]);
-                        finalOutBytes.Add(vert4.color[2]);
-                        finalOutBytes.Add(vert4.color[3]);
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv1.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv1.Y));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv2.X));
-                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv2.Y));
-                        break;
-                    default:
-                        return;
-                }
-            }
-
-            for (int i = 0; i < prmModels[0].faces.Count; i++)
-            {
-                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].X));
-                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].Y));
-                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prmModels[0].faces[i].Z));
-            }
-
-            AlignWriter(finalOutBytes, 0x10); //Should be padded at the end
-
-            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
-        }
-
         //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.
         //PRM is very simple and can only take in: Vertex positions, vertex normals, vert colors, and 2 UV mappings along with a list of triangles at best. It also expects only one object. 
         //The main purpose of this function is to fix UV and vert color conflicts upon conversion. While you can just do this logic yourself, this will do it for you as needed.
@@ -3470,7 +3393,7 @@ namespace AquaModelLibrary
             {
                 VTXLFromFaceVerts(aquaModels[0].models[0]);
             }
-            
+
             PRMModel prmModel = new PRMModel();
             for (int i = 0; i < aquaModels[0].models[0].vtxlList[0].vertPositions.Count; i++)
             {
@@ -3501,6 +3424,89 @@ namespace AquaModelLibrary
             prmModel.faces = aquaModels[0].models[0].tempTris[0].triList;
 
             prmModels.Add(prmModel);
+        }
+
+        //Version 1 is the most basic and was seen in alpha pso2. Version 3 was used in PSO2 Classic for most of its life. Version 4 was used some in PSO2 and in NGS.
+        //Version 1 requires some extra work to convert to since it doesn't have a face array and so is not supported at this time.
+        public unsafe void WritePRM(string outFileName, int version)
+        {
+            var prm = prmModels[0];
+            WritePRMToFile(prm, outFileName, version);
+        }
+
+        public unsafe static void WritePRMToFile(PRMModel prm, string outFileName, int version)
+        {
+            List<byte> finalOutBytes = new List<byte>();
+            finalOutBytes.AddRange(Encoding.UTF8.GetBytes("prm\0"));
+            finalOutBytes.AddRange(BitConverter.GetBytes(prm.vertices.Count));
+            switch (version)
+            {
+                case 1:
+                    MessageBox.Show("Version 1 unsupported at this time!");
+                    return;
+                case 2:
+                    MessageBox.Show("Version 2 unsupported at this time!");
+                    return;
+                case 3:
+                case 4:
+                    finalOutBytes.AddRange(BitConverter.GetBytes(prm.faces.Count * 3));
+                    break;
+                default:
+                    MessageBox.Show($"Version {version} unsupported at this time!");
+                    return;
+            }
+            finalOutBytes.AddRange(BitConverter.GetBytes(version));
+
+            for (int i = 0; i < prm.vertices.Count; i++)
+            {
+                switch (version)
+                {
+                    case 3:
+                        var vert3 = prm.vertices[i].GetType03Vert();
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.pos.Z));
+                        finalOutBytes.Add(vert3.color[0]);
+                        finalOutBytes.Add(vert3.color[1]);
+                        finalOutBytes.Add(vert3.color[2]);
+                        finalOutBytes.Add(vert3.color[3]);
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv1.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv1.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv2.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert3.uv2.Y));
+                        break;
+                    case 4:
+                        var vert4 = prm.vertices[i].GetType04Vert();
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.pos.Z));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.normal.Z));
+                        finalOutBytes.Add(vert4.color[0]);
+                        finalOutBytes.Add(vert4.color[1]);
+                        finalOutBytes.Add(vert4.color[2]);
+                        finalOutBytes.Add(vert4.color[3]);
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv1.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv1.Y));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv2.X));
+                        finalOutBytes.AddRange(BitConverter.GetBytes(vert4.uv2.Y));
+                        break;
+                    default:
+                        return;
+                }
+            }
+
+            for (int i = 0; i < prm.faces.Count; i++)
+            {
+                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prm.faces[i].X));
+                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prm.faces[i].Y));
+                finalOutBytes.AddRange(BitConverter.GetBytes((ushort)prm.faces[i].Z));
+            }
+
+            AlignWriter(finalOutBytes, 0x10); //Should be padded at the end
+
+            File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
 
         public byte[] returnModelType(string fileName)
