@@ -1,5 +1,5 @@
 ﻿
-namespace AquaModelTool.Forms.ModelSubpanels
+namespace AquaModelTool
 {
     partial class MeshStructEditor
     {
@@ -47,8 +47,29 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.psetIDLabel = new System.Windows.Forms.Label();
             this.faceSetIDCB = new System.Windows.Forms.ComboBox();
             this.warningLabel = new System.Windows.Forms.Label();
+            this.unkShort0UD = new System.Windows.Forms.NumericUpDown();
+            this.unkShort0Label = new System.Windows.Forms.Label();
+            this.unkByte0UD = new System.Windows.Forms.NumericUpDown();
+            this.unkByte0Label = new System.Windows.Forms.Label();
+            this.unkByte1UD = new System.Windows.Forms.NumericUpDown();
+            this.unkByte1Label = new System.Windows.Forms.Label();
+            this.unkShort1UD = new System.Windows.Forms.NumericUpDown();
+            this.unkShort1Label = new System.Windows.Forms.Label();
+            this.baseMeshNodeIdUD = new System.Windows.Forms.NumericUpDown();
+            this.baseMeshNodeIdLabel = new System.Windows.Forms.Label();
+            this.baseMeshDummyIdUD = new System.Windows.Forms.NumericUpDown();
+            this.baseMeshDummyIdLabel = new System.Windows.Forms.Label();
+            this.unkInt0UD = new System.Windows.Forms.NumericUpDown();
+            this.unkInt0Label = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.flagsUD)).BeginInit();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.unkShort0UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkByte0UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkByte1UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkShort1UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.baseMeshNodeIdUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.baseMeshDummyIdUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkInt0UD)).BeginInit();
             this.SuspendLayout();
             // 
             // meshIDCB
@@ -58,15 +79,16 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.meshIDCB.Name = "meshIDCB";
             this.meshIDCB.Size = new System.Drawing.Size(49, 21);
             this.meshIDCB.TabIndex = 3;
+            this.meshIDCB.SelectedIndexChanged += new System.EventHandler(this.meshIDCB_SelectedIndexChanged);
             // 
             // meshLabel
             // 
             this.meshLabel.AutoSize = true;
             this.meshLabel.Location = new System.Drawing.Point(4, 4);
             this.meshLabel.Name = "meshLabel";
-            this.meshLabel.Size = new System.Drawing.Size(89, 13);
+            this.meshLabel.Size = new System.Drawing.Size(80, 13);
             this.meshLabel.TabIndex = 2;
-            this.meshLabel.Text = "Mesh Parameters";
+            this.meshLabel.Text = "Mesh Selection";
             // 
             // flagsUD
             // 
@@ -84,6 +106,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.flagsUD.Name = "flagsUD";
             this.flagsUD.Size = new System.Drawing.Size(76, 20);
             this.flagsUD.TabIndex = 9;
+            this.flagsUD.ValueChanged += new System.EventHandler(this.flagsUD_ValueChanged);
             // 
             // flagsLabel
             // 
@@ -96,6 +119,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             // 
             // panel1
             // 
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.meshIDCB);
             this.panel1.Controls.Add(this.meshLabel);
             this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -119,6 +143,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.matIDCB.Name = "matIDCB";
             this.matIDCB.Size = new System.Drawing.Size(49, 21);
             this.matIDCB.TabIndex = 3;
+            this.matIDCB.SelectedIndexChanged += new System.EventHandler(this.matIDCB_SelectedIndexChanged);
             // 
             // renderIDLabel
             // 
@@ -136,6 +161,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.renderIDCB.Name = "renderIDCB";
             this.renderIDCB.Size = new System.Drawing.Size(49, 21);
             this.renderIDCB.TabIndex = 3;
+            this.renderIDCB.SelectedIndexChanged += new System.EventHandler(this.renderIDCB_SelectedIndexChanged);
             // 
             // shaderLabel
             // 
@@ -170,6 +196,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.tsetIDCB.Name = "tsetIDCB";
             this.tsetIDCB.Size = new System.Drawing.Size(49, 21);
             this.tsetIDCB.TabIndex = 3;
+            this.tsetIDCB.SelectedIndexChanged += new System.EventHandler(this.tsetIDCB_SelectedIndexChanged);
             // 
             // vsetIDLabel
             // 
@@ -187,6 +214,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.vsetIDCB.Name = "vsetIDCB";
             this.vsetIDCB.Size = new System.Drawing.Size(49, 21);
             this.vsetIDCB.TabIndex = 3;
+            this.vsetIDCB.SelectedIndexChanged += new System.EventHandler(this.vsetIDCB_SelectedIndexChanged);
             // 
             // psetIDLabel
             // 
@@ -204,21 +232,224 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.faceSetIDCB.Name = "faceSetIDCB";
             this.faceSetIDCB.Size = new System.Drawing.Size(49, 21);
             this.faceSetIDCB.TabIndex = 3;
+            this.faceSetIDCB.SelectedIndexChanged += new System.EventHandler(this.faceSetIDCB_SelectedIndexChanged);
             // 
             // warningLabel
             // 
             this.warningLabel.AutoSize = true;
-            this.warningLabel.Location = new System.Drawing.Point(64, 131);
+            this.warningLabel.Location = new System.Drawing.Point(64, 141);
             this.warningLabel.Name = "warningLabel";
             this.warningLabel.Size = new System.Drawing.Size(227, 13);
             this.warningLabel.TabIndex = 11;
             this.warningLabel.Text = "Warning, high risk of issues from editing below!";
-            this.warningLabel.Click += new System.EventHandler(this.warningLabel_Click);
+            // 
+            // unkShort0UD
+            // 
+            this.unkShort0UD.Location = new System.Drawing.Point(193, 21);
+            this.unkShort0UD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.unkShort0UD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.unkShort0UD.Name = "unkShort0UD";
+            this.unkShort0UD.Size = new System.Drawing.Size(76, 20);
+            this.unkShort0UD.TabIndex = 13;
+            this.unkShort0UD.ValueChanged += new System.EventHandler(this.unkShort0UD_ValueChanged);
+            // 
+            // unkShort0Label
+            // 
+            this.unkShort0Label.AutoSize = true;
+            this.unkShort0Label.Location = new System.Drawing.Point(190, 4);
+            this.unkShort0Label.Name = "unkShort0Label";
+            this.unkShort0Label.Size = new System.Drawing.Size(64, 13);
+            this.unkShort0Label.TabIndex = 12;
+            this.unkShort0Label.Text = "Unk Short 0";
+            // 
+            // unkByte0UD
+            // 
+            this.unkByte0UD.Location = new System.Drawing.Point(275, 21);
+            this.unkByte0UD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.unkByte0UD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.unkByte0UD.Name = "unkByte0UD";
+            this.unkByte0UD.Size = new System.Drawing.Size(76, 20);
+            this.unkByte0UD.TabIndex = 15;
+            this.unkByte0UD.ValueChanged += new System.EventHandler(this.unkByte0UD_ValueChanged);
+            // 
+            // unkByte0Label
+            // 
+            this.unkByte0Label.AutoSize = true;
+            this.unkByte0Label.Location = new System.Drawing.Point(272, 4);
+            this.unkByte0Label.Name = "unkByte0Label";
+            this.unkByte0Label.Size = new System.Drawing.Size(60, 13);
+            this.unkByte0Label.TabIndex = 14;
+            this.unkByte0Label.Text = "Unk Byte 0";
+            // 
+            // unkByte1UD
+            // 
+            this.unkByte1UD.Location = new System.Drawing.Point(29, 73);
+            this.unkByte1UD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.unkByte1UD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.unkByte1UD.Name = "unkByte1UD";
+            this.unkByte1UD.Size = new System.Drawing.Size(76, 20);
+            this.unkByte1UD.TabIndex = 17;
+            this.unkByte1UD.ValueChanged += new System.EventHandler(this.unkByte1UD_ValueChanged);
+            // 
+            // unkByte1Label
+            // 
+            this.unkByte1Label.AutoSize = true;
+            this.unkByte1Label.Location = new System.Drawing.Point(26, 56);
+            this.unkByte1Label.Name = "unkByte1Label";
+            this.unkByte1Label.Size = new System.Drawing.Size(60, 13);
+            this.unkByte1Label.TabIndex = 16;
+            this.unkByte1Label.Text = "Unk Byte 1";
+            // 
+            // unkShort1UD
+            // 
+            this.unkShort1UD.Location = new System.Drawing.Point(111, 73);
+            this.unkShort1UD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.unkShort1UD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.unkShort1UD.Name = "unkShort1UD";
+            this.unkShort1UD.Size = new System.Drawing.Size(76, 20);
+            this.unkShort1UD.TabIndex = 19;
+            this.unkShort1UD.ValueChanged += new System.EventHandler(this.unkShort1UD_ValueChanged);
+            // 
+            // unkShort1Label
+            // 
+            this.unkShort1Label.AutoSize = true;
+            this.unkShort1Label.Location = new System.Drawing.Point(108, 56);
+            this.unkShort1Label.Name = "unkShort1Label";
+            this.unkShort1Label.Size = new System.Drawing.Size(64, 13);
+            this.unkShort1Label.TabIndex = 18;
+            this.unkShort1Label.Text = "Unk Short 1";
+            // 
+            // baseMeshNodeIdUD
+            // 
+            this.baseMeshNodeIdUD.Location = new System.Drawing.Point(193, 73);
+            this.baseMeshNodeIdUD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.baseMeshNodeIdUD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.baseMeshNodeIdUD.Name = "baseMeshNodeIdUD";
+            this.baseMeshNodeIdUD.Size = new System.Drawing.Size(76, 20);
+            this.baseMeshNodeIdUD.TabIndex = 21;
+            this.baseMeshNodeIdUD.ValueChanged += new System.EventHandler(this.baseMeshNodeIdUD_ValueChanged);
+            // 
+            // baseMeshNodeIdLabel
+            // 
+            this.baseMeshNodeIdLabel.AutoSize = true;
+            this.baseMeshNodeIdLabel.Location = new System.Drawing.Point(190, 56);
+            this.baseMeshNodeIdLabel.Name = "baseMeshNodeIdLabel";
+            this.baseMeshNodeIdLabel.Size = new System.Drawing.Size(47, 13);
+            this.baseMeshNodeIdLabel.TabIndex = 20;
+            this.baseMeshNodeIdLabel.Text = "Node ID";
+            // 
+            // baseMeshDummyIdUD
+            // 
+            this.baseMeshDummyIdUD.Location = new System.Drawing.Point(275, 73);
+            this.baseMeshDummyIdUD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.baseMeshDummyIdUD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.baseMeshDummyIdUD.Name = "baseMeshDummyIdUD";
+            this.baseMeshDummyIdUD.Size = new System.Drawing.Size(76, 20);
+            this.baseMeshDummyIdUD.TabIndex = 23;
+            this.baseMeshDummyIdUD.ValueChanged += new System.EventHandler(this.baseMeshDummyIdUD_ValueChanged);
+            // 
+            // baseMeshDummyIdLabel
+            // 
+            this.baseMeshDummyIdLabel.AutoSize = true;
+            this.baseMeshDummyIdLabel.Location = new System.Drawing.Point(272, 56);
+            this.baseMeshDummyIdLabel.Name = "baseMeshDummyIdLabel";
+            this.baseMeshDummyIdLabel.Size = new System.Drawing.Size(40, 13);
+            this.baseMeshDummyIdLabel.TabIndex = 22;
+            this.baseMeshDummyIdLabel.Text = "Part ID";
+            // 
+            // unkInt0UD
+            // 
+            this.unkInt0UD.Location = new System.Drawing.Point(29, 118);
+            this.unkInt0UD.Maximum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            0});
+            this.unkInt0UD.Minimum = new decimal(new int[] {
+            1569325056,
+            23283064,
+            0,
+            -2147483648});
+            this.unkInt0UD.Name = "unkInt0UD";
+            this.unkInt0UD.Size = new System.Drawing.Size(76, 20);
+            this.unkInt0UD.TabIndex = 25;
+            this.unkInt0UD.ValueChanged += new System.EventHandler(this.unkInt0UD_ValueChanged);
+            // 
+            // unkInt0Label
+            // 
+            this.unkInt0Label.AutoSize = true;
+            this.unkInt0Label.Location = new System.Drawing.Point(26, 101);
+            this.unkInt0Label.Name = "unkInt0Label";
+            this.unkInt0Label.Size = new System.Drawing.Size(51, 13);
+            this.unkInt0Label.TabIndex = 24;
+            this.unkInt0Label.Text = "Unk Int 0";
             // 
             // MeshStructEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.unkInt0UD);
+            this.Controls.Add(this.unkInt0Label);
+            this.Controls.Add(this.baseMeshDummyIdUD);
+            this.Controls.Add(this.baseMeshDummyIdLabel);
+            this.Controls.Add(this.baseMeshNodeIdUD);
+            this.Controls.Add(this.baseMeshNodeIdLabel);
+            this.Controls.Add(this.unkShort1UD);
+            this.Controls.Add(this.unkShort1Label);
+            this.Controls.Add(this.unkByte1UD);
+            this.Controls.Add(this.unkByte1Label);
+            this.Controls.Add(this.unkByte0UD);
+            this.Controls.Add(this.unkByte0Label);
+            this.Controls.Add(this.unkShort0UD);
+            this.Controls.Add(this.unkShort0Label);
             this.Controls.Add(this.warningLabel);
             this.Controls.Add(this.faceSetIDCB);
             this.Controls.Add(this.psetIDLabel);
@@ -240,6 +471,13 @@ namespace AquaModelTool.Forms.ModelSubpanels
             ((System.ComponentModel.ISupportInitialize)(this.flagsUD)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.unkShort0UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkByte0UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkByte1UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkShort1UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.baseMeshNodeIdUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.baseMeshDummyIdUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.unkInt0UD)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -265,5 +503,19 @@ namespace AquaModelTool.Forms.ModelSubpanels
         private System.Windows.Forms.Label psetIDLabel;
         private System.Windows.Forms.ComboBox faceSetIDCB;
         private System.Windows.Forms.Label warningLabel;
+        private System.Windows.Forms.NumericUpDown unkShort0UD;
+        private System.Windows.Forms.Label unkShort0Label;
+        private System.Windows.Forms.NumericUpDown unkByte0UD;
+        private System.Windows.Forms.Label unkByte0Label;
+        private System.Windows.Forms.NumericUpDown unkByte1UD;
+        private System.Windows.Forms.Label unkByte1Label;
+        private System.Windows.Forms.NumericUpDown unkShort1UD;
+        private System.Windows.Forms.Label unkShort1Label;
+        private System.Windows.Forms.NumericUpDown baseMeshNodeIdUD;
+        private System.Windows.Forms.Label baseMeshNodeIdLabel;
+        private System.Windows.Forms.NumericUpDown baseMeshDummyIdUD;
+        private System.Windows.Forms.Label baseMeshDummyIdLabel;
+        private System.Windows.Forms.NumericUpDown unkInt0UD;
+        private System.Windows.Forms.Label unkInt0Label;
     }
 }

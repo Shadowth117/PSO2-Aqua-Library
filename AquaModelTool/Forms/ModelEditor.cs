@@ -10,12 +10,6 @@ namespace AquaModelTool
         {
             modelset = aquaModelset;
 
-            /*
-            if(modelset.models[0].objc.type == 0xC33 || modelset.models[0].objc.type == 0xC32)
-            {
-                MessageBox.Show("NGS era models are not properly supported. Saving will probably give unexpected results.");
-            }*/
-
             InitializeComponent();
             PopulateModelDropdown();
             SetDropdown();
@@ -55,7 +49,15 @@ namespace AquaModelTool
             {
                 editorCB.Items.Add("Materials");
             }
-            if(modelset.models[modelIDCB.SelectedIndex].shadList.Count > 0)
+            if (modelset.models[modelIDCB.SelectedIndex].meshList.Count > 0)
+            {
+                editorCB.Items.Add("Meshes");
+            }
+            if (modelset.models[modelIDCB.SelectedIndex].mesh2List.Count > 0)
+            {
+                editorCB.Items.Add("Mesh2s");
+            }
+            if (modelset.models[modelIDCB.SelectedIndex].shadList.Count > 0)
             {
                 editorCB.Items.Add("Shaders");
             }
@@ -78,12 +80,17 @@ namespace AquaModelTool
                 case "Materials":
                     control = new MaterialEditor(modelset.models[modelIDCB.SelectedIndex]);
                     break;
+                case "Meshes":
+                    control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].meshList);
+                    break;
+                case "Mesh2s":
+                    control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].mesh2List);
+                    break;
                 case "Shaders":
                     control = new ShaderEditor(modelset.models[modelIDCB.SelectedIndex]);
                     break;
                 default:
                     throw new Exception("Unexpected selection!");
-                    break;
             }
 
             modelPanel.Controls.Add(control);
