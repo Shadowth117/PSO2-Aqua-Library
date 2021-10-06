@@ -10,6 +10,7 @@ using zamboni;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.VTBFMethods;
+using static AquaModelLibrary.FilenameConstants;
 
 namespace AquaModelLibrary
 {
@@ -3710,6 +3711,10 @@ namespace AquaModelLibrary
                 File.WriteAllLines(Path.Combine(outputDirectory, $"Mags.csv"), magOut);
             }
 
+            //---------------------------Generate NGS Mag List
+
+    //TODO
+
             //---------------------------Generate Photon Blast Creature List
             var pbList = new List<string>();
             char letter = 'a';
@@ -3791,6 +3796,11 @@ namespace AquaModelLibrary
             File.WriteAllLines(Path.Combine(outputDirectory, $"General Character Animations NGS.csv"), genAnimListNGS);
             File.WriteAllLines(Path.Combine(outputDirectory, $"General Character Animations.csv"), genAnimList);
             File.WriteAllLines(Path.Combine(outputDirectory, "DarkBlasts_DrivableVehicles.csv"), dbList);
+
+            //---------------------------NGS Special Weapon/Vehicle List
+            List<string> ngsVehicleOutput = new List<string>();
+            ngsVehicleOutput.Add("Mobile Cannon,モバイルキャノン,f2/150838707a2fda44d80b91220a3b39");
+            File.WriteAllLines(Path.Combine(outputDirectory, "DarkBlasts_DrivableVehiclesNGS.csv"), ngsVehicleOutput);
 
             //---------------------------Generate Pet List
             List<string> classicPetOutput = new List<string>();
@@ -3977,11 +3987,383 @@ namespace AquaModelLibrary
 
             File.WriteAllLines(Path.Combine(outputDirectory, "EnemiesNGS Miscellaneous.csv"), ngsMiscOutput);
 
+            //---------------------------Generate Weapon Defaults
+            List<string> wepDefOutput = new List<string>();
+            List<string> wepDefNGSOutput = new List<string>();
+
+            for(int i = 1; i < weaponTypes.Count + 1; i++)
+            {
+                var type = weaponTypes[i - 1];
+                var file = weaponDir + baseWeaponString + ToCount(i, 2) + "_" + type + ".ice";
+                var hashedFile = GetFileHash(file);
+
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hashedFile)))
+                {
+                    wepDefOutput.Add($"{file},{hashedFile}");
+                }
+
+                if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
+                {
+                    var rebootHash = GetRebootHash(hashedFile);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootHash)))
+                    {
+                        wepDefNGSOutput.Add($"{file},{rebootHash}");
+                    }
+                }
+            }
+
+            Directory.CreateDirectory(outputDirectory + "\\Weapons\\PSO2\\");
+            Directory.CreateDirectory(outputDirectory + "\\Weapons\\NGS\\");
+            if (wepDefOutput.Count > 0)
+            {
+                File.WriteAllLines(outputDirectory + "\\Weapons\\PSO2\\" + "WeaponDefaults.csv", wepDefOutput);
+            }
+            if(wepDefNGSOutput.Count > 0)
+            {
+                File.WriteAllLines(outputDirectory + "\\Weapons\\NGS\\" + "WeaponDefaultsNGS.csv", wepDefNGSOutput);
+            }
+
             //---------------------------Generate Weapon list 
+            List<string> swordOutput = new List<string>();
+            List<string> wiredLanceOutput = new List<string>();
+            List<string> partizanOutput = new List<string>();
+            List<string> twinDaggerOutput = new List<string>();
+            List<string> doubleSaberOutput = new List<string>();
+            List<string> knucklesOutput = new List<string>();
+            List<string> gunslashOutput = new List<string>();
+            List<string> rifleOutput = new List<string>();
+            List<string> launcherOutput = new List<string>();
+            List<string> tmgOutput = new List<string>();
+            List<string> rodOutput = new List<string>();
+            List<string> talisOutput = new List<string>();
+            List<string> wandOutput = new List<string>();
+            List<string> katanaOutput = new List<string>();
+            List<string> bowOutput = new List<string>();
+            List<string> jetbootsOutput = new List<string>();
+            List<string> dualBladesOutput = new List<string>();
+            List<string> tactOutput = new List<string>();
+
+            List<string> fallbackOutput = new List<string>();
+
+            List<List<string>> wepOutputList = new List<List<string>>() 
+            {
+                swordOutput,
+                wiredLanceOutput,
+                partizanOutput,
+                twinDaggerOutput,
+                doubleSaberOutput,
+                knucklesOutput,
+                gunslashOutput,
+                rifleOutput,
+                launcherOutput,
+                tmgOutput,
+                rodOutput,
+                talisOutput,
+                wandOutput,
+                katanaOutput,
+                bowOutput,
+                jetbootsOutput,
+                dualBladesOutput,
+                tactOutput,
+                fallbackOutput
+            };
+
+
+            List<string> weaponListOutput;
+
+            //Get the default weapons
+            for(int i = 0; i < weaponTypesShort.Count; i++)
+            {
+                var type = weaponTypesShort[i];
+                if(type != null)
+                {
+                    weaponListOutput = wepOutputList[i];
+
+                    var file = weaponDir + defaultWeaponString + type + ".ice";
+                    var hashedFile = GetFileHash(file);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, hashedFile)))
+                    {
+                        weaponListOutput.Add($"Default {weaponTypes[i]},,{file},{hashedFile}");
+                    }
+                }
+            }
+
+            //Weapon names
+            for (int i = 1; i < 19; i++)
+            {
+                for (int id = 0; id < 1000; id++)
+                {
+                    var file = weaponDir + weaponString + ToCount(i, 2) + "_" + ToCount(id, 3) + ".ice";
+                    var hashedFile = GetFileHash(file);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, hashedFile)))
+                    {
+                        weaponListOutput = wepOutputList[i - 1];
+                        string name = null;
+                        switch (i - 1)
+                        {
+                            case 0:
+                                name = GetNameFromIdDict(id, swordNames);
+                                break;
+                            case 1:
+                                name = GetNameFromIdDict(id, wiredLanceNames);
+                                break;
+                            case 2:
+                                name = GetNameFromIdDict(id, partizanNames);
+                                break;
+                            case 3:
+                                name = GetNameFromIdDict(id, twinDaggerNames);
+                                break;
+                            case 4:
+                                name = GetNameFromIdDict(id, doubleSaberNames);
+                                break;
+                            case 5:
+                                name = GetNameFromIdDict(id, knucklesNames);
+                                break;
+                            case 6:
+                                name = GetNameFromIdDict(id, gunslashNames);
+                                break;
+                            case 7:
+                                name = GetNameFromIdDict(id, rifleNames);
+                                break;
+                            case 8:
+                                name = GetNameFromIdDict(id, launcherNames);
+                                break;
+                            case 9:
+                                name = GetNameFromIdDict(id, tmgNames);
+                                break;
+                            case 10:
+                                name = GetNameFromIdDict(id, rodNames);
+                                break;
+                            case 11:
+                                name = GetNameFromIdDict(id, talysNames);
+                                break;
+                            case 12:
+                                name = GetNameFromIdDict(id, wandNames);
+                                break;
+                            case 13:
+                                name = GetNameFromIdDict(id, katanaNames);
+                                break;
+                            case 14:
+                                name = GetNameFromIdDict(id, bowNames);
+                                break;
+                            case 15:
+                                name = GetNameFromIdDict(id, jetBootsNames);
+                                break;
+                            case 16:
+                                name = GetNameFromIdDict(id, dualBladesNames);
+                                break;
+                            case 17:
+                                name = GetNameFromIdDict(id, tactNames);
+                                break;
+                            default:
+                                weaponListOutput = new List<string>();
+                                break;
+                        }
+
+                        if(name == null)
+                        {
+                            name = ",";
+                        }
+
+                        weaponListOutput.Add(name + "," + file + "," + hashedFile);
+                    }
+                }
+            }
+
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "SwordNames.csv", swordOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "WiredLanceNames.csv", wiredLanceOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "PartizanNames.csv", partizanOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "TwinDaggerNames.csv", twinDaggerOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "DoubleSaberNames.csv", doubleSaberOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "KnucklesNames.csv", knucklesOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "GunslashNames.csv", gunslashOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "RifleNames.csv", rifleOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "LauncherNames.csv", launcherOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "TwinMachineGunNames.csv", tmgOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "RodNames.csv", rodOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "TalisNames.csv", talisOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "WandNames.csv", wandOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "KatanaNames.csv", katanaOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "BowNames.csv", bowOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "JetBootsNames.csv", jetbootsOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "DualBladesNames.csv", dualBladesOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "TactNames.csv", tactOutput);
+            WriteList(outputDirectory + "\\Weapons\\PSO2\\" + "Undefined.csv", fallbackOutput);
+
+            //---------------------------Generate NGS Weapon list
+            List<string> swordNGSOutput = new List<string>();
+            List<string> wiredLanceNGSOutput = new List<string>();
+            List<string> partizanNGSOutput = new List<string>();
+            List<string> twinDaggerNGSOutput = new List<string>();
+            List<string> doubleSaberNGSOutput = new List<string>();
+            List<string> knucklesNGSOutput = new List<string>();
+            List<string> gunslashNGSOutput = new List<string>();
+            List<string> rifleNGSOutput = new List<string>();
+            List<string> launcherNGSOutput = new List<string>();
+            List<string> tmgNGSOutput = new List<string>();
+            List<string> rodNGSOutput = new List<string>();
+            List<string> talisNGSOutput = new List<string>();
+            List<string> wandNGSOutput = new List<string>();
+            List<string> katanaNGSOutput = new List<string>();
+            List<string> bowNGSOutput = new List<string>();
+            List<string> jetbootsNGSOutput = new List<string>();
+            List<string> dualBladesNGSOutput = new List<string>();
+            List<string> tactNGSOutput = new List<string>();
+
+            List<string> fallbackNGSOutput = new List<string>();
+
+            List<List<string>> wepNGSOutputList = new List<List<string>>()
+            {
+                swordNGSOutput,
+                wiredLanceNGSOutput,
+                partizanNGSOutput,
+                twinDaggerNGSOutput,
+                doubleSaberNGSOutput,
+                knucklesNGSOutput,
+                gunslashNGSOutput,
+                rifleNGSOutput,
+                launcherNGSOutput,
+                tmgNGSOutput,
+                rodNGSOutput,
+                talisNGSOutput,
+                wandNGSOutput,
+                katanaNGSOutput,
+                bowNGSOutput,
+                jetbootsNGSOutput,
+                dualBladesNGSOutput,
+                tactNGSOutput,
+                fallbackNGSOutput
+            };
+
+            List<string> weaponListNGSOutput = new List<string>();
+
+            //Weapon names
+            for (int i = 0; i < 21; i++)
+            {
+                for (int id = 0; id < 1000; id++)
+                {
+                    var file = weaponDir + weaponString + ToCount(i, 2) + "_" + ToCount(id, 3) + ".ice";
+                    var hashedFile = GetFileHash(file);
+                    hashedFile = GetRebootHash(hashedFile);
+                    var test = Path.Combine(pso2_binDir, dataReboot, hashedFile);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, hashedFile)))
+                    {
+                        weaponListNGSOutput = wepNGSOutputList[i - 1];
+                        string name = null;
+                        switch (i - 1)
+                        {
+                            case 0:
+                                name = GetNameFromIdDict(id, swordNGSNames);
+                                break;
+                            case 1:
+                                name = GetNameFromIdDict(id, wiredLanceNGSNames);
+                                break;
+                            case 2:
+                                name = GetNameFromIdDict(id, partizanNGSNames);
+                                break;
+                            case 3:
+                                name = GetNameFromIdDict(id, twinDaggerNGSNames);
+                                break;
+                            case 4:
+                                name = GetNameFromIdDict(id, doubleSaberNGSNames);
+                                break;
+                            case 5:
+                                name = GetNameFromIdDict(id, knucklesNGSNames);
+                                break;
+                            case 6:
+                                name = GetNameFromIdDict(id, gunslashNGSNames);
+                                break;
+                            case 7:
+                                name = GetNameFromIdDict(id, rifleNGSNames);
+                                break;
+                            case 8:
+                                name = GetNameFromIdDict(id, launcherNGSNames);
+                                break;
+                            case 9:
+                                name = GetNameFromIdDict(id, tmgNGSNames);
+                                break;
+                            case 10:
+                                name = GetNameFromIdDict(id, rodNGSNames);
+                                break;
+                            case 11:
+                                name = GetNameFromIdDict(id, talysNGSNames);
+                                break;
+                            case 12:
+                                name = GetNameFromIdDict(id, wandNGSNames);
+                                break;
+                            case 13:
+                                name = GetNameFromIdDict(id, katanaNGSNames);
+                                break;
+                            case 14:
+                                name = GetNameFromIdDict(id, bowNGSNames);
+                                break;
+                            case 15:
+                                name = GetNameFromIdDict(id, jetBootsNGSNames);
+                                break;
+                            case 16:
+                                name = GetNameFromIdDict(id, dualBladesNGSNames);
+                                break;
+                            case 17:
+                                name = GetNameFromIdDict(id, tactNGSNames);
+                                break;
+                            default:
+                                weaponListNGSOutput = new List<string>();
+                                break;
+                        }
+
+                        if (name == null)
+                        {
+                            name = ",";
+                        }
+
+                        weaponListNGSOutput.Add(name + "," + file + "," + hashedFile);
+                    }
+                }
+            }
+
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "SwordNGSNames.csv", swordNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "WiredLanceNGSNames.csv", wiredLanceNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "PartizanNGSNames.csv", partizanNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "TwinDaggerNGSNames.csv", twinDaggerNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "DoubleSaberNGSNames.csv", doubleSaberNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "KnucklesNGSNames.csv", knucklesNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "GunslashNGSNames.csv", gunslashNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "RifleNGSNames.csv", rifleNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "LauncherNGSNames.csv", launcherNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "TwinMachineGunNGSNames.csv", tmgNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "RodNGSNames.csv", rodNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "TalisNGSNames.csv", talisNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "WandNGSNames.csv", wandNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "KatanaNGSNames.csv", katanaNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "BowNGSNames.csv", bowNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "JetBootsNGSNames.csv", jetbootsNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "DualBladesNGSNames.csv", dualBladesNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "TactNGSNames.csv", tactNGSOutput);
+            WriteList(outputDirectory + "\\Weapons\\NGS\\" + "UndefinedNGS.csv", fallbackNGSOutput);
 
             //---------------------------Generate Unit List
 
             //---------------------------Generate 
+        }
+
+        public static void WriteList(string filepath, List<string> output)
+        {
+            if(output.Count > 0)
+            {
+                File.WriteAllLines(filepath, output);
+            }
+        }
+
+        private static string GetNameFromIdDict(int id, Dictionary<int, string> names)
+        {
+            if (swordNames.ContainsKey(id))
+            {
+                return names[id];
+            }
+
+            return null;
         }
 
         public static string GetCastLegIconString(string id)
@@ -4530,6 +4912,17 @@ namespace AquaModelLibrary
         {
             string numString = num.ToString();
             return ToThree(numString);
+        }
+
+        public static string ToCount(int num, int count)
+        {
+            string numString = num.ToString();
+            while (numString.Length < count)
+            {
+                numString = numString.Insert(0, "0");
+            }
+
+            return numString;
         }
 
         public static string GetFileHash(string str)

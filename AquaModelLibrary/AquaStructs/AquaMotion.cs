@@ -151,7 +151,7 @@ namespace AquaModelLibrary
             //Texture/UV anim data - Seems to contain many types of data, though somewhat untested
             //Seemingly 8 data sets. 
 
-            //Node Tree Flag - Special subsec tion of data for player animations with an unknown purpose. Not necessary to include, but can be filled
+            //Node Tree Flag - Special subsection of data for player animations with an unknown purpose. Not necessary to include, but can be filled
             //with somewhat valid data if the user wishes
             //Pos, Rot data
         }
