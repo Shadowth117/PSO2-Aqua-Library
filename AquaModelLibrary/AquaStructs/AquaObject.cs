@@ -292,28 +292,28 @@ namespace AquaModelLibrary
 
         public struct REND
         {
-            public int tag;      //0x40, type 0x9 //Always 0x1FF
-            public int unk0;     //0x41, type 0x9 //3 usually
-            public int twosided; //0x42, type 0x9 //0 for backface cull, 1 for twosided, 2 used in persona live dance models for unknown purposes (backface only?)
-            public int int_0C; //0x43, type 0x9 //Maybe related to blend sort order? I'm not sure...
+            public int tag { get; set; }      //0x40, type 0x9 //Always 0x1FF
+            public int unk0 { get; set; }     //0x41, type 0x9 //3 usually
+            public int twosided { get; set; }  //0x42, type 0x9 //0 for backface cull, 1 for twosided, 2 used in persona live dance models for unknown purposes (backface only?)
+            public int int_0C { get; set; }  //0x43, type 0x9 //Maybe related to blend sort order? I'm not sure...
 
             //Next 12 values appear related, maybe to some texture setting? There are 3 sets that start with 5, first two go to 6, all go to 1, thhen 4th is typically different.
-            public int unk1; //0x44, type 0x9 //5 usually
-            public int unk2; //0x45, type 0x9 //6 usually
-            public int unk3; //0x46, type 0x9 //1 usually
-            public int unk4; //0x47, type 0x9 //0 usually
+            public int unk1 { get; set; }  //0x44, type 0x9 //5 usually
+            public int unk2 { get; set; }  //0x45, type 0x9 //6 usually
+            public int unk3 { get; set; }  //0x46, type 0x9 //1 usually
+            public int unk4 { get; set; }  //0x47, type 0x9 //0 usually
 
-            public int unk5; //0x48, type 0x9 //5 usually
-            public int unk6; //0x49, type 0x9 //6 usually
-            public int unk7; //0x4A, type 0x9 //1 usually. Another alpha setting, perhaps for multi/_s map?
-            public int unk8; //0x4B, type 0x9 //1 usually.
+            public int unk5 { get; set; }  //0x48, type 0x9 //5 usually
+            public int unk6 { get; set; }  //0x49, type 0x9 //6 usually
+            public int unk7 { get; set; }  //0x4A, type 0x9 //1 usually. Another alpha setting, perhaps for multi/_s map?
+            public int unk8 { get; set; }  //0x4B, type 0x9 //1 usually.
 
-            public int unk9;  //0x4C, type 0x9 //5 usually
-            public int alphaCutoff; //0x4D, type 0x9 //0-256, (Assumedly value of alpha at which a pixel is rendered invisible vs fully visible)
-            public int unk11; //0x4E, type 0x9 //1 usually
-            public int unk12; //0x4F, type 0x9 //4 usually
+            public int unk9 { get; set; }   //0x4C, type 0x9 //5 usually
+            public int alphaCutoff { get; set; }  //0x4D, type 0x9 //0-256, (Assumedly value of alpha at which a pixel is rendered invisible vs fully visible)
+            public int unk11 { get; set; }  //0x4E, type 0x9 //1 usually
+            public int unk12 { get; set; }  //0x4F, type 0x9 //4 usually
 
-            public int unk13; //0x50, type 0x9 //1 usually
+            public int unk13 { get; set; }  //0x50, type 0x9 //1 usually
 
             public bool Equals(REND c)
             {

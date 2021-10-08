@@ -353,3 +353,9 @@ x64/
 AMLNoesisPlugin/
 
 .vs/
+
+WeaponInstaller/obj/Debug/net5.0-windows/
+
+WeaponInstaller/obj/
+
+WeaponInstaller/bin/Debug/net5.0-windows/

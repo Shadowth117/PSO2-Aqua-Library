@@ -10,7 +10,7 @@ using zamboni;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.VTBFMethods;
-using static AquaModelLibrary.FilenameConstants;
+using static AquaExtras.FilenameConstants;
 
 namespace AquaModelLibrary
 {
@@ -4004,7 +4004,10 @@ namespace AquaModelLibrary
 
                 if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
                 {
-                    var rebootHash = GetRebootHash(hashedFile);
+                    var typeNGS = weaponTypesNGS[i - 1]; //Most of these are the same, but a few are slightly different
+                    var fileNGS = weaponDir + baseWeaponString + ToCount(i, 2) + "_" + typeNGS + ".ice";
+                    var hashedFileNGS = GetFileHash(fileNGS);
+                    var rebootHash = GetRebootHash(hashedFileNGS);
                     if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootHash)))
                     {
                         wepDefNGSOutput.Add($"{file},{rebootHash}");

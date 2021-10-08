@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaAutoRig", "AquaAutoRig\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMXPatcher", "CMXPatcher\CMXPatcher.csproj", "{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaponInstaller", "WeaponInstaller\WeaponInstaller.csproj", "{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,24 @@ Global
 		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.x86|x64.Build.0 = x86|Any CPU
 		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.x86|x86.ActiveCfg = x86|Any CPU
 		{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}.x86|x86.Build.0 = x86|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Debug|x64.Build.0 = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Debug|x86.Build.0 = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Release|x64.ActiveCfg = Release|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Release|x64.Build.0 = Release|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Release|x86.ActiveCfg = Release|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.Release|x86.Build.0 = Release|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.x86|Any CPU.Build.0 = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.x86|x64.ActiveCfg = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.x86|x64.Build.0 = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.x86|x86.ActiveCfg = Debug|Any CPU
+		{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}.x86|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

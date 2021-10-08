@@ -313,7 +313,6 @@ namespace AquaModelTool
                         MessageBox.Show("Invalid File");
                         return;
                 }
-
                 filePanel.Controls.Add(control);
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AquaModelLibrary;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,13 +9,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace AquaModelTool.Forms.ModelSubpanels
+namespace AquaModelTool
 {
     public partial class RenderEditor : UserControl
     {
-        public RenderEditor()
+        public RenderEditor(AquaObject newModel)
         {
             InitializeComponent();
         }
+
     }
 }

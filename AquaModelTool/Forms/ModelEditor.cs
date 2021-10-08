@@ -57,6 +57,10 @@ namespace AquaModelTool
             {
                 editorCB.Items.Add("Mesh2s");
             }
+            if (modelset.models[modelIDCB.SelectedIndex].rendList.Count > 0)
+            {
+               //editorCB.Items.Add("Render");
+            }
             if (modelset.models[modelIDCB.SelectedIndex].shadList.Count > 0)
             {
                 editorCB.Items.Add("Shaders");
@@ -86,6 +90,9 @@ namespace AquaModelTool
                 case "Mesh2s":
                     control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].mesh2List);
                     break;
+                //case "Render":
+                    //control = new RenderEditor(modelset.models[modelIDCB.SelectedIndex]);
+                    //break;
                 case "Shaders":
                     control = new ShaderEditor(modelset.models[modelIDCB.SelectedIndex]);
                     break;

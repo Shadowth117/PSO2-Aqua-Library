@@ -65,6 +65,10 @@
             // 
             // modelPanel
             // 
+            this.modelPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.modelPanel.AutoSize = true;
             this.modelPanel.Location = new System.Drawing.Point(4, 43);
             this.modelPanel.Name = "modelPanel";
             this.modelPanel.Size = new System.Drawing.Size(378, 204);

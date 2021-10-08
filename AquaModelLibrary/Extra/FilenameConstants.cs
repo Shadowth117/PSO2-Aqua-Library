@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary
+namespace AquaExtras
 {
     public static class FilenameConstants
     {
@@ -24,6 +24,28 @@ namespace AquaModelLibrary
             "gunslash",         //7
             "assaultrifle",     //8
             "grenadelauncher",  //9
+            "twinmachinegun",   //10
+            "rod",              //11
+            "thalys",           //12
+            "wand",             //13
+            "ktn",              //14
+            "bow",              //15
+            "jetboots",         //16
+            "dualblade",        //17
+            "tact"              //18
+        };
+
+        public static List<string> weaponTypesNGS = new List<string>()
+        {
+            "sword",            //1
+            "wiredlance",       //2
+            "partisan",         //3
+            "twindagger",       //4
+            "doublesaber",      //5
+            "knuckle",          //6
+            "gunslash",         //7
+            "rifle",            //8
+            "launcher",         //9
             "twinmachinegun",   //10
             "rod",              //11
             "thalys",           //12
@@ -96,5 +118,46 @@ namespace AquaModelLibrary
         public static Dictionary<int, string> jetBootsNGSNames = new Dictionary<int, string>();
         public static Dictionary<int, string> dualBladesNGSNames = new Dictionary<int, string>();
         public static Dictionary<int, string> tactNGSNames = new Dictionary<int, string>();
+        
+        public static List<string> csvFilenames = new List<string>() 
+        { 
+            "SwordNames.csv",
+            "WiredLanceNames.csv",
+            "PartizanNames.csv",
+            "TwinDaggerNames.csv",
+            "DoubleSaberNames.csv",
+            "KnucklesNames.csv",
+            "GunslashNames.csv",
+            "RifleNames.csv",
+            "LauncherNames.csv",
+            "TwinMachineGunNames.csv",
+            "RodNames.csv",
+            "TalisNames.csv",
+            "WandNames.csv",
+            "KatanaNames.csv",
+            "BowNames.csv",
+            "JetBootsNames.csv",
+            "DualBladesNames.csv",
+            "TactNames.csv",
+
+            "SwordNGSNames.csv",
+            "WiredLanceNGSNames.csv",
+            "PartizanNGSNames.csv",
+            "TwinDaggerNGSNames.csv",
+            "DoubleSaberNGSNames.csv",
+            "KnucklesNGSNames.csv",
+            "GunslashNGSNames.csv",
+            "RifleNGSNames.csv",
+            "LauncherNGSNames.csv",
+            "TwinMachineGunNGSNames.csv",
+            "RodNGSNames.csv",
+            "TalisNGSNames.csv",
+            "WandNGSNames.csv",
+            "KatanaNGSNames.csv",
+            "BowNGSNames.csv",
+            "JetBootsNGSNames.csv",
+            "DualBladesNGSNames.csv",
+            "TactNGSNames.csv",
+        };
     }
 }
