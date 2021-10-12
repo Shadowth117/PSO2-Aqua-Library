@@ -79,6 +79,8 @@ namespace WeaponInstaller
         bool canUpdate = false;
         string win32Folder = null;
         string win32RebootFolder = null;
+        string trueWin32Folder = null;
+        string trueWin32RebootFolder = null;
         string currentFile = null;
 
         public MainWindow()
@@ -88,7 +90,9 @@ namespace WeaponInstaller
             LoadWeaponRows();
             UpdateList();
             LoadPSO2Bin();
-
+#if DEBUG
+            replaceSelectedFromChecked.Visibility = Visibility.Visible;
+#endif
             canUpdate = true;
         }
 
@@ -99,6 +103,12 @@ namespace WeaponInstaller
                 var settings = File.ReadAllLines(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Weapons\\weaponSettings.txt");
                 win32Folder = settings[0];
                 win32RebootFolder = settings[1];
+                if(settings.Length < 4)
+                {
+                    MessageBox.Show("Re set your pso2bin please!");
+                }
+                trueWin32Folder = settings[2];
+                trueWin32RebootFolder = settings[3];
             } else
             {
                 MessageBox.Show("Must set pso2_bin before attempting to install weapons!");
@@ -126,6 +136,10 @@ namespace WeaponInstaller
                     win32RebootFolder = pso2BinSelect.FileName + "\\data\\win32reboot\\";
                     MessageBox.Show("Weapons will be installed to your win32 and win32reboot folders");
                 }
+                pso2Bin.Add(pso2BinSelect.FileName + "\\data\\win32\\");
+                pso2Bin.Add(pso2BinSelect.FileName + "\\data\\win32reboot\\");
+                trueWin32Folder = pso2BinSelect.FileName + "\\data\\win32\\";
+                trueWin32RebootFolder = pso2BinSelect.FileName + "\\data\\win32reboot\\";
                 File.WriteAllLines(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Weapons\\weaponSettings.txt", pso2Bin);
             }
         }
@@ -354,6 +368,10 @@ namespace WeaponInstaller
         {
             using (CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog())
             {
+                if(currentFile != null)
+                {
+                    openFileDialog.InitialDirectory = Path.GetDirectoryName(currentFile);
+                }
                 if(openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     currentFile = openFileDialog.FileName;
@@ -370,6 +388,7 @@ namespace WeaponInstaller
             } else
             {
                 ReplaceFiles(currentFile);
+                MessageBox.Show("Successfully Replaced!");
             }
         }
 
@@ -398,18 +417,28 @@ namespace WeaponInstaller
 
         private void ReplaceFile(byte[] bytes, string game, string hash)
         {
-            var baseDir = game == "NGS" ? win32RebootFolder : win32Folder;
             string filePath;
-            if (game == "NGS" && win32RebootFolder.Contains("modsreboot", StringComparison.OrdinalIgnoreCase))
+            filePath = GetGameFilePath(game, hash);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            File.WriteAllBytes(filePath, bytes);
+        }
+
+        private string GetGameFilePath(string game, string hash, bool truePaths = false)
+        {
+            string win32 = truePaths ? trueWin32Folder : win32Folder;
+            string reboot = truePaths ? trueWin32RebootFolder : win32RebootFolder;
+            string filePath;
+            var baseDir = game == "NGS" ? reboot : win32;
+            if (game == "NGS" && reboot.Contains("modsreboot", StringComparison.OrdinalIgnoreCase))
             {
                 filePath = baseDir + hash.Replace("\\", "");
             }
             else
             {
                 filePath = baseDir + hash;
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             }
-            File.WriteAllBytes(filePath, bytes);
+
+            return filePath;
         }
 
         private void showAllClick(object sender, RoutedEventArgs e)
@@ -628,6 +657,40 @@ namespace WeaponInstaller
                 File.WriteAllLines(saveDialog.FileName, lines);
             }
                 
+        }
+
+        public void ReplaceSelectedFromCheckedClick(object sender, RoutedEventArgs e)
+        {
+            if (currentFile == null || win32Folder == null || win32RebootFolder == null)
+            {
+                MessageBox.Show("Be sure a file is selected and that your pso2Bin is set!");
+                return;
+            }
+
+            foreach(var weapon in WeaponList)
+            {
+                if (weapon.Replace == false)
+                {
+                    continue;
+                }
+
+                var file = GetGameFilePath(weapon.Game, weapon.Md5Hash, true);
+                if(File.Exists(file))
+                {
+                    File.WriteAllBytes(currentFile, File.ReadAllBytes(file));
+                    MessageBox.Show($"{Path.GetFileName(currentFile)} replaced with {weapon.Md5Hash}!");
+                } else
+                {
+                    MessageBox.Show($"{Path.GetFileName(file)} not found!");
+                }
+            }
+        }
+
+        public void SetRowAsSelectedClick(object sender, RoutedEventArgs e)
+        {
+            WeaponRow row = (WeaponRow)dataGrid.SelectedItem;
+            currentFile = GetGameFilePath(row.Game, row.Md5Hash, true);
+            currentFileLabel.Content = Path.GetFileName(currentFile);
         }
     }
 }

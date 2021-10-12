@@ -11,7 +11,13 @@
             <ColumnDefinition Width="79*"/>
             <ColumnDefinition Width="721*"/>
         </Grid.ColumnDefinitions>
-        <DataGrid x:Name="dataGrid" HorizontalAlignment="Stretch" Margin="11,108,0,0" VerticalAlignment="Stretch" Grid.ColumnSpan="2"/>
+        <DataGrid x:Name="dataGrid" HorizontalAlignment="Stretch" Margin="11,108,0,0" VerticalAlignment="Stretch" Grid.ColumnSpan="2">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Set Current Row As Selected Item" Click="SetRowAsSelectedClick"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
         <Label x:Name="currentFileLabel" Content="Select a file" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="223" Grid.ColumnSpan="2"/>
         <Button x:Name="selectButton" Content="Select" HorizontalAlignment="Left" Margin="15,49,0,0" VerticalAlignment="Top" Click="selectButtonClick"/>
         <Button x:Name="replaceButton" Content="Replace Checked Files With Selected" HorizontalAlignment="Left" Margin="15,78,0,0" VerticalAlignment="Top" Width="201" Click="replaceButtonClick" Grid.ColumnSpan="2"/>
@@ -44,6 +50,7 @@
             </MenuItem>
             <MenuItem Header="Install From Config" Click="InstallFromConfigClick"/>
             <MenuItem Header="Export Config" Click="ExportConfigClick"/>
+            <MenuItem Name="replaceSelectedFromChecked" Header="Replace Selected from Checked" Click="ReplaceSelectedFromCheckedClick" Visibility="Hidden"/>
         </Menu>
         <Label x:Name="listFromLabel" Content="List from:" Grid.Column="1" HorizontalAlignment="Left" Margin="593,62,0,0" VerticalAlignment="Top"/>
         <Button x:Name="showAllLabel" Content="Show All" Grid.Column="1" HorizontalAlignment="Left" Margin="23,49,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.581,0.286" Click="showAllClick"/>
