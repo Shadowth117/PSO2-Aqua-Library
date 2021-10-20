@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -631,6 +632,7 @@ namespace AquaModelLibrary
                     case "DOC ":
                         break;
                     case "MAGR":
+                        Debug.WriteLine((int)data[0][0xFF]);
                         mgxIds.Add((int)data[0][0xFF]);
                         break;
                     default:

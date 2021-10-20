@@ -53,6 +53,7 @@
             this.legacyAqp2objObjExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,7 +65,7 @@
             this.readBTIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMagIndicesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -270,6 +271,13 @@
             this.prmEffectModelExportToolStripMenuItem.Text = "prm Effect Model Export";
             this.prmEffectModelExportToolStripMenuItem.Click += new System.EventHandler(this.prmEffectModelExportToolStripMenuItem_Click);
             // 
+            // prmEffectFromModelToolStripMenuItem
+            // 
+            this.prmEffectFromModelToolStripMenuItem.Name = "prmEffectFromModelToolStripMenuItem";
+            this.prmEffectFromModelToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.prmEffectFromModelToolStripMenuItem.Text = "prm Effect From Model";
+            this.prmEffectFromModelToolStripMenuItem.Click += new System.EventHandler(this.prmEffectFromModelToolStripMenuItem_Click);
+            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -280,7 +288,8 @@
             this.cloneBoneTransformsToolStripMenuItem,
             this.testVTXEToolStripMenuItem,
             this.dumpNOF0ToolStripMenuItem,
-            this.readBTIToolStripMenuItem});
+            this.readBTIToolStripMenuItem,
+            this.readMagIndicesToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -359,12 +368,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // prmEffectFromModelToolStripMenuItem
+            // readMagIndicesToolStripMenuItem
             // 
-            this.prmEffectFromModelToolStripMenuItem.Name = "prmEffectFromModelToolStripMenuItem";
-            this.prmEffectFromModelToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
-            this.prmEffectFromModelToolStripMenuItem.Text = "prm Effect From Model";
-            this.prmEffectFromModelToolStripMenuItem.Click += new System.EventHandler(this.prmEffectFromModelToolStripMenuItem_Click);
+            this.readMagIndicesToolStripMenuItem.Name = "readMagIndicesToolStripMenuItem";
+            this.readMagIndicesToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readMagIndicesToolStripMenuItem.Text = "ReadMagIndices";
+            this.readMagIndicesToolStripMenuItem.Click += new System.EventHandler(this.readMagIndicesToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -424,6 +433,7 @@
         private System.Windows.Forms.ToolStripMenuItem readBTIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prmEffectModelExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prmEffectFromModelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readMagIndicesToolStripMenuItem;
     }
 }
 

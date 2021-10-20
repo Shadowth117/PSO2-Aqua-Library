@@ -10,6 +10,8 @@ namespace AquaModelLibrary
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
     public unsafe class CharacterMakingIndex : AquaCommon
     {
+        public static int oct21TableAddressInt = 0x2318B4; //Used for checking the version of the cmx in order to maintain legacy support
+
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
         public static string dataReboot = $"data\\win32reboot\\";
@@ -89,312 +91,6 @@ namespace AquaModelLibrary
         public static string actorNameName = "actor_name.text";
         public static string faceVarName = "face_variation.cmp.lua";
         public static string lacName = "lobby_action_setting.lac";
-        public static string mgxName = "setting.mgx";
-
-        public static string pbCreatures = "photon_blast/photon_blast_";
-        public static string db_vehicle = "vehicle/";
-
-        public static string colorPaletteOut = @"colorPalettes\";
-
-        public static List<string> playerEffects =  new List<string>()
-            {
-                "actor/shot/effect_2dg.ice",
-                "actor/shot/effect_2sm.ice",
-                "actor/shot/effect_arks_buff.ice",
-                "actor/shot/effect_aslt.ice",
-                "actor/shot/effect_boots.ice",
-                "actor/shot/effect_cmpdbow.ice",
-                "actor/shot/effect_cs.ice",
-                "actor/shot/effect_dbld.ice",
-                "actor/shot/effect_dsa.ice",
-                "actor/shot/effect_en_sprdbm.ice",
-                "actor/shot/effect_ene_sld.ice",
-                "actor/shot/effect_gslh.ice",
-                "actor/shot/effect_hr2sm.ice",
-                "actor/shot/effect_hrswd.ice",
-                "actor/shot/effect_hrthlys.ice",
-                "actor/shot/effect_knu.ice",
-                "actor/shot/effect_ktn.ice",
-                "actor/shot/effect_lnch.ice",
-                "actor/shot/effect_mag.ice",
-                "actor/shot/effect_mrg_buff.ice",
-                "actor/shot/effect_mstdbld.ice",
-                "actor/shot/effect_mstdsa.ice",
-                "actor/shot/effect_mstwnd.ice",
-                "actor/shot/effect_mti_buff.ice",
-                "actor/shot/effect_parti.ice",
-                "actor/shot/effect_sc_success_buff.ice",
-                "actor/shot/effect_slagsl.ice",
-                "actor/shot/effect_sum.ice",
-                "actor/shot/effect_swd.ice",
-                "actor/shot/effect_tec.ice",
-                "actor/shot/effect_thlys.ice",
-                "actor/shot/effect_vlnaslt.ice",
-                "actor/shot/effect_vlnktn.ice",
-                "actor/shot/effect_vlnrod.ice",
-                "actor/shot/effect_wlce.ice",
-                "actor/shot/effect_wnd.ice",
-                "actor/shot/effect_wp_pot_02_242.ice",
-                "actor/shot/effect_wp_pot_06_202.ice",
-                "actor/shot/effect_wp_pot_07_091.ice",
-                "actor/shot/effect_wp_pot_09_bnk.ice",
-                "actor/shot/effect_wp_pot_13_290.ice",
-                "actor/shot/effect_wp_pot_14_264.ice",
-                "actor/shot/effect_wp_pot_15_059.ice",
-                "actor/shot/effect_wp_pot_16_128.ice",
-                "actor/shot/effect_wp_pot_absh.ice",
-                "actor/shot/effect_wp_pot_ace.ice",
-                "actor/shot/effect_wp_pot_ang.ice",
-                "actor/shot/effect_wp_pot_arles.ice",
-                "actor/shot/effect_wp_pot_aut_recv.ice",
-                "actor/shot/effect_wp_pot_autos.ice",
-                "actor/shot/effect_wp_pot_barrier.ice",
-                "actor/shot/effect_wp_pot_berserk.ice",
-                "actor/shot/effect_wp_pot_bldr.ice",
-                "actor/shot/effect_wp_pot_bone.ice",
-                "actor/shot/effect_wp_pot_chskip.ice",
-                "actor/shot/effect_wp_pot_com_plybuff.ice",
-                "actor/shot/effect_wp_pot_crystal.ice",
-                "actor/shot/effect_wp_pot_dest.ice",
-                "actor/shot/effect_wp_pot_dmgst.ice",
-                "actor/shot/effect_wp_pot_elebo.ice",
-                "actor/shot/effect_wp_pot_elebo2.ice",
-                "actor/shot/effect_wp_pot_elm_black.ice",
-                "actor/shot/effect_wp_pot_elm_blue.ice",
-                "actor/shot/effect_wp_pot_elm_green.ice",
-                "actor/shot/effect_wp_pot_elm_red.ice",
-                "actor/shot/effect_wp_pot_elm_white.ice",
-                "actor/shot/effect_wp_pot_elm_yellow.ice",
-                "actor/shot/effect_wp_pot_endstrong.ice",
-                "actor/shot/effect_wp_pot_expwep.ice",
-                "actor/shot/effect_wp_pot_gearguard_c.ice",
-                "actor/shot/effect_wp_pot_homilan.ice",
-                "actor/shot/effect_wp_pot_lastbl.ice",
-                "actor/shot/effect_wp_pot_med.ice",
-                "actor/shot/effect_wp_pot_mira_mnb.ice",
-                "actor/shot/effect_wp_pot_mrroid.ice",
-                "actor/shot/effect_wp_pot_nodb.ice",
-                "actor/shot/effect_wp_pot_non_pbld.ice",
-                "actor/shot/effect_wp_pot_phobos.ice",
-                "actor/shot/effect_wp_pot_ppfever.ice",
-                "actor/shot/effect_wp_pot_preh.ice",
-                "actor/shot/effect_wp_pot_preh2.ice",
-                "actor/shot/effect_wp_pot_prfdtlck.ice",
-                "actor/shot/effect_wp_pot_prod.ice",
-                "actor/shot/effect_wp_pot_rdbd.ice",
-                "actor/shot/effect_wp_pot_reng.ice",
-                "actor/shot/effect_wp_pot_revgift.ice",
-                "actor/shot/effect_wp_pot_saberstyle.ice",
-                "actor/shot/effect_wp_pot_sbeam.ice",
-                "actor/shot/effect_wp_pot_shooting_s.ice",
-                "actor/shot/effect_wp_pot_shwtim_onetim.ice",
-                "actor/shot/effect_wp_pot_spinfe.ice",
-                "actor/shot/effect_wp_pot_stedb.ice",
-                "actor/shot/effect_wp_pot_thdmas.ice",
-                "actor/shot/effect_wp_pot_time_chan.ice",
-                "actor/shot/effect_wp_pot_turt.ice",
-                "actor/shot/effect_wp_pot_union.ice",
-                "actor/shot/effect_wp_pot_vintrange.ice",
-                "actor/shot/effect_wp_pot_vrefine.ice",
-                "actor/shot/effect_wp_pot_weekhit.ice",
-                "actor/shot/effect_wp_pot_whitig.ice",
-                "actor/shot/effect_wp_pot_wideshot.ice",
-                "actor/shot/effect_wp_pot_wlance_high.ice",
-                "actor/shot/effect_wp_pot_zerodstrong.ice"
-            };
-
-        public static Dictionary<int, string> magNames = new Dictionary<int, string>()
-        {
-            { 1, "???,Alternate Mag?" },
-            { 2, "マグ,Mag" },
-            { 3, "ライラ,Lyra" },
-            { 4, "フォルナクス,Fornax" },
-            { 5, "レプス,Lepus"},
-            { 6, "アントリア,Antlia"},
-            { 7, "ライブラ,Libra"},
-            { 8, "ドルフィヌス,Delphinus"},
-            { 9, "キグナス,Cygnus"},
-            { 10, "カエルム,Caelum"},
-            { 11, "ケフェウス,Cepheus"},
-            { 12, "ツカナ,Tsukana"},
-            { 13, "カリーナ,Carina"},
-            { 14, "モノケロス,Monoceros"},
-            { 15, "オリオン,Orion"},
-            { 16, "アプス,Apus"},
-            { 17, "コルブス,Corvus"},
-            { 18, "レオ,Leo"},
-            { 19, "クルックス,Crux"},
-            { 20, "リンクス,Lynx"},
-            { 21, "ドラコ,Draco"},
-            { 22, "シャト,Sato"},
-            { 23, "ラッピー,Rappy"},
-            { 24, "ジャック,Jack"},
-            { 25, "ピート,Pete"},
-            { 26, "キャンサー,Cancer"},
-            { 27, "アクベンス,Acubens"},
-            { 28, "アセルス,Asers"},
-            { 29, "アルタルフ,Altarf"},
-            { 30, "キトゥン,Kitten"},
-            { 31, "カッツェ,Katze"},
-            { 32, "ミーツェ,Miishe"},
-            { 33, "クラーリタ,Clarita"},
-            { 34, "ナナハナ,nanahana"},
-            { 35, "アークマ,Arkuma"},
-            { 36, "アークマミ,Arkumami"},
-            { 37, "アンブラ,Umbra"},
-            { 38, "トロ,Toro"},
-            { 39, "クロ,Kuro"},
-            { 40, "ハンプティ,Humpty"},
-            { 41, "チャムライ,Chamurai"},
-            { 42, "チャーク,Chark"},
-            { 43, "リリーパ,Lillipan"},
-            { 44, "ゴストン,Ghoston"},
-            { 45, "ソニチ,Sonichi"},
-            { 46, "プーシャン,Pushan"},
-            { 47, "ミクダヨー,Mikudayo-"},
-            { 48, "緑ぷよ,Green Puyo"},
-            { 49, "カーバンクル,Carbuncle"},
-            { 50, "キュゥべえ,Kyubey"},
-            { 51, "ポリタン,Polytan"},
-            { 52, "カガミミ,Kagamimi"},
-            { 53, "ラブラッピー,Love Rappy"},
-            { 54, "ラヴィラッピー,Lovey Rappy"},
-            { 55, "キャリブー,Caribou" },
-
-            { 56, ",Unidentified Black Bear"},
-
-            { 57, "イーツター,Eatster (Intended spelling)"},
-            { 58, "ミャリッジ,Wedding Bell"},
-            { 59, "ベレイ,Berei"},
-            { 60, "ベレイMk2,Berei Mk2"},
-            { 61, "エトワル,étoile"},
-            { 62, "月見ラッピー,Moon-Viewing Rappy"},
-            { 63, "ソニック人形, Sonic Doll"},
-            { 64, "モロ星人,Moro Alien"},
-            { 65, "モロ星人B,Moro Alien B"},
-            { 66, "ナイトギア,Nightgear"},
-            { 67, "ニャウ,Nyau"},
-            { 68, "ジャクラン,Jack Lan"},
-            { 69, "テルクゥ,Teruku"},
-            { 70, "キリゾー,Girizoo"},
-            { 71, "SFC妖精,SFC Fairy"},
-            { 72, "赤ぷよ,Red Puyo"},
-            { 73, "ダンボー,Danboard"},
-            { 74, "カラッピー,Karappy"},
-            { 75, "タマヒメ,Tamahime"},
-            { 76, "お団子ヘア,Dumpling Hair"},
-            { 77, "ラブリーパ,LoveLipa"},
-            { 78, "ラヴィリー,LoveLi"},
-            { 79, "ドリキャス,Dreamcast"},
-            { 80, "セガサターン,Sega Saturn"},
-            { 81, "メガドラ,Mega Drive"},
-            { 82, "アナライザー,Analyzer"},
-            { 83, "ホヌホヌ,Honuhonu" },
-            { 84, "小梅,Xiaomei"},
-            { 85, "ニャンドリオン（ニャンD）,Nyandorion (NyanD)"},
-            { 86, "A.I.S,A.I.S"},
-
-            { 88, "ジーツター,Jiitsuter"},
-            { 89, "レイニャン,Rainyan"},
-            { 90, "ルクミン,Rukmin"},
-            { 91, "ネッキー,Necky"},
-            { 92, "リンクスR,Lynx R"},
-            { 93, "キトゥンR,Kitten R"},
-            { 96, "キャンサーR,Cancer R"},
-            { 97, "アクベンスR,Acubens R"},
-            { 100, "波乗ニャウ,Wave Riding Nyau"},
-            { 101, "リリダイコ,Lilidaigo"},
-            { 102, "RRリコ,RR Rico"},
-            { 103, "ニドラー,Nidra"},
-            { 104, "ピトリ,Pitri"},
-            { 105, "プチアンガ,Petit Anga"},
-            { 106, "ウサノヤ,Usanoya"},
-            { 107, "モチュゴヤ,Mochugoya"},
-            { 108, "オパオパ,Opa-Opa"},
-            { 109, "紫ぷよ,Purple Puyo"},
-            { 110, "テムジン,Temjin"},
-            { 111, "青ぷよ,Blue Puyo"},
-            { 112, "ルーシャー,Luther"},
-            { 113, "バットリー,Batreat"},
-            { 114, "シャノルン,Chanolun"},
-            { 115, "ハッピー,Happy"},
-            { 116, "ナガミミ,Nagamimi"},
-            { 117, "ノルルン,Nolulun"},
-            { 118, "クツッピー,Kutsuppy"},
-            { 119, "ラブクマミ,Lovekumami"},
-            { 120, "ラヴィクマ,LoveyKuma"},
-            { 121, "チェリシュ,Cherish"},
-            { 122, "オーディン,Odin"},
-            { 123, "モーグリ,Moogle"},
-            { 124, "プリニー,Prinny"},
-            { 125, "東京タワーラッピー,Tokyo Tower Rappy"},
-            { 126, "金シャチラッピー,Golden Whale Rappy"},
-            { 127, "屋台ラッピー,Food Cart Rappy"},
-            { 128, "ジンギスカンラッピー,Jingisukan Rappy"},
-            { 129, "通天閣(R)ラッピー,Tsutenkaku (R) Rappy"},
-            { 130, "ステルス化,Stealth"},
-            { 131, "ケツカッチン,Ketsukacchin"},
-            { 132, "エスカくん,Eska-kun"},
-            { 133, "プリュミー,Plumii"},
-            { 134, "光武二式（大神機）,Koubu MK II (OM)"},
-            { 135, "光武二式（さくら機）,Koubu MK II (SM)"},
-            { 136, "パティエンティア,Patty & Tiea"},
-            { 137, "ワンダラー,Wanderer"},
-            { 138, "ミニゴジラ,Mini Godzilla"},
-            { 139, "ピートR,Pete R"},
-            { 140, "ブラナート,Brownart"},
-            
-            { 143, "ポーラー,Polar"},
-            { 144, "ポッド０４２,Pod 042"},
-            { 145, "ポッド１５３,Pod 153"},
-            { 146, "桜ニャウ,Sakura Nyau"},
-            { 147, "フログラッピー,Frog Rappy"},
-            { 148, "モア,Moa"},
-            { 149, "スティレットＧ,Stylet G"},
-            { 150, "エンペ・ラッピー,Empe Rappy"},
-            { 151, "ヤミガラス,Yamigarasu"},
-            { 152, "プラフタ,Plachta"},
-            { 153, "ラタン・エンペ,Rotten Empe"},
-            { 154, "アクス・ラッピー,ARKS Rappy"},
-            { 155, "フェザーキャロル,Feather Carole"},
-            { 156, "フェリチェマクス,Felice Max"},
-            { 158, "ホワイトラプラス,White Laplace"},
-            { 159, "エグ・ラッピー,Egg Rappy"},
-            { 160, "ラヴィ・エンペ,Lovey Empe"},
-            { 162, "パック,Puck"},
-            { 164, "ラブ・エンペ,Love Empe"},
-            { 166, "ダークラッピー,Dark Rappy"},
-            { 167, "テルテルラッピー,Tell Tell Rappy"},
-            { 168, "モルガナ,Morgana"},
-            { 169, "バーゼラルドＧ,Baselard G"},
-            { 170, "轟雷Ｇ,Gourai G"},
-            { 171, "パートニャー,Partnya"},
-            { 172, "プーギー,Poogie"},
-            { 173, "レイチュ,Reichu"},
-            { 174, "セント・ラッピー,Saint Rappy"},
-            { 176, "ジャックフロスト,Jack Frost"},
-
-            { 177, ",Ornate Japanese looking black pig"},
-            { 178, "ちびレラ,Sabirera (Quartz Dragon/クォーツドラゴン)"},
-            { 179, "サクリャ,Sakurya"},
-            { 180, "リトルメデューナ,Little Meduna"},
-            { 181, "キツネアメ,Kitsune Ame"},
-            { 182, "カグヤ,Kaguya"},
-            { 183, "ペルチョナ,Perchona"},
-            { 184, "タマヒメ2,Tamahime 2"},
-            { 185, "ペギー,Pegi"},
-            { 186, "ペギータ,Pegita"},
-            { 188, "Vハンター,V Hunter"},
-            { 190, "パイ,Pai"},
-            { 191, ",Ornate Japanese looking black mouse"},
-            { 192, "チョトリ,Chotrea"},
-            { 193, "ミルトリ,Miltrea"},
-            { 194, "フェズ,Feath"},
-            { 195, "カエルン,Kaerun"},
-            { 196, "オッチャ,Ocha"},
-            
-            { 999, "Debug" }
-        };
 
         public Dictionary<int, BODYObject> costumeDict = new Dictionary<int, BODYObject>();
         public Dictionary<int, BODYObject> carmDict = new Dictionary<int, BODYObject>();
@@ -435,6 +131,7 @@ namespace AquaModelLibrary
         public Dictionary<int, BCLN> baseWearIdLink = new Dictionary<int, BCLN>();
 
         public Dictionary<int, BCLN> innerWearIdLink = new Dictionary<int, BCLN>();
+        public Dictionary<int, BCLN> unknownIdLink = new Dictionary<int, BCLN>();
 
         public CMXTable cmxTable;
 
@@ -1041,7 +738,7 @@ namespace AquaModelLibrary
             public int unkInt;
         }
 
-        public struct CMXTable
+        public class CMXTable
         {
             public int bodyAddress; //BODY Costumes
             public int carmAddress; //CARM Cast Arms
@@ -1079,6 +776,7 @@ namespace AquaModelLibrary
             public int baseWearIdLinkAddress; //BCLN basewear ids for recolors
 
             public int innerWearIdLinkAddress; //BCLN innerwear ids for recolors
+            public int oct21UnkAddress; //Only in October 12, 2021 builds and forward
 
             public int bodyCount; 
             public int carmCount; 
@@ -1116,6 +814,7 @@ namespace AquaModelLibrary
             public int baseWearIdLinkCount;
 
             public int innerWearIdLinkCount;
+            public int oct21UnkCount; //Only in October 12, 2021 builds and forward
         }
     }
 }

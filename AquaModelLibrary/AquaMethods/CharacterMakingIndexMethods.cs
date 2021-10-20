@@ -191,7 +191,7 @@ namespace AquaModelLibrary
             cmx.rel0 = streamReader.Read<AquaCommon.REL0>();
 
             streamReader.Seek(cmx.rel0.REL0DataStart + offset, SeekOrigin.Begin);
-            cmx.cmxTable = streamReader.Read<CMXTable>();
+            cmx.cmxTable = ReadCMXTable(streamReader, cmx.rel0.REL0DataStart);
 
             ReadBODY(streamReader, offset, cmx.cmxTable.bodyAddress, cmx.cmxTable.bodyCount, cmx.costumeDict);
             ReadBODY(streamReader, offset, cmx.cmxTable.carmAddress, cmx.cmxTable.carmCount, cmx.carmDict);
@@ -237,7 +237,102 @@ namespace AquaModelLibrary
 
             ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.innerWearIdLink);
 
+            if(cmx.cmxTable.oct21UnkAddress != 0)
+            {
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.oct21UnkAddress, cmx.cmxTable.oct21UnkCount, cmx.unknownIdLink);
+            }
+
             return cmx;
+        }
+
+        private static CMXTable ReadCMXTable(BufferedStreamReader streamReader, int headerOffset)
+        {
+            CMXTable cmxTable = new CMXTable();
+
+            cmxTable.bodyAddress = streamReader.Read<int>(); //BODY Costumes
+            cmxTable.carmAddress = streamReader.Read<int>(); //CARM Cast Arms
+            cmxTable.clegAddress = streamReader.Read<int>(); //CLEG Cast Legs
+            cmxTable.bodyOuterAddress = streamReader.Read<int>(); //BODY Outer Wear
+
+            cmxTable.baseWearAddress = streamReader.Read<int>(); //BCLN Base Wear
+            cmxTable.innerWearAddress = streamReader.Read<int>(); //BBLY Inner Wear
+            cmxTable.bodyPaintAddress = streamReader.Read<int>(); //BDP1 Body Paint 
+            cmxTable.stickerAddress = streamReader.Read<int>(); //BDP2 Stickers
+
+            cmxTable.faceAddress = streamReader.Read<int>(); //FACE All heads
+            cmxTable.faceMotionAddress = streamReader.Read<int>(); //Face motions
+            cmxTable.faceTextureAddress = streamReader.Read<int>(); //NGS Faces?
+            cmxTable.faceTexturesAddress = streamReader.Read<int>(); //Face textures and face paint
+
+            cmxTable.accessoryAddress = streamReader.Read<int>(); //ACCE Accessories
+            cmxTable.eyeTextureAddress = streamReader.Read<int>(); //EYE eye textures
+            cmxTable.earAddress = streamReader.Read<int>(); //reboot ears
+            cmxTable.teethAddress = streamReader.Read<int>(); //reboot mouths
+
+            cmxTable.hornAddress = streamReader.Read<int>(); //reboot horns
+            cmxTable.skinAddress = streamReader.Read<int>(); //reboot and maybe classic skin?
+            cmxTable.eyebrowAddress = streamReader.Read<int>(); //EYEB eyebrows
+            cmxTable.eyelashAddress = streamReader.Read<int>(); //EYEL eyelashes
+
+            cmxTable.hairAddress = streamReader.Read<int>(); //HAIR 
+            cmxTable.colAddress = streamReader.Read<int>(); //COL, for color chart textures
+            cmxTable.unkAddress = streamReader.Read<int>(); //Unknown arrays
+            cmxTable.costumeIdLinkAddress = streamReader.Read<int>(); //BCLN Costume ids for recolors
+
+            cmxTable.castArmIdLinkAddress = streamReader.Read<int>(); //BCLN Cast arm ids for recolors
+            cmxTable.castLegIdLinkAddress = streamReader.Read<int>(); //BCLN Cast leg ids for recolors
+            cmxTable.outerIdLinkAddress = streamReader.Read<int>(); //BCLN Outer ids for recolors
+            cmxTable.baseWearIdLinkAddress = streamReader.Read<int>(); //BCLN basewear ids for recolors
+
+            cmxTable.innerWearIdLinkAddress = streamReader.Read<int>(); //BCLN innerwear ids for recolors
+
+            if(oct21TableAddressInt >= headerOffset)
+            {
+                cmxTable.oct21UnkAddress = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
+            }
+
+            cmxTable.bodyCount = streamReader.Read<int>();
+            cmxTable.carmCount = streamReader.Read<int>();
+            cmxTable.clegCount = streamReader.Read<int>();
+            cmxTable.bodyOuterCount = streamReader.Read<int>();
+
+            cmxTable.baseWearCount = streamReader.Read<int>();
+            cmxTable.innerWearCount = streamReader.Read<int>();
+            cmxTable.bodyPaintCount = streamReader.Read<int>();
+            cmxTable.stickerCount = streamReader.Read<int>();
+
+            cmxTable.faceCount = streamReader.Read<int>();
+            cmxTable.faceMotionCount = streamReader.Read<int>();
+            cmxTable.faceTextureCount = streamReader.Read<int>();
+            cmxTable.faceTexturesCount = streamReader.Read<int>();
+
+            cmxTable.accessoryCount = streamReader.Read<int>();
+            cmxTable.eyeTextureCount = streamReader.Read<int>();
+            cmxTable.earCount = streamReader.Read<int>();
+            cmxTable.teethCount = streamReader.Read<int>();
+
+            cmxTable.hornCount = streamReader.Read<int>();
+            cmxTable.skinCount = streamReader.Read<int>();
+            cmxTable.eyebrowCount = streamReader.Read<int>();
+            cmxTable.eyelashCount = streamReader.Read<int>();
+
+            cmxTable.hairCount = streamReader.Read<int>();
+            cmxTable.colCount = streamReader.Read<int>();
+            cmxTable.unkCount = streamReader.Read<int>();
+            cmxTable.costumeIdLinkCount = streamReader.Read<int>();
+
+            cmxTable.castArmIdLinkCount = streamReader.Read<int>();
+            cmxTable.castLegIdLinkCount = streamReader.Read<int>();
+            cmxTable.outerIdLinkCount = streamReader.Read<int>();
+            cmxTable.baseWearIdLinkCount = streamReader.Read<int>();
+
+            cmxTable.innerWearIdLinkCount = streamReader.Read<int>();
+            if (oct21TableAddressInt >= headerOffset)
+            {
+                cmxTable.oct21UnkCount = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
+            }
+
+            return cmxTable;
         }
 
         private static void ReadNGSHorn(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
@@ -403,6 +498,10 @@ namespace AquaModelLibrary
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
+                if(dict.ContainsKey(body.body.id))
+                {
+                    continue;
+                }
                 dict.Add(body.body.id, body); //Set like this so we can access it by id later if we want. 
             }
         }
@@ -854,6 +953,7 @@ namespace AquaModelLibrary
             PSO2Text actorNameTextReboot = null;
             LobbyActionCommon lac = null;
             List<int> magIds = null;
+            List<int> magIdsReboot = null;
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
 
             aquaCMX = ExtractCMX(pso2_binDir, aquaCMX);
@@ -912,6 +1012,28 @@ namespace AquaModelLibrary
                     if (IceFile.getFileName(file).ToLower().Contains(mgxName))
                     {
                         magIds = ReadMGX(file);
+                    }
+                }
+
+                fVarIce = null;
+            }
+
+            string mgxRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(magSetting)));
+            if (File.Exists(mgxRebootPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(mgxPath));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
+                files.AddRange(fVarIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(mgxName))
+                    {
+                        magIdsReboot = ReadMGX(file);
                     }
                 }
 
@@ -3713,7 +3835,34 @@ namespace AquaModelLibrary
 
             //---------------------------Generate NGS Mag List
 
-    //TODO
+            if (magIdsReboot != null)
+            {
+                var magOut = new List<string>();
+
+                foreach (var id in magIdsReboot)
+                {
+                    string names;
+                    if (magNamesNGS.ContainsKey(id))
+                    {
+                        names = magNamesNGS[id] + ",";
+                    }
+                    else
+                    {
+                        names = $",Unknown {id},";
+                    }
+
+                    string mgFileName = magItem + ToFive(id) + ".ice";
+                    string exists = "";
+
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, GetFileHash(mgFileName))))
+                    {
+                        exists = ",(Not found)";
+                    }
+
+                    magOut.Add(names + mgFileName + "," + GetFileHash(mgFileName) + exists);
+                }
+                File.WriteAllLines(Path.Combine(outputDirectory, $"MagsNGS.csv"), magOut);
+            }
 
             //---------------------------Generate Photon Blast Creature List
             var pbList = new List<string>();
@@ -4361,7 +4510,7 @@ namespace AquaModelLibrary
 
         private static string GetNameFromIdDict(int id, Dictionary<int, string> names)
         {
-            if (swordNames.ContainsKey(id))
+            if (names.ContainsKey(id))
             {
                 return names[id];
             }

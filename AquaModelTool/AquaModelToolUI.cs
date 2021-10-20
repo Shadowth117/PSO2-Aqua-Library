@@ -1362,6 +1362,19 @@ namespace AquaModelTool
                 ModelImporter.AssimpPRMConvert(openFileDialog.FileName, Path.ChangeExtension(openFileDialog.FileName, ".prm"));
             }
         }
+
+        private void readMagIndicesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 MGX file",
+                Filter = "PSO2 MGX File (*.mgx)|*.mgx"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<int> magIds = AquaMiscMethods.ReadMGX(openFileDialog.FileName);
+            }
+        }
     }
 }
 
