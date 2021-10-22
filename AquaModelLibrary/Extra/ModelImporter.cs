@@ -11,7 +11,7 @@ namespace AquaModelLibrary
 {
     public class ModelImporter
     {
-        public static void AssimpAQMConvert(string initialFilePath, bool playerExport, bool useScale)
+        public static void AssimpAQMConvert(string initialFilePath, bool playerExport, bool useScaleFrames, float scaleFactor)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
@@ -21,12 +21,18 @@ namespace AquaModelLibrary
             List<string> nodeNames = new List<string>();
             List<string> aqmNames = new List<string>(); //Leave off extensions in case we want this to be .trm later
             List<AquaMotion> aqmList = new List<AquaMotion>();
-            int animatedNodeCount = GetAnimatedNodeCount(aiScene, nodeNames);
+            Dictionary<int, Assimp.Node> aiNodes = GetAnimatedNodes(aiScene);
+            int animatedNodeCount = aiNodes.Keys.ToList().Last();
             
             for(int i = 0; i < aiScene.Animations.Count; i++)
             {
+                if(aiScene.Animations[i] == null)
+                {
+                    continue;
+                }
                 AquaMotion aqm = new AquaMotion();
                 var anim = aiScene.Animations[i];
+                int animEndFrame = 0; //We'll fill this later. Assumes frame 0 to be the start
 
                 if(anim.Name != null && anim.Name != "")
                 {
@@ -54,7 +60,7 @@ namespace AquaModelLibrary
                 {
                     aqm.moHeader.frameSpeed = (float)anim.TicksPerSecond;
                 }
-
+                
                 aqm.moHeader.unkInt0 = 2; //Always, always 2 for NIFL
                 aqm.moHeader.variant = 0x2; //These are flags for the animation to tell the game what type it is. Since this is a skeletal animation, we always put 2 here.
                 //If it's a player one specifically, the game generally adds 0x10 to this.
@@ -70,39 +76,219 @@ namespace AquaModelLibrary
                 aqm.motionKeys = new List<AquaMotion.KeyData>(new AquaMotion.KeyData[aqm.moHeader.nodeCount]);
                 
                 //Nodes
-                foreach(var node in anim.NodeAnimationChannels)
+                foreach(var animNode in anim.NodeAnimationChannels)
                 {
+                    if (animNode == null)
+                    {
+                        continue;
+                    }
 
+                    int id = GetNodeNumber(animNode.NodeName);
+
+                    var node = aqm.motionKeys[id] = new AquaMotion.KeyData();
+
+                    node.mseg.nodeName.SetString(animNode.NodeName);
+                    node.mseg.nodeId = id;
+                    node.mseg.nodeType = 2;
+                    node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
+
+                    if (animNode.HasPositionKeys)
+                    {
+                        AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
+                        posKeys.keyType = 1;
+                        posKeys.dataType = 1;
+                        var first = true;
+                        foreach (var pos in animNode.PositionKeys)
+                        {
+                            posKeys.vector4Keys.Add(new Vector4(pos.Value.X, pos.Value.Y, pos.Value.Z, 0));
+
+                            //Account for first frame difference
+                            if (first)
+                            {
+                                posKeys.frameTimings.Add(1);
+                                first = false;
+                            }
+                            else
+                            {
+                                posKeys.frameTimings.Add((ushort)(pos.Time * 0x10));
+                            }
+                            posKeys.keyCount++;
+                        }
+                        posKeys.frameTimings[posKeys.keyCount] += 2; //Account for final frame bitflags
+
+                        animEndFrame = Math.Max(animEndFrame, posKeys.keyCount);
+                        node.keyData.Add(posKeys);
+                    }
+
+                    if (animNode.HasRotationKeys)
+                    {
+                        AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
+                        rotKeys.keyType = 2;
+                        rotKeys.dataType = 3;
+                        var first = true;
+                        foreach (var rot in animNode.RotationKeys)
+                        {
+                            rotKeys.vector4Keys.Add(new Vector4(rot.Value.X, rot.Value.Y, rot.Value.Z, rot.Value.W));
+
+                            //Account for first frame difference
+                            if (first)
+                            {
+                                rotKeys.frameTimings.Add(1);
+                                first = false;
+                            }
+                            else
+                            {
+                                rotKeys.frameTimings.Add((ushort)(rot.Time * 0x10));
+                            }
+                            rotKeys.keyCount++;
+                        }
+                        rotKeys.frameTimings[rotKeys.keyCount] += 2; //Account for final frame bitflags
+
+                        animEndFrame = Math.Max(animEndFrame, rotKeys.keyCount);
+                        node.keyData.Add(rotKeys);
+                    }
+
+                    if (animNode.HasScalingKeys)
+                    {
+                        AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
+                        sclKeys.keyType = 2;
+                        sclKeys.dataType = 3;
+                        var first = true;
+                        foreach (var scl in animNode.ScalingKeys)
+                        {
+                            sclKeys.vector4Keys.Add(new Vector4(scl.Value.X, scl.Value.Y, scl.Value.Z, 0));
+
+                            //Account for first frame difference
+                            if(first)
+                            {
+                                sclKeys.frameTimings.Add(1);
+                                first = false;
+                            } else
+                            {
+                                sclKeys.frameTimings.Add((ushort)(scl.Time * 0x10));
+                            }
+                            sclKeys.keyCount++;
+                        }
+                        sclKeys.frameTimings[sclKeys.keyCount] += 2; //Account for final frame bitflags
+
+                        animEndFrame = Math.Max(animEndFrame, sclKeys.keyCount);
+                        node.keyData.Add(sclKeys);
+                    }
                 }
 
                 //NodeTreeFlag
+                if(playerExport)
+                {
+                    var node = aqm.motionKeys[aqm.motionKeys.Count - 1] = new AquaMotion.KeyData();
+                    node.mseg.nodeName.SetString("__NodeTreeFlag__");
+                    node.mseg.nodeId = aqm.motionKeys.Count - 1;
+                    node.mseg.nodeType = 0x10;
+                    node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
+
+                    //Position
+                    AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
+                    posKeys.keyType = 0x10;
+                    posKeys.dataType = 5;
+                    posKeys.keyCount = animEndFrame + 1;
+                    for(int frame = 0; frame < posKeys.keyCount; frame++)
+                    {
+                        if(frame == 0)
+                        {
+                            posKeys.frameTimings.Add(0x9);
+                        } else if(frame == posKeys.keyCount - 1)
+                        {
+                            posKeys.frameTimings.Add((ushort)((frame * 0x10) + 0xA));
+                        } else
+                        {
+                            posKeys.frameTimings.Add((ushort)((frame * 0x10) + 0x8));
+                        }
+                        posKeys.intKeys.Add(0x31);
+                    }
+                    node.keyData.Add(posKeys);
+
+                    //Rotation
+                    AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
+                    rotKeys.keyType = 0x11;
+                    rotKeys.dataType = 5;
+                    rotKeys.keyCount = animEndFrame + 1;
+                    for (int frame = 0; frame < rotKeys.keyCount; frame++)
+                    {
+                        if (frame == 0)
+                        {
+                            rotKeys.frameTimings.Add(0x9);
+                        }
+                        else if (frame == rotKeys.keyCount - 1)
+                        {
+                            rotKeys.frameTimings.Add((ushort)((frame * 0x10) + 0xA));
+                        }
+                        else
+                        {
+                            rotKeys.frameTimings.Add((ushort)((frame * 0x10) + 0x8));
+                        }
+                        rotKeys.intKeys.Add(0x31);
+                    }
+                    node.keyData.Add(rotKeys);
+
+                    //Scale
+                    if (useScaleFrames)
+                    {
+                        AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
+                        sclKeys.keyType = 0x12;
+                        sclKeys.dataType = 5;
+                        sclKeys.keyCount = animEndFrame + 1;
+                        for (int frame = 0; frame < sclKeys.keyCount; frame++)
+                        {
+                            if (frame == 0)
+                            {
+                                sclKeys.frameTimings.Add(0x9);
+                            }
+                            else if (frame == sclKeys.keyCount - 1)
+                            {
+                                sclKeys.frameTimings.Add((ushort)((frame * 0x10) + 0xA));
+                            }
+                            else
+                            {
+                                sclKeys.frameTimings.Add((ushort)((frame * 0x10) + 0x8));
+                            }
+                            sclKeys.intKeys.Add(0x31);
+                        }
+                        node.keyData.Add(sclKeys);
+                    }
+                }
 
                 //Sanity check
-                for (int nodeId = 0; nodeId < animatedNodeCount; nodeId++)
+                foreach(var aiPair in aiNodes)
                 {
-                    var node = aqm.motionKeys[nodeId];
-
+                    var node = aqm.motionKeys[aiPair.Key];
+                    var aiNode = aiPair.Value;
                     if(node == null)
                     {
-                        node = aqm.motionKeys[nodeId] = new AquaMotion.KeyData();
+                        node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
 
-                        node.mseg.nodeName.SetString($"FillerNode_{nodeId}"); //The actual name doesn't matter normally for these as long as they have data. Should be fine for fallback
-                        node.mseg.nodeId = nodeId;
+                        node.mseg.nodeName.SetString(aiNode.Name); 
+                        node.mseg.nodeId = aiPair.Key;
                         node.mseg.nodeType = 2;
-                        node.mseg.nodeDataCount = useScale ? 3 : 2;
+                        node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
 
                         //Position
                         AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
-          //  ****            //TODO - GET bind position from bone
+                        posKeys.keyType = 1;
+                        posKeys.dataType = 1;
+                        posKeys.keyCount = 1;
+                        posKeys.vector4Keys = new List<Vector4>() { new Vector4(aiNode.Transform.D1, aiNode.Transform.D2, aiNode.Transform.D3, 0)};
                         node.keyData.Add(posKeys);
 
                         //Rotation
                         AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
-       //     ****            //TODO - GET bind rotation from bone
+                        rotKeys.keyType = 2;
+                        rotKeys.dataType = 3;
+                        rotKeys.keyCount = 1;
+                        var quat = Quaternion.CreateFromRotationMatrix(GetMat4FromAssimpMat4(aiNode.Transform));
+                        posKeys.vector4Keys = new List<Vector4>() { new Vector4(quat.X, quat.Y, quat.Z, quat.W) };
                         node.keyData.Add(rotKeys);
 
                         //Scale
-                        if (useScale)
+                        if (useScaleFrames)
                         {
                             AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
                             sclKeys.keyType = 3;
@@ -124,7 +310,7 @@ namespace AquaModelLibrary
 
         public static int GetNodeNumber(string name)
         {
-            string num = ((name.Split('('))[1].Split(')'))[0];
+            string num = name.Split('(')[1].Split(')')[0];
             
             if(Int32.TryParse(num, out int result))
             {
@@ -135,48 +321,56 @@ namespace AquaModelLibrary
             }
         }
 
-        public static int GetAnimatedNodeCount(Assimp.Scene aiScene, List<string> nodeNames)
+        public static Dictionary<int, Assimp.Node> GetAnimatedNodes(Assimp.Scene aiScene)
         {
-            nodeNames = new List<string>();
-            int nodeCount = 0;
+            Dictionary<int, Assimp.Node> nodes = new Dictionary<int, Assimp.Node>();
+
             foreach(var node in aiScene.RootNode.Children)
             {
-                CollectAnimatedCount(node, ref nodeCount, nodeNames);
+                CollectAnimated(node, nodes);
             }
-            nodeNames.Sort();
 
-            return nodeCount;
+            return nodes;
         }
 
-        public static void CollectAnimatedCount(Assimp.Node node, ref int nodeCount, List<string> nodeNames)
+        public static void CollectAnimated(Assimp.Node node, Dictionary<int, Assimp.Node> nodes)
         {
             //Be extra sure that this isn't an effect node
-            if (IsAnimatedNode(node, out string name))
-            {
-                nodeCount++;
-
+            if (IsAnimatedNode(node, out string name, out int num))
+            {  
                 //For now, assume animated node is numbered and we can add it directly
-                nodeNames.Add(name);
+                nodes.Add(num, node);
             }
 
             foreach (var childNode in node.Children)
             {
-                CollectAnimatedCount(childNode, ref nodeCount, nodeNames);
+                CollectAnimated(childNode, nodes);
             }
         }
 
         //Check if a node is an animated by node by checking if it has the numbering formatting and is NOT marked as an effect node. Output name 
-        public static bool IsAnimatedNode(Assimp.Node node, out string name)
+        public static bool IsAnimatedNode(Assimp.Node node, out string name, out int num)
         {
-            bool isNumbered = IsNumberedAnimated(node, out name);
+            bool isNumbered = IsNumberedAnimated(node, out name, out num);
             return isNumbered && !node.Name.Contains("#Eff");
         }
 
         //Check if node is numbered as an animated node. Output name
-        private static bool IsNumberedAnimated(Assimp.Node node, out string name)
+        private static bool IsNumberedAnimated(Assimp.Node node, out string name, out int num)
         {
             name = node.Name;
-            return node.Name[0] == '(' && node.Name.Contains(')');
+            num = -1;
+            if(node.Name[0] == '(' && node.Name.Contains(')'))
+            {
+                if (!int.TryParse(name.Split('(')[1].Split(')')[0], out num))
+                {
+                    //Make sure this is actually -1 if not parssed properly
+                    num = -1;
+                };
+
+                return true;
+            }
+            return false;
         }
 
         public static void AssimpPRMConvert(string initialFilePath, string finalFilePath)

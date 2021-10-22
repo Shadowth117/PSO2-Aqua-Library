@@ -171,6 +171,8 @@ namespace AquaModelLibrary
                 case 0x9:
                     return 0x2;
                 case 0x10:
+                case 0x11:
+                case 0x12:
                     return 0x5;
                 case 0xA:
                     return 0x1;
