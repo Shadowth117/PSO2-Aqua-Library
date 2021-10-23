@@ -1375,6 +1375,66 @@ namespace AquaModelTool
                 List<int> magIds = AquaMiscMethods.ReadMGX(openFileDialog.FileName);
             }
         }
+
+        private void convertAnimationToAQMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select Model file",
+                Filter = "Assimp Model Files (*.*)|*.*"
+            };
+            List<string> filters = new List<string>();
+            using (var ctx = new Assimp.AssimpContext())
+            {
+                foreach (var format in ctx.GetSupportedExportFormats())
+                {
+                    if (!filters.Contains(format.FileExtension))
+                    {
+                        filters.Add(format.FileExtension);
+                    }
+                }
+            }
+            filters.Sort();
+
+            StringBuilder filterString = new StringBuilder("Assimp Model Files(");
+            StringBuilder filterStringTypes = new StringBuilder("|");
+            StringBuilder filterStringSections = new StringBuilder();
+            foreach (var filter in filters)
+            {
+                filterString.Append($"*.{filter},");
+                filterStringTypes.Append($"*.{filter};");
+                filterStringSections.Append($"|{filter} Files ({filter})|*.{filter}");
+            }
+
+            //Get rid of comma, add parenthesis 
+            filterString.Remove(filterString.Length - 1, 1);
+            filterString.Append(")");
+
+            //Get rid of unneeded semicolon
+            filterStringTypes.Remove(filterStringTypes.Length - 1, 1);
+            filterString.Append(filterStringTypes);
+
+            //Add final section
+            filterString.Append(filterStringSections);
+
+            openFileDialog.Filter = filterString.ToString();
+            openFileDialog.Multiselect = true;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Handle maxscript scale differences from meters vs max's imperial feet based units
+                float scaleFactor = 1;
+                /*if(MessageBox.Show("Are the model(s) Maxscript model exports?", "Maxscript Model(s)?", MessageBoxButtons.YesNo) == DialogResult.No)
+                {
+                    scaleFactor = 0.3048f;
+                }*/
+
+                foreach(var file in openFileDialog.FileNames)
+                {
+                    ModelImporter.AssimpAQMConvert(file, false, true, scaleFactor);
+                }
+            }
+        }
     }
 }
 

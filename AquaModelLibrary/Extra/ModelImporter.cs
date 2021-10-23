@@ -13,17 +13,20 @@ namespace AquaModelLibrary
     {
         public static void AssimpAQMConvert(string initialFilePath, bool playerExport, bool useScaleFrames, float scaleFactor)
         {
+            float baseScale = 1f / 100f * scaleFactor; //We assume that this will be 100x the true scale because 1 unit to 1 meter isn't the norm
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
             string inputFilename = Path.GetFileNameWithoutExtension(initialFilePath);
-            List<string> nodeNames = new List<string>();
             List<string> aqmNames = new List<string>(); //Leave off extensions in case we want this to be .trm later
             List<AquaMotion> aqmList = new List<AquaMotion>();
             Dictionary<int, Assimp.Node> aiNodes = GetAnimatedNodes(aiScene);
-            int animatedNodeCount = aiNodes.Keys.ToList().Last();
-            
+            var nodeKeys = aiNodes.Keys.ToList();
+            nodeKeys.Sort();
+            int animatedNodeCount = nodeKeys.Last() + 1;
+            AquaUtil aqua = new AquaUtil();
+
             for(int i = 0; i < aiScene.Animations.Count; i++)
             {
                 if(aiScene.Animations[i] == null)
@@ -39,14 +42,14 @@ namespace AquaModelLibrary
                     //Make sure we're not overwriting anims that somehow have duplicate names
                     if(aqmNames.Contains(anim.Name))
                     {
-                        aqmNames.Add($"Anim_{i}_" + anim.Name);
+                        aqmNames.Add($"Anim_{i}_" + anim.Name + ".aqm");
                     } else
                     {
-                        aqmNames.Add(anim.Name);
+                        aqmNames.Add(anim.Name + ".aqm");
                     }
                 } else
                 {
-                    aqmNames.Add($"Anim_{i}_"  + inputFilename);
+                    aqmNames.Add($"Anim_{i}_"  + inputFilename + ".aqm");
                 }
 
                 aqm.moHeader = new AquaMotion.MOHeader();
@@ -100,7 +103,7 @@ namespace AquaModelLibrary
                         var first = true;
                         foreach (var pos in animNode.PositionKeys)
                         {
-                            posKeys.vector4Keys.Add(new Vector4(pos.Value.X, pos.Value.Y, pos.Value.Z, 0));
+                            posKeys.vector4Keys.Add(new Vector4(pos.Value.X * baseScale, pos.Value.Y * baseScale, pos.Value.Z * baseScale, 0));
 
                             //Account for first frame difference
                             if (first)
@@ -114,7 +117,7 @@ namespace AquaModelLibrary
                             }
                             posKeys.keyCount++;
                         }
-                        posKeys.frameTimings[posKeys.keyCount] += 2; //Account for final frame bitflags
+                        posKeys.frameTimings[posKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
                         animEndFrame = Math.Max(animEndFrame, posKeys.keyCount);
                         node.keyData.Add(posKeys);
@@ -142,7 +145,7 @@ namespace AquaModelLibrary
                             }
                             rotKeys.keyCount++;
                         }
-                        rotKeys.frameTimings[rotKeys.keyCount] += 2; //Account for final frame bitflags
+                        rotKeys.frameTimings[rotKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
                         animEndFrame = Math.Max(animEndFrame, rotKeys.keyCount);
                         node.keyData.Add(rotKeys);
@@ -169,7 +172,7 @@ namespace AquaModelLibrary
                             }
                             sclKeys.keyCount++;
                         }
-                        sclKeys.frameTimings[sclKeys.keyCount] += 2; //Account for final frame bitflags
+                        sclKeys.frameTimings[sclKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
                         animEndFrame = Math.Max(animEndFrame, sclKeys.keyCount);
                         node.keyData.Add(sclKeys);
@@ -265,42 +268,94 @@ namespace AquaModelLibrary
                     {
                         node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
 
-                        node.mseg.nodeName.SetString(aiNode.Name); 
+                        node.mseg.nodeName.SetString(aiNode.Name);
                         node.mseg.nodeId = aiPair.Key;
                         node.mseg.nodeType = 2;
                         node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
 
                         //Position
-                        AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
-                        posKeys.keyType = 1;
-                        posKeys.dataType = 1;
-                        posKeys.keyCount = 1;
-                        posKeys.vector4Keys = new List<Vector4>() { new Vector4(aiNode.Transform.D1, aiNode.Transform.D2, aiNode.Transform.D3, 0)};
-                        node.keyData.Add(posKeys);
+                        AddOnePosFrame(node, aiNode, baseScale);
 
                         //Rotation
-                        AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
-                        rotKeys.keyType = 2;
-                        rotKeys.dataType = 3;
-                        rotKeys.keyCount = 1;
-                        var quat = Quaternion.CreateFromRotationMatrix(GetMat4FromAssimpMat4(aiNode.Transform));
-                        posKeys.vector4Keys = new List<Vector4>() { new Vector4(quat.X, quat.Y, quat.Z, quat.W) };
-                        node.keyData.Add(rotKeys);
+                        AddOneRotFrame(node, aiNode);
 
                         //Scale
-                        if (useScaleFrames)
+                        AddOneScaleFrame(useScaleFrames, node);
+                    } else
+                    {
+                        if(node.keyData[0].vector4Keys.Count < 1)
                         {
-                            AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
-                            sclKeys.keyType = 3;
-                            sclKeys.dataType = 1;
-                            sclKeys.keyCount = 1;
-                            sclKeys.vector4Keys = new List<Vector4>() { new Vector4(1.0f, 1.0f, 1.0f, 0)};
-                            node.keyData.Add(sclKeys);
+                            AddOnePosFrame(node, aiNode, baseScale);
+                        }
+
+                        if (node.keyData[1].vector4Keys.Count < 1)
+                        {
+                            AddOneRotFrame(node, aiNode);
+                        }
+
+                        if (useScaleFrames && node.keyData[2].vector4Keys.Count < 1)
+                        {
+                            AddOneScaleFrame(useScaleFrames, node, aiNode);
                         }
                     }
                 }
 
+                aqmList.Add(aqm);
             }
+
+            for(int i = 0; i < aqmList.Count; i++)
+            {
+                var aqm = aqmList[i];
+                AquaUtil.AnimSet set = new AquaUtil.AnimSet();
+                set.anims.Add(aqm);
+                aqua.aquaMotions.Add(set);
+                aqua.WriteNIFLMotion(initialFilePath + "_" + aqmNames[i]);
+
+                aqua.aquaMotions.Clear();
+            }
+        }
+
+        private static void AddOneScaleFrame(bool useScaleFrames, AquaMotion.KeyData node, Assimp.Node aiNode = null)
+        {
+            if (useScaleFrames)
+            {
+                AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
+                sclKeys.keyType = 3;
+                sclKeys.dataType = 1;
+                sclKeys.keyCount = 1;
+                if(aiNode == null)
+                {
+                    sclKeys.vector4Keys = new List<Vector4>() { new Vector4(1.0f, 1.0f, 1.0f, 0) };
+                } else
+                {
+                    Matrix4x4.Invert(GetMat4FromAssimpMat4(aiNode.Transform), out Matrix4x4 mat4);
+                    sclKeys.vector4Keys = new List<Vector4>() { new Vector4(mat4.M11, mat4.M22, mat4.M33, 0) };
+                }
+                node.keyData.Add(sclKeys);
+            }
+        }
+
+        private static void AddOneRotFrame(AquaMotion.KeyData node, Assimp.Node aiNode)
+        {
+            AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
+            rotKeys.keyType = 2;
+            rotKeys.dataType = 3;
+            rotKeys.keyCount = 1;
+            Matrix4x4.Invert(GetMat4FromAssimpMat4(aiNode.Transform), out Matrix4x4 mat4);
+            var quat = Quaternion.CreateFromRotationMatrix(mat4);
+            rotKeys.vector4Keys = new List<Vector4>() { new Vector4(quat.X, quat.Y, quat.Z, quat.W) };
+            node.keyData.Add(rotKeys);
+        }
+
+        private static void AddOnePosFrame(AquaMotion.KeyData node, Assimp.Node aiNode, float baseScale)
+        {
+            AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
+            posKeys.keyType = 1;
+            posKeys.dataType = 1;
+            posKeys.keyCount = 1;
+            var mat4 = GetMat4FromAssimpMat4(aiNode.Transform);
+            posKeys.vector4Keys = new List<Vector4>() { new Vector4(mat4.M14 * baseScale, mat4.M24 * baseScale, mat4.M34 * baseScale, 0) };
+            node.keyData.Add(posKeys);
         }
 
         public static string FilterAnimatedNodeName(string name)

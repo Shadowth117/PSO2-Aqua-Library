@@ -9,7 +9,6 @@ using System.Windows;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.AquaObjectMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
-using static AquaModelLibrary.ModelExporter;
 using static AquaModelLibrary.VTBFMethods;
 
 namespace AquaModelLibrary

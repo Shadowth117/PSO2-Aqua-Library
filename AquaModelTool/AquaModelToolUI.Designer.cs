@@ -63,9 +63,10 @@
             this.testVTXEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dumpNOF0ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBTIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMagIndicesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readMagIndicesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -168,7 +169,8 @@
             this.legacyAqp2objObjExportToolStripMenuItem,
             this.legacyAqp2objObjImportToolStripMenuItem,
             this.prmEffectModelExportToolStripMenuItem,
-            this.prmEffectFromModelToolStripMenuItem});
+            this.prmEffectFromModelToolStripMenuItem,
+            this.convertAnimationToAQMToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -350,6 +352,13 @@
             this.readBTIToolStripMenuItem.Text = "ReadBTI";
             this.readBTIToolStripMenuItem.Click += new System.EventHandler(this.readBTIToolStripMenuItem_Click);
             // 
+            // readMagIndicesToolStripMenuItem
+            // 
+            this.readMagIndicesToolStripMenuItem.Name = "readMagIndicesToolStripMenuItem";
+            this.readMagIndicesToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readMagIndicesToolStripMenuItem.Text = "ReadMagIndices";
+            this.readMagIndicesToolStripMenuItem.Click += new System.EventHandler(this.readMagIndicesToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -368,12 +377,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readMagIndicesToolStripMenuItem
+            // convertAnimationToAQMToolStripMenuItem
             // 
-            this.readMagIndicesToolStripMenuItem.Name = "readMagIndicesToolStripMenuItem";
-            this.readMagIndicesToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.readMagIndicesToolStripMenuItem.Text = "ReadMagIndices";
-            this.readMagIndicesToolStripMenuItem.Click += new System.EventHandler(this.readMagIndicesToolStripMenuItem_Click);
+            this.convertAnimationToAQMToolStripMenuItem.Name = "convertAnimationToAQMToolStripMenuItem";
+            this.convertAnimationToAQMToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Animation to AQM";
+            this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -434,6 +443,7 @@
         private System.Windows.Forms.ToolStripMenuItem prmEffectModelExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prmEffectFromModelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMagIndicesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertAnimationToAQMToolStripMenuItem;
     }
 }
 

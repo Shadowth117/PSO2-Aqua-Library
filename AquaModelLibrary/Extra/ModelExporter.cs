@@ -46,9 +46,9 @@ namespace AquaModelLibrary
                     parentNode = boneArray[bn.parentId];
                     var pn = aqn.nodeList[bn.parentId];
                     parentTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
-                                            pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
-                                            pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
-                                            pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
+                                                pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
+                                                pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
+                                                pn.m4.X * 100, pn.m4.Y * 100, pn.m4.Z * 100, pn.m4.W);
                 }
                 var aiNode = new Assimp.Node($"({i})" + bn.boneName.GetString(), parentNode);
 
@@ -56,7 +56,7 @@ namespace AquaModelLibrary
                 var bnMat = new Matrix4x4(bn.m1.X, bn.m1.Y, bn.m1.Z, bn.m1.W,
                                             bn.m2.X, bn.m2.Y, bn.m2.Z, bn.m2.W,
                                             bn.m3.X, bn.m3.Y, bn.m3.Z, bn.m3.W,
-                                            bn.m4.X, bn.m4.Y, bn.m4.Z, bn.m4.W);
+                                            bn.m4.X * 100, bn.m4.Y * 100, bn.m4.Z * 100, bn.m4.W);
                 Matrix4x4.Invert(bnMat, out bnMat);
 
                 //Get local transform
@@ -78,7 +78,7 @@ namespace AquaModelLibrary
                    Assimp.Matrix4x4.FromRotationZ(bn.eulRot.Z);
 
                 matrix *= rotation;
-                matrix *= Assimp.Matrix4x4.FromTranslation(new Assimp.Vector3D(bn.pos.X, bn.pos.Y, bn.pos.Z));
+                matrix *= Assimp.Matrix4x4.FromTranslation(new Assimp.Vector3D(bn.pos.X * 100, bn.pos.Y * 100, bn.pos.Z *100));
                 aiNode.Transform = matrix;
 
                 parentNodo.Children.Add(aiNode);
