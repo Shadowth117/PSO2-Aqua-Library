@@ -2239,7 +2239,7 @@ namespace AquaModelLibrary
                     rend.alphaCutoff = 0;
                     break;
                 default:
-                    rend.int_0C = 0;
+                    rend.int_0C = 1;
                     rend.unk8 = 1;
                     rend.alphaCutoff = 0;
                     break;

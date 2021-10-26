@@ -49,7 +49,7 @@ namespace AquaModelTool
                         {
                             var rend = aqua.aquaModels[i].models[j].rendList[r];
                             
-                            rend.int_0C = 0;
+                            rend.int_0C = 1;
                             rend.unk8 = 1;
                             rend.alphaCutoff = 0;
                             aqua.aquaModels[i].models[j].rendList[r] = rend;
