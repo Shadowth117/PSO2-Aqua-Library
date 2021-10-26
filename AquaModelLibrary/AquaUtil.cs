@@ -4453,7 +4453,7 @@ namespace AquaModelLibrary
                 {
                     var nifl = streamReader.Read<AquaCommon.NIFL>();
                     var rel = streamReader.Read<AquaCommon.REL0>();
-                    streamReader.Seek(offset + rel.REL0Size, SeekOrigin.Begin);
+                    streamReader.Seek(nifl.NOF0OffsetFull, SeekOrigin.Begin);
                     Trace.WriteLine(streamReader.Position());
                     AlignReader(streamReader, 0x10);
                     var nof0 = AquaCommon.readNOF0(streamReader);

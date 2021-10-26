@@ -20,6 +20,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Diagnostics;
 using System.Windows.Forms;
 using MessageBox = System.Windows.MessageBox;
+using static AquaModelLibrary.CharacterMakingIndexMethods;
 
 namespace WeaponInstaller
 {
@@ -86,9 +87,6 @@ namespace WeaponInstaller
         public MainWindow()
         {
             InitializeComponent();
-            AddRowsToList();
-            LoadWeaponRows();
-            UpdateList();
             LoadPSO2Bin();
 #if DEBUG
             replaceSelectedFromChecked.Visibility = Visibility.Visible;
@@ -109,6 +107,9 @@ namespace WeaponInstaller
                 }
                 trueWin32Folder = settings[2];
                 trueWin32RebootFolder = settings[3];
+                AddRowsToList();
+                LoadWeaponRows();
+                UpdateList();
             } else
             {
                 MessageBox.Show("Must set pso2_bin before attempting to install weapons!");
@@ -140,7 +141,9 @@ namespace WeaponInstaller
                 pso2Bin.Add(pso2BinSelect.FileName + "\\data\\win32reboot\\");
                 trueWin32Folder = pso2BinSelect.FileName + "\\data\\win32\\";
                 trueWin32RebootFolder = pso2BinSelect.FileName + "\\data\\win32reboot\\";
+                Directory.CreateDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Weapons\\");
                 File.WriteAllLines(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Weapons\\weaponSettings.txt", pso2Bin);
+                LoadPSO2Bin();
             }
         }
 
@@ -317,7 +320,246 @@ namespace WeaponInstaller
                     type = type.Replace('c', 'k');
                 }
 
-                ReadWeaponCSV(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + folderPath + file, type, wepListList[i]);
+                CheckForWeapon(type, isOldType, wepListList[i]);
+            }
+        }
+
+        public void CheckForWeapon(string type, bool isOldType, List<WeaponRow> rows)
+        {
+            Dictionary<int, string> names = new Dictionary<int, string>();
+            string pso2Path;
+            string game;
+            if(isOldType)
+            {
+                pso2Path = trueWin32Folder;
+                game = "PSO2";
+            } else
+            {
+                pso2Path = trueWin32RebootFolder;
+
+                game = "NGS";
+            }
+
+            int typeInt = 0;
+            switch(type)
+            {
+                case "Sword":
+                    typeInt = 1;
+                    if(isOldType)
+                    {
+                        names = swordNames;
+                    } else
+                    {
+                        names = swordNGSNames;
+                    }
+                    break;
+                case "WiredLance":
+                    typeInt = 2;
+                    if (isOldType)
+                    {
+                        names = wiredLanceNames;
+                    }
+                    else
+                    {
+                        names = wiredLanceNGSNames;
+                    }
+                    break;
+                case "Partizan":
+                    typeInt = 3;
+                    if (isOldType)
+                    {
+                        names = partizanNames;
+                    }
+                    else
+                    {
+                        names = partizanNGSNames;
+                    }
+                    break;
+                case "TwinDagger":
+                    typeInt = 4;
+                    if (isOldType)
+                    {
+                        names = twinDaggerNames;
+                    }
+                    else
+                    {
+                        names = twinDaggerNGSNames;
+                    }
+                    break;
+                case "DoubleSaber":
+                    typeInt = 5;
+                    if (isOldType)
+                    {
+                        names = doubleSaberNames;
+                    }
+                    else
+                    {
+                        names = doubleSaberNGSNames;
+                    }
+                    break;
+                case "Knuckles":
+                    typeInt = 6;
+                    if (isOldType)
+                    {
+                        names = knucklesNames;
+                    }
+                    else
+                    {
+                        names = knucklesNGSNames;
+                    }
+                    break;
+                case "Gunslash":
+                    typeInt = 7;
+                    if (isOldType)
+                    {
+                        names = gunslashNames;
+                    }
+                    else
+                    {
+                        names = gunslashNGSNames;
+                    }
+                    break;
+                case "Rifle":
+                    typeInt = 8;
+                    if (isOldType)
+                    {
+                        names = rifleNames;
+                    }
+                    else
+                    {
+                        names = rifleNGSNames;
+                    }
+                    break;
+                case "Launcher":
+                    typeInt = 9;
+                    if (isOldType)
+                    {
+                        names = launcherNames ;
+                    }
+                    else
+                    {
+                        names = launcherNGSNames;
+                    }
+                    break;
+                case "TwinMachineGun":
+                    typeInt = 10;
+                    if (isOldType)
+                    {
+                        names = tmgNames;
+                    }
+                    else
+                    {
+                        names = tmgNGSNames;
+                    }
+                    break;
+                case "Rod":
+                    typeInt = 11;
+                    if (isOldType)
+                    {
+                        names = rodNames;
+                    }
+                    else
+                    {
+                        names = rodNGSNames;
+                    }
+                    break;
+                case "Talis":
+                    typeInt = 12;
+                    if (isOldType)
+                    {
+                        names = talysNames;
+                    }
+                    else
+                    {
+                        names = talysNGSNames;
+                    }
+                    break;
+                case "Wand":
+                    typeInt = 13;
+                    if (isOldType)
+                    {
+                        names = wandNames;
+                    }
+                    else
+                    {
+                        names = wandNGSNames;
+                    }
+                    break;
+                case "Katana":
+                    typeInt = 14;
+                    if (isOldType)
+                    {
+                        names = katanaNames;
+                    }
+                    else
+                    {
+                        names = katanaNGSNames;
+                    }
+                    break;
+                case "Bow":
+                    typeInt = 15;
+                    if (isOldType)
+                    {
+                        names = bowNames;
+                    }
+                    else
+                    {
+                        names = bowNGSNames;
+                    }
+                    break;
+                case "JetBoots":
+                    typeInt = 16;
+                    if (isOldType)
+                    {
+                        names = jetBootsNames;
+                    }
+                    else
+                    {
+                        names = jetBootsNGSNames;
+                    }
+                    break;
+                case "DualBlades":
+                    typeInt = 17;
+                    if (isOldType)
+                    {
+                        names = dualBladesNames;
+                    }
+                    else
+                    {
+                        names = dualBladesNGSNames;
+                    }
+                    break;
+                case "Takt":
+                    typeInt = 18;
+                    if (isOldType)
+                    {
+                        names = tactNames;
+                    }
+                    else
+                    {
+                        names = tactNGSNames;
+                    }
+                    break;
+            }
+            for(int i = 0; i < 999; i++)
+            {
+                var idStr = ToCount(i, 3);
+                var weapon = GetFileHash($"item/weapon/it_wp_{ToCount(typeInt, 2)}_{idStr}.ice");
+
+                if(!isOldType)
+                {
+                    weapon = GetRebootHash(weapon);
+                }
+
+                if (File.Exists(pso2Path + weapon))
+                {
+                    string[] nameArr = new string[] { "", "" };
+                    if(names.ContainsKey(i))
+                    {
+                        nameArr = names[i].Split(",");
+                    }
+                    rows.Add(new WeaponRow(type, idStr, game, nameArr[0], nameArr[1], weapon));
+                }
             }
         }
 
