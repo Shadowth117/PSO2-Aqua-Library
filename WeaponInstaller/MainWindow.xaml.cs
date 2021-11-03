@@ -544,7 +544,8 @@ namespace WeaponInstaller
             for(int i = 0; i < 999; i++)
             {
                 var idStr = ToCount(i, 3);
-                var weapon = GetFileHash($"item/weapon/it_wp_{ToCount(typeInt, 2)}_{idStr}.ice");
+                var weaponPreHash = $"item/weapon/it_wp_{ToCount(typeInt, 2)}_{idStr}.ice";
+                var weapon = GetFileHash(weaponPreHash);
 
                 if(!isOldType)
                 {
@@ -558,7 +559,7 @@ namespace WeaponInstaller
                     {
                         nameArr = names[i].Split(",");
                     }
-                    rows.Add(new WeaponRow(type, idStr, game, nameArr[0], nameArr[1], weapon));
+                    rows.Add(new WeaponRow(type, idStr, nameArr[1], nameArr[0], weaponPreHash, weapon));
                 }
             }
         }

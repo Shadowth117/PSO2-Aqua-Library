@@ -15,6 +15,8 @@ namespace AquaModelTool
     {
         AquaObject model;
         List<AquaObject.MESH> meshList;
+        ToolTip partsToolTip = new ToolTip();
+
         public MeshStructEditor(AquaObject newModel, List<AquaObject.MESH> newMeshList, bool isList2 = false)
         {
             InitializeComponent();
@@ -46,6 +48,7 @@ namespace AquaModelTool
             SetComboBox(tsetIDCB, tsetCount);
             SetComboBox(vsetIDCB, vsetCount);
             SetComboBox(faceSetIDCB, psetCount);
+            partsToolTip.SetToolTip(baseMeshDummyIdLabel, "Player body ids\ncostume = 0\nbreastNeck = 1\nfront = 2\naccessory1 = 3\nback = 4\nshoulder = 5\nforeArm = 6\nleg = 7\naccessory2 = 8");
 
             meshIDCB.SelectedIndex = 0;
         }
