@@ -541,6 +541,10 @@ namespace WeaponInstaller
                     }
                     break;
             }
+
+            //Clear in case of reloading names for a new pso2_bin
+            rows.Clear();
+
             for(int i = 0; i < 999; i++)
             {
                 var idStr = ToCount(i, 3);

@@ -117,6 +117,7 @@ namespace AquaExtras
             { 029, "マダムノアマガサ,Madam's Umbrella" },
             { 030, "エリュシオーヌ,Ely-Sion" },
             { 031, "アカツキ,Akatsuki" },
+            { 032, "アカツキ (印),Akatsuki (Unsealed)" },
             { 033, "ブリザックス,Blizaxe" },
             { 034, "ブレイザックス,Blazaxe" },
             { 035, "アリスティン,Aristine" },
@@ -166,6 +167,7 @@ namespace AquaExtras
             { 080, "キレートエディア,Chelate Edia" },
             { 081, "グリッドエディア,Grid Edia" },
             { 082, "ファラストエディア,Falast Edia" },
+            { 083, "＊ジングルツリー,* Jingle Tree" },
             { 084, "ホーリーツリー,Holy Tree" },
             { 085, "サイレントツリー,Silent Tree" },
             { 086, "ウェーブボード,Wave Board" },
@@ -295,7 +297,7 @@ namespace AquaExtras
             { 271, "イヴリダハンダー,Ivlida Hander"},
             { 272, "クリシスハンダー,Cleasis Hander"},
             { 273, "シュベルハンダー,Schvelle Hander"},
-            { 274, "＊ジェネ・マクラ,	* Gene Pillow"},
+            { 274, "＊ジェネ・マクラ,* Gene Pillow"},
             { 275, "レイソード,Ray Sword"},
             { 276, "ユニオンソード,Union Sword"},
             { 277, "＊バレトレイズ,* Bullet Rays"},
@@ -451,7 +453,7 @@ namespace AquaExtras
             { 458, "＊テイルススパナ,* Tails Wrench"},
             { 459, "＊勇者の聖剣,* The Hero’s Holy Sword"},
             { 460, "＊ソウルバニッシュ,* Soul Banish"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> wiredLanceNames = new Dictionary<int, string>()
         {
@@ -597,6 +599,7 @@ namespace AquaExtras
             { 197, "ランスドミナシオ,Lance Dominacio"},
             { 198, "ランスインクルシオ,Lance Inclusio"},
             { 199, "リグガイラー,Rig Gaira"},
+            { 200, "＊グラムガイラー,* Gram Gaira"},
             { 201, "シグマガイラー,Sigma Gaira"},
             { 202, "アウラデルウォッグ,Aura Delacque"},
             { 204, "マルスデルウォッグ,Mars Delacque"},
@@ -681,7 +684,7 @@ namespace AquaExtras
             { 303, "闇征鞭アジェルアンカー,Darkweave Agile Anchor"},
             { 304, "＊雪泉の扇子,* Yumi Folding Fans"},
             { 305, "＊ソニックリング,* Sonic Ring"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> partizanNames = new Dictionary<int, string>()
         {
@@ -891,7 +894,7 @@ namespace AquaExtras
             { 263, "ミリオンクーゼ,Million Couse"},
             { 265, "ストラジオスマザード,Strategeo Smothered"},
             { 267, "ジルドギローラ,Gilde Girola"},
-            { 268, "[NPC]ライアアックス,[NPC]Laia Axe"},
+            { 268, "ライアアックス (NPC),Laia Axe (NPC)"},
             { 269, "＊ヴィタグレイヴ,* Vita Glaive"},
             { 270, "＊クエンティンランス,* Cuentian Lance"},
             { 272, "＊キャバリエタリエンテ,* Cavalier Tagliente"},
@@ -971,7 +974,7 @@ namespace AquaExtras
             { 363, "＊スウィートジュエル,* Sweet Jewel"},
             { 366, "＊テイルススパナ,* Tails Wrench"},
             { 367, "＊青龍偃月刀・極,* Blue Dragon Crescent Blade"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> twinDaggerNames = new Dictionary<int, string>()
         {
@@ -1246,7 +1249,7 @@ namespace AquaExtras
             { 347, "＊雪泉の扇子,* Yumi Folding Fans"},
             { 348, "＊焔の六刀,* Homura Six Swords"},
             { 349, "＊テイルススパナ,* Tails Wrench"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> doubleSaberNames = new Dictionary<int, string>()
         {
@@ -1417,7 +1420,7 @@ namespace AquaExtras
             { 222, "イヴリダキジャル,Evleda Kijal"},
             { 223, "クリシスキジャル,Cleasis Kijal"},
             { 224, "シュベルキジャル,Schvelle Kijal"},
-            { 225, "＊ジェネ・マクラ,	* Gene Pillow"},
+            { 225, "＊ジェネ・マクラ,* Gene Pillow"},
             { 229, "ロギュールオービット,Roguele Orbit"},
             { 230, "ロギュールミラージュ,Roguele Mirage"},
             { 231, "ロギュールノヴァ,Roguele Nova"},
@@ -1531,7 +1534,7 @@ namespace AquaExtras
             { 360, "アナカテスシアン,Anacates Cyan"},
             { 362, "＊サマージェネマクラ,* Summer Gene Pillow"},
             { 363, "＊サマーアネットマクラ,* Summer Annette Pillow"},
-            { 364, "レンゴクトウ・レンサ,"},
+            { 364, "レンゴクトウ・レンサ,Rengokuto Rensa"},
             { 365, "＊ノーティカルスター,* Nautical Star"},
             { 366, "＊インペリアルクリムゾン,* Imperial Crimson"},
             { 367, "光纏斬クラースダブリス,Lightweave Klauz Doublis"},
@@ -1571,7 +1574,7 @@ namespace AquaExtras
             { 407, "＊青龍偃月刀・極,* Blue Dragon Crescent Blade"},
             { 408, "＊ダブルセイバーレガシー,* Double Saber Legacy"},
             { 409, "＊ソウルバニッシュ,* Soul Banish"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> knucklesNames = new Dictionary<int, string>()
         {
@@ -1761,7 +1764,7 @@ namespace AquaExtras
             { 242, "バレディアキャバリエ,Valledia Cavalier"},
             { 244, "ストラジオメイト,Strategeo Mate"},
             { 245, "＊ヴィタクラシェルブ,* Vita Crashelb"},
-            { 248, "[NPC]ＥＰ５ゲッテム拳,[NPC]EP5 Gettem Fist"},
+            { 248, "ＥＰ５ゲッテム拳 (NPC),EP5 Gettem Fist (NPC)"},
             { 249, "バトルナックルＬｖ３,Battle Knuckle Lv.3"},
             { 250, "＊ウォリアーナックル,* Warrior Knuckle"},
             { 251, "＊プラフタの駆動機兵,* Plachta Drive"},
@@ -1808,7 +1811,7 @@ namespace AquaExtras
             { 305, "闇征拳アジェルノッカー,Darkweave Agile Knocker"},
             { 307, "＊焔の六刀,* Homura Six Swords"},
             { 308, "＊ソニックリング,* Sonic Ring"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> gunslashNames = new Dictionary<int, string>()
         {
@@ -2068,7 +2071,7 @@ namespace AquaExtras
             { 328, "＊ラトナスノビーレ,* Latonas Nobire"},
             { 329, "＊A.I.Sヴェガアームズ,* AIS Vega Arms"},
             { 330, "＊シュリフトビルデン,* Schrift Bilden"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> rifleNames = new Dictionary<int, string>()
         {
@@ -2354,7 +2357,7 @@ namespace AquaExtras
             { 374, "＊姉御のマシンガン,* Matriarch's Machinegun"},
             { 375, "＊ボルカンファルバ,* Volcan Falva"},
             { 378, "＊シュリフトビルデン,* Schrift Bilden"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
 
         public static Dictionary<int, string> launcherNames = new Dictionary<int, string>()
@@ -2620,7 +2623,7 @@ namespace AquaExtras
             { 361, "＊ＴＦ２ミニガン,* TF2 Minigun"},
             { 362, "＊A.I.Sヴェガアームズ,* AIS Vega Arms"},
             { 363, "＊ボルカンファルバ,* Volcan Falva"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> tmgNames = new Dictionary<int, string>()
         {
@@ -2927,7 +2930,7 @@ namespace AquaExtras
             { 406, "＊リードバタフライ,* Reed Butterfly"},
             { 408, "＊姉御のマシンガン,* Matriarch's Machinegun"},
             { 409, "＊シュリフトビルデン,* Schrift Bilden"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> rodNames = new Dictionary<int, string>()
         {
@@ -3266,7 +3269,7 @@ namespace AquaExtras
             { 465, "＊テイルススパナ,* Tails Wrench"},
             { 466, "＊青龍偃月刀・極,* Blue Dragon Crescent Blade"},
             { 467, "＊ソウルバニッシュ,* Soul Banish"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> talysNames = new Dictionary<int, string>()
         {
@@ -3534,7 +3537,7 @@ namespace AquaExtras
             { 341, "リンザーハラン,Fluxio Haran"},
             { 342, "闇征符アジェルタリス,Darkweave Agile Talis"},
             { 343, "＊ソニックリング,* Sonic Ring"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> wandNames = new Dictionary<int, string>()
         {
@@ -3738,7 +3741,7 @@ namespace AquaExtras
             { 264, "シュベルカリンザ,Schvelle Karinza"},
             { 268, "フォームサイス,Form Scythe"},
             { 270, "ヴァーデスサイス,Vades Scythe"},
-            { 271, "＊ジェネ・マクラ,	* Gene Pillow"},
+            { 271, "＊ジェネ・マクラ,* Gene Pillow"},
             { 272, "＊煙管ノ槍,* Enkan-no-Sou"},
             { 276, "＊バレトデモリシャー,* Bullet Demolisher"},
             { 279, "レイウォンド,Ray Wand"},
@@ -3895,7 +3898,7 @@ namespace AquaExtras
             { 467, "＊テイルススパナ,* Tails Wrench"},
             { 468, "＊勇者の聖剣,* The Hero’s Holy Sword"},
             { 469, "＊ソウルバニッシュ,* Soul Banish"},
-            { 999, "＊ステルスウェポン,* Weapon Stealthing"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> katanaNames = new Dictionary<int, string>()
         {
@@ -4829,7 +4832,7 @@ namespace AquaExtras
             { 328, "＊日本帝国標準兵装,* Imperial Army Std. Equipment"},
             { 329, "シホウスザク,Shihou Suzaku"},
             { 330, "＊シコウレイジュウ,* Shikou Reiju"},
-            { 331, "ワールドオブガーディアン,"},
+            { 331, "ワールドオブガーディアン,World of Guardians"},
             { 334, "＊終の導き,* Demise's Guidance"},
             { 335, "＊コートグライド,* Coat Glide"},
             { 336, "＊グラッド・サッド,* Glad Sad"},
@@ -4969,6 +4972,7 @@ namespace AquaExtras
             { 505, "リサージュソード,Resurgir Sword"},
             { 508, "テルセウスソード,Theseus Sword"},
             { 509, "キャトリアソード,Cattleya Sword"},
+            { 510, "＊グラヴィルベオーネ,* Gravil Bayonet"},
             { 513, "グリッセンソード,Glissen Sword"},
             { 514, "プリムソード?,Primm Sword?"},
             { 515, "エヴォルコートソード,Evolcoat Sword"},
@@ -4999,7 +5003,8 @@ namespace AquaExtras
             { 523, "ストラーガワイヤー,Straga Wire"},
         };
         public static Dictionary<int, string> partizanNGSNames = new Dictionary<int, string>()
-        {
+        {            
+            { 052, "秋断,Akidachi"},
             { 061, "＊零織・イザヨイ,* Zero-type Izayoi"},
             { 201, "スピアレボルシオ,Spear Revolsio"},
             { 202, "スピアドミナシオ,Spear Dominacio"},
@@ -5017,6 +5022,7 @@ namespace AquaExtras
             { 522, "ゴルドプリムスピア,Gold Primm Spear"},
             { 523, "シルヴァプリムスピア,Silver Primm Spear"},
             { 524, "ストラーガスピア,Straga Spear"},
+            { 525, "フランメルスピア,Flamel Spear"},
         };
         public static Dictionary<int, string> twinDaggerNGSNames = new Dictionary<int, string>()
         {
@@ -5031,12 +5037,15 @@ namespace AquaExtras
             { 505, "エヴォルコートダガー,Evolcoat Daggers"},
             { 507, "トロワーデダガー,Trois De Daggers"},
             { 508, "ツヴィアダガー,Tzvia Daggers"},
+            { 521, "プリムダガー ?,Primm Daggers ?"},
             { 522, "ゴルドプリムダガー,Gold Primm Daggers"},
             { 523, "シルヴァプリムダガー,Silver Primm Daggers"},
             { 524, "ストラーガアダガー,Straga Daggers"},
+            { 526, "フランメルダガー,Flamel Daggers"},
         };
         public static Dictionary<int, string> doubleSaberNGSNames = new Dictionary<int, string>()
         {
+            { 056, "双蓮華,Sourenge"},
             { 062, "＊ブルー・ハート,* Blue Heart"},
             { 078, "＊ブラッドサイズ,* Blood Scythe"},
             { 196, "＊ジャンクヤード・ドッグ,* Junkyard Dog"},
@@ -5051,7 +5060,10 @@ namespace AquaExtras
             { 506, "ツヴィアセイバー,Tzvia Saber"},
             { 507, "グリッセンセイバー,Glissen Saber"},
             { 508, "エヴォルコートセイバー,Evolcoat Saber"},
+            { 509, "フランメルセイバー,Flamel Saber"},
             { 513, "フロステルセイバー,Frostel Saber"},
+            { 520, "＊グラヴィルラルーゴ,* Gravil Larugo"},
+            { 522, "プリムセイバー ?,Primm Saber ?"},
             { 523, "ゴルドプリムセイバー,Gold Primm Saber"},
             { 524, "シルヴァプリムセイバー,Silver Primm Saber"},
             { 525, "ストラーガプリムセイバー,Straga Saber"},
@@ -5068,6 +5080,7 @@ namespace AquaExtras
             { 506, "ツヴィアナックル,Tzvia Knuckles"},
             { 507, "グリッセンナックル,Glissen Knuckles"},
             { 508, "エヴォルコートナックル,Evolcoat Knuckles"},
+            { 520, "プリムナックル ?,Primm Knuckles ?"},
             { 521, "ゴルドプリムナックル,Gold Primm Knuckles"},
             { 522, "シルヴァプリムナックル,Silver Primm Knuckles"},
             { 523, "ストラーガナックル,Straga Knuckles"},
@@ -5083,16 +5096,18 @@ namespace AquaExtras
         };
         public static Dictionary<int, string> rifleNGSNames = new Dictionary<int, string>()
         {
-            { 237, "ショットレボルシオ,Shot Revolsio"},
-            { 238, "ショットドミナシオ,Shot Dominacio"},
-            { 239, "ショットインクルシオ,Shot Inclusio"},
+            { 224, "ショットレボルシオ,Shot Revolsio"},
+            { 225, "ショットドミナシオ,Shot Dominacio"},
+            { 226, "ショットインクルシオ,Shot Inclusio"},
             { 501, "プリムライフル,Primm Rifle"},
             { 502, "リサージュライフル,Resurgir Rifle"},
             { 505, "テルセウスライフル,Theseus Rifle"},
+            { 506, "＊グラヴィルベオーネ,* Gravil Rifle"},
             { 507, "フォーシスライフル,Foursis Rifle"},
             { 508, "＊アイネーロライフル,* Ainerro Rifle"},
             { 510, "ツヴィアライフル,Tzvia Rifle"},
             { 511, "エヴォルコートライフル,Evolcoat Rifle"},
+            { 512, "フランメルライフル,Flamel Rifle"},
             { 523, "ゴルドプリムライフル,Gold Primm Rifle"},
             { 524, "シルヴァプリムライフル,Silver Primm Rifle"},
             { 525, "ストラーガライフル,Straga Rifle"},
@@ -5102,6 +5117,7 @@ namespace AquaExtras
             { 027, "フォトンランチャー,Photon Launcher"},
             { 037, "レッドスコルピオ,Red Scorpio"},
             { 038, "ギルティライト,Guilty Light"},
+            { 064, "碇星砲,Ikariboshi Hou"},
             { 165, "＊メセタンシューター,* Mesetan Shooter"},
             { 193, "＊スクルド,* Skuld"},
             { 237, "キャノンレボルシオ,Cannon Revolsio"},
@@ -5125,9 +5141,11 @@ namespace AquaExtras
             { 521, "ゴルドプリムランチャー,Gold Primm Launcher"},
             { 522, "シルヴァプリムランチャー,Silver Primm Launcher"},
             { 524, "ストラーガランチャー,Straga Launcher"},
+            { 526, "＊グラヴィルトリーア,* Gravil Trileia"},
         };
         public static Dictionary<int, string> tmgNGSNames = new Dictionary<int, string>()
         {
+            { 057, "不知火星,Shiranuiboshi"},
             { 276, "バレットレボルシオ,Bullet Revolsio"},
             { 277, "バレットドミナシオ,Bullet Dominacio"},
             { 278, "バレットインクルシオ,Bullet Inclusio"},
@@ -5139,15 +5157,18 @@ namespace AquaExtras
             { 508, "グリッセンマシンガン,Glissen Machine Guns"},
             { 509, "エヴォルコートマシンガン,Evolcoat Machine Guns"},
             { 514, "フロステルマシンガン,Frostel Machine Guns"},
+            { 520, "＊グラヴィルクルーツ,Gravil Krutz"},
             { 521, "ゴルドプリムマシンガン,Gold Primm Machine Guns"},
             { 522, "シルヴァプリムマシンガン,Silver Machine Guns"},
             { 524, "ストラーガマシンガン,Straga Machine Guns"},
+            { 525, "フランメルマシンガン,Flamel Guns"},
         };
         public static Dictionary<int, string> rodNGSNames = new Dictionary<int, string>()
         {
             { 010, "フォールオンス,Fallounce"},
             { 011, "アルバフォールオンス,Alba Fallounce"},
             { 012, "ヴィタフォールオンス,Vita Fallounce"},
+            { 058, "恋鳳凰,Koi Houou"},
             { 259, "シャフトレボルシオ,Shaft Revolsio"},
             { 260, "シャフトドミナシオ,Shaft Dominacio"},
             { 261, "シャフトインクルシオ,Shaft Inclusio"},
@@ -5157,11 +5178,12 @@ namespace AquaExtras
             { 501, "プリムロッド,Primm Rod"},
             { 502, "リサージュロッド,Resurgir Rod"},
             { 503, "トロワーデロッド,Trois De Rod"},
-            { 504, ","},
+            { 504, "?,?"},
             { 505, "＊マノフィーマルテ,* Manophi Marte"},
             { 508, "フォーシスロッド,Foursis Rod"},
             { 510, "ツヴィアロッド,Tzvia Rod"},
             { 511, "エヴォルコートロッド,Evolcoat Rod"},
+            { 521, "＊グラヴィルラルーゴ,* Gravil Larugo"},
             { 522, "ゴルドプリムロッド,Gold Primm Rod"},
             { 523, "シルヴァプリムロッド,Silver Primm Rod"},
             { 524, "ストラーガロッド,Straga Rod"},
@@ -5180,6 +5202,7 @@ namespace AquaExtras
             { 507, "ツヴィアタリス,Tzvia Talis"},
             { 508, "グリッセンタリス,Glissen Talis"},
             { 509, "エヴォルコートタリス,Evolcoat Talis"},
+            { 510, "フランメルタリス,Flamel Talis"},
             { 520, "ゴルドプリムタリス,Gold Primm Talis"},
             { 521, "シルヴァプリムタリス,Silver Primm Talis"},
             { 522, "ストラーガタリス,Straga Talis"},
@@ -5201,7 +5224,9 @@ namespace AquaExtras
             { 508, "キャトリアウォンド,Cattleya Wand"},
             { 509, "ツヴィアウォンド,Tzvia Wand"},
             { 510, "エヴォルコートウォンド,Evolcoat Wand"},
+            { 511, "フランメルウォンド,Flamel Wand"},
             { 514, "フロステルウォンド,Frostel Wand"},
+            { 520, "＊グラヴィルクルーツ,* Gravil Krutz"},
             { 521, "ゴルドプリムウォンド,Gold Primm  Wand"},
             { 522, "シルヴァプリムウォンド,Silver Primm Wand"},
             { 524, "ストラーガウォンド,Straga Wand"},
@@ -5223,8 +5248,10 @@ namespace AquaExtras
             { 508, "ツヴィアカタナ,Tzvia Katana"},
             { 509, "エヴォルコートカタナ,Evolcoat Katana"},
             { 514, "フロステルカタナ,Frostel Katana"},
+            { 521, "＊グラヴィルトリーア,* Gravil Trileia"},
             { 522, "ゴルドプリムカタナ,Gold Primm Katana"},
             { 523, "シルヴァプリムカタナ,Silver Primm Katana"},
+            { 524, "＊ブレイブアンカー,* Brave Anchor"},
             { 526, "ストラーガカタナ,Straga Katana"},
         };
         public static Dictionary<int, string> bowNGSNames = new Dictionary<int, string>()
@@ -5238,8 +5265,11 @@ namespace AquaExtras
             { 506, "ツヴィアボウ,Tzvia Bow"},
             { 507, "エヴォルコートボウ,Evolcaot Bow"},
             { 508, "テルセウスボウ,Theseus Bow"},
+            { 510, "フランメルボウ,Flamel Bow"},
+            { 519, "＊グラヴィルフルーガ,* Gravil Fluga"},
             { 522, "ゴルドプリムボウ,Gold Primm Bow"},
             { 523, "シルヴァプリムボウ,Silver Primm Bow"},
+            { 524, "＊ブレイブアンカー,* Brave Anchor"},
             { 525, "ストラーガボウ,Straga Bow"},
         };
         public static Dictionary<int, string> jetBootsNGSNames = new Dictionary<int, string>()
@@ -5249,7 +5279,16 @@ namespace AquaExtras
             { 182, "ブレードドミナシオ,Shoes Dominacio"},
             { 183, "ブレードインクルシオ,Shoes Inclusio"},
             { 501, "プリムブーツ,Primm Boots"},
-            { 503, ","},
+            { 502, "リサージュブーツ,Resurgir Boots"},
+            { 503, "?,?"},
+            { 505, "ヴィアルトブーツ,Vialto Boots"},
+            { 506, "トロワーデブーツ,Trois De Boots"},
+            { 508, "ツヴィアブーツ,Tzvia Boots"},
+            { 509, "エヴォルコートブーツ,Evolcoat Boots"},
+            { 520, "ゴルドプリムブーツ,Gold Primm Boots"},
+            { 521, "シルヴァプリムブーツ,Silver Primm Boots"},
+            { 522, "＊バウンスアルメティフ,* Bounce Allmetiph"},
+            { 523, "ストラーガブーツ,Straga Boots"},
         };
         public static Dictionary<int, string> dualBladesNGSNames = new Dictionary<int, string>()
         {
@@ -5258,6 +5297,17 @@ namespace AquaExtras
             { 217, "ブレードインクルシオ,Blade Inclusio"},
             { 271, "＊レヴァティーン,* Laevateinn"},
             { 501, "プリムブレード,Primm Blade"},
+            { 502, "リサージュブレード,Resurgir Blade"},
+            { 503, "キャトリアブレード,Cattleya Blade"},
+            { 505, "テルセウスブレード,Theseus Blade"},
+            { 508, "ツヴィアブレード,Tzvia Blade"},
+            { 509, "エヴォルコートブレード,Evolcoat Blade"},
+            { 510, "＊グラヴィルフルーガ,* Gravil Fluga"},
+            { 511, "ゴルドプリムブレード,Gold Primm Blade"},
+            { 512, "シルヴァプリムブレード,Silver Primm Blade"},
+            { 514, "＊バウンスアルメティフ,* Bounce Allmetiph"},
+            { 515, "フランメルブレード,Flamel Blade"},
+            { 524, "ストラーガブレード,Straga Blade"},
         };
         public static Dictionary<int, string> tactNGSNames = new Dictionary<int, string>()
         {
