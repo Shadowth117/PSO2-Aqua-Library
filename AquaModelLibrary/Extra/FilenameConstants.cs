@@ -223,13 +223,13 @@ namespace AquaExtras
             { 170, "ストラジオ,Stradio" },
             { 171, "ストラジェス,Strages" },
             { 173, "＊ニャウ・ソード,* Nyau Sword" },
-            { 176, "＊焔龍閃滅刀,＊Dragon Flame Sword" },
+            { 176, "＊焔龍閃滅刀,* Dragon Flame Sword" },
             { 177, "＊スライプナーＭｋ６,* Sleipnir Mk6"},
             { 178, "＊真島吾朗バット,* Goro Majima's Bat"},
             { 179, "＊阿鼻,* Abi"},
             { 180, "＊アルマゲスト,* Almagest"},
             { 181, "＊ナイトギアエッジ,* Knight Gear Edge"},
-            { 182, "＊MJ国士無双剣,＊MJ Thirteen Orphans Sword"},
+            { 182, "＊MJ国士無双剣,* MJ Thirteen Orphans Sword"},
             { 183, "＊スライプナーＭｋ６Ｄ,* Sleipnir Mk6D"},
             { 184, "＊スライプナーＭｋ６Ｒ,* Sleipnir Mk6R"},
             { 185, "アルケラス,Alceras"},
@@ -4179,6 +4179,7 @@ namespace AquaExtras
             {365, "＊雅緋の黒刀,* Miyabi Black Sword"},
             {366, "＊テイルススパナ,* Tails Wrench"},
             {367, "＊コートウェポンD,* Coated Edge D"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> bowNames = new Dictionary<int, string>()
         {
@@ -4392,6 +4393,7 @@ namespace AquaExtras
             { 294, "フルクシオルリュテア,Fluxio Rulutea"},
             { 295, "リンザールリュテア,Rinser Rulutea"},
             { 296, "闇征弓アジェルアーチェ,Darkweave Agile Arche"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> jetBootsNames = new Dictionary<int, string>()
         {
@@ -4592,6 +4594,7 @@ namespace AquaExtras
             { 276, "リンザーラフェル,Rinser Raphel"},
             { 277, "闇征脚アジェルウォーカー,Darkweave Agile Walker"},
             { 278, "＊ソニックリング,* Sonic Ring"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> dualBladesNames = new Dictionary<int, string>()
         {
@@ -4866,6 +4869,7 @@ namespace AquaExtras
             { 368, "＊雪泉の扇子,* Yumi Folding Fans"},
             { 369, "＊テイルススパナ,* Tails Wrench"},
             { 370, "＊勇者の聖剣,* The Hero’s Holy Sword"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
         public static Dictionary<int, string> tactNames = new Dictionary<int, string>()
         {
@@ -4940,6 +4944,7 @@ namespace AquaExtras
             {100, "闇征奏アジェルリード,Darkweave Agile Reed"},
             {101, "＊バール,* Crowbar"},
             {102, "＊テイルススパナ,* Tails Wrench"},
+            { 999, "デバッグウェポン,Debug Weapon"},
         };
 
 
@@ -5172,7 +5177,7 @@ namespace AquaExtras
             { 259, "シャフトレボルシオ,Shaft Revolsio"},
             { 260, "シャフトドミナシオ,Shaft Dominacio"},
             { 261, "シャフトインクルシオ,Shaft Inclusio"},
-            { 323, "＊ヴィタフォールオンス,＊ Vita Fallounce"},
+            { 323, "＊ヴィタフォールオンス,* Vita Fallounce"},
             { 335, "＊リバレイトアーマリー,* Rivalate Armory"},
             { 352, "＊レヴァティーン,* Laevateinn"},
             { 501, "プリムロッド,Primm Rod"},
@@ -5263,7 +5268,7 @@ namespace AquaExtras
             { 502, "リサージュボウ,Resurgir Bow"},
             { 505, "ヴィアルトボウ,Vialto Bow"},
             { 506, "ツヴィアボウ,Tzvia Bow"},
-            { 507, "エヴォルコートボウ,Evolcaot Bow"},
+            { 507, "エヴォルコートボウ,Evolcoat Bow"},
             { 508, "テルセウスボウ,Theseus Bow"},
             { 510, "フランメルボウ,Flamel Bow"},
             { 519, "＊グラヴィルフルーガ,* Gravil Fluga"},
