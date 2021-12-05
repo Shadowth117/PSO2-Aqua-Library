@@ -54,6 +54,7 @@
             this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,7 +67,7 @@
             this.readMagIndicesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readCMOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -280,6 +281,13 @@
             this.prmEffectFromModelToolStripMenuItem.Text = "prm Effect From Model";
             this.prmEffectFromModelToolStripMenuItem.Click += new System.EventHandler(this.prmEffectFromModelToolStripMenuItem_Click);
             // 
+            // convertAnimationToAQMToolStripMenuItem
+            // 
+            this.convertAnimationToAQMToolStripMenuItem.Name = "convertAnimationToAQMToolStripMenuItem";
+            this.convertAnimationToAQMToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Animation to AQM";
+            this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click);
+            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -291,7 +299,8 @@
             this.testVTXEToolStripMenuItem,
             this.dumpNOF0ToolStripMenuItem,
             this.readBTIToolStripMenuItem,
-            this.readMagIndicesToolStripMenuItem});
+            this.readMagIndicesToolStripMenuItem,
+            this.readCMOToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -377,12 +386,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // convertAnimationToAQMToolStripMenuItem
+            // readCMOToolStripMenuItem
             // 
-            this.convertAnimationToAQMToolStripMenuItem.Name = "convertAnimationToAQMToolStripMenuItem";
-            this.convertAnimationToAQMToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
-            this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Animation to AQM";
-            this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click);
+            this.readCMOToolStripMenuItem.Name = "readCMOToolStripMenuItem";
+            this.readCMOToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readCMOToolStripMenuItem.Text = "ReadCMO";
+            this.readCMOToolStripMenuItem.Click += new System.EventHandler(this.readCMOToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -444,6 +453,7 @@
         private System.Windows.Forms.ToolStripMenuItem prmEffectFromModelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMagIndicesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertAnimationToAQMToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readCMOToolStripMenuItem;
     }
 }
 

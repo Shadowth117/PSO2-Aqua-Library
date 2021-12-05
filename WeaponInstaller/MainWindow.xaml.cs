@@ -76,7 +76,7 @@ namespace WeaponInstaller
             Title = "Select pso2_bin",
         };
 
-
+        
         bool canUpdate = false;
         string win32Folder = null;
         string win32RebootFolder = null;
@@ -938,6 +938,7 @@ namespace WeaponInstaller
             WeaponRow row = (WeaponRow)dataGrid.SelectedItem;
             currentFile = GetGameFilePath(row.Game, row.Md5Hash, true);
             currentFileLabel.Content = Path.GetFileName(currentFile);
+            row = null;
         }
     }
 }

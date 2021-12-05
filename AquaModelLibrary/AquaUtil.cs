@@ -4378,6 +4378,81 @@ namespace AquaModelLibrary
             }
         }
 
+        public static CharacterMakingOffsets LoadCMO(string inFilename)
+        {
+            CharacterMakingOffsets cmo = new CharacterMakingOffsets();
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string variant = ReadAquaHeader(streamReader, Path.GetExtension(inFilename), "", out int offset);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+
+                    //Read offsets for
+                    int count = streamReader.Read<int>();
+                    int listOffset = streamReader.Read<int>();
+                    streamReader.Seek(offset + listOffset, SeekOrigin.Begin);
+
+                    for(int i = 0; i < count; i++)
+                    {
+                        cmo.nodeDataInfo.Add(streamReader.Read<CharacterMakingOffsets.NodeDataInfo>());
+                    }
+
+                    foreach(var info in cmo.nodeDataInfo)
+                    {
+                        CharacterMakingOffsets.NodeData data = new CharacterMakingOffsets.NodeData();
+
+                        //Read strings
+                        streamReader.Seek(offset + info.strOffsetList, SeekOrigin.Begin);
+                        for(int i = 0; i < info.count; i++)
+                        {
+                            int strOffset = streamReader.Read<int>();
+                            long bookmark = streamReader.Position();
+
+                            streamReader.Seek(offset + strOffset, SeekOrigin.Begin);
+                            data.nodeStrings.Add(ReadCString(streamReader));
+                            streamReader.Seek(bookmark, SeekOrigin.Begin);
+                        }
+
+                        //Read data
+                        streamReader.Seek(offset + info.vectorListOffset, SeekOrigin.Begin);
+                        for(int i = 0; i < info.count; i++)
+                        {
+                            data.nodeVectors.Add(streamReader.Read<Vector4>());
+                        }
+
+                        cmo.nodeData.Add(data);
+                    }
+
+#if DEBUG
+                    StringBuilder output = new StringBuilder();
+                    output.AppendLine("CMO Data");
+                    for(int i = 0; i < cmo.nodeData.Count; i++)
+                    {
+                        var node = cmo.nodeData[i];
+                        output.AppendLine($"Set {i + 1}");
+                        for(int j = 0; j < node.nodeStrings.Count; j++)
+                        {
+                            output.AppendLine($"{node.nodeStrings[j]} - {node.nodeVectors[j]}");
+                        }
+
+                        output.AppendLine("");
+                    }
+                    File.WriteAllText(inFilename + "_dump.txt", output.ToString());
+#endif 
+
+                    return cmo;
+                }
+            }
+
+            return null;
+        }
+
         public void ReadBTI(string inFilename)
         {
             aquaMotionConfigs.Add(LoadBTI(inFilename));

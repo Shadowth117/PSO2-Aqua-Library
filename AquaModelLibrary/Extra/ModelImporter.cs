@@ -524,6 +524,196 @@ namespace AquaModelLibrary
             totalVerts = prm.vertices.Count;
         }
 
+        //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
+        public static void AssimpAquaConvertFull(string initialFilePath, string finalFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS)
+        {
+            float baseScale = 1f / 100f * scaleFactor; //We assume that this will be 100x the true scale because 1 unit to 1 meter isn't the norm
+            Assimp.AssimpContext context = new Assimp.AssimpContext();
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
+            Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+
+            AquaObject aqp;
+            AquaNode aqn = new AquaNode();
+            if (isNGS)
+            {
+                aqp = new NGSAquaObject();
+            } else {
+                aqp = new ClassicAquaObject();
+            }
+
+            //Construct Materials
+            foreach(var aiMat in aiScene.Materials)
+            {
+                
+            }
+
+            //Default to this so ids can be assigned by order if needed
+            if(aiScene.RootNode.Name == null || !aiScene.RootNode.Name.Contains("(") || preAssignNodeIds == true)
+            {
+                int nodeCounter = 0;
+                IterateAiNodesAssignNames(aiScene.RootNode, ref nodeCounter);
+            }
+
+            IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale);
+        }
+
+        private static void IterateAiNodesAssignNames(Assimp.Node aiNode, ref int nodeCounter)
+        {
+            aiNode.Name = aiNode.Name = $"({nodeCounter})" + aiNode.Name;
+            nodeCounter++;
+
+            foreach (var childNode in aiNode.Children)
+            {
+                IterateAiNodesAssignNames(childNode, ref nodeCounter);
+            }
+        }
+
+        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, Assimp.Scene aiScene, Assimp.Node aiNode, Matrix4x4 parentTfm, float baseScale)
+        {
+            //Decide if this is an effect node or not
+            string nodeName = aiNode.Name;
+            var nodeParent = aiNode.Parent;
+            if(ParseNodeId(nodeName, out int nodeId))
+            {
+                AquaNode.NODE node = new AquaNode.NODE();
+                node.animatedFlag = 1;
+                node.unkNode = -1;
+                node.firstChild = -1;
+                node.nextSibling = -1;
+                node.const0_2 = 0;
+                node.ngsSibling = 0; //Unsure how this is truly set. Seems to correlate to an id or bone count subtracted from 0xFFFFFFFF. However 0 seems to work so we just leave it as that.
+
+                //If there's a parent, do things reliant on that
+                if (nodeParent != null && ParseNodeId(nodeParent.Name, out int parNodeId))
+                {
+                    node.parentId = parNodeId;
+
+                    //Fix up parent node associations
+                    if(aqn.nodeList[parNodeId].firstChild == -1 || (aqn.nodeList[parNodeId].firstChild > nodeId))
+                    {
+                        var parNode = aqn.nodeList[parNodeId];
+                        parNode.firstChild = nodeId;
+                        aqn.nodeList[parNodeId] = parNode;
+                    }
+
+                    //Set next sibling. We loop through the parent node's children and set the smallest id that's larger than the present node's id. If nothing is found, keep it -1.
+                    foreach(var childNode in nodeParent.Children)
+                    {
+                        if(childNode.Name != aiNode.Name)
+                        {
+                            ParseNodeId(childNode.Name, out int sibCandidate);
+                            if (sibCandidate > nodeId && (node.nextSibling == -1 || sibCandidate < node.nextSibling))
+                            {
+                                node.nextSibling = sibCandidate;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception("Error: Parent node not processed before its child");
+                }
+                ParseShorts(nodeName, out node.boneShort1, out node.boneShort2);
+
+                //Assign transform data ===TODO===
+               // var worldMat = GetWorldMatrix(aiNode);
+
+                //Put in  list at appropriate id 
+                if (aqn.nodeList.Count < nodeId + 1)
+                {
+                    while(aqn.nodeList.Count < nodeId + 1)
+                    {
+                        aqn.nodeList.Add(new AquaNode.NODE());
+                    }
+                }
+                aqn.nodeList[nodeId] = node;
+            }
+            else
+            {
+                if(aiNode.HasChildren)
+                {
+                    throw new Exception("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
+                }
+                AquaNode.NODO nodo = new AquaNode.NODO();
+                nodo.animatedFlag = 1;
+                nodo.boneName.SetString(nodeName);
+                if(ParseNodeId(nodeParent.Name, out int parNodeId))
+                {
+                    nodo.parentId = parNodeId;
+                } else
+                {
+                    throw new Exception("Error: Parent node not processed before its child");
+                }
+                ParseShorts(nodeName, out nodo.boneShort1, out nodo.boneShort2);
+
+                //Assign transform data ===TODO===
+                var mat4 = GetMat4FromAssimpMat4(aiNode.Transform);
+                nodo.pos = new Vector3(mat4.M14 * baseScale, mat4.M24 * baseScale, mat4.M34 * baseScale);
+
+                //var worldMat = GetWorldMatrix(aiNode);
+                //nodo.eulRot =
+
+                //aqn.nodoList.Add(nodo);
+            }
+
+            Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform));
+            nodeMat = Matrix4x4.Multiply(nodeMat, parentTfm);
+
+            foreach (int meshId in aiNode.MeshIndices)
+            {
+                var mesh = aiScene.Meshes[meshId];
+                //AddAiMeshToAQP(aqp, mesh, nodeMat);
+            }
+
+            foreach (var childNode in aiNode.Children)
+            {
+                IterateAiNodesAQP(aqp, aqn, aiScene, childNode, nodeMat, baseScale);
+            }
+        }
+
+        public static void ParseShorts(string nodeName, out ushort boneShort1, out ushort boneShort2)
+        {
+            boneShort1 = 0x1C0;
+            boneShort2 = 0;
+            var numParse = nodeName.Split('#');
+            if(numParse.Length > 1)
+            {
+                numParse[1] = numParse[1].Replace("0x", "");
+                try
+                {
+                    boneShort1 = ushort.Parse(numParse[1], System.Globalization.NumberStyles.HexNumber);
+                    if (numParse.Length > 2)
+                    {
+                        numParse[2] = numParse[1].Replace("0x", "");
+
+                        try
+                        {
+                            boneShort2 = ushort.Parse(numParse[2], System.Globalization.NumberStyles.HexNumber);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                } catch
+                {
+                }
+            }
+        }
+
+        public static bool ParseNodeId(string nodeName, out int id)
+        {
+            var numParse = nodeName.Split('(', ')');
+            if(Int32.TryParse(numParse[1], out int result))
+            {
+                id = result;
+                return true;
+            } else
+            {
+                id = -1;
+                return false;
+            }
+        }
+
         public static Matrix4x4 GetMat4FromAssimpMat4(Assimp.Matrix4x4 mat4)
         {
             return new Matrix4x4(mat4.A1, mat4.A2, mat4.A3, mat4.A4,

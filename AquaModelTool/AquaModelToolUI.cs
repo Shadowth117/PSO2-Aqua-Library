@@ -1435,6 +1435,19 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readCMOToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 CMO file",
+                Filter = "PSO2 MGX File (*.cmo)|*.cmo"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var cmo = AquaUtil.LoadCMO(openFileDialog.FileName);
+            }
+        }
     }
 }
 
