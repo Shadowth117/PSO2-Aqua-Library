@@ -120,17 +120,14 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    int magic = BitConverter.ToInt32(streamReader.ReadBytes(streamReader.Position() + 0x30, 0x4), 0);
+                    int objcVersion = BitConverter.ToInt32(streamReader.ReadBytes(streamReader.Position() + 0x30, 0x4), 0);
 
-                    switch (magic)
+                    if(objcVersion >= 0xC32)
                     {
-                        case 0xC32:
-                        case 0xC33:
-                            ReadNGSNIFLModel(streamReader, new NGSAquaObject(), offset, aquaModels);
-                            break;
-                        default:
-                            ReadClassicNIFLModel(streamReader, new ClassicAquaObject(), offset, aquaModels);
-                            break;
+                        ReadNGSNIFLModel(streamReader, new NGSAquaObject(), offset, aquaModels);
+                    } else
+                    {
+                        ReadClassicNIFLModel(streamReader, new ClassicAquaObject(), offset, aquaModels);
                     }
 
                 }
@@ -154,7 +151,7 @@ namespace AquaModelLibrary
                 {
                     model.vsetList.Add(streamReader.Read<AquaObject.VSET>());
 
-                    //Get edge verts if needed. Bone palette is linked elsewhere in 0xC33 Aqua Objects.
+                    //Get edge verts if needed. Bone palette is linked elsewhere in 0xC32+ Aqua Objects.
                     List<ushort> edgeVerts = new List<ushort>();
                     if (model.vsetList[vsetIndex].edgeVertsCount > 0)
                     {
@@ -228,7 +225,7 @@ namespace AquaModelLibrary
                 {
                     streamReader.Seek(model.objc.vtxlStartOffset + offset, SeekOrigin.Begin);
 
-                    //0xC33 Aqua Objects use a global vertex array. To separate it into something more normally usable, we need to loop through the VSETs
+                    //0xC32+ Aqua Objects use a global vertex array. To separate it into something more normally usable, we need to loop through the VSETs
                     //To accurately dump all model parts, materials and all without having isolated vertices, we'll want to split this again later when we have face data.
                     for (int vset = 0; vset < model.vsetList.Count; vset++)
                     {

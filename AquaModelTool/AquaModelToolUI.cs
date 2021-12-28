@@ -240,16 +240,18 @@ namespace AquaModelTool
                             test.tstaList[i] = tsta;
                         }*/
                         //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
-                        for(int i = 0; i < test.tstaList.Count; i++)
+                        /*for(int i = 0; i < test.tstaList.Count; i++)
                         {
                             Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
                         }
-                        
+                        */
+
+                        //Spirefier 
                         /*
                         for(int j = 0; j < test.vtxlList[0].vertPositions.Count; j++)
                         {
                             var vec3 = test.vtxlList[0].vertPositions[j];
-                            if (vec3.Y > 0.2)
+                            if (vec3.Y > 0.85)
                             {
                                 vec3.Y *= 10000;
                                 test.vtxlList[0].vertPositions[j] = vec3;
@@ -1446,6 +1448,27 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 var cmo = AquaUtil.LoadCMO(openFileDialog.FileName);
+            }
+        }
+
+        private void legacyAqp2objBatchExportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 model file",
+                Filter = "|PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read models
+                AquaUtil aqua = new AquaUtil(); //We want to leave the currently loaded model alone.
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aqua.aquaModels.Clear();
+                    aqua.ReadModel(file);
+                    LegacyObj.LegacyObjIO.ExportObj(file + ".obj", aqua.aquaModels[0].models[0]);
+                }
             }
         }
     }

@@ -1928,11 +1928,11 @@ namespace AquaModelLibrary
             body.texString5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(bodyRaw[0], 5)).GetString();
             //TexString6 seemingly isn't stored in vtbf? Might correct later if that's not really the case.
 
-            body.body.int_24_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
-            body.body.costumeSoundId = GetObject<int>(bodyRaw[0], 0xA);
-            body.body.reference_id = GetObject<int>(bodyRaw[0], 0xD);
-            body.body.legLength = GetObject<float>(bodyRaw[0], 0x8);
-            body.body.float_4C_0xB = GetObject<float>(bodyRaw[0], 0xB);
+            body.body2.int_24_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
+            body.body2.costumeSoundId = GetObject<int>(bodyRaw[0], 0xA);
+            body.body2.reference_id = GetObject<int>(bodyRaw[0], 0xD);
+            body.body2.legLength = GetObject<float>(bodyRaw[0], 0x8);
+            body.body2.float_4C_0xB = GetObject<float>(bodyRaw[0], 0xB);
 
             //Todo, handle default junk data added with NIFL
 
@@ -1968,13 +1968,13 @@ namespace AquaModelLibrary
             string texStr5 = body.texString5;
             addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
 
-            addBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body.costumeSoundId));
-            addBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body.float_4C_0xB));
+            addBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body2.costumeSoundId));
+            addBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body2.float_4C_0xB));
             addBytes(outBytes, 0xC, 0x9, BitConverter.GetBytes((int)0));
             addBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
             addBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
-            addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body.legLength));
-            addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body.int_24_0x9_0x9));
+            addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body2.legLength));
+            addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body2.int_24_0x9_0x9));
 
             WriteTagHeader(outBytes, "BODY", 0x0, 0xE);
 
@@ -2051,7 +2051,7 @@ namespace AquaModelLibrary
             face.face.id = (int)faceRaw[0][0xFF];
 
             face.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x70)).GetString();
-            face.face.unkInt3 = GetObject<int>(faceRaw[0], 0x71);
+            face.face2.unkInt3 = GetObject<int>(faceRaw[0], 0x71);
             face.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x72)).GetString();
             face.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x73)).GetString();
             face.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(faceRaw[0], 0x74)).GetString();
@@ -2060,7 +2060,7 @@ namespace AquaModelLibrary
 
             //0x77 seemingly isn't parsed
             //0x78 seemingly isn't parsed
-            face.face.unkInt5 = GetObject<int>(faceRaw[0], 0x79);
+            face.face2.unkInt5 = GetObject<int>(faceRaw[0], 0x79);
 
             return face;
         }
@@ -2166,12 +2166,13 @@ namespace AquaModelLibrary
             return hair;
         }
 
-        public static BCLN parseLN(List<Dictionary<int, object>> lnRaw)
+        public static BCLNObject parseLN(List<Dictionary<int, object>> lnRaw)
         {
-            BCLN bcln = new BCLN();
-            bcln.id = (int)lnRaw[0][0xFF];
-            bcln.fileId = GetObject<int>(lnRaw[0], 0x1);
-            bcln.unkInt = GetObject<int>(lnRaw[0], 0x2);
+            BCLNObject bcln = new BCLNObject();
+            bcln.bcln = new BCLN();
+            bcln.bcln.id = (int)lnRaw[0][0xFF];
+            bcln.bcln.fileId = GetObject<int>(lnRaw[0], 0x1);
+            bcln.bcln.unkInt = GetObject<int>(lnRaw[0], 0x2);
 
             return bcln;
         }

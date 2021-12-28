@@ -4981,9 +4981,9 @@ namespace AquaExtras
             { 513, "グリッセンソード,Glissen Sword"},
             { 514, "プリムソード?,Primm Sword?"},
             { 515, "エヴォルコートソード,Evolcoat Sword"},
-            { 524, "ゴルドプリムソード,Gold Primm Sword"},
-            { 525, "シルヴァプリムソード,Silver Primm Sword"},
-            { 526, "ストラーガソード,Straga Sword"},
+            { 524, "ストラーガソード,Straga Sword"},
+            { 525, "ゴルドプリムソード,Gold Primm Sword"},
+            { 526, "シルヴァプリムソード,Silver Primm Sword"},
         };
         public static Dictionary<int, string> wiredLanceNGSNames = new Dictionary<int, string>()
         {

@@ -184,7 +184,7 @@ namespace AquaModelLibrary
             objc.unkCount0 = streamReader.Read<int>();
             objc.unrmOffset = streamReader.Read<int>();
 
-            if (objc.type == 0xC33 || objc.type == 0xC32)
+            if (objc.type >= 0xC32) 
             {
 
                 objc.vtxeCount = streamReader.Read<int>();
@@ -201,7 +201,7 @@ namespace AquaModelLibrary
                 objc.pset2Count = streamReader.Read<int>();
                 objc.pset2Offset = streamReader.Read<int>();
 
-                if (objc.type == 0xC33)
+                if (objc.type >= 0xC33)
                 {
                     objc.mesh2Count = streamReader.Read<int>();
                     objc.mesh2Offset = streamReader.Read<int>();
@@ -213,7 +213,7 @@ namespace AquaModelLibrary
                     objc.unkPointArray2Offset = streamReader.Read<int>();
                     objc.unkCount3 = streamReader.Read<int>();
                 }
-                objc.type = 0xC33; //0xC33 is essentially the same so we can treat it as that from here. Its objc just doesn't have those last 2 fields or the associated arrays.
+                //objc.type = 0xC33; //0xC33 is essentially the same so we can treat it as that from here. Its objc just doesn't have those last 2 fields or the associated arrays.
             }
 
             return objc;

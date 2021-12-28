@@ -11,6 +11,7 @@ namespace AquaModelLibrary
     public unsafe class CharacterMakingIndex : AquaCommon
     {
         public static int oct21TableAddressInt = 0x2318B4; //Used for checking the version of the cmx in order to maintain legacy support
+        public static int dec14_21TableAddressInt = 0x26B66C; //Ritem Update cmx. Some structs were reordered for this update.
 
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -123,15 +124,15 @@ namespace AquaModelLibrary
         public Dictionary<int, VTBF_COLObject> legacyColDict = new Dictionary<int, VTBF_COLObject>();
 
         public List<Unk_IntField> unkList = new List<Unk_IntField>();
-        public Dictionary<int, BCLN> costumeIdLink = new Dictionary<int, BCLN>();
+        public Dictionary<int, BCLNObject> costumeIdLink = new Dictionary<int, BCLNObject>();
 
-        public Dictionary<int, BCLN> castArmIdLink = new Dictionary<int, BCLN>();
-        public Dictionary<int, BCLN> clegIdLink = new Dictionary<int, BCLN>();
-        public Dictionary<int, BCLN> outerWearIdLink = new Dictionary<int, BCLN>();
-        public Dictionary<int, BCLN> baseWearIdLink = new Dictionary<int, BCLN>();
+        public Dictionary<int, BCLNObject> castArmIdLink = new Dictionary<int, BCLNObject>();
+        public Dictionary<int, BCLNObject> clegIdLink = new Dictionary<int, BCLNObject>();
+        public Dictionary<int, BCLNObject> outerWearIdLink = new Dictionary<int, BCLNObject>();
+        public Dictionary<int, BCLNObject> baseWearIdLink = new Dictionary<int, BCLNObject>();
 
-        public Dictionary<int, BCLN> innerWearIdLink = new Dictionary<int, BCLN>();
-        public Dictionary<int, BCLN> unknownIdLink = new Dictionary<int, BCLN>();
+        public Dictionary<int, BCLNObject> innerWearIdLink = new Dictionary<int, BCLNObject>();
+        public Dictionary<int, BCLNObject> castHeadLink = new Dictionary<int, BCLNObject>();
 
         public CMXTable cmxTable;
 
@@ -144,6 +145,8 @@ namespace AquaModelLibrary
         public class BODYObject : BaseCMXObject
         {
             public BODY body;
+            public BODYRitem bodyRitem;
+            public BODY2 body2;
             public string dataString;
             public string texString1;
             public string texString2;
@@ -153,7 +156,6 @@ namespace AquaModelLibrary
             public string texString6;
         }
 
-        //Used for BODY, CARM, CLEG, Outer Wear (BODY), BCLN
         public struct BODY
         {
             public int id; //0xFF, 0x8
@@ -167,6 +169,18 @@ namespace AquaModelLibrary
             public int texString6Ptr;
 
             public int int_20;
+        }
+
+        public struct BODYRitem //Body struct section addition added
+        {
+            public int int_0; 
+            public int int_4;
+            public int int_8;
+            public int int_C;
+        }
+
+        public struct BODY2
+        {
             public int int_24_0x9_0x9;   //0x9, 0x9
             public int int_28;
             public int int_2C;
@@ -245,6 +259,10 @@ namespace AquaModelLibrary
         public class FACEObject : BaseCMXObject
         {
             public FACE face;
+            public FACERitem faceRitem;
+            public FACE2 face2;
+            public float unkFloatRitem;
+
             public string dataString;
             public string texString1;
             public string texString2;
@@ -266,7 +284,16 @@ namespace AquaModelLibrary
             public int texString4Ptr;
             public int texString5Ptr;
             public int texString6Ptr;
+        }
 
+        public struct FACERitem
+        {
+            public int unkIntRT0;
+            public int unkIntRT1;
+        }
+
+        public struct FACE2
+        {
             public int unkInt0;
             public int unkInt1;
             public int unkInt2;
@@ -730,12 +757,26 @@ namespace AquaModelLibrary
             public fixed int unkIntField[79];
         }
 
+        public class BCLNObject
+        {
+            public BCLN bcln;
+            public BCLNRitem bclnRitem;
+        }
+
         //Also for LCLN, ACLN, and ICLN. Id remapping info. Recolor outfits have multiple ids, but only one id that will actually correlate to a file.
         public struct BCLN
         {
             public int id;
             public int fileId;
             public int unkInt;
+        }
+
+        public struct BCLNRitem
+        {
+            public int int_00;
+            public int int_04;
+            public int int_08;
+            public int int_0C;
         }
 
         public class CMXTable
@@ -772,7 +813,7 @@ namespace AquaModelLibrary
 
             public int castArmIdLinkAddress; //BCLN Cast arm ids for recolors
             public int castLegIdLinkAddress; //BCLN Cast leg ids for recolors
-            public int outerIdLinkAddress; //BCLN Outer ids for recolors
+            public int outerIdLinkAddress; //BCLN Outer ids for recolors                  Outer, basewear, and inner links are shifted down after oct 21 2021. This becomes CastHeadLinks
             public int baseWearIdLinkAddress; //BCLN basewear ids for recolors
 
             public int innerWearIdLinkAddress; //BCLN innerwear ids for recolors
