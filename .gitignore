@@ -401,3 +401,7 @@ WeaponInstaller/bin/Release/net5.0-windows/Weapons/weaponSettings.txt
 WeaponInstaller/bin/Release/net5.0-windows/ZomboniLib.dll
 
 WeaponInstaller/bin/Release/net5.0-windows/ZomboniLib.pdb
+
+AquaNoesisDummy/
+
+AquaNoesisPlugin/

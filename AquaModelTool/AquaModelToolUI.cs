@@ -1471,6 +1471,33 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void dumpFigEffectTypesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 FIG file",
+                Filter = "PSO2 FIG Files (*.fig)|*.fig",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read figs
+                StringBuilder sb = new StringBuilder();
+                List<int> ints = new List<int>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    sb.Append(AquaUtil.CheckFigEffectMaps(file, ints));
+                }
+                ints.Sort();
+                sb.AppendLine("All types:");
+                foreach(var num in ints)
+                {
+                    sb.AppendLine(num.ToString() + " " + num.ToString("X"));
+                }
+                File.WriteAllText(Path.GetDirectoryName(openFileDialog.FileNames[0]) + "\\" + "figEffectTypes.txt", sb.ToString());
+            }
+        }
     }
 }
 

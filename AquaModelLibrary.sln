@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaAutoRig", "AquaAutoRig\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMXPatcher", "CMXPatcher\CMXPatcher.csproj", "{AE25E5CC-858C-434A-91DA-6F1AA8745C0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeaponInstaller", "WeaponInstaller\WeaponInstaller.csproj", "{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeaponInstaller", "WeaponInstaller\WeaponInstaller.csproj", "{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

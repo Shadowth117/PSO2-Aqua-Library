@@ -51,6 +51,7 @@
             this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.legacyAqp2objBatchExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,7 +69,7 @@
             this.readCMOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.legacyAqp2objBatchExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpFigEffectTypesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -262,6 +263,13 @@
             this.legacyAqp2objObjExportToolStripMenuItem.Text = "(Legacy) aqp2obj obj export from current model";
             this.legacyAqp2objObjExportToolStripMenuItem.Click += new System.EventHandler(this.legacyAqp2objObjExportToolStripMenuItem_Click);
             // 
+            // legacyAqp2objBatchExportToolStripMenuItem
+            // 
+            this.legacyAqp2objBatchExportToolStripMenuItem.Name = "legacyAqp2objBatchExportToolStripMenuItem";
+            this.legacyAqp2objBatchExportToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.legacyAqp2objBatchExportToolStripMenuItem.Text = "(Legacy) aqp2obj batch export";
+            this.legacyAqp2objBatchExportToolStripMenuItem.Click += new System.EventHandler(this.legacyAqp2objBatchExportToolStripMenuItem_Click);
+            // 
             // legacyAqp2objObjImportToolStripMenuItem
             // 
             this.legacyAqp2objObjImportToolStripMenuItem.Name = "legacyAqp2objObjImportToolStripMenuItem";
@@ -302,7 +310,8 @@
             this.dumpNOF0ToolStripMenuItem,
             this.readBTIToolStripMenuItem,
             this.readMagIndicesToolStripMenuItem,
-            this.readCMOToolStripMenuItem});
+            this.readCMOToolStripMenuItem,
+            this.dumpFigEffectTypesToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -395,12 +404,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // legacyAqp2objBatchExportToolStripMenuItem
+            // dumpFigEffectTypesToolStripMenuItem
             // 
-            this.legacyAqp2objBatchExportToolStripMenuItem.Name = "legacyAqp2objBatchExportToolStripMenuItem";
-            this.legacyAqp2objBatchExportToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.legacyAqp2objBatchExportToolStripMenuItem.Text = "(Legacy) aqp2obj batch export";
-            this.legacyAqp2objBatchExportToolStripMenuItem.Click += new System.EventHandler(this.legacyAqp2objBatchExportToolStripMenuItem_Click);
+            this.dumpFigEffectTypesToolStripMenuItem.Name = "dumpFigEffectTypesToolStripMenuItem";
+            this.dumpFigEffectTypesToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.dumpFigEffectTypesToolStripMenuItem.Text = "DumpFigEffectTypes";
+            this.dumpFigEffectTypesToolStripMenuItem.Click += new System.EventHandler(this.dumpFigEffectTypesToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -464,6 +473,7 @@
         private System.Windows.Forms.ToolStripMenuItem convertAnimationToAQMToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readCMOToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem legacyAqp2objBatchExportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dumpFigEffectTypesToolStripMenuItem;
     }
 }
 

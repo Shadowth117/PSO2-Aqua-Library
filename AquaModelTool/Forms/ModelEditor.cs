@@ -59,7 +59,7 @@ namespace AquaModelTool
             }
             if (modelset.models[modelIDCB.SelectedIndex].rendList.Count > 0)
             {
-               //editorCB.Items.Add("Render");
+               editorCB.Items.Add("Render");
             }
             if (modelset.models[modelIDCB.SelectedIndex].shadList.Count > 0)
             {
@@ -90,9 +90,9 @@ namespace AquaModelTool
                 case "Mesh2s":
                     control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].mesh2List);
                     break;
-                //case "Render":
-                    //control = new RenderEditor(modelset.models[modelIDCB.SelectedIndex]);
-                    //break;
+                case "Render":
+                    control = new RenderEditor(modelset.models[modelIDCB.SelectedIndex]);
+                    break;
                 case "Shaders":
                     control = new ShaderEditor(modelset.models[modelIDCB.SelectedIndex]);
                     break;

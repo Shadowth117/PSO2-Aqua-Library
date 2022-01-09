@@ -27,6 +27,7 @@ namespace AquaModelLibrary
         public List<AnimSet> aquaMotions = new List<AnimSet>();
         public List<SetLayout> aquaSets = new List<SetLayout>();
         public List<AquaBTI_MotionConfig> aquaMotionConfigs = new List<AquaBTI_MotionConfig>();
+        public List<AquaFigure> aquaFigures = new List<AquaFigure>();
 
         public class ModelSet
         {
@@ -4448,6 +4449,125 @@ namespace AquaModelLibrary
             }
 
             return null;
+        }
+
+        public void ReadFig(string inFilename)
+        {
+            aquaFigures.Add(LoadFig(inFilename));
+        }
+
+        public static AquaFigure LoadFig(string inFilename)
+        {
+            AquaFigure fig = new AquaFigure();
+
+            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 4)
+            {
+                ext = ext.Substring(0, 4);
+            }
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    fig.figHeader = streamReader.Read<AquaFigure.FigHeader>();
+
+
+                }
+            }
+            
+            return null;
+        }
+
+        public static StringBuilder CheckFigEffectMaps(string inFilename, List<int> allTypes)
+        {
+            if(File.ReadAllBytes(inFilename).Length < 0x11)
+            {
+                return new StringBuilder();
+            }
+            StringBuilder dump = new StringBuilder();
+            dump.AppendLine(inFilename);
+
+            AquaFigure fig = new AquaFigure();
+
+            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 4)
+            {
+                ext = ext.Substring(0, 4);
+            }
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    fig.figHeader = streamReader.Read<AquaFigure.FigHeader>();
+
+                    streamReader.Seek(offset + fig.figHeader.unkPtr1, SeekOrigin.Begin);
+                    for (int i = 0; i < fig.figHeader.unkPtr1Count; i++)
+                    {
+                        int unk1Address = streamReader.Read<int>();
+                        long bookmark = streamReader.Position();
+
+                        if(unk1Address != 0x10 && unk1Address != 0)
+                        {
+                            streamReader.Seek(offset + unk1Address, SeekOrigin.Begin);
+                            var unk1 = streamReader.Read<AquaFigure.FigStruct1>();
+
+                            if (unk1.StateMappingPtr != 0x10 && unk1.StateMappingPtr != 0)
+                            {
+                                streamReader.Seek(offset + unk1.StateMappingPtr, SeekOrigin.Begin);
+                                var stateMap = streamReader.Read<AquaFigure.StateMapping>();
+
+                                if (stateMap.effectMapPtr != 0x10 && stateMap.effectMapPtr != 0)
+                                {
+                                    streamReader.Seek(offset + stateMap.effectMapPtr, SeekOrigin.Begin);
+
+                                    for (int j = 0; j < stateMap.effectMapCount; j++)
+                                    {
+                                        int mapAddress = streamReader.Read<int>();
+                                        long bookmark2 = streamReader.Position();
+
+                                        if(mapAddress != 0x10 && mapAddress != 0)
+                                        {
+                                            streamReader.Seek(offset + mapAddress, SeekOrigin.Begin);
+                                            int num = streamReader.Read<int>();
+                                            dump.AppendLine(num.ToString() + " " + num.ToString("X"));
+                                            if(!allTypes.Contains(num))
+                                            {
+                                                allTypes.Add(num);
+                                            }
+                                        }
+
+                                        streamReader.Seek(bookmark2, SeekOrigin.Begin);
+                                    }
+                                }
+                            }
+                        }
+
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+                    }
+                }
+            }
+
+            return dump;
         }
 
         public void ReadBTI(string inFilename)
