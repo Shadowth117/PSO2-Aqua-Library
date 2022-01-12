@@ -532,7 +532,7 @@ namespace AquaModelLibrary
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
-            AquaObject aqp;
+            AquaObject aqp = new NGSAquaObject();
             AquaNode aqn = new AquaNode();
             if (isNGS)
             {
@@ -542,29 +542,73 @@ namespace AquaModelLibrary
             }
 
             //Construct Materials
+            Dictionary<string, int> matNameTracker = new Dictionary<string, int>();
             foreach(var aiMat in aiScene.Materials)
             {
-                
+                string name;
+                if (matNameTracker.ContainsKey(aiMat.Name))
+                {
+                    name = $"{aiMat.Name} ({matNameTracker[aiMat.Name]})";
+                    matNameTracker[aiMat.Name] += 1;
+                } else
+                {
+                    name = aiMat.Name;
+                    matNameTracker.Add(aiMat.Name, 1);
+                }
+
+                AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
+                List<string> shaderList = new List<string>();
+                AquaObjectMethods.GetMaterialNameData(ref name, shaderList, out string alphaType, out string playerFlag);
+                genMat.matName = name;
+                genMat.shaderNames = shaderList;
+                genMat.blendType = alphaType;
+                genMat.specialType = playerFlag;
+
+                //Texture assignments. Since we can't rely on these to export properly, we dummy them or just put diffuse if a playerFlag isn't defined.
+                //We'll have the user set these later if needed.
+                if(genMat.specialType != null)
+                {
+                    AquaObjectMethods.GenerateSpecialMaterialParameters(genMat);
+                } else if(aiMat.TextureDiffuse.FilePath != null)
+                {
+                    genMat.texNames.Add(Path.GetFileName(aiMat.TextureDiffuse.FilePath));
+                } else
+                {
+                    genMat.texNames.Add("tex0_d.dds");
+                }
+                genMat.texUVSets.Add(0); 
+
+                AquaObjectMethods.GenerateMaterial(aqp, genMat, true);
             }
 
             //Default to this so ids can be assigned by order if needed
+            Dictionary<string, int> boneDict = new Dictionary<string, int>();
             if(aiScene.RootNode.Name == null || !aiScene.RootNode.Name.Contains("(") || preAssignNodeIds == true)
             {
                 int nodeCounter = 0;
-                IterateAiNodesAssignNames(aiScene.RootNode, ref nodeCounter);
+                BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
             }
 
             IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale);
         }
 
-        private static void IterateAiNodesAssignNames(Assimp.Node aiNode, ref int nodeCounter)
+        private static void BuildAiNodeDictionary(Assimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum = false)
         {
-            aiNode.Name = aiNode.Name = $"({nodeCounter})" + aiNode.Name;
+            var nodeCountName = GetNodeNumber(aiNode.Name);
+            if (nodeCountName != -1)
+            {
+                useNameNodeNum = true;
+                boneDict.Add(aiNode.Name, nodeCountName);
+            } else if(useNameNodeNum == false)
+            {
+                boneDict.Add(aiNode.Name, nodeCounter);
+            }
+            //We can in theory ignore bones that don't meet either condition since they'll be effect nodes and listed outside the normal count
             nodeCounter++;
 
             foreach (var childNode in aiNode.Children)
             {
-                IterateAiNodesAssignNames(childNode, ref nodeCounter);
+                BuildAiNodeDictionary(childNode, ref nodeCounter, boneDict, useNameNodeNum);
             }
         }
 

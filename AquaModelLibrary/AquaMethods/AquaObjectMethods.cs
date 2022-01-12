@@ -2291,6 +2291,43 @@ namespace AquaModelLibrary
             return textureList;
         }
 
+        public static void GetMaterialNameData(ref string name, List<string> shaderNames, out string alphaType, out string playerFlag)
+        {
+            shaderNames = new List<string>();
+            alphaType = null;
+            playerFlag = null;
+
+            //Get shader names
+            string[] nameArr = name.Split(')');
+            if(nameArr.Length > 1)
+            {
+                string shaderText = nameArr[1].Split('(')[1];
+                var shaderSet = shaderText.Split(',');
+                if(shaderSet.Length >= 2)
+                {
+                    shaderNames.Add(shaderSet[0]);
+                    shaderNames.Add(shaderSet[1]);
+                    name = nameArr[1];
+                }
+            }
+            
+            //Get alpha type
+            nameArr = name.Split('}');
+            if(nameArr.Length > 1)
+            {
+                alphaType = nameArr[1].Split('{')[1];
+                name = nameArr[1];
+            }
+
+            //Get player flags
+            nameArr = name.Split(']');
+            if (nameArr.Length > 1)
+            {
+                playerFlag = nameArr[1].Split('[')[1];
+                name = nameArr[1];
+            }
+        }
+
         public static List<string> GetShaderNames(AquaObject model, int shadIndex)
         {
             List<string> shaderList = new List<string>();
