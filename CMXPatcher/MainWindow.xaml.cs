@@ -34,6 +34,10 @@ namespace CMXPatcher
         {
             InitializeComponent();
             SetFunctionality();
+#if !DEBUG
+            downgradeButton.IsEnabled = false;
+            downgradeButton.Visibility = Visibility.Hidden;
+#endif
         }
 
         private void SetPSO2Bin(object sender, RoutedEventArgs e)

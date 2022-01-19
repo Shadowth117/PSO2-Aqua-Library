@@ -1415,8 +1415,9 @@ namespace AquaModelLibrary
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
                     string rebLinkedInner = $"{rebootStart}b1_{id + 50000}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{id + 50000}_ex.ice";
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
-                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInner.Replace(".ice", "_ex.ice"));
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))

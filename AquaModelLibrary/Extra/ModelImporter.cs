@@ -603,6 +603,7 @@ namespace AquaModelLibrary
             {
                 boneDict.Add(aiNode.Name, nodeCounter);
             }
+
             //We can in theory ignore bones that don't meet either condition since they'll be effect nodes and listed outside the normal count
             nodeCounter++;
 
