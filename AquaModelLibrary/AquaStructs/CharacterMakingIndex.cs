@@ -190,7 +190,7 @@ namespace AquaModelLibrary
             public int int_38;         //Usually -1
             public int int_3C;         //Usually -1
 
-            public int int_40;         //Usually -1
+            public int linkedInnerId;         //Usually -1
             public int int_44;         //Usually -1
             public float legLength;   //0x8, 0xA
             public float float_4C_0xB;   //0xB, 0xA

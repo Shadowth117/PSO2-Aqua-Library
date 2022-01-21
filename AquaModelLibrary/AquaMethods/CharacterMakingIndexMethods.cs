@@ -1210,6 +1210,7 @@ namespace AquaModelLibrary
 
                 //Decide if bd or ow
                 int soundId = -1;
+                int linkedInnerId = id + 50000;
                 string typeString = "bd_";
                 bool classicOwCheck = id >= 20000 && id < 40000;
                 bool rebootOwCheck = id >= 100000 && id < 300000;
@@ -1219,12 +1220,14 @@ namespace AquaModelLibrary
                     if (aquaCMX.outerDict.ContainsKey(id))
                     {
                         soundId = aquaCMX.outerDict[id].body2.costumeSoundId;
+                        linkedInnerId = aquaCMX.outerDict[id].body2.linkedInnerId;
                     }
                 } else
                 {
                     if (aquaCMX.costumeDict.ContainsKey(id))
                     {
                         soundId = aquaCMX.costumeDict[id].body2.costumeSoundId;
+                        linkedInnerId = aquaCMX.costumeDict[id].body2.linkedInnerId;
                     }
                 }
 
@@ -1235,8 +1238,8 @@ namespace AquaModelLibrary
                     string rebEx = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
-                    string rebLinkedInner = $"{rebootStart}b1_{id + 50000}.ice";
-                    string rebLinkedInnerEx = $"{rebootExStart}b1_{id + 50000}_ex.ice";
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 

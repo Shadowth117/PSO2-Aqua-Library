@@ -99,5 +99,44 @@ namespace AquaModelTool
 
             aqua.WriteVTBFModel(str, str);
         }
+
+        public static DialogResult ShowInputDialog(ref decimal input)
+        {
+            System.Drawing.Size size = new System.Drawing.Size(200, 100);
+            Form inputBox = new Form();
+
+            inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            inputBox.ClientSize = size;
+            inputBox.Text = "Spirefier";
+
+            System.Windows.Forms.Label label = new Label();
+            label.Text = "Please specify in meters where to extend from.";
+            label.Size = new System.Drawing.Size(195, 30);
+            label.Location = new System.Drawing.Point(5, 5);
+            inputBox.Controls.Add(label);
+
+            System.Windows.Forms.NumericUpDown nud = new NumericUpDown();
+            nud.DecimalPlaces = 6;
+            nud.Maximum = decimal.MaxValue;
+            nud.Minimum = decimal.MinValue;
+            nud.Increment = 0.000001m;
+            nud.Value = 0.5m;
+            nud.Location = new System.Drawing.Point(20, 35);
+            inputBox.Controls.Add(nud);
+
+            Button okButton = new Button();
+            okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            okButton.Name = "okButton";
+            okButton.Size = new System.Drawing.Size(75, 23);
+            okButton.Text = "&OK";
+            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, 59);
+            inputBox.Controls.Add(okButton);
+
+            inputBox.AcceptButton = okButton;
+
+            DialogResult result = inputBox.ShowDialog();
+            input = nud.Value;
+            return result;
+        }
     }
 }

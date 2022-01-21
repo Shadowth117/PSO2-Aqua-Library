@@ -12,44 +12,48 @@ namespace AquaAutoRig
     {
         public static void Main(string[] args)
         {
-            if(args.Length != 1)
+            if(args.Length < 1)
             {
                 DisplayUsage();
             }
             else
             {
-                var aqua = new AquaUtil();
-                switch(Path.GetExtension(args[0]))
+                foreach(var arg in args)
                 {
-                    case ".aqp":
-                    case ".aqo":
-                    case ".trp":
-                    case ".tro":
-                        string backup = Path.ChangeExtension(args[0], ".org.aqp");
-                        if (File.Exists(backup))
-                        {
-                            File.Delete(backup);
-                        }
-                        File.Copy(args[0], backup);
-                        var aqpName = args[0];
-                        aqua.ReadModel(aqpName);
-                        LegacyObj.LegacyObjIO.ExportObj(Path.ChangeExtension(aqpName, ".obj"), aqua.aquaModels[0].models[0]);
-                        break;
-                    case ".obj":
-                        aqua.ReadModel(Path.ChangeExtension(args[0], ".org.aqp"));
-                        aqua.aquaModels[0].models[0] = LegacyObj.LegacyObjIO.ImportObj(args[0], aqua.aquaModels[0].models[0]);
-                        string outName = Path.ChangeExtension(args[0], ".aqp");
-                        if (aqua.aquaModels[0].models[0].objc.type >= 0xC32)
-                        {
-                            aqua.WriteNGSNIFLModel(outName, outName);
-                        } else
-                        {
-                            aqua.WriteClassicNIFLModel(outName, outName);
-                        }
-                        break;
-                    default:
-                        DisplayUsage();
-                        break;
+                    var aqua = new AquaUtil();
+                    switch (Path.GetExtension(arg))
+                    {
+                        case ".aqp":
+                        case ".aqo":
+                        case ".trp":
+                        case ".tro":
+                            string backup = Path.ChangeExtension(arg, ".org.aqp");
+                            if (File.Exists(backup))
+                            {
+                                File.Delete(backup);
+                            }
+                            File.Copy(arg, backup);
+                            var aqpName = arg;
+                            aqua.ReadModel(aqpName);
+                            LegacyObj.LegacyObjIO.ExportObj(Path.ChangeExtension(aqpName, ".obj"), aqua.aquaModels[0].models[0]);
+                            break;
+                        case ".obj":
+                            aqua.ReadModel(Path.ChangeExtension(arg, ".org.aqp"));
+                            aqua.aquaModels[0].models[0] = LegacyObj.LegacyObjIO.ImportObj(arg, aqua.aquaModels[0].models[0]);
+                            string outName = Path.ChangeExtension(arg, ".aqp");
+                            if (aqua.aquaModels[0].models[0].objc.type >= 0xC32)
+                            {
+                                aqua.WriteNGSNIFLModel(outName, outName);
+                            }
+                            else
+                            {
+                                aqua.WriteClassicNIFLModel(outName, outName);
+                            }
+                            break;
+                        default:
+                            DisplayUsage();
+                            break;
+                    }
                 }
             }
         }

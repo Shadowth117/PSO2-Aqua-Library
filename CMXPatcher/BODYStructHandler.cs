@@ -27,7 +27,7 @@ namespace CMXPatcher
             outText.AppendLine("int_38 = " + body.body2.int_38);
             outText.AppendLine("int_3C = " + body.body2.int_3C);
 
-            outText.AppendLine("int_40 = " + body.body2.int_40);
+            outText.AppendLine("int_40 = " + body.body2.linkedInnerId);
             outText.AppendLine("int_44 = " + body.body2.int_44);
             outText.AppendLine("legLength = " + body.body2.legLength);
             outText.AppendLine("float_4C_0xB = " + body.body2.float_4C_0xB);
@@ -80,7 +80,7 @@ namespace CMXPatcher
                         break;
 
                     case "int_40":
-                        body.body2.int_40 = Int32.Parse(contents[1]);
+                        body.body2.linkedInnerId = Int32.Parse(contents[1]);
                         break;
                     case "int_44":
                         body.body2.int_44 = Int32.Parse(contents[1]);

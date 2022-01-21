@@ -258,7 +258,7 @@ namespace AquaModelTool
                             }
                         }*/
 
-                        test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);
+                        //test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if (aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)
@@ -1496,6 +1496,35 @@ namespace AquaModelTool
                     sb.AppendLine(num.ToString() + " " + num.ToString("X"));
                 }
                 File.WriteAllText(Path.GetDirectoryName(openFileDialog.FileNames[0]) + "\\" + "figEffectTypes.txt", sb.ToString());
+            }
+        }
+
+        private void spirefierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(aquaUI.aqua.aquaModels.Count == 0)
+            {
+                return;
+            }
+            decimal value = 0;
+
+            if(AquaUICommon.ShowInputDialog(ref value) == DialogResult.OK)
+            {
+                //Spirefier
+                for(int i = 0; i < aquaUI.aqua.aquaModels[0].models.Count; i++)
+                {
+                    var model = aquaUI.aqua.aquaModels[0].models[i];
+                    for (int j = 0; j < model.vtxlList[0].vertPositions.Count; j++)
+                    {
+                        var vec3 = model.vtxlList[0].vertPositions[j];
+                        if (vec3.Y > (float)value)
+                        {
+                            vec3.Y *= 10000;
+                            model.vtxlList[0].vertPositions[j] = vec3;
+                        }
+                    }
+
+                    model.objc.bounds = AquaObjectMethods.GenerateBounding(model.vtxlList);
+                }
             }
         }
     }
