@@ -38,12 +38,12 @@ namespace CMXPatcher
                 pso2_binDir = lines[0];
 
 
+                BackupCMX();
                 if (File.Exists(backupPath + "\\pl_data_info.cmx"))
                 {
                     cmx = CharacterMakingIndexMethods.ReadCMX(backupPath + "\\pl_data_info.cmx");
                     cmxRaw = File.ReadAllBytes(backupPath + "\\pl_data_info.cmx");
                 }
-                BackupCMX();
                 //InjectCMXMods();
             }
             else

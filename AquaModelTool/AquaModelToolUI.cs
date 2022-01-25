@@ -1527,6 +1527,24 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readCMXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var pso2_binDir = goodFolderDialog.FileName;
+
+                aquaUI.aqua.pso2_binDir = pso2_binDir; 
+                var aquaCMX = new CharacterMakingIndex();
+
+                aquaCMX = CharacterMakingIndexMethods.ExtractCMX(pso2_binDir, aquaCMX);
+            }
+        }
     }
 }
 

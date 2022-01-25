@@ -56,6 +56,7 @@
             this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.spirefierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +71,7 @@
             this.dumpFigEffectTypesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.spirefierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readCMXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -300,6 +301,13 @@
             this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Animation to AQM";
             this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click);
             // 
+            // spirefierToolStripMenuItem
+            // 
+            this.spirefierToolStripMenuItem.Name = "spirefierToolStripMenuItem";
+            this.spirefierToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.spirefierToolStripMenuItem.Text = "Spirefier";
+            this.spirefierToolStripMenuItem.Click += new System.EventHandler(this.spirefierToolStripMenuItem_Click);
+            // 
             // debugToolStripMenuItem
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -313,7 +321,8 @@
             this.readBTIToolStripMenuItem,
             this.readMagIndicesToolStripMenuItem,
             this.readCMOToolStripMenuItem,
-            this.dumpFigEffectTypesToolStripMenuItem});
+            this.dumpFigEffectTypesToolStripMenuItem,
+            this.readCMXToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -413,12 +422,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // spirefierToolStripMenuItem
+            // readCMXToolStripMenuItem
             // 
-            this.spirefierToolStripMenuItem.Name = "spirefierToolStripMenuItem";
-            this.spirefierToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.spirefierToolStripMenuItem.Text = "Spirefier";
-            this.spirefierToolStripMenuItem.Click += new System.EventHandler(this.spirefierToolStripMenuItem_Click);
+            this.readCMXToolStripMenuItem.Name = "readCMXToolStripMenuItem";
+            this.readCMXToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readCMXToolStripMenuItem.Text = "ReadCMX";
+            this.readCMXToolStripMenuItem.Click += new System.EventHandler(this.readCMXToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -484,6 +493,7 @@
         private System.Windows.Forms.ToolStripMenuItem legacyAqp2objBatchExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpFigEffectTypesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem spirefierToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readCMXToolStripMenuItem;
     }
 }
 
