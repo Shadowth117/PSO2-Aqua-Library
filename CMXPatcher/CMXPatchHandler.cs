@@ -84,7 +84,7 @@ namespace CMXPatcher
                 GatherCMXModText();
             }
 #if DEBUG
-            //File.WriteAllBytes(settingsPath + "test.cmx", cmxRaw);
+            File.WriteAllBytes(settingsPath + "test.cmx", cmxRaw);
 #endif
             //Write ice - We recreate the file in case for some strange reason it was something other than a v4 ice
             byte[] rawData = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), cmxIce.groupOneFiles, cmxIce.groupTwoFiles).getRawData(false, false);
@@ -279,41 +279,40 @@ namespace CMXPatcher
                 case "basewear ":
                     var baseEntry = cmx.baseWearDict[cmxId];
                     BODYStructHandler.PatchBody(cmx.baseWearDict[cmxId], cmxEntry);
-                    entryRaw = AquaObjectMethods.ConvertStruct(baseEntry.body);
+                    entryRaw = BODYStructHandler.GetBODYAsBytes(baseEntry);
                     Array.Copy(entryRaw, 0, cmxRaw, baseEntry.originalOffset, entryRaw.Length);
                     break;
                 case "outer ":
                 case "outerwear ":
                     var ouEntry = cmx.outerDict[cmxId];
                     BODYStructHandler.PatchBody(cmx.outerDict[cmxId], cmxEntry);
-                    entryRaw = AquaObjectMethods.ConvertStruct(ouEntry.body);
+                    entryRaw = BODYStructHandler.GetBODYAsBytes(ouEntry);
                     Array.Copy(entryRaw, 0, cmxRaw, ouEntry.originalOffset, entryRaw.Length);
                     break;
                 case "carm ":
                 case "castarm ":
                     var carmEntry = cmx.carmDict[cmxId];
                     BODYStructHandler.PatchBody(cmx.carmDict[cmxId], cmxEntry);
-                    entryRaw = AquaObjectMethods.ConvertStruct(carmEntry.body);
+                    entryRaw = BODYStructHandler.GetBODYAsBytes(carmEntry);
                     Array.Copy(entryRaw, 0, cmxRaw, carmEntry.originalOffset, entryRaw.Length);
                     break;
                 case "cleg ":
                 case "castleg ":
                     var clegEntry = cmx.clegDict[cmxId];
                     BODYStructHandler.PatchBody(cmx.clegDict[cmxId], cmxEntry);
-                    entryRaw = AquaObjectMethods.ConvertStruct(clegEntry.body);
+                    entryRaw = BODYStructHandler.GetBODYAsBytes(clegEntry);
                     Array.Copy(entryRaw, 0, cmxRaw, clegEntry.originalOffset, entryRaw.Length);
                     break;
                 case "body ":
                 case "costume ":
                     var bodyEntry = cmx.costumeDict[cmxId];
                     BODYStructHandler.PatchBody(cmx.costumeDict[cmxId], cmxEntry);
-                    entryRaw = AquaObjectMethods.ConvertStruct(bodyEntry.body);
+                    entryRaw = BODYStructHandler.GetBODYAsBytes(bodyEntry);
                     Array.Copy(entryRaw, 0, cmxRaw, bodyEntry.originalOffset, entryRaw.Length);
                     break;
                 default:
                     break;
             }
-            cmxEntry = new List<string>();
             cmxType = null;
             cmxId = -1;
         }

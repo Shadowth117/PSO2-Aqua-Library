@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AquaModelLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -116,6 +117,19 @@ namespace CMXPatcher
                         break;
                 }
             }
+        }
+
+        public static byte[] GetBODYAsBytes(BODYObject body, bool postRetem = true)
+        {
+            List<byte> bodyBytes = new List<byte>();
+            bodyBytes.AddRange(AquaObjectMethods.ConvertStruct(body.body));
+            if(postRetem)
+            {
+                bodyBytes.AddRange(AquaObjectMethods.ConvertStruct(body.bodyRitem));
+            }
+            bodyBytes.AddRange(AquaObjectMethods.ConvertStruct(body.body2));
+
+            return bodyBytes.ToArray();
         }
     }
 }

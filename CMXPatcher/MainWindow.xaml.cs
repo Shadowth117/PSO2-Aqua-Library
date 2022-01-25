@@ -89,6 +89,11 @@ namespace CMXPatcher
         private void ExtractBodyEntry(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict)
         {
             var id = NumberPrompt.ShowDialog(type);
+            ExtractBodyEmptryNoPrompt(type, dict, id);
+        }
+
+        private void ExtractBodyEmptryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict, int id)
+        {
             if (id != -1)
             {
                 if (dict.ContainsKey(id))
@@ -104,11 +109,13 @@ namespace CMXPatcher
                     {
                         MessageBox.Show($"Unable to write {path}. Ensure you have all permissions to said directory.");
                     }
-                } else
+                }
+                else
                 {
                     MessageBox.Show("Please Input a valid id to extract.");
                 }
-            } else
+            }
+            else
             {
                 MessageBox.Show("Please Input a valid id to extract.");
             }
