@@ -4506,7 +4506,7 @@ namespace AquaModelLibrary
                             int address = streamReader.Read<int>();
                             long bookmark = streamReader.Position();
                             streamReader.Seek(offset + address, SeekOrigin.Begin);
-                            fig.stateStructs.Add(ReadFS1Object(offset, streamReader));
+                            fig.stateStructs.Add(ReadStateStruct(offset, streamReader));
 
                             streamReader.Seek(bookmark, SeekOrigin.Begin);
                         }
@@ -4527,7 +4527,7 @@ namespace AquaModelLibrary
             return attach;
         }
 
-        private static AquaFigure.StateObjects ReadFS1Object(int offset, BufferedStreamReader streamReader)
+        private static AquaFigure.StateObjects ReadStateStruct(int offset, BufferedStreamReader streamReader)
         {
             AquaFigure.StateObjects fs1 = new AquaFigure.StateObjects();
             fs1.rawStruct = streamReader.Read<AquaFigure.StateStruct>();

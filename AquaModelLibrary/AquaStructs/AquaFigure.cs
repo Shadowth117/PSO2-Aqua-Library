@@ -117,7 +117,7 @@ namespace AquaModelLibrary
             public int namePtr;
             public int shape; //0 - Sphere: p0=radius; (origin at center)
                               //1 - Cylinder: p0=radius, p1=height; (origin at bottom. Seems to be rotated 90 X, 90 Z going by 3ds Max's standard Z-Up)
-                              //2 - Rectangular Cuboid: p0=width1, p2=width2, p3=width3; (origin at center)
+                              //2 - Box: p0=width1, p2=width2, p3=width3; (origin at center)
                               //3 - Plane: p0=width1, p1=width2; (Backface culled. Origin is its center on one edge)
                               //4 - Cone: p0=radiusUp, p1=radiusDown, p2=height; (origin at bottom. Seems to be rotated 90 X, 90 Z going by 3ds Max's standard Z-Up)
                               //5 - Pyramid: p0=edge, p1=height; (rotated 45 degrees with an edge facing forward and top point at shape origin) 
