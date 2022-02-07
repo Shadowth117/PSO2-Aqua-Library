@@ -1545,6 +1545,79 @@ namespace AquaModelTool
                 aquaCMX = CharacterMakingIndexMethods.ExtractCMX(pso2_binDir, aquaCMX);
             }
         }
+
+        private void readFIGToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 FIG file",
+                Filter = "PSO2 FIG Files (*.fig)|*.fig",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read figs
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.ReadFig(file);
+                }
+            }
+        }
+
+        private void dumpFigShapesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 FIG file",
+                Filter = "PSO2 FIG Files (*.fig)|*.fig",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read figs
+                StringBuilder sb = new StringBuilder();
+                List<int> uniqueShapes = new List<int>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.aquaFigures.Clear();
+                    aquaUI.aqua.ReadFig(file);
+
+                    sb.AppendLine(Path.GetFileName(file));
+                    var fig = aquaUI.aqua.aquaFigures[0];
+                    if (fig.stateStructs != null)
+                    {
+                        foreach (var state in fig.stateStructs)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine(state.text);
+                            if (state.collision != null)
+                            {
+                                if (state.collision.colliders != null)
+                                {
+                                    foreach (var col in state.collision.colliders)
+                                    {
+                                        int shape = col.colStruct.shape;
+                                        sb.AppendLine(shape + " " + col.name + " " + col.text1);
+                                        if (!uniqueShapes.Contains(shape))
+                                        {
+                                            uniqueShapes.Add(shape);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                uniqueShapes.Sort();
+                sb.AppendLine();
+                sb.AppendLine("Unique Shapes");
+                foreach (int shape in uniqueShapes)
+                {
+                    sb.AppendLine(shape + "");
+                }
+                File.WriteAllText(Path.GetDirectoryName(openFileDialog.FileNames[0]) + "\\" + "figShapes.txt", sb.ToString());
+            }
+        }
     }
 }
 

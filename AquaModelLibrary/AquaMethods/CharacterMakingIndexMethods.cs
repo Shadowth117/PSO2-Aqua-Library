@@ -1044,7 +1044,7 @@ namespace AquaModelLibrary
             string mgxRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(magSetting)));
             if (File.Exists(mgxRebootPath))
             {
-                var strm = new MemoryStream(File.ReadAllBytes(mgxPath));
+                var strm = new MemoryStream(File.ReadAllBytes(mgxRebootPath));
                 var fVarIce = IceFile.LoadIceFile(strm);
                 strm.Dispose();
 

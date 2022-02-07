@@ -69,9 +69,11 @@
             this.readMagIndicesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readCMOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dumpFigEffectTypesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readCMXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readCMXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readFIGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpFigShapesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -322,7 +324,9 @@
             this.readMagIndicesToolStripMenuItem,
             this.readCMOToolStripMenuItem,
             this.dumpFigEffectTypesToolStripMenuItem,
-            this.readCMXToolStripMenuItem});
+            this.readCMXToolStripMenuItem,
+            this.readFIGToolStripMenuItem,
+            this.dumpFigShapesToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -404,6 +408,13 @@
             this.dumpFigEffectTypesToolStripMenuItem.Text = "DumpFigEffectTypes";
             this.dumpFigEffectTypesToolStripMenuItem.Click += new System.EventHandler(this.dumpFigEffectTypesToolStripMenuItem_Click);
             // 
+            // readCMXToolStripMenuItem
+            // 
+            this.readCMXToolStripMenuItem.Name = "readCMXToolStripMenuItem";
+            this.readCMXToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readCMXToolStripMenuItem.Text = "ReadCMX";
+            this.readCMXToolStripMenuItem.Click += new System.EventHandler(this.readCMXToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -422,12 +433,19 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readCMXToolStripMenuItem
+            // readFIGToolStripMenuItem
             // 
-            this.readCMXToolStripMenuItem.Name = "readCMXToolStripMenuItem";
-            this.readCMXToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.readCMXToolStripMenuItem.Text = "ReadCMX";
-            this.readCMXToolStripMenuItem.Click += new System.EventHandler(this.readCMXToolStripMenuItem_Click);
+            this.readFIGToolStripMenuItem.Name = "readFIGToolStripMenuItem";
+            this.readFIGToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readFIGToolStripMenuItem.Text = "ReadFIG";
+            this.readFIGToolStripMenuItem.Click += new System.EventHandler(this.readFIGToolStripMenuItem_Click);
+            // 
+            // dumpFigShapesToolStripMenuItem
+            // 
+            this.dumpFigShapesToolStripMenuItem.Name = "dumpFigShapesToolStripMenuItem";
+            this.dumpFigShapesToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.dumpFigShapesToolStripMenuItem.Text = "DumpFigShapes";
+            this.dumpFigShapesToolStripMenuItem.Click += new System.EventHandler(this.dumpFigShapesToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -494,6 +512,8 @@
         private System.Windows.Forms.ToolStripMenuItem dumpFigEffectTypesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem spirefierToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readCMXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readFIGToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dumpFigShapesToolStripMenuItem;
     }
 }
 

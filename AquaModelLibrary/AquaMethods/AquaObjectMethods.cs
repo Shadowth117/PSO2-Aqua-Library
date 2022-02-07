@@ -2398,7 +2398,7 @@ namespace AquaModelLibrary
 
         public static string ReadCString(BufferedStreamReader streamReader)
         {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x40)); //Shouldn't ever be more than 0x40... in theory
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x60)); //Shouldn't ever be more than 0x40... in theory
             return str.Remove(str.IndexOf(char.MinValue));
         }
 

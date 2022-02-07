@@ -14,7 +14,8 @@ namespace AquaModelLibrary
         public List<int> attachTransformPtrList = new List<int>();
         public List<int> unkPtr1List = new List<int>();
         public List<AttachTransformObject> attachTransforms = new List<AttachTransformObject>();
-        public List<FigStruct1Object> figStruct1s = new List<FigStruct1Object>();
+        public List<AttachTransformObject> attachTransformsExtra = new List<AttachTransformObject>();
+        public List<StateObjects> stateStructs = new List<StateObjects>();
         public struct FigHeader
         {
             public int magic; //Should be fig/0 as plaintext
@@ -22,10 +23,10 @@ namespace AquaModelLibrary
             public int version;
             public int int_08;
 
-            public int attachTransofrmPtr;
-            public int unkPtr1;
+            public int attachTransformPtr;
+            public int statePtr;
             public int attachTransformCount;
-            public int unkPtr1Count;
+            public int stateCount;
         }
 
         public class AttachTransformObject
@@ -47,22 +48,22 @@ namespace AquaModelLibrary
             public int unkInt;
         }
 
-        public class FigStruct1Object
+        public class StateObjects
         {
-            public FigStruct1 rawStruct;
+            public StateStruct rawStruct;
             public string text;
-            FS1UnkStruct0Object struct0 = null;
-            FS1UnkStruct1Object struct1 = null;
-            StateMappingObject struct2 = null;
+            public FS1UnkStruct0Object struct0 = null;
+            public CollisionContainerObject collision = null;
+            public StateMappingObject stateMap = null;
         }
 
         //Pointers of value 0x10 are null
-        public struct FigStruct1
+        public struct StateStruct
         {
             public int textPtr;
             public int FS1UnkStruct0Ptr;
-            public int FS1UnkStruct1Ptr;
-            public int StateMappingPtr;
+            public int collisionPtr;
+            public int stateMappingPtr;
 
             public int int_10;
         }
@@ -89,35 +90,38 @@ namespace AquaModelLibrary
             public ushort ushort_1C;
         }
 
-        public class FS1UnkStruct1Object
+        public class CollisionContainerObject
         {
-            public FS1UnkStruct1 unkStruct1;
-            public string text0;
-            public List<FS1_US1_SubstructObject> subStructs = new List<FS1_US1_SubstructObject>();
-            public string text1;
-            public string text2;
+            public CollisionContainer colContainerStruct;
+            public string collisionName;
+            public List<int> colliderPtrs = new List<int>();
+            public List<ColliderObject> colliders = new List<ColliderObject>();
         }
 
-        public struct FS1UnkStruct1
+        public struct CollisionContainer
         {
             public int textPtr0;
             public int subStructPtr;
             public int subStructCount;
-            public int textPtr1;
-            public int textPtr2;
         }
 
-        public class FS1_US1_SubstructObject
+        public class ColliderObject
         {
-            public FS1_US1_Substruct unkStruct;
+            public Collider colStruct;
             public string name;
             public string text1;
         }
 
-        public struct FS1_US1_Substruct
+        public struct Collider
         {
             public int namePtr;
-            public int shape; //0 - Sphere?, 1 - Cylinder?
+            public int shape; //0 - Sphere: p0=radius; (origin at center)
+                              //1 - Cylinder: p0=radius, p1=height; (origin at bottom. Seems to be rotated 90 X, 90 Z going by 3ds Max's standard Z-Up)
+                              //2 - Rectangular Cuboid: p0=width1, p2=width2, p3=width3; (origin at center)
+                              //3 - Plane: p0=width1, p1=width2; (Backface culled. Origin is its center on one edge)
+                              //4 - Cone: p0=radiusUp, p1=radiusDown, p2=height; (origin at bottom. Seems to be rotated 90 X, 90 Z going by 3ds Max's standard Z-Up)
+                              //5 - Pyramid: p0=edge, p1=height; (rotated 45 degrees with an edge facing forward and top point at shape origin) 
+                              //6+ has no shape and cannot be damaged.
             public float shapeParam0;
             public float shapeParam1;
             
@@ -182,6 +186,9 @@ namespace AquaModelLibrary
             public List<float> fltList = new List<float>();
             public List<string> strList = new List<string>();
             public List<int> colorList = new List<int>();
+
+            //Extra
+            public bool knownType;
         }
 
         public class AnimMapObject
@@ -211,11 +218,12 @@ namespace AquaModelLibrary
             public int frameInfoPtrCount;
         }
 
+        //Seemingly, the ones with default frames are set specially somehow. -1, -1 may play on transition.
         public struct AnimFrameInfo
         {
-            public float flt_0;
-            public float flt_1;
-            public int frame;
+            public float startFrame; //-1 if default
+            public float endFrame;   //9999 if default
+            public int effectId;
         }
     }
 }
