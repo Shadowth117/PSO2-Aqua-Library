@@ -1539,7 +1539,7 @@ namespace AquaModelTool
             {
                 var pso2_binDir = goodFolderDialog.FileName;
 
-                aquaUI.aqua.pso2_binDir = pso2_binDir; 
+                aquaUI.aqua.pso2_binDir = pso2_binDir;
                 var aquaCMX = new CharacterMakingIndex();
 
                 aquaCMX = CharacterMakingIndexMethods.ExtractCMX(pso2_binDir, aquaCMX);
@@ -1652,6 +1652,20 @@ namespace AquaModelTool
                 {
                     AquaMiscMethods.ReadLAC(file);
                 }
+            }
+        }
+
+        private void readCMXFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select CMX",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var aquaCMX = new CharacterMakingIndex();
+
+                aquaCMX = CharacterMakingIndexMethods.ReadCMX(goodFolderDialog.FileName, aquaCMX);
             }
         }
     }

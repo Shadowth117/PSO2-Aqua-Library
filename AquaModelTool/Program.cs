@@ -13,7 +13,7 @@ namespace AquaModelTool
         /// </summary>
         [STAThread]
         static void Main(string[] args)
-        {
+      {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AquaModelTool aquaModelTool = new AquaModelTool();

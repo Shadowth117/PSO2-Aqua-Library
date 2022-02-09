@@ -2212,8 +2212,15 @@ namespace AquaModelLibrary
             ACCEObject acce = new ACCEObject();
 
             acce.acce.id = (int)acceRaw[0][0xFF];
-            acce.acce2.unkShort_C7 = GetObject<short>(acceRaw[0], 0xC7);
-            acce.acce2.unkShort_D7 = GetObject<short>(acceRaw[0], 0xD7);
+
+            ACCE_12Object acc12A = new ACCE_12Object();
+            ACCE_12Object acc12B = new ACCE_12Object();
+            ACCE_12Object acc12C = new ACCE_12Object();
+            acc12A.unkShort1 = GetObject<short>(acceRaw[0], 0xC7);
+            acc12B.unkShort1 = GetObject<short>(acceRaw[0], 0xD7);
+            acce.acce12List.Add(acc12A);
+            acce.acce12List.Add(acc12B);
+            acce.acce12List.Add(acc12C);
 
             acce.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF0)).GetString();
             acce.nodeAttach1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF1)).GetString();

@@ -26,7 +26,9 @@ namespace AquaModelLibrary
             VertTangent = 0x20,
             VertBinormal = 0x21,
             Vert0x22 = 0x22,
-            Vert0x23 = 0x23
+            Vert0x23 = 0x23,
+            Vert0x24 = 0x24,
+            Vert0x25 = 0x25,
         }
 
         public static Dictionary<int, int> NGSVertDataTypes = new Dictionary<int, int>()

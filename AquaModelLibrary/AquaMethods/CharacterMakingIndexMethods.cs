@@ -30,6 +30,7 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
+                File.WriteAllBytes("C:/a.cmx", file);
                 return BeginReadCMX(streamReader, cmx);
             }
         }
@@ -246,6 +247,10 @@ namespace AquaModelLibrary
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.baseWearIdLinkAddress, cmx.cmxTable.baseWearIdLinkCount, cmx.baseWearIdLink, cmx.rel0.REL0DataStart);
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.innerWearIdLink, cmx.rel0.REL0DataStart);
             }
+            if(cmx.cmxTable.feb8_22UnkAddress != 0)
+            {
+                ReadUnk40Cap(streamReader, offset, cmx);
+            }
 
             return cmx;
         }
@@ -258,42 +263,46 @@ namespace AquaModelLibrary
             cmxTable.carmAddress = streamReader.Read<int>(); //CARM Cast Arms
             cmxTable.clegAddress = streamReader.Read<int>(); //CLEG Cast Legs
             cmxTable.bodyOuterAddress = streamReader.Read<int>(); //BODY Outer Wear
-
+            //0x10
             cmxTable.baseWearAddress = streamReader.Read<int>(); //BCLN Base Wear
             cmxTable.innerWearAddress = streamReader.Read<int>(); //BBLY Inner Wear
             cmxTable.bodyPaintAddress = streamReader.Read<int>(); //BDP1 Body Paint 
             cmxTable.stickerAddress = streamReader.Read<int>(); //BDP2 Stickers
-
+            //0x20
             cmxTable.faceAddress = streamReader.Read<int>(); //FACE All heads
             cmxTable.faceMotionAddress = streamReader.Read<int>(); //Face motions
             cmxTable.faceTextureAddress = streamReader.Read<int>(); //NGS Faces?
             cmxTable.faceTexturesAddress = streamReader.Read<int>(); //Face textures and face paint
-
+            //0x30
             cmxTable.accessoryAddress = streamReader.Read<int>(); //ACCE Accessories
             cmxTable.eyeTextureAddress = streamReader.Read<int>(); //EYE eye textures
             cmxTable.earAddress = streamReader.Read<int>(); //reboot ears
             cmxTable.teethAddress = streamReader.Read<int>(); //reboot mouths
-
+            //0x40
             cmxTable.hornAddress = streamReader.Read<int>(); //reboot horns
             cmxTable.skinAddress = streamReader.Read<int>(); //reboot and maybe classic skin?
             cmxTable.eyebrowAddress = streamReader.Read<int>(); //EYEB eyebrows
             cmxTable.eyelashAddress = streamReader.Read<int>(); //EYEL eyelashes
-
+            //0x50
             cmxTable.hairAddress = streamReader.Read<int>(); //HAIR 
             cmxTable.colAddress = streamReader.Read<int>(); //COL, for color chart textures
             cmxTable.unkAddress = streamReader.Read<int>(); //Unknown arrays
             cmxTable.costumeIdLinkAddress = streamReader.Read<int>(); //BCLN Costume ids for recolors
-
+            //0x60
             cmxTable.castArmIdLinkAddress = streamReader.Read<int>(); //BCLN Cast arm ids for recolors
             cmxTable.castLegIdLinkAddress = streamReader.Read<int>(); //BCLN Cast leg ids for recolors
             cmxTable.outerIdLinkAddress = streamReader.Read<int>(); //BCLN Outer ids for recolors
             cmxTable.baseWearIdLinkAddress = streamReader.Read<int>(); //BCLN basewear ids for recolors
-
+            //0x70
             cmxTable.innerWearIdLinkAddress = streamReader.Read<int>(); //BCLN innerwear ids for recolors
 
             if(headerOffset >= oct21TableAddressInt)
             {
                 cmxTable.oct21UnkAddress = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
+            }
+            if(headerOffset >= feb8_22TableAddressInt)
+            {
+                cmxTable.feb8_22UnkAddress = streamReader.Read<int>(); //Only in feb 8, 2022 builds and forwared
             }
 
             cmxTable.bodyCount = streamReader.Read<int>();
@@ -336,8 +345,34 @@ namespace AquaModelLibrary
             {
                 cmxTable.oct21UnkCount = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
             }
+            if (headerOffset >= feb8_22TableAddressInt)
+            {
+                cmxTable.feb8_22UnkCount = streamReader.Read<int>(); //Only in feb 8, 2022 builds and forwared
+            }
 
             return cmxTable;
+        }
+
+        private static void ReadUnk40Cap(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
+        {
+            streamReader.Seek(cmx.cmxTable.feb8_22UnkAddress + offset, SeekOrigin.Begin);
+            for(int i = 0; i < cmx.cmxTable.feb8_22UnkCount; i++)
+            {
+                var unkObj = new unkCap40Object();
+                unkObj.num = i;
+                unkObj.rawStruct = streamReader.Read<unkCap40Struct>();
+                unkObj.originalOffset = streamReader.Position();
+                long bookmark = streamReader.Position();
+
+                streamReader.Seek(unkObj.rawStruct.strPtr0 + offset, SeekOrigin.Begin);
+                unkObj.unkString0 = AquaObjectMethods.ReadCString(streamReader);
+
+                streamReader.Seek(unkObj.rawStruct.strPtr1 + offset, SeekOrigin.Begin);
+                unkObj.unkString1 = AquaObjectMethods.ReadCString(streamReader);
+
+                cmx.unk40CapList.Add(unkObj);
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         private static void ReadNGSHorn(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
@@ -485,6 +520,11 @@ namespace AquaModelLibrary
                 }
 
                 body.body2 = streamReader.Read<BODY2>();
+                if(rel0DataStart >= feb8_22TableAddressInt)
+                {
+                    body.body40cap = streamReader.Read<BODY40Cap>();
+                }
+
                 long temp = streamReader.Position();
 
                 streamReader.Seek(body.body.dataStringPtr + offset, SeekOrigin.Begin);
@@ -735,12 +775,19 @@ namespace AquaModelLibrary
                 acce.num = i;
                 acce.originalOffset = streamReader.Position();
                 acce.acce = streamReader.Read<ACCE>();
+                acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();
+                acce.acceB = streamReader.Read<ACCE_B>();
                 //This int was added to the middle of these in the Aug_3_2021 patch
-                if(count >= 5977)
+                if (count >= 5977)
                 {
                     acce.int_54 = streamReader.Read<int>();
                 }
                 acce.acce2 = streamReader.Read<ACCE2>();
+                for(int j = 0; j < 3; j++)
+                {
+                    acce.acce12List.Add(ReadAcce12Object(streamReader, count));
+                }
+
                 long temp = streamReader.Position();
 
                 streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
@@ -780,6 +827,32 @@ namespace AquaModelLibrary
                     Console.WriteLine($"Duplicate acce id: {acce.acce.id}");
                 }
             }
+        }
+
+        private static ACCE_12Object ReadAcce12Object(BufferedStreamReader streamReader, int count)
+        {
+            ACCE_12Object acce12Obj = new ACCE_12Object();
+            acce12Obj.unkFloat0 = streamReader.Read<float>();
+            acce12Obj.unkFloat1 = streamReader.Read<float>();
+            acce12Obj.unkInt0 = streamReader.Read<int>();
+            acce12Obj.unkInt1 = streamReader.Read<int>();
+
+            if(count >= 6249)
+            {
+                acce12Obj.unkIntFeb822_0 = streamReader.Read<int>();
+            }
+            
+            acce12Obj.unkShort0 = streamReader.Read<short>();
+            acce12Obj.unkShort1 = streamReader.Read<short>();
+            acce12Obj.unkShort2 = streamReader.Read<short>();
+            acce12Obj.unkShort3 = streamReader.Read<short>();
+
+            if (count >= 6249)
+            {
+                acce12Obj.unkIntFeb822_1 = streamReader.Read<int>();
+            }
+
+            return acce12Obj;
         }
 
         private static void ReadEYE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, EYEObject> dict)

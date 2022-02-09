@@ -649,7 +649,14 @@ namespace AquaModelLibrary
                 {
                     vert0x23 = new List<short[]>(new short[vertCount][]);
                 }
-
+                if (modelVtxl.vert0x24.Count > 0)
+                {
+                    vert0x24 = new List<short[]>(new short[vertCount][]);
+                }
+                if (modelVtxl.vert0x25.Count > 0)
+                {
+                    vert0x25 = new List<short[]>(new short[vertCount][]);
+                }
                 //These can... potentially be mutually exclusive, but the use cases for that are kind of limited and I don't and am not interested in handling them.
                 if (modelVtxl.rawVertWeights.Count > 0)
                 {
@@ -693,6 +700,8 @@ namespace AquaModelLibrary
             public List<Vector2> uv4List = new List<Vector2>();
             public List<short[]> vert0x22 = new List<short[]>(); //This and the following type are 2 shorts seemingly that do... something. Only observed in 0xC33 player models at this time. 
             public List<short[]> vert0x23 = new List<short[]>(); //Possibly UV channels 5 and 6? Typically values are the same for every vertex in a mesh though.
+            public List<short[]> vert0x24 = new List<short[]>();
+            public List<short[]> vert0x25 = new List<short[]>();
 
             //Binormals and tangents for each face are calculated and each face's values for a particular vertex are summed and averaged for the result before being normalized
             //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
@@ -1203,7 +1212,14 @@ namespace AquaModelLibrary
                 {
                     vert0x23.AddRange(new short[vertCount][]);
                 }
-
+                if (modelVtxl.vert0x24.Count > 0)
+                {
+                    vert0x24.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.vert0x25.Count > 0)
+                {
+                    vert0x25.AddRange(new short[vertCount][]);
+                }
                 //These can... potentially be mutually exclusive, but the use cases for that are kind of limited and I don't and am not interested in handling them.
                 if (modelVtxl.rawVertWeights.Count > 0)
                 {
@@ -1255,6 +1271,8 @@ namespace AquaModelLibrary
                 newVTXL.uv4List = new List<Vector2>(uv4List);
                 newVTXL.vert0x22 = vert0x22.ConvertAll(uv => (short[])uv.Clone()).ToList();
                 newVTXL.vert0x23 = vert0x23.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.vert0x24 = vert0x24.ConvertAll(uv => (short[])uv.Clone()).ToList();
+                newVTXL.vert0x25 = vert0x25.ConvertAll(uv => (short[])uv.Clone()).ToList();
                 newVTXL.vertTangentListNGS = vertTangentListNGS.ConvertAll(nrm => (short[])nrm.Clone()).ToList();
                 newVTXL.vertBinormalListNGS = vertBinormalListNGS.ConvertAll(nrm => (short[])nrm.Clone()).ToList();
                 newVTXL.vertWeights = new List<Vector4>(vertWeights);

@@ -12,6 +12,7 @@ namespace AquaModelLibrary
     {
         public static int oct21TableAddressInt = 0x2318B4; //Used for checking the version of the cmx in order to maintain legacy support
         public static int dec14_21TableAddressInt = 0x26B66C; //Ritem Update cmx. Some structs were reordered for this update.
+        public static int feb8_22TableAddressInt = 0x2DAFD0; //Lv 40 update cmx
 
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -133,6 +134,7 @@ namespace AquaModelLibrary
 
         public Dictionary<int, BCLNObject> innerWearIdLink = new Dictionary<int, BCLNObject>();
         public Dictionary<int, BCLNObject> castHeadLink = new Dictionary<int, BCLNObject>();
+        public List<unkCap40Object> unk40CapList = new List<unkCap40Object>();
 
         public CMXTable cmxTable;
 
@@ -147,6 +149,7 @@ namespace AquaModelLibrary
             public BODY body;
             public BODYRitem bodyRitem;
             public BODY2 body2;
+            public BODY40Cap body40cap;
             public string dataString;
             public string texString1;
             public string texString2;
@@ -202,6 +205,12 @@ namespace AquaModelLibrary
 
             public float float_60;
             public int int_64;
+        }
+
+        public struct BODY40Cap //Added 2/9 update
+        {
+            public float float_78;
+            public float float_7C;
         }
 
         public class BBLYObject : BaseCMXObject
@@ -401,8 +410,11 @@ namespace AquaModelLibrary
         public class ACCEObject : BaseCMXObject
         {
             public ACCE acce;
+            public ACCE_B acceB;
+            public ACCE_Feb8_22 acceFeb8_22;
             public int int_54;
             public ACCE2 acce2;
+            public List<ACCE_12Object> acce12List = new List<ACCE_12Object>(); 
             public string dataString;
             public string nodeAttach1;
             public string nodeAttach2;
@@ -414,6 +426,18 @@ namespace AquaModelLibrary
 
             public string nodeAttach7;
             public string nodeAttach8;
+
+            //Feb 8 2022 strings
+            public string acceString1;
+            public string acceString2;
+
+            public string acceString3;
+            public string acceString4;
+            public string acceString5;
+            public string acceString6;
+
+            public string acceString7;
+            public string acceString8;
         }
 
         public struct ACCE
@@ -430,6 +454,23 @@ namespace AquaModelLibrary
 
             public int nodeAttach7Ptr;
             public int nodeAttach8Ptr;
+        }
+
+        public struct ACCE_Feb8_22
+        {
+            public int acceString9Ptr;
+            public int acceString10Ptr;
+
+            public int acceString11Ptr;
+            public int acceString12Ptr;
+            public int acceString13Ptr;
+            public int acceString14Ptr;
+
+            public int acceString15Ptr;
+        }
+
+        public struct ACCE_B
+        {
             public int unkInt0;           //Often 0x1
             public int unkInt1;           //Often 0x64
 
@@ -440,6 +481,7 @@ namespace AquaModelLibrary
 
             public int unkInt6;
         }
+
 
         public struct ACCE2
         {
@@ -455,36 +497,23 @@ namespace AquaModelLibrary
             public int unkInt8;
             public int unkInt9;
             public int unkInt10;
-            public float unkFloat6;
+        }
 
-            public int unkInt11;
-            public int unkInt12;
-            public int unkInt13;
+        public class ACCE_12Object
+        {
+            public float unkFloat0;
+            public float unkFloat1;
+            public int unkInt0;
+            public int unkInt1;
+
+            public int unkIntFeb822_0;
+
             public short unkShort0;
-            public short unkShort_D7; //0xD7, 0x6
-
+            public short unkShort1; //0xD7, 0x6 on 1st, 0xC7, 0x6
             public short unkShort2;
             public short unkShort3;
-            public short unkShort4;
-            public short unkshort5;
-            public int unktIn14;
-            public int unkInt15;
 
-            public int unkInt16;
-            public short unkShort6;
-            public short unkShort_C7; //0xC7, 0x6
-            public short unkShort8;
-            public short unkShort9;
-            public float unkFloat7;
-
-            public float unkFloat8;
-            public int unkInt18;
-            public int unkInt19;
-            public short unkShort10;
-            public short unkShort11;
-
-            public short unkShort12;
-            public short unkShort13;
+            public int unkIntFeb822_1;
         }
 
         public class EYEObject : BaseCMXObject
@@ -751,7 +780,7 @@ namespace AquaModelLibrary
             public fixed byte colorData[0xA8];
         }
 
-        //This maybe color related. But I have no idea what it's supposed to do.
+        //This may be color related. But I have no idea what it's supposed to do.
         public unsafe struct Unk_IntField
         {
             public fixed int unkIntField[79];
@@ -777,6 +806,30 @@ namespace AquaModelLibrary
             public int int_04;
             public int int_08;
             public int int_0C;
+        }
+
+        public struct unkCap40Struct
+        {
+            public int strPtr0;
+            public int strPtr1;
+            public int int_08;
+            public int int_0C;
+
+            public int int_10;
+            public int int_14;
+            public int int_18;
+            public int int_1C;
+
+            public int int_20;
+        }
+
+        public class unkCap40Object
+        {
+            public unkCap40Struct rawStruct;
+            public string unkString0;
+            public string unkString1;
+            public long originalOffset;
+            public int num;
         }
 
         public class CMXTable
@@ -818,6 +871,7 @@ namespace AquaModelLibrary
 
             public int innerWearIdLinkAddress; //BCLN innerwear ids for recolors
             public int oct21UnkAddress; //Only in October 12, 2021 builds and forward
+            public int feb8_22UnkAddress; //Only in feb 8, 2022 builds and forwared
 
             public int bodyCount; 
             public int carmCount; 
@@ -856,6 +910,7 @@ namespace AquaModelLibrary
 
             public int innerWearIdLinkCount;
             public int oct21UnkCount; //Only in October 12, 2021 builds and forward
+            public int feb8_22UnkCount; //Only in feb 8, 2022 builds and forwared
         }
     }
 }

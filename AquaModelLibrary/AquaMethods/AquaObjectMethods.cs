@@ -134,6 +134,14 @@ namespace AquaModelLibrary
                     {
                         vtxl.vert0x23[i] = new short[2];
                     }
+                    if (vtxl.vert0x24.Count > 0 && vtxl.vert0x24[i] == null)
+                    {
+                        vtxl.vert0x24[i] = new short[2];
+                    }
+                    if (vtxl.vert0x25.Count > 0 && vtxl.vert0x25[i] == null)
+                    {
+                        vtxl.vert0x25[i] = new short[2];
+                    }
                     if (vtxl.rawVertWeights.Count > 0 && vtxl.rawVertWeights[i] == null)
                     {
                         vtxl.rawVertWeights[i] = new List<float>();
@@ -261,6 +269,14 @@ namespace AquaModelLibrary
             if (sourceVTXL.vert0x23.Count > sourceIndex)
             {
                 destinationVTXL.vert0x23[destinationIndex] = (short[])sourceVTXL.vert0x23[sourceIndex].Clone();
+            }
+            if (sourceVTXL.vert0x24.Count > sourceIndex)
+            {
+                destinationVTXL.vert0x24[destinationIndex] = (short[])sourceVTXL.vert0x24[sourceIndex].Clone();
+            }
+            if (sourceVTXL.vert0x25.Count > sourceIndex)
+            {
+                destinationVTXL.vert0x25[destinationIndex] = (short[])sourceVTXL.vert0x25[sourceIndex].Clone();
             }
             if (sourceVTXL.vertTangentListNGS.Count > sourceIndex)
             {
@@ -470,6 +486,14 @@ namespace AquaModelLibrary
             {
                 return false;
             }
+            if (vtxl.vert0x24.Count > 0 && !IsEqualShortArray(vtxl.vert0x24[vertIndex], vtxl2.vert0x24[faceVertIndex]))
+            {
+                return false;
+            }
+            if (vtxl.vert0x25.Count > 0 && !IsEqualShortArray(vtxl.vert0x25[vertIndex], vtxl2.vert0x25[faceVertIndex]))
+            {
+                return false;
+            }
 
             return true;
         }
@@ -551,6 +575,16 @@ namespace AquaModelLibrary
             if (vtxl.vert0x23.Count > 0)
             {
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x23, 0xC, curLength));
+                curLength += 0x4;
+            }
+            if (vtxl.vert0x24.Count > 0)
+            {
+                vtxe.vertDataTypes.Add(vtxeElementGenerator(0x24, 0xC, curLength));
+                curLength += 0x4;
+            }
+            if (vtxl.vert0x25.Count > 0)
+            {
+                vtxe.vertDataTypes.Add(vtxeElementGenerator(0x25, 0xC, curLength));
                 curLength += 0x4;
             }
 
@@ -699,6 +733,12 @@ namespace AquaModelLibrary
                             break;
                         case (int)NGSAquaObject.NGSVertFlags.Vert0x23:
                             vtxl.vert0x23.Add(Read2Shorts(streamReader));
+                            break;
+                        case (int)NGSAquaObject.NGSVertFlags.Vert0x24:
+                            vtxl.vert0x24.Add(Read2Shorts(streamReader));
+                            break;
+                        case (int)NGSAquaObject.NGSVertFlags.Vert0x25:
+                            vtxl.vert0x25.Add(Read2Shorts(streamReader));
                             break;
                         default:
                             MessageBox.Show($"Unknown Vert type {vtxeSet.vertDataTypes[vtxeIndex].dataType.ToString("X")}! Please report!");
@@ -1855,6 +1895,18 @@ namespace AquaModelLibrary
                             for (int id = 0; id < 2; id++)
                             {
                                 outBytes2.AddRange(BitConverter.GetBytes(vtxl.vert0x23[i][id]));
+                            }
+                            break;
+                        case (int)NGSAquaObject.NGSVertFlags.Vert0x24:
+                            for (int id = 0; id < 2; id++)
+                            {
+                                outBytes2.AddRange(BitConverter.GetBytes(vtxl.vert0x24[i][id]));
+                            }
+                            break;
+                        case (int)NGSAquaObject.NGSVertFlags.Vert0x25:
+                            for (int id = 0; id < 2; id++)
+                            {
+                                outBytes2.AddRange(BitConverter.GetBytes(vtxl.vert0x25[i][id]));
                             }
                             break;
                         default:

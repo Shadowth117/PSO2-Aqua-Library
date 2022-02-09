@@ -76,6 +76,7 @@
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.readLacToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.readCMXFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -327,6 +328,7 @@
             this.readCMOToolStripMenuItem,
             this.dumpFigEffectTypesToolStripMenuItem,
             this.readCMXToolStripMenuItem,
+            this.readCMXFileToolStripMenuItem,
             this.readFIGToolStripMenuItem,
             this.dumpFigShapesToolStripMenuItem,
             this.readLacToolStripMenuItem,
@@ -465,6 +467,13 @@
             this.readLacToolStripMenuItem1.Text = "ReadLac";
             this.readLacToolStripMenuItem1.Click += new System.EventHandler(this.readLacToolStripMenuItem1_Click);
             // 
+            // readCMXFileToolStripMenuItem
+            // 
+            this.readCMXFileToolStripMenuItem.Name = "readCMXFileToolStripMenuItem";
+            this.readCMXFileToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.readCMXFileToolStripMenuItem.Text = "ReadCMXFile";
+            this.readCMXFileToolStripMenuItem.Click += new System.EventHandler(this.readCMXFileToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -534,6 +543,7 @@
         private System.Windows.Forms.ToolStripMenuItem dumpFigShapesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readLacToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readLacToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem readCMXFileToolStripMenuItem;
     }
 }
 

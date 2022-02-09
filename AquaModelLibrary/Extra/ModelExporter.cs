@@ -169,6 +169,20 @@ namespace AquaModelLibrary
                         var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
                     }
+
+                    if (vtxl.vert0x24.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.vert0x24[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
+                        aiMesh.TextureCoordinateChannels[6].Add(aiTextureCoordinate);
+                    }
+
+                    if (vtxl.vert0x25.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.vert0x25[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(shortToFloat(textureCoordinate[0]), shortToFloat(textureCoordinate[1]), 0f);
+                        aiMesh.TextureCoordinateChannels[7].Add(aiTextureCoordinate);
+                    }
                 }
 
                 //Assimp Bones - Assimp likes to store vertex weights in bones and bones references in meshes
