@@ -30,7 +30,6 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                File.WriteAllBytes("C:/a.cmx", file);
                 return BeginReadCMX(streamReader, cmx);
             }
         }
