@@ -975,6 +975,7 @@ namespace AquaModelLibrary
             PSO2Text commonTextReboot = null;
             PSO2Text actorNameTextReboot = null;
             LobbyActionCommon lac = null;
+            List<LobbyActionCommon> rebootLac = new List<LobbyActionCommon>();
             List<int> magIds = null;
             List<int> magIdsReboot = null;
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
@@ -987,15 +988,16 @@ namespace AquaModelLibrary
 
             //Load lac
             string lacPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicLobbyAction));
-            string lacPathRe = Path.Combine(pso2_binDir, dataReboot, GetFileHash(rebootLobbyAction));
+            string lacPathRe = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootLobbyAction));
             string lacTruePath = null;
+            string lacTruePathReboot = null;
             if (File.Exists(lacPath))
             {
                 lacTruePath = lacPath;
             }
-            else if (File.Exists(lacPath))
+            if (File.Exists(lacPathRe))
             {
-                //lacTruePath = lacPathRe;
+                lacTruePathReboot = lacPathRe;
             }
             if (lacTruePath != null)
             {
@@ -1003,7 +1005,7 @@ namespace AquaModelLibrary
                 var fVarIce = IceFile.LoadIceFile(strm);
                 strm.Dispose();
 
-                List<byte[]> files = (new List<byte[]>(fVarIce.groupOneFiles));
+                List<byte[]> files = new List<byte[]>(fVarIce.groupOneFiles);
                 files.AddRange(fVarIce.groupTwoFiles);
 
                 //Loop through files to get what we need
@@ -1012,6 +1014,27 @@ namespace AquaModelLibrary
                     if (IceFile.getFileName(file).ToLower().Contains(lacName))
                     {
                         lac = ReadLAC(file);
+                    }
+                }
+
+                fVarIce = null;
+            }
+            if(lacTruePathReboot != null)
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(lacTruePathReboot));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = new List<byte[]>(fVarIce.groupOneFiles);
+                files.AddRange(fVarIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    var name = IceFile.getFileName(file).ToLower();
+                    if (name.Contains(".lac") && !name.Contains("_classic")) //In theory, classic ices are covered already
+                    {
+                        rebootLac.Add(ReadRebootLAC(file));
                     }
                 }
 
@@ -3576,13 +3599,13 @@ namespace AquaModelLibrary
                         }
                     }
 
-                    if (lac.dataBlocks[i].iceName.Contains("_m.ice"))
+                    if (lac.dataBlocks[i].iceName.Contains("_m.ice") || lac.dataBlocks[i].iceName.Contains("_m_"))
                     {
-                        output += (", Male");
+                        output += ", Male";
                     }
-                    else if (lac.dataBlocks[i].iceName.Contains("_f.ice"))
+                    else if (lac.dataBlocks[i].iceName.Contains("_f.ice") || lac.dataBlocks[i].iceName.Contains("_f_"))
                     {
-                        output += (", Female");
+                        output += ", Female";
                     }
 
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
@@ -3596,6 +3619,110 @@ namespace AquaModelLibrary
                 }
 
                 WriteCSV(outputDirectory, "LobbyActions.csv", lobbyActions);
+            }
+
+            //---------------------------Reboot Lobby actions --f9/4e8bfb6ee674e39fa6bc1aa697bf82
+            //Unlike classic, there's a bunch of .lac files here, separated by some sort of expansion versioning and whether they're for fingers or not
+            if(lacTruePathReboot != null)
+            {
+                StringBuilder lobbyActionsReboot = new StringBuilder();
+                strNameDicts.Clear();
+                masterNameList.Clear();
+                List<string> iceTracker = new List<string>();
+                GatherTextIdsStringRef(commRebootByCat, masterNameList, strNameDicts, "LobbyAction", true);
+
+                lobbyActionsReboot.AppendLine("Files are layed out as: NGSHumanfile NGSCastFile NGSCasealFile NGSFigFile");
+                lobbyActionsReboot.AppendLine("There may also be a VFX ice and reboot VFX ice, which will be appended last when applicable");
+                lobbyActionsReboot.AppendLine("NGS Lobby Actions are in win32reboot, unlike most NGS player files");
+                lobbyActionsReboot.AppendLine("The first two characters of each filename are the folder name");
+
+                foreach(var reLac in rebootLac)
+                {
+                    for (int i = 0; i < reLac.rebootDataBlocks.Count; i++)
+                    {
+                        string iceName;
+                        if (reLac.rebootDataBlocks[i].iceName != null && reLac.rebootDataBlocks[i].iceName != "")
+                        {
+                            iceName = reLac.rebootDataBlocks[i].iceName;
+                        }
+                        else
+                        {
+                            iceName = "pl_" + reLac.rebootDataBlocks[i].internalName0.ToLower() + ".ice";
+                        }
+                        
+                        //There are sometimes multiple references to the same ice, but we're not interested in these entries
+                        if (iceTracker.Contains(iceName))
+                        {
+                            continue;
+                        }
+                        iceTracker.Add(iceName);
+                        string output = "";
+                        bool named = false;
+                        output += reLac.rebootDataBlocks[i].chatCommand + ",";
+                        foreach (var dict in strNameDicts)
+                        {
+                            if (dict.TryGetValue(reLac.rebootDataBlocks[i].commonReference1, out string str))
+                            {
+                                named = true;
+                                output += str + ",";
+                            }
+                            else
+                            {
+                                output += ",";
+                            }
+                        }
+
+                        //Account for lack of a name
+                        if (named == false)
+                        {
+                            output = $"[Unnamed {reLac.rebootDataBlocks[i].commonReference1}]" + output;
+                        }
+                        string reboot = $"{lobbyActionStartReboot}{iceName}";
+
+                        var rebootHumanHash = GetFileHash(reboot.Replace(".ice", rebootLAHuman + ".ice"));
+                        var rebootCastMalehash = GetFileHash(reboot.Replace(".ice", rebootLACastMale + ".ice"));
+                        var rebootCastFemaleHash = GetFileHash(reboot.Replace(".ice", rebootLACastFemale + ".ice"));
+                        var rebootFigHash = GetFileHash(reboot.Replace(".ice", rebootFig + ".ice"));
+
+                        //Some things apparently don't have reboot versions for some reason.
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
+                        {
+                            output += ", " + rebootHumanHash;
+                            output += ", " + rebootCastMalehash;
+                            output += ", " + rebootCastFemaleHash;
+                            output += ", " + rebootFigHash;
+                        }
+
+                        //Handle vfx output
+                        var rebootVfxHash = GetFileHash(lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce);
+
+                        if (reLac.rebootDataBlocks[i].vfxIce != "" && reLac.rebootDataBlocks[i].vfxIce != null
+                            && File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
+                        {
+                            output += ", " + rebootVfxHash;
+                        }
+
+                        if (iceName.Contains("_m.ice") || iceName.Contains("_m_"))
+                        {
+                            output += ", Male";
+                        }
+                        else if (iceName.Contains("_f.ice") || iceName.Contains("_f_"))
+                        {
+                            output += ", Female";
+                        }
+
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
+                        {
+                            output += ", (Not found)";
+                        }
+
+                        output += "\n";
+
+                        lobbyActionsReboot.Append(output);
+                    }
+                }
+                
+                WriteCSV(outputDirectory, "LobbyActionsNGS_HandPoses.csv", lobbyActionsReboot);
             }
 
             //---------------------------Get Substitute Motion files -- 

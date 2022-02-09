@@ -500,6 +500,22 @@ namespace AquaModelLibrary
                 return BeginReadLAC(streamReader);
             }
         }
+        public static LobbyActionCommon ReadRebootLAC(string fileName)
+        {
+            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadRebootLAC(streamReader);
+            }
+        }
+        public static LobbyActionCommon ReadRebootLAC(byte[] file)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadRebootLAC(streamReader);
+            }
+        }
 
         private static LobbyActionCommon BeginReadLAC(BufferedStreamReader streamReader)
         {
@@ -536,6 +552,41 @@ namespace AquaModelLibrary
             return null;
         }
 
+        private static LobbyActionCommon BeginReadRebootLAC(BufferedStreamReader streamReader)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("lac\0"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                //NIFL
+                return ReadNIFLRebootLAC(streamReader, offset);
+            }
+            else if (type.Equals("VTBF"))
+            {
+                //Lacs should really never be VTBF...
+            }
+            else
+            {
+                MessageBox.Show("Improper File Format!");
+            }
+
+            return null;
+        }
+
         public static LobbyActionCommon ReadNIFLLAC(BufferedStreamReader streamReader, int offset)
         {
             var lac = new LobbyActionCommon();
@@ -557,6 +608,33 @@ namespace AquaModelLibrary
                 long bookmark = streamReader.Position();
 
                 lac.dataBlocks.Add(LobbyActionCommon.ReadDataBlock(streamReader, offset, block));
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+
+            return lac;
+        }
+
+        public static LobbyActionCommon ReadNIFLRebootLAC(BufferedStreamReader streamReader, int offset)
+        {
+            var lac = new LobbyActionCommon();
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var end = nifl.NOF0Offset + offset;
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
+
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
+            lac.header = streamReader.Read<LobbyActionCommon.lacHeader>();
+
+            streamReader.Seek(lac.header.dataInfoPointer + offset, SeekOrigin.Begin);
+            lac.info = streamReader.Read<LobbyActionCommon.dataInfo>();
+
+            streamReader.Seek(lac.info.blockOffset + offset, SeekOrigin.Begin);
+
+            for (int i = 0; i < lac.info.blockCount; i++)
+            {
+                var block = streamReader.Read<LobbyActionCommon.dataBlockReboot>();
+                long bookmark = streamReader.Position();
+
+                lac.rebootDataBlocks.Add(LobbyActionCommon.ReadDataBlockReboot(streamReader, offset, block));
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
             }
 

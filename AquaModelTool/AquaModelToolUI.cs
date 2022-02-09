@@ -1618,6 +1618,42 @@ namespace AquaModelTool
                 File.WriteAllText(Path.GetDirectoryName(openFileDialog.FileNames[0]) + "\\" + "figShapes.txt", sb.ToString());
             }
         }
+
+        private void readRebootLacToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 finger LAC file",
+                Filter = "PSO2 finger LAC Files (*.lac)|*.lac",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read LACs
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    AquaMiscMethods.ReadRebootLAC(file);
+                }
+            }
+        }
+
+        private void readLacToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 LAC file",
+                Filter = "PSO2 LAC Files (*.lac)|*.lac",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read LACs
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    AquaMiscMethods.ReadLAC(file);
+                }
+            }
+        }
     }
 }
 
