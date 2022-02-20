@@ -714,7 +714,7 @@ namespace AquaModelLibrary
             foreach (int meshId in aiNode.MeshIndices)
             {
                 var mesh = aiScene.Meshes[meshId];
-                AddAiMeshToAQP(aqp, mesh, nodeMat);
+                AddAiMeshToAQP(aqp, mesh, nodeMat, baseScale);
             }
 
             foreach (var childNode in aiNode.Children)
@@ -723,8 +723,78 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat)
+        public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale)
         {
+            //Iterate through faces to get face and vertex data
+            for(int faceId = 0; faceId < mesh.FaceCount; faceId++)
+            {
+                var face = mesh.Faces[faceId];
+                var faceVerts = face.Indices;
+                AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
+
+                foreach(var v in faceVerts)
+                {
+                    faceVtxl.rawFaceId.Add(faceId);
+                    faceVtxl.rawVertId.Add(v);
+                    faceVtxl.vertPositions.Add(new Vector3(mesh.Vertices[v].X * baseScale, mesh.Vertices[v].Y * baseScale, mesh.Vertices[v].Z * baseScale));
+                    if(mesh.HasNormals)
+                    {
+                        faceVtxl.vertNormals.Add(new Vector3(mesh.Normals[v].X * baseScale, mesh.Normals[v].Y * baseScale, mesh.Normals[v].Z * baseScale));
+                    }
+                    if (mesh.HasVertexColors(0))
+                    {
+                        var color = mesh.VertexColorChannels[0][v];
+                        faceVtxl.vertColors.Add(new byte[] { floatToColor(color.B), floatToColor(color.G), floatToColor(color.R), floatToColor(color.A) });
+                    }
+                    if (mesh.HasVertexColors(1))
+                    {
+                        var color = mesh.VertexColorChannels[1][v];
+                        faceVtxl.vertColor2s.Add(new byte[] { floatToColor(color.B), floatToColor(color.G), floatToColor(color.R), floatToColor(color.A) });
+                    }
+                    if (mesh.HasTextureCoords(0))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[0][v];
+                        faceVtxl.uv1List.Add(new Vector2(uv.X, -uv.Y));
+                    }
+                    if (mesh.HasTextureCoords(1))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[1][v];
+                        faceVtxl.uv2List.Add(new Vector2(uv.X, -uv.Y));
+                    }
+                    if (mesh.HasTextureCoords(2))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[2][v];
+                        faceVtxl.uv3List.Add(new Vector2(uv.X, -uv.Y));
+                    }
+                    if (mesh.HasTextureCoords(3))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[3][v];
+                        faceVtxl.uv4List.Add(new Vector2(uv.X, -uv.Y));
+                    }
+                    if (mesh.HasTextureCoords(4))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[4][v];
+                        faceVtxl.vert0x22.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y)});
+                    }
+                    if (mesh.HasTextureCoords(5))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[5][v];
+                        faceVtxl.vert0x23.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y) });
+                    }
+                    if (mesh.HasTextureCoords(6))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[6][v];
+                        faceVtxl.vert0x24.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y) });
+                    }
+                    if (mesh.HasTextureCoords(7))
+                    {
+                        var uv = mesh.TextureCoordinateChannels[7][v];
+                        faceVtxl.vert0x25.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y) });
+                    }
+
+                    //Bone weights and indices
+                }
+            }
             //Convert vertices
             /*
             for (int vertId = 0; vertId < mesh.VertexCount; vertId++)
@@ -888,6 +958,28 @@ namespace AquaModelLibrary
                                  mat4.B1, mat4.B2, mat4.B3, mat4.B4,
                                  mat4.C1, mat4.C2, mat4.C3, mat4.C4,
                                  mat4.D1, mat4.D2, mat4.D3, mat4.D4);
+        }
+
+        public static byte floatToColor(float flt)
+        {
+            double dbl = flt * 255;
+            byte fltByte;
+            if(dbl > 255)
+            {
+                fltByte = 255;
+            } else
+            {
+                fltByte = (byte)dbl;
+            }
+            return fltByte;
+        }
+
+        public static short floatToShort(float flt)
+        {
+            double dbl = flt;
+            dbl *= 32767;
+
+            return (short)dbl;
         }
     }
 }
