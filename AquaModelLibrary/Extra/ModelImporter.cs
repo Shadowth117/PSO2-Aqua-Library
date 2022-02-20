@@ -660,8 +660,16 @@ namespace AquaModelLibrary
                 }
                 ParseShorts(nodeName, out node.boneShort1, out node.boneShort2);
 
-                //Assign transform data ===TODO===
-               // var worldMat = GetWorldMatrix(aiNode);
+                //Assign transform data ===TODO==
+                var localMat = GetMat4FromAssimpMat4(aiNode.Transform);
+                var worldMat = GetMat4FromAssimpMat4(GetWorldMatrix(aiNode));
+                node.m1 = new Vector4(worldMat.M11, worldMat.M12, worldMat.M13, worldMat.M14);
+                node.m2 = new Vector4(worldMat.M21, worldMat.M22, worldMat.M23, worldMat.M24);
+                node.m3 = new Vector4(worldMat.M31, worldMat.M32, worldMat.M33, worldMat.M34);
+                node.m4 = new Vector4(worldMat.M41, worldMat.M42, worldMat.M43, worldMat.M44);
+                node.pos = localMat.Translation;
+                node.eulRot = QuaternionToEuler(Quaternion.CreateFromRotationMatrix(localMat));
+                node.scale = new Vector3(1, 1, 1); //This is a bit of a weird thing
 
                 //Put in  list at appropriate id 
                 if (aqn.nodeList.Count < nodeId + 1)
@@ -691,14 +699,13 @@ namespace AquaModelLibrary
                 }
                 ParseShorts(nodeName, out nodo.boneShort1, out nodo.boneShort2);
 
-                //Assign transform data ===TODO===
+                //Assign transform data
                 var mat4 = GetMat4FromAssimpMat4(aiNode.Transform);
                 nodo.pos = new Vector3(mat4.M14 * baseScale, mat4.M24 * baseScale, mat4.M34 * baseScale);
 
-                //var worldMat = GetWorldMatrix(aiNode);
-                //nodo.eulRot =
+                nodo.eulRot = QuaternionToEuler(Quaternion.CreateFromRotationMatrix(mat4));
 
-                //aqn.nodoList.Add(nodo);
+                aqn.nodoList.Add(nodo);
             }
 
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform));
@@ -707,12 +714,128 @@ namespace AquaModelLibrary
             foreach (int meshId in aiNode.MeshIndices)
             {
                 var mesh = aiScene.Meshes[meshId];
-                //AddAiMeshToAQP(aqp, mesh, nodeMat);
+                AddAiMeshToAQP(aqp, mesh, nodeMat);
             }
 
             foreach (var childNode in aiNode.Children)
             {
                 IterateAiNodesAQP(aqp, aqn, aiScene, childNode, nodeMat, baseScale);
+            }
+        }
+
+        public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat)
+        {
+            //Convert vertices
+            /*
+            for (int vertId = 0; vertId < mesh.VertexCount; vertId++)
+            {
+                AquaObjectMethods.vt
+                PRMModel.PRMVert vert = new PRMModel.PRMVert();
+                var aiPos = mesh.Vertices[vertId];
+                var newPos = (new Vector3(aiPos.X, aiPos.Y, aiPos.Z));
+                vert.pos = Vector3.Transform(newPos, nodeMat) / 100;
+
+                if (mesh.HasVertexColors(0))
+                {
+                    var aiColor = mesh.VertexColorChannels[0][vertId];
+                    vert.color = new byte[] { (byte)(aiColor.B * 255), (byte)(aiColor.G * 255), (byte)(aiColor.R * 255), (byte)(aiColor.A * 255) };
+                }
+                else
+                {
+                    vert.color = new byte[4];
+                }
+
+                if (aiMesh.HasNormals)
+                {
+                    var aiNorm = aiMesh.Normals[vertId];
+                    var normal = new Vector3(aiNorm.X, aiNorm.Y, aiNorm.Z);
+                    vert.normal = Vector3.TransformNormal(normal, nodeMat);
+                }
+                else
+                {
+                    vert.normal = new Vector3();
+                }
+
+                if (aiMesh.HasTextureCoords(0))
+                {
+                    var aiUV1 = aiMesh.TextureCoordinateChannels[0][vertId];
+                    vert.uv1 = new Vector2(aiUV1.X, aiUV1.Y);
+                }
+                else
+                {
+                    vert.uv1 = new Vector2();
+                }
+
+                if (aiMesh.HasTextureCoords(1))
+                {
+                    var aiUV2 = aiMesh.TextureCoordinateChannels[1][vertId];
+                    vert.uv2 = new Vector2(aiUV2.X, aiUV2.Y);
+                }
+                else
+                {
+                    vert.uv2 = new Vector2();
+                }
+
+                prm.vertices.Add(vert);
+            }
+
+            //Convert Faces
+            foreach (var aiFace in aiMesh.Faces)
+            {
+                prm.faces.Add(new Vector3(aiFace.Indices[0] + totalVerts, aiFace.Indices[1] + totalVerts, aiFace.Indices[2] + totalVerts));
+            }
+
+            //Keep count up to date for next potential loop
+            totalVerts = prm.vertices.Count;*/
+        }
+
+        public static Assimp.Matrix4x4 GetWorldMatrix(Assimp.Node node)
+        {
+            var mat = node.Transform;
+            var currNode = node;
+            while (currNode.Parent != null)
+            {
+                mat *= currNode.Parent.Transform;
+                currNode = currNode.Parent;
+            }
+
+            return mat;
+        }
+
+        //Based on C++ code at https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+        public static Vector3 QuaternionToEuler(Quaternion quat)
+        {
+            Vector3 angles;
+
+            // roll (x-axis rotation)
+            double sinr_cosp = 2 * (quat.W * quat.X + quat.Y * quat.Z);
+            double cosr_cosp = 1 - 2 * (quat.X * quat.X + quat.Y * quat.Y);
+            angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch (y-axis rotation)
+            double sinp = 2 * (quat.W * quat.Y - quat.Z * quat.X);
+            if (Math.Abs(sinp) >= 1)
+                angles.Y = (float)CopySign(Math.PI / 2, sinp); // use 90 degrees if out of range
+            else
+                angles.Y = (float)Math.Asin(sinp);
+
+            // yaw (z-axis rotation)
+            double siny_cosp = 2 * (quat.W * quat.Z + quat.X * quat.Y);
+            double cosy_cosp = 1 - 2 * (quat.Y * quat.Y + quat.Z * quat.Z);
+            angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+            return angles;
+        }
+
+        public static double CopySign(double valMain, double valSign)
+        {
+            double final = Math.Abs(valMain);
+            if(valSign >= 0)
+            {
+                return final;
+            } else
+            {
+                return -final;
             }
         }
 

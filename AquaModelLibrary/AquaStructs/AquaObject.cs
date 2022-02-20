@@ -262,9 +262,9 @@ namespace AquaModelLibrary
                                          //all valid. Add is additive, and uses diffuse alpha for glow effects.
             public PSO2String matName;   //0x39, type 0x2 
 
-            public bool Equals(MATE c)
+            public override bool Equals(Object obj)
             {
-
+                MATE c = (MATE)obj;
                 // Optimization for a common success case.
                 if (Object.ReferenceEquals(this, c))
                 {

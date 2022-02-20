@@ -1813,9 +1813,9 @@ namespace AquaModelLibrary
                             }
                         } else
                         {
-                            for (int j = 0; j < mkey.keyCount; j++)
+                            for (int j = 0; j < mkey.keyCount * 4; j += 4)
                             {
-                                mkey.byteKeys.Add(((byte[])mkeyRaw[0][0xF2])[j]);
+                                mkey.intKeys.Add(BitConverter.ToInt32(((byte[])mkeyRaw[0][0xF2]), j));
                             }
                         }
                     }
@@ -1826,9 +1826,9 @@ namespace AquaModelLibrary
                             mkey.intKeys.Add((int)mkeyRaw[0][0xF3]);
                         } else
                         {
-                            for (int j = 0; j < mkey.keyCount; j++)
+                            for (int j = 0; j < mkey.keyCount * 4; j += 4)
                             {
-                                mkey.byteKeys.Add(((byte[])mkeyRaw[0][0xF2])[j]);
+                                mkey.intKeys.Add(BitConverter.ToInt32(((byte[])mkeyRaw[0][0xF2]), j));
                             }
                         }
                     }

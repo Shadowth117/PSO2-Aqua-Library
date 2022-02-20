@@ -42,9 +42,36 @@ namespace AquaModelLibrary
             public List<AquaMotion> anims = new List<AquaMotion>();
         }
 
-        public void ReadModel(string inFilename)
+        //Returns if the file is a model file or not, for instance to avoid saving over an ICE file with a model.
+        public bool ReadModel(string inFilename, bool checkIce = false)
         {
-            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            var file = File.ReadAllBytes(inFilename);
+            if(file.Length == 0)
+            {
+                return false;
+            }
+
+            bool isIce = false;
+            if(checkIce && 0x454349 == BitConverter.ToInt32(file, 0))
+            {
+                isIce = true;
+                file = IceArchiveSelector.ShowDialog(inFilename, ".aqp");
+            }
+            bool validModel = BeginReadModel(file);
+            file = null;
+
+            if (isIce)
+            {
+                return false;
+            }
+
+            return validModel;
+        }
+
+        //Returns true if the model read was valid, else false
+        private bool BeginReadModel(byte[] file)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 ModelSet set = new ModelSet();
@@ -69,7 +96,8 @@ namespace AquaModelLibrary
                     set.afp = streamReader.Read<AquaPackage.AFPMain>();
                     type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
                     offset += 0x40;
-                } else if (type.Equals("aqo\0") || type.Equals("tro\0"))
+                }
+                else if (type.Equals("aqo\0") || type.Equals("tro\0"))
                 {
                     streamReader.Seek(0x4, SeekOrigin.Current);
                     type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
@@ -86,14 +114,19 @@ namespace AquaModelLibrary
                 {
                     set.models = ReadNIFLModel(streamReader, set.afp.fileCount, offset);
                     aquaModels.Add(set);
-                } else if (type.Equals("VTBF"))
+                    return true;
+                }
+                else if (type.Equals("VTBF"))
                 {
                     set.models = ReadVTBFModel(streamReader, set.afp.fileCount, set.afp.afpBase.paddingOffset);
                     aquaModels.Add(set);
-                } else
+                    return true;
+                }
+                else
                 {
                     MessageBox.Show("Improper File Format!");
                 }
+                return false;
             }
         }
 

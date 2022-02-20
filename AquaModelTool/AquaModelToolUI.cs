@@ -222,8 +222,7 @@ namespace AquaModelTool
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
                         aquaUI.aqua.aquaEffect.Clear();
-                        aquaUI.aqua.ReadModel(file);
-
+                        aquaUI.aqua.ReadModel(file, true);
 #if DEBUG
                         var test = aquaUI.aqua.aquaModels[0].models[0];
                         /*
@@ -1666,6 +1665,105 @@ namespace AquaModelTool
                 var aquaCMX = new CharacterMakingIndex();
 
                 aquaCMX = CharacterMakingIndexMethods.ReadCMX(goodFolderDialog.FileName, aquaCMX);
+            }
+        }
+
+        private void proportionAQMAnalyzerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select proportion AQM",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                StringBuilder outStr = new StringBuilder();
+                Dictionary<int, List<int>> timeSorted = new Dictionary<int, List<int>>();
+                aquaUI.aqua.aquaMotions.Clear();
+                aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
+
+                //Go through keyframes for every node and note each bone that uses a specific frame
+                foreach(var keySet in aquaUI.aqua.aquaMotions[0].anims[0].motionKeys)
+                {
+                    foreach(var data in keySet.keyData)
+                    {
+                        foreach(var time in data.frameTimings)
+                        {
+                            var trueTime = time / 0x10;
+                            if(!timeSorted.ContainsKey(trueTime))
+                            {
+                                timeSorted[trueTime] = new List<int>();
+                            }
+                            if(!timeSorted[trueTime].Contains(keySet.mseg.nodeId))
+                            {
+                                timeSorted[trueTime].Add(keySet.mseg.nodeId);
+                            }
+                        }
+                    }
+                }
+
+                var timeSortedKeys = timeSorted.Keys.ToList();
+                timeSortedKeys.Sort();
+                foreach(var key in timeSortedKeys)
+                {
+                    timeSorted[key].Sort();
+                    outStr.AppendLine("Frame Time: " + key);
+                    foreach(var node in timeSorted[key])
+                    {
+                        outStr.AppendLine($"  {node} - {aquaUI.aqua.aquaMotions[0].anims[0].motionKeys[node].mseg.nodeName.GetString()}");
+                    }
+
+                    outStr.AppendLine();
+                }
+
+                File.WriteAllText(goodFolderDialog.FileName + "_times.txt", outStr.ToString());
+            }
+        }
+
+        private void proportionAQMTesterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select proportion AQM",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                int finalFrame = 1;
+                //Get framecount
+                aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
+                finalFrame = aquaUI.aqua.aquaMotions[0].anims[0].moHeader.endFrame;
+                aquaUI.aqua.aquaMotions.Clear();
+
+                //Go through the motion, make edits to all keys at a specific frame time, save a copy, reset, and repeat with an incrmented frametime until the final frame
+                for(int i = 0; i <= finalFrame; i++)
+                {
+                    aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
+
+                    foreach (var keySet in aquaUI.aqua.aquaMotions[0].anims[0].motionKeys)
+                    {
+                        foreach (var data in keySet.keyData)
+                        {
+                            int frameIndex = -1;
+                            for(int j = 0; j < data.frameTimings.Count; j++)
+                            {
+                                if(data.frameTimings[j] / 0x10 == i)
+                                {
+                                    frameIndex = j;
+                                }
+                            }
+
+                            if(frameIndex != -1)
+                            {
+                                data.vector4Keys[frameIndex] = new System.Numerics.Vector4(5, 5, 5, 0);
+                            }
+                        }
+                    }
+
+                    aquaUI.aqua.WriteNIFLMotion(goodFolderDialog.FileName.Replace(".aqm", $"_{i}.aqm"));
+                    aquaUI.aqua.aquaMotions.Clear();
+                }
+
+
+
             }
         }
     }

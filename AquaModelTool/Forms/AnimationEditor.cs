@@ -482,7 +482,6 @@ namespace AquaModelTool
                     break;
                 case 2:
                     var keySet = currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index];
-                    keySet.keyCount++;
 
                     if (keySet.frameTimings.Count == 0)
                     {
