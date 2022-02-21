@@ -177,7 +177,10 @@ namespace AquaModelLibrary
             aqp.tstaList = new List<TSTA>(tstaList);
             aqp.tsetList = tsetList.ConvertAll(tset => tset.Clone()).ToList();
             aqp.texfList = new List<TEXF>(texfList);
-            aqp.unrms = unrms.Clone();
+            if(aqp.unrms != null)
+            {
+                aqp.unrms = unrms.Clone();
+            }
             aqp.strips = strips.ConvertAll(stp => stp.Clone()).ToList();
 
             //*** 0xC33 only

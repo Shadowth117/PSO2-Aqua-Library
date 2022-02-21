@@ -525,14 +525,15 @@ namespace AquaModelLibrary
         }
 
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
-        public static void AssimpAquaConvertFull(string initialFilePath, string finalFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS)
+        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS)
         {
+            AquaUtil aquaUtil = new AquaUtil();
             float baseScale = 1f / 100f * scaleFactor; //We assume that this will be 100x the true scale because 1 unit to 1 meter isn't the norm
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
-            AquaObject aqp = new NGSAquaObject();
+            AquaObject aqp;
             AquaNode aqn = new AquaNode();
             if (isNGS)
             {
@@ -563,10 +564,12 @@ namespace AquaModelLibrary
                 genMat.shaderNames = shaderList;
                 genMat.blendType = alphaType;
                 genMat.specialType = playerFlag;
+                genMat.texNames = new List<string>();
+                genMat.texUVSets = new List<int>();
 
                 //Texture assignments. Since we can't rely on these to export properly, we dummy them or just put diffuse if a playerFlag isn't defined.
                 //We'll have the user set these later if needed.
-                if(genMat.specialType != null)
+                if (genMat.specialType != null)
                 {
                     AquaObjectMethods.GenerateSpecialMaterialParameters(genMat);
                 } else if(aiMat.TextureDiffuse.FilePath != null)
@@ -590,6 +593,16 @@ namespace AquaModelLibrary
             }
 
             IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale);
+
+            //Assimp data is gathered, proceed to processing model data for PSO2
+            AquaUtil.ModelSet set = new AquaUtil.ModelSet();
+            set.models.Add(aqp);
+            aquaUtil.aquaModels.Add(set);
+            aquaUtil.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, true);
+
+            //AQPs created this way will require more processing to finish.
+            //-Texture lists in particular, MUST be generated as what exists is not valid without serious errors
+            return aqp;
         }
 
         private static void BuildAiNodeDictionary(Assimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum = false)
@@ -725,18 +738,38 @@ namespace AquaModelLibrary
 
         public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale)
         {
+            AquaObject.GenericTriangles genTris = new AquaObject.GenericTriangles();
+            genTris.name = mesh.Name;
+            genTris.baseMeshNodeId = 0;
+            genTris.baseMeshDummyId = -1;
+            var ids = GetMeshIds(mesh.Name);
+            if (ids.Count > 0)
+            {
+                genTris.baseMeshNodeId = ids[0];
+                if (ids.Count > 1)
+                {
+                    genTris.baseMeshDummyId = ids[1];
+                }
+            }
+
             //Iterate through faces to get face and vertex data
-            for(int faceId = 0; faceId < mesh.FaceCount; faceId++)
+            for (int faceId = 0; faceId < mesh.FaceCount; faceId++)
             {
                 var face = mesh.Faces[faceId];
                 var faceVerts = face.Indices;
+                genTris.triList.Add(new Vector3(faceVerts[0], faceVerts[1], faceVerts[2]));
+                genTris.matIdList.Add(mesh.MaterialIndex);
+
                 AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
 
-                foreach(var v in faceVerts)
+                foreach(var v in faceVerts) //Expects triangles, not quads or polygons
                 {
                     faceVtxl.rawFaceId.Add(faceId);
                     faceVtxl.rawVertId.Add(v);
-                    faceVtxl.vertPositions.Add(new Vector3(mesh.Vertices[v].X * baseScale, mesh.Vertices[v].Y * baseScale, mesh.Vertices[v].Z * baseScale));
+                    var vertPos = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z);
+                    vertPos = Vector3.Transform(vertPos, nodeMat);
+                    vertPos = new Vector3(vertPos.X * baseScale, vertPos.Y * baseScale, vertPos.Z * baseScale);
+                    faceVtxl.vertPositions.Add(vertPos);
                     if(mesh.HasNormals)
                     {
                         faceVtxl.vertNormals.Add(new Vector3(mesh.Normals[v].X * baseScale, mesh.Normals[v].Y * baseScale, mesh.Normals[v].Z * baseScale));
@@ -793,70 +826,47 @@ namespace AquaModelLibrary
                     }
 
                     //Bone weights and indices
+                    if (mesh.HasBones)
+                    {
+                        List<int> vertWeightIds = new List<int>();
+                        List<float> vertWeights = new List<float>();
+                        foreach(var bone in mesh.Bones)
+                        {
+                            var boneId = GetNodeNumber(bone.Name);
+                            foreach(var weight in bone.VertexWeights)
+                            {
+                                if(weight.VertexID == v)
+                                {
+                                    vertWeightIds.Add(boneId);
+                                    vertWeights.Add(weight.Weight);
+                                    break;
+                                }
+                            }
+                        }
+                        faceVtxl.rawVertWeightIds.Add(vertWeightIds);
+                        faceVtxl.rawVertWeights.Add(vertWeights);
+                    }
                 }
+                genTris.faceVerts.Add(faceVtxl);
             }
-            //Convert vertices
-            /*
-            for (int vertId = 0; vertId < mesh.VertexCount; vertId++)
+
+            aqp.tempTris.Add(genTris);
+        }
+
+        public static List<int> GetMeshIds(string name)
+        {
+            List<int> ids = new List<int>();
+            var split = name.Split('#');
+            if(split.Length > 1)
             {
-                AquaObjectMethods.vt
-                PRMModel.PRMVert vert = new PRMModel.PRMVert();
-                var aiPos = mesh.Vertices[vertId];
-                var newPos = (new Vector3(aiPos.X, aiPos.Y, aiPos.Z));
-                vert.pos = Vector3.Transform(newPos, nodeMat) / 100;
-
-                if (mesh.HasVertexColors(0))
+                ids.Add(Int32.Parse(split[1]));
+                if(split.Length > 2)
                 {
-                    var aiColor = mesh.VertexColorChannels[0][vertId];
-                    vert.color = new byte[] { (byte)(aiColor.B * 255), (byte)(aiColor.G * 255), (byte)(aiColor.R * 255), (byte)(aiColor.A * 255) };
+                    ids.Add(Int32.Parse(split[2]));
                 }
-                else
-                {
-                    vert.color = new byte[4];
-                }
-
-                if (aiMesh.HasNormals)
-                {
-                    var aiNorm = aiMesh.Normals[vertId];
-                    var normal = new Vector3(aiNorm.X, aiNorm.Y, aiNorm.Z);
-                    vert.normal = Vector3.TransformNormal(normal, nodeMat);
-                }
-                else
-                {
-                    vert.normal = new Vector3();
-                }
-
-                if (aiMesh.HasTextureCoords(0))
-                {
-                    var aiUV1 = aiMesh.TextureCoordinateChannels[0][vertId];
-                    vert.uv1 = new Vector2(aiUV1.X, aiUV1.Y);
-                }
-                else
-                {
-                    vert.uv1 = new Vector2();
-                }
-
-                if (aiMesh.HasTextureCoords(1))
-                {
-                    var aiUV2 = aiMesh.TextureCoordinateChannels[1][vertId];
-                    vert.uv2 = new Vector2(aiUV2.X, aiUV2.Y);
-                }
-                else
-                {
-                    vert.uv2 = new Vector2();
-                }
-
-                prm.vertices.Add(vert);
             }
 
-            //Convert Faces
-            foreach (var aiFace in aiMesh.Faces)
-            {
-                prm.faces.Add(new Vector3(aiFace.Indices[0] + totalVerts, aiFace.Indices[1] + totalVerts, aiFace.Indices[2] + totalVerts));
-            }
-
-            //Keep count up to date for next potential loop
-            totalVerts = prm.vertices.Count;*/
+            return ids;
         }
 
         public static Assimp.Matrix4x4 GetWorldMatrix(Assimp.Node node)

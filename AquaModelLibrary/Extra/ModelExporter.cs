@@ -314,7 +314,7 @@ namespace AquaModelLibrary
                 {
                     mate.BlendMode = Assimp.BlendMode.Additive;
                 }
-                mate.Name = "(" + shaderSet[0] + "," + shaderSet[1] + ")" + "{" + mat.alphaType.GetString() + "}" + mat.matName.GetString();
+                mate.Name = "|[]{}~`!@#$%^&*;:'\"?><,./(" + shaderSet[0] + "," + shaderSet[1] + ")" + "{" + mat.alphaType.GetString() + "}" + mat.matName.GetString();
                 
                 //Set textures - PSO2 Texture slots are NOT consistent and depend entirely on the selected shader. As such, slots will be somewhat arbitrary after albedo/diffuse
                 for(int i = 0; i < textureSet.Count; i++)
@@ -379,7 +379,7 @@ namespace AquaModelLibrary
                 mate.ShadingMode = Assimp.ShadingMode.Phong;
 
 
-                var meshNodeName = string.Format($"mesh_node_{aiScene.Meshes.Count}");
+                var meshNodeName = string.Format("mesh[{4}]_{0}_{1}_{2}_{3}#{4}#{5}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, aiScene.Meshes.Count, msh.baseMeshNodeId, msh.baseMeshDummyId);
 
                 // Add mesh to meshes
                 aiScene.Meshes.Add(aiMesh);

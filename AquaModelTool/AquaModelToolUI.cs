@@ -1766,6 +1766,42 @@ namespace AquaModelTool
 
             }
         }
+
+        private void importModelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var ctx = new Assimp.AssimpContext())
+            {
+                var formats = ctx.GetSupportedImportFormats().ToList();
+                formats.Sort();
+
+                OpenFileDialog openFileDialog;
+                openFileDialog = new OpenFileDialog()
+                {
+                    Title = "Import model file",
+                    Filter = ""
+                };
+                string tempFilter = "All supported formats|";
+                string tempFilter2 = "";
+                foreach(var str in formats)
+                {
+                    tempFilter += $"*{str};";
+                    tempFilter2 += $"|(*{str})|*{str}";
+                }
+                openFileDialog.Filter = tempFilter + tempFilter2;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    aquaUI.aqua.aquaModels.Clear();
+                    AquaUtil.ModelSet modelSet = new AquaUtil.ModelSet();
+                    modelSet.models.Add(ModelImporter.AssimpAquaConvertFull(openFileDialog.FileName, 1, false, true));
+                    aquaUI.aqua.aquaModels.Add(modelSet);
+                    var outStr = Path.ChangeExtension(openFileDialog.FileName, ".aqp");
+                    aquaUI.aqua.WriteNGSNIFLModel(outStr, outStr);
+                    aquaUI.aqua.aquaModels.Clear();
+                    AquaUIOpenFile(outStr);
+                }
+            }
+        }
     }
 }
 

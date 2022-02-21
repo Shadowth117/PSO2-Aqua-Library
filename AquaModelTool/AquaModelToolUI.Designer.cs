@@ -75,10 +75,11 @@
             this.dumpFigShapesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readLacToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readLacToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.filePanel = new System.Windows.Forms.Panel();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.proportionAQMAnalyzerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePanel = new System.Windows.Forms.Panel();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.importModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -336,7 +337,8 @@
             this.readLacToolStripMenuItem,
             this.readLacToolStripMenuItem1,
             this.proportionAQMAnalyzerToolStripMenuItem,
-            this.proportionAQMTesterToolStripMenuItem});
+            this.proportionAQMTesterToolStripMenuItem,
+            this.importModelToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -460,6 +462,20 @@
             this.readLacToolStripMenuItem1.Text = "ReadLac";
             this.readLacToolStripMenuItem1.Click += new System.EventHandler(this.readLacToolStripMenuItem1_Click);
             // 
+            // proportionAQMAnalyzerToolStripMenuItem
+            // 
+            this.proportionAQMAnalyzerToolStripMenuItem.Name = "proportionAQMAnalyzerToolStripMenuItem";
+            this.proportionAQMAnalyzerToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.proportionAQMAnalyzerToolStripMenuItem.Text = "ProportionAQMAnalyzer";
+            this.proportionAQMAnalyzerToolStripMenuItem.Click += new System.EventHandler(this.proportionAQMAnalyzerToolStripMenuItem_Click);
+            // 
+            // proportionAQMTesterToolStripMenuItem
+            // 
+            this.proportionAQMTesterToolStripMenuItem.Name = "proportionAQMTesterToolStripMenuItem";
+            this.proportionAQMTesterToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.proportionAQMTesterToolStripMenuItem.Text = "ProportionAQMTester";
+            this.proportionAQMTesterToolStripMenuItem.Click += new System.EventHandler(this.proportionAQMTesterToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -478,19 +494,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // proportionAQMAnalyzerToolStripMenuItem
+            // importModelToolStripMenuItem
             // 
-            this.proportionAQMAnalyzerToolStripMenuItem.Name = "proportionAQMAnalyzerToolStripMenuItem";
-            this.proportionAQMAnalyzerToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.proportionAQMAnalyzerToolStripMenuItem.Text = "ProportionAQMAnalyzer";
-            this.proportionAQMAnalyzerToolStripMenuItem.Click += new System.EventHandler(this.proportionAQMAnalyzerToolStripMenuItem_Click);
-            // 
-            // proportionAQMTesterToolStripMenuItem
-            // 
-            this.proportionAQMTesterToolStripMenuItem.Name = "proportionAQMTesterToolStripMenuItem";
-            this.proportionAQMTesterToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.proportionAQMTesterToolStripMenuItem.Text = "ProportionAQMTester";
-            this.proportionAQMTesterToolStripMenuItem.Click += new System.EventHandler(this.proportionAQMTesterToolStripMenuItem_Click);
+            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
+            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.importModelToolStripMenuItem.Text = "Import Model";
+            this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -564,6 +573,7 @@
         private System.Windows.Forms.ToolStripMenuItem readCMXFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMAnalyzerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMTesterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importModelToolStripMenuItem;
     }
 }
 
