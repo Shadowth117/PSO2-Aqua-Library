@@ -163,6 +163,7 @@
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\EnemyData.cs" />
     <Compile Include="Extra\FilenameConstants.cs" />
+    <Compile Include="Extra\Half.cs" />
     <Compile Include="Extra\IceArchiveSelector.cs" />
     <Compile Include="Extra\LegacyObjPort\LegacyObjIO.cs" />
     <Compile Include="Extra\LegacyObjPort\MtlFile.cs" />
@@ -174,6 +175,18 @@
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
+    <Compile Include="Nova\AIFMethods.cs" />
+    <Compile Include="Nova\AXSConstants.cs" />
+    <Compile Include="Nova\AXSMethods.cs" />
+    <Compile Include="Nova\Structures\BaseMeshData.cs" />
+    <Compile Include="Nova\Structures\ffubStruct.cs" />
+    <Compile Include="Nova\Structures\ipnbStruct.cs" />
+    <Compile Include="Nova\Structures\lxdiStruct.cs" />
+    <Compile Include="Nova\Structures\MeshDefinitions.cs" />
+    <Compile Include="Nova\Structures\rddaStruct.cs" />
+    <Compile Include="Nova\Structures\salvStruct.cs" />
+    <Compile Include="Nova\Structures\XgmiStruct.cs" />
+    <Compile Include="Nova\Structures\ydbmStruct.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
     <Compile Include="OtherStructs\PRMModel.cs" />
     <Compile Include="AquaUtil.cs" />

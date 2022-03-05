@@ -77,9 +77,13 @@
             this.readLacToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMAnalyzerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSOXVMDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSOXVRConvertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.importModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -338,7 +342,11 @@
             this.readLacToolStripMenuItem1,
             this.proportionAQMAnalyzerToolStripMenuItem,
             this.proportionAQMTesterToolStripMenuItem,
-            this.importModelToolStripMenuItem});
+            this.importModelToolStripMenuItem,
+            this.pSOXVMDumpToolStripMenuItem,
+            this.pSOXVRConvertToolStripMenuItem,
+            this.importAXSToolStripMenuItem,
+            this.importAXSBoxTestToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -476,6 +484,41 @@
             this.proportionAQMTesterToolStripMenuItem.Text = "ProportionAQMTester";
             this.proportionAQMTesterToolStripMenuItem.Click += new System.EventHandler(this.proportionAQMTesterToolStripMenuItem_Click);
             // 
+            // importModelToolStripMenuItem
+            // 
+            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
+            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.importModelToolStripMenuItem.Text = "Import Model";
+            this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click);
+            // 
+            // pSOXVMDumpToolStripMenuItem
+            // 
+            this.pSOXVMDumpToolStripMenuItem.Name = "pSOXVMDumpToolStripMenuItem";
+            this.pSOXVMDumpToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.pSOXVMDumpToolStripMenuItem.Text = "PSO XVM Dump";
+            this.pSOXVMDumpToolStripMenuItem.Click += new System.EventHandler(this.pSOXVMDumpToolStripMenuItem_Click);
+            // 
+            // pSOXVRConvertToolStripMenuItem
+            // 
+            this.pSOXVRConvertToolStripMenuItem.Name = "pSOXVRConvertToolStripMenuItem";
+            this.pSOXVRConvertToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.pSOXVRConvertToolStripMenuItem.Text = "PSO XVR Convert";
+            this.pSOXVRConvertToolStripMenuItem.Click += new System.EventHandler(this.pSOXVRConvertToolStripMenuItem_Click);
+            // 
+            // importAXSToolStripMenuItem
+            // 
+            this.importAXSToolStripMenuItem.Name = "importAXSToolStripMenuItem";
+            this.importAXSToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.importAXSToolStripMenuItem.Text = "Import AXS";
+            this.importAXSToolStripMenuItem.Click += new System.EventHandler(this.importAXSToolStripMenuItem_Click);
+            // 
+            // importAXSBoxTestToolStripMenuItem
+            // 
+            this.importAXSBoxTestToolStripMenuItem.Name = "importAXSBoxTestToolStripMenuItem";
+            this.importAXSBoxTestToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.importAXSBoxTestToolStripMenuItem.Text = "Import AXS Box Test";
+            this.importAXSBoxTestToolStripMenuItem.Click += new System.EventHandler(this.importAXSBoxTestToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -493,13 +536,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 256);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // importModelToolStripMenuItem
-            // 
-            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
-            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.importModelToolStripMenuItem.Text = "Import Model";
-            this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -574,6 +610,10 @@
         private System.Windows.Forms.ToolStripMenuItem proportionAQMAnalyzerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMTesterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importModelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pSOXVMDumpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pSOXVRConvertToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importAXSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importAXSBoxTestToolStripMenuItem;
     }
 }
 

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AquaModelLibrary;
+using AquaModelLibrary.Nova;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using static AquaModelLibrary.AquaCommon;
 
@@ -1801,6 +1802,74 @@ namespace AquaModelTool
                     AquaUIOpenFile(outStr);
                 }
             }
+        }
+
+        private void pSOXVMDumpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO xvm file(s)",
+                Filter = "PSO xvm Files (*.xvm)|*.xvm",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read Xvms
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    PSOXVMConvert.ExtractXVM(file);
+                }
+            }
+        }
+
+        private void pSOXVRConvertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO xvr file(s)",
+                Filter = "PSO xvr Files (*.xvr)|*.xvr|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read Xvrs
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    PSOXVMConvert.ConvertLooseXVR(file);
+                }
+            }
+        }
+
+        private void importAXSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PS Nova axs file(s)",
+                Filter = "PS Nova axs Files (*.axs)|*.axs|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("C:\\axsout.txt"));
+                //Read Xvrs
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.aquaModels.Clear();
+                    AquaUtil.ModelSet set = new AquaUtil.ModelSet();
+                    set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
+                    aquaUI.aqua.aquaModels.Add(set);
+                    aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                    aquaUI.aqua.WriteNGSNIFLModel(@"C:\temp.aqp", @"C:\temp.aqp");
+                }
+                //System.Diagnostics.Debug.Unindent();
+                //System.Diagnostics.Debug.Flush();
+            }
+        }
+
+        private void importAXSBoxTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AXSMethods.boxTest();
         }
     }
 }

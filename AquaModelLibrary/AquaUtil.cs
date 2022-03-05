@@ -1026,7 +1026,9 @@ namespace AquaModelLibrary
                     {
                         GenerateMaterial(outModel, aquaModels[msI].models[aqI].tempMats[mat], true);
                     }
-                                            outModel = matModelSplit;
+
+                   outModel = matModelSplit;
+
                     //Set up PSETs and strips, and other per mesh data
                     for (int i = 0; i < outModel.tempTris.Count; i++)
                     {

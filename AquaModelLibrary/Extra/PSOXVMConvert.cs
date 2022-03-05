@@ -11,6 +11,11 @@ namespace AquaModelLibrary
     {
         public const int MAGIC_XVRT = 0x54525658;
 
+        public static void ExtractXVM(string xvmName)
+        {
+            ExtractXVM(xvmName, new List<string>(), xvmName.Replace(".xvm", "_xvmOut"));
+        }
+
         public static void ExtractXVM(string xvmName, List<string> texNames, string outFolder)
         {
             if (xvmName != null && File.Exists(xvmName))
@@ -64,6 +69,32 @@ namespace AquaModelLibrary
             }
         }
 
+        public static void ConvertLooseXVR(string xvrName)
+        {
+            int offset = 0;
+            var xvr = File.ReadAllBytes(xvrName);
+            var xvrList = new List<byte>(xvr);
+            int magic = BitConverter.ToInt32(xvr, offset);
+            int fullSize = BitConverter.ToInt32(xvr, offset + 0x4) + 8;
+            int type1 = BitConverter.ToInt32(xvr, offset + 0x8);
+            int type2 = BitConverter.ToInt32(xvr, offset + 0xC);
+            ushort sizeX = BitConverter.ToUInt16(xvr, offset + 0x14);
+            ushort sizeY = BitConverter.ToUInt16(xvr, offset + 0x16);
+            int dataSize = BitConverter.ToInt32(xvr, offset + 0x18);
+
+            var xvrOut = new List<byte>();
+            xvrOut.AddRange(GenerateDDSHeader(sizeX, sizeY, dataSize, type1, type2));
+            xvrOut.AddRange(xvrList.GetRange(offset + 0x40, dataSize));
+
+
+            var outFileName = Path.ChangeExtension(xvrName, ".dds");
+            
+            File.WriteAllBytes(outFileName, xvrOut.ToArray());
+
+            xvr = null;
+            xvrList = null;
+        }
+
         public static byte[] GenerateDDSHeader(ushort width, ushort height, int size, int type1, int type2)
         {
             var outBytes = new List<byte>();
@@ -84,7 +115,7 @@ namespace AquaModelLibrary
                 switch (type1)
                 {
                     default:
-                        outBytes.Add(0x33);
+                        outBytes.Add(0x33); //3 in DXT3
                         break;
                 }
             } else
@@ -95,7 +126,7 @@ namespace AquaModelLibrary
                     case 3:
                     case 6:
                     default:
-                        outBytes.Add(0x31);
+                        outBytes.Add(0x31); //1 in DXT1
                         break;
                 }
             }

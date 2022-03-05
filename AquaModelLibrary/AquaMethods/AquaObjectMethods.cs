@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
+using SystemHalf;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.NGSShaderPresets;
 
@@ -613,7 +614,21 @@ namespace AquaModelLibrary
                     switch (vtxeSet.vertDataTypes[vtxeIndex].dataType)
                     {
                         case (int)ClassicAquaObject.VertFlags.VertPosition:
-                            vtxl.vertPositions.Add(streamReader.Read<Vector3>());
+                            switch (vtxeSet.vertDataTypes[vtxeIndex].structVariation)
+                            {
+                                case 0x3:
+                                    vtxl.vertPositions.Add(streamReader.Read<Vector3>());
+                                    break;
+                                case 0x99: //For nova
+                                    var half0 = streamReader.Read<Half>();
+                                    var half1 = streamReader.Read<Half>();
+                                    var half2 = streamReader.Read<Half>();
+                                    streamReader.Read<Half>();
+                                    vtxl.vertPositions.Add(new Vector3(HalfHelper.HalfToSingle(half0), HalfHelper.HalfToSingle(half1), HalfHelper.HalfToSingle(half2)));
+                                    break;
+                                default:
+                                    break;
+                            }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertWeight:
                             switch(vtxeSet.vertDataTypes[vtxeIndex].structVariation)
@@ -1632,6 +1647,10 @@ namespace AquaModelLibrary
         public static void CalcUNRMs(AquaObject model, bool applyNormalAveraging, bool useUNRMs)
         {
             UNRM unrm = new UNRM();
+            if (useUNRMs == false && applyNormalAveraging == false)
+            {
+                return;
+            }
 
             //Set up a boolean array for tracking what we've gone through for this
             bool[][] meshCheckArr = new bool[model.vtxlList.Count][];
@@ -1690,10 +1709,12 @@ namespace AquaModelLibrary
                         }
                     }
                 }
+                
+
             }
 
             //Only actually apply them if we choose to. This function may just be used for averaging normals.
-            if(useUNRMs)
+            if (useUNRMs)
             {
                 model.unrms = unrm;
             }
