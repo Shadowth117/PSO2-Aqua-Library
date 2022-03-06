@@ -23,7 +23,8 @@ namespace AquaModelLibrary.Nova
         public const int ssem = 0x6D657373; //Precedes material data. Per mesh material colors?
         public const int xenr = 0x726E6578; //Contains texture/material references. Also contains texture setting data?
         public const int Xgmi = 0x696D6758; //Image data header
-        public const int ipnb = 0x626E7069; //?
+        public const int ipnb = 0x626E7069; //Local bone list per mesh. Indices in list are references to the bone at that index in the global bone list
+        public const int lpnb = 0x626E706C; //Global bone list
 
         public const int eert = 0x74726565; //Contains model nodes
         public const int rtta = 0x61747472; //Node struct

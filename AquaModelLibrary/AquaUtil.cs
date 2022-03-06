@@ -2536,6 +2536,8 @@ namespace AquaModelLibrary
             outBytes.AddRange(BitConverter.GetBytes(0x10));
             outBytes.AddRange(BitConverter.GetBytes(0));
 
+            bones.ndtr.boneCount = bones.nodeList.Count;
+            bones.ndtr.effCount = bones.nodoList.Count;
             outBytes.AddRange(ConvertStruct(bones.ndtr));
             //Write nodes
             if(bones.nodeList.Count > 0)

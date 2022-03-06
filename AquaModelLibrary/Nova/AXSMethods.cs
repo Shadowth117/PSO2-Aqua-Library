@@ -5,10 +5,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.Nova.AXSConstants;
+using static AquaModelLibrary.Extra.MathExtras;
 
 namespace AquaModelLibrary.Nova
 {
@@ -25,6 +28,8 @@ namespace AquaModelLibrary.Nova
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 Debug.WriteLine(Path.GetFileName(filePath));
+                eertStruct eertNodes = null;
+                ipnbStruct lpnbList = null;
                 List<ffubStruct> ffubList = new List<ffubStruct>();
                 List<XgmiStruct> xgmiList = new List<XgmiStruct>();
                 List<MeshDefinitions> meshDefList = new List<MeshDefinitions>();
@@ -59,8 +64,11 @@ namespace AquaModelLibrary.Nova
                         case __bm:
                             streamReader.ReadBM(meshDefList);
                             break;
+                        case lpnb:
+                            lpnbList = streamReader.ReadIpnb();
+                            break;
                         case eert:
-                            streamReader.SkipBasicAXSStruct(); //Replace when understood
+                            eertNodes = streamReader.ReadEert(); 
                             break;
                         case ssem:
                             streamReader.SkipBasicAXSStruct(); //Maybe use for material data later. Remember to store ordered id for _bm mesh entries for this
@@ -74,6 +82,69 @@ namespace AquaModelLibrary.Nova
                     }
 
                 }
+
+                //Assemble aqn from eert
+                if(eertNodes != null)
+                {
+                    for(int i = 0; i < eertNodes.boneCount; i++)
+                    {
+                        var rttaNode = eertNodes.rttaList[i];
+                        Matrix4x4 mat = Matrix4x4.Identity;
+
+                        mat *= Matrix4x4.CreateScale(rttaNode.scale);
+
+                        var rotation = Matrix4x4.CreateFromQuaternion(rttaNode.quatRot);
+
+                        mat *= rotation;
+
+                        mat *= Matrix4x4.CreateTranslation(rttaNode.pos);
+
+                        var parentId = rttaNode.parentNodeId;
+
+                        //If there's a parent, multiply by it
+                        if (i != 0 && rttaNode.parentNodeId != -1)
+                        {
+                            var pn = aqn.nodeList[rttaNode.parentNodeId];
+                            var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
+                                                          pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
+                                                          pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
+                                                          pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
+                            Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
+                            mat = mat * invParentInvTfm;
+
+                        } else
+                        {
+                            parentId = -1;
+                        }
+
+                        //Create AQN node
+                        NODE aqNode = new NODE();
+                        aqNode.animatedFlag = 1;
+                        aqNode.parentId = parentId;
+                        aqNode.unkNode = -1;
+                        aqNode.pos = rttaNode.pos;
+                        aqNode.eulRot = QuaternionToEuler(rttaNode.quatRot);
+
+                        if (Math.Abs(aqNode.eulRot.Y) > 120)
+                        {
+                            aqNode.scale = new Vector3(-1, -1, -1);
+                        }
+                        else
+                        {
+                            aqNode.scale = new Vector3(1, 1, 1);
+                        }
+
+                        Matrix4x4.Invert(mat, out var invMat);
+                        aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
+                        aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
+                        aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
+                        aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
+                        aqNode.boneName = rttaNode.nodeName;
+                        Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
+                        aqn.nodeList.Add(aqNode);
+                    }
+                }
+                
 
                 //Go to mesh buffers
                 streamReader.Seek(fsaLen, SeekOrigin.Begin);
@@ -129,6 +200,18 @@ namespace AquaModelLibrary.Nova
                     streamReader.Seek((meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset), SeekOrigin.Begin);
                     AquaObjectMethods.ReadVTXL(streamReader, mesh.vtxe, vtxl, vertCount, mesh.vtxe.vertDataTypes.Count);
                     vtxl.convertToLegacyTypes();
+                    if (mesh.ipnbStr != null && mesh.ipnbStr.shortList.Count > 0)
+                    {
+                        vtxl.bonePalette = (mesh.ipnbStr.shortList.ConvertAll(delegate (short num) {
+                             return (ushort)num;
+                         }));
+
+                        //Convert the indices based on the global bone list as pso2 will expect
+                        for(int bn = 0; bn < vtxl.bonePalette.Count; bn++)
+                        {
+                            vtxl.bonePalette[bn] = (ushort)lpnbList.shortList[vtxl.bonePalette[bn]];
+                        }
+                    }
 
                     aqp.vtxlList.Add(vtxl);
 
@@ -154,12 +237,6 @@ namespace AquaModelLibrary.Nova
 
                     //Extra
                     genMesh.vertCount = vertCount;
-                    if (mesh.ipnbStr != null && mesh.ipnbStr.shortList.Count > 0)
-                    {
-                        genMesh.bonePalette = (mesh.ipnbStr.shortList.ConvertAll(delegate (short num) {
-                            return (uint)num;
-                        }));
-                    }
                     genMesh.matIdList = new List<int>(new int[genMesh.triList.Count]);
 
                     aqp.tempTris.Add(genMesh);
@@ -303,6 +380,47 @@ namespace AquaModelLibrary.Nova
             }
 
             return vtxe;
+        }
+
+        public static eertStruct ReadEert(this BufferedStreamReader streamReader)
+        {
+            eertStruct boneList = new eertStruct();
+            long bookmark = streamReader.Position();
+
+            streamReader.Seek(0x4, SeekOrigin.Current);
+            var len = streamReader.Read<int>();
+            streamReader.Seek(0x4, SeekOrigin.Current);
+            var trueLen = streamReader.Read<int>();
+
+            boneList.boneCount = streamReader.Read<int>();
+
+            streamReader.Seek(bookmark + 0x100, SeekOrigin.Begin);
+            for (int i = 0; i < boneList.boneCount; i++)
+            {
+                rttaStruct bone = new rttaStruct();
+                bookmark = streamReader.Position();
+                bone.magic = streamReader.Read<int>();
+                bone.len = streamReader.Read<int>();
+                bone.int_08 = streamReader.Read<int>();
+                bone.trueLen = streamReader.Read<int>();
+
+                bone.nodeName = streamReader.Read<AquaCommon.PSO2String>();
+                bone.int_30 = streamReader.Read<int>();
+                bone.int_34 = streamReader.Read<int>();
+                bone.int_38 = streamReader.Read<int>();
+                bone.parentNodeId = streamReader.Read<int>();
+
+                bone.childNodeCount = streamReader.Read<short>();
+                streamReader.Seek(0x3E, SeekOrigin.Current);
+                bone.pos = streamReader.Read<Vector3>(); streamReader.Seek(0x4, SeekOrigin.Current);
+                bone.quatRot = streamReader.Read<Quaternion>();
+                bone.scale = streamReader.Read<Vector3>(); streamReader.Seek(0x4, SeekOrigin.Current);
+
+                boneList.rttaList.Add(bone);
+                streamReader.Seek(bookmark + bone.len, SeekOrigin.Begin);
+            }
+
+            return boneList;
         }
 
         //Returns DAEH's length for the section - its own length

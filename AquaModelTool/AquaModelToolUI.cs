@@ -1861,6 +1861,7 @@ namespace AquaModelTool
                     aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
 
                     aquaUI.aqua.WriteNGSNIFLModel(@"C:\temp.aqp", @"C:\temp.aqp");
+                    AquaUtil.WriteBones(@"C:\temp.aqn", aqn);
                 }
                 //System.Diagnostics.Debug.Unindent();
                 //System.Diagnostics.Debug.Flush();

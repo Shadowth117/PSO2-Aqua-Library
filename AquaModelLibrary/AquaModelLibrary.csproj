@@ -168,6 +168,7 @@
     <Compile Include="Extra\LegacyObjPort\LegacyObjIO.cs" />
     <Compile Include="Extra\LegacyObjPort\MtlFile.cs" />
     <Compile Include="Extra\LegacyObjPort\ObjFile.cs" />
+    <Compile Include="Extra\MathExtras.cs" />
     <Compile Include="Extra\ModelExporter.cs" />
     <Compile Include="Extra\ModelImporter.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
@@ -179,11 +180,13 @@
     <Compile Include="Nova\AXSConstants.cs" />
     <Compile Include="Nova\AXSMethods.cs" />
     <Compile Include="Nova\Structures\BaseMeshData.cs" />
+    <Compile Include="Nova\Structures\eertStruct.cs" />
     <Compile Include="Nova\Structures\ffubStruct.cs" />
     <Compile Include="Nova\Structures\ipnbStruct.cs" />
     <Compile Include="Nova\Structures\lxdiStruct.cs" />
     <Compile Include="Nova\Structures\MeshDefinitions.cs" />
     <Compile Include="Nova\Structures\rddaStruct.cs" />
+    <Compile Include="Nova\Structures\rttaStruct.cs" />
     <Compile Include="Nova\Structures\salvStruct.cs" />
     <Compile Include="Nova\Structures\XgmiStruct.cs" />
     <Compile Include="Nova\Structures\ydbmStruct.cs" />
