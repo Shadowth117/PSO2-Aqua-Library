@@ -17,7 +17,7 @@ namespace AquaModelLibrary.Nova.Structures
         public byte vertDef1;
         public byte vertDef2;
         public byte vertDef3;
-        public int int_14;
+        public int vertDef4;
         public int vertLen;
         public int int_1C;
 

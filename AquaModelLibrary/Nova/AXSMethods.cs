@@ -28,8 +28,9 @@ namespace AquaModelLibrary.Nova
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 Debug.WriteLine(Path.GetFileName(filePath));
+                long last__oaPos = 0;
                 eertStruct eertNodes = null;
-                ipnbStruct lpnbList = null;
+                ipnbStruct tempLpnbList = null;
                 List<ffubStruct> ffubList = new List<ffubStruct>();
                 List<XgmiStruct> xgmiList = new List<XgmiStruct>();
                 List<MeshDefinitions> meshDefList = new List<MeshDefinitions>();
@@ -56,16 +57,17 @@ namespace AquaModelLibrary.Nova
                     switch (tag)
                     {
                         case __oa:
+                            last__oaPos = streamReader.Position();
                             streamReader.Seek(0xD0, SeekOrigin.Current);
                             break;
                         case FIA:
                             streamReader.Seek(0x10, SeekOrigin.Current);
                             break;
                         case __bm:
-                            streamReader.ReadBM(meshDefList);
+                            streamReader.ReadBM(meshDefList, tempLpnbList, last__oaPos);
                             break;
                         case lpnb:
-                            lpnbList = streamReader.ReadIpnb();
+                            tempLpnbList = streamReader.ReadIpnb();
                             break;
                         case eert:
                             eertNodes = streamReader.ReadEert(); 
@@ -102,9 +104,13 @@ namespace AquaModelLibrary.Nova
                         var parentId = rttaNode.parentNodeId;
 
                         //If there's a parent, multiply by it
-                        if (i != 0 && rttaNode.parentNodeId != -1)
+                        if (i != 0)
                         {
-                            var pn = aqn.nodeList[rttaNode.parentNodeId];
+                            if(rttaNode.parentNodeId == -1)
+                            {
+                                parentId = 0;
+                            }
+                            var pn = aqn.nodeList[parentId];
                             var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
                                                           pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
                                                           pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
@@ -116,6 +122,7 @@ namespace AquaModelLibrary.Nova
                         {
                             parentId = -1;
                         }
+                        rttaNode.nodeMatrix = mat;
 
                         //Create AQN node
                         NODE aqNode = new NODE();
@@ -133,7 +140,6 @@ namespace AquaModelLibrary.Nova
                         {
                             aqNode.scale = new Vector3(1, 1, 1);
                         }
-
                         Matrix4x4.Invert(mat, out var invMat);
                         aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                         aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
@@ -188,6 +194,16 @@ namespace AquaModelLibrary.Nova
                 for(int i = 0; i < meshCount; i++)
                 {
                     var mesh = meshDefList[i];
+                    var nodeMatrix = Matrix4x4.Identity;
+                    for(int bn = 0; bn < eertNodes.boneCount; bn++)
+                    {
+                        var node = eertNodes.rttaList[bn];
+                        if(node.meshNodePtr == mesh.oaPos)
+                        {
+                            nodeMatrix = node.nodeMatrix;
+                            break;
+                        }
+                    }
                     var vertBufferInfo = vertRddaList[$"{mesh.salvStr.md5_1.ToString("X")}{mesh.salvStr.md5_2.ToString("X")}"];
                     var faceBufferInfo = faceRddaList[$"{mesh.lxdiStr.md5_1.ToString("X")}{mesh.lxdiStr.md5_2.ToString("X")}"];
                     Debug.WriteLine($"Vert set {i}: " + vertBufferInfo.md5_1.ToString("X") + " " + vertBufferInfo.dataStartOffset.ToString("X") + " " + vertBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + vertFfubPadding  + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset).ToString("X"));
@@ -200,6 +216,18 @@ namespace AquaModelLibrary.Nova
                     streamReader.Seek((meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset), SeekOrigin.Begin);
                     AquaObjectMethods.ReadVTXL(streamReader, mesh.vtxe, vtxl, vertCount, mesh.vtxe.vertDataTypes.Count);
                     vtxl.convertToLegacyTypes();
+
+                    //Fix vert transforms
+                    for(int p = 0; p < vtxl.vertPositions.Count; p++)
+                    {
+                        vtxl.vertPositions[p] = Vector3.Transform(vtxl.vertPositions[p], nodeMatrix);
+                        if(vtxl.vertNormals.Count > 0)
+                        {
+                            vtxl.vertNormals[p] = Vector3.TransformNormal(vtxl.vertNormals[p], nodeMatrix);
+                        }
+                    }
+
+                    //Handle bone indices
                     if (mesh.ipnbStr != null && mesh.ipnbStr.shortList.Count > 0)
                     {
                         vtxl.bonePalette = (mesh.ipnbStr.shortList.ConvertAll(delegate (short num) {
@@ -209,7 +237,7 @@ namespace AquaModelLibrary.Nova
                         //Convert the indices based on the global bone list as pso2 will expect
                         for(int bn = 0; bn < vtxl.bonePalette.Count; bn++)
                         {
-                            vtxl.bonePalette[bn] = (ushort)lpnbList.shortList[vtxl.bonePalette[bn]];
+                            vtxl.bonePalette[bn] = (ushort)mesh.lpnbStr.shortList[vtxl.bonePalette[bn]];
                         }
                     }
 
@@ -248,7 +276,7 @@ namespace AquaModelLibrary.Nova
             }
         }
 
-        public static AquaObject.VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, int trueLength)
+        public static AquaObject.VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, int vertData4, int trueLength)
         {
             AquaObject.VTXE vtxe = new AquaObject.VTXE();
             int curLength = 0;
@@ -285,12 +313,10 @@ namespace AquaModelLibrary.Nova
                 curLength += 0x4;
             }
 
-            //Weights and Weight Indices
-            if((vertData3 & 0x40) > 0)
+            //Yet another UV thing?
+            if ((vertData4 & 0x40) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x1, 0x11, curLength));
-                curLength += 0x8;
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0xb, 0x7, curLength));
+                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x25, 0xC, curLength));
                 curLength += 0x4;
             }
 
@@ -365,8 +391,17 @@ namespace AquaModelLibrary.Nova
                 addition += 2;
             }
 
+            //Weights and Weight Indices
+            if ((vertData3 & 0x40) > 0)
+            {
+                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x1, 0x11, curLength));
+                curLength += 0x8;
+                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0xb, 0x7, curLength));
+                curLength += 0x4;
+            }
+
             //More uv stuff??
-            if((vertData2 & 0x40) > 0)
+            if ((vertData2 & 0x40) > 0)
             {
                 vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x22, 0xC, curLength));
                 curLength += 0x4;
@@ -406,7 +441,7 @@ namespace AquaModelLibrary.Nova
 
                 bone.nodeName = streamReader.Read<AquaCommon.PSO2String>();
                 bone.int_30 = streamReader.Read<int>();
-                bone.int_34 = streamReader.Read<int>();
+                bone.meshNodePtr = streamReader.Read<int>();
                 bone.int_38 = streamReader.Read<int>();
                 bone.parentNodeId = streamReader.Read<int>();
 
@@ -417,7 +452,7 @@ namespace AquaModelLibrary.Nova
                 bone.scale = streamReader.Read<Vector3>(); streamReader.Seek(0x4, SeekOrigin.Current);
 
                 boneList.rttaList.Add(bone);
-                streamReader.Seek(bookmark + bone.len, SeekOrigin.Begin);
+                streamReader.Seek(bookmark + bone.trueLen, SeekOrigin.Begin);
             }
 
             return boneList;
@@ -452,7 +487,7 @@ namespace AquaModelLibrary.Nova
             streamReader.Seek(len, SeekOrigin.Current);
         }
 
-        public static void ReadBM(this BufferedStreamReader streamReader, List<MeshDefinitions> defs)
+        public static void ReadBM(this BufferedStreamReader streamReader, List<MeshDefinitions> defs, ipnbStruct tempLpnbList, long last__oaPos)
         {
             MeshDefinitions mesh = null;
             var bmStart = streamReader.Position();
@@ -472,6 +507,8 @@ namespace AquaModelLibrary.Nova
                             defs.Add(mesh);
                         }
                         mesh = new MeshDefinitions();
+                        mesh.oaPos = last__oaPos;
+                        mesh.lpnbStr = tempLpnbList;
                         mesh.ydbmStr = streamReader.ReadYdbm();
                         break;
                     case lxdi:
@@ -479,7 +516,7 @@ namespace AquaModelLibrary.Nova
                         break;
                     case salv:
                         mesh.salvStr = streamReader.ReadSalv();
-                        mesh.vtxe = GenerateGenericPSO2VTXE(mesh.salvStr.vertDef0, mesh.salvStr.vertDef1, mesh.salvStr.vertDef2, mesh.salvStr.vertDef3, mesh.salvStr.vertLen);
+                        mesh.vtxe = GenerateGenericPSO2VTXE(mesh.salvStr.vertDef0, mesh.salvStr.vertDef1, mesh.salvStr.vertDef2, mesh.salvStr.vertDef3, mesh.salvStr.vertDef4, mesh.salvStr.vertLen);
                         break;
                     case ipnb:
                         mesh.ipnbStr = streamReader.ReadIpnb();
@@ -549,7 +586,7 @@ namespace AquaModelLibrary.Nova
             salvStr.vertDef1 = streamReader.Read<byte>();
             salvStr.vertDef2 = streamReader.Read<byte>();
             salvStr.vertDef3 = streamReader.Read<byte>();
-            salvStr.int_14 = streamReader.Read<int>();
+            salvStr.vertDef4 = streamReader.Read<int>();
             salvStr.vertLen = streamReader.Read<int>();
             salvStr.int_1C = streamReader.Read<int>();
 
@@ -566,7 +603,8 @@ namespace AquaModelLibrary.Nova
 
 #if DEBUG
 
-            if((salvStr.vertDef0 & 0x2) > 0)
+            Debug.WriteLine($"vertDef4 == {salvStr.vertDef4}");
+            if ((salvStr.vertDef0 & 0x2) > 0)
             {
                 Debug.WriteLine("vertDef0 & 0x2 == true");
             }
