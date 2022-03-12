@@ -363,12 +363,6 @@ namespace AquaModelLibrary
                 unkObj.originalOffset = streamReader.Position();
                 long bookmark = streamReader.Position();
 
-                streamReader.Seek(unkObj.rawStruct.strPtr0 + offset, SeekOrigin.Begin);
-                unkObj.unkString0 = AquaObjectMethods.ReadCString(streamReader);
-
-                streamReader.Seek(unkObj.rawStruct.strPtr1 + offset, SeekOrigin.Begin);
-                unkObj.unkString1 = AquaObjectMethods.ReadCString(streamReader);
-
                 cmx.unk40CapList.Add(unkObj);
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
             }

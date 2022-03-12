@@ -9,6 +9,7 @@ namespace AquaModelLibrary.Nova
     public static class AXSConstants
     {
         public const int FSA = 0x41534620; //Contains bones, materials, and maybe defines vertex data layout
+        public const int FAA = 0x41414620; //Contains Animation data
         public const int FIA = 0x41494620; //Contains images
         public const int FRa = 0x61524620; //Unknown struct. Contains a large block of encrypted or hashed data.
         public const int daeh = 0x68656164; //Separator struct? Appears before major structs.
@@ -34,5 +35,7 @@ namespace AquaModelLibrary.Nova
         public const int FMA = 0x414D4620; //Geometry data struct
         public const int ffub = 0x62756666; //Stores bounds of vertex or face data
         public const int rdda = 0x61646472; //Stores bounds of vertex or face data per mesh
+
+        public const int animMagic = 0x0002002D;
     }
 }

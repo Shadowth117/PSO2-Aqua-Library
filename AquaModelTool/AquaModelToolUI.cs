@@ -1845,7 +1845,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select PS Nova axs file(s)",
-                Filter = "PS Nova axs Files (*.axs)|*.axs|All Files (*.*)|*",
+                Filter = "PS Nova axs Files (*.axs,*.aif)|*.axs;*.aif|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -1855,8 +1855,8 @@ namespace AquaModelTool
                 List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         aquaUI.aqua.aquaModels.Clear();
                         AquaUtil.ModelSet set = new AquaUtil.ModelSet();
                         set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
@@ -1869,14 +1869,14 @@ namespace AquaModelTool
                             aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
                             AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                         }
-                    }
-                    catch(Exception exc)
-                    {
-                        failedFiles.Add(file);
-                        failedFiles.Add(exc.Message);
-                        System.Diagnostics.Debug.WriteLine(exc.Message);
-                    }
+                    //}
+                    //catch (Exception exc)
+                    //{
+                    //    failedFiles.Add(file);
+                    //    failedFiles.Add(exc.Message);
+                    //}
                 }
+
 #if DEBUG
                 File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
 #endif
@@ -1888,6 +1888,23 @@ namespace AquaModelTool
         private void importAXSBoxTestToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AXSMethods.boxTest();
+        }
+
+        private void importAAIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PS Nova aai file(s)",
+                Filter = "PS Nova aai Files (*.aai)|*.aai|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    AAIMethods.ReadAAI(file);
+                }
+            }
         }
     }
 }

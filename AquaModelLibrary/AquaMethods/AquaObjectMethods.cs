@@ -674,6 +674,9 @@ namespace AquaModelLibrary
                                 case 0xE:
                                     vtxl.uv1ListNGS.Add(Read2Shorts(streamReader));
                                     break;
+                                case 0x99: //For nova
+                                    vtxl.uv1List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
+                                    break;
                                 default:
                                     throw new Exception($"Unexpected vert uv1 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
                             }
@@ -686,6 +689,9 @@ namespace AquaModelLibrary
                                     break;
                                 case 0xE:
                                     vtxl.uv2ListNGS.Add(Read2Shorts(streamReader));
+                                    break;
+                                case 0x99: //For nova
+                                    vtxl.uv2List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
                                     break;
                                 default:
                                     throw new Exception($"Unexpected vert uv2 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
@@ -700,6 +706,9 @@ namespace AquaModelLibrary
                                 case 0xE:
                                     vtxl.uv3ListNGS.Add(Read2Shorts(streamReader));
                                     break;
+                                case 0x99: //For nova
+                                    vtxl.uv3List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
+                                    break;
                                 default:
                                     throw new Exception($"Unexpected vert uv3 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
                             }
@@ -712,6 +721,9 @@ namespace AquaModelLibrary
                                     break;
                                 case 0xE:
                                     vtxl.uv4ListNGS.Add(Read2Shorts(streamReader));
+                                    break;
+                                case 0x99: //For nova
+                                    vtxl.uv4List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
                                     break;
                                 default:
                                     throw new Exception($"Unexpected vert uv4 struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
@@ -2443,6 +2455,19 @@ namespace AquaModelLibrary
             for (int shortIndex = 0; shortIndex < 2; shortIndex++) { shorts[shortIndex] = streamReader.Read<short>(); }
 
             return shorts;
+        }
+
+        private static ushort[] Read2Ushorts(BufferedStreamReader streamReader)
+        {
+            ushort[] shorts = new ushort[2];
+            for (int shortIndex = 0; shortIndex < 2; shortIndex++) { shorts[shortIndex] = streamReader.Read<ushort>(); }
+
+            return shorts;
+        }
+
+        private static Vector2 UshortsToVector2(ushort[] ushorts)
+        {
+            return new Vector2((float)((double)ushorts[0] / ushort.MaxValue), (float)((double)ushorts[1] / ushort.MaxValue));
         }
 
         public static float[] VectorAsArray(Vector3 vec3)

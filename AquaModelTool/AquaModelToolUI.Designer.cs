@@ -84,6 +84,7 @@
             this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -346,7 +347,8 @@
             this.pSOXVMDumpToolStripMenuItem,
             this.pSOXVRConvertToolStripMenuItem,
             this.importAXSToolStripMenuItem,
-            this.importAXSBoxTestToolStripMenuItem});
+            this.importAXSBoxTestToolStripMenuItem,
+            this.importAAIToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -537,6 +539,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // importAAIToolStripMenuItem
+            // 
+            this.importAAIToolStripMenuItem.Name = "importAAIToolStripMenuItem";
+            this.importAAIToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.importAAIToolStripMenuItem.Text = "Import AAI";
+            this.importAAIToolStripMenuItem.Click += new System.EventHandler(this.importAAIToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -614,6 +623,7 @@
         private System.Windows.Forms.ToolStripMenuItem pSOXVRConvertToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAXSToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAXSBoxTestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importAAIToolStripMenuItem;
     }
 }
 

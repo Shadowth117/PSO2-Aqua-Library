@@ -14,6 +14,7 @@ namespace AquaModelLibrary.Nova.Structures
         public ipnbStruct ipnbStr; //Mesh bone list
         public lxdiStruct lxdiStr; //Face definitions
         public salvStruct salvStr; //Vert definitions
+        public stamData stam; //Material data
         public AquaObject.VTXE vtxe = new AquaObject.VTXE();
     }
 }

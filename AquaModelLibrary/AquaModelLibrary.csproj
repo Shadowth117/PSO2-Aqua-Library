@@ -102,6 +102,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libraries\NvTriStripDotNet.dll</HintPath>
     </Reference>
+    <Reference Include="Pfim, Version=0.10.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pfim.0.10.3\lib\netstandard2.0\Pfim.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Reloaded.Memory, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -176,18 +179,23 @@
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
+    <Compile Include="Nova\AAIMethods.cs" />
     <Compile Include="Nova\AIFMethods.cs" />
     <Compile Include="Nova\AXSConstants.cs" />
     <Compile Include="Nova\AXSMethods.cs" />
+    <Compile Include="Nova\Structures\AnimDefinitionNode.cs" />
     <Compile Include="Nova\Structures\BaseMeshData.cs" />
     <Compile Include="Nova\Structures\eertStruct.cs" />
     <Compile Include="Nova\Structures\ffubStruct.cs" />
     <Compile Include="Nova\Structures\ipnbStruct.cs" />
     <Compile Include="Nova\Structures\lxdiStruct.cs" />
     <Compile Include="Nova\Structures\MeshDefinitions.cs" />
+    <Compile Include="Nova\Structures\NodeOffsetSet.cs" />
+    <Compile Include="Nova\Structures\OffsetTimeSet.cs" />
     <Compile Include="Nova\Structures\rddaStruct.cs" />
     <Compile Include="Nova\Structures\rttaStruct.cs" />
     <Compile Include="Nova\Structures\salvStruct.cs" />
+    <Compile Include="Nova\Structures\stamData.cs" />
     <Compile Include="Nova\Structures\XgmiStruct.cs" />
     <Compile Include="Nova\Structures\ydbmStruct.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />

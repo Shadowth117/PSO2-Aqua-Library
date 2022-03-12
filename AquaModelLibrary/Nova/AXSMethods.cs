@@ -33,20 +33,20 @@ namespace AquaModelLibrary.Nova
                 ipnbStruct tempLpnbList = null;
                 List<ffubStruct> ffubList = new List<ffubStruct>();
                 List<XgmiStruct> xgmiList = new List<XgmiStruct>();
+                List<string> texNames = new List<string>();
                 List<MeshDefinitions> meshDefList = new List<MeshDefinitions>();
+                List<stamData> stamList = new List<stamData>();
                 Dictionary<string, rddaStruct> rddaList = new Dictionary<string, rddaStruct>();
                 Dictionary<string, rddaStruct> imgRddaList = new Dictionary<string, rddaStruct>();
                 Dictionary<string, rddaStruct> vertRddaList = new Dictionary<string, rddaStruct>();
                 Dictionary<string, rddaStruct> faceRddaList = new Dictionary<string, rddaStruct>();
+                Dictionary<string, int> xgmiIdByCombined = new Dictionary<string, int>();
+                Dictionary<string, int> xgmiIdByUnique = new Dictionary<string, int>();
                 ffubStruct imgFfub = new ffubStruct();
                 ffubStruct vertFfub = new ffubStruct();
                 ffubStruct faceFfub = new ffubStruct(); 
 
                 var fType = streamReader.Read<int>();
-                if (fType != FSA)
-                {
-                    return null;
-                }
 
                 var fsaLen = streamReader.Read<int>();
                 streamReader.Seek(0x8, SeekOrigin.Current);
@@ -54,6 +54,9 @@ namespace AquaModelLibrary.Nova
                 while (streamReader.Position() < fsaLen)
                 {
                     var tag = streamReader.Peek<int>();
+                    var test = Encoding.UTF8.GetString(BitConverter.GetBytes(tag));
+                    Debug.WriteLine(streamReader.Position().ToString("X"));
+                    Debug.WriteLine(test);
                     switch (tag)
                     {
                         case __oa:
@@ -63,8 +66,15 @@ namespace AquaModelLibrary.Nova
                         case FIA:
                             streamReader.Seek(0x10, SeekOrigin.Current);
                             break;
+                        case __lm:
+                            var stam = streamReader.ReadLM();
+                            if(stam != null && stam.Count > 0)
+                            {
+                                stamList = stam;
+                            }
+                            break;
                         case __bm:
-                            streamReader.ReadBM(meshDefList, tempLpnbList, last__oaPos);
+                            streamReader.ReadBM(meshDefList, tempLpnbList, stamList, last__oaPos);
                             break;
                         case lpnb:
                             tempLpnbList = streamReader.ReadIpnb();
@@ -72,11 +82,17 @@ namespace AquaModelLibrary.Nova
                         case eert:
                             eertNodes = streamReader.ReadEert(); 
                             break;
-                        case ssem:
-                            streamReader.SkipBasicAXSStruct(); //Maybe use for material data later. Remember to store ordered id for _bm mesh entries for this
-                            break;
+                        //case ssem:
+                          //  streamReader.SkipBasicAXSStruct(); //Maybe use for material data later. Remember to store ordered id for _bm mesh entries for this
+                           // break;
                         case Xgmi:
-                            xgmiList.Add(streamReader.ReadXgmi());
+                            var xgmiData = streamReader.ReadXgmi();
+                            if(!xgmiIdByCombined.ContainsKey(xgmiData.stamCombinedId))
+                            {
+                                xgmiIdByCombined.Add(xgmiData.stamCombinedId, xgmiList.Count);
+                            }
+                            xgmiIdByUnique.Add(xgmiData.stamUniqueId, xgmiList.Count);
+                            xgmiList.Add(xgmiData);
                             break;
                         default:
                             streamReader.SkipBasicAXSStruct();
@@ -163,7 +179,7 @@ namespace AquaModelLibrary.Nova
                 //Read mesh data
                 if (fType2 != FMA)
                 {
-                    MessageBox.Show("Warning, this is NOT an FMA struct!");
+                    Debug.WriteLine("Unexpected struct in location of FMA!");
                     return null;
                 }
                 streamReader.Seek(0xC, SeekOrigin.Current);
@@ -182,10 +198,40 @@ namespace AquaModelLibrary.Nova
                 int meshCount = meshDefList.Count;
 
                 //Read image data
-                /*for (int i = 0; i < imgRddaList.Count; i++)
+                var ext = Path.GetExtension(filePath);
+                for (int i = 0; i < xgmiList.Count; i++)
                 {
-                    Debug.WriteLine($"Image set {i}: " + vertRddaList[i].dataStartOffset.ToString("X") + " " + vertRddaList[i].toTagStruct.ToString("X") + " " + (meshSettingStart + vertFfub.dataStartOffset + vertRddaList[i].dataStartOffset).ToString("X"));
-                }*/
+                    var xgmiData = xgmiList[i];
+                    var imgBufferInfo = imgRddaList[$"{xgmiData.md5_1.ToString("X")}{xgmiData.md5_2.ToString("X")}"];
+                    Debug.WriteLine($"Image set {i}: " + imgBufferInfo.md5_1.ToString("X") + " " + imgBufferInfo.dataStartOffset.ToString("X") + " " + imgBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset).ToString("X"));
+
+                    var position = meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset;
+                    var buffer = streamReader.ReadBytes(position, imgBufferInfo.dataSize);
+                    var outImagePath = filePath.Replace(ext, $"_tex_{i}" + ".png");
+                    texNames.Add(Path.GetFileName(outImagePath));
+                    try
+                    {
+                        //File.WriteAllBytes($"C:\\xgmiHeader_{i}.bin", xgmiData.GetBytes());
+                        //File.WriteAllBytes($"C:\\xgmiBuffer_{i}.bin", buffer);
+                        var image = AIFMethods.GetImage(xgmiData, buffer);
+                        image.Save(filePath.Replace(ext, $"_tex_{i}" + ".png"), System.Drawing.Imaging.ImageFormat.Png);
+                        string name = Path.GetFileName(filePath);
+                        //File.WriteAllBytes($"C:\\{name}_xgmiHeader_{i}.bin", xgmiData.GetBytes());
+                        //File.WriteAllBytes($"C:\\{name}_xgmiBuffer_{i}.bin", buffer);
+                    }
+                    catch(Exception exc)
+                    {
+#if DEBUG
+                        string name = Path.GetFileName(filePath);
+                        Debug.WriteLine($"Extract tex {i} failed.");
+                        File.WriteAllBytes($"C:\\{name}_xgmiHeader_{i}.bin", xgmiData.GetBytes());
+                        File.WriteAllBytes($"C:\\{name}_xgmiBuffer_{i}.bin", buffer);
+                        Debug.WriteLine(exc.Message);
+#endif
+                    }
+                    buffer = null;
+                }
+                
 
                 //Read model data - Since ffubs are initialized, they default to 0. 
                 int vertFfubPadding = imgFfub.structSize;
@@ -218,7 +264,7 @@ namespace AquaModelLibrary.Nova
                     vtxl.convertToLegacyTypes();
 
                     //Fix vert transforms
-                    for(int p = 0; p < vtxl.vertPositions.Count; p++)
+                    for (int p = 0; p < vtxl.vertPositions.Count; p++)
                     {
                         vtxl.vertPositions[p] = Vector3.Transform(vtxl.vertPositions[p], nodeMatrix);
                         if(vtxl.vertNormals.Count > 0)
@@ -227,6 +273,7 @@ namespace AquaModelLibrary.Nova
                         }
                     }
 
+                    
                     //Handle bone indices
                     if (mesh.ipnbStr != null && mesh.ipnbStr.shortList.Count > 0)
                     {
@@ -266,14 +313,46 @@ namespace AquaModelLibrary.Nova
                     //Extra
                     genMesh.vertCount = vertCount;
                     genMesh.matIdList = new List<int>(new int[genMesh.triList.Count]);
-
+                    for(int j = 0; j < genMesh.matIdList.Count; j++)
+                    {
+                        genMesh.matIdList[j] = aqp.tempMats.Count;
+                    }
                     aqp.tempTris.Add(genMesh);
-                }
 
-                aqp.tempMats.Add(new AquaObject.GenericMaterial() { texNames = new List<string>() { "noTexture.dds" } });
+                    //Material
+                    var mat = new AquaObject.GenericMaterial();
+                    mat.texNames = GetTexNames(mesh, xgmiIdByCombined, xgmiIdByUnique, texNames);
+                    aqp.tempMats.Add(mat);
+                }
 
                 return aqp;
             }
+        }
+
+        public static List<string> GetTexNames(MeshDefinitions mesh, Dictionary<string, int> xgmiIdByCombined, Dictionary<string, int> xgmiIdByUnique, List<string> cachedTexNames)
+        {
+            var texNames = new List<string>();
+            if(mesh.stam != null)
+            {
+                foreach (var xgmiKey in mesh.stam.texIds)
+                {
+                    if (xgmiIdByCombined.ContainsKey(xgmiKey))
+                    {
+                        texNames.Add(cachedTexNames[xgmiIdByCombined[xgmiKey]]);
+                    }
+                    else if (xgmiIdByUnique.ContainsKey(xgmiKey))
+                    {
+                        texNames.Add(cachedTexNames[xgmiIdByUnique[xgmiKey]]);
+                    }
+                }
+            }
+
+            if(texNames.Count == 0)
+            {
+                texNames.Add("dummyTex.dds");
+            }
+
+            return texNames;
         }
 
         public static AquaObject.VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, int vertData4, int trueLength)
@@ -326,7 +405,7 @@ namespace AquaModelLibrary.Nova
             {
                 if((vertData1 & 0x8) > 0)
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10, 0xE, curLength));
+                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10, 0x99, curLength));
                     curLength += 0x4;
                 } else
                 {
@@ -345,9 +424,9 @@ namespace AquaModelLibrary.Nova
                 }
                 if((vertData1 & 0x8) > 0)
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0xE, curLength));
+                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x99, curLength));
                     curLength += 0x4;
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0xE, curLength));
+                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0x99, curLength));
                     curLength += 0x4;
                 } else
                 {
@@ -383,9 +462,9 @@ namespace AquaModelLibrary.Nova
             //Some other kind of uv info? Idefk
             if ((vertData1 & 0x40) > 0) 
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0xE, curLength));
+                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x99, curLength));
                 curLength += 0x4;
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0xE, curLength));
+                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0x99, curLength));
                 curLength += 0x4;
 
                 addition += 2;
@@ -487,8 +566,73 @@ namespace AquaModelLibrary.Nova
             streamReader.Seek(len, SeekOrigin.Current);
         }
 
-        public static void ReadBM(this BufferedStreamReader streamReader, List<MeshDefinitions> defs, ipnbStruct tempLpnbList, long last__oaPos)
+        public static List<stamData> ReadLM(this BufferedStreamReader streamReader)
         {
+            var stamList = new List<stamData>();
+            var lmStart = streamReader.Position();
+            streamReader.Read<int>();
+            var lmEnd = streamReader.Read<int>() + lmStart;
+
+            streamReader.Seek(0x8, SeekOrigin.Current);
+            while (streamReader.Position() < lmEnd)
+            {
+                var tag = streamReader.Peek<int>();
+                switch (tag)
+                {
+                    case stam:
+                        stamList.Add(streamReader.ReadStam());
+                        break;
+                    default:
+                        streamReader.SkipBasicAXSStruct();
+                        break;
+                }
+
+                //Make sure to stop the loop if needed
+                if(stamList[stamList.Count - 1].lastStam == true)
+                {
+                    break;
+                }
+            }
+
+            streamReader.Seek(lmEnd, SeekOrigin.Begin);
+
+            return stamList;
+        }
+
+        public static stamData ReadStam(this BufferedStreamReader streamReader)
+        {
+            var stamDataObj = new stamData();
+            var stamStart = streamReader.Position();
+            streamReader.Read<int>();
+            streamReader.Seek(0x8, SeekOrigin.Current);
+            var stamSize = streamReader.Read<int>();
+            streamReader.Seek(0x8, SeekOrigin.Current);
+            var stamTexCount = streamReader.Read<ushort>();
+            streamReader.Seek(0x12, SeekOrigin.Current);
+
+            int texOffset = streamReader.Read<int>();
+            if(texOffset == 0)
+            {
+                stamDataObj.lastStam = true;
+                return stamDataObj;
+            }
+            streamReader.Seek(stamStart + texOffset, SeekOrigin.Begin);
+            for(int i = 0; i < stamTexCount; i++)
+            {
+                var key0 = BitConverter.GetBytes(streamReader.Read<int>());
+                int key1 = streamReader.Read<int>();
+                stamDataObj.texIds.Add(key0[0].ToString("X2") + key0[1].ToString("X2") + key0[2].ToString("X2") + key0[3].ToString("X2") + key1.ToString("X"));
+                streamReader.Seek(0x18, SeekOrigin.Current);
+            }
+
+            //streamReader.Seek(stamEnd, SeekOrigin.Begin);
+
+            return stamDataObj;
+        }
+
+        public static void ReadBM(this BufferedStreamReader streamReader, List<MeshDefinitions> defs, ipnbStruct tempLpnbList, List<stamData> stamList, long last__oaPos)
+        {
+            int counter = 0;
             MeshDefinitions mesh = null;
             var bmStart = streamReader.Position();
             streamReader.Read<int>();
@@ -510,6 +654,17 @@ namespace AquaModelLibrary.Nova
                         mesh.oaPos = last__oaPos;
                         mesh.lpnbStr = tempLpnbList;
                         mesh.ydbmStr = streamReader.ReadYdbm();
+                        if (stamList.Count > counter)
+                        {
+                            mesh.stam = stamList[counter];
+                        } else if (stamList.Count > 0)
+                        {
+                            mesh.stam = stamList[stamList.Count - 1];
+                        } else
+                        {
+                            mesh.stam = null;
+                        }
+                        counter++;
                         break;
                     case lxdi:
                         mesh.lxdiStr = streamReader.ReadLxdi();
@@ -822,9 +977,15 @@ namespace AquaModelLibrary.Nova
             return rddaStr;
         }
 
+        //Thanks to Silent for this find
         //Face decoding functions from: https://forum.xentax.com/viewtopic.php?p=143356&sid=c54ef316ad86c051345fec2ef63a0bf7#p143356
         public static List<int> inverseWatermarkTransform(List<int> in_inds, int max_step)
         {
+            if (max_step == 0x0000ffff)
+            {
+                return in_inds;
+            }
+
             List<int> out_inds = new List<int>();
 
             int hi = max_step - 1;
@@ -849,12 +1010,22 @@ namespace AquaModelLibrary.Nova
                     int a = inds[i++];
                     int b = inds[i++];
                     int c = inds[i++];
-                    out_inds.Add(b); out_inds.Add(a); out_inds.Add(c);
 
-                    if (a < b)
+                    bool isDegen = a == b || b == c || a == c;
+                    if(!isDegen)
+                    {
+                        out_inds.Add(b); out_inds.Add(a); out_inds.Add(c);
+                    }
+
+                    if (a < b && i < inds.Count)
                     {
                         int d = inds[i++];
-                        out_inds.Add(d); out_inds.Add(a); out_inds.Add(b);
+
+                        isDegen = a == b || b == d || a == d;
+                        if (!isDegen)
+                        {
+                            out_inds.Add(d); out_inds.Add(a); out_inds.Add(b);
+                        }
                     }
                 }
             }
@@ -865,12 +1036,21 @@ namespace AquaModelLibrary.Nova
                     int a = inds[i++];
                     int b = inds[i++];
                     int c = inds[i++];
-                    out_inds.Add(a); out_inds.Add(b); out_inds.Add(c);
 
-                    if (a < b)
+                    bool isDegen = a == b || b == c || a == c;
+                    if (!isDegen)
+                    {
+                        out_inds.Add(a); out_inds.Add(b); out_inds.Add(c);
+                    }
+
+                    if (a < b && i < inds.Count)
                     {
                         int d = inds[i++];
-                        out_inds.Add(a); out_inds.Add(d); out_inds.Add(b);
+                        isDegen = a == b || b == d || a == d;
+                        if (!isDegen)
+                        {
+                            out_inds.Add(a); out_inds.Add(d); out_inds.Add(b);
+                        }
                     }
                 }
             }
