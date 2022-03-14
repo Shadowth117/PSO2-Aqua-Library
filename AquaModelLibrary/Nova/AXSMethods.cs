@@ -207,7 +207,7 @@ namespace AquaModelLibrary.Nova
 
                     var position = meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset;
                     var buffer = streamReader.ReadBytes(position, imgBufferInfo.dataSize);
-                    var outImagePath = filePath.Replace(ext, $"_tex_{i}" + ".png");
+                    var outImagePath = filePath.Replace(ext, $"_tex_{i}" + ".dds");
                     texNames.Add(Path.GetFileName(outImagePath));
                     try
                     {
