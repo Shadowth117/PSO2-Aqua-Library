@@ -211,13 +211,10 @@ namespace AquaModelLibrary.Nova
                     texNames.Add(Path.GetFileName(outImagePath));
                     try
                     {
-                        //File.WriteAllBytes($"C:\\xgmiHeader_{i}.bin", xgmiData.GetBytes());
-                        //File.WriteAllBytes($"C:\\xgmiBuffer_{i}.bin", buffer);
-                        var image = AIFMethods.GetImage(xgmiData, buffer);
-                        image.Save(filePath.Replace(ext, $"_tex_{i}" + ".png"), System.Drawing.Imaging.ImageFormat.Png);
                         string name = Path.GetFileName(filePath);
-                        //File.WriteAllBytes($"C:\\{name}_xgmiHeader_{i}.bin", xgmiData.GetBytes());
-                        //File.WriteAllBytes($"C:\\{name}_xgmiBuffer_{i}.bin", buffer);
+                        Debug.WriteLine($"{name}_xgmi_{ i}");
+                        var image = AIFMethods.GetImage(xgmiData, buffer);
+                        File.WriteAllBytes(filePath.Replace(ext, $"_tex_{i}" + ".dds"), image);
                     }
                     catch(Exception exc)
                     {

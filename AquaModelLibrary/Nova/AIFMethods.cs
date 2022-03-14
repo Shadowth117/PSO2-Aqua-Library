@@ -32,7 +32,10 @@ namespace AquaModelLibrary.Nova
             xgmiStr.int_18 = streamReader.Read<int>();
             xgmiStr.int_1C = streamReader.Read<int>();
 
-            xgmiStr.int_20 = streamReader.Read<int>();
+            xgmiStr.dxtType = streamReader.Read<byte>();
+            xgmiStr.bt_21 = streamReader.Read<byte>();
+            xgmiStr.bt_22 = streamReader.Read<byte>();
+            xgmiStr.bt_23 = streamReader.Read<byte>();
             xgmiStr.int_24 = streamReader.Read<int>();
             xgmiStr.width = streamReader.Read<ushort>();
             xgmiStr.height = streamReader.Read<ushort>();
@@ -71,27 +74,76 @@ namespace AquaModelLibrary.Nova
             return xgmiStr;
         }
 
-        public static Bitmap GetImage(XgmiStruct xgmiStr, byte[] buffer)
+        public static byte[] GetImage(XgmiStruct xgmiStr, byte[] buffer)
         {
-            var dds = AssembleDDS(buffer, xgmiStr.width, xgmiStr.height, xgmiStr.alphaTesting, xgmiStr.mipIdByte);
-            using (var image = Pfim.Pfim.FromStream(new MemoryStream(dds)))
+            int sourceBytesPerPixel;
+            switch(xgmiStr.dxtType)
+            {
+                case 0x10:
+                    sourceBytesPerPixel = 0x8;
+                    break;
+                case 0x12:
+                    sourceBytesPerPixel = 0x10;
+                    break;
+                case 0x14:
+                    sourceBytesPerPixel = 0x10;
+                    break;
+                default:
+                    sourceBytesPerPixel = 0x8;
+                    break;
+            }
+            var processedBuffer = Unswizzle(buffer, xgmiStr.width >> 2, xgmiStr.height >> 2, sourceBytesPerPixel);
+            var dds = AssembleDDS(processedBuffer, xgmiStr.height, xgmiStr.width, xgmiStr.alphaTesting, xgmiStr.dxtType);
+            return dds;
+            /*using (var image = Pfim.Pfim.FromStream(new MemoryStream(dds)))
             {
                 // Pin pfim's data array so that it doesn't get reaped by GC, unnecessary
                 // in this snippet but useful technique if the data was going to be used in
                 // control like a picture box
                 var bytes = (new MemoryStream(image.Data)).ToArray();
-                var bytes2 = blockLevelUnswizzle(bytes, xgmiStr.width, xgmiStr.height, 4);
-                bytes = null;
                 Bitmap bmp = new Bitmap(xgmiStr.width, xgmiStr.height, PixelFormat.Format32bppArgb);
                 BitmapData currMip = bmp.LockBits(new Rectangle(0, 0, xgmiStr.width, xgmiStr.height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 
-                //Marshal.Copy(bytes, 0, currMip.Scan0, bytes.Length);
-                Marshal.Copy(bytes2, 0, currMip.Scan0, bytes2.Length);
-                bytes2 = null;
+                Marshal.Copy(bytes, 0, currMip.Scan0, bytes.Length);
+                bytes = null;
                 bmp.UnlockBits(currMip);
 
                 return bmp;
+            }*/
+        }
+
+        //Massive credit to Agrajag for the deswizzling here
+        public static byte[] Unswizzle(byte[] swizzledData, int width, int height, int sourceBytesPerPixel)
+        {
+            int maxU = (int)(Math.Log(width, 2));
+            int maxV = (int)(Math.Log(height, 2));
+
+            byte[] unswizzledData = new byte[swizzledData.Length];
+
+            for (int j = 0; (j < width * height) && (j * sourceBytesPerPixel < swizzledData.Length); j++)
+            {
+                int u = 0, v = 0;
+                int origCoord = j;
+                for (int k = 0; k < maxU || k < maxV; k++)
+                {
+                    if (k < maxV)   //Transpose!
+                    {
+                        v |= (origCoord & 1) << k;
+                        origCoord >>= 1;
+                    }
+                    if (k < maxU)   //Transpose!
+                    {
+                        u |= (origCoord & 1) << k;
+                        origCoord >>= 1;
+                    }
+                }
+                if (u < width && v < height)
+                {
+                    Array.Copy(swizzledData, j * sourceBytesPerPixel, unswizzledData, (v * width + u) * sourceBytesPerPixel, sourceBytesPerPixel);
+                }
+                
             }
+            return unswizzledData;
         }
 
         //Massive credit to Agrajag for the deswizzling here
@@ -152,14 +204,14 @@ namespace AquaModelLibrary.Nova
             return outBytes.ToArray();
         }
 
-        public static byte[] GenerateDDSHeader(ushort width, ushort height, int size, byte alphaTesting, byte pixelFormat)
+        public static byte[] GenerateDDSHeader(ushort height, ushort width, int size, byte alphaTesting, byte pixelFormat)
         {
             var outBytes = new List<byte>();
 
             outBytes.AddRange(new byte[] { 0x44, 0x44, 0x53, 0x20, 0x7C, 0x00, 0x00, 0x00, 0x07, 0x10, 0x08, 0x00 });
-            outBytes.AddRange(BitConverter.GetBytes(width));
-            outBytes.AddRange(new byte[] { 0x00, 0x00 });
             outBytes.AddRange(BitConverter.GetBytes(height));
+            outBytes.AddRange(new byte[] { 0x00, 0x00 });
+            outBytes.AddRange(BitConverter.GetBytes(width));
             outBytes.AddRange(new byte[] { 0x00, 0x00 });
             outBytes.AddRange(BitConverter.GetBytes(size));
             outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,

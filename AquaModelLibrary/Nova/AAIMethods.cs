@@ -58,6 +58,11 @@ namespace AquaModelLibrary.Nova
 
                 int clumpCount = 0;
                 List<AnimDefinitionNode> nodes = new List<AnimDefinitionNode>();
+                int ct14 = 0;
+                int ct24 = 0;
+                int ct30 = 0;
+                int ct34 = 0;
+                int ct44 = 0;
                 for(int i = 0; i < nodeCount; i++)
                 {
                     AnimDefinitionNode node = new AnimDefinitionNode();
@@ -75,19 +80,24 @@ namespace AquaModelLibrary.Nova
                         switch(dc.dcStart.dcType)
                         {
                             case 0x14:
+                                ct14++;
                                 dc.d14 = streamReader.Read<DataClump14>();
                                 break;
                             case 0x24:
+                                ct24++;
                                 dc.d24 = streamReader.Read<DataClump24>();
                                 break;
                             case 0x30:
+                                ct30++;
                                 dc.d30 = streamReader.Read<DataClump30>();
                                 break;
                             case 0x34:
+                                ct34++;
                                 dc.d34 = streamReader.Read<DataClump34>();
                                 dc.dcString = dc.d34.clumpName.GetString();
                                 break;
                             case 0x44:
+                                ct44++;
                                 dc.d44 = streamReader.Read<DataClump44>();
                                 dc.dcString = dc.d44.clumpName.GetString();
                                 break;
@@ -95,6 +105,7 @@ namespace AquaModelLibrary.Nova
                                 MessageBox.Show($"clumpSize {dc.dcStart.dcType.ToString("X")} at {streamReader.Position().ToString("X")} is unexpected!");
                                 break;
                         }
+                        node.data.Add(dc);
                     }
                     nodes.Add(node);
                 }

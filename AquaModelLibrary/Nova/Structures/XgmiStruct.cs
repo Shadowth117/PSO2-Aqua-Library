@@ -24,7 +24,10 @@ namespace AquaModelLibrary.Nova.Structures
         public int int_18;
         public int int_1C;
 
-        public int int_20;
+        public byte dxtType;
+        public byte bt_21;
+        public byte bt_22;
+        public byte bt_23;
         public int int_24;
         public ushort width;
         public ushort height;
@@ -60,16 +63,19 @@ namespace AquaModelLibrary.Nova.Structures
             outBytes.AddRange(BitConverter.GetBytes(int_08));
             outBytes.AddRange(BitConverter.GetBytes(paddingLen));
 
-            outBytes.Add(mipIdByte);
+            outBytes.Add(mipIdByte); //bit *0000000 defines a DIFFERENT texture id. This results in valid ranges of 0x0-0x7F and 0x80-0xFF for mips, seemingly
             outBytes.Add(idByte1);
             outBytes.Add(idByte2);
             outBytes.Add(idByte3);
+            outBytes.AddRange(BitConverter.GetBytes(texCatId)); //Shared between mips, sometimes shared with unrelated textures
             outBytes.AddRange(BitConverter.GetBytes(int_18));
             outBytes.AddRange(BitConverter.GetBytes(int_1C));
 
-            outBytes.AddRange(BitConverter.GetBytes(int_20));
+            outBytes.Add(dxtType);
+            outBytes.Add(bt_21);
+            outBytes.Add(bt_22);
+            outBytes.Add(bt_23);
             outBytes.AddRange(BitConverter.GetBytes(int_24));
-            outBytes.AddRange(BitConverter.GetBytes(texCatId));
             outBytes.AddRange(BitConverter.GetBytes(width));
             outBytes.AddRange(BitConverter.GetBytes(height));
             outBytes.Add(bt_2C);

@@ -42,8 +42,8 @@ namespace AquaModelLibrary
                     int fullSize = BitConverter.ToInt32(xvm, offset + 0x4) + 8;
                     int type1 = BitConverter.ToInt32(xvm, offset + 0x8);
                     int type2 = BitConverter.ToInt32(xvm, offset + 0xC);
-                    ushort sizeX = BitConverter.ToUInt16(xvm, offset + 0x14);
-                    ushort sizeY = BitConverter.ToUInt16(xvm, offset + 0x16);
+                    ushort sizeY = BitConverter.ToUInt16(xvm, offset + 0x14);
+                    ushort sizeX = BitConverter.ToUInt16(xvm, offset + 0x16);
                     int dataSize = BitConverter.ToInt32(xvm, offset + 0x18);
 
                     var xvr = new List<byte>();
@@ -83,7 +83,7 @@ namespace AquaModelLibrary
             int dataSize = BitConverter.ToInt32(xvr, offset + 0x18);
 
             var xvrOut = new List<byte>();
-            xvrOut.AddRange(GenerateDDSHeader(sizeX, sizeY, dataSize, type1, type2));
+            xvrOut.AddRange(GenerateDDSHeader(sizeY, sizeX, dataSize, type1, type2));
             xvrOut.AddRange(xvrList.GetRange(offset + 0x40, dataSize));
 
 
@@ -95,14 +95,14 @@ namespace AquaModelLibrary
             xvrList = null;
         }
 
-        public static byte[] GenerateDDSHeader(ushort width, ushort height, int size, int type1, int type2)
+        public static byte[] GenerateDDSHeader(ushort height, ushort width, int size, int type1, int type2)
         {
             var outBytes = new List<byte>();
 
             outBytes.AddRange(new byte[] { 0x44, 0x44, 0x53, 0x20, 0x7C, 0x00, 0x00, 0x00, 0x07, 0x10, 0x08, 0x00 });
-            outBytes.AddRange(BitConverter.GetBytes(width));
-            outBytes.AddRange(new byte[] { 0x00, 0x00 });
             outBytes.AddRange(BitConverter.GetBytes(height));
+            outBytes.AddRange(new byte[] { 0x00, 0x00 });
+            outBytes.AddRange(BitConverter.GetBytes(width));
             outBytes.AddRange(new byte[] { 0x00, 0x00 });
             outBytes.AddRange(BitConverter.GetBytes(size));
             outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,

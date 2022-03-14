@@ -1855,8 +1855,8 @@ namespace AquaModelTool
                 List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    //try
-                    //{
+                    try
+                    {
                         aquaUI.aqua.aquaModels.Clear();
                         AquaUtil.ModelSet set = new AquaUtil.ModelSet();
                         set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
@@ -1869,19 +1869,19 @@ namespace AquaModelTool
                             aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
                             AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                         }
-                    //}
-                    //catch (Exception exc)
-                    //{
-                    //    failedFiles.Add(file);
-                    //    failedFiles.Add(exc.Message);
-                    //}
+                    }
+                    catch (Exception exc)
+                    {
+                        failedFiles.Add(file);
+                        failedFiles.Add(exc.Message);
+                    }
                 }
 
 #if DEBUG
                 File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
 #endif
-                //System.Diagnostics.Debug.Unindent();
-                //System.Diagnostics.Debug.Flush();
+                System.Diagnostics.Debug.Unindent();
+                System.Diagnostics.Debug.Flush();
             }
         }
 
@@ -1903,6 +1903,41 @@ namespace AquaModelTool
                 foreach (var file in openFileDialog.FileNames)
                 {
                     AAIMethods.ReadAAI(file);
+                }
+            }
+        }
+
+        private void convertPSNovaaxsaifToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PS Nova axs/aif file(s)",
+                Filter = "PS Nova model and texture Files (*.axs,*.aif)|*.axs;*.aif|PS Nova model files (*.axs)|*.axs|PS Nova Texture files (*.aif)|*.aif|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    try
+                    {
+                        aquaUI.aqua.aquaModels.Clear();
+                        AquaUtil.ModelSet set = new AquaUtil.ModelSet();
+                        set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
+                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                        {
+                            aquaUI.aqua.aquaModels.Add(set);
+                            aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                            var outName = Path.ChangeExtension(file, ".aqp");
+                            aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                            AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                    }
                 }
             }
         }

@@ -2902,7 +2902,7 @@ namespace AquaModelLibrary
 
                         //Stream aligns to 0x10 after timings.
                         streamReader.Seek(motion.motionKeys[i].keyData[j].frameAddress + offset, SeekOrigin.Begin);
-
+                        
                         switch (motion.motionKeys[i].keyData[j].dataType)
                         {
                             //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.

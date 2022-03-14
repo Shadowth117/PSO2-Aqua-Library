@@ -82,9 +82,10 @@
             this.pSOXVRConvertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSNovaaxsaifToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -190,7 +191,8 @@
             this.prmEffectModelExportToolStripMenuItem,
             this.prmEffectFromModelToolStripMenuItem,
             this.convertAnimationToAQMToolStripMenuItem,
-            this.spirefierToolStripMenuItem});
+            this.spirefierToolStripMenuItem,
+            this.convertPSNovaaxsaifToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -521,6 +523,13 @@
             this.importAXSBoxTestToolStripMenuItem.Text = "Import AXS Box Test";
             this.importAXSBoxTestToolStripMenuItem.Click += new System.EventHandler(this.importAXSBoxTestToolStripMenuItem_Click);
             // 
+            // importAAIToolStripMenuItem
+            // 
+            this.importAAIToolStripMenuItem.Name = "importAAIToolStripMenuItem";
+            this.importAAIToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.importAAIToolStripMenuItem.Text = "Import AAI";
+            this.importAAIToolStripMenuItem.Click += new System.EventHandler(this.importAAIToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -539,12 +548,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // importAAIToolStripMenuItem
+            // convertPSNovaaxsaifToolStripMenuItem
             // 
-            this.importAAIToolStripMenuItem.Name = "importAAIToolStripMenuItem";
-            this.importAAIToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.importAAIToolStripMenuItem.Text = "Import AAI";
-            this.importAAIToolStripMenuItem.Click += new System.EventHandler(this.importAAIToolStripMenuItem_Click);
+            this.convertPSNovaaxsaifToolStripMenuItem.Name = "convertPSNovaaxsaifToolStripMenuItem";
+            this.convertPSNovaaxsaifToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertPSNovaaxsaifToolStripMenuItem.Text = "Convert PS Nova .axs/.aif";
+            this.convertPSNovaaxsaifToolStripMenuItem.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -624,6 +633,7 @@
         private System.Windows.Forms.ToolStripMenuItem importAXSToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAXSBoxTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAAIToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertPSNovaaxsaifToolStripMenuItem;
     }
 }
 
