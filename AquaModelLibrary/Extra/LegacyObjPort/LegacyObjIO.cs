@@ -249,7 +249,7 @@ namespace LegacyObj
             {
                 //strips
                 AquaObject.stripData strips;
-                if(aqo.objc.type >= 0xC32)
+                if(aqo.objc.type >= 0xC31)
                 {
                     strips = new AquaObject.stripData();
                     strips.format0xC33 = true;
@@ -266,7 +266,7 @@ namespace LegacyObj
                 var pset = new AquaObject.PSET();
                 pset.faceGroupCount = 0x1;
                 pset.psetFaceCount = strips.triIdCount;
-                if(aqo.objc.type >= 0xC32)
+                if(aqo.objc.type >= 0xC31)
                 {
                     pset.tag = 0x1000;
                     pset.stripStartCount = totalStripsShorts;

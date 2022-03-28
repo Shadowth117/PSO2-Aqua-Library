@@ -8,6 +8,7 @@ namespace AquaExtras
 {
     public static class FilenameConstants
     {
+        public static string classicSystemData = "character/making/pl_system_data.ice"; //handles body proportions, unloaded player models, and subnormal textures
         public static string mgxName = "setting.mgx";
         public static string pbCreatures = "photon_blast/photon_blast_";
         public static string db_vehicle = "vehicle/";

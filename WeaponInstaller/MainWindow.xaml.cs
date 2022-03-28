@@ -308,12 +308,10 @@ namespace WeaponInstaller
                 int len = file.Length;
                 string type = file.Replace("NGSNames.csv", "");
                 bool isOldType = type.Length == len;
-                string folderPath = "\\Weapons\\NGS\\"; 
 
                 if(isOldType)
                 {
                     type = file.Replace("Names.csv", "");
-                    folderPath = "\\Weapons\\PSO2\\";
                 }
                 if(type == "Tact")
                 {
@@ -328,16 +326,12 @@ namespace WeaponInstaller
         {
             Dictionary<int, string> names = new Dictionary<int, string>();
             string pso2Path;
-            string game;
             if(isOldType)
             {
                 pso2Path = trueWin32Folder;
-                game = "PSO2";
             } else
             {
                 pso2Path = trueWin32RebootFolder;
-
-                game = "NGS";
             }
 
             int typeInt = 0;

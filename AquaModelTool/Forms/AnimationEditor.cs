@@ -45,7 +45,7 @@ namespace AquaModelTool
             animTreeView.Nodes.Clear();
             for (int i = 0; i < currentMotion.motionKeys.Count; i++)
             {
-                TreeNode topNode = new TreeNode(currentMotion.motionKeys[i].mseg.nodeName.GetString());
+                TreeNode topNode = new TreeNode($" ({currentMotion.motionKeys[i].mseg.nodeId}) " + currentMotion.motionKeys[i].mseg.nodeName.GetString());
                 topNode.Tag = 0;
                 animTreeView.Nodes.Add(topNode);
 

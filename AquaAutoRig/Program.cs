@@ -41,7 +41,7 @@ namespace AquaAutoRig
                             aqua.ReadModel(Path.ChangeExtension(arg, ".org.aqp"));
                             aqua.aquaModels[0].models[0] = LegacyObj.LegacyObjIO.ImportObj(arg, aqua.aquaModels[0].models[0]);
                             string outName = Path.ChangeExtension(arg, ".aqp");
-                            if (aqua.aquaModels[0].models[0].objc.type >= 0xC32)
+                            if (aqua.aquaModels[0].models[0].objc.type >= 0xC31)
                             {
                                 aqua.WriteNGSNIFLModel(outName, outName);
                             }

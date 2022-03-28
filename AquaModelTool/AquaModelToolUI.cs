@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AquaModelLibrary;
 using AquaModelLibrary.Nova;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using zamboni;
 using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelTool
@@ -223,6 +226,8 @@ namespace AquaModelTool
                         aquaUI.aqua.aquaModels.Clear();
                         aquaUI.aqua.aquaMotions.Clear();
                         aquaUI.aqua.aquaEffect.Clear();
+                        aquaUI.aqua.aquaBones.Clear();
+                        aquaUI.aqua.tpnFiles.Clear();
                         aquaUI.aqua.ReadModel(file, true);
 #if DEBUG
                         var test = aquaUI.aqua.aquaModels[0].models[0];
@@ -606,174 +611,121 @@ namespace AquaModelTool
             }
         }
 
-        private void getShadTexSheetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void GetTexSheetData(Dictionary<string, List<string>> shaderCombinationsTexSheet, Dictionary<string, List<string>> shaderModelFilesTexSheet, string file)
         {
-            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            var model = aquaUI.aqua.aquaModels[0].models[0];
+
+            //Go through all meshes in each model
+            foreach (var mesh in model.meshList)
             {
-                IsFolderPicker = true,
-                Title = "Select a folder containing pso2 models (PRM has no shader and will not be read)",
-            };
-            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                Dictionary<string, List<string>> shaderCombinations = new Dictionary<string, List<string>>();
-                Dictionary<string, List<string>> shaderModelFiles = new Dictionary<string, List<string>>();
-                List<string> files = new List<string>();
-                string[] extensions = new string[] { "*.aqp", "*.aqo", "*.trp", "*.tro" };
-                foreach (string s in extensions)
+                var shad = model.shadList[mesh.shadIndex];
+                string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
+                var textures = AquaObjectMethods.GetTexListNames(model, mesh.tsetIndex);
+
+                if (textures.Count == 0 || textures == null)
                 {
-                    files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
+                    continue;
                 }
 
-                //Go through models we gathered
-                foreach (string file in files)
+                string combination = "";
+                foreach (var tex in textures)
                 {
-                    try
+                    if (tex.Contains("_d.dds") || tex.Contains("_d_") || tex.Contains("_diffuse")) //diffuse
                     {
-                        aquaUI.aqua.ReadModel(file);
+                        combination += "d";
                     }
-                    catch
+                    else if (tex.Contains("_s.dds") || tex.Contains("_s_") || tex.Contains("_multi")) //specular composite
                     {
-                        Console.WriteLine("Could not read file: " + file);
-                        continue;
+                        combination += "s";
                     }
-
-                    var model = aquaUI.aqua.aquaModels[0].models[0];
-
-                    //Go through all meshes in each model
-                    foreach (var mesh in model.meshList)
+                    else if (tex.Contains("_m.dds") || tex.Contains("_m_")) //mask
                     {
-                        var shad = model.shadList[mesh.shadIndex];
-                        string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
-                        var textures = AquaObjectMethods.GetTexListNames(model, mesh.tsetIndex);
-
-                        if (textures.Count == 0 || textures == null)
-                        {
-                            continue;
-                        }
-
-                        string combination = "";
-                        foreach (var tex in textures)
-                        {
-                            if (tex.Contains("_d.dds") || tex.Contains("_d_") || tex.Contains("_diffuse")) //diffuse
-                            {
-                                combination += "d";
-                            }
-                            else if (tex.Contains("_s.dds") || tex.Contains("_s_") || tex.Contains("_multi")) //specular composite
-                            {
-                                combination += "s";
-                            }
-                            else if (tex.Contains("_m.dds") || tex.Contains("_m_")) //mask
-                            {
-                                combination += "m";
-                            }
-                            else if (tex.Contains("_n.dds") || tex.Contains("_n_") || tex.Contains("_normal")) //normal
-                            {
-                                combination += "n";
-                            }
-                            else if (tex.Contains("_t.dds") || tex.Contains("_t_"))
-                            {
-                                combination += "t";
-                            }
-                            else if (tex.Contains("_k.dds") || tex.Contains("_k_")) //glow thing
-                            {
-                                combination += "k";
-                            }
-                            else if (tex.Contains("_p.dds") || tex.Contains("_p_")) //another glow thing
-                            {
-                                combination += "p";
-                            }
-                            else if (tex.Contains("_a.dds") || tex.Contains("_a_"))
-                            {
-                                combination += "a";
-                            }
-                            else if (tex.Contains("_b.dds") || tex.Contains("_b_"))
-                            {
-                                combination += "b";
-                            }
-                            else if (tex.Contains("_c.dds") || tex.Contains("_c_"))
-                            {
-                                combination += "c";
-                            }
-                            else if (tex.Contains("_e.dds") || tex.Contains("_e_") || tex.Contains("_env.dds")) //environment map
-                            {
-                                combination += "e";
-                            }
-                            else if (tex.Contains("_f.dds") || tex.Contains("_f_")) //feather map? Mostly for rappies
-                            {
-                                combination += "f";
-                            }
-                            else if (tex.Contains("_r.dds") || tex.Contains("_r_"))
-                            {
-                                combination += "r";
-                            }
-                            else if (tex.Contains("_decal"))
-                            {
-                                combination += "decal";
-                            }
-                            else if (tex.Contains("_noise"))
-                            {
-                                combination += "noise";
-                            }
-                            else if (tex.Contains("_subnormal_01"))
-                            {
-                                combination += "subnormal_01";
-                            }
-                            else if (tex.Contains("_subnormal_02"))
-                            {
-                                combination += "subnormal_02";
-                            }
-                            else if (tex.Contains("_subnormal_03"))
-                            {
-                                combination += "subnormal_03";
-                            }
-                            else if (tex.Contains("_mask"))
-                            {
-                                combination += "mask";
-                            }
-                            else //Add the full name if we absolutely cannot figure this out from these
-                            {
-                                combination += tex;
-                            }
-                            combination += " ";
-                        }
-
-                        //Add them to the list
-                        if (!shaderCombinations.ContainsKey(key))
-                        {
-                            shaderCombinations[key] = new List<string>() { combination };
-                            shaderModelFiles[key] = new List<string>() { Path.GetFileName(file) };
-                        }
-                        else
-                        {
-                            shaderCombinations[key].Add(combination);
-                            shaderModelFiles[key].Add(Path.GetFileName(file));
-                        }
+                        combination += "m";
                     }
-                    model = null;
-                    aquaUI.aqua.aquaModels.Clear();
+                    else if (tex.Contains("_n.dds") || tex.Contains("_n_") || tex.Contains("_normal")) //normal
+                    {
+                        combination += "n";
+                    }
+                    else if (tex.Contains("_t.dds") || tex.Contains("_t_"))
+                    {
+                        combination += "t";
+                    }
+                    else if (tex.Contains("_k.dds") || tex.Contains("_k_")) //glow thing
+                    {
+                        combination += "k";
+                    }
+                    else if (tex.Contains("_p.dds") || tex.Contains("_p_")) //another glow thing
+                    {
+                        combination += "p";
+                    }
+                    else if (tex.Contains("_a.dds") || tex.Contains("_a_"))
+                    {
+                        combination += "a";
+                    }
+                    else if (tex.Contains("_b.dds") || tex.Contains("_b_"))
+                    {
+                        combination += "b";
+                    }
+                    else if (tex.Contains("_c.dds") || tex.Contains("_c_"))
+                    {
+                        combination += "c";
+                    }
+                    else if (tex.Contains("_e.dds") || tex.Contains("_e_") || tex.Contains("_env.dds")) //environment map
+                    {
+                        combination += "e";
+                    }
+                    else if (tex.Contains("_f.dds") || tex.Contains("_f_")) //feather map? Mostly for rappies
+                    {
+                        combination += "f";
+                    }
+                    else if (tex.Contains("_r.dds") || tex.Contains("_r_"))
+                    {
+                        combination += "r";
+                    }
+                    else if (tex.Contains("_decal"))
+                    {
+                        combination += "decal";
+                    }
+                    else if (tex.Contains("_noise"))
+                    {
+                        combination += "noise";
+                    }
+                    else if (tex.Contains("_subnormal_01"))
+                    {
+                        combination += "subnormal_01";
+                    }
+                    else if (tex.Contains("_subnormal_02"))
+                    {
+                        combination += "subnormal_02";
+                    }
+                    else if (tex.Contains("_subnormal_03"))
+                    {
+                        combination += "subnormal_03";
+                    }
+                    else if (tex.Contains("_mask"))
+                    {
+                        combination += "mask";
+                    }
+                    else //Add the full name if we absolutely cannot figure this out from these
+                    {
+                        combination += tex;
+                    }
+                    combination += " ";
                 }
 
-                //Sort the list so we don't get a mess
-                var keys = shaderCombinations.Keys.ToList();
-                keys.Sort();
-
-                StringBuilder simpleOutput = new StringBuilder();
-                StringBuilder advancedOutput = new StringBuilder();
-                foreach (var key in keys)
+                //Add them to the list
+                if (!shaderCombinationsTexSheet.ContainsKey(key))
                 {
-                    simpleOutput.AppendLine(key + "," + shaderCombinations[key][0]);
-
-                    advancedOutput.AppendLine(key + "," + shaderCombinations[key][0] + "," + shaderModelFiles[key][0]);
-                    for (int i = 1; i < shaderCombinations[key].Count; i++)
-                    {
-                        advancedOutput.AppendLine("," + shaderCombinations[key][i] + "," + shaderModelFiles[key][i]);
-                    }
-                    advancedOutput.AppendLine();
+                    shaderCombinationsTexSheet[key] = new List<string>() { combination };
+                    shaderModelFilesTexSheet[key] = new List<string>() { Path.GetFileName(file) };
                 }
-
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleOutput.csv", simpleOutput.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutput.csv", advancedOutput.ToString());
+                else
+                {
+                    shaderCombinationsTexSheet[key].Add(combination);
+                    shaderModelFilesTexSheet[key].Add(Path.GetFileName(file));
+                }
             }
+            model = null;
         }
 
         private void batchParsePSO2SetToTextToolStripMenuItem_Click(object sender, EventArgs e)
@@ -859,135 +811,249 @@ namespace AquaModelTool
             CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
             {
                 IsFolderPicker = true,
-                Title = "Select a folder containing pso2 models (PRM has no shader and will not be read)",
+                Title = "Select a folder containing pso2 models/ice files (PRM has no shader and will not be read). This shit can take a longass time",
             };
             if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
+                Dictionary<string, List<string>> shaderCombinationsTexSheet = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderModelFilesTexSheet = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderUnk0 = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderCombinations = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderModelFiles = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderDetails = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderExtras = new Dictionary<string, List<string>>();
                 List<string> files = new List<string>();
-                string[] extensions = new string[] { "*.aqp", "*.aqo", "*.trp", "*.tro" };
-                foreach (string s in extensions)
-                {
-                    files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
-                }
+                string[] extensions = new string[] { ".aqp", ".aqo", ".trp", ".tro" };
+                files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, "*", SearchOption.AllDirectories));
 
                 //Go through models we gathered
                 foreach (string file in files)
                 {
-                    try
+                    if(extensions.Contains(Path.GetExtension(file)))
                     {
-                        aquaUI.aqua.ReadModel(file);
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Could not read file: " + file);
-                        continue;
-                    }
-
-                    var model = aquaUI.aqua.aquaModels[0].models[0];
-
-                    //Go through all meshes in each model
-                    if(model.objc.type > 0xC2A)
-                    {
-                        foreach (var shad in model.shadList)
+                        try
                         {
-                            if(shad is NGSAquaObject.NGSSHAD && (((NGSAquaObject.NGSSHAD)shad).shadDetailOffset != 0 || ((NGSAquaObject.NGSSHAD)shad).shadExtraOffset != 0))
-                            {
-                                NGSAquaObject.NGSSHAD ngsShad = (NGSAquaObject.NGSSHAD)shad;
-                                string key = ngsShad.pixelShader.GetString() + " " + ngsShad.vertexShader.GetString();
+                            aquaUI.aqua.ReadModel(file);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Could not read file: " + file);
+                            continue;
+                        }
 
-                                string data = "";
-                                string detData = "";
-                                string extData = "";
-                                if (ngsShad.shadDetailOffset != 0)
+                        ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, file);
+                        GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, file);
+                    } else 
+                    {
+                        var fileBytes = File.ReadAllBytes(file);
+                        if(fileBytes.Length > 0)
+                        {
+                            var magic = BitConverter.ToInt32(fileBytes, 0);
+                            if (magic == 0x454349)
+                            {
+                                var strm = new MemoryStream(fileBytes);
+                                IceFile fVarIce;
+                                try
                                 {
-                                    data = $"Detail : \n unk0:{ngsShad.shadDetail.unk0} Extra Count:{ngsShad.shadDetail.shadExtraCount} unk1:{ngsShad.shadDetail.unk1} unkCount0:{ngsShad.shadDetail.unkCount0}\n" +
-                                        $" unk2:{ngsShad.shadDetail.unk2} unkCount1:{ngsShad.shadDetail.unkCount1} unk3:{ngsShad.shadDetail.unk3} unk4:{ngsShad.shadDetail.unk4}\n";
-                                    detData = "{" + $"\"{key}\", CreateDetail({ngsShad.shadDetail.unk0}, {ngsShad.shadDetail.shadExtraCount}, {ngsShad.shadDetail.unk1}, " +
-                                        $"{ngsShad.shadDetail.unkCount0}, {ngsShad.shadDetail.unk2}, {ngsShad.shadDetail.unkCount1}, {ngsShad.shadDetail.unk3}, " +
-                                        $"{ngsShad.shadDetail.unk4})" + "},\n";
-                                }
-                                if(ngsShad.shadExtraOffset != 0)
-                                {
-                                    data += "Extra :\n";
-                                    extData = "{" + $"\"{key}\", new List<SHADExtraEntry>()" + "{";
-                                    foreach (var extra in ngsShad.shadExtra)
+                                    fVarIce = IceFile.LoadIceFile(strm);
+
+                                    List<byte[]> iceFiles = (new List<byte[]>(fVarIce.groupOneFiles));
+                                    iceFiles.AddRange(fVarIce.groupTwoFiles);
+
+                                    //Loop through files to get what we need
+                                    foreach (byte[] iceFileBytes in iceFiles)
                                     {
-                                        data += $"{extra.entryString.GetString()} {extra.entryFlag0} {extra.entryFlag1} {extra.entryFlag2}\n" +
-                                            $"{extra.entryFloats.X} {extra.entryFloats.Y} {extra.entryFloats.Z} {extra.entryFloats.W}\n";
-                                        extData += " CreateExtra(" + $"{extra.entryFlag0}, \"{extra.entryString.GetString()}\"," +
-                                            $" {extra.entryFlag1}, {extra.entryFlag2}, new Vector4({extra.entryFloats.X}f, {extra.entryFloats.Y}f, {extra.entryFloats.Z}f, " +
-                                            $"{extra.entryFloats.W}f)),";
+                                        var name = IceFile.getFileName(iceFileBytes).ToLower();
+                                        var nameExtension = Path.GetExtension(name);
+                                        if (extensions.Contains(nameExtension))
+                                        {
+                                            try
+                                            {
+                                                aquaUI.aqua.ReadModel(iceFileBytes);
+                                                ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, name);
+                                                GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, name);
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine("Could not read file: " + name + " in " + file);
+                                                continue;
+                                            }
+                                        }
                                     }
-                                    extData += "}},\n";
-                                }
 
-                                //Add them to the list
-                                if (!shaderCombinations.ContainsKey(key))
-                                {
-                                    shaderCombinations[key] = new List<string>() { data };
-                                    shaderModelFiles[key] = new List<string>() { Path.GetFileName(file) };
-                                    shaderDetails[key] = new List<string>() { detData };
-                                    shaderExtras[key] = new List<string>() { extData };
+                                    fVarIce = null;
                                 }
-                                else
+                                catch
                                 {
-                                    shaderCombinations[key].Add(data);
-                                    shaderModelFiles[key].Add(Path.GetFileName(file));
-                                    shaderDetails[key].Add(detData);
-                                    shaderExtras[key].Add(extData);
                                 }
-                            } else
-                            {
-                                continue;
+                                strm.Dispose();
                             }
                         }
 
+                        fileBytes = null;
                     }
-                    model = null;
                     aquaUI.aqua.aquaModels.Clear();
                 }
 
                 //Sort the list so we don't get a mess
                 var keys = shaderCombinations.Keys.ToList();
                 keys.Sort();
-
+                
                 StringBuilder simpleOutput = new StringBuilder();
                 StringBuilder advancedOutput = new StringBuilder();
                 StringBuilder detailDictOutput = new StringBuilder();
                 StringBuilder extraDictOutput = new StringBuilder();
+                StringBuilder unk0DictOutput = new StringBuilder();
 
                 detailDictOutput.Append("public static Dictionary<string, SHADDetail> NGSShaderDetailPresets = new Dictionary<string, SHADDetail>(){\n");
                 extraDictOutput.Append("public static Dictionary<string, List<SHADExtraEntry>> NGSShaderExtraPresets = new Dictionary<string, List<SHADExtraEntry>>(){\n");
-
+                unk0DictOutput.Append("public static Dictionary<string, int> ShaderUnk0Values = new Dictionary<string, int>(){\n");
                 foreach (var key in keys)
                 {
                     simpleOutput.Append("\n" + key + "\n" + shaderCombinations[key][0]);
                     detailDictOutput.Append(shaderDetails[key][0]);
                     extraDictOutput.Append(shaderExtras[key][0]);
-
+                    unk0DictOutput.Append(shaderUnk0[key][0]);
                     advancedOutput.Append("\n" + key + "\n" + shaderCombinations[key][0] + "," + shaderModelFiles[key][0]);
                     for (int i = 1; i < shaderCombinations[key].Count; i++)
                     {
-                        advancedOutput.AppendLine("," + shaderCombinations[key][i] + "," + shaderModelFiles[key][i]);
+                        advancedOutput.AppendLine("," + shaderCombinations[key][i] + "," + shaderModelFiles[key][i] + "," + shaderUnk0[key][i]);
                         advancedOutput.AppendLine();
                     }
                     advancedOutput.AppendLine();
                 }
                 detailDictOutput.Append("};\n");
-                extraDictOutput.Append("};");
+                extraDictOutput.Append("};\n");
+                unk0DictOutput.Append("};\n");
 
                 detailDictOutput.Append(extraDictOutput);
+                detailDictOutput.Append(unk0DictOutput);
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleNGSOutput.csv", simpleOutput.ToString());
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedNGSOutput.csv", advancedOutput.ToString());
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "presetDictionary.cs", detailDictOutput.ToString());
+
+                //Sort the tex sheet list so we don't get a mess
+                var keysTexSheet = shaderCombinationsTexSheet.Keys.ToList();
+                keysTexSheet.Sort();
+
+                StringBuilder simpleOutputTexSheet = new StringBuilder();
+                StringBuilder advancedOutputTexSheet = new StringBuilder();
+                foreach (var key in keysTexSheet)
+                {
+                    simpleOutputTexSheet.AppendLine(key + "," + shaderCombinationsTexSheet[key][0]);
+
+                    advancedOutputTexSheet.AppendLine(key + "," + shaderCombinationsTexSheet[key][0] + "," + shaderModelFilesTexSheet[key][0]);
+                    for (int i = 1; i < shaderCombinationsTexSheet[key].Count; i++)
+                    {
+                        advancedOutputTexSheet.AppendLine("," + shaderCombinationsTexSheet[key][i] + "," + shaderModelFilesTexSheet[key][i]);
+                    }
+                    advancedOutputTexSheet.AppendLine();
+                }
+
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleOutputTexSheets.csv", simpleOutputTexSheet.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutputTexSheets.csv", advancedOutputTexSheet.ToString());
             }
 
             aquaUI.aqua.aquaModels.Clear();
         }
+
+        private void ParseModelShaderInfo(Dictionary<string, List<string>> shaderUnk0, Dictionary<string, List<string>> shaderCombinations, Dictionary<string, List<string>> shaderModelFiles, Dictionary<string, List<string>> shaderDetails, Dictionary<string, List<string>> shaderExtras, string file)
+        {
+            string filestring = file;
+            //Add them to the list
+            if (filestring.Contains(":"))
+            {
+                filestring = Path.GetFileName(filestring);
+            }
+            var model = aquaUI.aqua.aquaModels[0].models[0];
+
+            //Go through all meshes in each model
+            foreach (var shad in model.shadList)
+            {
+                string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
+                string shad0Line = "{" + $"\"{key}\", " + shad.unk0.ToString() + " },\n";
+                if (shad.unk0 != 0)
+                {
+                    Debug.WriteLine(key + " " + shad.unk0);
+                }
+
+
+                if (shad is NGSAquaObject.NGSSHAD && (((NGSAquaObject.NGSSHAD)shad).shadDetailOffset != 0 || ((NGSAquaObject.NGSSHAD)shad).shadExtraOffset != 0))
+                {
+                    NGSAquaObject.NGSSHAD ngsShad = (NGSAquaObject.NGSSHAD)shad;
+
+                    string data = "";
+                    string detData = "";
+                    string extData = "";
+                    if (ngsShad.shadDetailOffset != 0)
+                    {
+                        data = $"Detail : \n unk0:{ngsShad.shadDetail.unk0} Extra Count:{ngsShad.shadDetail.shadExtraCount} unk1:{ngsShad.shadDetail.unk1} unkCount0:{ngsShad.shadDetail.unkCount0}\n" +
+                            $" unk2:{ngsShad.shadDetail.unk2} unkCount1:{ngsShad.shadDetail.unkCount1} unk3:{ngsShad.shadDetail.unk3} unk4:{ngsShad.shadDetail.unk4}\n";
+                        detData = "{" + $"\"{key}\", CreateDetail({ngsShad.shadDetail.unk0}, {ngsShad.shadDetail.shadExtraCount}, {ngsShad.shadDetail.unk1}, " +
+                            $"{ngsShad.shadDetail.unkCount0}, {ngsShad.shadDetail.unk2}, {ngsShad.shadDetail.unkCount1}, {ngsShad.shadDetail.unk3}, " +
+                            $"{ngsShad.shadDetail.unk4})" + "},\n";
+                    }
+                    if (ngsShad.shadExtraOffset != 0)
+                    {
+                        data += "Extra :\n";
+                        extData = "{" + $"\"{key}\", new List<SHADExtraEntry>()" + "{";
+                        foreach (var extra in ngsShad.shadExtra)
+                        {
+                            data += $"{extra.entryString.GetString()} {extra.entryFlag0} {extra.entryFlag1} {extra.entryFlag2}\n" +
+                                $"{extra.entryFloats.X} {extra.entryFloats.Y} {extra.entryFloats.Z} {extra.entryFloats.W}\n";
+                            extData += " CreateExtra(" + $"{extra.entryFlag0}, \"{extra.entryString.GetString()}\"," +
+                                $" {extra.entryFlag1}, {extra.entryFlag2}, new Vector4({extra.entryFloats.X}f, {extra.entryFloats.Y}f, {extra.entryFloats.Z}f, " +
+                                $"{extra.entryFloats.W}f)),";
+                        }
+                        extData += "}},\n";
+                    }
+
+                    if (!shaderCombinations.ContainsKey(key))
+                    {
+                        shaderUnk0[key] = new List<string>() { shad0Line };
+                        shaderCombinations[key] = new List<string>() { data };
+                        shaderModelFiles[key] = new List<string>() { filestring };
+                        shaderDetails[key] = new List<string>() { detData };
+                        shaderExtras[key] = new List<string>() { extData };
+                    }
+                    else
+                    {
+                        shaderUnk0[key].Add(shad0Line);
+                        shaderCombinations[key].Add(data);
+                        shaderModelFiles[key].Add(filestring);
+                        shaderDetails[key].Add(detData);
+                        shaderExtras[key].Add(extData);
+                    }
+                }
+                else if(shad.unk0 != 0)
+                {
+                    if (!shaderCombinations.ContainsKey(key))
+                    {
+                        shaderUnk0[key] = new List<string>() { shad0Line };
+                        shaderCombinations[key] = new List<string>() { "" };
+                        shaderModelFiles[key] = new List<string>() { filestring };
+                        shaderDetails[key] = new List<string>() { "" };
+                        shaderExtras[key] = new List<string>() { "" };
+                    }
+                    else
+                    {
+                        shaderUnk0[key].Add(shad0Line);
+                        shaderCombinations[key].Add("");
+                        shaderModelFiles[key].Add(filestring);
+                        shaderDetails[key].Add("");
+                        shaderExtras[key].Add("");
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+
+            model = null;
+        }
+
         private void computeTangentSpaceTestToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AquaObjectMethods.ComputeTangentSpace(aquaUI.aqua.aquaModels[0].models[0], false, true);
@@ -1456,7 +1522,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select PSO2 model file",
-                Filter = "|PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro",
+                Filter = "PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -1678,6 +1744,7 @@ namespace AquaModelTool
             if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 StringBuilder outStr = new StringBuilder();
+                StringBuilder endStr = new StringBuilder();
                 Dictionary<int, List<int>> timeSorted = new Dictionary<int, List<int>>();
                 aquaUI.aqua.aquaMotions.Clear();
                 aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
@@ -1712,10 +1779,10 @@ namespace AquaModelTool
                     {
                         outStr.AppendLine($"  {node} - {aquaUI.aqua.aquaMotions[0].anims[0].motionKeys[node].mseg.nodeName.GetString()}");
                     }
-
+                    endStr.AppendLine(key + "");
                     outStr.AppendLine();
                 }
-
+                outStr.Append(endStr);
                 File.WriteAllText(goodFolderDialog.FileName + "_times.txt", outStr.ToString());
             }
         }
@@ -1935,11 +2002,232 @@ namespace AquaModelTool
                             AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                         }
                     }
-                    catch (Exception exc)
+                    catch 
                     {
                     }
                 }
             }
+        }
+
+        private void proportionAQMJankTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select proportion AQM ice",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                aquaUI.aqua.aquaMotions.Clear();
+                var strm = new MemoryStream(File.ReadAllBytes(goodFolderDialog.FileName));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                int frameToHit = 6;
+                int tfmType = 3;
+                int tfmType2 = 2;
+                var vec4 = new System.Numerics.Vector4(5, 5, 5, 0);
+                var vec4_2 = new System.Numerics.Vector4(0.707f, 0, -0.707f, 0);
+
+                //Loop through files to get what we need
+                for (int i = 0; i < fVarIce.groupTwoFiles.Length; i++)
+                {
+                    List<byte> file;
+                    var name = IceFile.getFileName(fVarIce.groupTwoFiles[i]).ToLower();
+                    switch (name)
+                    {
+                        case "pl_cmakemot_b_fc.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        case "pl_cmakemot_b_fh.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        case "pl_cmakemot_b_fh_hand.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        case "pl_cmakemot_b_fh_rb.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        case "pl_cmakemot_b_fh_rb_oldface.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        default:
+                            break;
+                    }
+                    aquaUI.aqua.aquaMotions.Clear();
+                }
+
+                byte[] rawData = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), fVarIce.groupOneFiles, fVarIce.groupTwoFiles).getRawData(false, false);
+                File.WriteAllBytes(goodFolderDialog.FileName + $"_{frameToHit}.ice", rawData);
+
+                rawData = null;
+                fVarIce = null;
+            }
+        }
+
+        private List<byte> AdjustNormalKeysMotion(IceFile fVarIce, int frameToHit, int i, string name, int tfmType, System.Numerics.Vector4 vec4, int node = -1)
+        {
+            List<byte> file;
+            aquaUI.aqua.ReadMotion(fVarIce.groupTwoFiles[i]);
+            SetNormalKeysToValue(frameToHit, tfmType, vec4, node);
+            file = aquaUI.aqua.GetNiflMotionBytes(name);
+            file.InsertRange(0, (new IceHeaderStructures.IceFileHeader(name, (uint)file.Count)).GetBytes());
+            fVarIce.groupTwoFiles[i] = file.ToArray();
+            return file;
+        }
+
+        private void SetNormalKeysToValue(int frame, int keyType, System.Numerics.Vector4 value, int node = -1)
+        {
+            //Go through the motion, make edits to all keys at a specific frame time, save a copy, reset, and repeat with an incrmented frametime until the final frame
+
+            foreach (var keySet in aquaUI.aqua.aquaMotions[0].anims[0].motionKeys)
+            {
+                if(node == -1 || keySet.mseg.nodeId == node)
+                {
+                    foreach (var data in keySet.keyData)
+                    {
+                        if (data.keyType == keyType)
+                        {
+                            int frameIndex = -1;
+                            for (int j = 0; j < data.frameTimings.Count; j++)
+                            {
+                                if (data.frameTimings[j] / 0x10 == frame)
+                                {
+                                    frameIndex = j;
+                                }
+                            }
+
+                            if (frameIndex != -1)
+                            {
+                                data.vector4Keys[frameIndex] = value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //Unused data???
+        private void proportionAQMFaceTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select face proportion AQM ice",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                aquaUI.aqua.aquaMotions.Clear();
+                var strm = new MemoryStream(File.ReadAllBytes(goodFolderDialog.FileName));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                int frameToHit = 62;
+                int tfmType = 3;
+                int tfmType2 = 2;
+                var vec4 = new System.Numerics.Vector4(5, 5, 5, 0);
+                var vec4_2 = new System.Numerics.Vector4(0.707f, 0, -0.707f, 0);
+
+                //Loop through files to get what we need
+                for (int i = 0; i < fVarIce.groupTwoFiles.Length; i++)
+                {
+                    List<byte> file;
+                    var name = IceFile.getFileName(fVarIce.groupTwoFiles[i]).ToLower();
+                    switch (name)
+                    {
+                        case "pl_cmakemot_f_fd.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        case "pl_cmakemot_f_fh.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        case "pl_cmakemot_f_fn.aqm":
+                            file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4);
+                            //file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2);
+                            break;
+                        default:
+                            break;
+                    }
+                    aquaUI.aqua.aquaMotions.Clear();
+                }
+
+                byte[] rawData = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), fVarIce.groupOneFiles, fVarIce.groupTwoFiles).getRawData(false, false);
+                File.WriteAllBytes(goodFolderDialog.FileName + $"_{frameToHit}.ice", rawData);
+
+                rawData = null;
+                fVarIce = null;
+            }
+        }
+
+        private void proportionAQMNGSFaceTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select NGS Face proportion AQM ice",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                aquaUI.aqua.aquaMotions.Clear();
+                var strm = new MemoryStream(File.ReadAllBytes(goodFolderDialog.FileName));
+                var fVarIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+                
+                int frameToHit = 158;
+                int tfmType = 3;
+                int tfmType2 = 2;
+                int tfmType3 = 1;
+                var vec4 = new System.Numerics.Vector4(5, 5, 5, 0);
+                var vec4_2 = new System.Numerics.Vector4(0.707f, 0, -0.707f, 0);
+                var vec4_3 = new System.Numerics.Vector4(5, 5, 5, 0);
+                var node = -1;
+
+                //Loop through files to get what we need
+                for (int i = 0; i < fVarIce.groupTwoFiles.Length; i++)
+                {
+                    List<byte> file;
+                    var name = IceFile.getFileName(fVarIce.groupTwoFiles[i]).ToLower();
+                    if(name.Contains(".aqm"))
+                    {
+                        file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType3, vec4_3, node); //pos
+                        file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4, node); //scale
+                        file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType2, vec4_2, node); //rot
+                    }
+                    aquaUI.aqua.aquaMotions.Clear();
+                }
+
+                byte[] rawData = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), fVarIce.groupOneFiles, fVarIce.groupTwoFiles).getRawData(false, false);
+                File.WriteAllBytes(goodFolderDialog.FileName + $"_{frameToHit}.ice", rawData);
+
+                rawData = null;
+                fVarIce = null;
+            }
+        }
+
+        private void testPointToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //General vertex transformation theory:
+            //1. Subtract bone's translation from vertex translation
+            //2. Assemble matrix from rotation and scale key data (we add translation again later)
+            //3. Vector3.Transform() the point to the matrix
+            //4. Readd bone translation
+
+            Matrix4x4 mat = Matrix4x4.Identity;
+            mat *= Matrix4x4.CreateScale(0.5f, 1, 1);
+
+            var rotation = Matrix4x4.CreateFromQuaternion(new Quaternion(0.707107f, 0, 0, 0.707107f));
+
+            mat *= rotation;
+
+            //mat *= Matrix4x4.CreateTranslation(5, 5, 5);
+
+            Vector3 vec3 = new Vector3(1, 1, 1);
+            var vec3Transformed = Vector3.Transform(vec3, mat);
+            var a = 0;
         }
     }
 }

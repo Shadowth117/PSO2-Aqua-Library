@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using System.Numerics;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Numerics;
 
 namespace AquaModelLibrary
 {
@@ -12,7 +10,7 @@ namespace AquaModelLibrary
     {
         public static Assimp.Scene AssimpExport(string filePath, AquaObject aqp, AquaNode aqn)
         {
-            if(aqp is NGSAquaObject)
+            if (aqp is NGSAquaObject)
             {
                 //NGS aqps will give lots of isolated vertices if we don't handle them
                 //Since we're not actually altering the data so much as rearranging references, we can just do this
@@ -23,7 +21,7 @@ namespace AquaModelLibrary
 
             //Create an array to hold references to these since Assimp lacks a way to grab these by order or id
             //We don't need the nodo count in this since they can't be parents
-            Assimp.Node[] boneArray = new Assimp.Node[aqn.nodeList.Count]; 
+            Assimp.Node[] boneArray = new Assimp.Node[aqn.nodeList.Count];
 
             //Set up root node
             var root = aqn.nodeList[0];
@@ -41,7 +39,8 @@ namespace AquaModelLibrary
                 if (bn.parentId == -1)
                 {
                     parentNode = aiRootNode;
-                } else
+                }
+                else
                 {
                     parentNode = boneArray[bn.parentId];
                     var pn = aqn.nodeList[bn.parentId];
@@ -78,12 +77,12 @@ namespace AquaModelLibrary
                    Assimp.Matrix4x4.FromRotationZ(bn.eulRot.Z);
 
                 matrix *= rotation;
-                matrix *= Assimp.Matrix4x4.FromTranslation(new Assimp.Vector3D(bn.pos.X * 100, bn.pos.Y * 100, bn.pos.Z *100));
+                matrix *= Assimp.Matrix4x4.FromTranslation(new Assimp.Vector3D(bn.pos.X * 100, bn.pos.Y * 100, bn.pos.Z * 100));
                 aiNode.Transform = matrix;
 
                 parentNodo.Children.Add(aiNode);
             }
-            
+
             //Assign meshes and materials
             foreach (AquaObject.MESH msh in aqp.meshList)
             {
@@ -99,7 +98,7 @@ namespace AquaModelLibrary
                 //It may actually be possible to add this to the previous loop, but my reference didn't so I'm doing it in a separate loop for safety
                 //Reference: https://github.com/TGEnigma/Amicitia/blob/master/Source/AmicitiaLibrary/Graphics/RenderWare/RWClumpNode.cs
                 //UVs will have dummied data to ensure that if the game arbitrarily writes them, they will still be exported back in the same order
-                for(int vertId = 0; vertId < vtxl.vertPositions.Count; vertId++)
+                for (int vertId = 0; vertId < vtxl.vertPositions.Count; vertId++)
                 {
                     if (vtxl.vertPositions.Count > 0)
                     {
@@ -134,7 +133,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.uv1List[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
                         aiMesh.TextureCoordinateChannels[0].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[0].Add(aiTextureCoordinate);
@@ -145,7 +145,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.uv2List[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
                         aiMesh.TextureCoordinateChannels[1].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[1].Add(aiTextureCoordinate);
@@ -156,7 +157,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.uv3List[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
                         aiMesh.TextureCoordinateChannels[2].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[2].Add(aiTextureCoordinate);
@@ -167,7 +169,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.uv4List[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
                         aiMesh.TextureCoordinateChannels[3].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[3].Add(aiTextureCoordinate);
@@ -178,7 +181,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.vert0x22[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[4].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[4].Add(aiTextureCoordinate);
@@ -189,7 +193,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.vert0x23[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
@@ -200,7 +205,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.vert0x24[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[6].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[6].Add(aiTextureCoordinate);
@@ -211,7 +217,8 @@ namespace AquaModelLibrary
                         var textureCoordinate = vtxl.vert0x25[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[7].Add(aiTextureCoordinate);
-                    } else
+                    }
+                    else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(0, 0, 0f);
                         aiMesh.TextureCoordinateChannels[7].Add(aiTextureCoordinate);
@@ -219,17 +226,18 @@ namespace AquaModelLibrary
                 }
 
                 //Assimp Bones - Assimp likes to store vertex weights in bones and bones references in meshes
-                if(hasVertexWeights)
+                if (hasVertexWeights)
                 {
                     //Get bone palette
                     List<uint> bonePalette;
                     if (aqp.objc.bonePaletteOffset > 0)
                     {
                         bonePalette = aqp.bonePalette;
-                    } else
+                    }
+                    else
                     {
                         bonePalette = new List<uint>();
-                        for(int bn = 0; bn < vtxl.bonePalette.Count; bn++)
+                        for (int bn = 0; bn < vtxl.bonePalette.Count; bn++)
                         {
                             bonePalette.Add(vtxl.bonePalette[bn]);
                         }
@@ -237,7 +245,7 @@ namespace AquaModelLibrary
                     var aiBoneMap = new Dictionary<int, Assimp.Bone>();
 
                     //Iterate through vertices
-                    for(int vertId = 0; vertId < vtxl.vertWeightIndices.Count; vertId++)
+                    for (int vertId = 0; vertId < vtxl.vertWeightIndices.Count; vertId++)
                     {
                         var boneIndices = vtxl.vertWeightIndices[vertId];
                         var boneWeights = Vector4ToFloatArray(vtxl.vertWeights[vertId]);
@@ -277,7 +285,8 @@ namespace AquaModelLibrary
 
                     //Add the bones to the mesh
                     aiMesh.Bones.AddRange(aiBoneMap.Values);
-                } else //Handle rigid meshes
+                }
+                else //Handle rigid meshes
                 {
                     var aiBone = new Assimp.Bone();
                     var aqnBone = boneArray[msh.baseMeshNodeId];
@@ -315,15 +324,15 @@ namespace AquaModelLibrary
                     mate.BlendMode = Assimp.BlendMode.Additive;
                 }
                 mate.Name = "|[]{}~`!@#$%^&*;:'\"?><,./(" + shaderSet[0] + "," + shaderSet[1] + ")" + "{" + mat.alphaType.GetString() + "}" + mat.matName.GetString();
-                
+
                 //Set textures - PSO2 Texture slots are NOT consistent and depend entirely on the selected shader. As such, slots will be somewhat arbitrary after albedo/diffuse
-                for(int i = 0; i < textureSet.Count; i++)
+                for (int i = 0; i < textureSet.Count; i++)
                 {
                     switch (i)
                     {
                         case 0:
                             mate.TextureDiffuse = new Assimp.TextureSlot(
-                                textureSet[i], Assimp.TextureType.Diffuse, i, Assimp.TextureMapping.FromUV, aqp.tstaList[aqp.tsetList[msh.tsetIndex].tstaTexIDs[i]].modelUVSet, 0, 
+                                textureSet[i], Assimp.TextureType.Diffuse, i, Assimp.TextureMapping.FromUV, aqp.tstaList[aqp.tsetList[msh.tsetIndex].tstaTexIDs[i]].modelUVSet, 0,
                                 Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0);
                             break;
                         case 1:
@@ -398,7 +407,7 @@ namespace AquaModelLibrary
 
                 meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
             }
-            
+
             return aiScene;
         }
 
@@ -442,7 +451,7 @@ namespace AquaModelLibrary
 
                 var pos = prmVert.pos * 100;
                 aiMesh.Vertices.Add(new Assimp.Vector3D(pos.X, pos.Y, pos.Z));
-                
+
                 var nrm = prmVert.normal;
                 aiMesh.Normals.Add(new Assimp.Vector3D(nrm.X, nrm.Y, nrm.Z));
 
@@ -459,9 +468,9 @@ namespace AquaModelLibrary
                 var uv2 = prmVert.uv2;
                 var aiUV2 = new Assimp.Vector3D(uv2.X, uv2.Y, 0f);
                 aiMesh.TextureCoordinateChannels[1].Add(aiUV2);
-                
+
             }
-            
+
             //Handle rigid meshes
             {
                 var aiBone = new Assimp.Bone();
@@ -514,7 +523,7 @@ namespace AquaModelLibrary
             aiScene.RootNode.Children.Add(meshNode);
 
             meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
-            
+
 
             return aiScene;
         }

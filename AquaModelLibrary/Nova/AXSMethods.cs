@@ -114,7 +114,7 @@ namespace AquaModelLibrary.Nova
                         var rotation = Matrix4x4.CreateFromQuaternion(rttaNode.quatRot);
 
                         mat *= rotation;
-
+                        
                         mat *= Matrix4x4.CreateTranslation(rttaNode.pos);
 
                         var parentId = rttaNode.parentNodeId;
@@ -318,6 +318,7 @@ namespace AquaModelLibrary.Nova
 
                     //Material
                     var mat = new AquaObject.GenericMaterial();
+                    mat.matName = $"NovaMaterial_{i}";
                     mat.texNames = GetTexNames(mesh, xgmiIdByCombined, xgmiIdByUnique, texNames);
                     aqp.tempMats.Add(mat);
                 }

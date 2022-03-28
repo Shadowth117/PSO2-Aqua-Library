@@ -262,6 +262,10 @@
       <Project>{ac648cf6-3e5c-4c7a-8a6e-083ae962fa1c}</Project>
       <Name>AquaModelLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">
+      <Project>{F0C5B71B-5956-42FE-8DAC-10759CF6BEE0}</Project>
+      <Name>ZamboniLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />

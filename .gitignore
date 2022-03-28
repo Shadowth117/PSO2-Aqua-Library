@@ -407,3 +407,11 @@ AquaNoesisDummy/
 AquaNoesisPlugin/
 
 WeaponInstaller/bin/Debug/
+
+AquaModelLibrary.Native/obj/
+
+AquaModelLibrary.Native/bin/
+
+AquaModelLibrary.Native/Dependencies/FBX/include/
+
+AquaModelLibrary.Native/Dependencies/FBX/lib/

@@ -1495,9 +1495,9 @@ namespace AquaModelLibrary
 
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
-                if (aquaCMX.innerWearIdLink.ContainsKey(id))
+                if (aquaCMX.baseWearIdLink.ContainsKey(id))
                 {
-                    adjustedId = aquaCMX.innerWearIdLink[id].bcln.fileId;
+                    adjustedId = aquaCMX.baseWearIdLink[id].bcln.fileId;
                 }
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -1506,8 +1506,8 @@ namespace AquaModelLibrary
                     string rebEx = $"{rebootExStart}bw_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
-                    string rebLinkedInner = $"{rebootStart}b1_{id + 50000}.ice";
-                    string rebLinkedInnerEx = $"{rebootExStart}b1_{id + 50000}_ex.ice";
+                    string rebLinkedInner = $"{rebootStart}b1_{adjustedId + 50000}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{adjustedId + 50000}_ex.ice";
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
@@ -1641,9 +1641,9 @@ namespace AquaModelLibrary
 
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
-                if (aquaCMX.baseWearIdLink.ContainsKey(id))
+                if (aquaCMX.innerWearIdLink.ContainsKey(id))
                 {
-                    adjustedId = aquaCMX.baseWearIdLink[id].bcln.fileId;
+                    adjustedId = aquaCMX.innerWearIdLink[id].bcln.fileId;
                 }
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -5041,11 +5041,10 @@ namespace AquaModelLibrary
             }
         }
 
-        private static string AddBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
+        public static string AddBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
         {
-            string rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
-            string bmCheck = GetFileHash(fname.Replace(typeString, "_bm_"));
-            string hnCheck = GetFileHash(fname.Replace(typeString, "_hn_")); //If not basewear, hn. If basewear, ho
+            string rpCheck, bmCheck, hnCheck;
+            GetBodyExtraFileStrings(fname, typeString, out rpCheck, out bmCheck, out hnCheck);
 
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
@@ -5071,10 +5070,18 @@ namespace AquaModelLibrary
             return output;
         }
 
-        private static string AddBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
+        public static void GetBodyExtraFileStrings(string fname, string typeString, out string rpCheck, out string bmCheck, out string hnCheck)
         {
-            string rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
-            string hnCheck = GetFileHash(fname.Replace("bw", "ho")); //If not basewear, hn. If basewear, ho
+            rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
+            bmCheck = GetFileHash(fname.Replace(typeString, "_bm_"));
+            hnCheck = GetFileHash(fname.Replace(typeString, "_hn_"));
+            //If not basewear, hn. If basewear, ho
+        }
+
+        public static string AddBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
+        {
+            string rpCheck, hnCheck;
+            GetBasewearExtraFileStrings(fname, out rpCheck, out hnCheck);
 
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
@@ -5083,7 +5090,7 @@ namespace AquaModelLibrary
             }
 
             //NGS doesn't have these sorts of files
-            if(isClassic)
+            if (isClassic)
             {
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
@@ -5095,7 +5102,14 @@ namespace AquaModelLibrary
             return output;
         }
 
-        private static string AddOutfitSound(string pso2_binDir, string partialFilename, int soundId)
+        public static void GetBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck)
+        {
+            rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
+            hnCheck = GetFileHash(fname.Replace("bw", "ho"));
+            //If not basewear, hn. If basewear, ho
+        }
+
+        public static string AddOutfitSound(string pso2_binDir, string partialFilename, int soundId)
         {
             if(soundId != -1)
             {

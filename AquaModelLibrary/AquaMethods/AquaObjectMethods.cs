@@ -911,7 +911,7 @@ namespace AquaModelLibrary
                 int vsetIndex;
                 int psetIndex;
                 //Unlike older aqo variants, NGS models can have a different vsetIndex than their
-                if((model.objc.type == 0xC33 || model.objc.type == 0xc32) && model.meshList.Count > 0)
+                if((model.objc.type >= 0xc31) && model.meshList.Count > 0)
                 {
                     vsetIndex = model.meshList[meshIndex].vsetIndex;
                     psetIndex = model.meshList[meshIndex].psetIndex;
@@ -2286,12 +2286,19 @@ namespace AquaModelLibrary
             mate.matName.SetString(mat.matName);
 
             //Set up SHAD
+            string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
             shad.pixelShader.SetString(mat.shaderNames[0]);
             shad.vertexShader.SetString(mat.shaderNames[1]);
+
+            //Only in NGS shaders, but in theory could come up in others. Otherwise 0. No idea what this is.
+            if(ShaderUnk0Values.ContainsKey(key))
+            {
+                shad.unk0 = ShaderUnk0Values[key];
+            }
+
             if(ngsMat)
             {
                 var ngsShad = (NGSAquaObject.NGSSHAD)shad;
-                string key = ngsShad.pixelShader.GetString() + " " + ngsShad.vertexShader.GetString();
                 if(NGSShaderDetailPresets.ContainsKey(key))
                 {
                     ngsShad.shadDetail = NGSShaderDetailPresets[key];

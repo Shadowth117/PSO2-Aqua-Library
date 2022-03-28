@@ -110,7 +110,7 @@ namespace AquaModelLibrary.Nova
                     nodes.Add(node);
                 }
 
-                return null;
+                //return null;
 
                 var offsetTimes = streamReader.ReadOffsetTimeSets(streamReader.Position(), timeCount);
                 List<List<OffsetTimeSet>> setsList = new List<List<OffsetTimeSet>>();

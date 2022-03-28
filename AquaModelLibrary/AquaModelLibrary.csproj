@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AquaModelLibrary</RootNamespace>
     <AssemblyName>AquaModelLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -149,6 +149,7 @@
   <ItemGroup>
     <Compile Include="AquaMethods\AquaMiscMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
+    <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AquaBTI_MotionConfig.cs" />
@@ -177,6 +178,9 @@
     <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
+    <Compile Include="Native\Fbx\FbxExporter.cs" />
+    <Compile Include="Native\Fbx\Interfaces\IFbxExporter.cs" />
+    <Compile Include="Native\Native.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
     <Compile Include="Nova\AAIMethods.cs" />
@@ -228,6 +232,7 @@
       <Name>ZamboniLib</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
