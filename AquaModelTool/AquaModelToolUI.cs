@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AquaModelLibrary;
+using AquaModelLibrary.Native.Fbx;
 using AquaModelLibrary.Nova;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using zamboni;
@@ -1155,7 +1156,54 @@ namespace AquaModelTool
             //Model saving
             if (modelExtensions.Contains(ext))
             {
-                using (var ctx = new Assimp.AssimpContext())
+                SaveFileDialog saveFileDialog;
+                saveFileDialog = new SaveFileDialog()
+                {
+                    Title = "Export fbx model file",
+                    Filter = "Filmbox files (*.fbx)|*.fbx"
+                };
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    //Get bone ext
+                    string boneExt = "";
+                    switch (ext)
+                    {
+                        case ".aqo":
+                        case ".aqp":
+                            boneExt = ".aqn";
+                            break;
+                        case ".tro":
+                        case ".trp":
+                            boneExt = ".trn";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    var bonePath = currentFile.Replace(ext, boneExt);
+                    if (!File.Exists(bonePath))
+                    {
+                        OpenFileDialog openFileDialog = new OpenFileDialog()
+                        {
+                            Title = "Select PSO2 bones",
+                            Filter = "PSO2 Bones (*.aqn,*.trn)|*.aqn;*.trn"
+                        };
+                        if (openFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            bonePath = openFileDialog.FileName;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Must be able to read bones to export!");
+                            return;
+                        }
+                    }
+
+                    aquaUI.aqua.aquaBones.Clear();
+                    aquaUI.aqua.ReadBones(bonePath);
+                    FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aquaUI.aqua.aquaBones[0], saveFileDialog.FileName);
+                }
+                /*using (var ctx = new Assimp.AssimpContext())
                 {
                     var formats = ctx.GetSupportedExportFormats();
                     List<(string ext,string desc)> filterKeys = new List<(string ext,string desc)>();
@@ -1164,7 +1212,7 @@ namespace AquaModelTool
                         filterKeys.Add((format.FileExtension,format.Description));
                     }
                     filterKeys.Sort();
-                
+
                     SaveFileDialog saveFileDialog;
                     saveFileDialog = new SaveFileDialog()
                     {
@@ -1236,7 +1284,7 @@ namespace AquaModelTool
                         try
                         {
                             ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
-                            
+
                             //Dae fix because Assimp 4 and 5.X can't seem to properly get a root node.
                             if (Path.GetExtension(saveFileDialog.FileName) == ".dae")
                             {
@@ -1259,9 +1307,9 @@ namespace AquaModelTool
                         }
 
                     }
-                }
+                }*/
 
-            }
+                }
         }
 
         private void dumpNOF0ToolStripMenuItem_Click(object sender, EventArgs e)

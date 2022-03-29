@@ -34,168 +34,264 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
         return lLayer;
     }
-    /*
-    FbxNode* CreateFbxNodeFromMesh( Mesh^ mesh, Object^ object, FbxScene* lScene, List<IntPtr>^ materials, Dictionary<String^, IntPtr>^ convertedBones )
+    
+    FbxNode* CreateFbxNodeFromMesh( AquaObject^ aqo, int meshId, FbxScene* lScene, List<IntPtr>^ materials, List<int>^ meshMatMappings, List<IntPtr>^ convertedBones, AquaNode^ aqn)
     {
-        FbxNode* lNode = FbxNode::Create( lScene, Utf8String( mesh->Name ).ToCStr() );
-        FbxMesh* lMesh = FbxMesh::Create( lScene, Utf8String( mesh->Name + "_mesh" ).ToCStr() );
+        List<uint>^ bonePalette;
+        AquaObject::MESH msh = aqo->meshList[meshId];
+        AquaObject::VTXL^ vtxl = aqo->vtxlList[msh.vsetIndex];
+        String^ meshName = String::Format("mesh[{4}]_{0}_{1}_{2}_{3}_mesh", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, meshId);
+        FbxNode* lNode = FbxNode::Create( lScene, Utf8String(meshName).ToCStr() );
+        FbxMesh* lMesh = FbxMesh::Create( lScene, Utf8String(meshName + "_mesh" ).ToCStr() );
+        bool hasVertexWeights = vtxl->vertWeightIndices->Count > 0;
 
-        lMesh->InitControlPoints( mesh->Positions->Length );
+        lMesh->InitControlPoints( vtxl->vertPositions->Count );
 
-        for ( int i = 0; i < mesh->Positions->Length; i++ )
+        if (aqo->objc.bonePaletteOffset > 0)
         {
-            Vector3 position = mesh->Positions[ i ];
+            bonePalette = aqo->bonePalette;
+        }
+        else {
+            bonePalette = gcnew List<uint>();
+            for (int bn = 0; bn < vtxl->bonePalette->Count; bn++)
+            {
+                bonePalette->Add(vtxl->bonePalette[bn]);
+            }
+        }
+
+        for ( int i = 0; i < vtxl->vertPositions->Count; i++ )
+        {
+            Vector3 position = vtxl->vertPositions[ i ];
             lMesh->SetControlPointAt( FbxVector4( position.X, position.Y, position.Z ), i );
         }
 
         // Elements need to be created in this exact order for 3DS Max to read it properly.
 
-        if ( mesh->Normals != nullptr )
+        if (vtxl->vertNormals->Count > 0 )
         {
             FbxGeometryElementNormal* lElementNormal = ( FbxGeometryElementNormal* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eNormal );
             lElementNormal->SetMappingMode( FbxLayerElement::eByControlPoint );
             lElementNormal->SetReferenceMode( FbxLayerElement::eDirect );
 
-            for each ( Vector3 normal in mesh->Normals )
+            for each ( Vector3 normal in vtxl->vertNormals)
                 lElementNormal->GetDirectArray().Add( FbxVector4( normal.X, normal.Y, normal.Z ) );
         }
 
         FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
+        FbxGeometryElementVertexColor* lElementVertexColor2 = nullptr;
 
-        for ( int i = 0; i < 1; i++ )
+        if (vtxl->vertColors->Count > 0)
         {
-            array<Color>^ colors = mesh->GetColorsChannel( i );
-
-            if ( colors == nullptr )
-                continue;
-
-            lElementVertexColor = ( FbxGeometryElementVertexColor* ) GetFbxLayer( lMesh, i )->CreateLayerElementOfType( FbxLayerElement::eVertexColor );
+            lElementVertexColor = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
 
             // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            lElementVertexColor->SetMappingMode( FbxLayerElement::eByPolygonVertex );
-            lElementVertexColor->SetReferenceMode( FbxLayerElement::eIndexToDirect );
+            lElementVertexColor->SetName("VCChannel_0");
+            lElementVertexColor->SetMappingMode(FbxLayerElement::eByPolygonVertex);
+            lElementVertexColor->SetReferenceMode(FbxLayerElement::eIndexToDirect);
 
-            for each ( Color color in colors )
-                lElementVertexColor->GetDirectArray().Add( FbxColor( color.R, color.G, color.B, color.A ) );
+            for each (array<unsigned char>^ color in vtxl->vertColors)
+                lElementVertexColor->GetDirectArray().Add(FbxColor(color[2], color[1], color[0], color[3]));
         }
 
-        for ( int i = 0; i < 4; i++ )
+        if (vtxl->vertColor2s->Count > 0)
         {
-            array<Vector2>^ texCoords = mesh->GetTexCoordsChannel( i );
+            lElementVertexColor2 = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 1)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
 
-            if ( texCoords == nullptr )
-                continue;
+            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+            lElementVertexColor2->SetName("VCChannel_1");
+            lElementVertexColor2->SetMappingMode(FbxLayerElement::eByPolygonVertex);
+            lElementVertexColor2->SetReferenceMode(FbxLayerElement::eIndexToDirect);
 
-            FbxGeometryElementUV* lElementUV = ( FbxGeometryElementUV* ) GetFbxLayer( lMesh, i )->CreateLayerElementOfType( FbxLayerElement::eUV );
-            lElementUV->SetName( Utf8String( String::Format( "UVChannel_{0}", i + 1 ) ).ToCStr() );
-            lElementUV->SetMappingMode( FbxLayerElement::eByControlPoint );
-            lElementUV->SetReferenceMode( FbxLayerElement::eDirect );
+            for each (array<unsigned char> ^ color in vtxl->vertColor2s)
+                lElementVertexColor2->GetDirectArray().Add(FbxColor(color[2], color[1], color[0], color[3]));
+        }
+        
+        if (vtxl->uv1List->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_1")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
 
-            for each ( Vector2 texCoord in texCoords )
-                lElementUV->GetDirectArray().Add( FbxVector2( texCoord.X, 1 - texCoord.Y ) );
+            for each (Vector2 texCoord in vtxl->uv1List)
+                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
+        }
+
+        if (vtxl->uv2List->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 1)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_2")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (Vector2 texCoord in vtxl->uv2List)
+                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
+        }
+
+        if (vtxl->uv3List->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 2)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_3")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (Vector2 texCoord in vtxl->uv3List)
+                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
+        }
+
+        if (vtxl->uv4List->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 3)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_4")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (Vector2 texCoord in vtxl->uv4List)
+                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
+        }
+
+        if (vtxl->vert0x22->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 4)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_5")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (array<short>^ texCoord in vtxl->vert0x22)
+                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767,texCoord[1] / 32767));
+        }
+
+        if (vtxl->vert0x23->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 5)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_6")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (array<short> ^ texCoord in vtxl->vert0x23)
+                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, texCoord[1] / 32767));
+        }
+
+        if (vtxl->vert0x24->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 6)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_7")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (array<short> ^ texCoord in vtxl->vert0x24)
+                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, texCoord[1] / 32767));
+        }
+
+        if (vtxl->vert0x25->Count > 0)
+        {
+            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 7)->CreateLayerElementOfType(FbxLayerElement::eUV);
+            lElementUV->SetName(Utf8String(String::Format("UVChannel_8")).ToCStr());
+            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (array<short> ^ texCoord in vtxl->vert0x25)
+                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, texCoord[1] / 32767));
         }
 
         FbxGeometryElementMaterial* lElementMaterial = ( FbxGeometryElementMaterial* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eMaterial );
         lElementMaterial->SetMappingMode( FbxLayerElement::eByPolygon );
         lElementMaterial->SetReferenceMode( FbxLayerElement::eIndexToDirect );
 
-        HashSet<unsigned int>^ vertexIndices = gcnew HashSet<unsigned int>( mesh->Positions->Length );
-        Dictionary<int, int>^ materialMap = gcnew Dictionary<int, int>( materials->Count );
+        HashSet<unsigned int>^ vertexIndices = gcnew HashSet<unsigned int>( vtxl->vertPositions->Count );
 
         FbxSkin* lSkin = nullptr;
         Dictionary<int, IntPtr>^ clusterMap = nullptr;
 
-        if ( object->Skin != nullptr )
+        if ( vtxl->vertWeights->Count > 0 )
         {
-            lSkin = FbxSkin::Create( lScene, Utf8String( mesh->Name + "_skin" ).ToCStr() );
-            clusterMap = gcnew Dictionary<int, IntPtr>( object->Skin->Bones->Count );
+            lSkin = FbxSkin::Create( lScene, Utf8String(meshName + "_skin" ).ToCStr() );
+            clusterMap = gcnew Dictionary<int, IntPtr>( bonePalette->Count );
         }
 
-        for ( int i = 0; i < mesh->SubMeshes->Count; i++ )
+        List<Vector3>^ triangles = aqo->strips[msh.psetIndex]->GetTriangles(true);
+
+        int materialIndex = lNode->AddMaterial( ( FbxSurfacePhong* ) materials[meshMatMappings[meshId]].ToPointer() );
+
+        for each ( Vector3 triangle in triangles )
         {
-            SubMesh^ subMesh = mesh->SubMeshes[ i ];
-            List<Triangle>^ triangles = subMesh->GetTriangles();
+            vertexIndices->Add( triangle.X );
+            vertexIndices->Add( triangle.Y );
+            vertexIndices->Add( triangle.Z );
 
-            int materialIndex;
+            lMesh->BeginPolygon( materialIndex, -1, -1, false );
+            lMesh->AddPolygon( triangle.X );
+            lMesh->AddPolygon( triangle.Y );
+            lMesh->AddPolygon( triangle.Z );
+            lMesh->EndPolygon();
 
-            if ( !materialMap->TryGetValue( subMesh->MaterialIndex, materialIndex ) )
+            if ( lElementVertexColor )
             {
-                materialIndex = lNode->AddMaterial( ( FbxSurfacePhong* ) materials[ subMesh->MaterialIndex ].ToPointer() );
-                materialMap->Add( subMesh->MaterialIndex, materialIndex );
+                lElementVertexColor->GetIndexArray().Add( triangle.X ); 
+                lElementVertexColor->GetIndexArray().Add( triangle.Y ); 
+                lElementVertexColor->GetIndexArray().Add( triangle.Z ); 
             }
-
-            for each ( Triangle triangle in triangles )
+            if (lElementVertexColor2)
             {
-                vertexIndices->Add( triangle.A );
-                vertexIndices->Add( triangle.B );
-                vertexIndices->Add( triangle.C );
-
-                lMesh->BeginPolygon( materialIndex, -1, -1, false );
-                lMesh->AddPolygon( triangle.A );
-                lMesh->AddPolygon( triangle.B );
-                lMesh->AddPolygon( triangle.C );
-                lMesh->EndPolygon();
-
-                if ( lElementVertexColor )
-                {
-                    lElementVertexColor->GetIndexArray().Add( triangle.A ); 
-                    lElementVertexColor->GetIndexArray().Add( triangle.B ); 
-                    lElementVertexColor->GetIndexArray().Add( triangle.C ); 
-                }
+                lElementVertexColor->GetIndexArray().Add(triangle.X);
+                lElementVertexColor->GetIndexArray().Add(triangle.Y);
+                lElementVertexColor->GetIndexArray().Add(triangle.Z);
             }
-
-            if ( lSkin != nullptr && subMesh->BoneIndices != nullptr )
-            {
-                for ( int j = 0; j < subMesh->BoneIndices->Length; j++ )
-                {
-                    ushort boneIndex = subMesh->BoneIndices[ j ];
-                    BoneInfo^ boneInfo = object->Skin->Bones[ boneIndex ];
-                    FbxNode* lBoneNode = ( FbxNode* ) convertedBones[ boneInfo->Name ].ToPointer();
-
-                    IntPtr clusterPtr;
-                    FbxCluster* lCluster;
-
-                    if ( !clusterMap->TryGetValue( boneIndex, clusterPtr ) )
-                    {
-                        lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", mesh->Name, i, boneInfo->Name ) ).ToCStr() );
-                        lCluster->SetLink( lBoneNode );
-                        lCluster->SetLinkMode( FbxCluster::eTotalOne );
-
-                        Matrix4x4 worldTransformation;
-                        Matrix4x4::Invert( boneInfo->InverseBindPoseMatrix, worldTransformation );
-
-                        lCluster->SetTransformLinkMatrix( CreateFbxAMatrixFromNumerics( worldTransformation ) );
-
-                        clusterMap->Add( boneIndex, IntPtr( lCluster ) );
-                    }
-                    else
-                    {
-                        lCluster = ( FbxCluster* ) clusterPtr.ToPointer();
-                    }
-
-                    for each ( unsigned int index in vertexIndices )
-                    {
-                        BoneWeight boneWeight = mesh->BoneWeights[ index ];
-
-                        if ( boneWeight.Index1 == j )
-                            lCluster->AddControlPointIndex( index, boneWeight.Weight1 );
-
-                        if ( boneWeight.Index2 == j )
-                            lCluster->AddControlPointIndex( index, boneWeight.Weight2 );
-
-                        if ( boneWeight.Index3 == j )
-                            lCluster->AddControlPointIndex( index, boneWeight.Weight3 );
-
-                        if ( boneWeight.Index4 == j )
-                            lCluster->AddControlPointIndex( index, boneWeight.Weight4 );
-                    }
-
-                    lSkin->AddCluster( lCluster );
-                }
-            }
-
-            vertexIndices->Clear();
         }
+
+        if ( lSkin != nullptr )
+        {
+            for ( int j = 0; j < bonePalette->Count; j++ )
+            {
+                ushort boneIndex = bonePalette[ j ];
+                AquaNode::NODE node = aqn->nodeList[ boneIndex ];
+                FbxNode* lBoneNode = ( FbxNode* ) convertedBones[ boneIndex ].ToPointer();
+
+                IntPtr clusterPtr;
+                FbxCluster* lCluster;
+
+                if ( !clusterMap->TryGetValue( boneIndex, clusterPtr ) )
+                {
+                    lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, node.boneName.GetString() ) ).ToCStr() );
+                    lCluster->SetLink( lBoneNode );
+                    lCluster->SetLinkMode( FbxCluster::eTotalOne );
+
+                    Matrix4x4 worldTransformation;
+                    Matrix4x4::Invert( node.GetInverseBindPoseMatrix(), worldTransformation );
+
+                    lCluster->SetTransformLinkMatrix( CreateFbxAMatrixFromNumerics( worldTransformation ) );
+
+                    clusterMap->Add( boneIndex, IntPtr( lCluster ) );
+                }
+                else
+                {
+                    lCluster = ( FbxCluster* ) clusterPtr.ToPointer();
+                }
+
+                for each ( unsigned int index in vertexIndices )
+                {
+                    array<unsigned char>^ weightIndices = vtxl->vertWeightIndices[index];
+                    Vector4 weights = vtxl->vertWeights[index];
+
+                    if ( weightIndices[0] == j )
+                        lCluster->AddControlPointIndex( index, weights.X );
+
+                    if (weightIndices[1] == j )
+                        lCluster->AddControlPointIndex( index, weights.Y );
+
+                    if (weightIndices[2] == j )
+                        lCluster->AddControlPointIndex( index, weights.Z );
+
+                    if (weightIndices[3] == j )
+                        lCluster->AddControlPointIndex( index, weights.W );
+                }
+
+                lSkin->AddCluster( lCluster );
+            }
+        }
+
+        vertexIndices->Clear();
+        
 
         if ( lSkin != nullptr )
         {
@@ -212,114 +308,60 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lNode;
     }
 
-    FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( Material^ material, TextureSet^ textureSet, String^ texturesDirectoryPath, FbxScene* lScene )
+    FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( AquaObject::GenericMaterial^ aqMat, String^ texturesDirectoryPath, FbxScene* lScene )
     {
-        FbxSurfacePhong* lSurfacePhong = FbxSurfacePhong::Create( lScene, Utf8String( material->Name ).ToCStr() );
+        FbxSurfacePhong* lSurfacePhong = FbxSurfacePhong::Create( lScene, Utf8String(aqMat->matName ).ToCStr() );
 
         lSurfacePhong->ShadingModel.Set( "Phong" );
 
-        lSurfacePhong->Diffuse.Set( FbxDouble3( material->Diffuse.R, material->Diffuse.G, material->Diffuse.B ) );
-        lSurfacePhong->TransparencyFactor.Set( 1 - material->Diffuse.A );
+        lSurfacePhong->Diffuse.Set( FbxDouble3( aqMat->diffuseRGBA.X, aqMat->diffuseRGBA.Y, aqMat->diffuseRGBA.Z) );
+        lSurfacePhong->TransparencyFactor.Set((double)aqMat->diffuseRGBA.W);
 
-        lSurfacePhong->Ambient.Set( FbxDouble3( material->Ambient.R, material->Ambient.G, material->Ambient.B ) );
+        lSurfacePhong->Ambient.Set( FbxDouble3(aqMat->unkRGBA0.X, aqMat->unkRGBA0.Y, aqMat->unkRGBA0.Z) );
 
-        lSurfacePhong->Specular.Set( FbxDouble3( material->Specular.R, material->Specular.G, material->Specular.B ) );
-        lSurfacePhong->ReflectionFactor.Set( material->Specular.A );
-
-        lSurfacePhong->Emissive.Set( FbxDouble3( material->Emission.R, material->Emission.G, material->Emission.B ) );
-
-        lSurfacePhong->Shininess.Set( material->Shininess );
-
-        if ( textureSet == nullptr || textureSet->Textures->Count == 0 )
+        if ( aqMat->texNames->Count == 0 )
             return lSurfacePhong;
 
-        HashSet<MaterialTextureType>^ exportedTypes = gcnew HashSet<MaterialTextureType>( 8 );
-
-        for each ( MaterialTexture^ materialTexture in material->MaterialTextures )
+        //For now, just do diffuse since sets are so arbitrary
+        for(int i = 0; i < 1; i++)
         {
-            if ( materialTexture->Type == MaterialTextureType::None || exportedTypes->Contains( materialTexture->Type ) )
-                continue;
-
-            Texture^ texture = nullptr;
-
-            for each ( Texture^ item in textureSet->Textures )
-            {
-                if ( item->Id != materialTexture->TextureId )
-                    continue;
-
-                texture = item;
-                break;
-            }
-
-            if ( texture == nullptr )
-                continue;
-
-            String^ extension = TextureFormatUtilities::IsBlockCompressed( texture->Format ) && !texture->IsYCbCr ? ".dds" : ".png";
-
             FbxFileTexture* lFileTexture = FbxFileTexture::Create( lScene,
-                Utf8String( String::Format( "{0}_{1}", material->Name, Enum::GetName( materialTexture->Type.GetType(), materialTexture->Type ) ) ).ToCStr() );
+                Utf8String( String::Format( "{0}", aqMat->texNames[i] ) ).ToCStr() );
 
-            lFileTexture->SetFileName( Utf8String( Path::Combine( texturesDirectoryPath, texture->Name + extension ) ).ToCStr() );
+            lFileTexture->SetFileName( Utf8String( Path::Combine( texturesDirectoryPath, aqMat->texNames[i]) ).ToCStr() );
 
-            lFileTexture->UVSet.Set( "UVChannel_1" );
-
-            if ( materialTexture->TextureCoordinateTranslationType == MaterialTextureCoordinateTranslationType::Sphere )
-                lFileTexture->SetMappingType( FbxTexture::eSpherical );
-
-            else if ( materialTexture->TextureCoordinateTranslationType == MaterialTextureCoordinateTranslationType::Cube )
-                lFileTexture->SetMappingType( FbxTexture::eBox );
-
-            else
-                lFileTexture->SetMappingType( FbxTexture::eUV );
-
-            switch ( materialTexture->Type )
+            if (aqMat->texUVSets[i] == -1)
             {
-            case MaterialTextureType::Color:
-                lSurfacePhong->Diffuse.ConnectSrcObject( lFileTexture );
-                break;
-
-            case MaterialTextureType::Normal:
-                lFileTexture->SetTextureUse( FbxTexture::eBumpNormalMap );
-                lSurfacePhong->Bump.ConnectSrcObject( lFileTexture );
-                break;
-
-            case MaterialTextureType::Specular:
-                lSurfacePhong->Specular.ConnectSrcObject( lFileTexture );
-                break;
-
-            case MaterialTextureType::Reflection:
-            case MaterialTextureType::EnvironmentCube:
-            case MaterialTextureType::EnvironmentSphere:
-                lSurfacePhong->Reflection.ConnectSrcObject( lFileTexture );
-                break;
-
-            case MaterialTextureType::Transparency:
-                lSurfacePhong->TransparentColor.ConnectSrcObject( lFileTexture );
-                break;
-
-            default:
-                lFileTexture->Destroy();
-                break;
+                lFileTexture->SetMappingType(FbxTexture::eEnvironment);
+                lFileTexture->UVSet.Set("UVChannel_1");
+                lSurfacePhong->Reflection.ConnectSrcObject(lFileTexture);
             }
-
-            exportedTypes->Add( materialTexture->Type );
+            else
+            {
+                lFileTexture->SetMappingType(FbxTexture::eUV);
+                lFileTexture->UVSet.Set(Utf8String(String::Format("UVChannel_{0}", aqMat->texUVSets[i] + 1)).ToCStr());
+                lSurfacePhong->Diffuse.ConnectSrcObject(lFileTexture);
+            }
         }
 
         return lSurfacePhong;
     }
 
-    FbxNode* CreateFbxNodeFromObject( Object^ object, TextureSet^ textureSet, String^ texturesDirectoryPath, FbxScene* lScene, FbxPose* lBindPose, Dictionary<String^, IntPtr>^ convertedBones )
+    FbxNode* CreateFbxNodeFromAquaObject( AquaObject^ aqo, String^ aqoName, String^ texturesDirectoryPath, FbxScene* lScene, FbxPose* lBindPose, List<IntPtr>^ convertedBones, AquaNode^ aqn)
     {
-        FbxNode* lNode = FbxNode::Create( lScene, Utf8String( object->Name ).ToCStr() );
+        FbxNode* lNode = FbxNode::Create( lScene, Utf8String(aqoName).ToCStr() );
+        List<int>^ meshMatMappings;
+        List<AquaObject::GenericMaterial^>^ aqMats = aqo->GetUniqueMaterials(meshMatMappings);
+        List<IntPtr>^ materials = gcnew List<IntPtr>( aqMats->Count );
 
-        List<IntPtr>^ materials = gcnew List<IntPtr>( object->Materials->Count );
-
-        for each ( Material^ material in object->Materials )
-            materials->Add( IntPtr( CreateFbxSurfacePhongFromMaterial( material, textureSet, texturesDirectoryPath, lScene ) ) );
-
-        for each ( Mesh^ mesh in object->Meshes )
+        for each (AquaObject::GenericMaterial^ aqMat in aqMats)
         {
-            FbxNode* lMeshNode = CreateFbxNodeFromMesh( mesh, object, lScene, materials, convertedBones );
+            materials->Add(IntPtr(CreateFbxSurfacePhongFromMaterial(aqMat, texturesDirectoryPath, lScene)));
+        }
+        
+        for (int i = 0; i < aqo->meshList->Count; i++ )
+        {
+            FbxNode* lMeshNode = CreateFbxNodeFromMesh( aqo, i, lScene, materials, meshMatMappings, convertedBones, aqn);
             lNode->AddChild( lMeshNode );
             lBindPose->Add( lMeshNode, FbxAMatrix() );
         }
@@ -328,66 +370,76 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
         return lNode;
     }
-
-    FbxNode* CreateFbxNodeFromBoneInfo( BoneInfo^ boneInfo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose )
+    
+    FbxNode* CreateFbxNodeFromAqnNode(AquaNode::NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose)
     {
-        FbxNode* lNode = FbxNode::Create( lScene, Utf8String( boneInfo->Name ).ToCStr() );
+        const char* name = Utf8String(node.boneName.GetString()).ToCStr();
+        FbxNode* lNode = FbxNode::Create(lScene, name);
 
         Matrix4x4 worldTransformation;
-        Matrix4x4::Invert( boneInfo->InverseBindPoseMatrix, worldTransformation );
+        Matrix4x4::Invert(node.GetInverseBindPoseMatrix(), worldTransformation);
 
-        Matrix4x4 localTransformation = Matrix4x4::Multiply( worldTransformation, inverseParentTransformation );
+        Matrix4x4 localTransformation = Matrix4x4::Multiply(worldTransformation, inverseParentTransformation);
 
         Vector3 scale, translation;
         Quaternion rotation;
 
-        Matrix4x4::Decompose( localTransformation, scale, rotation, translation );
+        Matrix4x4::Decompose(localTransformation, scale, rotation, translation);
 
         FbxVector4 eulerAngles;
-        eulerAngles.SetXYZ( FbxQuaternion( rotation.X, rotation.Y, rotation.Z, rotation.W ) );
+        eulerAngles.SetXYZ(FbxQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
 
-        lNode->LclTranslation.Set( FbxVector4( translation.X, translation.Y, translation.Z ) );
-        lNode->LclRotation.Set( eulerAngles );
-        lNode->LclScaling.Set( FbxVector4( scale.X, scale.Y, scale.Z ) );
+        lNode->LclTranslation.Set(FbxVector4(translation.X, translation.Y, translation.Z));
+        lNode->LclRotation.Set(eulerAngles);
+        lNode->LclScaling.Set(FbxVector4(scale.X, scale.Y, scale.Z));
 
-        FbxSkeleton* lSkeleton = FbxSkeleton::Create( lScene, Utf8String( boneInfo->Name ).ToCStr() );
+        FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
 
-        lSkeleton->SetSkeletonType( FbxSkeleton::eLimbNode );
+        lSkeleton->SetSkeletonType(FbxSkeleton::eLimbNode);
         lSkeleton->LimbLength = 0.1;
 
-        lNode->SetNodeAttribute( lSkeleton );
-        lBindPose->Add( lNode, CreateFbxAMatrixFromNumerics( worldTransformation ) );
+        lNode->SetNodeAttribute(lSkeleton);
+        lBindPose->Add(lNode, CreateFbxAMatrixFromNumerics(worldTransformation));
 
         return lNode;
     }
 
-    void CreateFbxNodesFromBoneInfos( List<BoneInfo^>^ boneInfos, FbxScene* lScene, FbxNode* lParentNode, FbxPose* lBindPose, BoneInfo^ parentBoneInfo, Dictionary<String^, IntPtr>^ convertedBones )
+    FbxNode* CreateFbxNodeFromAqnNodo(AquaNode::NODO nodo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose)
     {
-        for each ( BoneInfo^ boneInfo in boneInfos )
-        {
-            if ( boneInfo->Parent != parentBoneInfo )
-                continue;
+        const char* name = Utf8String(nodo.boneName.GetString()).ToCStr();
+        FbxNode* lNode = FbxNode::Create(lScene, name);
 
-            IntPtr nodePtr;
-            FbxNode* lNode;
+        Matrix4x4 parentTransformation;
+        Matrix4x4::Invert(inverseParentTransformation, parentTransformation);
+        Matrix4x4 localTransformation = nodo.GetLocalTransformMatrix();
+       
+        Matrix4x4 worldTransformation;
+        Matrix4x4::Invert(Matrix4x4::Multiply(localTransformation, parentTransformation), worldTransformation);
 
-            if ( !convertedBones->TryGetValue( boneInfo->Name, nodePtr ) )
-            {
-                lNode = CreateFbxNodeFromBoneInfo( boneInfo, parentBoneInfo != nullptr ? parentBoneInfo->InverseBindPoseMatrix : Matrix4x4::Identity, lScene, lBindPose );
-                lParentNode->AddChild( lNode );
+        Vector3 scale, translation;
+        Quaternion rotation;
 
-                convertedBones->Add( boneInfo->Name, IntPtr( lNode ) );
-            }
+        Matrix4x4::Decompose(localTransformation, scale, rotation, translation);
 
-            else
-            {
-                lNode = ( FbxNode* ) nodePtr.ToPointer();
-            }
+        FbxVector4 eulerAngles;
+        eulerAngles.SetXYZ(FbxQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
 
-            CreateFbxNodesFromBoneInfos( boneInfos, lScene, lNode, lBindPose, boneInfo, convertedBones );
-        }
+        lNode->LclTranslation.Set(FbxVector4(translation.X, translation.Y, translation.Z));
+        lNode->LclRotation.Set(eulerAngles);
+        lNode->LclScaling.Set(FbxVector4(scale.X, scale.Y, scale.Z));
+
+        FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
+
+        lSkeleton->SetSkeletonType(FbxSkeleton::eLimbNode);
+        lSkeleton->LimbLength = 0.1;
+
+        lNode->SetNodeAttribute(lSkeleton);
+        lBindPose->Add(lNode, CreateFbxAMatrixFromNumerics(worldTransformation));
+
+        return lNode;
     }
-    */
+
+
     FbxExporterCore::FbxExporterCore()
     {
         lManager = FbxManager::Create();
@@ -402,6 +454,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     void FbxExporterCore::ExportToFile( AquaObject^ aqo, AquaNode^ aqn, String^ destinationFilePath )
     {
         String^ texturesDirectoryPath = Path::GetDirectoryName( destinationFilePath );
+        String^ aqoName = Path::GetFileNameWithoutExtension ( destinationFilePath );
 
         int lFileFormat = lManager->GetIOPluginRegistry()->GetNativeWriterFormat();
 
@@ -433,13 +486,21 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         for(int i = 0; i < aqn->nodeList->Count; i++)
         {
             AquaNode::NODE node = aqn->nodeList[i];
-            FbxNode* parentNode;
+            Matrix4x4 parentInvTfm;
+            FbxNode* parentFbxNode = nullptr;
             if (node.parentId != -1)
             {
-                parentNode = (FbxNode*)convertedBones[node.parentId].ToPointer();
+                parentFbxNode = (FbxNode*)convertedBones[node.parentId].ToPointer();
+                parentInvTfm = aqn->nodeList[node.parentId].GetInverseBindPoseMatrix();
             }
-            FbxNode* fbxNode = CreateFbxNodeFromAqnNode();
-            parentNode->AddChild(fbxNode);
+            else {
+                parentInvTfm = Matrix4x4::Identity;
+            }
+            FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose);
+            if (parentFbxNode != nullptr)
+            {
+                parentFbxNode->AddChild(fbxNode);
+            }
 
             convertedBones->Add(IntPtr(fbxNode));
         }
@@ -447,13 +508,12 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         //Go through 'effect nodes'. These can't have children or be tied to skinning
         for (int i = 0; i < aqn->nodoList->Count; i++) 
         {
-            AquaNode::NODO node = aqn->nodoList[i];
-            FbxNode* parentNode;
-            if (node.parentId != -1)
-            {
-                parentNode = (FbxNode*)convertedBones[node.parentId].ToPointer();
-            }
-            FbxNode* fbxNode = CreateFbxNodeFromAqnNodo();
+            AquaNode::NODO nodo = aqn->nodoList[i];
+            //All effect nodes need a parent. 
+            FbxNode* parentNode = (FbxNode*)convertedBones[nodo.parentId].ToPointer();
+            Matrix4x4 parentInvTfm = aqn->nodeList[nodo.parentId].GetInverseBindPoseMatrix();
+            
+            FbxNode* fbxNode = CreateFbxNodeFromAqnNodo(nodo, parentInvTfm, lScene, lBindPose);
             parentNode->AddChild(fbxNode);
         }
 
@@ -463,11 +523,9 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         lBindPose->Add(lSkeletonNode, FbxMatrix());
         lRootNode->AddChild(lSkeletonNode);
         
-        for (int i = 0; i < aqo->meshList->Count; i++ )
-        {
-            FbxNode* lObjectNode = CreateFbxNodeFromObject( aqo, i, texturesDirectoryPath, lScene, lBindPose, convertedBones );
-            lRootNode->AddChild( lObjectNode );
-        }
+        FbxNode* lObjectNode = CreateFbxNodeFromAquaObject( aqo, aqoName, texturesDirectoryPath, lScene, lBindPose, convertedBones, aqn);
+        lRootNode->AddChild( lObjectNode );
+        
 
         lScene->AddPose( lBindPose );
 

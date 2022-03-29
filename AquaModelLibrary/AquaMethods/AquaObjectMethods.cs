@@ -2383,6 +2383,31 @@ namespace AquaModelLibrary
             return textureList;
         }
 
+        public static List<int> GetTexListUVChannels(AquaObject model, int tsetIndex)
+        {
+            List<int> uvList = new List<int>();
+
+            //Don't try to read what's not there
+            if (model.tstaList.Count == 0 || model.tstaList == null)
+            {
+                return uvList;
+            }
+            TSET tset = model.tsetList[tsetIndex];
+
+            for (int index = 0; index < tset.tstaTexIDs.Count; index++)
+            {
+                int texIndex = tset.tstaTexIDs[index];
+                if (texIndex != -1)
+                {
+                    TSTA tsta = model.tstaList[texIndex];
+
+                    uvList.Add(tsta.modelUVSet);
+                }
+            }
+
+            return uvList;
+        }
+
         public static void GetMaterialNameData(ref string name, List<string> shaderNames, out string alphaType, out string playerFlag)
         {
             shaderNames = new List<string>();

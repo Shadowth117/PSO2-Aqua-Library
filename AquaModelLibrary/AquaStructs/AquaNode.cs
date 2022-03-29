@@ -53,6 +53,23 @@ namespace AquaModelLibrary
             public Vector4 m3;
             public Vector4 m4;
             public PSO2String boneName; //0xD, type 0x2
+
+            public Matrix4x4 GetInverseBindPoseMatrix()
+            {
+                var bnMat = new Matrix4x4(m1.X, m1.Y, m1.Z, m1.W,
+                                            m2.X, m2.Y, m2.Z, m2.W,
+                                            m3.X, m3.Y, m3.Z, m3.W,
+                                            m4.X, m4.Y, m4.Z, m4.W);
+                return bnMat;
+            }
+
+            public void SetInverseBindPoseMatrix(Matrix4x4 bnMat)
+            {
+                m1 = new Vector4(bnMat.M11, bnMat.M12, bnMat.M13, bnMat.M14);
+                m2 = new Vector4(bnMat.M21, bnMat.M22, bnMat.M23, bnMat.M24);
+                m3 = new Vector4(bnMat.M31, bnMat.M32, bnMat.M33, bnMat.M34);
+                m4 = new Vector4(bnMat.M41, bnMat.M42, bnMat.M43, bnMat.M44);
+            }
         }
 
         //A stripped down variant of NODE used for effect nodes. 
@@ -68,6 +85,20 @@ namespace AquaModelLibrary
             public Vector3 eulRot;     //0x8, type 0x4A, 0x1
             public int const0_5;
             public PSO2String boneName; //0xD, type 0x2
+
+            //We don't do this for NODE since the result doesn't always match the expected result for unknown reasons
+            public Matrix4x4 GetLocalTransformMatrix()
+            {
+                var matrix = Matrix4x4.Identity;
+                var rotation = Matrix4x4.CreateRotationX(eulRot.X) *
+                   Matrix4x4.CreateRotationY(eulRot.Y) *
+                   Matrix4x4.CreateRotationZ(eulRot.Z);
+
+                matrix *= rotation;
+                matrix *= Matrix4x4.CreateTranslation(pos);
+
+                return matrix;
+            }
         }
     }
 }

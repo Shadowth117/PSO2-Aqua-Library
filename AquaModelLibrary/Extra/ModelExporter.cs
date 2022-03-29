@@ -86,6 +86,7 @@ namespace AquaModelLibrary
             //Assign meshes and materials
             foreach (AquaObject.MESH msh in aqp.meshList)
             {
+                List<uint> bonePalette = new List<uint>();
                 var vtxl = aqp.vtxlList[msh.vsetIndex];
 
                 //Mesh
@@ -94,6 +95,22 @@ namespace AquaModelLibrary
 
                 var aiMesh = new Assimp.Mesh(aiMeshName, Assimp.PrimitiveType.Triangle);
 
+                if (hasVertexWeights)
+                {
+                    //Get bone palette
+                    if (aqp.objc.bonePaletteOffset > 0)
+                    {
+                        bonePalette = aqp.bonePalette;
+                    }
+                    else
+                    {
+                        bonePalette = new List<uint>();
+                        for (int bn = 0; bn < vtxl.bonePalette.Count; bn++)
+                        {
+                            bonePalette.Add(vtxl.bonePalette[bn]);
+                        }
+                    }
+                }
                 //Vertex face data - PSO2 Actually doesn't do this, it just has per vertex data so we can just map a vertice's data to each face using it
                 //It may actually be possible to add this to the previous loop, but my reference didn't so I'm doing it in a separate loop for safety
                 //Reference: https://github.com/TGEnigma/Amicitia/blob/master/Source/AmicitiaLibrary/Graphics/RenderWare/RWClumpNode.cs
@@ -228,20 +245,6 @@ namespace AquaModelLibrary
                 //Assimp Bones - Assimp likes to store vertex weights in bones and bones references in meshes
                 if (hasVertexWeights)
                 {
-                    //Get bone palette
-                    List<uint> bonePalette;
-                    if (aqp.objc.bonePaletteOffset > 0)
-                    {
-                        bonePalette = aqp.bonePalette;
-                    }
-                    else
-                    {
-                        bonePalette = new List<uint>();
-                        for (int bn = 0; bn < vtxl.bonePalette.Count; bn++)
-                        {
-                            bonePalette.Add(vtxl.bonePalette[bn]);
-                        }
-                    }
                     var aiBoneMap = new Dictionary<int, Assimp.Bone>();
 
                     //Iterate through vertices

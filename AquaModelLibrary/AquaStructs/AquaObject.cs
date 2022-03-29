@@ -601,6 +601,22 @@ namespace AquaModelLibrary
                 {
                     vertNormalsNGS = new List<short[]>(new short[vertCount][]);
                 }
+                if (modelVtxl.vertBinormalList.Count > 0)
+                {
+                    vertBinormalList = new List<Vector3>(new Vector3[vertCount]);
+                }
+                if (modelVtxl.vertBinormalListNGS.Count > 0)
+                {
+                    vertBinormalListNGS = new List<short[]>(new short[vertCount][]);
+                }
+                if (modelVtxl.vertTangentList.Count > 0)
+                {
+                    vertTangentList = new List<Vector3>(new Vector3[vertCount]);
+                }
+                if (modelVtxl.vertTangentListNGS.Count > 0)
+                {
+                    vertTangentListNGS = new List<short[]>(new short[vertCount][]);
+                }
                 if (modelVtxl.vertColors.Count > 0)
                 {
                     vertColors = new List<byte[]>(new byte[vertCount][]);
@@ -1164,6 +1180,22 @@ namespace AquaModelLibrary
                 {
                     vertNormalsNGS.AddRange(new short[vertCount][]);
                 }
+                if (modelVtxl.vertBinormalList.Count > 0)
+                {
+                    vertBinormalList.AddRange(new Vector3[vertCount]);
+                }
+                if (modelVtxl.vertBinormalListNGS.Count > 0)
+                {
+                    vertBinormalListNGS.AddRange(new short[vertCount][]);
+                }
+                if (modelVtxl.vertTangentList.Count > 0)
+                {
+                    vertTangentList.AddRange(new Vector3[vertCount]);
+                }
+                if (modelVtxl.vertTangentListNGS.Count > 0)
+                {
+                    vertTangentListNGS.AddRange(new short[vertCount][]);
+                }
                 if (modelVtxl.vertColors.Count > 0)
                 {
                     vertColors.AddRange(new byte[vertCount][]);
@@ -1702,77 +1734,6 @@ namespace AquaModelLibrary
 
             return vsetList.Count;
         }
-        /*
-        public int splitVSETPerMeshNew()
-        {
-            bool continueSplitting = false;
-            Dictionary<int, List<int>> vsetTracker = new Dictionary<int, List<int>>(); //Key int is a VSET, value is a list of indices for each mesh that uses said VSET
-            for (int meshId = 0; meshId < meshList.Count; meshId++)
-            {
-                if (!vsetTracker.ContainsKey(meshList[meshId].vsetIndex))
-                {
-                    vsetTracker.Add(meshList[meshId].vsetIndex, new List<int>() { meshId });
-                }
-                else
-                {
-                    continueSplitting = true;
-                    vsetTracker[meshList[meshId].vsetIndex].Add(meshId);
-                }
-            }
-
-            if (continueSplitting)
-            {
-                VSET[] newVsetArray = new VSET[meshList.Count];
-                VTXL[] newVtxlArray = new VTXL[meshList.Count];
-
-                //Handle instances in which there are multiple of the same VSET used.
-                //VTXL and VSETs should be cloned and updated as necessary while strips should be updated to match new vertex ids (strips using the same VTXL continue from old Ids, typically)
-                foreach (var key in vsetTracker.Keys)
-                {
-                    if (vsetTracker[key].Count > 1)
-                    {
-                        foreach (int meshId in vsetTracker[key])
-                        {
-                            Dictionary<int, int> usedVerts = new Dictionary<int, int>();
-                            VSET newVset = new VSET();
-                            VTXL newVtxl = new VTXL();
-
-                            int counter = 0;
-                            for (int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
-                            {
-                                ushort id = strips[meshId].triStrips[stripIndex];
-                                if (!usedVerts.ContainsKey(id))
-                                {
-                                    AquaObjectMethods.appendVertex(vtxlList[meshList[meshId].vsetIndex], newVtxl, id);
-                                    usedVerts.Add(id, counter);
-                                    counter++;
-                                }
-                                strips[meshId].triStrips[stripIndex] = (ushort)usedVerts[id];
-                            }
-                            var tempMesh = meshList[meshId];
-                            tempMesh.vsetIndex = meshId;
-                            meshList[meshId] = tempMesh;
-                            newVsetArray[meshId] = newVset;
-                            newVtxlArray[meshId] = newVtxl;
-                        }
-                    }
-                    else
-                    {
-                        int meshId = vsetTracker[key][0];
-                        newVsetArray[meshId] = vsetList[meshList[meshId].vsetIndex];
-                        newVtxlArray[meshId] = vtxlList[meshList[meshId].vsetIndex];
-                        var tempMesh = meshList[meshId];
-                        tempMesh.vsetIndex = meshId;
-                        meshList[meshId] = tempMesh;
-                    }
-                }
-                vsetList = newVsetArray.ToList();
-                vtxlList = newVtxlArray.ToList();
-            }
-            objc.vsetCount = vsetList.Count;
-
-            return vsetList.Count;
-        }*/
 
         public int getStripIndexCount()
         {
@@ -1794,15 +1755,66 @@ namespace AquaModelLibrary
             return vertCount;
         }
 
-        public abstract AquaObject Clone();
-        /*
-        public int getBiggestVertSize()
+        /// <summary>
+        /// Gets a list of GenericMaterials representing all possible material component combinations used by this model based on its MESH structs.
+        /// The idea would be condensing a list of traditional materials for external usage.
+        /// A list of integers which map mesh indices to GenericMaterial ids is also output.
+        /// </summary>
+        /// <returns>List<GenericMaterial>, out List<int></returns>
+        public List<GenericMaterial> GetUniqueMaterials(out List<int> meshMatMapping)
         {
-            int vertSize = 0;
-            for (int i = 0; i < vtxeList.Count; i++)
+            List<GenericMaterial> mats = new List<GenericMaterial>();
+            meshMatMapping = new List<int>();
+
+            for(int i = 0; i < meshList.Count; i++)
             {
+                var curMesh = meshList[i];
+                for(int msh = 0; msh < meshMatMapping.Count; msh++)
+                {
+                    var checkMesh = meshList[msh];
+                    //Mate, rend, shad, and tset define what would make up a traditional material in a 3d program
+                    if(curMesh.mateIndex == checkMesh.mateIndex && curMesh.rendIndex == checkMesh.rendIndex && curMesh.shadIndex == checkMesh.shadIndex && curMesh.tsetIndex == checkMesh.tsetIndex)
+                    {
+                        meshMatMapping.Add(meshMatMapping[msh]);
+                        break;
+                    }
+                }
+
+                if(meshMatMapping.Count - 1 != i)
+                {
+                    var curMate = mateList[curMesh.mateIndex];
+                    var curRend = rendList[curMesh.rendIndex];
+                    var shadNames = AquaObjectMethods.GetShaderNames(this, curMesh.shadIndex);
+                    var texNames = AquaObjectMethods.GetTexListNames(this, curMesh.tsetIndex);
+                    var texUvSets = AquaObjectMethods.GetTexListUVChannels(this, curMesh.tsetIndex);
+                    GenericMaterial mat = new GenericMaterial();
+                    mat.texNames = texNames;
+                    mat.texUVSets = texUvSets;
+                    mat.shaderNames = shadNames;
+                    mat.blendType = curMate.alphaType.GetString();
+                    mat.specialType = "";
+                    mat.matName = curMate.matName.GetString();
+                    mat.twoSided = curRend.twosided > 0 ? true : false;
+
+                    mat.diffuseRGBA = curMate.diffuseRGBA;
+                    mat.unkRGBA0 = curMate.unkRGBA0;
+                    mat._sRGBA = curMate._sRGBA;
+                    mat.unkRGBA1 = curMate.unkRGBA1;
+
+                    mat.reserve0 = curMate.reserve0;
+                    mat.unkFloat0 = curMate.unkFloat0;
+                    mat.unkFloat1 = curMate.unkFloat1;
+                    mat.unkInt0 = curMate.unkInt0;
+                    mat.unkInt1 = curMate.unkInt1;
+
+                    mats.Add(mat);
+                    meshMatMapping.Add(mats.Count - 1);
+                }
             }
-            //return vertSize;
-        }*/
+
+            return mats;
+        }
+
+        public abstract AquaObject Clone();
     }
 }

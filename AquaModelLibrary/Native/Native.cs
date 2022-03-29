@@ -19,17 +19,17 @@ namespace AquaModelLibrary.Native
             var executingAssembly = Assembly.GetExecutingAssembly();
 
             string dllFilePath = Path.Combine(Path.GetDirectoryName(executingAssembly.Location),
-                $"MikuMikuLibrary.Native.X{(IntPtr.Size == 8 ? "64" : "86")}.dll");
+                $"AquaModelLibrary.Native.X{(IntPtr.Size == 8 ? "64" : "86")}.dll");
 
             // Unblock DLL when extracted through Windows (thanks Sewer)
             DeleteFile(dllFilePath + ":Zone.Identifier");
 
             if (!File.Exists(dllFilePath))
-                throw new FileNotFoundException("Native MML library could not be found", dllFilePath);
+                throw new FileNotFoundException("Native Aqua Model Library could not be found", dllFilePath);
 
             var assembly = Assembly.LoadFile(dllFilePath);
 
-            assembly.GetType("MikuMikuLibrary.NativeContext")
+            assembly.GetType("AquaModelLibrary.NativeContext")
                 .GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
 
             FbxExporter = (IFbxExporter)Activator.CreateInstance(

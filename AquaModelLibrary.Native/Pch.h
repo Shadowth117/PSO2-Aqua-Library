@@ -3,13 +3,11 @@
 #pragma warning(push)
 #pragma warning(disable : 4561)
 
-#include <DirectXTex.h>
-
 #pragma warning(pop)
 
 #include <fbxsdk.h>
 #include <vcclr.h>
-
+#include <combaseapi.h>
 
 #undef min
 #undef max
