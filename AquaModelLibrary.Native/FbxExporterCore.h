@@ -13,6 +13,6 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         FbxExporterCore();
         ~FbxExporterCore();
 
-        virtual void ExportToFile( AquaObject^ aqo, AquaNode^ aqn, String^ destinationFilePath );
+        virtual void ExportToFile( AquaObject^ aqo, AquaNode^ aqn, String^ destinationFilePath, bool includeMetadata);
     };
 }

@@ -2,7 +2,7 @@
 {
     public static class FbxExporter
     {
-        public static void ExportToFile(AquaObject aqo, AquaNode aqn, string destinationFilePath) =>
-            Native.FbxExporter.ExportToFile(aqo, aqn, destinationFilePath);
+        public static void ExportToFile(AquaObject aqo, AquaNode aqn, string destinationFilePath, bool includeMetadata) =>
+            Native.FbxExporter.ExportToFile(aqo, aqn, destinationFilePath, includeMetadata);
     }
 }

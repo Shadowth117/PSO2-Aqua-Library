@@ -2,6 +2,6 @@
 {
     public interface IFbxExporter
     {
-        void ExportToFile(AquaObject aqo, AquaNode aqn, string destinationFilePath);
+        void ExportToFile(AquaObject aqo, AquaNode aqn, string destinationFilePath, bool includeMetadata);
     }
 }

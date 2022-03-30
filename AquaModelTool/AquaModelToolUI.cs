@@ -1152,6 +1152,7 @@ namespace AquaModelTool
 
         private void exportModelToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            bool includeMetadata = includeMetadataToolStripMenuItem.Checked;
             string ext = Path.GetExtension(currentFile);
             //Model saving
             if (modelExtensions.Contains(ext))
@@ -1207,7 +1208,7 @@ namespace AquaModelTool
                     {
                         model.splitVSETPerMesh();
                     }
-                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], saveFileDialog.FileName);
+                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], saveFileDialog.FileName, includeMetadata);
                 }
                 /*using (var ctx = new Assimp.AssimpContext())
                 {
@@ -2282,6 +2283,57 @@ namespace AquaModelTool
             Vector3 vec3 = new Vector3(1, 1, 1);
             var vec3Transformed = Vector3.Transform(vec3, mat);
             var a = 0;
+        }
+
+        private void batchPSO2ToFBXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a PSO2 file",
+                Filter = "All Supported Files|*.aqp;*.aqo;*.trp;*.tro;*.axs",
+                Multiselect = true,
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil aqua = new AquaUtil();
+                foreach(var filename in openFileDialog.FileNames)
+                {
+                    if(!filename.Contains(".axs"))
+                    {
+                        var ext = Path.GetExtension(filename);
+                        //Get bone ext
+                        string boneExt = "";
+                        switch (ext)
+                        {
+                            case ".aqo":
+                            case ".aqp":
+                                boneExt = ".aqn";
+                                break;
+                            case ".tro":
+                            case ".trp":
+                                boneExt = ".trn";
+                                break;
+                            default:
+                                break;
+                        }
+                        var bonePath = filename.Replace(ext, boneExt);
+                        aqua.aquaBones.Clear();
+                        if(!File.Exists(bonePath)) //We need bones for this
+                        {
+                            continue;
+                        }
+                        aqua.ReadBones(bonePath);
+                    }
+                    aqua.ReadModel(filename);
+                    var model = aqua.aquaModels[0].models[0];
+                    if (model.objc.type > 0xC32)
+                    {
+                        model.splitVSETPerMesh();
+                    }
+                    FbxExporter.ExportToFile(model, aqua.aquaBones[0], Path.ChangeExtension(filename, ".fbx"), includeMetadataToolStripMenuItem.Checked);
+                }
+            }
+            
         }
     }
 }

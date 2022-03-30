@@ -32,6 +32,8 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.includeMetadataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -89,6 +91,7 @@
             this.testPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -126,11 +129,30 @@
             // 
             // exportModelToolStripMenuItem
             // 
+            this.exportModelToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportFBXToolStripMenuItem,
+            this.includeMetadataToolStripMenuItem});
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
             this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportModelToolStripMenuItem.Text = "Export Model";
-            this.exportModelToolStripMenuItem.ToolTipText = "May produce strange results or crash on some models.";
-            this.exportModelToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
+            // 
+            // exportFBXToolStripMenuItem
+            // 
+            this.exportFBXToolStripMenuItem.Name = "exportFBXToolStripMenuItem";
+            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportFBXToolStripMenuItem.Text = "Export FBX";
+            this.exportFBXToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
+            // 
+            // includeMetadataToolStripMenuItem
+            // 
+            this.includeMetadataToolStripMenuItem.Checked = true;
+            this.includeMetadataToolStripMenuItem.CheckOnClick = true;
+            this.includeMetadataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.includeMetadataToolStripMenuItem.Name = "includeMetadataToolStripMenuItem";
+            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.includeMetadataToolStripMenuItem.Text = "Include Metadata";
+            this.includeMetadataToolStripMenuItem.ToolTipText = "Leave this on for modding PSO2/NGS. Determines if the data appended in #s and sim" +
+    "ilar elements should be added to the final bone, mesh, and material names.";
             // 
             // saveToolStripMenuItem
             // 
@@ -177,6 +199,7 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.batchPSO2ToFBXToolStripMenuItem,
             this.batchParsePSO2SetToTextToolStripMenuItem,
             this.checkAllShaderExtrasToolStripMenuItem,
             this.generateCharacterFileSheetToolStripMenuItem,
@@ -582,6 +605,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // batchPSO2ToFBXToolStripMenuItem
+            // 
+            this.batchPSO2ToFBXToolStripMenuItem.Name = "batchPSO2ToFBXToolStripMenuItem";
+            this.batchPSO2ToFBXToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.batchPSO2ToFBXToolStripMenuItem.Text = "Batch PSO2 model to FBX";
+            this.batchPSO2ToFBXToolStripMenuItem.Click += new System.EventHandler(this.batchPSO2ToFBXToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -664,6 +694,9 @@
         private System.Windows.Forms.ToolStripMenuItem proportionAQMFaceTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMNGSFaceTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testPointToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportFBXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem includeMetadataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem batchPSO2ToFBXToolStripMenuItem;
     }
 }
 
