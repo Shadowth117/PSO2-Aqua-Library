@@ -86,9 +86,9 @@
             this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.testPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -120,36 +120,36 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // exportModelToolStripMenuItem
             // 
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
-            this.exportModelToolStripMenuItem.Text = "Export Model (Buggy)";
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportModelToolStripMenuItem.Text = "Export Model";
             this.exportModelToolStripMenuItem.ToolTipText = "May produce strange results or crash on some models.";
             this.exportModelToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAsToolStripMenuItem.Text = "Save As";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -557,6 +557,13 @@
             this.importAAIToolStripMenuItem.Text = "Import AAI";
             this.importAAIToolStripMenuItem.Click += new System.EventHandler(this.importAAIToolStripMenuItem_Click);
             // 
+            // testPointToolStripMenuItem
+            // 
+            this.testPointToolStripMenuItem.Name = "testPointToolStripMenuItem";
+            this.testPointToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.testPointToolStripMenuItem.Text = "TestPoint";
+            this.testPointToolStripMenuItem.Click += new System.EventHandler(this.testPointToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -574,13 +581,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 256);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // testPointToolStripMenuItem
-            // 
-            this.testPointToolStripMenuItem.Name = "testPointToolStripMenuItem";
-            this.testPointToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.testPointToolStripMenuItem.Text = "TestPoint";
-            this.testPointToolStripMenuItem.Click += new System.EventHandler(this.testPointToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 

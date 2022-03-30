@@ -1042,20 +1042,39 @@ namespace AquaModelLibrary
                         }
                         if (vertWeightIndices[i][1] != 0 || vertWeights[i].Y != 0)
                         {
-                            trueWeight = addById(trueWeight, vertWeights[i].Y, trueBytes.Count);
-                            trueBytes.Add(vertWeightIndices[i][1]);
+                            if(trueBytes.Contains(vertWeightIndices[i][1]))
+                            {
+                                trueWeight = addToId(trueWeight, vertWeights[i].Y, trueBytes.IndexOf(vertWeightIndices[i][1]));
+                            } else
+                            {
+                                trueWeight = addById(trueWeight, vertWeights[i].Y, trueBytes.Count);
+                                trueBytes.Add(vertWeightIndices[i][1]);
+                            }
                         }
                         if (vertWeightIndices[i][2] != 0 || vertWeights[i].Z != 0)
                         {
-                            trueWeight = addById(trueWeight, vertWeights[i].Z, trueBytes.Count);
-                            trueBytes.Add(vertWeightIndices[i][2]);
+                            if (trueBytes.Contains(vertWeightIndices[i][2]))
+                            {
+                                trueWeight = addToId(trueWeight, vertWeights[i].Z, trueBytes.IndexOf(vertWeightIndices[i][2]));
+                            }
+                            else
+                            {
+                                trueWeight = addById(trueWeight, vertWeights[i].Z, trueBytes.Count);
+                                trueBytes.Add(vertWeightIndices[i][2]);
+                            }
                         }
                         if (vertWeightIndices[i][3] != 0 || vertWeights[i].W != 0)
                         {
-                            trueWeight = addById(trueWeight, vertWeights[i].W, trueBytes.Count);
-                            trueBytes.Add(vertWeightIndices[i][3]);
+                            if (trueBytes.Contains(vertWeightIndices[i][3]))
+                            {
+                                trueWeight = addToId(trueWeight, vertWeights[i].W, trueBytes.IndexOf(vertWeightIndices[i][3]));
+                            }
+                            else
+                            {
+                                trueWeight = addById(trueWeight, vertWeights[i].W, trueBytes.Count);
+                                trueBytes.Add(vertWeightIndices[i][3]);
+                            }
                         }
-
                         //Ensure sum is as close as possible to 1.0.
                         trueWeight = SumWeightsTo1(trueWeight);
 
@@ -1163,6 +1182,27 @@ namespace AquaModelLibrary
                         break;
                     case 3:
                         vec4.W = value;
+                        break;
+                }
+
+                return vec4;
+            }
+
+            private Vector4 addToId(Vector4 vec4, float value, int id)
+            {
+                switch (id)
+                {
+                    case 0:
+                        vec4.X += value;
+                        break;
+                    case 1:
+                        vec4.Y += value;
+                        break;
+                    case 2:
+                        vec4.Z += value;
+                        break;
+                    case 3:
+                        vec4.W += value;
                         break;
                 }
 
@@ -1532,7 +1572,7 @@ namespace AquaModelLibrary
             public string blendType = null;
             public string specialType = null;
             public string matName = null;
-            public bool twoSided = false;
+            public int twoSided = 0; //0 False, 1 True. Higher values give unknown results
 
             public Vector4 diffuseRGBA = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
             public Vector4 unkRGBA0 = new Vector4(.9f, .9f, .9f, 1.0f);
@@ -1794,7 +1834,7 @@ namespace AquaModelLibrary
                     mat.blendType = curMate.alphaType.GetString();
                     mat.specialType = "";
                     mat.matName = curMate.matName.GetString();
-                    mat.twoSided = curRend.twosided > 0 ? true : false;
+                    mat.twoSided = curRend.twosided;
 
                     mat.diffuseRGBA = curMate.diffuseRGBA;
                     mat.unkRGBA0 = curMate.unkRGBA0;

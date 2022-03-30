@@ -2314,15 +2314,8 @@ namespace AquaModelLibrary
             //Set up REND
             rend.tag = 0x1FF;
             rend.unk0 = 3;
-            switch(mat.twoSided)
-            {
-                case true:
-                    rend.twosided = 1;
-                    break;
-                case false:
-                    rend.twosided = 0;
-                    break;
-            }
+            rend.twosided = mat.twoSided;
+
             switch(mat.blendType)
             {
                 case "opaque":

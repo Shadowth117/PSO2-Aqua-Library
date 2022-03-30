@@ -683,7 +683,7 @@ namespace AquaModelLibrary
                         genMat.texNames.Add(texNames[(int)id] + ".dds");
                         break;
                     case 4:
-                        genMat.twoSided = true;
+                        genMat.twoSided = 1;
                         var twoSided = streamReader.ReadBEV3(be);
                         break;
                     case 5:

@@ -2615,11 +2615,7 @@ namespace AquaModelLibrary
                     }
                     else
                     {
-                        faceCount = prmModel.header.entryCount;
-                        for (int i = 0; i < faceCount; i += 3)
-                        {
-                            prmModel.faces.Add(new Vector3(i, i + 1, i + 2));
-                        }
+                        faceCount = PRMGenerateFacesFromVerts(prmModel);
                     }
                     break;
                 case 2:
@@ -2631,10 +2627,16 @@ namespace AquaModelLibrary
                         prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
                     }
 
-                    faceCount = prmModel.header.groupIndexCount / 3;
-                    for (int i = 0; i < faceCount; i++)
+                    if(prmModel.header.groupIndexCount > 0)
                     {
-                        prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        faceCount = prmModel.header.groupIndexCount / 3;
+                        for (int i = 0; i < faceCount; i++)
+                        {
+                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        }
+                    } else
+                    {
+                        faceCount = PRMGenerateFacesFromVerts(prmModel);
                     }
                     break;
                 case 4:
@@ -2643,16 +2645,33 @@ namespace AquaModelLibrary
                         prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType04Vert>()));
                     }
 
-                    faceCount = prmModel.header.groupIndexCount / 3;
-                    for (int i = 0; i < faceCount; i++)
+                    if (prmModel.header.groupIndexCount > 0)
                     {
-                        prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        faceCount = prmModel.header.groupIndexCount / 3;
+                        for (int i = 0; i < faceCount; i++)
+                        {
+                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                        }
+                    } else
+                    {
+                        faceCount = PRMGenerateFacesFromVerts(prmModel);
                     }
                     break;
                 default:
                     MessageBox.Show("Unknown PRM version! Please report!");
                     break;
             }
+        }
+
+        private static int PRMGenerateFacesFromVerts(PRMModel prmModel)
+        {
+            int faceCount = prmModel.header.entryCount;
+            for (int i = 0; i < faceCount; i += 3)
+            {
+                prmModel.faces.Add(new Vector3(i, i + 1, i + 2));
+            }
+
+            return faceCount;
         }
 
         //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.

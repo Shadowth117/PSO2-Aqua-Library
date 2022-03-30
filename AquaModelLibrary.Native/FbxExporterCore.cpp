@@ -40,7 +40,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         List<uint>^ bonePalette;
         AquaObject::MESH msh = aqo->meshList[meshId];
         AquaObject::VTXL^ vtxl = aqo->vtxlList[msh.vsetIndex];
-        String^ meshName = String::Format("mesh[{4}]_{0}_{1}_{2}_{3}_mesh", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, meshId);
+        String^ meshName = String::Format("mesh[{4}]_{0}_{1}_{2}_{3}#{5}#{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, meshId, msh.baseMeshNodeId, msh.baseMeshDummyId);
         FbxNode* lNode = FbxNode::Create( lScene, Utf8String(meshName).ToCStr() );
         FbxMesh* lMesh = FbxMesh::Create( lScene, Utf8String(meshName + "_mesh" ).ToCStr() );
         bool hasVertexWeights = vtxl->vertWeightIndices->Count > 0;
@@ -73,8 +73,10 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             lElementNormal->SetMappingMode( FbxLayerElement::eByControlPoint );
             lElementNormal->SetReferenceMode( FbxLayerElement::eDirect );
 
-            for each ( Vector3 normal in vtxl->vertNormals)
-                lElementNormal->GetDirectArray().Add( FbxVector4( normal.X, normal.Y, normal.Z ) );
+            for each (Vector3 normal in vtxl->vertNormals)
+            {
+                lElementNormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+            }
         }
 
         FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
@@ -85,25 +87,25 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             lElementVertexColor = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
 
             // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            lElementVertexColor->SetName("VCChannel_0");
+            //lElementVertexColor2->SetName("VCChannel_0"); //Remove this if the name breaks it
             lElementVertexColor->SetMappingMode(FbxLayerElement::eByPolygonVertex);
             lElementVertexColor->SetReferenceMode(FbxLayerElement::eIndexToDirect);
 
             for each (array<unsigned char>^ color in vtxl->vertColors)
-                lElementVertexColor->GetDirectArray().Add(FbxColor(color[2], color[1], color[0], color[3]));
+                lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
         }
-
+        
         if (vtxl->vertColor2s->Count > 0)
         {
             lElementVertexColor2 = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 1)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
 
             // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            lElementVertexColor2->SetName("VCChannel_1");
+            //lElementVertexColor2->SetName("VCChannel_1");
             lElementVertexColor2->SetMappingMode(FbxLayerElement::eByPolygonVertex);
             lElementVertexColor2->SetReferenceMode(FbxLayerElement::eIndexToDirect);
 
             for each (array<unsigned char> ^ color in vtxl->vertColor2s)
-                lElementVertexColor2->GetDirectArray().Add(FbxColor(color[2], color[1], color[0], color[3]));
+                lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
         }
         
         if (vtxl->uv1List->Count > 0)
@@ -252,7 +254,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
                 if ( !clusterMap->TryGetValue( boneIndex, clusterPtr ) )
                 {
-                    lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, node.boneName.GetString() ) ).ToCStr() );
+                    lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, String::Format("(" + boneIndex + ")" + node.boneName.GetString()) ) ).ToCStr() );
                     lCluster->SetLink( lBoneNode );
                     lCluster->SetLinkMode( FbxCluster::eTotalOne );
 
@@ -270,20 +272,31 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
                 for each ( unsigned int index in vertexIndices )
                 {
-                    array<unsigned char>^ weightIndices = vtxl->vertWeightIndices[index];
-                    Vector4 weights = vtxl->vertWeights[index];
+                    array<unsigned char>^ weightIndices = vtxl->trueVertWeightIndices[index];
+                    Vector4 weights = vtxl->trueVertWeights[index];
 
-                    if ( weightIndices[0] == j )
-                        lCluster->AddControlPointIndex( index, weights.X );
-
-                    if (weightIndices[1] == j )
-                        lCluster->AddControlPointIndex( index, weights.Y );
-
-                    if (weightIndices[2] == j )
-                        lCluster->AddControlPointIndex( index, weights.Z );
-
-                    if (weightIndices[3] == j )
-                        lCluster->AddControlPointIndex( index, weights.W );
+                    for (int wt = 0; wt < weightIndices->Length; wt++)
+                    {
+                        switch (wt)
+                        {
+                            case 0:
+                                if (weightIndices[0] == j)
+                                    lCluster->AddControlPointIndex(index, weights.X);
+                                break;
+                            case 1:
+                                if (weightIndices[1] == j)
+                                    lCluster->AddControlPointIndex(index, weights.Y);
+                                break;
+                            case 2:
+                                if (weightIndices[2] == j)
+                                    lCluster->AddControlPointIndex(index, weights.Z);
+                                break;
+                            case 3:
+                                if (weightIndices[3] == j)
+                                    lCluster->AddControlPointIndex(index, weights.W);
+                                break;
+                        }
+                    }
                 }
 
                 lSkin->AddCluster( lCluster );
@@ -310,7 +323,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
     FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( AquaObject::GenericMaterial^ aqMat, String^ texturesDirectoryPath, FbxScene* lScene )
     {
-        FbxSurfacePhong* lSurfacePhong = FbxSurfacePhong::Create( lScene, Utf8String(aqMat->matName ).ToCStr() );
+        FbxSurfacePhong* lSurfacePhong = FbxSurfacePhong::Create( lScene, Utf8String("(" + aqMat->shaderNames[0] + "," + aqMat->shaderNames[1] + ")" + "{" + aqMat->blendType + "}"+ aqMat->matName + "@" + aqMat->twoSided.ToString()).ToCStr() );
 
         lSurfacePhong->ShadingModel.Set( "Phong" );
 
@@ -349,7 +362,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
     FbxNode* CreateFbxNodeFromAquaObject( AquaObject^ aqo, String^ aqoName, String^ texturesDirectoryPath, FbxScene* lScene, FbxPose* lBindPose, List<IntPtr>^ convertedBones, AquaNode^ aqn)
     {
-        FbxNode* lNode = FbxNode::Create( lScene, Utf8String(aqoName).ToCStr() );
+        FbxNode* lNode = FbxNode::Create( lScene, Utf8String(aqoName + "_model").ToCStr() );
         List<int>^ meshMatMappings;
         List<AquaObject::GenericMaterial^>^ aqMats = aqo->GetUniqueMaterials(meshMatMappings);
         List<IntPtr>^ materials = gcnew List<IntPtr>( aqMats->Count );
@@ -371,9 +384,9 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lNode;
     }
     
-    FbxNode* CreateFbxNodeFromAqnNode(AquaNode::NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose)
+    FbxNode* CreateFbxNodeFromAqnNode(AquaNode::NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex)
     {
-        const char* name = Utf8String(node.boneName.GetString()).ToCStr();
+        const char* name = Utf8String(String::Format("(" + boneIndex + ")" + node.boneName.GetString() + "#" + node.boneShort1.ToString("X") + "#" + node.boneShort2.ToString("X"))).ToCStr();
         FbxNode* lNode = FbxNode::Create(lScene, name);
 
         Matrix4x4 worldTransformation;
@@ -406,7 +419,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
     FbxNode* CreateFbxNodeFromAqnNodo(AquaNode::NODO nodo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose)
     {
-        const char* name = Utf8String(nodo.boneName.GetString()).ToCStr();
+        const char* name = Utf8String(nodo.boneName.GetString() + "#" + nodo.boneShort1.ToString("X") + "#" + nodo.boneShort2.ToString("X")).ToCStr();
         FbxNode* lNode = FbxNode::Create(lScene, name);
 
         Matrix4x4 parentTransformation;
@@ -474,10 +487,13 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         FbxNode* lRootNode = lScene->GetRootNode();
 
         List<IntPtr>^ convertedBones = gcnew List<IntPtr>();
+        AquaNode::NODE node0 = aqn->nodeList[0];
+        const char* name = Utf8String(String::Format("(0)" + node0.boneName.GetString() + "#" + node0.boneShort1.ToString("X") + "#" + node0.boneShort2.ToString("X"))).ToCStr();
 
-        FbxNode* lSkeletonNode = FbxNode::Create( lScene, "gblctr" );
+        FbxNode* lSkeletonNode = FbxNode::Create( lScene, name);
+        convertedBones->Add(IntPtr(lSkeletonNode));
 
-        FbxSkeleton* lSkeleton = FbxSkeleton::Create( lScene, "gblctr" );
+        FbxSkeleton* lSkeleton = FbxSkeleton::Create( lScene, name);
         lSkeleton->SetSkeletonType( FbxSkeleton::eRoot );
 
         lSkeletonNode->SetNodeAttribute( lSkeleton );
@@ -485,7 +501,12 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         //Go through standard nodes
         for(int i = 0; i < aqn->nodeList->Count; i++)
         {
+            if (i == 0)
+            {
+                continue;
+            }
             AquaNode::NODE node = aqn->nodeList[i];
+
             Matrix4x4 parentInvTfm;
             FbxNode* parentFbxNode = nullptr;
             if (node.parentId != -1)
@@ -496,7 +517,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             else {
                 parentInvTfm = Matrix4x4::Identity;
             }
-            FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose);
+            FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose, i);
             if (parentFbxNode != nullptr)
             {
                 parentFbxNode->AddChild(fbxNode);

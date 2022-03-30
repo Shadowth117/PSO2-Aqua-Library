@@ -1160,7 +1160,8 @@ namespace AquaModelTool
                 saveFileDialog = new SaveFileDialog()
                 {
                     Title = "Export fbx model file",
-                    Filter = "Filmbox files (*.fbx)|*.fbx"
+                    Filter = "Filmbox files (*.fbx)|*.fbx",
+                    FileName = Path.ChangeExtension(Path.GetFileName(currentFile), ".fbx")
                 };
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -1201,7 +1202,12 @@ namespace AquaModelTool
 
                     aquaUI.aqua.aquaBones.Clear();
                     aquaUI.aqua.ReadBones(bonePath);
-                    FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aquaUI.aqua.aquaBones[0], saveFileDialog.FileName);
+                    var model = aquaUI.aqua.aquaModels[0].models[0];
+                    if (model.objc.type > 0xC32)
+                    {
+                        model.splitVSETPerMesh();
+                    }
+                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], saveFileDialog.FileName);
                 }
                 /*using (var ctx = new Assimp.AssimpContext())
                 {
@@ -1343,7 +1349,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select PSO2 prm file",
-                Filter = "PSO2 Effect Model File (*.prm)|*.prm",
+                Filter = "PSO2 Effect Model File (*.prm, *.prx)|*.prm;*.prx",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)

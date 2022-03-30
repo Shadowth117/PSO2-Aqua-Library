@@ -91,7 +91,7 @@ namespace AquaModelLibrary
 
                     var node = aqm.motionKeys[id] = new AquaMotion.KeyData();
 
-                    node.mseg.nodeName.SetString(animNode.NodeName);
+                    node.mseg.nodeName.SetString(animNode.NodeName.Split('#')[0]);
                     node.mseg.nodeId = id;
                     node.mseg.nodeType = 2;
                     node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
