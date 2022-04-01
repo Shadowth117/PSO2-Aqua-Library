@@ -2203,65 +2203,68 @@ namespace AquaModelLibrary
             REND rend = new REND();
 
             //Set up textures
-            for (int i = 0; i < mat.texNames.Count; i++)
+            if(mat.texNames != null)
             {
-                bool foundCopy = false;
-                for(int texIndex = 0; texIndex < model.texfList.Count; texIndex++)
+                for (int i = 0; i < mat.texNames.Count; i++)
                 {
-                    if(mat.texNames[i].Equals(model.texfList[texIndex].texName.GetString()))
+                    bool foundCopy = false;
+                    for(int texIndex = 0; texIndex < model.texfList.Count; texIndex++)
                     {
-                        tempTexIds.Add(texIndex);
-                        foundCopy = true;
-                        break;
+                        if(mat.texNames[i].Equals(model.texfList[texIndex].texName.GetString()))
+                        {
+                            tempTexIds.Add(texIndex);
+                            foundCopy = true;
+                            break;
+                        }
                     }
+
+                    if(foundCopy == true)
+                    {
+                        continue;
+                    }
+
+                    TEXF texf = new TEXF();
+                    TSTA tsta = new TSTA();
+
+                    texf.texName.SetString(mat.texNames[i]);
+
+                    tsta.tag = 0x16; //Reexamine this one when possible, these actually vary a bit in 0xC33 variants.
+                    //NGS does some funny things with the tex usage order int
+                    if(mat.texNames[i].Contains("_subnormal_"))
+                    {
+                        tsta.texUsageOrder = 0xA;
+                    } else
+                    {
+                        tsta.texUsageOrder = texArrayStartIndex + i;
+                    }
+                    if (mat.texUVSets == null)
+                    {
+                        tsta.modelUVSet = 0;
+                    } else
+                    {
+                        tsta.modelUVSet = mat.texUVSets[i];
+                    }
+                    var unkVector0 = new Vector3();
+                    if (ngsMat == true)
+                    {
+                        unkVector0.Z = 1;
+                    }
+
+                    tsta.unkVector0 = unkVector0;
+                    tsta.unkFloat2 = 0;
+                    tsta.unkFloat3 = 0;
+                    tsta.unkFloat4 = 0;
+                    tsta.unkInt3 = 1;
+                    tsta.unkInt4 = 1;
+                    tsta.unkInt5 = 1;
+                    tsta.unkFloat0 = 0f;
+                    tsta.unkFloat1 = 0f;
+                    tsta.texName = texf.texName;
+
+                    model.texfList.Add(texf);
+                    model.tstaList.Add(tsta);
+                    tempTexIds.Add(model.texfList.Count - 1);
                 }
-
-                if(foundCopy == true)
-                {
-                    continue;
-                }
-
-                TEXF texf = new TEXF();
-                TSTA tsta = new TSTA();
-
-                texf.texName.SetString(mat.texNames[i]);
-
-                tsta.tag = 0x16; //Reexamine this one when possible, these actually vary a bit in 0xC33 variants.
-                //NGS does some funny things with the tex usage order int
-                if(mat.texNames[i].Contains("_subnormal_"))
-                {
-                    tsta.texUsageOrder = 0xA;
-                } else
-                {
-                    tsta.texUsageOrder = texArrayStartIndex + i;
-                }
-                if (mat.texUVSets == null)
-                {
-                    tsta.modelUVSet = 0;
-                } else
-                {
-                    tsta.modelUVSet = mat.texUVSets[i];
-                }
-                var unkVector0 = new Vector3();
-                if (ngsMat == true)
-                {
-                    unkVector0.Z = 1;
-                }
-
-                tsta.unkVector0 = unkVector0;
-                tsta.unkFloat2 = 0;
-                tsta.unkFloat3 = 0;
-                tsta.unkFloat4 = 0;
-                tsta.unkInt3 = 1;
-                tsta.unkInt4 = 1;
-                tsta.unkInt5 = 1;
-                tsta.unkFloat0 = 0f;
-                tsta.unkFloat1 = 0f;
-                tsta.texName = texf.texName;
-
-                model.texfList.Add(texf);
-                model.tstaList.Add(tsta);
-                tempTexIds.Add(model.texfList.Count - 1);
             }
 
             //Set up texture set.

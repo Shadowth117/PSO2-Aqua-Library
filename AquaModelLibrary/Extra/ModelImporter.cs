@@ -14,7 +14,7 @@ namespace AquaModelLibrary
     {
         public static void AssimpAQMConvert(string initialFilePath, bool playerExport, bool useScaleFrames, float scaleFactor)
         {
-            float baseScale = 1f / 100f * scaleFactor; //We assume that this will be 100x the true scale because 1 unit to 1 meter isn't the norm
+            float baseScale = 2.54f * scaleFactor; //We assume that this will be 39.37008f * the true scale
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
@@ -469,7 +469,7 @@ namespace AquaModelLibrary
                 PRMModel.PRMVert vert = new PRMModel.PRMVert();
                 var aiPos = aiMesh.Vertices[vertId];
                 var newPos = (new Vector3(aiPos.X, aiPos.Y, aiPos.Z));
-                vert.pos = Vector3.Transform(newPos, nodeMat) / 100;
+                vert.pos = (Vector3.Transform(newPos, nodeMat) * 2.54f);
 
                 if (aiMesh.HasVertexColors(0))
                 {
@@ -529,7 +529,7 @@ namespace AquaModelLibrary
         public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS)
         {
             AquaUtil aquaUtil = new AquaUtil();
-            float baseScale = 1f / 100f * scaleFactor; //We assume that this will be 100x the true scale because 1 unit to 1 meter isn't the norm
+            float baseScale = 2.54f * scaleFactor; //We assume that this will be 39.37008f the true scale
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
@@ -674,7 +674,7 @@ namespace AquaModelLibrary
                 }
                 ParseShorts(nodeName, out node.boneShort1, out node.boneShort2);
 
-                //Assign transform data ===TODO==
+                //Assign transform data
                 var localMat = GetMat4FromAssimpMat4(aiNode.Transform);
                 var worldMat = GetMat4FromAssimpMat4(GetWorldMatrix(aiNode));
                 node.m1 = new Vector4(worldMat.M11, worldMat.M12, worldMat.M13, worldMat.M14);

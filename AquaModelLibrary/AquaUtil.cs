@@ -153,6 +153,53 @@ namespace AquaModelLibrary
             }
         }
 
+        public void ConvertPRMToAquaObject()
+        {
+            aquaModels.Clear();
+            aquaBones.Clear();
+            for (int i = 0; i < prmModels.Count; i++)
+            {
+                AquaObject aqp = new NGSAquaObject();
+
+                AquaObject.VTXL vtxl = new AquaObject.VTXL();
+                for(int v = 0; v < prmModels[i].vertices.Count; v++)
+                {
+                    var vertex = prmModels[i].vertices[v];
+                    vtxl.vertPositions.Add(vertex.pos);
+                    vtxl.vertNormals.Add(vertex.normal);
+                    vtxl.vertColors.Add(vertex.color);
+                    vtxl.uv1List.Add(vertex.uv1);
+                    vtxl.uv2List.Add(vertex.uv2);
+                }
+                aqp.vtxlList.Add(vtxl);
+
+                var tris = new AquaObject.GenericTriangles(prmModels[i].faces);
+                tris.matIdList = new List<int>(new int[tris.triList.Count]);
+                aqp.tempTris.Add(tris);
+                aqp.tempMats.Add(new AquaObject.GenericMaterial() { matName = "PRMMat"});
+
+                aquaModels.Add(new ModelSet { models = new List<AquaObject> { aqp } });
+
+                AquaNode aqn = new AquaNode();
+                aqn.ndtr = new AquaNode.NDTR();
+                aqn.ndtr.boneCount = 1;
+                AquaNode.NODE node = new AquaNode.NODE();
+                node.boneName.SetString("Root Node");
+                node.m1 = new Vector4(1, 0, 0, 0);
+                node.m2 = new Vector4(0, 1, 0, 0);
+                node.m3 = new Vector4(0, 0, 1, 0);
+                node.m4 = new Vector4(0, 0, 0, 1);
+                node.parentId = -1;
+                node.nextSibling = -1;
+                node.firstChild = -1;
+
+                aqn.nodeList.Add(node);
+                aqn.nodeList.Add(node);
+                aquaBones.Add(aqn);
+            }
+            ConvertToNGSPSO2Mesh(false, true, false, true, false, false, false);
+        }
+
         //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
         public void ConvertToNGSPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true)
         {

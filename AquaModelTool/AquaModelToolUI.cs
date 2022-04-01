@@ -23,6 +23,7 @@ namespace AquaModelTool
     {
         public AquaUICommon aquaUI = new AquaUICommon();
         public List<string> modelExtensions = new List<string>() { ".aqp", ".aqo", ".trp", ".tro" };
+        public List<string> simpleModelExtensions = new List<string>() { ".prm", ".prx"};
         public List<string> effectExtensions = new List<string>() { ".aqe" };
         public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public string currentFile;
@@ -2290,7 +2291,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select a PSO2 file",
-                Filter = "All Supported Files|*.aqp;*.aqo;*.trp;*.tro;*.axs",
+                Filter = "All Supported Files|*.aqp;*.aqo;*.trp;*.tro;*.axs;*.prm;*.prx",
                 Multiselect = true,
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -2298,39 +2299,50 @@ namespace AquaModelTool
                 AquaUtil aqua = new AquaUtil();
                 foreach(var filename in openFileDialog.FileNames)
                 {
-                    if(!filename.Contains(".axs"))
+                    AquaObject model;
+                    var ext = Path.GetExtension(filename);
+                    if (simpleModelExtensions.Contains(ext))
                     {
-                        var ext = Path.GetExtension(filename);
-                        //Get bone ext
-                        string boneExt = "";
-                        switch (ext)
-                        {
-                            case ".aqo":
-                            case ".aqp":
-                                boneExt = ".aqn";
-                                break;
-                            case ".tro":
-                            case ".trp":
-                                boneExt = ".trn";
-                                break;
-                            default:
-                                break;
-                        }
-                        var bonePath = filename.Replace(ext, boneExt);
-                        aqua.aquaBones.Clear();
-                        if(!File.Exists(bonePath)) //We need bones for this
-                        {
-                            continue;
-                        }
-                        aqua.ReadBones(bonePath);
-                    }
-                    aqua.ReadModel(filename);
-                    var model = aqua.aquaModels[0].models[0];
-                    if (model.objc.type > 0xC32)
+                        aqua.LoadPRM(filename);
+                        aqua.ConvertPRMToAquaObject();
+                        model = aqua.aquaModels[0].models[0];
+                    } else
                     {
-                        model.splitVSETPerMesh();
+                        if (modelExtensions.Contains(ext))
+                        {
+                            //Get bone ext
+                            string boneExt = "";
+                            switch (ext)
+                            {
+                                case ".aqo":
+                                case ".aqp":
+                                    boneExt = ".aqn";
+                                    break;
+                                case ".tro":
+                                case ".trp":
+                                    boneExt = ".trn";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            var bonePath = filename.Replace(ext, boneExt);
+                            aqua.aquaBones.Clear();
+                            if (!File.Exists(bonePath)) //We need bones for this
+                            {
+                                continue;
+                            }
+                            aqua.ReadBones(bonePath);
+                        }
+                        aqua.ReadModel(filename);
+                        model = aqua.aquaModels[0].models[0];
+                        if (model.objc.type > 0xC32)
+                        {
+                            model.splitVSETPerMesh();
+                        }
                     }
                     FbxExporter.ExportToFile(model, aqua.aquaBones[0], Path.ChangeExtension(filename, ".fbx"), includeMetadataToolStripMenuItem.Checked);
+                    aqua.aquaBones.Clear();
+                    aqua.aquaModels.Clear();
                 }
             }
             
