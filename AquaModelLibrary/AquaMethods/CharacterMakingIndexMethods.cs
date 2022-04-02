@@ -11,6 +11,7 @@ using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.VTBFMethods;
 using static AquaExtras.FilenameConstants;
+using AquaModelLibrary.AquaMethods;
 
 namespace AquaModelLibrary
 {
@@ -384,7 +385,7 @@ namespace AquaModelLibrary
                 ngsHornObj.substruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsHornObj.ngsHorn.dataStringPtr + offset, SeekOrigin.Begin);
-                ngsHornObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+                ngsHornObj.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 cmx.ngsHornList.Add(ngsHornObj);
 
@@ -420,19 +421,19 @@ namespace AquaModelLibrary
                 ngsTeethObj.substruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.dataStringPtr + offset, SeekOrigin.Begin);
-                ngsTeethObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsTeethObj.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                ngsTeethObj.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
                 int id = Int32.Parse(ngsTeethObj.dataString.Replace(rebootTeethDataStr, ""));
@@ -465,22 +466,22 @@ namespace AquaModelLibrary
                 ngsEarObj.subStruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsEarObj.ngsEar.dataStringPtr + offset, SeekOrigin.Begin);
-                ngsEarObj.dataString = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsEarObj.ngsEar.texString5Ptr + offset, SeekOrigin.Begin);
-                ngsEarObj.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                ngsEarObj.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
                 int id = Int32.Parse(ngsEarObj.dataString.Replace(rebootEarDataStr, ""));
@@ -521,25 +522,25 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(body.body.dataStringPtr + offset, SeekOrigin.Begin);
-                body.dataString = AquaObjectMethods.ReadCString(streamReader);
+                body.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(body.body.texString1Ptr + offset, SeekOrigin.Begin);
-                body.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                body.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(body.body.texString2Ptr + offset, SeekOrigin.Begin);
-                body.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                body.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(body.body.texString3Ptr + offset, SeekOrigin.Begin);
-                body.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                body.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(body.body.texString4Ptr + offset, SeekOrigin.Begin);
-                body.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                body.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
-                body.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                body.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
-                body.texString6 = AquaObjectMethods.ReadCString(streamReader);
+                body.texString6 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -563,19 +564,19 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(bbly.bbly.texString1Ptr + offset, SeekOrigin.Begin);
-                bbly.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                bbly.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(bbly.bbly.texString2Ptr + offset, SeekOrigin.Begin);
-                bbly.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                bbly.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(bbly.bbly.texString3Ptr + offset, SeekOrigin.Begin);
-                bbly.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                bbly.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(bbly.bbly.texString4Ptr + offset, SeekOrigin.Begin);
-                bbly.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                bbly.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(bbly.bbly.texString5Ptr + offset, SeekOrigin.Begin);
-                bbly.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                bbly.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -595,7 +596,7 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(sticker.sticker.texStringPtr + offset, SeekOrigin.Begin);
-                sticker.texString = AquaObjectMethods.ReadCString(streamReader);
+                sticker.texString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -618,25 +619,25 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(face.face.dataStringPtr + offset, SeekOrigin.Begin);
-                face.dataString = AquaObjectMethods.ReadCString(streamReader);
+                face.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(face.face.texString1Ptr + offset, SeekOrigin.Begin);
-                face.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                face.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(face.face.texString2Ptr + offset, SeekOrigin.Begin);
-                face.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                face.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(face.face.texString3Ptr + offset, SeekOrigin.Begin);
-                face.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                face.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(face.face.texString4Ptr + offset, SeekOrigin.Begin);
-                face.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                face.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
-                face.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                face.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
-                face.texString6 = AquaObjectMethods.ReadCString(streamReader);
+                face.texString6 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -659,37 +660,37 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(fcmn.fcmn.proportionAnimPtr + offset, SeekOrigin.Begin);
-                fcmn.proportionAnim = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.proportionAnim = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim1Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim1 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim2Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim2 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim3Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim3 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim4Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim4 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim5Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim5 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim6Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim6 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim6 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim7Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim7 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim7 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim8Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim8 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim8 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim9Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim9 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim9 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcmn.fcmn.faceAnim10Ptr + offset, SeekOrigin.Begin);
-                fcmn.faceAnim10 = AquaObjectMethods.ReadCString(streamReader);
+                fcmn.faceAnim10 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -710,16 +711,16 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(fcp.fcp.texString1Ptr + offset, SeekOrigin.Begin);
-                fcp.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                fcp.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcp.fcp.texString2Ptr + offset, SeekOrigin.Begin);
-                fcp.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                fcp.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcp.fcp.texString3Ptr + offset, SeekOrigin.Begin);
-                fcp.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                fcp.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(fcp.fcp.texString4Ptr + offset, SeekOrigin.Begin);
-                fcp.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                fcp.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
                 if(dict.ContainsKey(fcp.fcp.id))
@@ -742,16 +743,16 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(ngsFace.ngsFace.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsFace.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                ngsFace.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsFace.ngsFace.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsFace.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                ngsFace.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsFace.ngsFace.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsFace.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                ngsFace.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsFace.ngsFace.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsFace.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                ngsFace.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -784,31 +785,31 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
-                acce.dataString = AquaObjectMethods.ReadCString(streamReader);
+                acce.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach1Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach1 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach2Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach2 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach3Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach3 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach4Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach4 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach5Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach5 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach6Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach6 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach6 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach7Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach7 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach7 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach8 = AquaObjectMethods.ReadCString(streamReader);
+                acce.nodeAttach8 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -860,19 +861,19 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(eye.eye.texString1Ptr + offset, SeekOrigin.Begin);
-                eye.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                eye.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eye.eye.texString2Ptr + offset, SeekOrigin.Begin);
-                eye.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                eye.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eye.eye.texString3Ptr + offset, SeekOrigin.Begin);
-                eye.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                eye.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eye.eye.texString4Ptr + offset, SeekOrigin.Begin);
-                eye.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                eye.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eye.eye.texString5Ptr + offset, SeekOrigin.Begin);
-                eye.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                eye.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -892,25 +893,25 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString6 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString6 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(ngsSkin.ngsSkin.texString7Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString7 = AquaObjectMethods.ReadCString(streamReader);
+                ngsSkin.texString7 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -930,16 +931,16 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(eyeb.eyeb.texString1Ptr + offset, SeekOrigin.Begin);
-                eyeb.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                eyeb.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eyeb.eyeb.texString2Ptr + offset, SeekOrigin.Begin);
-                eyeb.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                eyeb.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eyeb.eyeb.texString3Ptr + offset, SeekOrigin.Begin);
-                eyeb.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                eyeb.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(eyeb.eyeb.texString4Ptr + offset, SeekOrigin.Begin);
-                eyeb.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                eyeb.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -959,28 +960,28 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(hair.hair.dataStringPtr + offset, SeekOrigin.Begin);
-                hair.dataString = AquaObjectMethods.ReadCString(streamReader);
+                hair.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString1Ptr + offset, SeekOrigin.Begin);
-                hair.texString1 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString1 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString2Ptr + offset, SeekOrigin.Begin);
-                hair.texString2 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString2 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString3Ptr + offset, SeekOrigin.Begin);
-                hair.texString3 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString3 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString4Ptr + offset, SeekOrigin.Begin);
-                hair.texString4 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString6Ptr + offset, SeekOrigin.Begin);
-                hair.texString5 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString6Ptr + offset, SeekOrigin.Begin);
-                hair.texString6 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString6 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString7Ptr + offset, SeekOrigin.Begin);
-                hair.texString7 = AquaObjectMethods.ReadCString(streamReader);
+                hair.texString7 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -1000,7 +1001,7 @@ namespace AquaModelLibrary
                 long temp = streamReader.Position();
 
                 streamReader.Seek(col.niflCol.textStringPtr + offset, SeekOrigin.Begin);
-                col.textString = AquaObjectMethods.ReadCString(streamReader);
+                col.textString = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 

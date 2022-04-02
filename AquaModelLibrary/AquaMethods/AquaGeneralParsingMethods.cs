@@ -5,16 +5,66 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using zamboni;
-using static AquaModelLibrary.AquaObjectMethods;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.VTBFMethods;
 
 namespace AquaModelLibrary
 {
     public class AquaMiscMethods
     {
+
+        public static AquaBTI_MotionConfig LoadBTI(string inFilename)
+        {
+            AquaBTI_MotionConfig bti = new AquaBTI_MotionConfig();
+
+            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 4)
+            {
+                ext = ext.Substring(0, 4);
+            }
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    bti.header = streamReader.Read<AquaBTI_MotionConfig.BTIHeader>();
+
+                    for (int i = 0; i < bti.header.entryCount; i++)
+                    {
+                        streamReader.Seek(offset + bti.header.entryPtr + AquaBTI_MotionConfig.btiEntrySize * i, SeekOrigin.Begin);
+
+                        AquaBTI_MotionConfig.BTIEntryObject btiEntry = new AquaBTI_MotionConfig.BTIEntryObject();
+                        btiEntry.entry = streamReader.Read<AquaBTI_MotionConfig.BTIEntry>();
+
+                        //Get strings
+                        streamReader.Seek(offset + btiEntry.entry.additionPtr, SeekOrigin.Begin);
+                        btiEntry.addition = ReadCString(streamReader);
+
+                        streamReader.Seek(offset + btiEntry.entry.nodePtr, SeekOrigin.Begin);
+                        btiEntry.node = ReadCString(streamReader);
+
+                        streamReader.Seek(offset + btiEntry.entry.unkStringPtr, SeekOrigin.Begin);
+                        btiEntry.unkString = ReadCString(streamReader);
+
+                        bti.btiEntries.Add(btiEntry);
+                    }
+                }
+            }
+
+            return bti;
+        }
+
 
         public static PSO2Text ReadPSO2Text(string fileName)
         {
@@ -179,12 +229,12 @@ namespace AquaModelLibrary
             PSO2Text text = new PSO2Text();
 
             //We start on line 3 to avoid the metadata text
-            if(lines.Length < 4)
+            if (lines.Length < 4)
             {
                 return null;
             }
             int mode = 0;
-            for(int i = 3; i < lines.Length; i++)
+            for (int i = 3; i < lines.Length; i++)
             {
                 switch (mode)
                 {
@@ -201,34 +251,36 @@ namespace AquaModelLibrary
                         if (lines[i] == "")
                         {
                             mode = 0;
-                        } else if (lines[i].Contains("Group"))
+                        }
+                        else if (lines[i].Contains("Group"))
                         {
                             text.text[text.text.Count - 1].Add(new List<PSO2Text.textPair>());
                             mode = 2;
                         }
                         break;
                     case 2: //Text
-                        if(lines[i] == "")
+                        if (lines[i] == "")
                         {
                             mode = 1;
-                        } else if(lines[i].Contains('-'))
+                        }
+                        else if (lines[i].Contains('-'))
                         {
                             PSO2Text.textPair pair = new PSO2Text.textPair();
                             string[] line = lines[i].Split('-');
 
                             //Handle - being used as the name for whatever reason. Should be an uncommon issue
-                            if(line[0] == "")
+                            if (line[0] == "")
                             {
                                 pair.name = "-";
                                 lines[i] = ReplaceFirst(lines[i], "- ", "");
-                            } 
-                            else if(line[0][line[0].Length - 1] == ' ')
+                            }
+                            else if (line[0][line[0].Length - 1] == ' ')
                             {
                                 pair.name = line[0].Substring(0, line[0].Length - 1); //Get rid of the space
                             }
 
                             string schrodingersSpace = "";
-                            if(line[1][0].ToString() == " ")
+                            if (line[1][0].ToString() == " ")
                             {
                                 schrodingersSpace = " ";
                             }
@@ -246,7 +298,7 @@ namespace AquaModelLibrary
 
         public static void WritePSO2TextNIFL(string outname, PSO2Text pso2Text)
         {
-            if(pso2Text == null)
+            if (pso2Text == null)
             {
                 return;
             }
@@ -263,7 +315,7 @@ namespace AquaModelLibrary
             List<int> subCategoryAddress = new List<int>();
             List<List<int>> subCategoryNullAddresses = new List<List<int>>();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
-            
+
             //REL0
             outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
             rel0SizeOffset = outBytes.Count; //We'll fill this later
@@ -275,16 +327,16 @@ namespace AquaModelLibrary
 
             //Write placeholders for the text pointers
             //Iterate through each category
-            for(int cat = 0; cat < pso2Text.text.Count; cat++)
+            for (int cat = 0; cat < pso2Text.text.Count; cat++)
             {
                 namePointers.Add(new Dictionary<string, int>());
                 textAddresses.Add(new List<int>());
-                for(int sub = 0; sub < pso2Text.text[cat].Count; sub++)
+                for (int sub = 0; sub < pso2Text.text[cat].Count; sub++)
                 {
                     //Add this for when we write it later
                     textAddresses[cat].Add(outBytes.Count);
 
-                    for(int pair = 0; pair < pso2Text.text[cat][sub].Count; pair++)
+                    for (int pair = 0; pair < pso2Text.text[cat][sub].Count; pair++)
                     {
                         NOF0Append(nof0PointerLocations, outBytes.Count, 1);
                         NOF0Append(nof0PointerLocations, outBytes.Count + 4, 1);
@@ -312,10 +364,11 @@ namespace AquaModelLibrary
                         subCategoryNullAddresses.Add(new List<int>());
                     }
 
-                    if(pso2Text.text[cat][sub].Count > 0)
+                    if (pso2Text.text[cat][sub].Count > 0)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(textAddresses[cat][sub]));
-                    } else
+                    }
+                    else
                     {
                         subCategoryNullAddresses[sub].Add(outBytes.Count);
                         outBytes.AddRange(BitConverter.GetBytes(0));
@@ -348,13 +401,14 @@ namespace AquaModelLibrary
             outBytes.AddRange(BitConverter.GetBytes(pso2Text.text.Count));
 
             //Write main text as null terminated strings
-            for(int i = 0; i < textPairs.Count; i++)
+            for (int i = 0; i < textPairs.Count; i++)
             {
                 //Write the internal name
                 if (namePointers[textPairs[i].category].ContainsKey(textPairs[i].text.name))
                 {
                     SetByteListInt(outBytes, textPairs[i].address, namePointers[textPairs[i].category][textPairs[i].text.name]);
-                } else
+                }
+                else
                 {
                     SetByteListInt(outBytes, textPairs[i].address, outBytes.Count);
                     namePointers[textPairs[i].category].Add(textPairs[i].text.name, outBytes.Count);
@@ -383,14 +437,15 @@ namespace AquaModelLibrary
             //Unknown data? Don't write if it's not needed. May just be debug related. Empty groups/subcategories point here, but it's possible you could direct them to a general 0.
             //NA .text files seem to write this slightly differently, writing only one of these while JP .text files write one for every category, seemingly.
             //For the sake of sanity and space, NA's style will be used for custom .text
-            for(int i = 0; i < pso2Text.text[0].Count; i++)
+            for (int i = 0; i < pso2Text.text[0].Count; i++)
             {
                 if (pso2Text.text[0][0].Count > 0)
                 {
                     outBytes.AddRange(BitConverter.GetBytes(i));
-                } else
+                }
+                else
                 {
-                    for(int groupCounter = 0; groupCounter < subCategoryNullAddresses[i].Count; groupCounter++)
+                    for (int groupCounter = 0; groupCounter < subCategoryNullAddresses[i].Count; groupCounter++)
                     {
                         SetByteListInt(outBytes, subCategoryNullAddresses[i][groupCounter], outBytes.Count);
                     }
@@ -724,87 +779,6 @@ namespace AquaModelLibrary
             }
 
             return mgxIds;
-        }
-
-        public static int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
-        {
-            if (countToCheck < 1)
-            {
-                return -1;
-            }
-            int newAddress = currentOffset - subtractedOffset;
-            nof0.Add(newAddress);
-
-            return newAddress;
-        }
-
-        //https://stackoverflow.com/questions/8809354/replace-first-occurrence-of-pattern-in-a-string
-        public static string ReplaceFirst(string text, string search, string replace)
-        {
-            int pos = text.IndexOf(search);
-            if (pos < 0)
-            {
-                return text;
-            }
-            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
-        }
-
-        //Mainly for handling pointer offsets
-        public static int SetByteListInt(List<byte> outBytes, int offset, int value)
-        {
-            if (offset != -1)
-            {
-                var newBytes = BitConverter.GetBytes(value);
-                for (int i = 0; i < 4; i++)
-                {
-                    outBytes[offset + i] = newBytes[i];
-                }
-
-                return value;
-            }
-
-            return -1;
-        }
-
-        public static void AlignReader(BufferedStreamReader streamReader, int align)
-        {
-            //Align to int align
-            while (streamReader.Position() % align > 0)
-            {
-                streamReader.Read<byte>();
-            }
-        }
-
-        public static int AlignWriter(List<byte> outBytes, int align)
-        {
-            //Align to int align
-            int additions = 0;
-            while (outBytes.Count % align > 0)
-            {
-                additions++;
-                outBytes.Add(0);
-            }
-
-            return additions;
-        }
-
-        public static void AlignFileEndWrite(List<byte> outBytes, int align)
-        {
-            if (outBytes.Count % align == 0)
-            {
-                for (int i = 0; i < 0x10; i++)
-                {
-                    outBytes.Add(0);
-                }
-            }
-            else
-            {
-                //Align to 0x10
-                while (outBytes.Count % align > 0)
-                {
-                    outBytes.Add(0);
-                }
-            }
         }
     }
 }

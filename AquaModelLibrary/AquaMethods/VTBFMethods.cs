@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Text;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaNode;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaObjectMethods;
 using System.Windows;
 using static AquaModelLibrary.AquaMotion;

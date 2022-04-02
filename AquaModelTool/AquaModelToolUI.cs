@@ -1,21 +1,18 @@
-﻿using System;
+﻿using AquaModelLibrary;
+using AquaModelLibrary.Native.Fbx;
+using AquaModelLibrary.Nova;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using AquaModelLibrary;
-using AquaModelLibrary.Native.Fbx;
-using AquaModelLibrary.Nova;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using zamboni;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelTool
 {
@@ -23,7 +20,7 @@ namespace AquaModelTool
     {
         public AquaUICommon aquaUI = new AquaUICommon();
         public List<string> modelExtensions = new List<string>() { ".aqp", ".aqo", ".trp", ".tro" };
-        public List<string> simpleModelExtensions = new List<string>() { ".prm", ".prx"};
+        public List<string> simpleModelExtensions = new List<string>() { ".prm", ".prx" };
         public List<string> effectExtensions = new List<string>() { ".aqe" };
         public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public string currentFile;
@@ -364,7 +361,7 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                foreach(string file in openFileDialog.FileNames)
+                foreach (string file in openFileDialog.FileNames)
                 {
                     AquaModelLibrary.AquaUtil.AnalyzeVTBF(file);
                 }
@@ -436,7 +433,7 @@ namespace AquaModelTool
         {
             foreach (var fileName in fileNames)
             {
-                    AquaUtil.ConvertPSO2Text(fileName.Split('.')[0] + ".text", fileName);
+                AquaUtil.ConvertPSO2Text(fileName.Split('.')[0] + ".text", fileName);
             }
         }
         private void parsePSO2TextFolderSelectToolStripMenuItem_Click(object sender, EventArgs e)
@@ -476,7 +473,7 @@ namespace AquaModelTool
             {
                 aquaUI.aqua.ReadBones(openFileDialog.FileName);
 #if DEBUG
-                for(int i = 0; i < aquaUI.aqua.aquaBones[0].nodeList.Count; i++)
+                for (int i = 0; i < aquaUI.aqua.aquaBones[0].nodeList.Count; i++)
                 {
                     var bone = aquaUI.aqua.aquaBones[0].nodeList[i];
                     Console.WriteLine($"{bone.boneName.GetString()} {bone.boneShort1.ToString("X")} {bone.boneShort2.ToString("X")}  {bone.eulRot.X.ToString()} {bone.eulRot.Y.ToString()} {bone.eulRot.Z.ToString()} ");
@@ -740,7 +737,7 @@ namespace AquaModelTool
             if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 List<string> files = new List<string>();
-                string[] extensions = new string[] { "*.set"};
+                string[] extensions = new string[] { "*.set" };
                 foreach (string s in extensions)
                 {
                     files.AddRange(Directory.GetFiles(goodFolderDialog.FileName, s));
@@ -831,7 +828,7 @@ namespace AquaModelTool
                 //Go through models we gathered
                 foreach (string file in files)
                 {
-                    if(extensions.Contains(Path.GetExtension(file)))
+                    if (extensions.Contains(Path.GetExtension(file)))
                     {
                         try
                         {
@@ -845,10 +842,11 @@ namespace AquaModelTool
 
                         ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, file);
                         GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, file);
-                    } else 
+                    }
+                    else
                     {
                         var fileBytes = File.ReadAllBytes(file);
-                        if(fileBytes.Length > 0)
+                        if (fileBytes.Length > 0)
                         {
                             var magic = BitConverter.ToInt32(fileBytes, 0);
                             if (magic == 0x454349)
@@ -900,7 +898,7 @@ namespace AquaModelTool
                 //Sort the list so we don't get a mess
                 var keys = shaderCombinations.Keys.ToList();
                 keys.Sort();
-                
+
                 StringBuilder simpleOutput = new StringBuilder();
                 StringBuilder advancedOutput = new StringBuilder();
                 StringBuilder detailDictOutput = new StringBuilder();
@@ -1027,7 +1025,7 @@ namespace AquaModelTool
                         shaderExtras[key].Add(extData);
                     }
                 }
-                else if(shad.unk0 != 0)
+                else if (shad.unk0 != 0)
                 {
                     if (!shaderCombinations.ContainsKey(key))
                     {
@@ -1124,7 +1122,7 @@ namespace AquaModelTool
         private void legacyAqp2objObjImportToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //Import obj geometry to current file. Make sure to remove LOD models.
-            if(aquaUI.aqua.aquaModels.Count > 0)
+            if (aquaUI.aqua.aquaModels.Count > 0)
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog()
                 {
@@ -1145,7 +1143,7 @@ namespace AquaModelTool
         private void testVTXEToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var model = aquaUI.aqua.aquaModels[0].models[0];
-            for(int i = 0; i < model.vtxlList.Count; i++)
+            for (int i = 0; i < model.vtxlList.Count; i++)
             {
                 model.vtxeList[i] = AquaObjectMethods.ConstructClassicVTXE(model.vtxlList[i], out int vertSize);
             }
@@ -1317,7 +1315,7 @@ namespace AquaModelTool
                     }
                 }*/
 
-                }
+            }
         }
 
         private void dumpNOF0ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1329,7 +1327,7 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                AquaUtil.DumpNOF0(openFileDialog.FileName);
+                AquaModelLibrary.AquaMethods.AquaGeneralMethods.DumpNOF0(openFileDialog.FileName);
             }
         }
 
@@ -1357,7 +1355,7 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 //Read prms
-                foreach(var file in openFileDialog.FileNames)
+                foreach (var file in openFileDialog.FileNames)
                 {
                     aquaUI.aqua.LoadPRM(file);
                 }
@@ -1408,13 +1406,14 @@ namespace AquaModelTool
 
                         //Iterate through each selected model and use the selected type.
                         var finalExtension = Path.GetExtension(saveFileDialog.FileName);
-                        for(int i = 0; i < aquaUI.aqua.prmModels.Count; i++)
+                        for (int i = 0; i < aquaUI.aqua.prmModels.Count; i++)
                         {
                             string finalName;
-                            if(i == 0)
+                            if (i == 0)
                             {
                                 finalName = saveFileDialog.FileName;
-                            } else
+                            }
+                            else
                             {
                                 finalName = Path.ChangeExtension(openFileDialog.FileNames[i], finalExtension);
                             }
@@ -1553,7 +1552,7 @@ namespace AquaModelTool
                     scaleFactor = 0.3048f;
                 }*/
 
-                foreach(var file in openFileDialog.FileNames)
+                foreach (var file in openFileDialog.FileNames)
                 {
                     ModelImporter.AssimpAQMConvert(file, false, true, scaleFactor);
                 }
@@ -1609,11 +1608,11 @@ namespace AquaModelTool
                 List<int> ints = new List<int>();
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    sb.Append(AquaUtil.CheckFigEffectMaps(file, ints));
+                    sb.Append(AquaModelLibrary.AquaMethods.AquaFigMethods.CheckFigEffectMaps(file, ints));
                 }
                 ints.Sort();
                 sb.AppendLine("All types:");
-                foreach(var num in ints)
+                foreach (var num in ints)
                 {
                     sb.AppendLine(num.ToString() + " " + num.ToString("X"));
                 }
@@ -1623,16 +1622,16 @@ namespace AquaModelTool
 
         private void spirefierToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(aquaUI.aqua.aquaModels.Count == 0)
+            if (aquaUI.aqua.aquaModels.Count == 0)
             {
                 return;
             }
             decimal value = 0;
 
-            if(AquaUICommon.ShowInputDialog(ref value) == DialogResult.OK)
+            if (AquaUICommon.ShowInputDialog(ref value) == DialogResult.OK)
             {
                 //Spirefier
-                for(int i = 0; i < aquaUI.aqua.aquaModels[0].models.Count; i++)
+                for (int i = 0; i < aquaUI.aqua.aquaModels[0].models.Count; i++)
                 {
                     var model = aquaUI.aqua.aquaModels[0].models[i];
                     for (int j = 0; j < model.vtxlList[0].vertPositions.Count; j++)
@@ -1806,18 +1805,18 @@ namespace AquaModelTool
                 aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
 
                 //Go through keyframes for every node and note each bone that uses a specific frame
-                foreach(var keySet in aquaUI.aqua.aquaMotions[0].anims[0].motionKeys)
+                foreach (var keySet in aquaUI.aqua.aquaMotions[0].anims[0].motionKeys)
                 {
-                    foreach(var data in keySet.keyData)
+                    foreach (var data in keySet.keyData)
                     {
-                        foreach(var time in data.frameTimings)
+                        foreach (var time in data.frameTimings)
                         {
                             var trueTime = time / 0x10;
-                            if(!timeSorted.ContainsKey(trueTime))
+                            if (!timeSorted.ContainsKey(trueTime))
                             {
                                 timeSorted[trueTime] = new List<int>();
                             }
-                            if(!timeSorted[trueTime].Contains(keySet.mseg.nodeId))
+                            if (!timeSorted[trueTime].Contains(keySet.mseg.nodeId))
                             {
                                 timeSorted[trueTime].Add(keySet.mseg.nodeId);
                             }
@@ -1827,11 +1826,11 @@ namespace AquaModelTool
 
                 var timeSortedKeys = timeSorted.Keys.ToList();
                 timeSortedKeys.Sort();
-                foreach(var key in timeSortedKeys)
+                foreach (var key in timeSortedKeys)
                 {
                     timeSorted[key].Sort();
                     outStr.AppendLine("Frame Time: " + key);
-                    foreach(var node in timeSorted[key])
+                    foreach (var node in timeSorted[key])
                     {
                         outStr.AppendLine($"  {node} - {aquaUI.aqua.aquaMotions[0].anims[0].motionKeys[node].mseg.nodeName.GetString()}");
                     }
@@ -1858,7 +1857,7 @@ namespace AquaModelTool
                 aquaUI.aqua.aquaMotions.Clear();
 
                 //Go through the motion, make edits to all keys at a specific frame time, save a copy, reset, and repeat with an incrmented frametime until the final frame
-                for(int i = 0; i <= finalFrame; i++)
+                for (int i = 0; i <= finalFrame; i++)
                 {
                     aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
 
@@ -1867,15 +1866,15 @@ namespace AquaModelTool
                         foreach (var data in keySet.keyData)
                         {
                             int frameIndex = -1;
-                            for(int j = 0; j < data.frameTimings.Count; j++)
+                            for (int j = 0; j < data.frameTimings.Count; j++)
                             {
-                                if(data.frameTimings[j] / 0x10 == i)
+                                if (data.frameTimings[j] / 0x10 == i)
                                 {
                                     frameIndex = j;
                                 }
                             }
 
-                            if(frameIndex != -1)
+                            if (frameIndex != -1)
                             {
                                 data.vector4Keys[frameIndex] = new System.Numerics.Vector4(5, 5, 5, 0);
                             }
@@ -1906,7 +1905,7 @@ namespace AquaModelTool
                 };
                 string tempFilter = "All supported formats|";
                 string tempFilter2 = "";
-                foreach(var str in formats)
+                foreach (var str in formats)
                 {
                     tempFilter += $"*{str};";
                     tempFilter2 += $"|(*{str})|*{str}";
@@ -2058,7 +2057,7 @@ namespace AquaModelTool
                             AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                         }
                     }
-                    catch 
+                    catch
                     {
                     }
                 }
@@ -2142,7 +2141,7 @@ namespace AquaModelTool
 
             foreach (var keySet in aquaUI.aqua.aquaMotions[0].anims[0].motionKeys)
             {
-                if(node == -1 || keySet.mseg.nodeId == node)
+                if (node == -1 || keySet.mseg.nodeId == node)
                 {
                     foreach (var data in keySet.keyData)
                     {
@@ -2232,7 +2231,7 @@ namespace AquaModelTool
                 var strm = new MemoryStream(File.ReadAllBytes(goodFolderDialog.FileName));
                 var fVarIce = IceFile.LoadIceFile(strm);
                 strm.Dispose();
-                
+
                 int frameToHit = 158;
                 int tfmType = 3;
                 int tfmType2 = 2;
@@ -2247,7 +2246,7 @@ namespace AquaModelTool
                 {
                     List<byte> file;
                     var name = IceFile.getFileName(fVarIce.groupTwoFiles[i]).ToLower();
-                    if(name.Contains(".aqm"))
+                    if (name.Contains(".aqm"))
                     {
                         file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType3, vec4_3, node); //pos
                         file = AdjustNormalKeysMotion(fVarIce, frameToHit, i, name, tfmType, vec4, node); //scale
@@ -2297,7 +2296,7 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 AquaUtil aqua = new AquaUtil();
-                foreach(var filename in openFileDialog.FileNames)
+                foreach (var filename in openFileDialog.FileNames)
                 {
                     AquaObject model;
                     var ext = Path.GetExtension(filename);
@@ -2306,7 +2305,8 @@ namespace AquaModelTool
                         aqua.LoadPRM(filename);
                         aqua.ConvertPRMToAquaObject();
                         model = aqua.aquaModels[0].models[0];
-                    } else
+                    }
+                    else
                     {
                         if (modelExtensions.Contains(ext))
                         {
@@ -2345,7 +2345,7 @@ namespace AquaModelTool
                     aqua.aquaModels.Clear();
                 }
             }
-            
+
         }
     }
 }

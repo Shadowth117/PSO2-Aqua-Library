@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using static AquaModelLibrary.AquaObjectMethods;
-using static AquaModelLibrary.AquaMiscMethods;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.VTBFMethods;
 using System.Numerics;
 

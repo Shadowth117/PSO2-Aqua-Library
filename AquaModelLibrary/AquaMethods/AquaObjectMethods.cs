@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using SystemHalf;
 using static AquaModelLibrary.AquaObject;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.NGSShaderPresets;
 
 namespace AquaModelLibrary
@@ -2453,99 +2454,6 @@ namespace AquaModelLibrary
             return shaderList;
         }
 
-        private static byte[] Read4Bytes(BufferedStreamReader streamReader)
-        {
-            byte[] bytes = new byte[4];
-            for (int byteIndex = 0; byteIndex < 4; byteIndex++) { bytes[byteIndex] = streamReader.Read<byte>(); }
-
-            return bytes;
-        }
-
-        private static ushort[] Read4UShorts(BufferedStreamReader streamReader)
-        {
-            ushort[] ushorts = new ushort[4];
-            for (int ushortIndex = 0; ushortIndex < 4; ushortIndex++) { ushorts[ushortIndex] = streamReader.Read<ushort>(); }
-
-            return ushorts;
-        }
-
-        private static short[] Read4Shorts(BufferedStreamReader streamReader)
-        {
-            short[] shorts = new short[4];
-            for (int shortIndex = 0; shortIndex < 4; shortIndex++) { shorts[shortIndex] = streamReader.Read<short>(); }
-
-            return shorts;
-        }
-
-        private static short[] Read2Shorts(BufferedStreamReader streamReader)
-        {
-            short[] shorts = new short[2];
-            for (int shortIndex = 0; shortIndex < 2; shortIndex++) { shorts[shortIndex] = streamReader.Read<short>(); }
-
-            return shorts;
-        }
-
-        private static ushort[] Read2Ushorts(BufferedStreamReader streamReader)
-        {
-            ushort[] shorts = new ushort[2];
-            for (int shortIndex = 0; shortIndex < 2; shortIndex++) { shorts[shortIndex] = streamReader.Read<ushort>(); }
-
-            return shorts;
-        }
-
-        private static Vector2 UshortsToVector2(ushort[] ushorts)
-        {
-            return new Vector2((float)((double)ushorts[0] / ushort.MaxValue), (float)((double)ushorts[1] / ushort.MaxValue));
-        }
-
-        public static float[] VectorAsArray(Vector3 vec3)
-        {
-            return new float[] { vec3.X, vec3.Y, vec3.Z }; 
-        }
-
-        //This shouldn't be necessary, but library binding issues in maxscript necessitated it over the Reloaded.Memory implementation. System.Runtime.CompilerServices.Unsafe causes errors otherwise.
-        //Borrowed from: https://stackoverflow.com/questions/42154908/cannot-take-the-address-of-get-the-size-of-or-declare-a-pointer-to-a-managed-t
-        private static byte[] ConvertStruct<T>(ref T str) where T : struct
-        {
-            int size = Marshal.SizeOf(str);
-            IntPtr arrPtr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(str, arrPtr, true);
-            var arr = new byte[size];
-            Marshal.Copy(arrPtr, arr, 0, size);
-            Marshal.FreeHGlobal(arrPtr);
-            return arr;
-        }
-
-        public static byte[] ConvertStruct<T>(T str) where T : struct
-        {
-            return ConvertStruct(ref str);
-        }
-
-
-        public static string ReadCString(BufferedStreamReader streamReader)
-        {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x60)); //Shouldn't ever be more than 0x60... in theory
-            return str.Remove(str.IndexOf(char.MinValue));
-        }
-
-        public static string ReadUTF16String(BufferedStreamReader streamReader, long end, bool quickMode = true)
-        {
-            string str;
-            // There's really no string limit, but it takes a long time to read these accurately. To avoid this attempt reading a short amount first. Then, go to failsafe if needed.
-            if(quickMode == true)
-            {
-                str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), 0x60));
-                int strEnd = str.IndexOf(char.MinValue);
-
-                //Return the string if the buffer is valid
-                if(strEnd != -1)
-                {
-                    return str.Remove(strEnd);
-                }
-            }
-            str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Come up with a better way handling sometime because I hate this.
-            return str.Remove(str.IndexOf(char.MinValue));
-        }
 
     }
 }

@@ -11,6 +11,7 @@ using static AquaModelLibrary.AquaObject;
 using Reloaded.Memory;
 using static AquaModelLibrary.PSOXVMConvert;
 using System.Windows;
+using AquaModelLibrary.AquaMethods;
 
 namespace AquaModelLibrary
 {
@@ -311,7 +312,7 @@ namespace AquaModelLibrary
             foreach(uint offset in nameOffsets)
             {
                 streamReader.Seek(offset, SeekOrigin.Begin);
-                texNames.Add(AquaObjectMethods.ReadCString(streamReader));
+                texNames.Add(AquaGeneralMethods.ReadCString(streamReader));
             }
 
             //If there's an .xvm, dump that too with texture names from the .rel

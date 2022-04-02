@@ -147,7 +147,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AquaMethods\AquaMiscMethods.cs" />
+    <Compile Include="AquaMethods\AquaFigMethods.cs" />
+    <Compile Include="AquaMethods\AquaGeneralMethods.cs" />
+    <Compile Include="AquaMethods\AquaGeneralParsingMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
@@ -161,6 +163,7 @@
     <Compile Include="AquaStructs\LHIObjectDetailLayout.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\MusicFile.cs" />
+    <Compile Include="AquaStructs\MusicFileAlpha.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\NGSShaderPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
