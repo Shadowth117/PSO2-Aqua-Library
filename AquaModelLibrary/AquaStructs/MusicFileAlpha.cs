@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
+﻿using System.Collections.Generic;
 
 namespace AquaModelLibrary.AquaStructs
 {
@@ -12,18 +7,21 @@ namespace AquaModelLibrary.AquaStructs
     public class MusicFileAlpha : AquaCommon
     {
         public bool isAlpha = false;
+        public musHeader header;
+        public List<sympathyPart> parts = new List<sympathyPart>();
 
         public struct musHeader
         {
-            public int unkStruct0Offset;
+            public int nextFourBytesOffset;
 
             public byte unkByte0;
-            public byte unkStruct0Count;
+            public byte sympathyPartCount;
             public byte unkByte1;
             public byte unkByte2;
         }
 
-        public struct unkStruct0            //Sympathy Part?
+        //Comes right after the header
+        public struct sympathyPart            //Sympathy Part?
         {
             public int unkStruct1Offset;
             public int unkStruct2Offset;
@@ -137,7 +135,7 @@ namespace AquaModelLibrary.AquaStructs
 
         public struct clipInfoAlpha
         {
-            public int  clipStringOffsetOffset; 
+            public int clipStringOffsetOffset;
             public int unkFloat0;
             public byte unkByte0;
             public byte unkByte1;
@@ -146,12 +144,13 @@ namespace AquaModelLibrary.AquaStructs
         }
 
         //There's no outright tell on these which version they'll be, but the alpha versions always seem to lay the first struct after the second... for some reason
-        public void AlphaCheck(unkStruct0 unk)
+        public void AlphaCheck(sympathyPart unk)
         {
-            if(unk.unkStruct1Offset > unk.unkStruct2Offset)
+            if (unk.unkStruct1Offset > unk.unkStruct2Offset)
             {
                 isAlpha = true;
-            } else
+            }
+            else
             {
                 isAlpha = false;
             }

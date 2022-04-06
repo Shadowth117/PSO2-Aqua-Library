@@ -4,9 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using static AquaModelLibrary.NGSAquaObject;
+using AquaModelLibrary.Extra;
 
 namespace AquaModelLibrary
 
@@ -1034,7 +1033,6 @@ namespace AquaModelLibrary
                     {
                         Vector4 trueWeight = new Vector4();
                         List<byte> trueBytes = new List<byte>();
-
                         if (vertWeightIndices[i][0] != 0 || vertWeights[i].X != 0)
                         {
                             trueWeight = addById(trueWeight, vertWeights[i].X, trueBytes.Count);
@@ -1080,6 +1078,163 @@ namespace AquaModelLibrary
 
                         trueVertWeights.Add(trueWeight);
                         trueVertWeightIndices.Add(trueBytes.ToArray());
+                    }
+                }
+
+            }
+
+            //Fixes invalid bone assignments and weights them bone 0 instead.
+            public void fixWeightsFromBoneCount(int maxBone = Int32.MaxValue)
+            {
+                if (vertWeights.Count > 0 && vertWeightIndices.Count > 0)
+                {
+                    for (int i = 0; i < vertWeights.Count; i++)
+                    {
+                        List<int> idList = new List<int>(); //List of ids to combine to bone0Id's value
+                        int bone0Id = 0;
+                        bool bone0Set = false;
+                        for(int id = 0; id < vertWeightIndices[i].Length; id++)
+                        {
+                            int loopId = vertWeightIndices[i][id];
+                            if(loopId == 0)
+                            {
+                                if(bone0Set == false)
+                                {
+                                    bone0Id = id;
+                                    bone0Set = true;
+                                    continue;
+                                } else
+                                {
+                                    idList.Add(id);
+                                }
+                            } 
+
+                            if(loopId > maxBone)
+                            {
+                                vertWeightIndices[i][id] = 0;
+                                if (bone0Set == false)
+                                {
+                                    bone0Id = id;
+
+                                } else
+                                {
+                                    idList.Add(id);
+                                }
+                            }
+                        }
+
+                        foreach(var id in idList)
+                        {
+                            vertWeights[i].Set(bone0Id,vertWeights[i].Get(id) + vertWeights[i].Get(bone0Id));
+                            vertWeights[i].Set(id, 0);
+                        }
+                    }
+                }
+                if (rawVertWeights.Count > 0 && rawVertWeightIds.Count > 0)
+                {
+                    for (int i = 0; i < rawVertWeights.Count; i++)
+                    {
+                        List<int> idList = new List<int>(); //List of ids to combine to bone0Id's value
+                        int bone0Id = 0;
+                        bool bone0Set = false;
+                        for (int id = 0; id < rawVertWeightIds[i].Count; id++)
+                        {
+                            int loopId = rawVertWeightIds[i][id];
+                            if (loopId == 0)
+                            {
+                                if (bone0Set == false)
+                                {
+                                    bone0Id = id;
+                                    bone0Set = true;
+                                    continue;
+                                }
+                                else
+                                {
+                                    idList.Add(id);
+                                }
+                            }
+
+                            if (loopId > maxBone)
+                            {
+                                rawVertWeightIds[i][id] = 0;
+                                if (bone0Set == false)
+                                {
+                                    bone0Id = id;
+
+                                }
+                                else
+                                {
+                                    idList.Add(id);
+                                }
+                            }
+                        }
+
+                        foreach (var id in idList)
+                        {
+                            rawVertWeights[i][bone0Id] =  rawVertWeights[i][id] + rawVertWeights[i][bone0Id];
+                            rawVertWeights[i][id] = 0;
+                        }
+                        if (idList.Count > 0)
+                        {
+                            for (int id = idList.Count - 1; id >= 0; id--)
+                            {
+                                rawVertWeightIds.RemoveAt(idList[id]);
+                                rawVertWeights.RemoveAt(idList[id]);
+                            }
+                        }
+                    }
+                }
+                if (trueVertWeights.Count > 0 && trueVertWeightIndices.Count > 0)
+                {
+                    for (int i = 0; i < trueVertWeights.Count; i++)
+                    {
+                        List<int> idList = new List<int>(); //List of ids to combine to bone0Id's value
+                        int bone0Id = 0;
+                        bool bone0Set = false;
+                        for (int id = 0; id < trueVertWeightIndices[i].Length; id++)
+                        {
+                            int loopId = trueVertWeightIndices[i][id];
+                            if (loopId == 0)
+                            {
+                                if (bone0Set == false)
+                                {
+                                    bone0Id = id;
+                                    bone0Set = true;
+                                    continue;
+                                }
+                                else
+                                {
+                                    idList.Add(id);
+                                }
+                            }
+
+                            if (loopId > maxBone)
+                            {
+                                trueVertWeightIndices[i][id] = 0;
+                                if (bone0Set == false)
+                                {
+                                    bone0Id = id;
+
+                                }
+                                else
+                                {
+                                    idList.Add(id);
+                                }
+                            }
+                        }
+
+                        foreach (var id in idList)
+                        {
+                            trueVertWeights[i].Set(bone0Id, trueVertWeights[i].Get(id) + trueVertWeights[i].Get(bone0Id));
+                            trueVertWeights[i].Set(id, 0);
+                        }
+                        if(idList.Count > 0)
+                        {
+                            for (int id = idList.Count - 1; id >= 0; id--)
+                            {
+                                trueVertWeightIndices.RemoveAt(idList[id]);
+                            }
+                        }
                     }
                 }
 
@@ -1855,6 +2010,15 @@ namespace AquaModelLibrary
             return mats;
         }
 
+        public void fixWeightsFromBoneCount(int maxBone = Int32.MaxValue)
+        {
+            for (int i = 0; i < vtxlList.Count; i++)
+            {
+                vtxlList[i].fixWeightsFromBoneCount(maxBone);
+            }
+        }
+
         public abstract AquaObject Clone();
+
     }
 }

@@ -14,6 +14,7 @@ using static AquaModelLibrary.AquaObjectMethods;
 using static AquaModelLibrary.AquaObjectParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.VTBFMethods;
+using AquaModelLibrary.AquaStructs;
 
 namespace AquaModelLibrary
 {
@@ -3202,9 +3203,24 @@ namespace AquaModelLibrary
             AquaCommon.NIFL nifl = streamReader.Read<AquaCommon.NIFL>();
             AquaCommon.REL0 rel0 = streamReader.Read<AquaCommon.REL0>();
 
+            bool isAlpha = false;
             streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
             int offsetOffset = streamReader.Read<int>();
             streamReader.Seek(offsetOffset + offset, SeekOrigin.Begin);
+            isAlpha = rel0.REL0DataStart == 0x10 && offsetOffset == 0x14;
+            AquaCommon musFile;
+            if(isAlpha)
+            {
+                var mus = new MusicFileAlpha();
+                mus.header = streamReader.Read<AquaStructs.MusicFileAlpha.musHeader>();
+                for(int i = 0; i < mus.header.sympathyPartCount; i++)
+                {
+                    mus.parts.Add(streamReader.Read<MusicFileAlpha.sympathyPart>());
+                }
+            } else
+            {
+
+            }
         }
 
         public void ReadEffect(string inFilename)

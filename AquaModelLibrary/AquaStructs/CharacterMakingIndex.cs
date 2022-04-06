@@ -133,7 +133,8 @@ namespace AquaModelLibrary
         public Dictionary<int, BCLNObject> baseWearIdLink = new Dictionary<int, BCLNObject>();
 
         public Dictionary<int, BCLNObject> innerWearIdLink = new Dictionary<int, BCLNObject>();
-        public Dictionary<int, BCLNObject> castHeadLink = new Dictionary<int, BCLNObject>();
+        public Dictionary<int, BCLNObject> castHeadIdLink = new Dictionary<int, BCLNObject>();
+        public Dictionary<int, BCLNObject> accessoryIdLink = new Dictionary<int, BCLNObject>();
         public List<unkCap40Object> unk40CapList = new List<unkCap40Object>();
 
         public CMXTable cmxTable;
@@ -176,7 +177,7 @@ namespace AquaModelLibrary
 
         public struct BODYRitem //Body struct section addition added
         {
-            public int int_0; 
+            public int int_0;
             public int int_4;
             public int int_8;
             public int int_C;
@@ -414,7 +415,7 @@ namespace AquaModelLibrary
             public ACCE_Feb8_22 acceFeb8_22;
             public int int_54;
             public ACCE2 acce2;
-            public List<ACCE_12Object> acce12List = new List<ACCE_12Object>(); 
+            public List<ACCE_12Object> acce12List = new List<ACCE_12Object>();
             public string dataString;
             public string nodeAttach1;
             public string nodeAttach2;
@@ -790,6 +791,9 @@ namespace AquaModelLibrary
         {
             public BCLN bcln;
             public BCLNRitem bclnRitem;
+
+            //Only for ICLN
+            public BCLNRitem2 bclnRitem2;
         }
 
         //Also for LCLN, ACLN, and ICLN. Id remapping info. Recolor outfits have multiple ids, but only one id that will actually correlate to a file.
@@ -806,6 +810,13 @@ namespace AquaModelLibrary
             public int int_04;
             public int int_08;
             public int int_0C;
+        }
+
+        //Added sometime before April 3 2022
+        public struct BCLNRitem2
+        {
+            public int int_00;
+            public int int_04;
         }
 
         public struct unkCap40Struct

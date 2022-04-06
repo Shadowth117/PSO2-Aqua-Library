@@ -230,17 +230,17 @@ namespace AquaModelLibrary
                 cmx.unkList.Add(streamReader.Read<Unk_IntField>());
             }
 
-            ReadIndexLinks(streamReader, offset, cmx.cmxTable.costumeIdLinkAddress, cmx.cmxTable.costumeIdLinkCount, cmx.costumeIdLink, cmx.rel0.REL0DataStart);
-            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castArmIdLinkAddress, cmx.cmxTable.castArmIdLinkCount, cmx.castArmIdLink, cmx.rel0.REL0DataStart);
-            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castLegIdLinkAddress, cmx.cmxTable.castLegIdLinkCount, cmx.clegIdLink, cmx.rel0.REL0DataStart);
+            ReadIndexLinks(streamReader, offset, cmx.cmxTable.costumeIdLinkAddress, cmx.cmxTable.costumeIdLinkCount, cmx.costumeIdLink, cmx.rel0.REL0DataStart, 1);
+            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castArmIdLinkAddress, cmx.cmxTable.castArmIdLinkCount, cmx.castArmIdLink, cmx.rel0.REL0DataStart, 1);
+            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castLegIdLinkAddress, cmx.cmxTable.castLegIdLinkCount, cmx.clegIdLink, cmx.rel0.REL0DataStart, 1);
 
             //If after a oct 21, the order is changed and we need to read things differently as the addresses get shifted down
             if (cmx.cmxTable.oct21UnkAddress != 0)
             {
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.castHeadLink, cmx.rel0.REL0DataStart);
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.baseWearAddress, cmx.cmxTable.baseWearCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart);
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearAddress, cmx.cmxTable.innerWearCount, cmx.baseWearIdLink, cmx.rel0.REL0DataStart);
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.oct21UnkAddress, cmx.cmxTable.oct21UnkCount, cmx.innerWearIdLink, cmx.rel0.REL0DataStart);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.castHeadIdLink, cmx.rel0.REL0DataStart, 1);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.baseWearIdLinkAddress, cmx.cmxTable.baseWearIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart, 1);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.baseWearIdLink, cmx.rel0.REL0DataStart, 1);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.oct21UnkAddress, cmx.cmxTable.oct21UnkCount, cmx.innerWearIdLink, cmx.rel0.REL0DataStart, 1);
             } else
             {
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart);
@@ -249,7 +249,7 @@ namespace AquaModelLibrary
             }
             if(cmx.cmxTable.feb8_22UnkAddress != 0)
             {
-                ReadUnk40Cap(streamReader, offset, cmx);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.feb8_22UnkAddress, cmx.cmxTable.feb8_22UnkCount, cmx.accessoryIdLink, cmx.rel0.REL0DataStart, 1);
             }
 
             return cmx;
@@ -618,26 +618,47 @@ namespace AquaModelLibrary
                 face.unkFloatRitem = streamReader.Read<float>();
                 long temp = streamReader.Position();
 
-                streamReader.Seek(face.face.dataStringPtr + offset, SeekOrigin.Begin);
-                face.dataString = AquaGeneralMethods.ReadCString(streamReader);
+                if(face.face.dataStringPtr + offset > 0)
+                {
+                    streamReader.Seek(face.face.dataStringPtr + offset, SeekOrigin.Begin);
+                    face.dataString = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
-                streamReader.Seek(face.face.texString1Ptr + offset, SeekOrigin.Begin);
-                face.texString1 = AquaGeneralMethods.ReadCString(streamReader);
+                if (face.face.texString1Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face.texString1Ptr + offset, SeekOrigin.Begin);
+                    face.texString1 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
-                streamReader.Seek(face.face.texString2Ptr + offset, SeekOrigin.Begin);
-                face.texString2 = AquaGeneralMethods.ReadCString(streamReader);
+                if (face.face.texString2Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face.texString2Ptr + offset, SeekOrigin.Begin);
+                    face.texString2 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
-                streamReader.Seek(face.face.texString3Ptr + offset, SeekOrigin.Begin);
-                face.texString3 = AquaGeneralMethods.ReadCString(streamReader);
+                if (face.face.texString3Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face.texString3Ptr + offset, SeekOrigin.Begin);
+                    face.texString3 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
-                streamReader.Seek(face.face.texString4Ptr + offset, SeekOrigin.Begin);
-                face.texString4 = AquaGeneralMethods.ReadCString(streamReader);
+                if (face.face.texString4Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face.texString4Ptr + offset, SeekOrigin.Begin);
+                    face.texString4 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
-                streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
-                face.texString5 = AquaGeneralMethods.ReadCString(streamReader);
+                if (face.face.texString5Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face.texString5Ptr + offset, SeekOrigin.Begin);
+                    face.texString5 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
-                streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
-                face.texString6 = AquaGeneralMethods.ReadCString(streamReader);
+                if (face.face.texString6Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
+                    face.texString6 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -784,32 +805,51 @@ namespace AquaModelLibrary
 
                 long temp = streamReader.Position();
 
-                streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
-                acce.dataString = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach1Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach1 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach2Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach2 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach3Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach3 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach4Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach4 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach5Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach5 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach6Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach6 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach7Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach7 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
-                acce.nodeAttach8 = AquaGeneralMethods.ReadCString(streamReader);
+                if(acce.acce.dataStringPtr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
+                    acce.dataString = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach1Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach1Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach1 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach2Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach2Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach2 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach3Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach3Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach3 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach4Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach4Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach4 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach5Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach5Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach5 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach6Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach6Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach6 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach7Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach7Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach7 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (acce.acce.nodeAttach8Ptr + offset > 0)
+                {
+                    streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
+                    acce.nodeAttach8 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -1009,7 +1049,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BCLNObject> dict, int rel0Start)
+        private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BCLNObject> dict, int rel0Start, int type = 0)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -1019,6 +1059,10 @@ namespace AquaModelLibrary
                 if(rel0Start >= dec14_21TableAddressInt)
                 {
                     bcln.bclnRitem = streamReader.Read<BCLNRitem>();
+                    if(rel0Start >= feb8_22TableAddressInt)
+                    {
+                        bcln.bclnRitem2 = streamReader.Read<BCLNRitem2>();
+                    }
                 }
                 if (!dict.ContainsKey(bcln.bcln.id))
                 {
@@ -2691,11 +2735,18 @@ namespace AquaModelLibrary
                     output = $"[Unnamed {id}]" + output;
                 }
 
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.accessoryIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.accessoryIdLink[id].bcln.fileId;
+                }
+
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
-                    string reb = $"{rebootStart}ac_{id}.ice";
-                    string rebEx = $"{rebootExStart}ac_{id}_ex.ice";
+                    string reb = $"{rebootStart}ac_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}ac_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
@@ -3751,22 +3802,36 @@ namespace AquaModelLibrary
                         var rebootCastFemaleHash = GetFileHash(reboot.Replace(".ice", rebootLACastFemale + ".ice"));
                         var rebootFigHash = GetFileHash(reboot.Replace(".ice", rebootFig + ".ice"));
 
+                        output += ", ";
                         //Some things apparently don't have reboot versions for some reason.
                         if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
                         {
-                            output += ", " + rebootHumanHash;
-                            output += ", " + rebootCastMalehash;
-                            output += ", " + rebootCastFemaleHash;
-                            output += ", " + rebootFigHash;
+                            output += rebootHumanHash;
+                        }
+                        output += ", ";
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootCastMalehash))))
+                        {
+                            output += rebootCastMalehash;
+                        }
+                        output += ", ";
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootCastFemaleHash))))
+                        {
+                            output += rebootCastFemaleHash;
+                        }
+                        output += ", ";
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootFigHash))))
+                        {
+                            output += rebootFigHash;
                         }
 
                         //Handle vfx output
-                        var rebootVfxHash = GetFileHash(lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce);
+                        var vfxHash = GetFileHash(lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce);
+                        var rebootVfxHash = GetRebootHash(GetFileHash(lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce));
 
                         if (reLac.rebootDataBlocks[i].vfxIce != "" && reLac.rebootDataBlocks[i].vfxIce != null
                             && File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
                         {
-                            output += ", " + rebootVfxHash;
+                            output += ", " + vfxHash;
                         }
 
                         if (iceName.Contains("_m.ice") || iceName.Contains("_m_"))

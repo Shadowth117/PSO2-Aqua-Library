@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Extra
 {
     public static class MathExtras
-    {        
+    {
         //Based on C++ code at https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         public static Vector3 QuaternionToEuler(Quaternion quat)
         {
@@ -44,6 +40,69 @@ namespace AquaModelLibrary.Extra
             else
             {
                 return -final;
+            }
+        }
+        public static float Get(this Vector3 vec3, int id)
+        {
+            switch (id)
+            {
+                case 0:
+                    return vec3.X;
+                case 1:
+                    return vec3.Y;
+                case 2:
+                    return vec3.Z;
+                default:
+                    throw new Exception("Unreachable Code");
+            }
+        }
+        public static void Set(this Vector3 vec3, int id, float value)
+        {
+            switch (id)
+            {
+                case 0:
+                    vec3.X = value;
+                    break;
+                case 1:
+                    vec3.Y = value;
+                    break;
+                case 2:
+                    vec3.Z = value;
+                    break;
+            }
+        }
+        public static float Get(this Vector4 vec4, int id)
+        {
+            switch (id)
+            {
+                case 0:
+                    return vec4.X;
+                case 1:
+                    return vec4.Y;
+                case 2:
+                    return vec4.Z;
+                case 3:
+                    return vec4.W;
+                default:
+                    throw new Exception("Unreachable Code");
+            }
+        }
+        public static void Set(this Vector4 vec4, int id, float value)
+        {
+            switch (id)
+            {
+                case 0:
+                    vec4.X = value;
+                    break;
+                case 1:
+                    vec4.Y = value;
+                    break;
+                case 2:
+                    vec4.Z = value;
+                    break;
+                case 3:
+                    vec4.W = value;
+                    break;
             }
         }
     }
