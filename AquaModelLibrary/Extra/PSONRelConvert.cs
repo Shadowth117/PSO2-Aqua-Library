@@ -424,7 +424,7 @@ namespace AquaModelLibrary
             var rotation = Matrix4x4.CreateRotationX(node.rot.X) *
                 Matrix4x4.CreateRotationY(node.rot.Y) *
                 Matrix4x4.CreateRotationZ(node.rot.Z);
-
+            
             mat *= rotation;
 
             mat *= Matrix4x4.CreateTranslation(node.pos * rootScale);

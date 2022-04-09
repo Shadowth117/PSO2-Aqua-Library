@@ -1559,7 +1559,15 @@ namespace AquaModelLibrary
         public static List<List<int>> GetAllMaterialFaceGroups(AquaObject model, int meshId)
         {
             List<List<int>> matGroups = new List<List<int>>();
-            for(int i = 0; i < model.tempMats.Count; i++)
+            int matCount = 0;
+            if(model.tempMats.Count > 0)
+            {
+                matCount = model.tempMats.Count;
+            } else
+            {
+                matCount = model.mateList.Count;
+            }
+            for(int i = 0; i < matCount; i++)
             {
                 matGroups.Add(new List<int>());
             }
@@ -2405,7 +2413,7 @@ namespace AquaModelLibrary
             return uvList;
         }
 
-        public static void GetMaterialNameData(ref string name, List<string> shaderNames, out string alphaType, out string playerFlag)
+        public static void GetMaterialNameData(ref string name, ref List<string> shaderNames, out string alphaType, out string playerFlag)
         {
             shaderNames = new List<string>();
             alphaType = null;
@@ -2415,7 +2423,7 @@ namespace AquaModelLibrary
             string[] nameArr = name.Split(')');
             if(nameArr.Length > 1)
             {
-                string shaderText = nameArr[1].Split('(')[1];
+                string shaderText = nameArr[0].Split('(')[1];
                 var shaderSet = shaderText.Split(',');
                 if(shaderSet.Length >= 2)
                 {
@@ -2429,7 +2437,7 @@ namespace AquaModelLibrary
             nameArr = name.Split('}');
             if(nameArr.Length > 1)
             {
-                alphaType = nameArr[1].Split('{')[1];
+                alphaType = nameArr[0].Split('{')[1];
                 name = nameArr[1];
             }
 

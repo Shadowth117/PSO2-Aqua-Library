@@ -366,7 +366,17 @@ namespace AquaModelLibrary
 
         public static int GetNodeNumber(string name)
         {
-            string num = name.Split('(')[1].Split(')')[0];
+            var nameArr = name.Split('(');
+            if (nameArr.Length == 1)
+            {
+                return -1;
+            }
+            nameArr = nameArr[1].Split(')');
+            if (nameArr.Length == 1)
+            {
+                return -1;
+            }
+            string num = nameArr[0];
             
             if(Int32.TryParse(num, out int result))
             {
@@ -526,16 +536,17 @@ namespace AquaModelLibrary
         }
 
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
-        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS)
+        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn)
         {
             AquaUtil aquaUtil = new AquaUtil();
-            float baseScale = 2.54f * scaleFactor; //We assume that this will be 39.37008f the true scale
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
-
+            double scale = (double)aiScene.Metadata["UnitScaleFactor"].Data;
+            float orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
+            float baseScale = (float)(scale / 100.0);
             AquaObject aqp;
-            AquaNode aqn = new AquaNode();
+            aqn = new AquaNode();
             if (isNGS)
             {
                 aqp = new NGSAquaObject();
@@ -560,7 +571,7 @@ namespace AquaModelLibrary
 
                 AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
                 List<string> shaderList = new List<string>();
-                AquaObjectMethods.GetMaterialNameData(ref name, shaderList, out string alphaType, out string playerFlag);
+                AquaObjectMethods.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag);
                 genMat.matName = name;
                 genMat.shaderNames = shaderList;
                 genMat.blendType = alphaType;
@@ -587,13 +598,20 @@ namespace AquaModelLibrary
 
             //Default to this so ids can be assigned by order if needed
             Dictionary<string, int> boneDict = new Dictionary<string, int>();
-            if(aiScene.RootNode.Name == null || !aiScene.RootNode.Name.Contains("(") || preAssignNodeIds == true)
+            var aqnRoot = GetRootNode(aiScene.RootNode);
+            if (aqnRoot == null || preAssignNodeIds == true)
             {
                 int nodeCounter = 0;
                 BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
             }
-
             IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale);
+            
+            //Generate bonepalette. No real reason not to just put in every bone at the moment.
+            aqp.bonePalette = new List<uint>();
+            for(uint i = 0; i < aqn.nodeList.Count; i++)
+            {
+                aqp.bonePalette.Add(i);
+            }
 
             //Assimp data is gathered, proceed to processing model data for PSO2
             AquaUtil.ModelSet set = new AquaUtil.ModelSet();
@@ -603,7 +621,28 @@ namespace AquaModelLibrary
 
             //AQPs created this way will require more processing to finish.
             //-Texture lists in particular, MUST be generated as what exists is not valid without serious errors
-            return aqp;
+            return aquaUtil.aquaModels[0].models[0];
+        }
+
+        private static Assimp.Node GetRootNode(Assimp.Node aiNode)
+        {
+            var nodeCountName = GetNodeNumber(aiNode.Name);
+            if (nodeCountName != -1)
+            {
+                if(nodeCountName == 0)
+                {
+                    return aiNode;
+                }
+            }
+            foreach (var childNode in aiNode.Children)
+            {
+                var node = GetRootNode(childNode);
+                if(node != null)
+                {
+                    return node;
+                }
+            }
+            return null;
         }
 
         private static void BuildAiNodeDictionary(Assimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum = false)
@@ -632,9 +671,10 @@ namespace AquaModelLibrary
             //Decide if this is an effect node or not
             string nodeName = aiNode.Name;
             var nodeParent = aiNode.Parent;
-            if(ParseNodeId(nodeName, out int nodeId))
+            if(ParseNodeId(nodeName, out string finalName, out int nodeId))
             {
                 AquaNode.NODE node = new AquaNode.NODE();
+                node.boneName.SetString(finalName);
                 node.animatedFlag = 1;
                 node.unkNode = -1;
                 node.firstChild = -1;
@@ -642,53 +682,70 @@ namespace AquaModelLibrary
                 node.const0_2 = 0;
                 node.ngsSibling = 0; //Unsure how this is truly set. Seems to correlate to an id or bone count subtracted from 0xFFFFFFFF. However 0 seems to work so we just leave it as that.
 
-                //If there's a parent, do things reliant on that
-                if (nodeParent != null && ParseNodeId(nodeParent.Name, out int parNodeId))
+                //Ignore parent logic for node 0 since it may be attached to a root node
+                if (nodeId != 0)
                 {
-                    node.parentId = parNodeId;
-
-                    //Fix up parent node associations
-                    if(aqn.nodeList[parNodeId].firstChild == -1 || (aqn.nodeList[parNodeId].firstChild > nodeId))
+                    //If there's a parent, do things reliant on that
+                    if (nodeParent != null && ParseNodeId(nodeParent.Name, out string nodeParentName, out int parNodeId))
                     {
-                        var parNode = aqn.nodeList[parNodeId];
-                        parNode.firstChild = nodeId;
-                        aqn.nodeList[parNodeId] = parNode;
-                    }
+                        node.parentId = parNodeId;
 
-                    //Set next sibling. We loop through the parent node's children and set the smallest id that's larger than the present node's id. If nothing is found, keep it -1.
-                    foreach(var childNode in nodeParent.Children)
-                    {
-                        if(childNode.Name != aiNode.Name)
+                        //Fix up parent node associations
+                        if (aqn.nodeList[parNodeId].firstChild == -1 || (aqn.nodeList[parNodeId].firstChild > nodeId))
                         {
-                            ParseNodeId(childNode.Name, out int sibCandidate);
-                            if (sibCandidate > nodeId && (node.nextSibling == -1 || sibCandidate < node.nextSibling))
+                            var parNode = aqn.nodeList[parNodeId];
+                            parNode.firstChild = nodeId;
+                            aqn.nodeList[parNodeId] = parNode;
+                        }
+
+                        //Set next sibling. We loop through the parent node's children and set the smallest id that's larger than the present node's id. If nothing is found, keep it -1.
+                        foreach (var childNode in nodeParent.Children)
+                        {
+                            if (childNode.Name != aiNode.Name)
                             {
-                                node.nextSibling = sibCandidate;
+                                ParseNodeId(childNode.Name, out string childName, out int sibCandidate);
+                                if (sibCandidate > nodeId && (node.nextSibling == -1 || sibCandidate < node.nextSibling))
+                                {
+                                    node.nextSibling = sibCandidate;
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+                        throw new Exception("Error: Parent node not processed before its child");
                     }
                 }
                 else
                 {
-                    throw new Exception("Error: Parent node not processed before its child");
+                    node.parentId = -1;
                 }
                 ParseShorts(nodeName, out node.boneShort1, out node.boneShort2);
 
                 //Assign transform data
-                var localMat = GetMat4FromAssimpMat4(aiNode.Transform);
-                var worldMat = GetMat4FromAssimpMat4(GetWorldMatrix(aiNode));
-                node.m1 = new Vector4(worldMat.M11, worldMat.M12, worldMat.M13, worldMat.M14);
-                node.m2 = new Vector4(worldMat.M21, worldMat.M22, worldMat.M23, worldMat.M24);
-                node.m3 = new Vector4(worldMat.M31, worldMat.M32, worldMat.M33, worldMat.M34);
-                node.m4 = new Vector4(worldMat.M41, worldMat.M42, worldMat.M43, worldMat.M44);
-                node.pos = localMat.Translation;
+                Matrix4x4 worldMat;
+                var localMat = SwapRow4Column4Mat4(GetMat4FromAssimpMat4(aiNode.Transform));
+                worldMat = localMat;
+                if (node.parentId != -1)
+                {
+                    //Matrix4x4.Invert(aqn.nodeList[node.parentId].GetInverseBindPoseMatrix(), out var parMatrix);
+                    //worldMat *= parMatrix;
+                    worldMat = GetWorldTransform(aiNode);
+                }
+                worldMat = SetMatrixScale1(worldMat);
+                Matrix4x4.Invert(worldMat, out var worldMatInv);
+                node.m1 = new Vector4(worldMatInv.M11, worldMatInv.M12, worldMatInv.M13, worldMatInv.M14);
+                node.m2 = new Vector4(worldMatInv.M21, worldMatInv.M22, worldMatInv.M23, worldMatInv.M24);
+                node.m3 = new Vector4(worldMatInv.M31, worldMatInv.M32, worldMatInv.M33, worldMatInv.M34);
+                node.m4 = new Vector4(worldMatInv.M41 * baseScale, worldMatInv.M42 * baseScale, worldMatInv.M43 * baseScale, worldMatInv.M44);
+                node.pos = localMat.Translation * baseScale;
                 node.eulRot = QuaternionToEuler(Quaternion.CreateFromRotationMatrix(localMat));
                 node.scale = new Vector3(1, 1, 1); //This is a bit of a weird thing
 
                 //Put in  list at appropriate id 
                 if (aqn.nodeList.Count < nodeId + 1)
                 {
-                    while(aqn.nodeList.Count < nodeId + 1)
+                    while (aqn.nodeList.Count < nodeId + 1)
                     {
                         aqn.nodeList.Add(new AquaNode.NODE());
                     }
@@ -697,29 +754,28 @@ namespace AquaModelLibrary
             }
             else
             {
-                if(aiNode.HasChildren)
+                //Nodo nodes can't have nodo parents. Therefore, we skip anything below another nodo or nodes that aren't in the proper hierarchy.
+                if(aiNode.Parent != null && ParseNodeId(aiNode.Parent.Name, out string parentName, out int parNodeId) == true)
                 {
-                    throw new Exception("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
-                }
-                AquaNode.NODO nodo = new AquaNode.NODO();
-                nodo.animatedFlag = 1;
-                nodo.boneName.SetString(nodeName);
-                if(ParseNodeId(nodeParent.Name, out int parNodeId))
-                {
+                    if (aiNode.HasChildren)
+                    {
+                        throw new Exception("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
+                    }
+                    AquaNode.NODO nodo = new AquaNode.NODO();
+                    nodo.boneName.SetString(finalName);
+                    nodo.animatedFlag = 1;
+                    nodo.boneName.SetString(nodeName);
                     nodo.parentId = parNodeId;
-                } else
-                {
-                    throw new Exception("Error: Parent node not processed before its child");
+                    ParseShorts(nodeName, out nodo.boneShort1, out nodo.boneShort2);
+
+                    //Assign transform data
+                    var localMat = SwapRow4Column4Mat4(GetMat4FromAssimpMat4(aiNode.Transform));
+                    nodo.pos = localMat.Translation;
+
+                    nodo.eulRot = QuaternionToEuler(Quaternion.CreateFromRotationMatrix(localMat));
+
+                    aqn.nodoList.Add(nodo);
                 }
-                ParseShorts(nodeName, out nodo.boneShort1, out nodo.boneShort2);
-
-                //Assign transform data
-                var mat4 = GetMat4FromAssimpMat4(aiNode.Transform);
-                nodo.pos = new Vector3(mat4.M14 * baseScale, mat4.M24 * baseScale, mat4.M34 * baseScale);
-
-                nodo.eulRot = QuaternionToEuler(Quaternion.CreateFromRotationMatrix(mat4));
-
-                aqn.nodoList.Add(nodo);
             }
 
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform));
@@ -735,6 +791,18 @@ namespace AquaModelLibrary
             {
                 IterateAiNodesAQP(aqp, aqn, aiScene, childNode, nodeMat, baseScale);
             }
+        }
+
+        //There's probably a better way to do this, but I am no math king
+        private static Matrix4x4 SetMatrixScale1(Matrix4x4 worldMat)
+        {
+            Matrix4x4 mat;
+            Matrix4x4.Decompose(worldMat, out var scaleMat, out var rotMat, out var posMat);
+            mat = Matrix4x4.Identity;
+            mat *= Matrix4x4.CreateScale(new Vector3(1, 1, 1));
+            mat *= Matrix4x4.CreateFromQuaternion(rotMat);
+            mat *= Matrix4x4.CreateTranslation(posMat);
+            return mat;
         }
 
         public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale)
@@ -760,7 +828,7 @@ namespace AquaModelLibrary
                 var faceVerts = face.Indices;
                 genTris.triList.Add(new Vector3(faceVerts[0], faceVerts[1], faceVerts[2]));
                 genTris.matIdList.Add(mesh.MaterialIndex);
-
+                genTris.vertCount = mesh.Vertices.Count;
                 AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
 
                 foreach(var v in faceVerts) //Expects triangles, not quads or polygons
@@ -788,22 +856,22 @@ namespace AquaModelLibrary
                     if (mesh.HasTextureCoords(0))
                     {
                         var uv = mesh.TextureCoordinateChannels[0][v];
-                        faceVtxl.uv1List.Add(new Vector2(uv.X, -uv.Y));
+                        faceVtxl.uv1List.Add(new Vector2(uv.X, uv.Y));
                     }
                     if (mesh.HasTextureCoords(1))
                     {
                         var uv = mesh.TextureCoordinateChannels[1][v];
-                        faceVtxl.uv2List.Add(new Vector2(uv.X, -uv.Y));
+                        faceVtxl.uv2List.Add(new Vector2(uv.X, uv.Y));
                     }
                     if (mesh.HasTextureCoords(2))
                     {
                         var uv = mesh.TextureCoordinateChannels[2][v];
-                        faceVtxl.uv3List.Add(new Vector2(uv.X, -uv.Y));
+                        faceVtxl.uv3List.Add(new Vector2(uv.X, uv.Y));
                     }
                     if (mesh.HasTextureCoords(3))
                     {
                         var uv = mesh.TextureCoordinateChannels[3][v];
-                        faceVtxl.uv4List.Add(new Vector2(uv.X, -uv.Y));
+                        faceVtxl.uv4List.Add(new Vector2(uv.X, uv.Y));
                     }
                     if (mesh.HasTextureCoords(4))
                     {
@@ -856,6 +924,10 @@ namespace AquaModelLibrary
 
         public static List<int> GetMeshIds(string name)
         {
+            if(name.Substring(name.Length - 5, 5) == "_mesh")
+            {
+                name = name.Substring(name.Length - 5);
+            }
             List<int> ids = new List<int>();
             var split = name.Split('#');
             if(split.Length > 1)
@@ -912,10 +984,18 @@ namespace AquaModelLibrary
             }
         }
 
-        public static bool ParseNodeId(string nodeName, out int id)
+        public static bool ParseNodeId(string nodeName, out string nodeNameSeparated, out int id)
         {
+            nodeNameSeparated = nodeName;
             var numParse = nodeName.Split('(', ')');
-            if(Int32.TryParse(numParse[1], out int result))
+            if(numParse.Length == 1)
+            {
+                id = -1;
+                return false;
+            }
+            nodeNameSeparated = numParse[2];
+            nodeNameSeparated = nodeNameSeparated.Split('#')[0];
+            if (Int32.TryParse(numParse[1], out int result))
             {
                 id = result;
                 return true;
@@ -925,6 +1005,25 @@ namespace AquaModelLibrary
                 return false;
             }
         }
+        private static Matrix4x4 GetWorldTransform(Assimp.Node aiNode)
+        {
+            var transform = aiNode.Transform;
+
+            while ((aiNode = aiNode.Parent) != null)
+                transform *= aiNode.Transform;
+
+            return ToNumericsTransposed(transform);
+        }
+
+        public static Matrix4x4 ToNumericsTransposed(Assimp.Matrix4x4 value)
+        {
+            return new Matrix4x4(
+                value.A1, value.B1, value.C1, value.D1,
+                value.A2, value.B2, value.C2, value.D2,
+                value.A3, value.B3, value.C3, value.D3,
+                value.A4, value.B4, value.C4, value.D4);
+        }
+
 
         public static Matrix4x4 GetMat4FromAssimpMat4(Assimp.Matrix4x4 mat4)
         {
@@ -932,6 +1031,13 @@ namespace AquaModelLibrary
                                  mat4.B1, mat4.B2, mat4.B3, mat4.B4,
                                  mat4.C1, mat4.C2, mat4.C3, mat4.C4,
                                  mat4.D1, mat4.D2, mat4.D3, mat4.D4);
+        }
+        public static Matrix4x4 SwapRow4Column4Mat4(Matrix4x4 mat4)
+        {
+            return new Matrix4x4(mat4.M11, mat4.M12, mat4.M13, mat4.M41,
+                                mat4.M21, mat4.M22, mat4.M23, mat4.M42,
+                                mat4.M31, mat4.M32, mat4.M33, mat4.M43,
+                                mat4.M14, mat4.M24, mat4.M34, mat4.M44);
         }
 
         public static byte floatToColor(float flt)

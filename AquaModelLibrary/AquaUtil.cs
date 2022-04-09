@@ -258,7 +258,11 @@ namespace AquaModelLibrary
                     {
                         //BatchSplitByBoneCount(matModelSplit, outModel, 255);
                         //RemoveAllUnusedBones(outModel);
-                        GenerateGlobalBonePalette(outModel);
+                        outModel.bonePalette = aquaModels[msI].models[aqI].bonePalette;
+                        if(aquaModels[msI].models[aqI].bonePalette == null || aquaModels[msI].models[aqI].bonePalette.Count == 0)
+                        {
+                            GenerateGlobalBonePalette(outModel);
+                        }
                     }
                     if (splitVerts)
                     {
@@ -266,12 +270,25 @@ namespace AquaModelLibrary
                     }
 
                     //Set up materials and related data
-                    for (int mat = 0; mat < aquaModels[msI].models[aqI].tempMats.Count; mat++)
+                    if(aquaModels[msI].models[aqI].mateList.Count > 0)
                     {
-                        GenerateMaterial(outModel, aquaModels[msI].models[aqI].tempMats[mat], true);
+                        outModel.mateList = aquaModels[msI].models[aqI].mateList;
+                        outModel.tsetList = aquaModels[msI].models[aqI].tsetList;
+                        outModel.shadList = aquaModels[msI].models[aqI].shadList;
+                        outModel.rendList = aquaModels[msI].models[aqI].rendList;
+                        outModel.texfList = aquaModels[msI].models[aqI].texfList;
+                        outModel.tstaList = aquaModels[msI].models[aqI].tstaList;
+                        
+                    } else
+                    {
+                        for (int mat = 0; mat < aquaModels[msI].models[aqI].tempMats.Count; mat++)
+                        {
+                            GenerateMaterial(outModel, aquaModels[msI].models[aqI].tempMats[mat], true);
+                        }
                     }
 
-                   outModel = matModelSplit;
+
+                   //outModel = matModelSplit;
 
                     //Set up PSETs and strips, and other per mesh data
                     for (int i = 0; i < outModel.tempTris.Count; i++)

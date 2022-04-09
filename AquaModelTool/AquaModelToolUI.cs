@@ -1914,13 +1914,15 @@ namespace AquaModelTool
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    aquaUI.aqua.aquaModels.Clear();
+                    AquaUtil aqua = new AquaUtil();
                     AquaUtil.ModelSet modelSet = new AquaUtil.ModelSet();
-                    modelSet.models.Add(ModelImporter.AssimpAquaConvertFull(openFileDialog.FileName, 1, false, true));
-                    aquaUI.aqua.aquaModels.Add(modelSet);
-                    var outStr = Path.ChangeExtension(openFileDialog.FileName, ".aqp");
-                    aquaUI.aqua.WriteNGSNIFLModel(outStr, outStr);
-                    aquaUI.aqua.aquaModels.Clear();
+                    modelSet.models.Add(ModelImporter.AssimpAquaConvertFull(openFileDialog.FileName, 1, false, true, out AquaNode aqn));
+                    aqua.aquaModels.Add(modelSet);
+                    var ext = Path.GetExtension(openFileDialog.FileName);
+                    var outStr = openFileDialog.FileName.Replace(ext, "_out.aqp");
+                    aqua.WriteNGSNIFLModel(outStr, outStr);
+                    AquaUtil.WriteBones(Path.ChangeExtension(outStr, ".aqn"), aqn);
+                    aqua.aquaModels.Clear();
                     AquaUIOpenFile(outStr);
                 }
             }
