@@ -41,6 +41,7 @@
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkAllShaderExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -88,10 +89,8 @@
             this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.testPointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -221,6 +220,13 @@
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // batchPSO2ToFBXToolStripMenuItem
+            // 
+            this.batchPSO2ToFBXToolStripMenuItem.Name = "batchPSO2ToFBXToolStripMenuItem";
+            this.batchPSO2ToFBXToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.batchPSO2ToFBXToolStripMenuItem.Text = "Batch PSO2 model to FBX";
+            this.batchPSO2ToFBXToolStripMenuItem.Click += new System.EventHandler(this.batchPSO2ToFBXToolStripMenuItem_Click);
             // 
             // batchParsePSO2SetToTextToolStripMenuItem
             // 
@@ -378,8 +384,7 @@
             this.pSOXVRConvertToolStripMenuItem,
             this.importAXSToolStripMenuItem,
             this.importAXSBoxTestToolStripMenuItem,
-            this.importAAIToolStripMenuItem,
-            this.testPointToolStripMenuItem});
+            this.importAAIToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -580,13 +585,6 @@
             this.importAAIToolStripMenuItem.Text = "Import AAI";
             this.importAAIToolStripMenuItem.Click += new System.EventHandler(this.importAAIToolStripMenuItem_Click);
             // 
-            // testPointToolStripMenuItem
-            // 
-            this.testPointToolStripMenuItem.Name = "testPointToolStripMenuItem";
-            this.testPointToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.testPointToolStripMenuItem.Text = "TestPoint";
-            this.testPointToolStripMenuItem.Click += new System.EventHandler(this.testPointToolStripMenuItem_Click);
-            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -604,13 +602,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 256);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // batchPSO2ToFBXToolStripMenuItem
-            // 
-            this.batchPSO2ToFBXToolStripMenuItem.Name = "batchPSO2ToFBXToolStripMenuItem";
-            this.batchPSO2ToFBXToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.batchPSO2ToFBXToolStripMenuItem.Text = "Batch PSO2 model to FBX";
-            this.batchPSO2ToFBXToolStripMenuItem.Click += new System.EventHandler(this.batchPSO2ToFBXToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -693,7 +684,6 @@
         private System.Windows.Forms.ToolStripMenuItem proportionAQMJankTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMFaceTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMNGSFaceTestToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem testPointToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportFBXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem includeMetadataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem batchPSO2ToFBXToolStripMenuItem;

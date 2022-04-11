@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary;
+using AquaModelLibrary.AquaMethods;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,12 +123,12 @@ namespace CMXPatcher
         public static byte[] GetBODYAsBytes(BODYObject body, bool postRetem = true)
         {
             List<byte> bodyBytes = new List<byte>();
-            bodyBytes.AddRange(AquaObjectMethods.ConvertStruct(body.body));
+            bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body));
             if(postRetem)
             {
-                bodyBytes.AddRange(AquaObjectMethods.ConvertStruct(body.bodyRitem));
+                bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.bodyRitem));
             }
-            bodyBytes.AddRange(AquaObjectMethods.ConvertStruct(body.body2));
+            bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body2));
 
             return bodyBytes.ToArray();
         }

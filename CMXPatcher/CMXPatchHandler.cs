@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using AquaModelLibrary;
+using AquaModelLibrary.AquaMethods;
 using zamboni;
 using static AquaModelLibrary.CharacterMakingIndex;
 
@@ -169,8 +170,8 @@ namespace CMXPatcher
             List<byte> acceBytes = new List<byte>();
             foreach(var acceKey in cmx.accessoryDict.Keys)
             {
-                acceBytes.AddRange(AquaObjectMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce));
-                acceBytes.AddRange(AquaObjectMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce2));
+                acceBytes.AddRange(AquaGeneralMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce));
+                acceBytes.AddRange(AquaGeneralMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce2));
             }
             Array.Copy(acceBytes.ToArray(), 0, cmxRaw, cmx.cmxTable.accessoryAddress, acceBytes.Count);
 
