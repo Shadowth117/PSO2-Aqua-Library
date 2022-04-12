@@ -429,7 +429,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         lNode->LclScaling.Set(FbxVector4(scale.X, scale.Y, scale.Z));
 
         FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
-
+        lSkeleton->Color.Set(FbxDouble3(0, 0.769, 0.769));
         lSkeleton->SetSkeletonType(FbxSkeleton::eLimbNode);
         lSkeleton->LimbLength = 0.1;
 
@@ -471,6 +471,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         lNode->LclScaling.Set(FbxVector4(scale.X, scale.Y, scale.Z));
 
         FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
+        lSkeleton->Color.Set(FbxDouble3(0, 0.769, 0));
 
         lSkeleton->SetSkeletonType(FbxSkeleton::eLimbNode);
         lSkeleton->LimbLength = 0.1;
