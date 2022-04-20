@@ -187,7 +187,7 @@ namespace AquaModelLibrary
         {
             public int int_24_0x9_0x9;   //0x9, 0x9
             public int int_28;
-            public int int_2C;
+            public int int_2C;           //One byte of this is a set of bitflags for parts to hide if it's outer wear. They follow the order of basewear ids.
 
             public int costumeSoundId;   //0xA, 0x8
             public int reference_id;  //0xD, 0x8

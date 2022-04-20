@@ -472,7 +472,7 @@ namespace AquaModelLibrary
         {
             public int tag; //0x60, type 0x9 //0x16, always in classic. In 0xC33, often 0x17
             public int texUsageOrder; //0x61, type 0x9  //0,1,2, 3 etc. PSO2 TSETs (Texture sets) require specific textures in specfic places. There should be a new TSTA if using a texture in a different slot for some reason.
-            public int modelUVSet;    //0x62, type 0x9  //Observed as -1, 1, and 2. 3 and maybe more theoretically usable. 0 is default, -1 is for _t maps or any map that doesn't use UVs. 1 is for _k maps.
+            public int modelUVSet;    //0x62, type 0x9  //Observed as -1, 0, 1, and 2. 3 and maybe more theoretically usable. 0 is default, -1 is for _t maps or any map that doesn't use UVs. 1 is for _k maps.
             public Vector3 unkVector0; //0x63, type 0x4A, 0x1 //0, -0, 0, often.
             public float unkFloat2; //0x64, type 0x9 //0
             public float unkFloat3; //0x65, type 0x9 //0

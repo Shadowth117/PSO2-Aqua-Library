@@ -2239,7 +2239,7 @@ namespace AquaModelLibrary
 
                     tsta.tag = 0x16; //Reexamine this one when possible, these actually vary a bit in 0xC33 variants.
                     //NGS does some funny things with the tex usage order int
-                    if(mat.texNames[i].Contains("_subnormal_"))
+                    if(mat.texNames[i].Contains("subnormal_"))
                     {
                         tsta.texUsageOrder = 0xA;
                     } else
@@ -2361,6 +2361,31 @@ namespace AquaModelLibrary
             model.mateList.Add(mate);
             model.shadList.Add(shad);
             model.rendList.Add(rend);
+        }
+
+        public static List<TSTA> GetTexListTSTAs(AquaObject model, int tsetIndex)
+        {
+            List<TSTA> textureList = new List<TSTA>();
+
+            //Don't try to read what's not there
+            if (model.tstaList.Count == 0 || model.tstaList == null)
+            {
+                return textureList;
+            }
+            TSET tset = model.tsetList[tsetIndex];
+
+            for (int index = 0; index < tset.tstaTexIDs.Count; index++)
+            {
+                int texIndex = tset.tstaTexIDs[index];
+                if (texIndex != -1)
+                {
+                    TSTA tsta = model.tstaList[texIndex];
+
+                    textureList.Add(tsta);
+                }
+            }
+
+            return textureList;
         }
 
         public static List<string> GetTexListNames(AquaObject model, int tsetIndex)

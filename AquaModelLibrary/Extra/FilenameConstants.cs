@@ -28,6 +28,7 @@ namespace AquaExtras
             { "_s.dds", "s"},
             { "_s_", "s"},
             { "multi", "s"},
+            { "_specular", "s"},
 
             { "_m.dds", "m"},
             { "_m_", "m"},
@@ -73,9 +74,9 @@ namespace AquaExtras
 
             { "_noise", "noise"},
 
-            { "_subnormal_01", "subnormal_01"},
-            { "_subnormal_02", "subnormal_02"},
-            { "_subnormal_03", "subnormal_03"},
+            { "subnormal_01", "subnormal_01"},
+            { "subnormal_02", "subnormal_02"},
+            { "subnormal_03", "subnormal_03"},
             { "_mask", "mask"},
         };
 

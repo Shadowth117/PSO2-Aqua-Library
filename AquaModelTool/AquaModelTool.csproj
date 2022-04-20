@@ -150,6 +150,12 @@
     <Compile Include="Forms\BTIEditor.Designer.cs">
       <DependentUpon>BTIEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ModelSubpanels\BoundingEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\BoundingEditor.Designer.cs">
+      <DependentUpon>BoundingEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ModelSubpanels\MaterialEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -179,6 +185,18 @@
     </Compile>
     <Compile Include="Forms\ModelSubpanels\ShaderEditor.Designer.cs">
       <DependentUpon>ShaderEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\TextureListEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\TextureListEditor.Designer.cs">
+      <DependentUpon>TextureListEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\TextureReferenceEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\TextureReferenceEditor.Designer.cs">
+      <DependentUpon>TextureReferenceEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -221,6 +239,9 @@
     <EmbeddedResource Include="Forms\ModelEditor.resx">
       <DependentUpon>ModelEditor.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\BoundingEditor.resx">
+      <DependentUpon>BoundingEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\MaterialEditor.resx">
       <DependentUpon>MaterialEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -232,6 +253,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\ShaderEditor.resx">
       <DependentUpon>ShaderEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\TextureListEditor.resx">
+      <DependentUpon>TextureListEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\TextureReferenceEditor.resx">
+      <DependentUpon>TextureReferenceEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

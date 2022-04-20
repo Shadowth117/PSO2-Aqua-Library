@@ -355,7 +355,6 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         {
             FbxFileTexture* lFileTexture = FbxFileTexture::Create( lScene,
                 Utf8String( String::Format( "{0}", aqMat->texNames[i] ) ).ToCStr() );
-
             lFileTexture->SetFileName( Utf8String( Path::Combine( texturesDirectoryPath, aqMat->texNames[i]) ).ToCStr() );
 
             if (aqMat->texUVSets[i] == -1)

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using AquaModelTool.Forms.ModelSubpanels;
+using System;
 using System.Windows.Forms;
-
 namespace AquaModelTool
 {
     public partial class ModelEditor : UserControl
@@ -45,7 +45,8 @@ namespace AquaModelTool
         public void SetDropdown()
         {
             editorCB.Items.Clear();
-            if(modelset.models[modelIDCB.SelectedIndex].mateList.Count > 0)
+            editorCB.Items.Add("Bounding");
+            if (modelset.models[modelIDCB.SelectedIndex].mateList.Count > 0)
             {
                 editorCB.Items.Add("Materials");
             }
@@ -59,7 +60,7 @@ namespace AquaModelTool
             }
             if (modelset.models[modelIDCB.SelectedIndex].rendList.Count > 0)
             {
-               editorCB.Items.Add("Render");
+                editorCB.Items.Add("Render");
             }
             if (modelset.models[modelIDCB.SelectedIndex].shadList.Count > 0)
             {
@@ -81,6 +82,9 @@ namespace AquaModelTool
 
             switch (editorCB.Items[editorCB.SelectedIndex].ToString())
             {
+                case "Bounding":
+                    control = new BoundingEditor(modelset.models[modelIDCB.SelectedIndex]);
+                    break;
                 case "Materials":
                     control = new MaterialEditor(modelset.models[modelIDCB.SelectedIndex]);
                     break;

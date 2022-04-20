@@ -62,8 +62,6 @@
             this.convertPSNovaaxsaifToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importFromGLTFToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cloneBoneTransformsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testVTXEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,7 +120,7 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -132,13 +130,13 @@
             this.exportFBXToolStripMenuItem,
             this.includeMetadataToolStripMenuItem});
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.exportModelToolStripMenuItem.Text = "Export Model";
             // 
             // exportFBXToolStripMenuItem
             // 
             this.exportFBXToolStripMenuItem.Name = "exportFBXToolStripMenuItem";
-            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.exportFBXToolStripMenuItem.Text = "Export FBX";
             this.exportFBXToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
             // 
@@ -148,7 +146,7 @@
             this.includeMetadataToolStripMenuItem.CheckOnClick = true;
             this.includeMetadataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.includeMetadataToolStripMenuItem.Name = "includeMetadataToolStripMenuItem";
-            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.includeMetadataToolStripMenuItem.Text = "Include Metadata";
             this.includeMetadataToolStripMenuItem.ToolTipText = "Leave this on for modding PSO2/NGS. Determines if the data appended in #s and sim" +
     "ilar elements should be added to the final bone, mesh, and material names.";
@@ -156,21 +154,21 @@
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.saveAsToolStripMenuItem.Text = "Save As";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -358,8 +356,6 @@
             // 
             this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.readBonesToolStripMenuItem,
-            this.exportToGLTFToolStripMenuItem,
-            this.importFromGLTFToolStripMenuItem,
             this.computeTangentSpaceTestToolStripMenuItem,
             this.cloneBoneTransformsToolStripMenuItem,
             this.testVTXEToolStripMenuItem,
@@ -395,20 +391,6 @@
             this.readBonesToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.readBonesToolStripMenuItem.Text = "Read Bones";
             this.readBonesToolStripMenuItem.Click += new System.EventHandler(this.readBonesToolStripMenuItem_Click);
-            // 
-            // exportToGLTFToolStripMenuItem
-            // 
-            this.exportToGLTFToolStripMenuItem.Name = "exportToGLTFToolStripMenuItem";
-            this.exportToGLTFToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.exportToGLTFToolStripMenuItem.Text = "Export To GLTF";
-            this.exportToGLTFToolStripMenuItem.Click += new System.EventHandler(this.exportToGLTFToolStripMenuItem_Click);
-            // 
-            // importFromGLTFToolStripMenuItem
-            // 
-            this.importFromGLTFToolStripMenuItem.Name = "importFromGLTFToolStripMenuItem";
-            this.importFromGLTFToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.importFromGLTFToolStripMenuItem.Text = "Import From GLTF";
-            this.importFromGLTFToolStripMenuItem.Click += new System.EventHandler(this.importFromGLTFToolStripMenuItem_Click);
             // 
             // computeTangentSpaceTestToolStripMenuItem
             // 
@@ -637,8 +619,6 @@
         private System.Windows.Forms.ToolStripMenuItem readBonesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Splitter splitter1;
-        private System.Windows.Forms.ToolStripMenuItem exportToGLTFToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem importFromGLTFToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateCharacterFileSheetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem updateClassicPlayerAnimToNGSAnimToolStripMenuItem;

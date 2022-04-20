@@ -585,88 +585,6 @@ namespace AquaModelTool
             }
         }
 
-        private void exportToGLTFToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var exportDialog = new SaveFileDialog()
-            {
-                Title = "Export model file",
-                Filter = "GLB model (*.glb)|*.glb"
-            };
-            if (exportDialog.ShowDialog() == DialogResult.OK)
-            {
-                //aquaUI.aqua.ExportToGLTF(exportDialog.FileName);
-            }
-        }
-
-        private void importFromGLTFToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select gltf/glb model file",
-                Filter = "GLTF model (*.glb, *.gltf)|*.glb;*.gltf"
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                //ModelExporter.getGLTF(openFileDialog.FileName);
-            }
-        }
-
-        private void GetTexSheetData(Dictionary<string, List<string>> shaderCombinationsTexSheet, Dictionary<string, List<string>> shaderModelFilesTexSheet, Dictionary<string, List<string>> shaderTexListCode, string file)
-        {
-            var model = aquaUI.aqua.aquaModels[0].models[0];
-
-            //Go through all meshes in each model
-            foreach (var mesh in model.meshList)
-            {
-                var shad = model.shadList[mesh.shadIndex];
-                string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
-                var textures = AquaObjectMethods.GetTexListNames(model, mesh.tsetIndex);
-
-                if (textures.Count == 0 || textures == null)
-                {
-                    continue;
-                }
-
-                string combination = "";
-                string combination2 = "{" + $"\"{key}\", new List<string>() " + "{ ";
-                foreach (var tex in textures)
-                {
-                    foreach(var ptn in texNamePresetPatterns.Keys)
-                    {
-                        if(tex.Contains(ptn))
-                        {
-                            combination += texNamePresetPatterns[ptn];
-                            combination2 += "\"" + texNamePresetPatterns[ptn] + "\"" + ", ";
-                            break;
-                        }
-                    }
-
-                    if(combination == "") //Add the full name if we absolutely cannot figure this out from these
-                    {
-                        combination += tex;
-                        combination2 += "\"" + tex + "\"" + ", ";
-                    }
-                    combination += " ";
-                }
-                combination2 += "}},\n";
-
-                //Add them to the list
-                if (!shaderCombinationsTexSheet.ContainsKey(key))
-                {
-                    shaderTexListCode[key] = new List<string>() { combination2 };
-                    shaderCombinationsTexSheet[key] = new List<string>() { combination };
-                    shaderModelFilesTexSheet[key] = new List<string>() { Path.GetFileName(file) };
-                }
-                else
-                {
-                    shaderTexListCode[key].Add(combination2);
-                    shaderCombinationsTexSheet[key].Add(combination);
-                    shaderModelFilesTexSheet[key].Add(Path.GetFileName(file));
-                }
-            }
-            model = null;
-        }
-
         private void batchParsePSO2SetToTextToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
@@ -757,6 +675,7 @@ namespace AquaModelTool
                 Dictionary<string, List<string>> shaderCombinationsTexSheet = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderModelFilesTexSheet = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderTexListCode = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> shaderTexDataCode = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderUnk0 = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderCombinations = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> shaderModelFiles = new Dictionary<string, List<string>>();
@@ -782,7 +701,7 @@ namespace AquaModelTool
                         }
 
                         ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, file);
-                        GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, shaderTexListCode, file);
+                        GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, shaderTexListCode, shaderTexDataCode, file);
                     }
                     else
                     {
@@ -812,7 +731,7 @@ namespace AquaModelTool
                                             {
                                                 aquaUI.aqua.ReadModel(iceFileBytes);
                                                 ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, name);
-                                                GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, shaderTexListCode, name);
+                                                GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, shaderTexListCode, shaderTexDataCode, name);
                                             }
                                             catch
                                             {
@@ -850,18 +769,27 @@ namespace AquaModelTool
                     "using static AquaModelLibrary.NGSAquaObject;\n\n" +
                     "namespace AquaModelLibrary\n" +
                     "{\n" +
-                    "    //Autogenerated presets from existing models" +
-                    "    public static class NGSShaderPresets" +
-                    "    {");
+                    "    //Autogenerated presets from existing models\n" +
+                    "    public static class NGSShaderPresets\n" +
+                    "    {\n");
                 detailDictOutput.Append("        public static Dictionary<string, SHADDetail> NGSShaderDetailPresets = new Dictionary<string, SHADDetail>(){\n");
                 extraDictOutput.Append("        public static Dictionary<string, List<SHADExtraEntry>> NGSShaderExtraPresets = new Dictionary<string, List<SHADExtraEntry>>(){\n");
                 unk0DictOutput.Append("        public static Dictionary<string, int> ShaderUnk0Values = new Dictionary<string, int>(){\n");
                 foreach (var key in keys)
                 {
                     simpleOutput.Append("\n" + key + "\n" + shaderCombinations[key][0]);
-                    detailDictOutput.Append("            " + shaderDetails[key][0]);
-                    extraDictOutput.Append("            " + shaderExtras[key][0]);
-                    unk0DictOutput.Append("            " + shaderUnk0[key][0]);
+                    if(shaderDetails[key][0] != null && shaderDetails[key][0] != "")
+                    {
+                        detailDictOutput.Append("            " + shaderDetails[key][0]);
+                    }
+                    if (shaderExtras[key][0] != null && shaderExtras[key][0] != "")
+                    {
+                        extraDictOutput.Append("            " + shaderExtras[key][0]);
+                    }
+                    if (shaderUnk0[key][0] != null && shaderUnk0[key][0] != "")
+                    {
+                        unk0DictOutput.Append("            " + shaderUnk0[key][0]);
+                    }
                     advancedOutput.Append("\n" + key + "\n" + shaderCombinations[key][0] + "," + shaderModelFiles[key][0]);
                     for (int i = 1; i < shaderCombinations[key].Count; i++)
                     {
@@ -886,12 +814,25 @@ namespace AquaModelTool
                 StringBuilder simpleOutputTexSheet = new StringBuilder();
                 StringBuilder advancedOutputTexSheet = new StringBuilder();
                 StringBuilder presetTexList = new StringBuilder();
+                StringBuilder tstaDict = new StringBuilder();
 
                 presetTexList.Append("        public static Dictionary<string, List<string>> shaderTexSet = new Dictionary<string, List<string>>(){\n");
+                tstaDict.Append("        public static Dictionary<string, Dictionary<string, AquaObject.TSTA>> tstaTexSet = new Dictionary<string, Dictionary<string, AquaObject.TSTA>>(){\n");
                 foreach (var key in keysTexSheet)
                 {
                     simpleOutputTexSheet.AppendLine(key + "," + shaderCombinationsTexSheet[key][0]);
                     presetTexList.Append("            " + shaderTexListCode[key][0]);
+
+                    string texDataStr = "";
+                    //We want the largest one since in most cases it should contain the most definitions for textures (NGS shaders do NOT need all textures and instead have textures allocated based on other values)
+                    for(int i = 0; i < shaderTexDataCode[key].Count; i++)
+                    {
+                        if(shaderTexDataCode[key][i].Length > texDataStr.Length)
+                        {
+                            texDataStr = shaderTexDataCode[key][i];
+                        }
+                    }
+                    tstaDict.Append("            " + texDataStr);
                     advancedOutputTexSheet.AppendLine(key + "," + shaderCombinationsTexSheet[key][0] + "," + shaderModelFilesTexSheet[key][0]);
                     for (int i = 1; i < shaderCombinationsTexSheet[key].Count; i++)
                     {
@@ -900,7 +841,11 @@ namespace AquaModelTool
                     advancedOutputTexSheet.AppendLine();
                 }
                 presetTexList.Append("        };\n\n");
+                tstaDict.Append("        };\n\n");
                 detailDictOutput.Append(presetTexList);
+                detailDictOutput.Append(tstaDict);
+                detailDictOutput.Append("    }\n");
+                detailDictOutput.Append("}\n");
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleOutputTexSheets.csv", simpleOutputTexSheet.ToString());
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutputTexSheets.csv", advancedOutputTexSheet.ToString());
                 File.WriteAllText(goodFolderDialog.FileName + "\\" + "presetDictionary.cs", detailDictOutput.ToString());
@@ -924,11 +869,6 @@ namespace AquaModelTool
             {
                 string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
                 string shad0Line = "{" + $"\"{key}\", " + shad.unk0.ToString() + " },\n";
-                if (shad.unk0 != 0)
-                {
-                    Debug.WriteLine(key + " " + shad.unk0);
-                }
-
 
                 if (shad is NGSAquaObject.NGSSHAD && (((NGSAquaObject.NGSSHAD)shad).shadDetailOffset != 0 || ((NGSAquaObject.NGSSHAD)shad).shadExtraOffset != 0))
                 {
@@ -1003,6 +943,83 @@ namespace AquaModelTool
             }
 
 
+            model = null;
+        }
+
+        private void GetTexSheetData(Dictionary<string, List<string>> shaderCombinationsTexSheet, Dictionary<string, List<string>> shaderModelFilesTexSheet, Dictionary<string, List<string>> shaderTexListCode,
+            Dictionary<string, List<string>> shaderTexDataCode, string file)
+        {
+            var model = aquaUI.aqua.aquaModels[0].models[0];
+
+            //Go through all meshes in each model
+            foreach (var mesh in model.meshList)
+            {
+                var shad = model.shadList[mesh.shadIndex];
+                string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
+                var textures = AquaObjectMethods.GetTexListTSTAs(model, mesh.tsetIndex);
+
+                if (textures.Count == 0 || textures == null)
+                {
+                    continue;
+                }
+                Dictionary<string, int> usedTextures = new Dictionary<string, int>(); 
+
+                string combination = "";
+                string combination2 = "{" + $"\"{key}\", new List<string>() " + "{ ";
+                string combination3 = "{" + $"\"{key}\", new Dictionary<string, AquaObject.TSTA>() " + "{ ";
+                foreach (var tex in textures)
+                {
+                    string texString = "";
+                    foreach (var ptn in texNamePresetPatterns.Keys)
+                    {
+                        if (tex.texName.GetString().Contains(ptn))
+                        {
+                            texString = texNamePresetPatterns[ptn];
+                            combination += texString;
+                            combination2 += "\"" + texString + "\"" + ", ";
+                            break;
+                        }
+                    }
+
+                    if (combination == "") //Add the full name if we absolutely cannot figure this out from these
+                    {
+                        texString = tex.texName.GetString();
+                        combination += texString;
+                        combination2 += "\"" + texString + "\"" + ", ";
+                    }
+                    
+                    if(!usedTextures.ContainsKey(texString))
+                    {
+                        usedTextures[texString] = 0;
+                    } else
+                    {
+                        usedTextures[texString] += 1;
+                    }
+
+                    combination3 += "{\"" + texString + usedTextures[texString] + "\", new AquaObject.TSTA() {" + $"tag = {tex.tag}, texUsageOrder = {tex.texUsageOrder}, modelUVSet = {tex.modelUVSet}, " +
+                        $"unkVector0 = new Vector3({tex.unkVector0.X}f, {tex.unkVector0.Y}f, {tex.unkVector0.Z}f), unkFloat2 = {tex.unkFloat2}f, unkFloat3 = {tex.unkFloat3}f, unkFloat4 = {tex.unkFloat4}f," +
+                        $"unkInt3 = {tex.unkInt3}, unkInt4 = {tex.unkInt4}, unkInt5 = {tex.unkInt5}, unkFloat0 = {tex.unkFloat0}f, unkFloat1 = {tex.unkFloat1}f," + "}}, ";
+                    combination += " ";
+                }
+                combination2 += "}},\n";
+                combination3 += "}},\n";
+
+                //Add them to the list
+                if (!shaderCombinationsTexSheet.ContainsKey(key))
+                {
+                    shaderTexListCode[key] = new List<string>() { combination2 };
+                    shaderTexDataCode[key] = new List<string>() { combination3 };
+                    shaderCombinationsTexSheet[key] = new List<string>() { combination };
+                    shaderModelFilesTexSheet[key] = new List<string>() { Path.GetFileName(file) };
+                }
+                else
+                {
+                    shaderTexListCode[key].Add(combination2);
+                    shaderTexDataCode[key].Add(combination3);
+                    shaderCombinationsTexSheet[key].Add(combination);
+                    shaderModelFilesTexSheet[key].Add(Path.GetFileName(file));
+                }
+            }
             model = null;
         }
 
