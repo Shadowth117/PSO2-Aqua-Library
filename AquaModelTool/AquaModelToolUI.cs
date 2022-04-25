@@ -2328,9 +2328,10 @@ namespace AquaModelTool
 
                         var win32NAFiles = Directory.GetFiles(inWin32);
                         var win32rebootNAFiles = Directory.GetFiles(inWin32Reboot, "*", SearchOption.AllDirectories);
+                        
                         Parallel.ForEach(win32rebootNAFiles, file =>
                         {
-                            var jpRbtFilename = file.Replace(inWin32Reboot, inWin32RebootJp);
+                            var jpRbtFilename = (file.Replace(inWin32Reboot, inWin32RebootJp)).Replace("_na","");
                             if (!File.Exists(jpRbtFilename))
                             {
                                 return;
@@ -2339,6 +2340,10 @@ namespace AquaModelTool
                             if (rbtFile != null)
                             {
                                 var newPath = file.Replace(inWin32Reboot, outWin32Reboot);
+                                if(newPath == file)
+                                {
+                                    throw new Exception("Path not corrected!");
+                                }
                                 var newParDirectory = Path.GetDirectoryName(newPath);
                                 Directory.CreateDirectory(newParDirectory);
                                 File.WriteAllBytes(newPath, rbtFile);
@@ -2347,7 +2352,7 @@ namespace AquaModelTool
                         });
                         Parallel.ForEach(win32NAFiles, file =>
                         {
-                            var jpFilename = file.Replace(inWin32Reboot, inWin32RebootJp);
+                            var jpFilename = (file.Replace(inWin32, inWin32Jp)).Replace("_na", "");
                             if (!File.Exists(jpFilename))
                             {
                                 return;
@@ -2355,7 +2360,12 @@ namespace AquaModelTool
                             var win32File = ConvertNATextIce(file, jpFilename);
                             if (win32File != null)
                             {
-                                File.WriteAllBytes(file.Replace(inWin32, outWin32), win32File);
+                                var newPath = file.Replace(inWin32, outWin32);
+                                if (newPath == file)
+                                {
+                                    throw new Exception("Path not corrected!");
+                                }
+                                File.WriteAllBytes(newPath, win32File);
                             }
                             win32File = null;
                         });
@@ -2373,6 +2383,10 @@ namespace AquaModelTool
             using (Stream strm = new FileStream(str, FileMode.Open))
             using (Stream jpStrm = new FileStream(jpStr, FileMode.Open))
             {
+                if(strm.Length <= 0 || jpStrm.Length <= 0)
+                {
+                    return null;
+                }
                 //Check if this is even an ICE file
                 byte[] arr = new byte[4];
                 strm.Read(arr, 0, 4);
@@ -2398,7 +2412,15 @@ namespace AquaModelTool
                 //Index JP filenames first for replacing
                 for (int i = 0; i < jpIceFile.groupOneFiles.Length; i++)
                 {
-                    var name = IceFile.getFileName(jpIceFile.groupOneFiles[i]);
+                    string name = null;
+                    try
+                    {
+                        name = IceFile.getFileName(jpIceFile.groupOneFiles[i]);
+                    }
+                    catch
+                    {
+                        Trace.WriteLine($"Unable to get filename in group one at id {i} in ice {str}");
+                    }
 
                     //Check if this is something we shouldn't move over
                     foreach (var check in NAConversionBlackList)
@@ -2413,12 +2435,19 @@ namespace AquaModelTool
                 }
                 for (int i = 0; i < jpIceFile.groupTwoFiles.Length; i++)
                 {
-                    var name = IceFile.getFileName(jpIceFile.groupTwoFiles[i]);                    
-                    
+                    string name = null;
+                    try
+                    {
+                        name = IceFile.getFileName(jpIceFile.groupTwoFiles[i]);
+                    }
+                    catch
+                    {
+                        Trace.WriteLine($"Unable to get filename in group two at id {i} in ice {str}");
+                    }
                     //Check if this is something we shouldn't move over
                     foreach (var check in NAConversionBlackList)
                     {
-                        if (name.Contains(check))
+                        if (name == null || name.Contains(check))
                         {
                             return null;
                         }
@@ -2454,7 +2483,9 @@ namespace AquaModelTool
                         copy = true;
                         if(jpId != -1)
                         {
-                            jpIceFile.groupOneFiles[jpId] = AquaMiscMethods.GetEngToJPTextAsBytes(AquaMiscMethods.ReadPSO2Text(iceFile.groupOneFiles[i]), AquaMiscMethods.ReadPSO2Text(jpIceFile.groupOneFiles[jpId]));
+                            var text = new List<byte>(AquaMiscMethods.GetEngToJPTextAsBytes(AquaMiscMethods.ReadPSO2Text(iceFile.groupOneFiles[i]), AquaMiscMethods.ReadPSO2Text(jpIceFile.groupOneFiles[jpId])));
+                            text.InsertRange(0, (new IceHeaderStructures.IceFileHeader(name, (uint)text.Count)).GetBytes());
+                            jpIceFile.groupOneFiles[jpId] = text.ToArray();
                         }
                     }
                 }
@@ -2486,7 +2517,9 @@ namespace AquaModelTool
                         copy = true;
                         if (jpId != -1)
                         {
-                            jpIceFile.groupTwoFiles[jpId] = AquaMiscMethods.GetEngToJPTextAsBytes(AquaMiscMethods.ReadPSO2Text(iceFile.groupTwoFiles[i]), AquaMiscMethods.ReadPSO2Text(jpIceFile.groupTwoFiles[jpId]));
+                            var text = new List<byte>(AquaMiscMethods.GetEngToJPTextAsBytes(AquaMiscMethods.ReadPSO2Text(iceFile.groupTwoFiles[i]), AquaMiscMethods.ReadPSO2Text(jpIceFile.groupTwoFiles[jpId])));
+                            text.InsertRange(0, (new IceHeaderStructures.IceFileHeader(name, (uint)text.Count)).GetBytes());
+                            jpIceFile.groupTwoFiles[jpId] = text.ToArray();
                         }
                     }
                 }

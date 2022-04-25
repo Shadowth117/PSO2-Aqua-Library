@@ -302,6 +302,11 @@ namespace AquaModelLibrary
 
         public static PSO2Text SyncNAToJPText(PSO2Text pso2TextNA, PSO2Text pso2TextJP)
         {
+            
+            for(int i = 0; i < pso2TextNA.text.Count; i++)
+            {
+                pso2TextNA.text[i].RemoveAt(0);
+            }
             for(int i = 0; i < pso2TextJP.categoryNames.Count; i++)
             {
                 if(!pso2TextNA.categoryNames.Contains(pso2TextJP.categoryNames[i]))
@@ -330,6 +335,11 @@ namespace AquaModelLibrary
                         if(!idCheck.Contains(pso2TextJP.text[i][0][j].name))
                         {
                             pso2TextNA.text[i][0].Add(pso2TextJP.text[i][0][j]);
+                        } else if(pso2TextNA.text[i][0][j].str.Contains("") || pso2TextNA.text[i][0][j].str.Contains("***") || pso2TextNA.text[i][0][j].str.Contains("＊＊＊")) //Use JP text if text is redacted
+                        {
+                            var text = pso2TextNA.text[i][0][j];
+                            text.str = pso2TextNA.text[i][0][j].str;
+                            pso2TextNA.text[i][0][j] = text;
                         }
                     }
                 }
@@ -446,7 +456,7 @@ namespace AquaModelLibrary
             //Write header data
             SetByteListInt(outBytes, rel0SizeOffset + 4, outBytes.Count);
             NOF0Append(nof0PointerLocations, outBytes.Count, 1);
-            if(pso2Text.text.Count > 0)
+            if(pso2Text.text.Count > 0 || pso2Text.categoryNames.Count > 0)
             {
                 outBytes.AddRange(BitConverter.GetBytes(categoryOffset));
                 outBytes.AddRange(BitConverter.GetBytes(pso2Text.text.Count));
