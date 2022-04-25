@@ -335,7 +335,7 @@ namespace AquaModelLibrary
                         if(!idCheck.Contains(pso2TextJP.text[i][0][j].name))
                         {
                             pso2TextNA.text[i][0].Add(pso2TextJP.text[i][0][j]);
-                        } else if(pso2TextNA.text[i][0][j].str.Contains("") || pso2TextNA.text[i][0][j].str.Contains("***") || pso2TextNA.text[i][0][j].str.Contains("＊＊＊")) //Use JP text if text is redacted
+                        } else if(pso2TextNA.text[i][0][j].str == "" || pso2TextNA.text[i][0][j].str.Contains("***") || pso2TextNA.text[i][0][j].str.Contains("＊＊＊")) //Use JP text if text is redacted
                         {
                             var text = pso2TextNA.text[i][0][j];
                             text.str = pso2TextNA.text[i][0][j].str;
