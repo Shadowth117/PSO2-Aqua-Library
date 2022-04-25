@@ -221,6 +221,10 @@ namespace AquaModelLibrary
         {
             WritePSO2TextNIFL(outname, pso2Text);
         }
+        public static byte[] GetEngToJPTextAsBytes(PSO2Text pso2TextNA, PSO2Text pso2TextJP)
+        {
+            return PSO2TextToNIFLBytes(SyncNAToJPText(pso2TextNA, pso2TextJP)).ToArray();
+        }
 
         //Expects somewhat strict formatting, but reads this from a .text file
         public static PSO2Text ReadPSO2TextFromTxt(string filename)
@@ -231,7 +235,7 @@ namespace AquaModelLibrary
             //We start on line 3 to avoid the metadata text
             if (lines.Length < 4)
             {
-                return null;
+                return new PSO2Text();
             }
             int mode = 0;
             for (int i = 3; i < lines.Length; i++)
@@ -296,12 +300,57 @@ namespace AquaModelLibrary
             return text;
         }
 
+        public static PSO2Text SyncNAToJPText(PSO2Text pso2TextNA, PSO2Text pso2TextJP)
+        {
+            for(int i = 0; i < pso2TextJP.categoryNames.Count; i++)
+            {
+                if(!pso2TextNA.categoryNames.Contains(pso2TextJP.categoryNames[i]))
+                {
+                    pso2TextNA.categoryNames.Insert(i, pso2TextJP.categoryNames[i]);
+                    pso2TextNA.text.Insert(i, pso2TextJP.text[i]); //Just plop the JP one in if the whole category is missing
+                }
+            }
+
+            for (int i = 0; i < pso2TextJP.text.Count; i++)
+            {
+                //We only care about group 0, JP language, in this case
+                if(pso2TextJP.text[i].Count > 0)
+                {
+                    List<string> idCheck = new List<string>();
+                    if(pso2TextNA.text[i].Count > 0)
+                    {
+                        for(int id = 0; id < pso2TextNA.text[i][0].Count; id++)
+                        {
+                            idCheck.Add(pso2TextNA.text[i][0][id].name);
+                        }
+                    }
+                    for(int j = 0; j < pso2TextJP.text[i][0].Count; j++)
+                    {
+                        //This really should be a dictionary check, but whoever designed this format allowed for funny business with the 'keys'
+                        if(!idCheck.Contains(pso2TextJP.text[i][0][j].name))
+                        {
+                            pso2TextNA.text[i][0].Add(pso2TextJP.text[i][0][j]);
+                        }
+                    }
+                }
+            }
+
+            return pso2TextNA;
+        }
+
         public static void WritePSO2TextNIFL(string outname, PSO2Text pso2Text)
         {
             if (pso2Text == null)
             {
                 return;
             }
+            List<byte> outBytes = PSO2TextToNIFLBytes(pso2Text);
+
+            File.WriteAllBytes(outname, outBytes.ToArray());
+        }
+
+        public static List<byte> PSO2TextToNIFLBytes(PSO2Text pso2Text)
+        {
             List<byte> finalOutBytes = new List<byte>();
 
             int rel0SizeOffset = 0;
@@ -397,8 +446,18 @@ namespace AquaModelLibrary
             //Write header data
             SetByteListInt(outBytes, rel0SizeOffset + 4, outBytes.Count);
             NOF0Append(nof0PointerLocations, outBytes.Count, 1);
-            outBytes.AddRange(BitConverter.GetBytes(categoryOffset));
-            outBytes.AddRange(BitConverter.GetBytes(pso2Text.text.Count));
+            if(pso2Text.text.Count > 0)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(categoryOffset));
+                outBytes.AddRange(BitConverter.GetBytes(pso2Text.text.Count));
+            } else //Handle empty files like retail
+            {
+                outBytes.AddRange(BitConverter.GetBytes(0x24));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+                outBytes.AddRange(BitConverter.GetBytes(1));
+                outBytes.AddRange(BitConverter.GetBytes(0));
+            }
 
             //Write main text as null terminated strings
             for (int i = 0; i < textPairs.Count; i++)
@@ -433,23 +492,26 @@ namespace AquaModelLibrary
                 outBytes.Add(0);
                 AlignWriter(outBytes, 0x4);
             }
-
+            
             //Unknown data? Don't write if it's not needed. May just be debug related. Empty groups/subcategories point here, but it's possible you could direct them to a general 0.
             //NA .text files seem to write this slightly differently, writing only one of these while JP .text files write one for every category, seemingly.
             //For the sake of sanity and space, NA's style will be used for custom .text
-            for (int i = 0; i < pso2Text.text[0].Count; i++)
+            if(pso2Text.text.Count > 0)
             {
-                if (pso2Text.text[0][0].Count > 0)
+                for (int i = 0; i < pso2Text.text[0].Count; i++)
                 {
-                    outBytes.AddRange(BitConverter.GetBytes(i));
-                }
-                else
-                {
-                    for (int groupCounter = 0; groupCounter < subCategoryNullAddresses[i].Count; groupCounter++)
+                    if (pso2Text.text[0][0].Count > 0)
                     {
-                        SetByteListInt(outBytes, subCategoryNullAddresses[i][groupCounter], outBytes.Count);
+                        outBytes.AddRange(BitConverter.GetBytes(i));
                     }
-                    outBytes.AddRange(BitConverter.GetBytes(0));
+                    else
+                    {
+                        for (int groupCounter = 0; groupCounter < subCategoryNullAddresses[i].Count; groupCounter++)
+                        {
+                            SetByteListInt(outBytes, subCategoryNullAddresses[i][groupCounter], outBytes.Count);
+                        }
+                        outBytes.AddRange(BitConverter.GetBytes(0));
+                    }
                 }
             }
             AlignWriter(outBytes, 0x10);
@@ -494,7 +556,7 @@ namespace AquaModelLibrary
             //Write NIFL
             outBytes.InsertRange(0, ConvertStruct(nifl));
 
-            File.WriteAllBytes(outname, outBytes.ToArray());
+            return outBytes;
         }
 
         public static PSO2Text GetTextConditional(string normalPath, string overridePath, string textFileName)

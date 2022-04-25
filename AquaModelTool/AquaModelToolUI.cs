@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using System.Text;
 using System.Windows.Forms;
 using zamboni;
@@ -2296,6 +2297,222 @@ namespace AquaModelTool
             }
 
         }
+
+        private void convertNATextToEnPatchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select NA pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var pso2_binDir = goodFolderDialog.FileName;
+                goodFolderDialog.Title = "Select JP pso2_bin";
+                if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    var jpPso2_binDir = goodFolderDialog.FileName;
+                    goodFolderDialog.Title = "Select output directory";
+                    if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        var outfolder = goodFolderDialog.FileName;
+                        string inWin32 = pso2_binDir + "\\data\\win32_na\\";
+                        string inWin32Reboot = pso2_binDir + "\\data\\win32reboot_na\\";
+                        string inWin32Jp = jpPso2_binDir + "\\data\\win32_na\\";
+                        string inWin32RebootJp = jpPso2_binDir + "\\data\\win32reboot_na\\";
+                        string outWin32 = outfolder + "\\win32\\";
+                        string outWin32Reboot = outfolder + "\\win32reboot\\";
+
+                        Directory.CreateDirectory(outWin32);
+                        Directory.CreateDirectory(outWin32Reboot);
+
+                        var win32NAFiles = Directory.GetFiles(inWin32);
+                        var win32rebootNAFiles = Directory.GetFiles(inWin32Reboot, "*", SearchOption.AllDirectories);
+                        Parallel.ForEach(win32rebootNAFiles, file =>
+                        {
+                            var jpRbtFilename = file.Replace(inWin32Reboot, inWin32RebootJp);
+                            if (!File.Exists(jpRbtFilename))
+                            {
+                                return;
+                            }
+                            var rbtFile = ConvertNATextIce(file, jpRbtFilename);
+                            if (rbtFile != null)
+                            {
+                                var newPath = file.Replace(inWin32Reboot, outWin32Reboot);
+                                var newParDirectory = Path.GetDirectoryName(newPath);
+                                Directory.CreateDirectory(newParDirectory);
+                                File.WriteAllBytes(newPath, rbtFile);
+                            }
+                            rbtFile = null;
+                        });
+                        Parallel.ForEach(win32NAFiles, file =>
+                        {
+                            var jpFilename = file.Replace(inWin32Reboot, inWin32RebootJp);
+                            if (!File.Exists(jpFilename))
+                            {
+                                return;
+                            }
+                            var win32File = ConvertNATextIce(file, jpFilename);
+                            if (win32File != null)
+                            {
+                                File.WriteAllBytes(file.Replace(inWin32, outWin32), win32File);
+                            }
+                            win32File = null;
+                        });
+                    }
+                }
+
+            }
+        }
+
+        public static byte[] ConvertNATextIce(string str, string jpStr)
+        {
+            IceFile iceFile = null;
+            IceFile jpIceFile = null;
+            bool copy = false;
+            using (Stream strm = new FileStream(str, FileMode.Open))
+            using (Stream jpStrm = new FileStream(jpStr, FileMode.Open))
+            {
+                //Check if this is even an ICE file
+                byte[] arr = new byte[4];
+                strm.Read(arr, 0, 4);
+                bool isIce = arr[0] == 0x49 && arr[1] == 0x43 && arr[2] == 0x45 && arr[3] == 0;
+                if(isIce == false)
+                {
+                    return null;
+                }
+
+                try
+                {
+                    iceFile = IceFile.LoadIceFile(strm);
+                    jpIceFile = IceFile.LoadIceFile(jpStrm);
+                }
+                catch
+                {
+                    return null;
+                }
+
+                List<string> jpGroupOneNames = new List<string>();
+                List<string> jpGroupTwoNames = new List<string>();
+
+                //Index JP filenames first for replacing
+                for (int i = 0; i < jpIceFile.groupOneFiles.Length; i++)
+                {
+                    var name = IceFile.getFileName(jpIceFile.groupOneFiles[i]);
+
+                    //Check if this is something we shouldn't move over
+                    foreach (var check in NAConversionBlackList)
+                    {
+                        if (name.Contains(check))
+                        {
+                            return null;
+                        }
+                    }
+
+                    jpGroupOneNames.Add(name);
+                }
+                for (int i = 0; i < jpIceFile.groupTwoFiles.Length; i++)
+                {
+                    var name = IceFile.getFileName(jpIceFile.groupTwoFiles[i]);                    
+                    
+                    //Check if this is something we shouldn't move over
+                    foreach (var check in NAConversionBlackList)
+                    {
+                        if (name.Contains(check))
+                        {
+                            return null;
+                        }
+                    }
+
+                    jpGroupTwoNames.Add(name);
+                }
+
+                for (int i = 0; i < iceFile.groupOneFiles.Length; i++)
+                {
+                    var name = IceFile.getFileName(iceFile.groupOneFiles[i]);
+
+                    //In theory, the NA files have to be in the same group
+                    var jpId = jpGroupOneNames.IndexOf(name);
+
+                    if (name.Contains(".usm"))
+                    {
+                        copy = true;
+                        if (jpId != -1)
+                        {
+                            jpIceFile.groupOneFiles[jpId] = iceFile.groupOneFiles[i];
+                        }
+                    }
+                    else if (name.Contains(".dds"))
+                    {
+                        copy = true;
+                        if (jpId != -1)
+                        {
+                            jpIceFile.groupOneFiles[jpId] = iceFile.groupOneFiles[i];
+                        }
+                    } else if(name.Contains(".text"))
+                    {
+                        copy = true;
+                        if(jpId != -1)
+                        {
+                            jpIceFile.groupOneFiles[jpId] = AquaMiscMethods.GetEngToJPTextAsBytes(AquaMiscMethods.ReadPSO2Text(iceFile.groupOneFiles[i]), AquaMiscMethods.ReadPSO2Text(jpIceFile.groupOneFiles[jpId]));
+                        }
+                    }
+                }
+                for (int i = 0; i < iceFile.groupTwoFiles.Length; i++)
+                {
+                    var name = IceFile.getFileName(iceFile.groupTwoFiles[i]);
+
+                    //In theory, the NA files have to be in the same group
+                    var jpId = jpGroupTwoNames.IndexOf(name);
+
+                    if (name.Contains(".usm"))
+                    {
+                        copy = true;
+                        if (jpId != -1)
+                        {
+                            jpIceFile.groupTwoFiles[jpId] = iceFile.groupTwoFiles[i];
+                        }
+                    }
+                    else if (name.Contains(".dds"))
+                    {
+                        copy = true;
+                        if (jpId != -1)
+                        {
+                            jpIceFile.groupTwoFiles[jpId] = iceFile.groupTwoFiles[i];
+                        }
+                    }
+                    else if (name.Contains(".text"))
+                    {
+                        copy = true;
+                        if (jpId != -1)
+                        {
+                            jpIceFile.groupTwoFiles[jpId] = AquaMiscMethods.GetEngToJPTextAsBytes(AquaMiscMethods.ReadPSO2Text(iceFile.groupTwoFiles[i]), AquaMiscMethods.ReadPSO2Text(jpIceFile.groupTwoFiles[jpId]));
+                        }
+                    }
+                }
+            }
+
+            if(copy)
+            {
+                return new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), jpIceFile.groupOneFiles, jpIceFile.groupTwoFiles).getRawData(false, false);
+            } else
+            {
+                return null;
+            }
+        }
+
+        //List of strings to check for and stop conversion if found
+        public static List<string> NAConversionBlackList = new List<string>() { 
+            "ui_icon",
+            "ui_vital",
+            "ui_making",
+            "ui_reb_title01",
+            "ui_ending_common",
+            "ui_system_01",
+            "ui_rough",
+            ".fon",
+            ".ttf",
+        };
     }
 }
 

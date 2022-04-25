@@ -89,6 +89,7 @@
             this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.convertNATextToEnPatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -205,6 +206,7 @@
             this.parsePSO2TextFolderSelectToolStripMenuItem,
             this.convertTxtToPSO2TextToolStripMenuItem,
             this.convertTxtToPSO2TextFolderSelectToolStripMenuItem,
+            this.convertNATextToEnPatchToolStripMenuItem,
             this.parseVTBFToTextToolStripMenuItem,
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
             this.legacyAqp2objObjExportToolStripMenuItem,
@@ -585,6 +587,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // convertNATextToEnPatchToolStripMenuItem
+            // 
+            this.convertNATextToEnPatchToolStripMenuItem.Name = "convertNATextToEnPatchToolStripMenuItem";
+            this.convertNATextToEnPatchToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertNATextToEnPatchToolStripMenuItem.Text = "ConvertNATextToEnPatch";
+            this.convertNATextToEnPatchToolStripMenuItem.Click += new System.EventHandler(this.convertNATextToEnPatchToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -667,6 +676,7 @@
         private System.Windows.Forms.ToolStripMenuItem exportFBXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem includeMetadataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem batchPSO2ToFBXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertNATextToEnPatchToolStripMenuItem;
     }
 }
 
