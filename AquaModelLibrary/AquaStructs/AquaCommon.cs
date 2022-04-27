@@ -76,6 +76,13 @@ namespace AquaModelLibrary
         {
             public fixed byte stringArray[0xA];
 
+            public string curString
+            {
+                get {
+                    return GetString();
+                }
+            }
+
             //Sometimes strings don't convert to the expected character set (Possibly sega setting in Unicode chars without warning?) This can help deal with that
             public int GetLength()
             {
@@ -152,6 +159,13 @@ namespace AquaModelLibrary
         public unsafe struct PSO2String
         {
             public fixed byte stringArray[0x20];
+            public string curString
+            {
+                get
+                {
+                    return GetString();
+                }
+            }
 
             public static PSO2String GeneratePSO2String(byte[] bytes)
             {
@@ -285,6 +299,13 @@ namespace AquaModelLibrary
         public unsafe struct PSO2Stringx30
         {
             public fixed byte stringArray[0x30];
+            public string curString
+            {
+                get
+                {
+                    return GetString();
+                }
+            }
 
             public static PSO2Stringx30 GeneratePSO2String(byte[] bytes)
             {
