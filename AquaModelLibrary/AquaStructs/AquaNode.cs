@@ -90,9 +90,9 @@ namespace AquaModelLibrary
             public Matrix4x4 GetLocalTransformMatrix()
             {
                 var matrix = Matrix4x4.Identity;
-                var rotation = Matrix4x4.CreateRotationX(eulRot.X) *
-                   Matrix4x4.CreateRotationY(eulRot.Y) *
-                   Matrix4x4.CreateRotationZ(eulRot.Z);
+                var rotation = Matrix4x4.CreateRotationX((float)(eulRot.X * System.Math.PI / 180)) *
+                   Matrix4x4.CreateRotationY((float)(eulRot.Y * System.Math.PI / 180)) *
+                   Matrix4x4.CreateRotationZ((float)(eulRot.Z * System.Math.PI / 180));
 
                 matrix *= rotation;
                 matrix *= Matrix4x4.CreateTranslation(pos);

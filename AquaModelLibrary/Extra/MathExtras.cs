@@ -5,6 +5,33 @@ namespace AquaModelLibrary.Extra
 {
     public static class MathExtras
     {
+        public static Quaternion EulerToQuaternion(Vector3 angle)
+        {
+            return EulerToQuaternion(angle.X, angle.Y, angle.Z);
+        }
+        public static Quaternion EulerToQuaternion(double x, double y, double z) // roll (X), pitch (Y),  yaw (Z)
+        {
+            x *= (float)(Math.PI / 180);
+            y *= (float)(Math.PI / 180);
+            z *= (float)(Math.PI / 180);
+
+            // Abbreviations for the various angular functions
+            double cy = Math.Cos(z * 0.5);
+            double sy = Math.Sin(z * 0.5);
+            double cp = Math.Cos(y * 0.5);
+            double sp = Math.Sin(y * 0.5);
+            double cr = Math.Cos(x * 0.5);
+            double sr = Math.Sin(x * 0.5);
+
+            Quaternion q = new Quaternion();
+            q.W = (float)(cr * cp * cy + sr * sp * sy);
+            q.X = (float)(sr * cp * cy - cr * sp * sy);
+            q.Y = (float)(cr * sp * cy + sr * cp * sy);
+            q.Z = (float)(cr * cp * sy - sr * sp * cy);
+
+            return q;
+        }
+
         //Based on C++ code at https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         public static Vector3 QuaternionToEuler(Quaternion quat)
         {
@@ -26,6 +53,8 @@ namespace AquaModelLibrary.Extra
             double siny_cosp = 2 * (quat.W * quat.Z + quat.X * quat.Y);
             double cosy_cosp = 1 - 2 * (quat.Y * quat.Y + quat.Z * quat.Z);
             angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+            angles *= (float)(180 / Math.PI);
 
             return angles;
         }

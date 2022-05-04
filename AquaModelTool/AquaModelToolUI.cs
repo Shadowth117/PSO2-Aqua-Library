@@ -2546,6 +2546,235 @@ namespace AquaModelTool
             ".fon",
             ".ttf",
         };
+
+        private void aQMOnToAQNToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select player Aqn",
+                Filter = "aqn|*.aqn",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                OpenFileDialog openFileDialog1 = new OpenFileDialog()
+                {
+                    Title = "Select player Aqm",
+                    Filter = "aqm|*.aqm",
+                };
+                if(openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    AquaUtil aqua = new AquaUtil();
+                    aqua.ReadBones(openFileDialog.FileName);
+                    aqua.ReadMotion(openFileDialog1.FileName);
+
+                    var bn = aqua.aquaBones[0];
+                    var mtn = aqua.aquaMotions[0].anims[0];
+                    for(int i = 0; i < mtn.motionKeys.Count; i++)
+                    {
+                        if(bn.nodeList.Count > i)
+                        {
+                            var node = bn.nodeList[i];
+                            var rawPos = mtn.motionKeys[i].keyData[0].vector4Keys[0];
+                            var pos = new Vector3(rawPos.X, rawPos.Y, rawPos.Z);
+
+                            var rawRot = mtn.motionKeys[i].keyData[1].vector4Keys[0];
+                            var rot = new Quaternion(rawRot.X, rawRot.Y, rawRot.Z, rawRot.W); 
+
+                            var rawScale = mtn.motionKeys[i].keyData[2].vector4Keys[0];
+                            var scale = new Vector3(rawScale.X, rawScale.Y, rawScale.Z);
+
+                            Matrix4x4 mat = Matrix4x4.Identity;
+
+                            mat *= Matrix4x4.CreateScale(scale);
+                            mat *= Matrix4x4.CreateFromQuaternion(rot);
+                            mat *= Matrix4x4.CreateTranslation(pos);
+
+                            if(bn.nodeList[i].parentId != -1)
+                            {
+                                Matrix4x4.Invert(bn.nodeList[bn.nodeList[i].parentId].GetInverseBindPoseMatrix(), out var parMat);
+
+                                mat *= parMat;
+                            }
+                            Matrix4x4.Invert(mat, out var invMat);
+
+                            node.SetInverseBindPoseMatrix(invMat);
+                            node.boneName.SetString(node.boneName.curString + "_test");
+                            bn.nodeList[i] = node;
+                        } else
+                        {
+                            break;
+                        }
+                    }
+
+                    AquaUtil.WriteBones(openFileDialog.FileName.Replace(".aqn", $"_{Path.GetFileNameWithoutExtension(openFileDialog1.FileName)}.aqn"), bn);
+                }
+            }
+        }
+
+        private void aqnLocalTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select player Aqn",
+                Filter = "aqn|*.aqn",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil aqua = new AquaUtil();
+                aqua.ReadBones(openFileDialog.FileName);
+
+                var bn = aqua.aquaBones[0];
+                List<Vector3> boneLocalRots = new List<Vector3>();
+                List<Vector3> boneLocalPos = new List<Vector3>();
+                List<Quaternion> boneLocalQuats = new List<Quaternion>();
+                List<Vector3> boneWorldRots = new List<Vector3>();
+                List<Quaternion> boneWorldQuats = new List<Quaternion>();
+                List<Quaternion> boneWorldInvInvRots = new List<Quaternion>();
+                List<Quaternion> boneLocalInvInvRots = new List<Quaternion>();
+                List<Vector3> boneLocalInvInvPos = new List<Vector3>();
+                for (int i = 0; i < bn.nodeList.Count; i++)
+                {
+                    var node = bn.nodeList[i];
+                    var pos = bn.nodeList[i].pos;
+                    var rot = bn.nodeList[i].eulRot;
+                    var scale = bn.nodeList[i].scale;
+
+                    boneLocalPos.Add(pos);
+
+                    Matrix4x4.Invert(bn.nodeList[i].GetInverseBindPoseMatrix(), out var invInvMat);
+                    Matrix4x4.Decompose(invInvMat, out var invInvScale, out var invInvRot, out var invInvPos);
+                    boneWorldInvInvRots.Add(invInvRot);
+                    //boneLocalInvInvPos.Add(invInvPos);
+                    if (bn.nodeList[i].parentId != -1)
+                    {
+                        var invParMat = bn.nodeList[bn.nodeList[i].parentId].GetInverseBindPoseMatrix();
+                        Matrix4x4.Invert(invParMat, out var parInvInvMat);
+                        Matrix4x4.Decompose(parInvInvMat, out var parinvInvLocScale, out var parinvInvLocRot, out var parinvInvLocPos);
+                        var localMat = invInvMat * invParMat;
+                        Matrix4x4.Decompose(localMat, out var invInvLocScale, out var invInvLocRot, out var invInvLocPos);
+                        boneLocalInvInvPos.Add(invInvLocPos);
+                        boneLocalInvInvRots.Add(invInvRot * Quaternion.Inverse(boneWorldInvInvRots[bn.nodeList[i].parentId]));
+                    } else
+                    {
+                        boneLocalInvInvPos.Add(invInvPos);
+                        boneLocalInvInvRots.Add(invInvRot);
+                    }
+                    boneLocalRots.Add(rot);
+                    boneLocalQuats.Add(AquaModelLibrary.Extra.MathExtras.EulerToQuaternion(node.eulRot.X, node.eulRot.Y, node.eulRot.Z));
+                    Matrix4x4 mat = Matrix4x4.Identity;
+
+                    mat *= Matrix4x4.CreateScale(scale);
+                    var rotation = Matrix4x4.CreateRotationX((float)(rot.X * Math.PI / 180)) *
+                        Matrix4x4.CreateRotationY((float)(rot.Y * Math.PI / 180)) *
+                        Matrix4x4.CreateRotationZ((float)(rot.Z * Math.PI / 180));
+
+                    mat *= rotation;
+                    mat *= Matrix4x4.CreateTranslation(pos);
+
+                    if (bn.nodeList[i].parentId != -1)
+                    {
+                        var parBone = bn.nodeList[bn.nodeList[i].parentId];
+                        Matrix4x4.Invert(parBone.GetInverseBindPoseMatrix(), out var parMat);
+
+                        mat *= parMat;
+
+                        while (parBone.parentId != -1) //Root is expected to be 0, 0, 0 for rot and so won't factor in it
+                        {
+                            rot += parBone.eulRot;
+                            parBone = bn.nodeList[parBone.parentId];
+                        }
+                    }
+                    boneWorldRots.Add(rot);
+                    boneWorldQuats.Add(Quaternion.CreateFromYawPitchRoll((float)(rot.Y * Math.PI / 180), (float)(rot.X * Math.PI / 180), (float)(rot.Z * Math.PI / 180)));
+
+                    Matrix4x4.Invert(mat, out var invMat);
+
+                    node.SetInverseBindPoseMatrix(invMat);
+                    node.boneName.SetString(node.boneName.curString + "_test");
+                    bn.nodeList[i] = node;
+                }
+
+                AquaUtil.WriteBones(openFileDialog.FileName.Replace(".aqn", $"_local.aqn"), bn);
+            }
+        }
+
+        private void aqnHighestXYZValuesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select player Aqn",
+                Filter = "aqn|*.aqn",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil aqua = new AquaUtil();
+                aqua.ReadBones(openFileDialog.FileName);
+
+                var bn = aqua.aquaBones[0];
+                Vector3 max = new Vector3();
+                for (int i = 0; i < bn.nodeList.Count; i++)
+                {
+                    var nodeVec = bn.nodeList[i].eulRot;
+                    if(Math.Abs(nodeVec.X) > Math.Abs(max.X))
+                    {
+                        max.X = nodeVec.X;
+                    }
+                    if (Math.Abs(nodeVec.Y) > Math.Abs(max.Y))
+                    {
+                        max.Y = nodeVec.Y;
+                    }
+                    if (Math.Abs(nodeVec.Z) > Math.Abs(max.Z))
+                    {
+                        max.Z = nodeVec.Z;
+                    }
+                }
+
+                Trace.WriteLine($"{max.X}, {max.Y}, {max.Z}");
+            }
+        }
+
+        private void aqnDumpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select player Aqn",
+                Filter = "aqn|*.aqn",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil aqua = new AquaUtil();
+                aqua.ReadBones(openFileDialog.FileName);
+
+                StringBuilder sb = new StringBuilder();
+                var bn = aqua.aquaBones[0];
+                for (int i = 0; i < bn.nodeList.Count; i++)
+                {
+                    var node = bn.nodeList[i];
+                    sb.AppendLine($"=== ({i}) {node.boneName.curString}:");
+                    sb.AppendLine($"Bone Short 1 {node.boneShort1.ToString("X")} | Bone Short 2 {node.boneShort2.ToString("X")}");
+                    if(i != 0)
+                    {
+                        sb.AppendLine($"Parent info - ({node.parentId}) {bn.nodeList[node.parentId].boneName.curString}");
+                    }
+                    sb.AppendLine($"Pos {node.pos.X} {node.pos.Y} {node.pos.Z}");
+                    sb.AppendLine($"Euler Rot {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}");
+                    var quat = AquaModelLibrary.Extra.MathExtras.EulerToQuaternion(node.eulRot.X, node.eulRot.Y, node.eulRot.Z);
+                    sb.AppendLine($"Euler Rot to Quat {quat.X} {quat.Y} {quat.Z} {quat.W}");
+                    sb.AppendLine($"Scale {node.scale.X} {node.scale.Y} {node.scale.Z}");
+                    sb.AppendLine($"");
+
+                    Matrix4x4.Invert(node.GetInverseBindPoseMatrix(), out var mat);
+                    Matrix4x4.Decompose(mat, out var scale, out var rotation, out var pos);
+                    sb.AppendLine($"Inv Bind World Pos {pos.X} {pos.Y} {pos.Z}");
+                    sb.AppendLine($"Inv Bind World Quat Rot {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
+                    sb.AppendLine($"Inv Bind World Scale {scale.X} {scale.Y} {scale.Z}");
+                    sb.AppendLine($"===");
+                    sb.AppendLine($"");
+                }
+
+                File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}.txt", sb.ToString());
+            }
+        }
     }
 }
 

@@ -39,7 +39,9 @@ namespace AquaAutoRig
                             break;
                         case ".obj":
                             aqua.ReadModel(Path.ChangeExtension(arg, ".org.aqp"));
-                            aqua.aquaModels[0].models[0] = LegacyObj.LegacyObjIO.ImportObj(arg, aqua.aquaModels[0].models[0]);
+                            var model = LegacyObj.LegacyObjIO.ImportObj(arg, aqua.aquaModels[0].models[0]);
+                            aqua.aquaModels[0].models.Clear();
+                            aqua.aquaModels[0].models.Add(model);
                             string outName = Path.ChangeExtension(arg, ".aqp");
                             if (aqua.aquaModels[0].models[0].objc.type >= 0xC31)
                             {

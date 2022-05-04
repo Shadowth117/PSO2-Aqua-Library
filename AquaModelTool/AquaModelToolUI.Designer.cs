@@ -40,27 +40,32 @@
             this.extraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.spirefierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.convertPSNovaaxsaifToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkAllShaderExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.parsePSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertTxtToPSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertNATextToEnPatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objBatchExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.spirefierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertPSNovaaxsaifToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.convertTxtToPSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parsePSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parsePSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.checkAllShaderExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertNATextToEnPatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -88,13 +93,12 @@
             this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aQMOnToAQNToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aqnLocalTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aqnHighestXYZValuesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.aqnDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -127,7 +131,7 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -137,7 +141,7 @@
             this.exportFBXToolStripMenuItem,
             this.includeMetadataToolStripMenuItem});
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.exportModelToolStripMenuItem.Text = "Export Model";
             // 
             // exportFBXToolStripMenuItem
@@ -161,21 +165,21 @@
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.saveAsToolStripMenuItem.Text = "Save As";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -199,6 +203,11 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(306, 6);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 23);
             // 
             // toolsToolStripMenuItem
             // 
@@ -231,6 +240,44 @@
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 23);
             this.toolsToolStripMenuItem.Text = "Tools";
             // 
+            // spirefierToolStripMenuItem
+            // 
+            this.spirefierToolStripMenuItem.Name = "spirefierToolStripMenuItem";
+            this.spirefierToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.spirefierToolStripMenuItem.Text = "Spirefier";
+            this.spirefierToolStripMenuItem.Click += new System.EventHandler(this.spirefierToolStripMenuItem_Click);
+            // 
+            // updateClassicPlayerAnimToNGSAnimToolStripMenuItem
+            // 
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Name = "updateClassicPlayerAnimToNGSAnimToolStripMenuItem";
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Text = "Update classic player anim to NGS anim";
+            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Click += new System.EventHandler(this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(326, 6);
+            // 
+            // convertPSNovaaxsaifToolStripMenuItem
+            // 
+            this.convertPSNovaaxsaifToolStripMenuItem.Name = "convertPSNovaaxsaifToolStripMenuItem";
+            this.convertPSNovaaxsaifToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertPSNovaaxsaifToolStripMenuItem.Text = "Convert PS Nova .axs/.aif";
+            this.convertPSNovaaxsaifToolStripMenuItem.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem_Click);
+            // 
+            // pSOnrelTotrpToolStripMenuItem
+            // 
+            this.pSOnrelTotrpToolStripMenuItem.Name = "pSOnrelTotrpToolStripMenuItem";
+            this.pSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.pSOnrelTotrpToolStripMenuItem.Text = "PSO *n.rel to .trp";
+            this.pSOnrelTotrpToolStripMenuItem.Click += new System.EventHandler(this.pSOnrelTotrpToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(326, 6);
+            // 
             // batchPSO2ToFBXToolStripMenuItem
             // 
             this.batchPSO2ToFBXToolStripMenuItem.Name = "batchPSO2ToFBXToolStripMenuItem";
@@ -244,76 +291,6 @@
             this.batchParsePSO2SetToTextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
             this.batchParsePSO2SetToTextToolStripMenuItem.Text = "Batch Parse PSO2 Set to Text";
             this.batchParsePSO2SetToTextToolStripMenuItem.Click += new System.EventHandler(this.batchParsePSO2SetToTextToolStripMenuItem_Click);
-            // 
-            // checkAllShaderExtrasToolStripMenuItem
-            // 
-            this.checkAllShaderExtrasToolStripMenuItem.Name = "checkAllShaderExtrasToolStripMenuItem";
-            this.checkAllShaderExtrasToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.checkAllShaderExtrasToolStripMenuItem.Text = "Check All Shader Extras";
-            this.checkAllShaderExtrasToolStripMenuItem.Click += new System.EventHandler(this.checkAllShaderExtrasToolStripMenuItem_Click);
-            // 
-            // generateCharacterFileSheetToolStripMenuItem
-            // 
-            this.generateCharacterFileSheetToolStripMenuItem.Name = "generateCharacterFileSheetToolStripMenuItem";
-            this.generateCharacterFileSheetToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.generateCharacterFileSheetToolStripMenuItem.Text = "Generate Character FileSheet";
-            this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateCharacterFileSheetToolStripMenuItem_Click_1);
-            // 
-            // pSOnrelTotrpToolStripMenuItem
-            // 
-            this.pSOnrelTotrpToolStripMenuItem.Name = "pSOnrelTotrpToolStripMenuItem";
-            this.pSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.pSOnrelTotrpToolStripMenuItem.Text = "PSO *n.rel to .trp";
-            this.pSOnrelTotrpToolStripMenuItem.Click += new System.EventHandler(this.pSOnrelTotrpToolStripMenuItem_Click);
-            // 
-            // parsePSO2TextToolStripMenuItem
-            // 
-            this.parsePSO2TextToolStripMenuItem.Name = "parsePSO2TextToolStripMenuItem";
-            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.parsePSO2TextToolStripMenuItem.Text = "Parse PSO2 Text";
-            this.parsePSO2TextToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextToolStripMenuItem_Click);
-            // 
-            // parsePSO2TextFolderSelectToolStripMenuItem
-            // 
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Name = "parsePSO2TextFolderSelectToolStripMenuItem";
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Text = "Parse PSO2 Text (Folder Select)";
-            this.parsePSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextFolderSelectToolStripMenuItem_Click);
-            // 
-            // convertTxtToPSO2TextToolStripMenuItem
-            // 
-            this.convertTxtToPSO2TextToolStripMenuItem.Name = "convertTxtToPSO2TextToolStripMenuItem";
-            this.convertTxtToPSO2TextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertTxtToPSO2TextToolStripMenuItem.Text = "Convert txt to PSO2 Text";
-            this.convertTxtToPSO2TextToolStripMenuItem.Click += new System.EventHandler(this.convertTxtToPSO2TextToolStripMenuItem_Click);
-            // 
-            // convertTxtToPSO2TextFolderSelectToolStripMenuItem
-            // 
-            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Name = "convertTxtToPSO2TextFolderSelectToolStripMenuItem";
-            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Text = "Convert txt to PSO2 Text (Folder Select)";
-            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.convertTxtToPSO2TextFolderSelectToolStripMenuItem_Click);
-            // 
-            // convertNATextToEnPatchToolStripMenuItem
-            // 
-            this.convertNATextToEnPatchToolStripMenuItem.Name = "convertNATextToEnPatchToolStripMenuItem";
-            this.convertNATextToEnPatchToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertNATextToEnPatchToolStripMenuItem.Text = "ConvertNATextToEnPatch";
-            this.convertNATextToEnPatchToolStripMenuItem.Click += new System.EventHandler(this.convertNATextToEnPatchToolStripMenuItem_Click);
-            // 
-            // parseVTBFToTextToolStripMenuItem
-            // 
-            this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
-            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.parseVTBFToTextToolStripMenuItem.Text = "Parse VTBF To Text";
-            this.parseVTBFToTextToolStripMenuItem.Click += new System.EventHandler(this.parseVTBFToTextToolStripMenuItem_Click);
-            // 
-            // updateClassicPlayerAnimToNGSAnimToolStripMenuItem
-            // 
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Name = "updateClassicPlayerAnimToNGSAnimToolStripMenuItem";
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Text = "Update classic player anim to NGS anim";
-            this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem.Click += new System.EventHandler(this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem_Click);
             // 
             // legacyAqp2objObjExportToolStripMenuItem
             // 
@@ -357,19 +334,71 @@
             this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Animation to AQM";
             this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click);
             // 
-            // spirefierToolStripMenuItem
+            // toolStripSeparator3
             // 
-            this.spirefierToolStripMenuItem.Name = "spirefierToolStripMenuItem";
-            this.spirefierToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.spirefierToolStripMenuItem.Text = "Spirefier";
-            this.spirefierToolStripMenuItem.Click += new System.EventHandler(this.spirefierToolStripMenuItem_Click);
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(326, 6);
             // 
-            // convertPSNovaaxsaifToolStripMenuItem
+            // convertTxtToPSO2TextToolStripMenuItem
             // 
-            this.convertPSNovaaxsaifToolStripMenuItem.Name = "convertPSNovaaxsaifToolStripMenuItem";
-            this.convertPSNovaaxsaifToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertPSNovaaxsaifToolStripMenuItem.Text = "Convert PS Nova .axs/.aif";
-            this.convertPSNovaaxsaifToolStripMenuItem.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem_Click);
+            this.convertTxtToPSO2TextToolStripMenuItem.Name = "convertTxtToPSO2TextToolStripMenuItem";
+            this.convertTxtToPSO2TextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertTxtToPSO2TextToolStripMenuItem.Text = "Convert txt to PSO2 Text";
+            this.convertTxtToPSO2TextToolStripMenuItem.Click += new System.EventHandler(this.convertTxtToPSO2TextToolStripMenuItem_Click);
+            // 
+            // convertTxtToPSO2TextFolderSelectToolStripMenuItem
+            // 
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Name = "convertTxtToPSO2TextFolderSelectToolStripMenuItem";
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Text = "Convert txt to PSO2 Text (Folder Select)";
+            this.convertTxtToPSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.convertTxtToPSO2TextFolderSelectToolStripMenuItem_Click);
+            // 
+            // parsePSO2TextToolStripMenuItem
+            // 
+            this.parsePSO2TextToolStripMenuItem.Name = "parsePSO2TextToolStripMenuItem";
+            this.parsePSO2TextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.parsePSO2TextToolStripMenuItem.Text = "Parse PSO2 Text";
+            this.parsePSO2TextToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextToolStripMenuItem_Click);
+            // 
+            // parsePSO2TextFolderSelectToolStripMenuItem
+            // 
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Name = "parsePSO2TextFolderSelectToolStripMenuItem";
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Text = "Parse PSO2 Text (Folder Select)";
+            this.parsePSO2TextFolderSelectToolStripMenuItem.Click += new System.EventHandler(this.parsePSO2TextFolderSelectToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(326, 6);
+            // 
+            // checkAllShaderExtrasToolStripMenuItem
+            // 
+            this.checkAllShaderExtrasToolStripMenuItem.Name = "checkAllShaderExtrasToolStripMenuItem";
+            this.checkAllShaderExtrasToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.checkAllShaderExtrasToolStripMenuItem.Text = "Check All Shader Extras";
+            this.checkAllShaderExtrasToolStripMenuItem.Click += new System.EventHandler(this.checkAllShaderExtrasToolStripMenuItem_Click);
+            // 
+            // convertNATextToEnPatchToolStripMenuItem
+            // 
+            this.convertNATextToEnPatchToolStripMenuItem.Name = "convertNATextToEnPatchToolStripMenuItem";
+            this.convertNATextToEnPatchToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertNATextToEnPatchToolStripMenuItem.Text = "ConvertNATextToEnPatch";
+            this.convertNATextToEnPatchToolStripMenuItem.Click += new System.EventHandler(this.convertNATextToEnPatchToolStripMenuItem_Click);
+            // 
+            // generateCharacterFileSheetToolStripMenuItem
+            // 
+            this.generateCharacterFileSheetToolStripMenuItem.Name = "generateCharacterFileSheetToolStripMenuItem";
+            this.generateCharacterFileSheetToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.generateCharacterFileSheetToolStripMenuItem.Text = "Generate Character FileSheet";
+            this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateCharacterFileSheetToolStripMenuItem_Click_1);
+            // 
+            // parseVTBFToTextToolStripMenuItem
+            // 
+            this.parseVTBFToTextToolStripMenuItem.Name = "parseVTBFToTextToolStripMenuItem";
+            this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.parseVTBFToTextToolStripMenuItem.Text = "Parse VTBF To Text";
+            this.parseVTBFToTextToolStripMenuItem.Click += new System.EventHandler(this.parseVTBFToTextToolStripMenuItem_Click);
             // 
             // debugToolStripMenuItem
             // 
@@ -399,7 +428,11 @@
             this.pSOXVRConvertToolStripMenuItem,
             this.importAXSToolStripMenuItem,
             this.importAXSBoxTestToolStripMenuItem,
-            this.importAAIToolStripMenuItem});
+            this.importAAIToolStripMenuItem,
+            this.aQMOnToAQNToolStripMenuItem,
+            this.aqnLocalTestToolStripMenuItem,
+            this.aqnHighestXYZValuesToolStripMenuItem,
+            this.aqnDumpToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 23);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -586,6 +619,27 @@
             this.importAAIToolStripMenuItem.Text = "Import AAI";
             this.importAAIToolStripMenuItem.Click += new System.EventHandler(this.importAAIToolStripMenuItem_Click);
             // 
+            // aQMOnToAQNToolStripMenuItem
+            // 
+            this.aQMOnToAQNToolStripMenuItem.Name = "aQMOnToAQNToolStripMenuItem";
+            this.aQMOnToAQNToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.aQMOnToAQNToolStripMenuItem.Text = "AQMOnToAQN";
+            this.aQMOnToAQNToolStripMenuItem.Click += new System.EventHandler(this.aQMOnToAQNToolStripMenuItem_Click);
+            // 
+            // aqnLocalTestToolStripMenuItem
+            // 
+            this.aqnLocalTestToolStripMenuItem.Name = "aqnLocalTestToolStripMenuItem";
+            this.aqnLocalTestToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.aqnLocalTestToolStripMenuItem.Text = "AqnLocalTest";
+            this.aqnLocalTestToolStripMenuItem.Click += new System.EventHandler(this.aqnLocalTestToolStripMenuItem_Click);
+            // 
+            // aqnHighestXYZValuesToolStripMenuItem
+            // 
+            this.aqnHighestXYZValuesToolStripMenuItem.Name = "aqnHighestXYZValuesToolStripMenuItem";
+            this.aqnHighestXYZValuesToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.aqnHighestXYZValuesToolStripMenuItem.Text = "AqnHighestXYZValues";
+            this.aqnHighestXYZValuesToolStripMenuItem.Click += new System.EventHandler(this.aqnHighestXYZValuesToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -604,30 +658,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // toolStripSeparator2
+            // aqnDumpToolStripMenuItem
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 23);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(326, 6);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(326, 6);
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(326, 6);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(326, 6);
+            this.aqnDumpToolStripMenuItem.Name = "aqnDumpToolStripMenuItem";
+            this.aqnDumpToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.aqnDumpToolStripMenuItem.Text = "AqnDump";
+            this.aqnDumpToolStripMenuItem.Click += new System.EventHandler(this.aqnDumpToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -717,6 +753,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem aQMOnToAQNToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aqnLocalTestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aqnHighestXYZValuesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aqnDumpToolStripMenuItem;
     }
 }
 
