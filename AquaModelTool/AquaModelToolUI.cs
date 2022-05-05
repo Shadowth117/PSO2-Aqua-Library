@@ -2752,6 +2752,8 @@ namespace AquaModelTool
                     var node = bn.nodeList[i];
                     sb.AppendLine($"=== ({i}) {node.boneName.curString}:");
                     sb.AppendLine($"Bone Short 1 {node.boneShort1.ToString("X")} | Bone Short 2 {node.boneShort2.ToString("X")}");
+                    sb.AppendLine($"Animated Flag {node.animatedFlag}");
+                    sb.AppendLine($"First Child {node.firstChild} | Next Sibling {node.nextSibling} | NGS Sibling {node.ngsSibling} | Unk Node {node.unkNode}");
                     if(i != 0)
                     {
                         sb.AppendLine($"Parent info - ({node.parentId}) {bn.nodeList[node.parentId].boneName.curString}");

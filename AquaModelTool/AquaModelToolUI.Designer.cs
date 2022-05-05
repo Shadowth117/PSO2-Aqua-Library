@@ -96,9 +96,9 @@
             this.aQMOnToAQNToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aqnLocalTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aqnHighestXYZValuesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aqnDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.aqnDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -640,6 +640,13 @@
             this.aqnHighestXYZValuesToolStripMenuItem.Text = "AqnHighestXYZValues";
             this.aqnHighestXYZValuesToolStripMenuItem.Click += new System.EventHandler(this.aqnHighestXYZValuesToolStripMenuItem_Click);
             // 
+            // aqnDumpToolStripMenuItem
+            // 
+            this.aqnDumpToolStripMenuItem.Name = "aqnDumpToolStripMenuItem";
+            this.aqnDumpToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.aqnDumpToolStripMenuItem.Text = "AqnDump";
+            this.aqnDumpToolStripMenuItem.Click += new System.EventHandler(this.aqnDumpToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -657,13 +664,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 253);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // aqnDumpToolStripMenuItem
-            // 
-            this.aqnDumpToolStripMenuItem.Name = "aqnDumpToolStripMenuItem";
-            this.aqnDumpToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.aqnDumpToolStripMenuItem.Text = "AqnDump";
-            this.aqnDumpToolStripMenuItem.Click += new System.EventHandler(this.aqnDumpToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
