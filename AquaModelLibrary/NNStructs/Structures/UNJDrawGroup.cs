@@ -18,9 +18,9 @@ namespace AquaModelLibrary.NNStructs.Structures
         public Vector3 center;
         public float radius;
         public int topLevelBone;
-        public int int_14;
+        public int matrixId;
         public int matId;
         public int groupId;
-        public int int_20;
+        public int shaderId;
     }
 }

@@ -23,6 +23,7 @@ namespace AquaModelLibrary.NNStructs
         public int offset = 0;
         public UNJHeader header;
         public AquaNode nodes; //Technically not the same, but it's close enough we can store everything PSU really has here
+        public Dictionary<int, int> animNodeMap = null;
         public List<byte[]> nodeMetaData = new List<byte[]>();
 
         public List<AquaObject.VTXL> vtxlList = new List<AquaObject.VTXL>();
@@ -62,6 +63,7 @@ namespace AquaModelLibrary.NNStructs
         public AquaObject ConvertToBasicAquaobject(out AquaNode aqn)
         {
             List<List<int>> globalVtxlMapping = new List<List<int>>();
+            List<AquaObject.VTXL> newVtxlList = new List<AquaObject.VTXL>();
             aqn = nodes;
             AquaObject aqp = new NGSAquaObject();
             aqp.bonePalette = new List<uint>();
@@ -100,7 +102,7 @@ namespace AquaModelLibrary.NNStructs
                     vtxlMapping.Add(map);
                 }
 
-                aqp.vtxlList.Add(newVtxl);
+                newVtxlList.Add(newVtxl);
                 globalVtxlMapping.Add(vtxlMapping);
             }
 
@@ -111,6 +113,7 @@ namespace AquaModelLibrary.NNStructs
                 AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
                 genMat.diffuseRGBA = curMat.diffuseColor;
                 genMat.matName = $"PSPMaterial_{i}";
+                genMat.texNames = new List<string>();
                 for(int t = 0; t < curMat.diffuseTexIds.Count; t++)
                 {
                     genMat.texNames.Add(Path.ChangeExtension(texList[curMat.diffuseTexIds[t]], ".dds"));
@@ -126,7 +129,7 @@ namespace AquaModelLibrary.NNStructs
                     var group = drawMeshes[i][j].groupId;
                     var matId = drawMeshes[i][j].matId;
                     AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
-                    genMesh.vertCount = aqp.vtxlList[group].vertPositions.Count;
+                    genMesh.vertCount = newVtxlList[group].vertPositions.Count;
 
                     //Generate strips
                     //UNJ vertices are stored in strip order as far as I know. Therefore, we generate the strips here
@@ -156,6 +159,7 @@ namespace AquaModelLibrary.NNStructs
                         genMesh.matIdList.Add(matId);
                         genMesh.triList.Add(new Vector3(a, b, c));
                     }
+                    aqp.vtxlList.Add(newVtxlList[group].Clone());
                     aqp.tempTris.Add(genMesh);
                 }
             }
@@ -165,16 +169,17 @@ namespace AquaModelLibrary.NNStructs
 
         public void ReadDrawGroups()
         {
+            drawMeshes = new List<List<UNJDirectDrawMesh>>();
             streamReader.Seek(offset + header.drawOffset, SeekOrigin.Begin);
             for (int i = 0; i < header.drawCount; i++)
             {
                 drawGroups.Add(streamReader.Read<UNJDrawGroup>());
                 var bookmark = streamReader.Position();
 
-                drawMeshes = new List<List<UNJDirectDrawMesh>>();
+                drawMeshes.Add(new List<UNJDirectDrawMesh>());
+                streamReader.Seek(offset + drawGroups[i].directDrawOffset, SeekOrigin.Begin);
                 for (int j = 0; j < drawGroups[i].directDrawCount; j++)
                 {
-                    streamReader.Seek(offset + drawGroups[i].directDrawOffset, SeekOrigin.Begin);
                     drawMeshes[i].Add(streamReader.Read<UNJDirectDrawMesh>());
                 }
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
@@ -199,8 +204,10 @@ namespace AquaModelLibrary.NNStructs
         public UNJMaterial ReadMaterial(UNJMaterialHeader matHeader)
         {
             UNJMaterial mat = new UNJMaterial();
-            mat.int_00 = streamReader.Read<int>();
+            mat.disablingFlags = streamReader.Read<short>();
+            mat.unkFlags = streamReader.Read<short>();
             mat.int_04 = streamReader.Read<int>();
+            mat.int_08 = streamReader.Read<int>();
 
             for(int i = 0; i < matHeader.diffuseTexCount; i++)
             {
@@ -415,33 +422,29 @@ namespace AquaModelLibrary.NNStructs
                 //Weight reading
                 Vector4 weights = new Vector4();
                 byte[] weightIndices = new byte[4];
-                switch(weightFormat)
+                for (int j = 0; j < boneCount; j++)
                 {
-                    case UINT8:
-                        for(int j = 0; j < boneCount; j++)
-                        {
-                            weightIndices[j] = (byte)bonePalette[j];
-                            switch(j)
+                    weightIndices[j] = (byte)animNodeMap[bonePalette[j]];
+                    switch (weightFormat)
+                    {
+                        case UINT8:
+                            switch (j)
                             {
                                 case 0:
-                                    weights.X = ((float)streamReader.Read<byte>()) / 0x7F;
+                                    weights.X = ((float)streamReader.Read<sbyte>()) / 0x7F;
                                     break;
                                 case 1:
-                                    weights.Y = ((float)streamReader.Read<byte>()) / 0x7F;
+                                    weights.Y = ((float)streamReader.Read<sbyte>()) / 0x7F;
                                     break;
                                 case 2:
-                                    weights.Z = ((float)streamReader.Read<byte>()) / 0x7F;
+                                    weights.Z = ((float)streamReader.Read<sbyte>()) / 0x7F;
                                     break;
                                 case 3:
-                                    weights.W = ((float)streamReader.Read<byte>()) / 0x7F;
+                                    weights.W = ((float)streamReader.Read<sbyte>()) / 0x7F;
                                     break;
                             }
-                        }
-                        break;
-                    case INT16:
-                        for (int j = 0; j < boneCount; j++)
-                        {
-                            weightIndices[j] = (byte)bonePalette[j];
+                            break;
+                        case INT16:
                             switch (j)
                             {
                                 case 0:
@@ -457,32 +460,28 @@ namespace AquaModelLibrary.NNStructs
                                     weights.W = ((float)streamReader.Read<short>()) / 0x7FFF;
                                     break;
                             }
-                        }
-                        break;
-                    case FLOAT:
-                        for (int j = 0; j < boneCount; j++)
-                        {
-                            weightIndices[j] = (byte)bonePalette[j];
+                            break;
+                        case FLOAT:
                             switch (j)
                             {
                                 case 0:
-                                    weights.X = (streamReader.Read<float>());
+                                    weights.X = streamReader.Read<float>();
                                     break;
                                 case 1:
-                                    weights.Y = (streamReader.Read<float>());
+                                    weights.Y = streamReader.Read<float>();
                                     break;
                                 case 2:
-                                    weights.Z = (streamReader.Read<float>());
+                                    weights.Z = streamReader.Read<float>();
                                     break;
                                 case 3:
-                                    weights.W = (streamReader.Read<float>());
+                                    weights.W = streamReader.Read<float>();
                                     break;
                             }
-                        }
-                        break;
-                    default:
-                        weights.X = 1;
-                        break;
+                            break;
+                        default:
+                            weights.X = 1;
+                            break;
+                    }
                 }
                 vtxl.vertWeights.Add(weights);
                 vtxl.vertWeightIndices.Add(weightIndices);
@@ -511,7 +510,7 @@ namespace AquaModelLibrary.NNStructs
                     switch (uvFormat)
                     {
                         case INT8:
-                            uvList.Add(new Vector2(((float)streamReader.Read<byte>()) / 0x7F, ((float)streamReader.Read<byte>()) / 0x7F));
+                            uvList.Add(new Vector2(((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F));
                             break;
                         case INT16:
                             AquaGeneralMethods.AlignReader(streamReader, 0x2);
@@ -543,7 +542,7 @@ namespace AquaModelLibrary.NNStructs
                 switch (normalFormat)
                 {
                     case INT8:
-                        vtxl.vertNormals.Add(new Vector3(((float)streamReader.Read<byte>()) / 0x7F, ((float)streamReader.Read<byte>()) / 0x7F, ((float)streamReader.Read<byte>()) / 0x7F));
+                        vtxl.vertNormals.Add(new Vector3(((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F));
                         break;
                     case INT16:
                         AquaGeneralMethods.AlignReader(streamReader, 0x2);
@@ -561,7 +560,7 @@ namespace AquaModelLibrary.NNStructs
                 switch (positionFormat)
                 {
                     case INT8:
-                        vtxl.vertPositions.Add(new Vector3(((float)streamReader.Read<byte>()) / 0x7F, ((float)streamReader.Read<byte>()) / 0x7F, ((float)streamReader.Read<byte>()) / 0x7F) * info.vertScale);
+                        vtxl.vertPositions.Add(new Vector3(((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F) * info.vertScale);
                         break;
                     case INT16:
                         AquaGeneralMethods.AlignReader(streamReader, 0x2);
@@ -595,6 +594,7 @@ namespace AquaModelLibrary.NNStructs
             }
             nodes = new AquaNode();
             Dictionary<int, AquaNode.NODE> nodeDict = new Dictionary<int, AquaNode.NODE>();
+            Dictionary<int, int> nodeIntDict = new Dictionary<int, int>();
 
             streamReader.Seek(offset + header.boneOffset, SeekOrigin.Begin);
             for(int i = 0; i < header.boneCount; i++)
@@ -630,9 +630,11 @@ namespace AquaModelLibrary.NNStructs
                 if (mapId >= 0)
                 {
                     nodeDict.Add(mapId, node);
+                    nodeIntDict.Add(mapId, i);
                 }
                 nodes.nodeList.Add(node);
             }
+            animNodeMap = nodeIntDict;
             /*
             //Fix node references
             for(int i = 0; i < nodes.nodeList.Count; i++)

@@ -13,8 +13,10 @@ namespace AquaModelLibrary.NNStructs.Structures
 
     public class UNJMaterial
     {
-        public int int_00;
+        public short disablingFlags;
+        public short unkFlags;
         public int int_04;
+        public int int_08;
         public Vector4 emissiveColor = new Vector4();
         public Vector4 ambientColor = new Vector4();
         public Vector4 diffuseColor = new Vector4();
