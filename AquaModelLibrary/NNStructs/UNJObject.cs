@@ -11,6 +11,7 @@ using System.Text;
 namespace AquaModelLibrary.NNStructs
 {
     //UNJ file, found in Phantasy Star Portable, Phantasy Star Portable 2, and Phantasy Star Portable 2 Infinity
+    //Credit to Kion and Agrajag for playing around with this format
     public class UNJObject
     {
         //Vert data formats
