@@ -99,6 +99,7 @@
             this.aqnDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.convertPSPortableunjToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -216,6 +217,7 @@
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem,
             this.toolStripSeparator4,
             this.convertPSNovaaxsaifToolStripMenuItem,
+            this.convertPSPortableunjToolStripMenuItem,
             this.pSOnrelTotrpToolStripMenuItem,
             this.toolStripSeparator5,
             this.batchPSO2ToFBXToolStripMenuItem,
@@ -665,6 +667,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // convertPSPortableunjToolStripMenuItem
+            // 
+            this.convertPSPortableunjToolStripMenuItem.Name = "convertPSPortableunjToolStripMenuItem";
+            this.convertPSPortableunjToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertPSPortableunjToolStripMenuItem.Text = "Convert PS Portable .unj";
+            this.convertPSPortableunjToolStripMenuItem.Click += new System.EventHandler(this.convertPSPortableunjToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -757,6 +766,7 @@
         private System.Windows.Forms.ToolStripMenuItem aqnLocalTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aqnHighestXYZValuesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aqnDumpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertPSPortableunjToolStripMenuItem;
     }
 }
 

@@ -215,7 +215,8 @@ namespace CMXPatcher
             }
             else
             {
-                throw new Exception("Cannot find CMX ice!");
+                MessageBox.Show("Cannot find CMX ice!");
+                return;
             }
 
             //Backup if the file didn't exist or the CMX was old
@@ -310,6 +311,12 @@ namespace CMXPatcher
                     BODYStructHandler.PatchBody(cmx.costumeDict[cmxId], cmxEntry);
                     entryRaw = BODYStructHandler.GetBODYAsBytes(bodyEntry);
                     Array.Copy(entryRaw, 0, cmxRaw, bodyEntry.originalOffset, entryRaw.Length);
+                    break;
+                case "hair ":
+                    var hairEntry = cmx.hairDict[cmxId];
+                    HAIRStructHandler.PatchBody(cmx.hairDict[cmxId], cmxEntry);
+                    entryRaw = HAIRStructHandler.GetHAIRAsBytes(hairEntry);
+                    Array.Copy(entryRaw, 0, cmxRaw, hairEntry.originalOffset, entryRaw.Length);
                     break;
                 default:
                     break;

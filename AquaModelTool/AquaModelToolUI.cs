@@ -15,6 +15,7 @@ using System.Text;
 using System.Windows.Forms;
 using zamboni;
 using static AquaExtras.FilenameConstants;
+using AquaModelLibrary.NNStructs;
 
 namespace AquaModelTool
 {
@@ -2775,6 +2776,51 @@ namespace AquaModelTool
                 }
 
                 File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}.txt", sb.ToString());
+            }
+        }
+
+        private void convertPSPortableunjToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PS Portable unj file(s)",
+                Filter = "PS Portable unj Files (*.unj)|*.unj|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    //try
+                    //{
+                        aquaUI.aqua.aquaModels.Clear();
+                        AquaUtil.ModelSet set = new AquaUtil.ModelSet();
+                        UNJObject unj = new UNJObject();
+                        unj.ReadUNJ(file);
+                        set.models.Add(unj.ConvertToBasicAquaobject(out var aqn));
+                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                        {
+                            aquaUI.aqua.aquaModels.Add(set);
+                            aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                            var outName = Path.ChangeExtension(file, ".aqp");
+                            aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                            AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                        }
+                    /*}
+                    catch (Exception exc)
+                    {
+                        failedFiles.Add(file);
+                        failedFiles.Add(exc.Message);
+                    }*/
+                }
+
+#if DEBUG
+                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
+#endif
+                System.Diagnostics.Debug.Unindent();
+                System.Diagnostics.Debug.Flush();
             }
         }
     }

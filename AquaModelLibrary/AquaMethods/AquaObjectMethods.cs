@@ -430,69 +430,73 @@ namespace AquaModelLibrary
             }
         }
 
-        public static bool IsSameVertex(VTXL vtxl, int vertIndex, VTXL vtxl2, int faceVertIndex)
+        public static bool IsSameVertex(VTXL vtxl, int vertIndex, VTXL vtxl2, int vertIndex2)
         {
-            if (vtxl.vertNormals.Count > 0 && !vtxl.vertNormals[vertIndex].Equals(vtxl2.vertNormals[faceVertIndex]))
+            if (vtxl.vertPositions.Count > 0 && !vtxl.vertPositions[vertIndex].Equals(vtxl2.vertPositions[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vertNormalsNGS.Count > 0 && !vtxl.vertNormalsNGS[vertIndex].Equals(vtxl2.vertNormalsNGS[faceVertIndex]))
+            if (vtxl.vertNormals.Count > 0 && !vtxl.vertNormals[vertIndex].Equals(vtxl2.vertNormals[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vertColors.Count > 0 && !IsEqualByteArray(vtxl.vertColors[vertIndex], vtxl2.vertColors[faceVertIndex]))
+            if (vtxl.vertNormalsNGS.Count > 0 && !vtxl.vertNormalsNGS[vertIndex].Equals(vtxl2.vertNormalsNGS[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vertColor2s.Count > 0 && !IsEqualByteArray(vtxl.vertColor2s[vertIndex], vtxl2.vertColor2s[faceVertIndex]))
+            if (vtxl.vertColors.Count > 0 && !IsEqualByteArray(vtxl.vertColors[vertIndex], vtxl2.vertColors[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv1List.Count > 0 && !vtxl.uv1List[vertIndex].Equals(vtxl2.uv1List[faceVertIndex]))
+            if (vtxl.vertColor2s.Count > 0 && !IsEqualByteArray(vtxl.vertColor2s[vertIndex], vtxl2.vertColor2s[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv1ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv1ListNGS[vertIndex], vtxl2.uv1ListNGS[faceVertIndex]))
+            if (vtxl.uv1List.Count > 0 && !vtxl.uv1List[vertIndex].Equals(vtxl2.uv1List[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv2ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv2ListNGS[vertIndex], vtxl2.uv2ListNGS[faceVertIndex]))
+            if (vtxl.uv1ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv1ListNGS[vertIndex], vtxl2.uv1ListNGS[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv3ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv3ListNGS[vertIndex], vtxl2.uv3ListNGS[faceVertIndex]))
+            if (vtxl.uv2ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv2ListNGS[vertIndex], vtxl2.uv2ListNGS[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv4ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv4ListNGS[vertIndex], vtxl2.uv4ListNGS[faceVertIndex]))
+            if (vtxl.uv3ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv3ListNGS[vertIndex], vtxl2.uv3ListNGS[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv2List.Count > 0 && !vtxl.uv2List[vertIndex].Equals(vtxl2.uv2List[faceVertIndex]))
+            if (vtxl.uv4ListNGS.Count > 0 && !IsEqualShortArray(vtxl.uv4ListNGS[vertIndex], vtxl2.uv4ListNGS[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv3List.Count > 0 && !vtxl.uv3List[vertIndex].Equals(vtxl2.uv3List[faceVertIndex]))
+            if (vtxl.uv2List.Count > 0 && !vtxl.uv2List[vertIndex].Equals(vtxl2.uv2List[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.uv4List.Count > 0 && !vtxl.uv4List[vertIndex].Equals(vtxl2.uv4List[faceVertIndex]))
+            if (vtxl.uv3List.Count > 0 && !vtxl.uv3List[vertIndex].Equals(vtxl2.uv3List[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vert0x22.Count > 0 && !IsEqualShortArray(vtxl.vert0x22[vertIndex], vtxl2.vert0x22[faceVertIndex]))
+            if (vtxl.uv4List.Count > 0 && !vtxl.uv4List[vertIndex].Equals(vtxl2.uv4List[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vert0x23.Count > 0 && !IsEqualShortArray(vtxl.vert0x23[vertIndex], vtxl2.vert0x23[faceVertIndex]))
+            if (vtxl.vert0x22.Count > 0 && !IsEqualShortArray(vtxl.vert0x22[vertIndex], vtxl2.vert0x22[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vert0x24.Count > 0 && !IsEqualShortArray(vtxl.vert0x24[vertIndex], vtxl2.vert0x24[faceVertIndex]))
+            if (vtxl.vert0x23.Count > 0 && !IsEqualShortArray(vtxl.vert0x23[vertIndex], vtxl2.vert0x23[vertIndex2]))
             {
                 return false;
             }
-            if (vtxl.vert0x25.Count > 0 && !IsEqualShortArray(vtxl.vert0x25[vertIndex], vtxl2.vert0x25[faceVertIndex]))
+            if (vtxl.vert0x24.Count > 0 && !IsEqualShortArray(vtxl.vert0x24[vertIndex], vtxl2.vert0x24[vertIndex2]))
+            {
+                return false;
+            }
+            if (vtxl.vert0x25.Count > 0 && !IsEqualShortArray(vtxl.vert0x25[vertIndex], vtxl2.vert0x25[vertIndex2]))
             {
                 return false;
             }

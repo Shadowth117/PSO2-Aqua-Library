@@ -85,14 +85,51 @@ namespace CMXPatcher
         {
             ExtractBodyEntry("castleg", patcher.cmx.clegDict);
         }
+        private void ExtractHairEntry(object sender, RoutedEventArgs e)
+        {
+            ExtractHairEntry("hair", patcher.cmx.hairDict);
+        }
+        private void ExtractHairEntry(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.HAIRObject> dict)
+        {
+            var id = NumberPrompt.ShowDialog(type);
+            ExtractHairEntryNoPrompt(type, dict, id);
+        }
 
         private void ExtractBodyEntry(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict)
         {
             var id = NumberPrompt.ShowDialog(type);
-            ExtractBodyEmptryNoPrompt(type, dict, id);
+            ExtractBodyEntryNoPrompt(type, dict, id);
+        }
+        private void ExtractHairEntryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.HAIRObject> dict, int id)
+        {
+            if (id != -1)
+            {
+                if (dict.ContainsKey(id))
+                {
+                    Directory.CreateDirectory(settingsPath + "CMXEntryDumps\\");
+                    string path = settingsPath + $"CMXEntryDumps\\{ type}_{id}_cmxConfig.txt";
+                    try
+                    {
+                        File.WriteAllText(path, HAIRStructHandler.ConvertToString(dict[id], type).ToString());
+                        MessageBox.Show($"Wrote successfully to {path}.");
+                    }
+                    catch
+                    {
+                        MessageBox.Show($"Unable to write {path}. Ensure you have all permissions to said directory.");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please Input a valid id to extract.");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please Input a valid id to extract.");
+            }
         }
 
-        private void ExtractBodyEmptryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict, int id)
+        private void ExtractBodyEntryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict, int id)
         {
             if (id != -1)
             {

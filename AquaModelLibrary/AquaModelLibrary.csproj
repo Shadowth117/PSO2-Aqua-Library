@@ -186,6 +186,14 @@
     <Compile Include="Native\Native.cs" />
     <Compile Include="NNStructs\NNObject.cs" />
     <Compile Include="AquaStructs\CharacterMakingIndex.cs" />
+    <Compile Include="NNStructs\Structures\NNNodeNames.cs" />
+    <Compile Include="NNStructs\Structures\NNTextureList.cs" />
+    <Compile Include="NNStructs\Structures\UNJDrawGroup.cs" />
+    <Compile Include="NNStructs\Structures\UNJHeader.cs" />
+    <Compile Include="NNStructs\Structures\UNJMaterial.cs" />
+    <Compile Include="NNStructs\Structures\UNJVertGroupHeader.cs" />
+    <Compile Include="NNStructs\Structures\UNJVertGroupInfo.cs" />
+    <Compile Include="NNStructs\UNJObject.cs" />
     <Compile Include="Nova\AAIMethods.cs" />
     <Compile Include="Nova\AIFMethods.cs" />
     <Compile Include="Nova\AXSConstants.cs" />
