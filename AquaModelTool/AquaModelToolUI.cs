@@ -25,6 +25,7 @@ namespace AquaModelTool
         public List<string> modelExtensions = new List<string>() { ".aqp", ".aqo", ".trp", ".tro" };
         public List<string> simpleModelExtensions = new List<string>() { ".prm", ".prx" };
         public List<string> effectExtensions = new List<string>() { ".aqe" };
+        public List<string> motionConfigExtensions = new List<string>() { ".bti" };
         public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public string currentFile;
         public bool isNIFL = false;
@@ -141,7 +142,7 @@ namespace AquaModelTool
             {
                 saveFileDialog = new SaveFileDialog()
                 {
-                    Title = "Save model file",
+                    Title = "Save EFfect file",
                     Filter = $"PSO2 Classic NIFL Effect (*{ext})|*{ext}"
                 };
                 /*
@@ -155,6 +156,26 @@ namespace AquaModelTool
                     {
                         case 1:
                             aquaUI.aqua.WriteClassicNIFLEffect(saveFileDialog.FileName);
+                            break;
+                    }
+                    currentFile = saveFileDialog.FileName;
+                    AquaUIOpenFile(saveFileDialog.FileName);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                }
+            }
+            else if (motionConfigExtensions.Contains(ext))
+            {
+                saveFileDialog = new SaveFileDialog()
+                {
+                    Title = "Save motion config file",
+                    Filter = $"PSO2 Motion Config (*{ext})|*{ext}"
+                };
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    switch (saveFileDialog.FilterIndex)
+                    {
+                        case 1:
+                            AquaUtil.WriteBTI(aquaUI.aqua.aquaMotionConfigs[0], saveFileDialog.FileName);
                             break;
                     }
                     currentFile = saveFileDialog.FileName;
@@ -206,6 +227,12 @@ namespace AquaModelTool
                     AquaUIOpenFile(currentFile);
                     this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
                 }
+                else if (motionConfigExtensions.Contains(ext))
+                {
+                    AquaUtil.WriteBTI(aquaUI.aqua.aquaMotionConfigs[0], currentFile);
+                    AquaUIOpenFile(currentFile);
+                    this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
+                }
             }
         }
 
@@ -225,11 +252,7 @@ namespace AquaModelTool
                     case ".aqo":
                     case ".trp":
                     case ".tro":
-                        aquaUI.aqua.aquaModels.Clear();
-                        aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.aquaEffect.Clear();
-                        aquaUI.aqua.aquaBones.Clear();
-                        aquaUI.aqua.tpnFiles.Clear();
+                        ClearData();
                         aquaUI.aqua.ReadModel(file, true);
 #if DEBUG
                         var test = aquaUI.aqua.aquaModels[0].models[0];
@@ -286,9 +309,7 @@ namespace AquaModelTool
                     case ".trm":
                     case ".trv":
                     case ".trw":
-                        aquaUI.aqua.aquaModels.Clear();
-                        aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.aquaEffect.Clear();
+                        ClearData();
                         aquaUI.aqua.ReadMotion(file);
 #if DEBUG
                         var test2 = aquaUI.aqua.aquaMotions[0].anims[0];
@@ -298,9 +319,7 @@ namespace AquaModelTool
                         control = SetMotion();
                         break;
                     case ".aqe":
-                        aquaUI.aqua.aquaModels.Clear();
-                        aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.aquaEffect.Clear();
+                        ClearData();
                         aquaUI.aqua.ReadEffect(file);
 #if DEBUG
                         var test3 = aquaUI.aqua.aquaEffect[0];
@@ -318,6 +337,13 @@ namespace AquaModelTool
                         this.Size = new Size(800, 660);
                         setModelOptions(false);
                         break;
+                    case ".bti":
+                        ClearData();
+                        aquaUI.aqua.ReadBTI(file);
+                        control = new BTIEditor(aquaUI.aqua.aquaMotionConfigs[0]);
+                        this.Size = new Size(600, 460);
+                        setModelOptions(false);
+                        break;
                     default:
                         MessageBox.Show("Invalid File");
                         return;
@@ -326,6 +352,14 @@ namespace AquaModelTool
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();
             }
+        }
+
+        private void ClearData()
+        {
+            aquaUI.aqua.aquaModels.Clear();
+            aquaUI.aqua.aquaMotions.Clear();
+            aquaUI.aqua.aquaEffect.Clear();
+            aquaUI.aqua.aquaMotionConfigs.Clear();
         }
 
         private UserControl SetMotion()

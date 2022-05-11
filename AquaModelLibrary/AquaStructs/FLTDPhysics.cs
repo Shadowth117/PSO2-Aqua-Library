@@ -1,33 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
-
-namespace AquaModelLibrary
+﻿namespace AquaModelLibrary
 {
     public class FLTDPhysics : AquaCommon
     {
-        public struct fltdHeader
+        public class fltdHeader
         {
             public byte version;         //Apparently there are a number of these and they work differently. This makes things painful
-            public byte unkStruct0Count;
+            public byte mainPhysicsNodeCount;
             public byte unkStruct1Count;
             public byte unkByte1;
 
-            public int unkStruct0Offset;
+            public int mainPhysicsNodeOffset;
             public int unkStruct1Offset;
+
+
+            public int int_18;
+            public int unkStructNGSOffset;
+        }
+
+        public struct unkStructNGS
+        {
+            public int int_00;
+            public int unkEndStructPtr; //Struct only observed pointing to null areas at end of file
+            public int int_08;
+            public int unkEndStructPtr1; //Struct only observed pointing to the 0xFFFFFFFF at 0x10 of most NGS files.
         }
 
         //Sub of fltdHeader
-        public struct unkStruct0
+        public class MainPhysicsNode
         {
             public byte index;
             public byte unkByte1; //Usually 0x1
             public byte unkByte2;
             public byte unkByte3;
-            public int namePointerPointer; 
+            public int namePointerPointer;
             public int unkPointer1;
         }
 

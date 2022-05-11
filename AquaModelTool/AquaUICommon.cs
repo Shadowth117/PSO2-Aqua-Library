@@ -22,9 +22,10 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select a PSO2 file",
-                Filter = "All Supported Files|*.aqp;*.aqo;*.trp;*.tro;*.aqm;*.aqc;*.aqv;*.aqw;*.trm;*.trv;*.trw;*.aqe" +
+                Filter = "All Supported Files|*.aqp;*.aqo;*.trp;*.tro;*.aqm;*.aqc;*.aqv;*.aqw;*.trm;*.trv;*.trw;*.aqe;*.bti" +
                          "|PSO2 Model Files (*.aqp, *.aqo, *.trp, *.tro)|*.aqp;*.aqo;*.trp;*.tro" +
                          "|PSO2 Motion Files (*.aqm, *.aqv, *.aqw, *.aqc, *.trm, *.trv, *.trw)|*.aqm;*.aqv;*.aqw;*.aqc;*.trm;*.trv;*.trw" +
+                         "|PSO2 Motion Config BTI Files (*.bti)|*.bti" +
                          "|PSO2 Effect/Particle Files (*.aqe)|*.aqe"
             };
             if(str == null)

@@ -3836,7 +3836,20 @@ namespace AquaModelLibrary
             aquaMotionConfigs.Add(LoadBTI(inFilename));
         }
 
+        public static void WriteBTI(AquaBTI_MotionConfig bti, string outFileName)
+        {
+            AquaMiscMethods.WriteBTI(bti, outFileName);
+        }
 
+        public void ReadFLTD(string inFilename)
+        {
+            //LoadFLTD();
+        }
+
+        public static void LoadFLTD(string inFilename)
+        {
+
+        }
 
     }
 }

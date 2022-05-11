@@ -54,9 +54,6 @@ namespace AquaModelLibrary
                         streamReader.Seek(offset + btiEntry.entry.nodePtr, SeekOrigin.Begin);
                         btiEntry.node = ReadCString(streamReader);
 
-                        streamReader.Seek(offset + btiEntry.entry.unkStringPtr, SeekOrigin.Begin);
-                        btiEntry.unkString = ReadCString(streamReader);
-
                         bti.btiEntries.Add(btiEntry);
                     }
                 }
@@ -64,7 +61,12 @@ namespace AquaModelLibrary
 
             return bti;
         }
-
+        
+        public static void WriteBTI(AquaBTI_MotionConfig bti, string outFileName)
+        {
+            var outBytes = BTIToBytes(bti);
+            File.WriteAllBytes(outFileName, outBytes.ToArray());
+        }
 
         public static PSO2Text ReadPSO2Text(string fileName)
         {
@@ -359,10 +361,117 @@ namespace AquaModelLibrary
             File.WriteAllBytes(outname, outBytes.ToArray());
         }
 
+        public static void AddOntoDict(Dictionary<string, List<int>> dict, List<string> strList, string str, int address)
+        {
+            if(dict.ContainsKey(str))
+            {
+                dict[str].Add(address);
+            } else
+            {
+                strList.Add(str);
+                dict.Add(str, new List<int>() { address });
+            }
+        }
+
+        public static List<byte> BTIToBytes(AquaBTI_MotionConfig bti)
+        {
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+            Dictionary<string, List<int>> textAddressDict = new Dictionary<string, List<int>>();
+            List<string> textList = new List<string>();
+            int rel0SizeOffset = 0;
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(1));
+
+            outBytes.AddRange(BitConverter.GetBytes(-1));
+
+            //Entries
+            for(int i = 0; i < bti.btiEntries.Count; i++)
+            {
+                var entry = bti.btiEntries[i];
+                NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                NOF0Append(nof0PointerLocations, outBytes.Count + 4, 1);
+                AddOntoDict(textAddressDict, textList, entry.addition, outBytes.Count);
+                AddOntoDict(textAddressDict, textList, entry.node, outBytes.Count + 4);
+                outBytes.AddRange(ConvertStruct(entry.entry));
+            }
+
+            //Write header data
+            SetByteListInt(outBytes, rel0SizeOffset + 4, outBytes.Count);
+            NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(0x14));
+            outBytes.AddRange(BitConverter.GetBytes(bti.btiEntries.Count));
+            outBytes.AddRange(BitConverter.GetBytes(bti.header.animLength));
+
+            //Write text
+            for(int i = 0; i < textList.Count; i++)
+            {
+                var offsetList = textAddressDict[textList[i]];
+                for(int j = 0; j < offsetList.Count; j++)
+                {
+                    SetByteListInt(outBytes, offsetList[j], outBytes.Count);
+                }
+                outBytes.AddRange(Encoding.UTF8.GetBytes(textList[i]));
+                var count = outBytes.Count;
+                AlignWriter(outBytes, 0x4);
+                if (count == outBytes.Count)
+                {
+                    outBytes.AddRange(new byte[4]);
+                }
+            }
+
+            AlignWriter(outBytes, 0x10);
+
+            //Write REL0 Size
+            SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+            //Write NOF0
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
+
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += AlignWriter(outBytes, 0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, ConvertStruct(nifl));
+
+            return outBytes;
+        }
+
         public static List<byte> PSO2TextToNIFLBytes(PSO2Text pso2Text)
         {
-            List<byte> finalOutBytes = new List<byte>();
-
             int rel0SizeOffset = 0;
             int categoryOffset = 0;
 
