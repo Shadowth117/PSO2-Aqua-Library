@@ -192,6 +192,8 @@
             this.field13CUD = new System.Windows.Forms.NumericUpDown();
             this.field14CLabel = new System.Windows.Forms.Label();
             this.field14CUD = new System.Windows.Forms.NumericUpDown();
+            this.unkStringLabel = new System.Windows.Forms.Label();
+            this.unkStringTB = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.sizeYUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sizeXUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sizeZUD)).BeginInit();
@@ -575,7 +577,7 @@
             // 
             // intC0UD
             // 
-            this.intC0UD.Location = new System.Drawing.Point(253, 284);
+            this.intC0UD.Location = new System.Drawing.Point(253, 324);
             this.intC0UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -594,7 +596,7 @@
             // intC0Label
             // 
             this.intC0Label.AutoSize = true;
-            this.intC0Label.Location = new System.Drawing.Point(250, 267);
+            this.intC0Label.Location = new System.Drawing.Point(250, 307);
             this.intC0Label.Name = "intC0Label";
             this.intC0Label.Size = new System.Drawing.Size(37, 13);
             this.intC0Label.TabIndex = 42;
@@ -605,9 +607,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(267, 112);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(71, 13);
+            this.label1.Size = new System.Drawing.Size(100, 13);
             this.label1.TabIndex = 45;
-            this.label1.Text = "Sub Directory";
+            this.label1.Text = "AQM/Sub Directory";
             // 
             // subDirBox
             // 
@@ -623,9 +625,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(267, 151);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(110, 13);
+            this.label2.Size = new System.Drawing.Size(137, 13);
             this.label2.TabIndex = 47;
-            this.label2.Text = "Diffuse Texture Name";
+            this.label2.Text = "AQV/Diffuse Texture Name";
             // 
             // diffuseBox
             // 
@@ -1395,7 +1397,7 @@
             // floatB0Label
             // 
             this.floatB0Label.AutoSize = true;
-            this.floatB0Label.Location = new System.Drawing.Point(250, 229);
+            this.floatB0Label.Location = new System.Drawing.Point(250, 269);
             this.floatB0Label.Name = "floatB0Label";
             this.floatB0Label.Size = new System.Drawing.Size(46, 13);
             this.floatB0Label.TabIndex = 51;
@@ -1404,7 +1406,7 @@
             // floatB0UD
             // 
             this.floatB0UD.DecimalPlaces = 6;
-            this.floatB0UD.Location = new System.Drawing.Point(253, 246);
+            this.floatB0UD.Location = new System.Drawing.Point(253, 286);
             this.floatB0UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1423,7 +1425,7 @@
             // floatB4Label
             // 
             this.floatB4Label.AutoSize = true;
-            this.floatB4Label.Location = new System.Drawing.Point(323, 229);
+            this.floatB4Label.Location = new System.Drawing.Point(323, 269);
             this.floatB4Label.Name = "floatB4Label";
             this.floatB4Label.Size = new System.Drawing.Size(46, 13);
             this.floatB4Label.TabIndex = 51;
@@ -1432,7 +1434,7 @@
             // floatB4UD
             // 
             this.floatB4UD.DecimalPlaces = 6;
-            this.floatB4UD.Location = new System.Drawing.Point(326, 246);
+            this.floatB4UD.Location = new System.Drawing.Point(326, 286);
             this.floatB4UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1451,7 +1453,7 @@
             // floatB8Label
             // 
             this.floatB8Label.AutoSize = true;
-            this.floatB8Label.Location = new System.Drawing.Point(396, 229);
+            this.floatB8Label.Location = new System.Drawing.Point(396, 269);
             this.floatB8Label.Name = "floatB8Label";
             this.floatB8Label.Size = new System.Drawing.Size(46, 13);
             this.floatB8Label.TabIndex = 51;
@@ -1460,7 +1462,7 @@
             // floatB8UD
             // 
             this.floatB8UD.DecimalPlaces = 6;
-            this.floatB8UD.Location = new System.Drawing.Point(399, 246);
+            this.floatB8UD.Location = new System.Drawing.Point(399, 286);
             this.floatB8UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1479,7 +1481,7 @@
             // floatBCLabel
             // 
             this.floatBCLabel.AutoSize = true;
-            this.floatBCLabel.Location = new System.Drawing.Point(469, 229);
+            this.floatBCLabel.Location = new System.Drawing.Point(469, 269);
             this.floatBCLabel.Name = "floatBCLabel";
             this.floatBCLabel.Size = new System.Drawing.Size(47, 13);
             this.floatBCLabel.TabIndex = 51;
@@ -1488,7 +1490,7 @@
             // floatBCUD
             // 
             this.floatBCUD.DecimalPlaces = 6;
-            this.floatBCUD.Location = new System.Drawing.Point(472, 246);
+            this.floatBCUD.Location = new System.Drawing.Point(472, 286);
             this.floatBCUD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1507,7 +1509,7 @@
             // floatC4Label
             // 
             this.floatC4Label.AutoSize = true;
-            this.floatC4Label.Location = new System.Drawing.Point(323, 267);
+            this.floatC4Label.Location = new System.Drawing.Point(323, 307);
             this.floatC4Label.Name = "floatC4Label";
             this.floatC4Label.Size = new System.Drawing.Size(46, 13);
             this.floatC4Label.TabIndex = 51;
@@ -1516,7 +1518,7 @@
             // floatC4UD
             // 
             this.floatC4UD.DecimalPlaces = 6;
-            this.floatC4UD.Location = new System.Drawing.Point(326, 284);
+            this.floatC4UD.Location = new System.Drawing.Point(326, 324);
             this.floatC4UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1535,7 +1537,7 @@
             // byteC8Label
             // 
             this.byteC8Label.AutoSize = true;
-            this.byteC8Label.Location = new System.Drawing.Point(396, 267);
+            this.byteC8Label.Location = new System.Drawing.Point(396, 307);
             this.byteC8Label.Name = "byteC8Label";
             this.byteC8Label.Size = new System.Drawing.Size(46, 13);
             this.byteC8Label.TabIndex = 42;
@@ -1543,7 +1545,7 @@
             // 
             // byteC8UD
             // 
-            this.byteC8UD.Location = new System.Drawing.Point(399, 284);
+            this.byteC8UD.Location = new System.Drawing.Point(399, 324);
             this.byteC8UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1562,7 +1564,7 @@
             // byteC9Label
             // 
             this.byteC9Label.AutoSize = true;
-            this.byteC9Label.Location = new System.Drawing.Point(469, 267);
+            this.byteC9Label.Location = new System.Drawing.Point(469, 307);
             this.byteC9Label.Name = "byteC9Label";
             this.byteC9Label.Size = new System.Drawing.Size(46, 13);
             this.byteC9Label.TabIndex = 42;
@@ -1570,7 +1572,7 @@
             // 
             // byteC9UD
             // 
-            this.byteC9UD.Location = new System.Drawing.Point(472, 284);
+            this.byteC9UD.Location = new System.Drawing.Point(472, 324);
             this.byteC9UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1589,7 +1591,7 @@
             // byteCALabel
             // 
             this.byteCALabel.AutoSize = true;
-            this.byteCALabel.Location = new System.Drawing.Point(250, 307);
+            this.byteCALabel.Location = new System.Drawing.Point(250, 347);
             this.byteCALabel.Name = "byteCALabel";
             this.byteCALabel.Size = new System.Drawing.Size(47, 13);
             this.byteCALabel.TabIndex = 42;
@@ -1597,7 +1599,7 @@
             // 
             // byteCAUD
             // 
-            this.byteCAUD.Location = new System.Drawing.Point(253, 324);
+            this.byteCAUD.Location = new System.Drawing.Point(253, 364);
             this.byteCAUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1616,7 +1618,7 @@
             // byteCBLabel
             // 
             this.byteCBLabel.AutoSize = true;
-            this.byteCBLabel.Location = new System.Drawing.Point(323, 307);
+            this.byteCBLabel.Location = new System.Drawing.Point(323, 347);
             this.byteCBLabel.Name = "byteCBLabel";
             this.byteCBLabel.Size = new System.Drawing.Size(47, 13);
             this.byteCBLabel.TabIndex = 42;
@@ -1624,7 +1626,7 @@
             // 
             // byteCBUD
             // 
-            this.byteCBUD.Location = new System.Drawing.Point(326, 324);
+            this.byteCBUD.Location = new System.Drawing.Point(326, 364);
             this.byteCBUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1643,7 +1645,7 @@
             // floatCCLabel
             // 
             this.floatCCLabel.AutoSize = true;
-            this.floatCCLabel.Location = new System.Drawing.Point(395, 307);
+            this.floatCCLabel.Location = new System.Drawing.Point(395, 347);
             this.floatCCLabel.Name = "floatCCLabel";
             this.floatCCLabel.Size = new System.Drawing.Size(47, 13);
             this.floatCCLabel.TabIndex = 51;
@@ -1652,7 +1654,7 @@
             // floatCCUD
             // 
             this.floatCCUD.DecimalPlaces = 6;
-            this.floatCCUD.Location = new System.Drawing.Point(398, 324);
+            this.floatCCUD.Location = new System.Drawing.Point(398, 364);
             this.floatCCUD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1671,7 +1673,7 @@
             // floatD8Label
             // 
             this.floatD8Label.AutoSize = true;
-            this.floatD8Label.Location = new System.Drawing.Point(469, 307);
+            this.floatD8Label.Location = new System.Drawing.Point(469, 347);
             this.floatD8Label.Name = "floatD8Label";
             this.floatD8Label.Size = new System.Drawing.Size(47, 13);
             this.floatD8Label.TabIndex = 51;
@@ -1680,7 +1682,7 @@
             // floatD8UD
             // 
             this.floatD8UD.DecimalPlaces = 6;
-            this.floatD8UD.Location = new System.Drawing.Point(472, 324);
+            this.floatD8UD.Location = new System.Drawing.Point(472, 364);
             this.floatD8UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1699,7 +1701,7 @@
             // floatDCLabel
             // 
             this.floatDCLabel.AutoSize = true;
-            this.floatDCLabel.Location = new System.Drawing.Point(250, 346);
+            this.floatDCLabel.Location = new System.Drawing.Point(250, 386);
             this.floatDCLabel.Name = "floatDCLabel";
             this.floatDCLabel.Size = new System.Drawing.Size(48, 13);
             this.floatDCLabel.TabIndex = 51;
@@ -1708,7 +1710,7 @@
             // floatDCUD
             // 
             this.floatDCUD.DecimalPlaces = 6;
-            this.floatDCUD.Location = new System.Drawing.Point(253, 363);
+            this.floatDCUD.Location = new System.Drawing.Point(253, 403);
             this.floatDCUD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1726,7 +1728,7 @@
             // floatEULabel
             // 
             this.floatEULabel.AutoSize = true;
-            this.floatEULabel.Location = new System.Drawing.Point(323, 346);
+            this.floatEULabel.Location = new System.Drawing.Point(323, 386);
             this.floatEULabel.Name = "floatEULabel";
             this.floatEULabel.Size = new System.Drawing.Size(46, 13);
             this.floatEULabel.TabIndex = 51;
@@ -1735,7 +1737,7 @@
             // floatE0UD
             // 
             this.floatE0UD.DecimalPlaces = 6;
-            this.floatE0UD.Location = new System.Drawing.Point(326, 363);
+            this.floatE0UD.Location = new System.Drawing.Point(326, 403);
             this.floatE0UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1753,7 +1755,7 @@
             // floatE4Label
             // 
             this.floatE4Label.AutoSize = true;
-            this.floatE4Label.Location = new System.Drawing.Point(396, 346);
+            this.floatE4Label.Location = new System.Drawing.Point(396, 386);
             this.floatE4Label.Name = "floatE4Label";
             this.floatE4Label.Size = new System.Drawing.Size(46, 13);
             this.floatE4Label.TabIndex = 51;
@@ -1762,7 +1764,7 @@
             // floatE4UD
             // 
             this.floatE4UD.DecimalPlaces = 6;
-            this.floatE4UD.Location = new System.Drawing.Point(399, 363);
+            this.floatE4UD.Location = new System.Drawing.Point(399, 403);
             this.floatE4UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1780,7 +1782,7 @@
             // floatE8Label
             // 
             this.floatE8Label.AutoSize = true;
-            this.floatE8Label.Location = new System.Drawing.Point(469, 346);
+            this.floatE8Label.Location = new System.Drawing.Point(469, 386);
             this.floatE8Label.Name = "floatE8Label";
             this.floatE8Label.Size = new System.Drawing.Size(46, 13);
             this.floatE8Label.TabIndex = 51;
@@ -1789,7 +1791,7 @@
             // floatE8UD
             // 
             this.floatE8UD.DecimalPlaces = 6;
-            this.floatE8UD.Location = new System.Drawing.Point(472, 363);
+            this.floatE8UD.Location = new System.Drawing.Point(472, 403);
             this.floatE8UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1807,7 +1809,7 @@
             // intF0Label
             // 
             this.intF0Label.AutoSize = true;
-            this.intF0Label.Location = new System.Drawing.Point(250, 386);
+            this.intF0Label.Location = new System.Drawing.Point(250, 426);
             this.intF0Label.Name = "intF0Label";
             this.intF0Label.Size = new System.Drawing.Size(36, 13);
             this.intF0Label.TabIndex = 42;
@@ -1815,7 +1817,7 @@
             // 
             // intF0UD
             // 
-            this.intF0UD.Location = new System.Drawing.Point(253, 403);
+            this.intF0UD.Location = new System.Drawing.Point(253, 443);
             this.intF0UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1834,7 +1836,7 @@
             // intF4Label
             // 
             this.intF4Label.AutoSize = true;
-            this.intF4Label.Location = new System.Drawing.Point(323, 386);
+            this.intF4Label.Location = new System.Drawing.Point(323, 426);
             this.intF4Label.Name = "intF4Label";
             this.intF4Label.Size = new System.Drawing.Size(36, 13);
             this.intF4Label.TabIndex = 42;
@@ -1842,7 +1844,7 @@
             // 
             // intF4UD
             // 
-            this.intF4UD.Location = new System.Drawing.Point(326, 403);
+            this.intF4UD.Location = new System.Drawing.Point(326, 443);
             this.intF4UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1861,7 +1863,7 @@
             // intF8Label
             // 
             this.intF8Label.AutoSize = true;
-            this.intF8Label.Location = new System.Drawing.Point(396, 386);
+            this.intF8Label.Location = new System.Drawing.Point(396, 426);
             this.intF8Label.Name = "intF8Label";
             this.intF8Label.Size = new System.Drawing.Size(36, 13);
             this.intF8Label.TabIndex = 42;
@@ -1869,7 +1871,7 @@
             // 
             // intF8UD
             // 
-            this.intF8UD.Location = new System.Drawing.Point(399, 403);
+            this.intF8UD.Location = new System.Drawing.Point(399, 443);
             this.intF8UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -1888,7 +1890,7 @@
             // byteFCLabel
             // 
             this.byteFCLabel.AutoSize = true;
-            this.byteFCLabel.Location = new System.Drawing.Point(469, 386);
+            this.byteFCLabel.Location = new System.Drawing.Point(469, 426);
             this.byteFCLabel.Name = "byteFCLabel";
             this.byteFCLabel.Size = new System.Drawing.Size(46, 13);
             this.byteFCLabel.TabIndex = 42;
@@ -1896,7 +1898,7 @@
             // 
             // byteFCUD
             // 
-            this.byteFCUD.Location = new System.Drawing.Point(472, 403);
+            this.byteFCUD.Location = new System.Drawing.Point(472, 443);
             this.byteFCUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1915,7 +1917,7 @@
             // byteFDLabel
             // 
             this.byteFDLabel.AutoSize = true;
-            this.byteFDLabel.Location = new System.Drawing.Point(250, 426);
+            this.byteFDLabel.Location = new System.Drawing.Point(250, 466);
             this.byteFDLabel.Name = "byteFDLabel";
             this.byteFDLabel.Size = new System.Drawing.Size(47, 13);
             this.byteFDLabel.TabIndex = 42;
@@ -1923,7 +1925,7 @@
             // 
             // byteFDUD
             // 
-            this.byteFDUD.Location = new System.Drawing.Point(253, 443);
+            this.byteFDUD.Location = new System.Drawing.Point(253, 483);
             this.byteFDUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1942,7 +1944,7 @@
             // byteFELabel
             // 
             this.byteFELabel.AutoSize = true;
-            this.byteFELabel.Location = new System.Drawing.Point(323, 426);
+            this.byteFELabel.Location = new System.Drawing.Point(323, 466);
             this.byteFELabel.Name = "byteFELabel";
             this.byteFELabel.Size = new System.Drawing.Size(46, 13);
             this.byteFELabel.TabIndex = 42;
@@ -1950,7 +1952,7 @@
             // 
             // byteFEUD
             // 
-            this.byteFEUD.Location = new System.Drawing.Point(326, 443);
+            this.byteFEUD.Location = new System.Drawing.Point(326, 483);
             this.byteFEUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1969,7 +1971,7 @@
             // byteFFLabel
             // 
             this.byteFFLabel.AutoSize = true;
-            this.byteFFLabel.Location = new System.Drawing.Point(395, 426);
+            this.byteFFLabel.Location = new System.Drawing.Point(395, 466);
             this.byteFFLabel.Name = "byteFFLabel";
             this.byteFFLabel.Size = new System.Drawing.Size(45, 13);
             this.byteFFLabel.TabIndex = 42;
@@ -1977,7 +1979,7 @@
             // 
             // byteFFUD
             // 
-            this.byteFFUD.Location = new System.Drawing.Point(398, 443);
+            this.byteFFUD.Location = new System.Drawing.Point(398, 483);
             this.byteFFUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -1996,7 +1998,7 @@
             // int100Label
             // 
             this.int100Label.AutoSize = true;
-            this.int100Label.Location = new System.Drawing.Point(469, 426);
+            this.int100Label.Location = new System.Drawing.Point(469, 466);
             this.int100Label.Name = "int100Label";
             this.int100Label.Size = new System.Drawing.Size(42, 13);
             this.int100Label.TabIndex = 42;
@@ -2004,7 +2006,7 @@
             // 
             // int100UD
             // 
-            this.int100UD.Location = new System.Drawing.Point(472, 443);
+            this.int100UD.Location = new System.Drawing.Point(472, 483);
             this.int100UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2104,7 +2106,7 @@
             // short10Label
             // 
             this.short10Label.AutoSize = true;
-            this.short10Label.Location = new System.Drawing.Point(251, 467);
+            this.short10Label.Location = new System.Drawing.Point(251, 507);
             this.short10Label.Name = "short10Label";
             this.short10Label.Size = new System.Drawing.Size(55, 13);
             this.short10Label.TabIndex = 42;
@@ -2112,7 +2114,7 @@
             // 
             // short10EUD
             // 
-            this.short10EUD.Location = new System.Drawing.Point(253, 484);
+            this.short10EUD.Location = new System.Drawing.Point(253, 524);
             this.short10EUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -2131,7 +2133,7 @@
             // field110Label
             // 
             this.field110Label.AutoSize = true;
-            this.field110Label.Location = new System.Drawing.Point(324, 467);
+            this.field110Label.Location = new System.Drawing.Point(324, 507);
             this.field110Label.Name = "field110Label";
             this.field110Label.Size = new System.Drawing.Size(50, 13);
             this.field110Label.TabIndex = 42;
@@ -2139,7 +2141,7 @@
             // 
             // field110UD
             // 
-            this.field110UD.Location = new System.Drawing.Point(326, 484);
+            this.field110UD.Location = new System.Drawing.Point(326, 524);
             this.field110UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2158,7 +2160,7 @@
             // field114Label
             // 
             this.field114Label.AutoSize = true;
-            this.field114Label.Location = new System.Drawing.Point(396, 467);
+            this.field114Label.Location = new System.Drawing.Point(396, 507);
             this.field114Label.Name = "field114Label";
             this.field114Label.Size = new System.Drawing.Size(50, 13);
             this.field114Label.TabIndex = 42;
@@ -2166,7 +2168,7 @@
             // 
             // field114UD
             // 
-            this.field114UD.Location = new System.Drawing.Point(398, 484);
+            this.field114UD.Location = new System.Drawing.Point(398, 524);
             this.field114UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2185,7 +2187,7 @@
             // field118Label
             // 
             this.field118Label.AutoSize = true;
-            this.field118Label.Location = new System.Drawing.Point(470, 467);
+            this.field118Label.Location = new System.Drawing.Point(470, 507);
             this.field118Label.Name = "field118Label";
             this.field118Label.Size = new System.Drawing.Size(50, 13);
             this.field118Label.TabIndex = 42;
@@ -2193,7 +2195,7 @@
             // 
             // field118UD
             // 
-            this.field118UD.Location = new System.Drawing.Point(472, 484);
+            this.field118UD.Location = new System.Drawing.Point(472, 524);
             this.field118UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2293,7 +2295,7 @@
             // field128Label
             // 
             this.field128Label.AutoSize = true;
-            this.field128Label.Location = new System.Drawing.Point(251, 507);
+            this.field128Label.Location = new System.Drawing.Point(251, 547);
             this.field128Label.Name = "field128Label";
             this.field128Label.Size = new System.Drawing.Size(51, 13);
             this.field128Label.TabIndex = 42;
@@ -2301,7 +2303,7 @@
             // 
             // field128UD
             // 
-            this.field128UD.Location = new System.Drawing.Point(253, 524);
+            this.field128UD.Location = new System.Drawing.Point(253, 564);
             this.field128UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2320,7 +2322,7 @@
             // field12CLabel
             // 
             this.field12CLabel.AutoSize = true;
-            this.field12CLabel.Location = new System.Drawing.Point(324, 507);
+            this.field12CLabel.Location = new System.Drawing.Point(324, 547);
             this.field12CLabel.Name = "field12CLabel";
             this.field12CLabel.Size = new System.Drawing.Size(52, 13);
             this.field12CLabel.TabIndex = 42;
@@ -2328,7 +2330,7 @@
             // 
             // field12CUD
             // 
-            this.field12CUD.Location = new System.Drawing.Point(326, 524);
+            this.field12CUD.Location = new System.Drawing.Point(326, 564);
             this.field12CUD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2347,7 +2349,7 @@
             // field130Label
             // 
             this.field130Label.AutoSize = true;
-            this.field130Label.Location = new System.Drawing.Point(396, 507);
+            this.field130Label.Location = new System.Drawing.Point(396, 547);
             this.field130Label.Name = "field130Label";
             this.field130Label.Size = new System.Drawing.Size(50, 13);
             this.field130Label.TabIndex = 42;
@@ -2355,7 +2357,7 @@
             // 
             // field130UD
             // 
-            this.field130UD.Location = new System.Drawing.Point(398, 524);
+            this.field130UD.Location = new System.Drawing.Point(398, 564);
             this.field130UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2374,7 +2376,7 @@
             // field134Label
             // 
             this.field134Label.AutoSize = true;
-            this.field134Label.Location = new System.Drawing.Point(470, 507);
+            this.field134Label.Location = new System.Drawing.Point(470, 547);
             this.field134Label.Name = "field134Label";
             this.field134Label.Size = new System.Drawing.Size(50, 13);
             this.field134Label.TabIndex = 42;
@@ -2382,7 +2384,7 @@
             // 
             // field134UD
             // 
-            this.field134UD.Location = new System.Drawing.Point(472, 524);
+            this.field134UD.Location = new System.Drawing.Point(472, 564);
             this.field134UD.Maximum = new decimal(new int[] {
             2147483647,
             0,
@@ -2479,11 +2481,31 @@
             this.field14CUD.TabIndex = 43;
             this.field14CUD.ValueChanged += new System.EventHandler(this.field14CUD_ValueChanged);
             // 
+            // unkStringLabel
+            // 
+            this.unkStringLabel.AutoSize = true;
+            this.unkStringLabel.Location = new System.Drawing.Point(264, 229);
+            this.unkStringLabel.Name = "unkStringLabel";
+            this.unkStringLabel.Size = new System.Drawing.Size(83, 13);
+            this.unkStringLabel.TabIndex = 54;
+            this.unkStringLabel.Text = "Unknown String";
+            // 
+            // unkStringTB
+            // 
+            this.unkStringTB.Location = new System.Drawing.Point(264, 245);
+            this.unkStringTB.MaxLength = 32;
+            this.unkStringTB.Name = "unkStringTB";
+            this.unkStringTB.Size = new System.Drawing.Size(216, 20);
+            this.unkStringTB.TabIndex = 53;
+            this.unkStringTB.TextChanged += new System.EventHandler(this.unkStringTB_TextChanged);
+            // 
             // PtclEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
+            this.Controls.Add(this.unkStringLabel);
+            this.Controls.Add(this.unkStringTB);
             this.Controls.Add(this.floatBCUD);
             this.Controls.Add(this.floatB8UD);
             this.Controls.Add(this.floatBCLabel);
@@ -2897,5 +2919,7 @@
         private System.Windows.Forms.NumericUpDown field13CUD;
         private System.Windows.Forms.Label field14CLabel;
         private System.Windows.Forms.NumericUpDown field14CUD;
+        private System.Windows.Forms.Label unkStringLabel;
+        private System.Windows.Forms.TextBox unkStringTB;
     }
 }

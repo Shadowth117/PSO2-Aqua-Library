@@ -117,7 +117,6 @@ namespace AquaModelLibrary
         public Dictionary<int, NGS_EarObject> ngsEarDict = new Dictionary<int, NGS_EarObject>();
         public Dictionary<int, NGS_TeethObject> ngsTeethDict = new Dictionary<int, NGS_TeethObject>();
 
-        public List<NGS_HornObject> ngsHornList = new List<NGS_HornObject>(); //Necessary since there are unindexable structs in these. Unfortunate.
         public Dictionary<int, NGS_HornObject> ngsHornDict = new Dictionary<int, NGS_HornObject>();
         public Dictionary<int, NGS_SKINObject> ngsSkinDict = new Dictionary<int, NGS_SKINObject>();
         public Dictionary<int, EYEBObject> eyebrowDict = new Dictionary<int, EYEBObject>();
@@ -138,7 +137,6 @@ namespace AquaModelLibrary
         public Dictionary<int, BCLNObject> innerWearIdLink = new Dictionary<int, BCLNObject>();
         public Dictionary<int, BCLNObject> castHeadIdLink = new Dictionary<int, BCLNObject>();
         public Dictionary<int, BCLNObject> accessoryIdLink = new Dictionary<int, BCLNObject>();
-        public List<unkCap40Object> unk40CapList = new List<unkCap40Object>();
 
         public CMXTable cmxTable;
 
@@ -547,7 +545,6 @@ namespace AquaModelLibrary
         public class NGS_EarObject : BaseCMXObject
         {
             public NGS_Ear ngsEar;
-            public NGS_Unk_Substruct subStruct;
 
             public string dataString;
             public string texString1;
@@ -560,7 +557,7 @@ namespace AquaModelLibrary
 
         public struct NGS_Ear
         {
-            public int unkSubStructPtr; //Not sure what this is at the moment.
+            public int id;
             public int dataStringPtr;
             public int texString1Ptr;
             public int texString2Ptr;
@@ -576,20 +573,9 @@ namespace AquaModelLibrary
             public int unkInt4;
         }
 
-        //Weird 0xA long substruct for NGS_Ear and NGS_Horn
-        public struct NGS_Unk_Substruct
-        {
-            public short unkShort0;
-            public short unkShort1;
-            public short unkShort2;
-            public short unkShort3;
-            public short unkShort4;
-        }
-
         public class NGS_TeethObject : BaseCMXObject
         {
             public NGS_Teeth ngsTeeth;
-            public NGS_Unk_Substruct substruct;
 
             public string dataString;
             public string texString1;
@@ -601,7 +587,7 @@ namespace AquaModelLibrary
 
         public struct NGS_Teeth
         {
-            public int unkSubStructPtr; //Not sure what this is at the moment.
+            public int id; 
             public int dataStringPtr;
             public int texString1Ptr;
             public int texString2Ptr;
@@ -613,14 +599,13 @@ namespace AquaModelLibrary
         public class NGS_HornObject : BaseCMXObject
         {
             public NGS_Horn ngsHorn;
-            public NGS_Unk_Substruct substruct;
 
             public string dataString;
         }
 
         public struct NGS_Horn
         {
-            public int unkSubStructPtr; //Not sure what this is at the moment. Shared with NGS_Ear versions? Assumedly not used when 0.
+            public int id;
             public int dataStringPtr; //Name of the aqp, aqn, fltd, etc.
             public int reserve0;      //Always 0 so far.
         }
@@ -636,6 +621,9 @@ namespace AquaModelLibrary
             public string texString5;
             public string texString6;
             public string texString7;
+            public string texString8;
+            public string texString9;
+            public string texString10;
         }
 
         public struct NGS_Skin
@@ -787,15 +775,13 @@ namespace AquaModelLibrary
         //This may be color related. But I have no idea what it's supposed to do.
         public unsafe struct Unk_IntField
         {
-            public fixed int unkIntField[79];
+            public fixed int unkIntField[0x79];
         }
 
         public class BCLNObject
         {
             public BCLN bcln;
             public BCLNRitem bclnRitem;
-
-            //Only for ICLN
             public BCLNRitem2 bclnRitem2;
         }
 
@@ -835,15 +821,6 @@ namespace AquaModelLibrary
             public int int_1C;
 
             public int int_20;
-        }
-
-        public class unkCap40Object
-        {
-            public unkCap40Struct rawStruct;
-            public string unkString0;
-            public string unkString1;
-            public long originalOffset;
-            public int num;
         }
 
         public class CMXTable

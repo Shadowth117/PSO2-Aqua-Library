@@ -2387,6 +2387,7 @@ namespace AquaModelLibrary
             strings.subDirectory.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x40));
             strings.diffuseTex.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x63));
             strings.opacityTex.SetBytes(GetObject<byte[]>(ptclRaw[0], 0x65));
+            //strings.unkString //May be unused in vtbf?
 
             ptclObject.strings = strings;
             ptclObject.ptcl = ptcl;

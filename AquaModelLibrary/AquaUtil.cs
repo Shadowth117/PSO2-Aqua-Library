@@ -3843,14 +3843,84 @@ namespace AquaModelLibrary
 
         public void ReadFLTD(string inFilename)
         {
-            //LoadFLTD();
+            LoadFLTD(inFilename);
         }
 
         public static void LoadFLTD(string inFilename)
         {
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 5)
+            {
+                ext = ext.Substring(0, 5);
+            }
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
 
+                if (variant == "NIFL")
+                {
+                    FLTDPhysics fltd = new FLTDPhysics();
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    fltd.header = ReadFLTDHeader(streamReader);
+
+                    //Read main nodes
+                    streamReader.Seek(offset + fltd.header.mainPhysicsNodeOffset, SeekOrigin.Begin);
+                    for(int i = 0; i < fltd.header.mainPhysicsNodeCount; i++)
+                    {
+                        fltd.mainNodes.Add(ReadMainNode(streamReader, offset, fltd.header.version));
+                    }
+                }
+            }
         }
 
+        private static FLTDPhysics.FltdHeader ReadFLTDHeader(BufferedStreamReader streamReader)
+        {
+            FLTDPhysics.FltdHeader header = new FLTDPhysics.FltdHeader();
+            header.version = streamReader.Read<byte>();
+            header.mainPhysicsNodeCount = streamReader.Read<byte>();
+            header.unkStruct1Count = streamReader.Read<byte>();
+            header.unkByte1 = streamReader.Read<byte>();
+
+            header.mainPhysicsNodeOffset = streamReader.Read<int>();
+            header.unkStruct1Offset = streamReader.Read<int>();
+
+            header.int_18 = streamReader.Read<int>();
+            header.unkStructNGSOffset = streamReader.Read<int>();
+
+            return header;
+        }
+
+        private static FLTDPhysics.MainPhysicsNode ReadMainNode(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.MainPhysicsNode physicsNode = new FLTDPhysics.MainPhysicsNode();
+
+            physicsNode.index = streamReader.Read<byte>();
+            physicsNode.unkByte1 = streamReader.Read<byte>();
+            physicsNode.unkByte2 = streamReader.Read<byte>();
+            physicsNode.unkByte3 = streamReader.Read<byte>();
+            physicsNode.namePointerPointer = streamReader.Read<int>();
+            physicsNode.unkPointer1 = streamReader.Read<int>();
+            physicsNode.int_0C = streamReader.Read<int>();
+            physicsNode.int_10 = streamReader.Read<int>();
+
+            var bookmark = streamReader.Position();
+
+            streamReader.Seek(offset + physicsNode.namePointerPointer, SeekOrigin.Begin);
+            var nameAddress = streamReader.Read<int>();
+            streamReader.Seek(offset + nameAddress, SeekOrigin.Begin);
+            physicsNode.name = ReadCString(streamReader);
+
+            //Read unkPointer node
+            streamReader.Seek(offset + physicsNode.unkPointer1, SeekOrigin.Begin);
+
+            streamReader.Seek(bookmark, SeekOrigin.Begin);
+            return physicsNode;
+        }
     }
 }
  

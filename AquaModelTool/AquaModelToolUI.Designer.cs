@@ -46,6 +46,7 @@
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.convertPSNovaaxsaifToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSPortableunjToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,15 +92,15 @@
             this.pSOXVMDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSOXVRConvertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importAXSBoxTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aQMOnToAQNToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aqnLocalTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aqnHighestXYZValuesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aqnDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readFLTDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.convertPSPortableunjToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testCMXBuild = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -268,6 +269,13 @@
             this.convertPSNovaaxsaifToolStripMenuItem.Text = "Convert PS Nova .axs/.aif";
             this.convertPSNovaaxsaifToolStripMenuItem.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem_Click);
             // 
+            // convertPSPortableunjToolStripMenuItem
+            // 
+            this.convertPSPortableunjToolStripMenuItem.Name = "convertPSPortableunjToolStripMenuItem";
+            this.convertPSPortableunjToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertPSPortableunjToolStripMenuItem.Text = "Convert PS Portable .unj";
+            this.convertPSPortableunjToolStripMenuItem.Click += new System.EventHandler(this.convertPSPortableunjToolStripMenuItem_Click);
+            // 
             // pSOnrelTotrpToolStripMenuItem
             // 
             this.pSOnrelTotrpToolStripMenuItem.Name = "pSOnrelTotrpToolStripMenuItem";
@@ -414,6 +422,7 @@
             this.readMagIndicesToolStripMenuItem,
             this.readCMOToolStripMenuItem,
             this.dumpFigEffectTypesToolStripMenuItem,
+            this.testCMXBuild,
             this.readCMXToolStripMenuItem,
             this.readCMXFileToolStripMenuItem,
             this.readFIGToolStripMenuItem,
@@ -429,12 +438,12 @@
             this.pSOXVMDumpToolStripMenuItem,
             this.pSOXVRConvertToolStripMenuItem,
             this.importAXSToolStripMenuItem,
-            this.importAXSBoxTestToolStripMenuItem,
             this.importAAIToolStripMenuItem,
             this.aQMOnToAQNToolStripMenuItem,
             this.aqnLocalTestToolStripMenuItem,
             this.aqnHighestXYZValuesToolStripMenuItem,
-            this.aqnDumpToolStripMenuItem});
+            this.aqnDumpToolStripMenuItem,
+            this.readFLTDToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 23);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -607,13 +616,6 @@
             this.importAXSToolStripMenuItem.Text = "Import AXS";
             this.importAXSToolStripMenuItem.Click += new System.EventHandler(this.importAXSToolStripMenuItem_Click);
             // 
-            // importAXSBoxTestToolStripMenuItem
-            // 
-            this.importAXSBoxTestToolStripMenuItem.Name = "importAXSBoxTestToolStripMenuItem";
-            this.importAXSBoxTestToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.importAXSBoxTestToolStripMenuItem.Text = "Import AXS Box Test";
-            this.importAXSBoxTestToolStripMenuItem.Click += new System.EventHandler(this.importAXSBoxTestToolStripMenuItem_Click);
-            // 
             // importAAIToolStripMenuItem
             // 
             this.importAAIToolStripMenuItem.Name = "importAAIToolStripMenuItem";
@@ -649,6 +651,13 @@
             this.aqnDumpToolStripMenuItem.Text = "AqnDump";
             this.aqnDumpToolStripMenuItem.Click += new System.EventHandler(this.aqnDumpToolStripMenuItem_Click);
             // 
+            // readFLTDToolStripMenuItem
+            // 
+            this.readFLTDToolStripMenuItem.Name = "readFLTDToolStripMenuItem";
+            this.readFLTDToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readFLTDToolStripMenuItem.Text = "ReadFLTD";
+            this.readFLTDToolStripMenuItem.Click += new System.EventHandler(this.readFLTDToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -667,12 +676,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // convertPSPortableunjToolStripMenuItem
+            // testCMXBuild
             // 
-            this.convertPSPortableunjToolStripMenuItem.Name = "convertPSPortableunjToolStripMenuItem";
-            this.convertPSPortableunjToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertPSPortableunjToolStripMenuItem.Text = "Convert PS Portable .unj";
-            this.convertPSPortableunjToolStripMenuItem.Click += new System.EventHandler(this.convertPSPortableunjToolStripMenuItem_Click);
+            this.testCMXBuild.Name = "testCMXBuild";
+            this.testCMXBuild.Size = new System.Drawing.Size(231, 22);
+            this.testCMXBuild.Text = "TestCMXBuild";
+            this.testCMXBuild.Click += new System.EventHandler(this.testCMXBuild_Click);
             // 
             // AquaModelTool
             // 
@@ -747,7 +756,6 @@
         private System.Windows.Forms.ToolStripMenuItem pSOXVMDumpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSOXVRConvertToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAXSToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem importAXSBoxTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAAIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertPSNovaaxsaifToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMJankTestToolStripMenuItem;
@@ -767,6 +775,8 @@
         private System.Windows.Forms.ToolStripMenuItem aqnHighestXYZValuesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aqnDumpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertPSPortableunjToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readFLTDToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testCMXBuild;
     }
 }
 

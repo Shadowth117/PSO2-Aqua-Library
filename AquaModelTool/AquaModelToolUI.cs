@@ -2014,11 +2014,6 @@ namespace AquaModelTool
             }
         }
 
-        private void importAXSBoxTestToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AXSMethods.boxTest();
-        }
-
         private void importAAIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -2855,6 +2850,40 @@ namespace AquaModelTool
 #endif
                 System.Diagnostics.Debug.Unindent();
                 System.Diagnostics.Debug.Flush();
+            }
+        }
+
+        private void readFLTDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 Physics file(s)",
+                Filter = "PSO2 Physics Files (*.fltd)|*.fltd|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil.LoadFLTD(openFileDialog.FileName);
+            }
+        }
+
+        private void testCMXBuild_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var pso2_binDir = goodFolderDialog.FileName;
+
+                aquaUI.aqua.pso2_binDir = pso2_binDir;
+                var aquaCMX = new CharacterMakingIndex();
+
+                aquaCMX = CharacterMakingIndexMethods.ExtractCMX(pso2_binDir, aquaCMX);
+                CharacterMakingIndexMethods.WriteCMX("C://benchmarkCMX.cmx", aquaCMX, 0);
+                CharacterMakingIndexMethods.WriteCMX("C://finalCMX.cmx", aquaCMX, 1);
             }
         }
     }

@@ -22,7 +22,7 @@ namespace AquaModelTool
             nodeTB.Text = curEntry.node;
             short08UD.Value = curEntry.entry.sht_08;
             short0AUD.Value = curEntry.entry.sht_0A;
-            float0CUD.Value = (decimal)curEntry.entry.float_0C;
+            startingFrameUD.Value = (decimal)curEntry.entry.startFrame;
             float10UD.Value = (decimal)curEntry.entry.float_10;
             posXUD.Value = (decimal)curEntry.entry.pos.X;
             posYUD.Value = (decimal)curEntry.entry.pos.Y;
@@ -35,7 +35,7 @@ namespace AquaModelTool
             scaleXUD.Value = (decimal)curEntry.entry.scale.X;
             scaleYUD.Value = (decimal)curEntry.entry.scale.Y;
             scaleZUD.Value = (decimal)curEntry.entry.scale.Z;
-            unkFrameUD.Value = (decimal)curEntry.entry.unkFrame;
+            endFrameUD.Value = (decimal)curEntry.entry.endFrame;
             unkVecXUD.Value = (decimal)curEntry.entry.vec3_68.X;
             unkVecYUD.Value = (decimal)curEntry.entry.vec3_68.Y;
             unkVecZUD.Value = (decimal)curEntry.entry.vec3_68.Z;
@@ -139,7 +139,7 @@ namespace AquaModelTool
         private void float0CUD_ValueChanged(object sender, EventArgs e)
         {
             var curEntry = bti.btiEntries[btiIEntryCB.SelectedIndex];
-            curEntry.entry.float_0C = (float)float0CUD.Value;
+            curEntry.entry.startFrame = (float)startingFrameUD.Value;
         }
 
         private void float10UD_ValueChanged(object sender, EventArgs e)
@@ -216,7 +216,7 @@ namespace AquaModelTool
         private void unkFrameUD_ValueChanged(object sender, EventArgs e)
         {
             var curEntry = bti.btiEntries[btiIEntryCB.SelectedIndex];
-            curEntry.entry.unkFrame = (float)unkFrameUD.Value;
+            curEntry.entry.endFrame = (float)endFrameUD.Value;
         }
 
         private void unkVecXUD_ValueChanged(object sender, EventArgs e)

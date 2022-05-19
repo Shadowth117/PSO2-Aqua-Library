@@ -26,7 +26,7 @@ namespace AquaModelLibrary
             public int nodePtr;
             public short sht_08;
             public short sht_0A;
-            public float float_0C;
+            public float startFrame;
 
             public float float_10;
 
@@ -37,7 +37,7 @@ namespace AquaModelLibrary
             public float float_30;
 
             public Vector3 scale;
-            public float unkFrame;
+            public float endFrame;
 
             public float float_44;
             public float float_48;

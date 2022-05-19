@@ -247,10 +247,11 @@ namespace AquaModelLibrary
 
         public struct PTCLStrings
         {
-            public PSO2Stringx30 assetName;
-            public PSO2Stringx30 subDirectory;
-            public PSO2String diffuseTex;
+            public PSO2String assetName;
+            public PSO2String subDirectory; //Can be aqm
+            public PSO2String diffuseTex; //Can be aqv
             public PSO2String opacityTex;
+            public PSO2String unkString;
         }
 
         //Seems to have varying pointer data, but no actual data

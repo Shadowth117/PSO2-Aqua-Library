@@ -363,6 +363,7 @@ namespace AquaModelLibrary
 
         public static void AddOntoDict(Dictionary<string, List<int>> dict, List<string> strList, string str, int address)
         {
+            str = str ?? "";
             if(dict.ContainsKey(str))
             {
                 dict[str].Add(address);

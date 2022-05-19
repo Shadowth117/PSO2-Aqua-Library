@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -12,6 +13,7 @@ using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.VTBFMethods;
 using static AquaExtras.FilenameConstants;
 using AquaModelLibrary.AquaMethods;
+using System.Diagnostics;
 
 namespace AquaModelLibrary
 {
@@ -191,6 +193,10 @@ namespace AquaModelLibrary
             cmx.nifl = streamReader.Read<AquaCommon.NIFL>();
             cmx.rel0 = streamReader.Read<AquaCommon.REL0>();
 
+            streamReader.Seek(cmx.rel0.REL0Size + offset, SeekOrigin.Begin);
+            AquaGeneralMethods.AlignReader(streamReader, 0x10);
+            cmx.nof0 = AquaCommon.readNOF0(streamReader);
+
             streamReader.Seek(cmx.rel0.REL0DataStart + offset, SeekOrigin.Begin);
             cmx.cmxTable = ReadCMXTable(streamReader, cmx.rel0.REL0DataStart);
 
@@ -204,12 +210,12 @@ namespace AquaModelLibrary
             ReadBBLY(streamReader, offset, cmx.cmxTable.bodyPaintAddress, cmx.cmxTable.bodyPaintCount, cmx.bodyPaintDict);
             ReadSticker(streamReader, offset, cmx.cmxTable.stickerAddress, cmx.cmxTable.stickerCount, cmx.stickerDict);
 
-            ReadFACE(streamReader, offset, cmx.cmxTable.faceAddress, cmx.cmxTable.faceCount, cmx.faceDict);
+            ReadFACE(streamReader, offset, cmx.cmxTable.faceAddress, cmx.cmxTable.faceCount, cmx.faceDict, cmx.rel0.REL0DataStart);
             ReadFCMN(streamReader, offset, cmx.cmxTable.faceMotionAddress, cmx.cmxTable.faceMotionCount, cmx.fcmnDict);
             ReadFaceTextures(streamReader, offset, cmx.cmxTable.faceTextureAddress, cmx.cmxTable.faceTextureCount, cmx.faceTextureDict);
             ReadFCP(streamReader, offset, cmx.cmxTable.faceTexturesAddress, cmx.cmxTable.faceTexturesCount, cmx.fcpDict);
 
-            ReadACCE(streamReader, offset, cmx.cmxTable.accessoryAddress, cmx.cmxTable.accessoryCount, cmx.accessoryDict);
+            ReadACCE(streamReader, offset, cmx.cmxTable.accessoryAddress, cmx.cmxTable.accessoryCount, cmx.accessoryDict, cmx.rel0.REL0DataStart);
             ReadEYE(streamReader, offset, cmx.cmxTable.eyeTextureAddress, cmx.cmxTable.eyeTextureCount, cmx.eyeDict);
 
             ReadNGSEAR(streamReader, offset, cmx);
@@ -230,17 +236,17 @@ namespace AquaModelLibrary
                 cmx.unkList.Add(streamReader.Read<Unk_IntField>());
             }
 
-            ReadIndexLinks(streamReader, offset, cmx.cmxTable.costumeIdLinkAddress, cmx.cmxTable.costumeIdLinkCount, cmx.costumeIdLink, cmx.rel0.REL0DataStart, 1);
-            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castArmIdLinkAddress, cmx.cmxTable.castArmIdLinkCount, cmx.castArmIdLink, cmx.rel0.REL0DataStart, 1);
-            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castLegIdLinkAddress, cmx.cmxTable.castLegIdLinkCount, cmx.clegIdLink, cmx.rel0.REL0DataStart, 1);
+            ReadIndexLinks(streamReader, offset, cmx.cmxTable.costumeIdLinkAddress, cmx.cmxTable.costumeIdLinkCount, cmx.costumeIdLink, cmx.rel0.REL0DataStart);
+            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castArmIdLinkAddress, cmx.cmxTable.castArmIdLinkCount, cmx.castArmIdLink, cmx.rel0.REL0DataStart);
+            ReadIndexLinks(streamReader, offset, cmx.cmxTable.castLegIdLinkAddress, cmx.cmxTable.castLegIdLinkCount, cmx.clegIdLink, cmx.rel0.REL0DataStart);
 
             //If after a oct 21, the order is changed and we need to read things differently as the addresses get shifted down
             if (cmx.cmxTable.oct21UnkAddress != 0)
             {
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.castHeadIdLink, cmx.rel0.REL0DataStart, 1);
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.baseWearIdLinkAddress, cmx.cmxTable.baseWearIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart, 1);
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.baseWearIdLink, cmx.rel0.REL0DataStart, 1);
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.oct21UnkAddress, cmx.cmxTable.oct21UnkCount, cmx.innerWearIdLink, cmx.rel0.REL0DataStart, 1);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.castHeadIdLink, cmx.rel0.REL0DataStart);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.baseWearIdLinkAddress, cmx.cmxTable.baseWearIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.baseWearIdLink, cmx.rel0.REL0DataStart);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.oct21UnkAddress, cmx.cmxTable.oct21UnkCount, cmx.innerWearIdLink, cmx.rel0.REL0DataStart);
             } else
             {
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart);
@@ -249,10 +255,1248 @@ namespace AquaModelLibrary
             }
             if(cmx.cmxTable.feb8_22UnkAddress != 0)
             {
-                ReadIndexLinks(streamReader, offset, cmx.cmxTable.feb8_22UnkAddress, cmx.cmxTable.feb8_22UnkCount, cmx.accessoryIdLink, cmx.rel0.REL0DataStart, 1);
+                ReadIndexLinks(streamReader, offset, cmx.cmxTable.feb8_22UnkAddress, cmx.cmxTable.feb8_22UnkCount, cmx.accessoryIdLink, cmx.rel0.REL0DataStart);
             }
 
+#if DEBUG
+            //CalcCMXPointers(cmx.cmxTable, cmx.nof0, cmx.rel0.REL0DataStart, cmx);
+#endif 
+
             return cmx;
+        }
+
+        public static void WriteCMX(string filename, CharacterMakingIndex cmx, int mode = 0)
+        {
+            File.WriteAllBytes(filename, CMXToBytes(cmx, mode));
+        }
+
+        //Mode 1 will be latest. Mode 0 will be benchmark
+        public static byte[] CMXToBytes(CharacterMakingIndex cmx, int mode = 0)
+        {
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+            Dictionary<string, List<int>> textAddressDict = new Dictionary<string, List<int>>();
+            List<string> textList = new List<string>();
+            int rel0SizeOffset = 0;
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            outBytes.AddRange(BitConverter.GetBytes(-1));
+
+            //BODY
+            //Costumes/Cast Bodies
+            int bodyAddress = outBytes.Count;
+            var costList = cmx.costumeDict.Keys.ToList();
+            costList.Sort();
+            foreach (var key in costList)
+            {
+                AddBodyBytes(cmx.costumeDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Cast Arms
+            int carmAddress = outBytes.Count;
+            var carmList = cmx.carmDict.Keys.ToList();
+            carmList.Sort();
+            foreach (var key in carmList)
+            {
+                AddBodyBytes(cmx.carmDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Cast Legs
+            int clegAddress = outBytes.Count;
+            var clegList = cmx.clegDict.Keys.ToList();
+            clegList.Sort();
+            foreach (var key in clegList)
+            {
+                AddBodyBytes(cmx.clegDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //BDP1
+            //Body Paint
+            int bodyPaintAddress = outBytes.Count;
+            var bdpList = cmx.bodyPaintDict.Keys.ToList();
+            bdpList.Sort();
+            foreach (var key in bdpList)
+            {
+                AddBDPBytes(cmx.bodyPaintDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Stickers
+            int stickerAddress = outBytes.Count;
+            var stickerList = cmx.stickerDict.Keys.ToList();
+            stickerList.Sort();
+            foreach (var key in stickerList)
+            {
+                AddStickerBytes(cmx.stickerDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //FACE
+            int faceAddress = outBytes.Count;
+            var faceList = cmx.faceDict.Keys.ToList();
+            faceList.Sort();
+            foreach (var key in faceList)
+            {
+                AddFACEBytes(cmx.faceDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //FCMN
+            int fcmnAddress = outBytes.Count;
+            var fcmnList = cmx.fcmnDict.Keys.ToList();
+            fcmnList.Sort();
+            foreach (var key in fcmnList)
+            {
+                AddFCMNBytes(cmx.fcmnDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //FaceTextures
+            int ftexAddress = outBytes.Count;
+            var ftexList = cmx.faceTextureDict.Keys.ToList();
+            ftexList.Sort();
+            foreach (var key in ftexList)
+            {
+                AddFaceTexturesBytes(cmx.faceTextureDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //FCP
+            int fcpAddress = outBytes.Count;
+            var fcpList = cmx.fcpDict.Keys.ToList();
+            fcpList.Sort();
+            foreach (var key in fcpList)
+            {
+                AddFCPBytes(cmx.fcpDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //ACCE
+            int acceAddress = outBytes.Count;
+            var acceList = cmx.accessoryDict.Keys.ToList();
+            acceList.Sort();
+            foreach (var key in acceList)
+            {
+                AddACCEBytes(cmx.accessoryDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //EYE
+            int eyeAddress = outBytes.Count;
+            var eyeList = cmx.eyeDict.Keys.ToList();
+            eyeList.Sort();
+            foreach (var key in eyeList)
+            {
+                AddEYEBytes(cmx.eyeDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //EAR
+            int earAddress = outBytes.Count;
+            var earList = cmx.ngsEarDict.Keys.ToList();
+            earList.Sort();
+            foreach (var key in earList)
+            {
+                AddEARBytes(cmx.ngsEarDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Teeth
+            int teethAddress = outBytes.Count;
+            var teethList = cmx.ngsTeethDict.Keys.ToList();
+            teethList.Sort();
+            foreach (var key in teethList)
+            {
+                AddTeethBytes(cmx.ngsTeethDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Horn
+            int hornAddress = outBytes.Count;
+            var hornList = cmx.ngsHornDict.Keys.ToList();
+            hornList.Sort();
+            foreach (var key in hornList)
+            {
+                AddHornBytes(cmx.ngsHornDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Skin
+            int skinAddress = outBytes.Count;
+            var skinList = cmx.ngsSkinDict.Keys.ToList();
+            skinList.Sort();
+            foreach (var key in skinList)
+            {
+                AddSkinBytes(cmx.ngsSkinDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //EYEB
+            //Eyebrow
+            int eyeBAddress = outBytes.Count;
+            var eyeBList = cmx.eyebrowDict.Keys.ToList();
+            eyeBList.Sort();
+            foreach (var key in eyeBList)
+            {
+                AddEYEBBytes(cmx.eyebrowDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Eyelash
+            int eyeLAddress = outBytes.Count;
+            var eyeLList = cmx.eyelashDict.Keys.ToList();
+            eyeLList.Sort();
+            foreach (var key in eyeLList)
+            {
+                AddEYEBBytes(cmx.eyelashDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Hair
+            int hairAddress = outBytes.Count;
+            var hairList = cmx.hairDict.Keys.ToList();
+            hairList.Sort();
+            foreach (var key in hairList)
+            {
+                AddHAIRBytes(cmx.hairDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //NIFL COL
+            int colAddress = outBytes.Count;
+            var colList = cmx.colDict.Keys.ToList();
+            colList.Sort();
+            foreach (var key in colList)
+            {
+                AddNIFLCOLBytes(cmx.colDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Unk
+            int unkAddress = outBytes.Count;
+            var unkList = cmx.unkList;
+            foreach (var unkArr in unkList)
+            {
+                AddUnkIntFieldBytes(unkArr, mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+            //Outer
+            int bodyOuterAddress = outBytes.Count;
+            var outerList = cmx.outerDict.Keys.ToList();
+            outerList.Sort();
+            foreach (var key in outerList)
+            {
+                AddBodyBytes(cmx.outerDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Basewear
+            int baseWearAddress = outBytes.Count;
+            var baseList = cmx.baseWearDict.Keys.ToList();
+            baseList.Sort();
+            foreach (var key in baseList)
+            {
+                AddBodyBytes(cmx.baseWearDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //BBLY
+            //Inner wear 
+            int innerWearAddress = outBytes.Count;
+            var innerList = cmx.innerWearDict.Keys.ToList();
+            innerList.Sort();
+            foreach (var key in innerList)
+            {
+                AddBDPBytes(cmx.innerWearDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            //Index Links
+            //Costume/Body
+            int bodyLinkAddress = outBytes.Count;
+            var bodyLinkList = cmx.costumeIdLink.Keys.ToList();
+            bodyLinkList.Sort();
+            foreach (var key in bodyLinkList)
+            {
+                AddBCLNBytes(cmx.costumeIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+            //Cast Leg
+            int clegLinkAddress = outBytes.Count;
+            var clegLinkList = cmx.clegIdLink.Keys.ToList();
+            clegLinkList.Sort();
+            foreach (var key in clegLinkList)
+            {
+                AddBCLNBytes(cmx.clegIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+            //Cast Arm
+            int carmLinkAddress = outBytes.Count;
+            var carmLinkList = cmx.castArmIdLink.Keys.ToList();
+            carmLinkList.Sort();
+            foreach (var key in carmLinkList)
+            {
+                AddBCLNBytes(cmx.castArmIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            int castHeadLinkAddress = -1;
+            if(mode >= 1)
+            {
+                //Cast Head
+                castHeadLinkAddress = outBytes.Count;
+                var cHeadLinkList = cmx.castHeadIdLink.Keys.ToList();
+                cHeadLinkList.Sort();
+                foreach (var key in cHeadLinkList)
+                {
+                    AddBCLNBytes(cmx.castHeadIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                }
+            }
+            //Outer
+            int outerLinkAddress = outBytes.Count;
+            var outerLinkList = cmx.outerWearIdLink.Keys.ToList();
+            outerLinkList.Sort();
+            foreach (var key in outerLinkList)
+            {
+                AddBCLNBytes(cmx.outerWearIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+            //Base
+            int baseLinkAddress = outBytes.Count;
+            var baseLinkList = cmx.baseWearIdLink.Keys.ToList();
+            baseLinkList.Sort();
+            foreach (var key in baseLinkList)
+            {
+                AddBCLNBytes(cmx.baseWearIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+            //Inner
+            int innerLinkAddress = outBytes.Count;
+            var innerLinkList = cmx.innerWearIdLink.Keys.ToList();
+            innerLinkList.Sort();
+            foreach (var key in innerLinkList)
+            {
+                AddBCLNBytes(cmx.innerWearIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+            }
+
+            int accessoryIdLinkAddress = -1;
+            if (mode >= 1)
+            {
+                //Accessory
+                accessoryIdLinkAddress = outBytes.Count;
+                var acceLinkList = cmx.accessoryIdLink.Keys.ToList();
+                acceLinkList.Sort();
+                foreach (var key in acceLinkList)
+                {
+                    AddBCLNBytes(cmx.accessoryIdLink[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                }
+            }
+            //Write header data
+            AquaGeneralMethods.SetByteListInt(outBytes, rel0SizeOffset + 4, outBytes.Count);
+            //CMX Table
+            //Addresses
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(bodyAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(carmAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(clegAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(bodyOuterAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(baseWearAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(innerWearAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(bodyPaintAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(stickerAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(faceAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(fcmnAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(ftexAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(fcpAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(acceAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(eyeAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(earAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(teethAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(hornAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(skinAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(eyeBAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(eyeLAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(hairAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(colAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(unkAddress));
+
+            //ID Links
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(bodyLinkAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(carmLinkAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(clegLinkAddress));
+
+            if (mode >= 1)
+            {
+                AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                outBytes.AddRange(BitConverter.GetBytes(castHeadLinkAddress));
+            }
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(outerLinkAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(baseLinkAddress));
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(innerLinkAddress));
+
+            if (mode >= 1)
+            {
+                AquaGeneralMethods.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                outBytes.AddRange(BitConverter.GetBytes(accessoryIdLinkAddress));
+            }
+
+            //Counts
+            outBytes.AddRange(BitConverter.GetBytes(cmx.costumeDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.carmDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.clegDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.outerDict.Count));
+
+            outBytes.AddRange(BitConverter.GetBytes(cmx.baseWearDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.innerWearDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.bodyPaintDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.stickerDict.Count));
+
+            outBytes.AddRange(BitConverter.GetBytes(cmx.faceDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.fcmnDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.faceTextureDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.fcpDict.Count));
+
+            outBytes.AddRange(BitConverter.GetBytes(cmx.accessoryDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.eyeDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsEarDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsTeethDict.Count));
+
+            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsHornDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsSkinDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.eyebrowDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.eyelashDict.Count));
+
+            outBytes.AddRange(BitConverter.GetBytes(cmx.hairDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.colDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.unkList.Count));
+
+            outBytes.AddRange(BitConverter.GetBytes(cmx.costumeIdLink.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.castArmIdLink.Count));
+            outBytes.AddRange(BitConverter.GetBytes(cmx.clegIdLink.Count));
+
+            if (mode >= 1)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(cmx.castHeadIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(cmx.outerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(cmx.baseWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(cmx.innerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(cmx.accessoryIdLink.Count));
+            } else
+            {
+                outBytes.AddRange(BitConverter.GetBytes(cmx.outerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(cmx.baseWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(cmx.innerWearIdLink.Count));
+            }
+
+            //Write text
+            for (int i = 0; i < textList.Count; i++)
+            {
+                var offsetList = textAddressDict[textList[i]];
+                for (int j = 0; j < offsetList.Count; j++)
+                {
+                    AquaGeneralMethods.SetByteListInt(outBytes, offsetList[j], outBytes.Count);
+                }
+                outBytes.AddRange(Encoding.UTF8.GetBytes(textList[i]));
+                var count = outBytes.Count;
+                AquaGeneralMethods.AlignWriter(outBytes, 0x4);
+                if (count == outBytes.Count)
+                {
+                    outBytes.AddRange(new byte[4]);
+                }
+            }
+
+            AquaGeneralMethods.AlignWriter(outBytes, 0x10);
+
+            //Write REL0 Size
+            AquaGeneralMethods.SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+            //Write NOF0
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
+
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += AquaGeneralMethods.AlignWriter(outBytes, 0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, AquaGeneralMethods.ConvertStruct(nifl));
+
+            return outBytes.ToArray();
+        }
+
+        private static void AddNIFLText(int address, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList, string str)
+        {
+            AquaGeneralMethods.NOF0Append(nof0PointerLocations, address, 1);
+            AddOntoDict(textAddressDict, textList, str, address);
+        }
+
+        private static void AddBCLNBytes(BCLNObject bcln, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(bcln.bcln));
+            if(mode >= 1)
+            {
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(bcln.bclnRitem));
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(bcln.bclnRitem2));
+            }
+        }
+
+        private static void AddUnkIntFieldBytes(Unk_IntField unkIntField, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(unkIntField));
+        }
+
+        private static void AddNIFLCOLBytes(NIFL_COLObject col, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, col.textString);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(col.niflCol));
+        }
+
+        private static void AddHAIRBytes(HAIRObject hair, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, hair.dataString);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, hair.texString1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, hair.texString2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, hair.texString3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, hair.texString4);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, hair.texString5);
+            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, hair.texString6);
+            AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, hair.texString7);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(hair.hair));
+        }
+
+        private static void AddEYEBBytes(EYEBObject eyeB, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, eyeB.texString1);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, eyeB.texString2);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, eyeB.texString3);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, eyeB.texString4);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(eyeB.eyeb));
+        }
+
+        private static void AddSkinBytes(NGS_SKINObject skin, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, skin.texString1);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, skin.texString2);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, skin.texString3);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, skin.texString4);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, skin.texString5);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, skin.texString6);
+            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, skin.texString7);
+            AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, skin.texString8);
+            AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, skin.texString9);
+            AddNIFLText(outBytes.Count + 0x28, nof0PointerLocations, textAddressDict, textList, skin.texString10);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(skin.ngsSkin));
+        }
+
+        private static void AddHornBytes(NGS_HornObject horn, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, horn.dataString);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(horn.ngsHorn));
+        }
+
+        private static void AddTeethBytes(NGS_TeethObject teeth, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, teeth.dataString);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, teeth.texString1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, teeth.texString2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, teeth.texString3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, teeth.texString4);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(teeth.ngsTeeth));
+        }
+
+        private static void AddEARBytes(NGS_EarObject ear, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, ear.dataString);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, ear.texString1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, ear.texString2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, ear.texString3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, ear.texString4);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, ear.texString5);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(ear.ngsEar));
+        }
+
+        private static void AddEYEBytes(EYEObject eye, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, eye.texString1);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, eye.texString2);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, eye.texString3);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, eye.texString4);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, eye.texString5);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(eye.eye));
+        }
+
+        private static void AddACCEBytes(ACCEObject acce, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, acce.dataString);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach4);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach5);
+            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach6);
+            AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach7);
+            AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach8);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acce));
+            if(mode >= 1)
+            {
+                AddNIFLText(outBytes.Count + 0x0, nof0PointerLocations, textAddressDict, textList, acce.acceString1);
+                AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, acce.acceString2);
+
+                AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, acce.acceString3);
+                AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, acce.acceString4);
+                AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, acce.acceString5);
+                AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, acce.acceString6);
+                
+                AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.acceString7);
+                AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.acceString8);
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acceFeb8_22));
+            }
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acceB));
+            if(mode >= 1)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(acce.int_54));
+            }
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acce2));
+            if(mode >= 1)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var acce12 = acce.acce12List[i];
+
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkFloat0));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkFloat1));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkInt0));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkInt1));
+
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkIntFeb822_0));
+
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort0));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort1));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort2));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort3));
+
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkIntFeb822_1));
+                }
+            } else
+            {
+                for(int i = 0; i < 3; i++)
+                {
+                    var acce12 = acce.acce12List[i];
+
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkFloat0));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkFloat1));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkInt0));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkInt1));
+
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort0));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort1));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort2));
+                    outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort3));
+                }
+            }
+        }
+
+        private static void AddFCPBytes(FCPObject face, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, face.texString1);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, face.texString2);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, face.texString3);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, face.texString4);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.fcp));
+        }
+
+        private static void AddFaceTexturesBytes(FaceTextureObject face, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, face.texString1);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, face.texString2);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, face.texString3);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, face.texString4);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.ngsFace));
+        }
+
+        private static void AddFCMNBytes(FCMNObject face, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, face.proportionAnim);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, face.faceAnim1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, face.faceAnim2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, face.faceAnim3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, face.faceAnim4);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, face.faceAnim5);
+            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, face.faceAnim6);
+            AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, face.faceAnim7);
+            AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, face.faceAnim8);
+            AddNIFLText(outBytes.Count + 0x28, nof0PointerLocations, textAddressDict, textList, face.faceAnim9);
+            AddNIFLText(outBytes.Count + 0x2C, nof0PointerLocations, textAddressDict, textList, face.faceAnim10);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.fcmn));
+        }
+
+        private static void AddFACEBytes(FACEObject face, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, face.dataString);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, face.texString1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, face.texString2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, face.texString3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, face.texString4);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, face.texString5);
+            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, face.texString6);
+
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.face));
+            if (mode >= 1)
+            {
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.faceRitem));
+            }
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.face2));
+            if (mode >= 1)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(face.unkFloatRitem));
+            }
+        }
+
+        private static void AddStickerBytes(StickerObject sticker, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, sticker.texString);
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(sticker.sticker));
+        }
+
+        private static void AddBDPBytes(BBLYObject bbly, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, bbly.texString1);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, bbly.texString2);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, bbly.texString3);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, bbly.texString4);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, bbly.texString5);
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(bbly.bbly));
+        }
+
+        private static void AddBodyBytes(BODYObject body, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        {
+            AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, body.dataString);
+            AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, body.texString1);
+            AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, body.texString2);
+            AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, body.texString3);
+            AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, body.texString4);
+            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, body.texString5);
+            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, body.texString6);
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body));
+            if (mode >= 1)
+            {
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.bodyRitem));
+            }
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body2));
+            if (mode >= 1)
+            {
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body40cap));
+            }
+        }
+
+        //Collects pointers locations relative each struct 
+        private static void CalcCMXPointers(CMXTable table, AquaCommon.NOF0 nof0, int rel0DataStart, CharacterMakingIndex cmx)
+        {
+            long position = 0;
+            int count = 0;
+            int start = 0;
+            List<int> BODYPtrs = new List<int>();
+            List<int> BODYRitemPtrs = new List<int>();
+            List<int> BODY2Ptrs = new List<int>();
+            List<int> BODY40CapPtrs = new List<int>();
+
+            List<int> BBLYPtrs = new List<int>();
+
+            List<int> StickerPtrs = new List<int>();
+
+            List<int> FacePtrs = new List<int>();
+            List<int> FaceRitemPtrs = new List<int>();
+            List<int> Face2Ptrs = new List<int>();
+
+            List<int> FcmnPtrs = new List<int>();
+
+            List<int> FaceTexPtrs = new List<int>();
+
+            List<int> FcpPtrs = new List<int>();
+
+            List<int> AccePtrs = new List<int>();
+            List<int> AcceBPtrs = new List<int>();
+            List<int> AcceFeb822Ptrs = new List<int>();
+            List<int> Acce2Ptrs = new List<int>();
+            List<int> Acce12Ptrs = new List<int>();
+
+            List<int> EyePtrs = new List<int>();
+
+            List<int> EarPtrs = new List<int>();
+
+            List<int> TeethPtr = new List<int>();
+
+            List<int> HornPtr = new List<int>();
+
+            List<int> SkinPtr = new List<int>();
+
+            List<int> EyeBPtr = new List<int>(); //For EYEL too
+
+            List<int> HairPtr = new List<int>();
+
+            List<int> NIFL_COLPtr = new List<int>();
+
+            List<int> Unk_IntFieldPtr = new List<int>();
+
+            List<int> BCLNPtr = new List<int>();
+            List<int> BCLNRitemPtr = new List<int>();
+            List<int> BCLNRitem2Ptr = new List<int>();
+
+            for (int b = 0; b < 5; b++)
+            {
+                switch (b)
+                {
+                    case 0:
+                        position = table.bodyAddress;
+                        count = table.bodyCount;
+                        break;
+                    case 1:
+                        position = table.carmAddress;
+                        count = table.carmCount;
+                        break;
+                    case 2:
+                        position = table.clegAddress;
+                        count = table.clegCount;
+                        break;
+                    case 3:
+                        position = table.bodyOuterAddress;
+                        count = table.bodyOuterCount;
+                        break;
+                    case 4:
+                        position = table.baseWearAddress;
+                        count = table.baseWearCount;
+                        break;
+                }
+                start = getPointrStart(nof0.relAddresses, position);
+                for (int i = 0; i < count; i++)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(BODY), BODYPtrs, start);
+                    position += sizeof(BODY);
+                    if (rel0DataStart >= dec14_21TableAddressInt)
+                    {
+                        pointerCheck(position, nof0.relAddresses, sizeof(BODYRitem), BODYRitemPtrs, start);
+                        position += sizeof(BODYRitem);
+                    }
+                    pointerCheck(position, nof0.relAddresses, sizeof(BODY2), BODY2Ptrs, start);
+                    position += sizeof(BODY2);
+                    if (rel0DataStart >= feb8_22TableAddressInt)
+                    {
+                        pointerCheck(position, nof0.relAddresses, sizeof(BODY40Cap), BODY40CapPtrs, start);
+                        position += sizeof(BODY40Cap);
+                    }
+                }
+            }
+            BODYPtrs.Sort();
+            BODYRitemPtrs.Sort();
+            BODY2Ptrs.Sort();
+            BODY40CapPtrs.Sort();
+
+            for (int b = 0; b < 2; b++)
+            {
+                switch (b)
+                {
+                    case 0:
+                        position = table.innerWearAddress;
+                        count = table.innerWearCount;
+                        break;
+                    case 1:
+                        position = table.bodyPaintAddress;
+                        count = table.bodyPaintCount;
+                        break;
+                }
+                start = getPointrStart(nof0.relAddresses, position);
+                for (int i = 0; i < count; i++)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(BBLY), BBLYPtrs, start);
+                    position += sizeof(BBLY);
+                }
+            }
+            BBLYPtrs.Sort();
+
+            position = table.stickerAddress;
+            count = table.stickerCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(Sticker), StickerPtrs, start);
+                position += sizeof(Sticker);
+            }
+            StickerPtrs.Sort();
+
+            position = table.faceAddress;
+            count = table.faceCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(FACE), FacePtrs, start);
+                position += sizeof(FACE);
+
+                if (rel0DataStart >= dec14_21TableAddressInt)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(FACERitem), FaceRitemPtrs, start);
+                    position += sizeof(FACERitem);
+                }
+                pointerCheck(position, nof0.relAddresses, sizeof(FACE2), Face2Ptrs, start);
+                position += sizeof(FACE2);
+
+                if (rel0DataStart >= dec14_21TableAddressInt)
+                {
+                    position += sizeof(float);
+                }
+            }
+            FacePtrs.Sort();
+
+            position = table.faceMotionAddress;
+            count = table.faceMotionCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(FCMN), FcmnPtrs, start);
+                position += sizeof(FCMN);
+            }
+            FcmnPtrs.Sort();
+
+            position = table.faceTextureAddress;
+            count = table.faceTextureCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(FaceTextures), FaceTexPtrs, start);
+                position += sizeof(FaceTextures);
+            }
+            FaceTexPtrs.Sort();
+
+            position = table.faceTexturesAddress;
+            count = table.faceTexturesCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(FCP), FcpPtrs, start);
+                position += sizeof(FCP);
+            }
+            FcpPtrs.Sort();
+
+            position = table.accessoryAddress;
+            count = table.accessoryCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(ACCE), AccePtrs, start);
+                position += sizeof(ACCE);
+                if (rel0DataStart >= feb8_22TableAddressInt)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(ACCE_Feb8_22), AcceFeb822Ptrs, start);
+                    position += sizeof(ACCE_Feb8_22);
+                }
+                pointerCheck(position, nof0.relAddresses, sizeof(ACCE_B), AcceBPtrs, start);
+                position += sizeof(ACCE_B);
+                if (rel0DataStart >= oct21TableAddressInt)
+                {
+                    position += sizeof(int);
+                }
+                pointerCheck(position, nof0.relAddresses, sizeof(ACCE2), Acce2Ptrs, start);
+                position += sizeof(ACCE2);
+                if (rel0DataStart >= feb8_22TableAddressInt)
+                {
+                    pointerCheck(position, nof0.relAddresses, 0x60, Acce12Ptrs, start, true);
+                    position += 0x60;
+                } else
+                {
+                    pointerCheck(position, nof0.relAddresses, 0x48, Acce12Ptrs, start);
+                    position += 0x48;
+                }
+            }
+            AccePtrs.Sort();
+            AcceBPtrs.Sort();
+            AcceFeb822Ptrs.Sort();
+            Acce2Ptrs.Sort();
+            Acce12Ptrs.Sort();
+
+            position = table.eyeTextureAddress;
+            count = table.eyeTextureCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(EYE), EyePtrs, start);
+                position += sizeof(EYE);
+            }
+            EyePtrs.Sort();
+
+            for (int b = 0; b < 2; b++)
+            {
+                switch (b)
+                {
+                    case 0:
+                        position = table.eyebrowAddress;
+                        count = table.eyebrowCount;
+                        break;
+                    case 1:
+                        position = table.eyelashAddress;
+                        count = table.eyelashCount;
+                        break;
+                }
+                start = getPointrStart(nof0.relAddresses, position);
+                for (int i = 0; i < count; i++)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(EYEB), EyeBPtr, start);
+                    position += sizeof(EYEB);
+                }
+            }
+            EyeBPtr.Sort();
+
+            position = table.earAddress;
+            count = table.earCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(NGS_Ear), EarPtrs, start);
+                position += sizeof(NGS_Ear);
+            }
+            EarPtrs.Sort();
+
+            position = table.hornAddress;
+            count = table.hornCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(NGS_Horn), HornPtr, start);
+                position += sizeof(NGS_Horn);
+            }
+            HornPtr.Sort();
+
+            position = table.teethAddress;
+            count = table.teethCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(NGS_Teeth), TeethPtr, start);
+                position += sizeof(NGS_Teeth);
+            }
+            TeethPtr.Sort();
+
+            position = table.skinAddress;
+            count = table.skinCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(NGS_Skin), SkinPtr, start);
+                position += sizeof(NGS_Skin);
+            }
+            SkinPtr.Sort();
+
+            position = table.hairAddress;
+            count = table.hairCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(HAIR), HairPtr, start);
+                position += sizeof(HAIR);
+            }
+            HairPtr.Sort();
+
+            position = table.colAddress;
+            count = table.colCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(NIFL_COL), NIFL_COLPtr, start);
+                position += sizeof(NIFL_COL);
+            }
+            NIFL_COLPtr.Sort();
+
+            position = table.unkAddress;
+            count = table.unkCount;
+            start = getPointrStart(nof0.relAddresses, position);
+            for (int i = 0; i < count; i++)
+            {
+                pointerCheck(position, nof0.relAddresses, sizeof(Unk_IntField), Unk_IntFieldPtr, start);
+                position += sizeof(Unk_IntField);
+            }
+            Unk_IntFieldPtr.Sort();
+
+            if(table.oct21UnkCount > 0)
+            {
+                position = table.oct21UnkAddress;
+                count = table.oct21UnkCount;
+                start = getPointrStart(nof0.relAddresses, position);
+                for (int i = 0; i < count; i++)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(BCLN), BCLNPtr, start);
+                    position += sizeof(BCLN);
+                    if (rel0DataStart >= dec14_21TableAddressInt)
+                    {
+                        pointerCheck(position, nof0.relAddresses, sizeof(BCLNRitem), BCLNRitemPtr, start);
+                        position += sizeof(BCLNRitem);
+                        if (rel0DataStart >= feb8_22TableAddressInt)
+                        {
+                            pointerCheck(position, nof0.relAddresses, sizeof(BCLNRitem2), BCLNRitem2Ptr, start);
+                            position += sizeof(BCLNRitem2);
+                        }
+                    }
+                }
+            }
+
+            if (table.feb8_22UnkCount > 0)
+            {
+                position = table.feb8_22UnkAddress;
+                count = table.feb8_22UnkCount;
+                start = getPointrStart(nof0.relAddresses, position);
+                for (int i = 0; i < count; i++)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(BCLN), BCLNPtr, start);
+                    position += sizeof(BCLN);
+                    if (rel0DataStart >= dec14_21TableAddressInt)
+                    {
+                        pointerCheck(position, nof0.relAddresses, sizeof(BCLNRitem), BCLNRitemPtr, start);
+                        position += sizeof(BCLNRitem);
+                        if (rel0DataStart >= feb8_22TableAddressInt)
+                        {
+                            pointerCheck(position, nof0.relAddresses, sizeof(BCLNRitem2), BCLNRitem2Ptr, start);
+                            position += sizeof(BCLNRitem2);
+                        }
+                    }
+                }
+            }
+
+            for(int b = 0; b < 6; b++)
+            {
+                switch (b)
+                {
+                    case 0:
+                        position = table.costumeIdLinkAddress;
+                        count = table.costumeIdLinkCount;
+                        break;
+                    case 1:
+                        position = table.castArmIdLinkAddress;
+                        count = table.castArmIdLinkCount;
+                        break;
+                    case 2:
+                        position = table.castLegIdLinkAddress;
+                        count = table.castLegIdLinkCount;
+                        break;
+                    case 3:
+                        position = table.outerIdLinkAddress;
+                        count = table.outerIdLinkCount;
+                        break;
+                    case 4:
+                        position = table.baseWearIdLinkAddress;
+                        count = table.baseWearIdLinkCount;
+                        break;
+                    case 5:
+                        position = table.innerWearIdLinkAddress;
+                        count = table.innerWearIdLinkCount;
+                        break;
+                }
+                start = getPointrStart(nof0.relAddresses, position);
+                for (int i = 0; i < count; i++)
+                {
+                    pointerCheck(position, nof0.relAddresses, sizeof(BCLN), BCLNPtr, start);
+                    position += sizeof(BCLN);
+                    if (rel0DataStart >= dec14_21TableAddressInt)
+                    {
+                        pointerCheck(position, nof0.relAddresses, sizeof(BCLNRitem), BCLNRitemPtr, start);
+                        position += sizeof(BCLNRitem);
+                        if (rel0DataStart >= feb8_22TableAddressInt)
+                        {
+                            pointerCheck(position, nof0.relAddresses, sizeof(BCLNRitem2), BCLNRitem2Ptr, start);
+                            position += sizeof(BCLNRitem2);
+                        }
+                    }
+                }
+            }
+
+            BCLNPtr.Sort();
+            BCLNRitemPtr.Sort();
+            BCLNRitem2Ptr.Sort();
+        
+        }
+
+        private static int getPointrStart(List<int> nof0, long position)
+        {
+            int i = 0;
+            while(nof0[i] < position && i < nof0.Count)
+            {
+                i++;
+            }
+
+            return i;
+        }
+
+        private static bool specialContains(List<int> nof0, long position, int i)
+        {
+            for(int index = i; index < nof0.Count; index++)
+            {
+                if(nof0[index] == position)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static void pointerCheck(long position, List<int> nof0, int lenToCheck, List<int> ptrList, int start, bool log = false)
+        {
+            for(int i = 0; i < lenToCheck; i+= 4)
+            {
+                if (!ptrList.Contains(i))
+                {
+                    if (specialContains(nof0, (position + i), start))
+                    {
+                        ptrList.Add(i);
+                        if(log == true)
+                        {
+                            Debug.WriteLine((position + i).ToString("X"));
+                        }
+                    }
+                }
+            }
         }
 
         private static CMXTable ReadCMXTable(BufferedStreamReader streamReader, int headerOffset)
@@ -353,22 +1597,6 @@ namespace AquaModelLibrary
             return cmxTable;
         }
 
-        private static void ReadUnk40Cap(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
-        {
-            streamReader.Seek(cmx.cmxTable.feb8_22UnkAddress + offset, SeekOrigin.Begin);
-            for(int i = 0; i < cmx.cmxTable.feb8_22UnkCount; i++)
-            {
-                var unkObj = new unkCap40Object();
-                unkObj.num = i;
-                unkObj.rawStruct = streamReader.Read<unkCap40Struct>();
-                unkObj.originalOffset = streamReader.Position();
-                long bookmark = streamReader.Position();
-
-                cmx.unk40CapList.Add(unkObj);
-                streamReader.Seek(bookmark, SeekOrigin.Begin);
-            }
-        }
-
         private static void ReadNGSHorn(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
         {
             //NGS Horns
@@ -381,27 +1609,12 @@ namespace AquaModelLibrary
                 ngsHornObj.ngsHorn = streamReader.Read<NGS_Horn>();
                 long bookmark = streamReader.Position();
 
-                streamReader.Seek(ngsHornObj.ngsHorn.unkSubStructPtr + offset, SeekOrigin.Begin);
-                ngsHornObj.substruct = streamReader.Read<NGS_Unk_Substruct>();
-
                 streamReader.Seek(ngsHornObj.ngsHorn.dataStringPtr + offset, SeekOrigin.Begin);
                 ngsHornObj.dataString = AquaGeneralMethods.ReadCString(streamReader);
 
-                cmx.ngsHornList.Add(ngsHornObj);
-
-                //Some ids can't be parsed and indexed properly. In this case, skip them. They seemingly don't have associated files anyways. 
-                if (!ngsHornObj.dataString.Contains(rebootHornDataStr))
-                {
-                    continue;    
-                }
-
-                //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
-                int id = Int32.Parse(ngsHornObj.dataString.Replace(rebootHornDataStr, ""));
-
-                //There aren't texture strings to double check this like with the teeth and ears so we have to assume this is correct. Thankfully, the game doesn't appear to have any conflicts here so far.
-
-                cmx.ngsHornDict.Add(id, ngsHornObj);
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
+
+                cmx.ngsHornDict.Add(ngsHornObj.ngsHorn.id, ngsHornObj);
             }
         }
 
@@ -416,9 +1629,6 @@ namespace AquaModelLibrary
                 ngsTeethObj.originalOffset = streamReader.Position();
                 ngsTeethObj.ngsTeeth = streamReader.Read<NGS_Teeth>();
                 long bookmark = streamReader.Position();
-
-                streamReader.Seek(ngsTeethObj.ngsTeeth.unkSubStructPtr + offset, SeekOrigin.Begin);
-                ngsTeethObj.substruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsTeethObj.ngsTeeth.dataStringPtr + offset, SeekOrigin.Begin);
                 ngsTeethObj.dataString = AquaGeneralMethods.ReadCString(streamReader);
@@ -435,17 +1645,7 @@ namespace AquaModelLibrary
                 streamReader.Seek(ngsTeethObj.ngsTeeth.texString4Ptr + offset, SeekOrigin.Begin);
                 ngsTeethObj.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
-                //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
-                int id = Int32.Parse(ngsTeethObj.dataString.Replace(rebootTeethDataStr, ""));
-                string tempId2 = ngsTeethObj.texString1.Replace(rebootTeethDataStr, "");
-                int id2 = Int32.Parse(tempId2.Replace("_d.dds", ""));
-
-                //Some of the more debug looking stuff recycles the data names. This is hacky, but getting the id from these strings is already hacky.
-                if (id != id2)
-                {
-                    id = id2;
-                }
-                cmx.ngsTeethDict.Add(id, ngsTeethObj);
+                cmx.ngsTeethDict.Add(ngsTeethObj.ngsTeeth.id, ngsTeethObj);
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
             }
         }
@@ -461,9 +1661,6 @@ namespace AquaModelLibrary
                 ngsEarObj.originalOffset = streamReader.Position();
                 ngsEarObj.ngsEar = streamReader.Read<NGS_Ear>();
                 long bookmark = streamReader.Position();
-
-                streamReader.Seek(ngsEarObj.ngsEar.unkSubStructPtr + offset, SeekOrigin.Begin);
-                ngsEarObj.subStruct = streamReader.Read<NGS_Unk_Substruct>();
 
                 streamReader.Seek(ngsEarObj.ngsEar.dataStringPtr + offset, SeekOrigin.Begin);
                 ngsEarObj.dataString = AquaGeneralMethods.ReadCString(streamReader);
@@ -483,17 +1680,7 @@ namespace AquaModelLibrary
                 streamReader.Seek(ngsEarObj.ngsEar.texString5Ptr + offset, SeekOrigin.Begin);
                 ngsEarObj.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
-                //Hackily get the id from the strings. This only works because NGS uses proper ids in the asset filenames and wouldn't work in classic pso2.
-                int id = Int32.Parse(ngsEarObj.dataString.Replace(rebootEarDataStr, ""));
-                string tempId2 = ngsEarObj.texString1.Replace(rebootEarDataStr, "");
-                int id2 = Int32.Parse(tempId2.Replace("_d.dds", ""));
-                
-                //Some of the more debug looking stuff recycles the data names. This is hacky, but getting the id from these strings is already hacky.
-                if(id != id2)
-                {
-                    id = id2;
-                }
-                cmx.ngsEarDict.Add(id, ngsEarObj);
+                cmx.ngsEarDict.Add(ngsEarObj.ngsEar.id, ngsEarObj);
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
             }
         }
@@ -604,7 +1791,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void ReadFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, FACEObject> dict)
+        private static void ReadFACE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, FACEObject> dict, int rel0DataStart)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -613,9 +1800,15 @@ namespace AquaModelLibrary
                 face.num = i;
                 face.originalOffset = streamReader.Position();
                 face.face = streamReader.Read<FACE>();
-                face.faceRitem = streamReader.Read<FACERitem>();
+                if(rel0DataStart > dec14_21TableAddressInt)
+                {
+                    face.faceRitem = streamReader.Read<FACERitem>();
+                }
                 face.face2 = streamReader.Read<FACE2>();
-                face.unkFloatRitem = streamReader.Read<float>();
+                if (rel0DataStart > dec14_21TableAddressInt)
+                {
+                    face.unkFloatRitem = streamReader.Read<float>();
+                }
                 long temp = streamReader.Position();
 
                 if(face.face.dataStringPtr + offset > 0)
@@ -781,7 +1974,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void ReadACCE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, ACCEObject> dict)
+        private static void ReadACCE(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, ACCEObject> dict, int cmxDateSize)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -790,7 +1983,10 @@ namespace AquaModelLibrary
                 acce.num = i;
                 acce.originalOffset = streamReader.Position();
                 acce.acce = streamReader.Read<ACCE>();
-                acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();
+                if (cmxDateSize >= feb8_22TableAddressInt)
+                {
+                    acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();
+                }
                 acce.acceB = streamReader.Read<ACCE_B>();
                 //This int was added to the middle of these in the Aug_3_2021 patch
                 if (count >= 5977)
@@ -798,7 +1994,7 @@ namespace AquaModelLibrary
                     acce.int_54 = streamReader.Read<int>();
                 }
                 acce.acce2 = streamReader.Read<ACCE2>();
-                for(int j = 0; j < 3; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     acce.acce12List.Add(ReadAcce12Object(streamReader, count));
                 }
@@ -953,6 +2149,15 @@ namespace AquaModelLibrary
                 streamReader.Seek(ngsSkin.ngsSkin.texString7Ptr + offset, SeekOrigin.Begin);
                 ngsSkin.texString7 = AquaGeneralMethods.ReadCString(streamReader);
 
+                streamReader.Seek(ngsSkin.ngsSkin.texString8Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString8 = AquaGeneralMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString9Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString9 = AquaGeneralMethods.ReadCString(streamReader);
+
+                streamReader.Seek(ngsSkin.ngsSkin.texString10Ptr + offset, SeekOrigin.Begin);
+                ngsSkin.texString10 = AquaGeneralMethods.ReadCString(streamReader);
+
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
                 dict.Add(ngsSkin.ngsSkin.id, ngsSkin); //Set like this so we can access it by id later if we want. 
@@ -1049,7 +2254,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BCLNObject> dict, int rel0Start, int type = 0)
+        private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BCLNObject> dict, int rel0Start)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -1070,7 +2275,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    Console.WriteLine($"Duplicate key {bcln.bcln.id} at {streamReader.Position().ToString("X")}");
+                    Console.WriteLine($"Duplicate key {bcln.bcln.id} at {(streamReader.Position() - offset).ToString("X")}");
                 }
             }
         }

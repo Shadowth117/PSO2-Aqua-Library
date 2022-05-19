@@ -55,14 +55,14 @@
             this.short08Label = new System.Windows.Forms.Label();
             this.float10UD = new System.Windows.Forms.NumericUpDown();
             this.float10Label = new System.Windows.Forms.Label();
-            this.float0CUD = new System.Windows.Forms.NumericUpDown();
-            this.float0CLabel = new System.Windows.Forms.Label();
+            this.startingFrameUD = new System.Windows.Forms.NumericUpDown();
+            this.startFrameLabel = new System.Windows.Forms.Label();
             this.float_20UD = new System.Windows.Forms.NumericUpDown();
             this.float2Label = new System.Windows.Forms.Label();
             this.float_30UD = new System.Windows.Forms.NumericUpDown();
             this.float30Label = new System.Windows.Forms.Label();
-            this.unkFrameUD = new System.Windows.Forms.NumericUpDown();
-            this.unkFrameLabel = new System.Windows.Forms.Label();
+            this.endFrameUD = new System.Windows.Forms.NumericUpDown();
+            this.endFrameLabel = new System.Windows.Forms.Label();
             this.unkVecZUD = new System.Windows.Forms.NumericUpDown();
             this.unkVecXUD = new System.Windows.Forms.NumericUpDown();
             this.vec368_Label = new System.Windows.Forms.Label();
@@ -83,11 +83,12 @@
             this.nodeLabel = new System.Windows.Forms.Label();
             this.additionTB = new System.Windows.Forms.TextBox();
             this.additionLabel = new System.Windows.Forms.Label();
-            this.startTimeLabel = new System.Windows.Forms.Label();
+            this.frameCountLabel = new System.Windows.Forms.Label();
             this.startFrameUD = new System.Windows.Forms.NumericUpDown();
             this.addBtn = new System.Windows.Forms.Button();
             this.duplicateBtn = new System.Windows.Forms.Button();
             this.removeBtn = new System.Windows.Forms.Button();
+            this.splitter1 = new System.Windows.Forms.Splitter();
             this.modelPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.field64UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.field60UD)).BeginInit();
@@ -101,10 +102,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.short0AUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.short08UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.float10UD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.float0CUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.startingFrameUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.float_20UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.float_30UD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.unkFrameUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.endFrameUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unkVecZUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unkVecXUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unkVecYUD)).BeginInit();
@@ -140,6 +141,7 @@
             // 
             // modelPanel
             // 
+            this.modelPanel.Controls.Add(this.splitter1);
             this.modelPanel.Controls.Add(this.field64UD);
             this.modelPanel.Controls.Add(this.field64Label);
             this.modelPanel.Controls.Add(this.field60UD);
@@ -164,14 +166,14 @@
             this.modelPanel.Controls.Add(this.short08Label);
             this.modelPanel.Controls.Add(this.float10UD);
             this.modelPanel.Controls.Add(this.float10Label);
-            this.modelPanel.Controls.Add(this.float0CUD);
-            this.modelPanel.Controls.Add(this.float0CLabel);
+            this.modelPanel.Controls.Add(this.startingFrameUD);
+            this.modelPanel.Controls.Add(this.startFrameLabel);
             this.modelPanel.Controls.Add(this.float_20UD);
             this.modelPanel.Controls.Add(this.float2Label);
             this.modelPanel.Controls.Add(this.float_30UD);
             this.modelPanel.Controls.Add(this.float30Label);
-            this.modelPanel.Controls.Add(this.unkFrameUD);
-            this.modelPanel.Controls.Add(this.unkFrameLabel);
+            this.modelPanel.Controls.Add(this.endFrameUD);
+            this.modelPanel.Controls.Add(this.endFrameLabel);
             this.modelPanel.Controls.Add(this.unkVecZUD);
             this.modelPanel.Controls.Add(this.unkVecXUD);
             this.modelPanel.Controls.Add(this.vec368_Label);
@@ -446,7 +448,7 @@
             // 
             // short0AUD
             // 
-            this.short0AUD.Location = new System.Drawing.Point(312, 20);
+            this.short0AUD.Location = new System.Drawing.Point(384, 124);
             this.short0AUD.Maximum = new decimal(new int[] {
             32767,
             0,
@@ -465,7 +467,7 @@
             // short0ALabel
             // 
             this.short0ALabel.AutoSize = true;
-            this.short0ALabel.Location = new System.Drawing.Point(309, 4);
+            this.short0ALabel.Location = new System.Drawing.Point(381, 108);
             this.short0ALabel.Name = "short0ALabel";
             this.short0ALabel.Size = new System.Drawing.Size(51, 13);
             this.short0ALabel.TabIndex = 77;
@@ -473,7 +475,7 @@
             // 
             // short08UD
             // 
-            this.short08UD.Location = new System.Drawing.Point(237, 20);
+            this.short08UD.Location = new System.Drawing.Point(384, 84);
             this.short08UD.Maximum = new decimal(new int[] {
             32767,
             0,
@@ -492,7 +494,7 @@
             // short08Label
             // 
             this.short08Label.AutoSize = true;
-            this.short08Label.Location = new System.Drawing.Point(234, 4);
+            this.short08Label.Location = new System.Drawing.Point(381, 68);
             this.short08Label.Name = "short08Label";
             this.short08Label.Size = new System.Drawing.Size(50, 13);
             this.short08Label.TabIndex = 75;
@@ -526,38 +528,38 @@
             this.float10Label.TabIndex = 73;
             this.float10Label.Text = "Float_10";
             // 
-            // float0CUD
+            // startingFrameUD
             // 
-            this.float0CUD.DecimalPlaces = 6;
-            this.float0CUD.Location = new System.Drawing.Point(387, 20);
-            this.float0CUD.Maximum = new decimal(new int[] {
+            this.startingFrameUD.DecimalPlaces = 6;
+            this.startingFrameUD.Location = new System.Drawing.Point(243, 27);
+            this.startingFrameUD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.float0CUD.Minimum = new decimal(new int[] {
+            this.startingFrameUD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.float0CUD.Name = "float0CUD";
-            this.float0CUD.Size = new System.Drawing.Size(72, 20);
-            this.float0CUD.TabIndex = 72;
-            this.float0CUD.ValueChanged += new System.EventHandler(this.float0CUD_ValueChanged);
+            this.startingFrameUD.Name = "startingFrameUD";
+            this.startingFrameUD.Size = new System.Drawing.Size(72, 20);
+            this.startingFrameUD.TabIndex = 72;
+            this.startingFrameUD.ValueChanged += new System.EventHandler(this.float0CUD_ValueChanged);
             // 
-            // float0CLabel
+            // startFrameLabel
             // 
-            this.float0CLabel.AutoSize = true;
-            this.float0CLabel.Location = new System.Drawing.Point(384, 4);
-            this.float0CLabel.Name = "float0CLabel";
-            this.float0CLabel.Size = new System.Drawing.Size(49, 13);
-            this.float0CLabel.TabIndex = 71;
-            this.float0CLabel.Text = "Float_0C";
+            this.startFrameLabel.AutoSize = true;
+            this.startFrameLabel.Location = new System.Drawing.Point(240, 11);
+            this.startFrameLabel.Name = "startFrameLabel";
+            this.startFrameLabel.Size = new System.Drawing.Size(61, 13);
+            this.startFrameLabel.TabIndex = 71;
+            this.startFrameLabel.Text = "Start Frame";
             // 
             // float_20UD
             // 
             this.float_20UD.DecimalPlaces = 6;
-            this.float_20UD.Location = new System.Drawing.Point(237, 60);
+            this.float_20UD.Location = new System.Drawing.Point(462, 84);
             this.float_20UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -576,7 +578,7 @@
             // float2Label
             // 
             this.float2Label.AutoSize = true;
-            this.float2Label.Location = new System.Drawing.Point(234, 44);
+            this.float2Label.Location = new System.Drawing.Point(459, 68);
             this.float2Label.Name = "float2Label";
             this.float2Label.Size = new System.Drawing.Size(48, 13);
             this.float2Label.TabIndex = 69;
@@ -585,7 +587,7 @@
             // float_30UD
             // 
             this.float_30UD.DecimalPlaces = 6;
-            this.float_30UD.Location = new System.Drawing.Point(237, 100);
+            this.float_30UD.Location = new System.Drawing.Point(462, 124);
             this.float_30UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -604,39 +606,39 @@
             // float30Label
             // 
             this.float30Label.AutoSize = true;
-            this.float30Label.Location = new System.Drawing.Point(234, 84);
+            this.float30Label.Location = new System.Drawing.Point(459, 108);
             this.float30Label.Name = "float30Label";
             this.float30Label.Size = new System.Drawing.Size(48, 13);
             this.float30Label.TabIndex = 67;
             this.float30Label.Text = "Float_30";
             // 
-            // unkFrameUD
+            // endFrameUD
             // 
-            this.unkFrameUD.DecimalPlaces = 6;
-            this.unkFrameUD.Location = new System.Drawing.Point(237, 140);
-            this.unkFrameUD.Maximum = new decimal(new int[] {
+            this.endFrameUD.DecimalPlaces = 6;
+            this.endFrameUD.Location = new System.Drawing.Point(243, 66);
+            this.endFrameUD.Maximum = new decimal(new int[] {
             10000000,
             0,
             0,
             0});
-            this.unkFrameUD.Minimum = new decimal(new int[] {
+            this.endFrameUD.Minimum = new decimal(new int[] {
             10000000,
             0,
             0,
             -2147483648});
-            this.unkFrameUD.Name = "unkFrameUD";
-            this.unkFrameUD.Size = new System.Drawing.Size(72, 20);
-            this.unkFrameUD.TabIndex = 66;
-            this.unkFrameUD.ValueChanged += new System.EventHandler(this.unkFrameUD_ValueChanged);
+            this.endFrameUD.Name = "endFrameUD";
+            this.endFrameUD.Size = new System.Drawing.Size(72, 20);
+            this.endFrameUD.TabIndex = 66;
+            this.endFrameUD.ValueChanged += new System.EventHandler(this.unkFrameUD_ValueChanged);
             // 
-            // unkFrameLabel
+            // endFrameLabel
             // 
-            this.unkFrameLabel.AutoSize = true;
-            this.unkFrameLabel.Location = new System.Drawing.Point(234, 124);
-            this.unkFrameLabel.Name = "unkFrameLabel";
-            this.unkFrameLabel.Size = new System.Drawing.Size(85, 13);
-            this.unkFrameLabel.TabIndex = 65;
-            this.unkFrameLabel.Text = "Unknown Frame";
+            this.endFrameLabel.AutoSize = true;
+            this.endFrameLabel.Location = new System.Drawing.Point(240, 50);
+            this.endFrameLabel.Name = "endFrameLabel";
+            this.endFrameLabel.Size = new System.Drawing.Size(58, 13);
+            this.endFrameLabel.TabIndex = 65;
+            this.endFrameLabel.Text = "End Frame";
             // 
             // unkVecZUD
             // 
@@ -936,14 +938,14 @@
             this.additionLabel.TabIndex = 0;
             this.additionLabel.Text = "Add-on";
             // 
-            // startTimeLabel
+            // frameCountLabel
             // 
-            this.startTimeLabel.AutoSize = true;
-            this.startTimeLabel.Location = new System.Drawing.Point(342, 3);
-            this.startTimeLabel.Name = "startTimeLabel";
-            this.startTimeLabel.Size = new System.Drawing.Size(64, 13);
-            this.startTimeLabel.TabIndex = 29;
-            this.startTimeLabel.Text = "End frame? ";
+            this.frameCountLabel.AutoSize = true;
+            this.frameCountLabel.Location = new System.Drawing.Point(342, 3);
+            this.frameCountLabel.Name = "frameCountLabel";
+            this.frameCountLabel.Size = new System.Drawing.Size(67, 13);
+            this.frameCountLabel.TabIndex = 29;
+            this.frameCountLabel.Text = "Frame Count";
             // 
             // startFrameUD
             // 
@@ -994,6 +996,14 @@
             this.removeBtn.UseVisualStyleBackColor = true;
             this.removeBtn.Click += new System.EventHandler(this.removeBtn_Click);
             // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(0, 0);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(8, 318);
+            this.splitter1.TabIndex = 105;
+            this.splitter1.TabStop = false;
+            // 
             // BTIEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1001,7 +1011,7 @@
             this.Controls.Add(this.removeBtn);
             this.Controls.Add(this.duplicateBtn);
             this.Controls.Add(this.addBtn);
-            this.Controls.Add(this.startTimeLabel);
+            this.Controls.Add(this.frameCountLabel);
             this.Controls.Add(this.startFrameUD);
             this.Controls.Add(this.modelPanel);
             this.Controls.Add(this.modelIDLabel);
@@ -1022,10 +1032,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.short0AUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.short08UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.float10UD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.float0CUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.startingFrameUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.float_20UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.float_30UD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.unkFrameUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.endFrameUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unkVecZUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unkVecXUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unkVecYUD)).EndInit();
@@ -1048,7 +1058,7 @@
         private System.Windows.Forms.ComboBox btiIEntryCB;
         private System.Windows.Forms.Label modelIDLabel;
         private System.Windows.Forms.Panel modelPanel;
-        private System.Windows.Forms.Label startTimeLabel;
+        private System.Windows.Forms.Label frameCountLabel;
         private System.Windows.Forms.NumericUpDown startFrameUD;
         private System.Windows.Forms.TextBox nodeTB;
         private System.Windows.Forms.Label nodeLabel;
@@ -1072,14 +1082,14 @@
         private System.Windows.Forms.NumericUpDown posYUD;
         private System.Windows.Forms.NumericUpDown float10UD;
         private System.Windows.Forms.Label float10Label;
-        private System.Windows.Forms.NumericUpDown float0CUD;
-        private System.Windows.Forms.Label float0CLabel;
+        private System.Windows.Forms.NumericUpDown startingFrameUD;
+        private System.Windows.Forms.Label startFrameLabel;
         private System.Windows.Forms.NumericUpDown float_20UD;
         private System.Windows.Forms.Label float2Label;
         private System.Windows.Forms.NumericUpDown float_30UD;
         private System.Windows.Forms.Label float30Label;
-        private System.Windows.Forms.NumericUpDown unkFrameUD;
-        private System.Windows.Forms.Label unkFrameLabel;
+        private System.Windows.Forms.NumericUpDown endFrameUD;
+        private System.Windows.Forms.Label endFrameLabel;
         private System.Windows.Forms.NumericUpDown short0AUD;
         private System.Windows.Forms.Label short0ALabel;
         private System.Windows.Forms.NumericUpDown short08UD;
@@ -1105,5 +1115,6 @@
         private System.Windows.Forms.Button addBtn;
         private System.Windows.Forms.Button duplicateBtn;
         private System.Windows.Forms.Button removeBtn;
+        private System.Windows.Forms.Splitter splitter1;
     }
 }

@@ -1,8 +1,14 @@
-﻿namespace AquaModelLibrary
+﻿using System.Collections.Generic;
+
+namespace AquaModelLibrary
 {
     public class FLTDPhysics : AquaCommon
     {
-        public class fltdHeader
+        public FltdHeader header = null;
+        public UnkStructNGS ngsStruct = null;
+        public List<MainPhysicsNode> mainNodes = new List<MainPhysicsNode>();
+
+        public class FltdHeader
         {
             public byte version;         //Apparently there are a number of these and they work differently. This makes things painful
             public byte mainPhysicsNodeCount;
@@ -12,9 +18,15 @@
             public int mainPhysicsNodeOffset;
             public int unkStruct1Offset;
 
-
             public int int_18;
             public int unkStructNGSOffset;
+        }
+
+        public class UnkStructNGS
+        {
+            public unkStructNGS ngsStruct;
+            //public unkEndStruct
+            //public unkEndStruct1
         }
 
         public struct unkStructNGS
@@ -34,6 +46,11 @@
             public byte unkByte3;
             public int namePointerPointer;
             public int unkPointer1;
+
+            public int int_0C;
+            public int int_10;
+
+            public string name;
         }
 
         //Sub of fltdHeader

@@ -25,6 +25,7 @@ namespace AquaModelTool
             subDirBox.Text = ptclObj.strings.subDirectory.GetString();
             diffuseBox.Text = ptclObj.strings.diffuseTex.GetString();
             opacityBox.Text = ptclObj.strings.opacityTex.GetString();
+            unkStringTB.Text = ptclObj.strings.unkString.GetString();
 
             diffuseRGBButton.BackColor = Color.FromArgb(ptcl.ptcl.color[3], ptcl.ptcl.color[2], ptcl.ptcl.color[1], ptcl.ptcl.color[0]);
             diffuseUD.Value = ptcl.ptcl.color[3];
@@ -164,6 +165,11 @@ namespace AquaModelTool
         private void opacityBox_TextChanged(object sender, EventArgs e)
         {
             ptcl.strings.opacityTex.SetString(opacityBox.Text);
+        }
+
+        private void unkStringTB_TextChanged(object sender, EventArgs e)
+        {
+            ptcl.strings.unkString.SetString(unkStringTB.Text);
         }
 
         public void setVector3Element(ref Vector3 vec3, NumericUpDown UD, string axis)
@@ -631,5 +637,6 @@ namespace AquaModelTool
         {
             ((EffectEditor)(this.Parent.Parent)).loadAnimEditor(ptcl, node);
         }
+
     }
 }

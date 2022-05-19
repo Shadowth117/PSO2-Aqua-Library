@@ -60,7 +60,12 @@ namespace AquaModelLibrary
             shoulder = 0x5,
             foreArm = 0x6,
             leg = 0x7,
-            accessory2 = 0x8
+            accessory2 = 0x8,
+            headOrnament = 0x9,
+            castBodyOrnament = 0xA,
+            castLegsOrnament = 0xB,
+            castArmsOrnament = 0xC,
+            outerOrnament = 0xD,
         }
 
         public struct BoundingVolume
