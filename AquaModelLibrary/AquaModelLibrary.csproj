@@ -150,6 +150,7 @@
     <Compile Include="AquaMethods\AquaFigMethods.cs" />
     <Compile Include="AquaMethods\AquaGeneralMethods.cs" />
     <Compile Include="AquaMethods\AquaGeneralParsingMethods.cs" />
+    <Compile Include="AquaMethods\AquaNodeParsingMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="AquaStructs\AquaFigure.cs" />
     <Compile Include="AquaStructs\AquaFigure\FigEffectMapStructs.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
+    <Compile Include="AquaStructs\AquaTextureList.cs" />
     <Compile Include="AquaStructs\CharacterMakingOffsets.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />
     <Compile Include="AquaStructs\LHIObjectDetailLayout.cs" />
@@ -168,6 +170,8 @@
     <Compile Include="AquaStructs\NGSShaderPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
+    <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
+    <Compile Include="Extra\DDS\DirectXUtil.cs" />
     <Compile Include="Extra\EnemyData.cs" />
     <Compile Include="Extra\FilenameConstants.cs" />
     <Compile Include="Extra\Half.cs" />
@@ -179,6 +183,7 @@
     <Compile Include="Extra\ModelExporter.cs" />
     <Compile Include="Extra\ModelImporter.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
+    <Compile Include="Extra\PSO2MapHandler.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="Native\Fbx\FbxExporter.cs" />
@@ -226,6 +231,7 @@
     <Compile Include="OtherStructs\TCBTerrainConvex.cs" />
     <Compile Include="OtherStructs\TPNTexturePattern.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\AquaUtilData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

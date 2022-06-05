@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using static AquaModelLibrary.NGSAquaObject;
 using AquaModelLibrary.Extra;
+using System.IO;
 
 namespace AquaModelLibrary
 
@@ -266,6 +267,11 @@ namespace AquaModelLibrary
                                          //all valid. Add is additive, and uses diffuse alpha for glow effects.
             public PSO2String matName;   //0x39, type 0x2 
 
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
             public override bool Equals(Object obj)
             {
                 MATE c = (MATE)obj;
@@ -318,6 +324,16 @@ namespace AquaModelLibrary
             public int unk12 { get; set; }  //0x4F, type 0x9 //4 usually
 
             public int unk13 { get; set; }  //0x50, type 0x9 //1 usually
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals((REND)obj);
+            }
 
             public bool Equals(REND c)
             {
@@ -1745,6 +1761,16 @@ namespace AquaModelLibrary
             public int unkInt0 = 100;
             public int unkInt1 = 0;
 
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public override bool Equals(object o)
+            {
+                return Equals((GenericMaterial)o);
+            }
+
             public bool Equals(GenericMaterial c)
             {
 
@@ -1860,6 +1886,18 @@ namespace AquaModelLibrary
                 genMat.unkInt1 = unkInt1;
 
                 return genMat;
+            }
+        }
+
+        public void changeTexExtension(string ext)
+        {
+            for(int i = 0; i < texfList.Count; i++)
+            {
+                texfList[i].texName.SetString(Path.ChangeExtension(texfList[i].texName.GetString(), ext));
+            }
+            for (int i = 0; i < tstaList.Count; i++)
+            {
+                tstaList[i].texName.SetString(Path.ChangeExtension(tstaList[i].texName.GetString(), ext));
             }
         }
 

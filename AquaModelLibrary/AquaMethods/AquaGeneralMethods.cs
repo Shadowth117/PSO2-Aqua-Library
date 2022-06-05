@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -56,11 +57,16 @@ namespace AquaModelLibrary.AquaMethods
 
         public static void ReadIceEnvelope(BufferedStreamReader streamReader, string ext, ref int offset, ref string type)
         {
-            //Deal with deicer's extra header nonsense
+            if(ext.Contains('.'))
+            {
+                ext = ext.Substring(1, ext.Length - 1) + "\0";
+            }
+
+            //Deal with ice envelope nonsense
             if (type.Equals(ext))
             {
                 streamReader.Seek(0xC, SeekOrigin.Begin);
-                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                //Basically always 0x60, but some from the Alpha have 0x50... 
                 int headJunkSize = streamReader.Read<int>();
 
                 streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
@@ -68,7 +74,6 @@ namespace AquaModelLibrary.AquaMethods
                 offset += headJunkSize;
             }
         }
-
 
         public static void DumpNOF0(string inFilename)
         {
@@ -95,6 +100,7 @@ namespace AquaModelLibrary.AquaMethods
                     AlignReader(streamReader, 0x10);
                     var nof0 = AquaCommon.readNOF0(streamReader);
 
+                    Dictionary<int, List<int>> addresses = new Dictionary<int, List<int>>();
                     List<string> output = new List<string>();
                     output.Add(Path.GetFileName(inFilename));
                     output.Add("");
@@ -106,6 +112,27 @@ namespace AquaModelLibrary.AquaMethods
                         streamReader.Seek(entry + offset, SeekOrigin.Begin);
                         int ptr = streamReader.Read<int>();
                         output.Add($"{entry:X} - {ptr:X}");
+                        
+                        if(!addresses.ContainsKey(ptr))
+                        {
+                            addresses[ptr] = new List<int>() { entry };
+                         } else
+                        {
+                            addresses[ptr].Add(entry);
+                            addresses[ptr].Sort();
+                        }
+                    }
+                    output.Add("");
+                    var addressKeys = addresses.Keys.ToList();
+                    addressKeys.Sort();
+                    foreach(var key in addressKeys)
+                    {
+                        output.Add(key.ToString("X") + ":");
+                        var addressList = addresses[key];
+                        for(int i = 0; i < addressList.Count; i++)
+                        {
+                            output.Add("    " + addressList[i].ToString("X"));
+                        }
                     }
 
                     File.WriteAllLines(inFilename + "_nof0.txt", output);
@@ -243,6 +270,14 @@ namespace AquaModelLibrary.AquaMethods
             return new float[] { vec3.X, vec3.Y, vec3.Z };
         }
 
+        public static Matrix4x4 ReadMatrix4(BufferedStreamReader streamReader)
+        {
+            return new Matrix4x4(streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(),
+                streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(),
+                streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(),
+                streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>());
+        }
+
         //This shouldn't be necessary, but library binding issues in maxscript necessitated it over the Reloaded.Memory implementation. System.Runtime.CompilerServices.Unsafe causes errors otherwise.
         //Borrowed from: https://stackoverflow.com/questions/42154908/cannot-take-the-address-of-get-the-size-of-or-declare-a-pointer-to-a-managed-t
         private static byte[] ConvertStruct<T>(ref T str) where T : struct
@@ -285,6 +320,16 @@ namespace AquaModelLibrary.AquaMethods
             }
             str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Come up with a better way handling sometime because I hate this.
             return str.Remove(str.IndexOf(char.MinValue));
+        }
+
+        public static byte[] RemoveIceEnvelope(byte[] inData)
+        {
+            byte[] outData;
+            var headerSize = BitConverter.ToInt32(inData, 0xC);
+            outData = new byte[inData.Length - headerSize];
+            Array.Copy(inData, headerSize, outData, 0, outData.Length);
+
+            return outData;
         }
     }
 }

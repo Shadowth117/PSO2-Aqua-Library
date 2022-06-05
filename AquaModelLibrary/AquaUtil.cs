@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.AquaStructs.AquaFigure;
+﻿using AquaModelLibrary.AquaStructs;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
@@ -7,14 +7,15 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Windows;
-using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.AquaMethods.AquaFigMethods;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using static AquaModelLibrary.AquaMiscMethods;
+using static AquaModelLibrary.AquaMethods.AquaNodeParsingMethods;
 using static AquaModelLibrary.AquaObjectMethods;
 using static AquaModelLibrary.AquaObjectParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
+using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.VTBFMethods;
-using AquaModelLibrary.AquaStructs;
 
 namespace AquaModelLibrary
 {
@@ -34,23 +35,11 @@ namespace AquaModelLibrary
         public List<AquaBTI_MotionConfig> aquaMotionConfigs = new List<AquaBTI_MotionConfig>();
         public List<AquaFigure> aquaFigures = new List<AquaFigure>();
 
-        public class ModelSet
-        {
-            public AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
-            public List<AquaObject> models = new List<AquaObject>();
-        }
-
-        public class AnimSet
-        {
-            public AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
-            public List<AquaMotion> anims = new List<AquaMotion>();
-        }
-
         //Returns if the file is a model file or not, for instance to avoid saving over an ICE file with a model.
         public bool ReadModel(string inFilename, bool checkIce = false)
         {
             var file = File.ReadAllBytes(inFilename);
-            if(file.Length == 0)
+            if (file.Length == 0)
             {
                 return false;
             }
@@ -99,60 +88,21 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 ModelSet set = new ModelSet();
-                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                int offset = 0x20; //Base offset due to NIFL header
+                List<AquaObject> models = new List<AquaObject>();
+                List<TPNTexturePattern> tpns = new List<TPNTexturePattern>();
+                bool success = ReadAQOModel(streamReader, set, ref models, ref tpns);
 
-                //Deal with deicer's extra header nonsense
-                if (type.Equals("aqp\0") || type.Equals("trp\0"))
+                if (success)
                 {
-                    streamReader.Seek(0xC, SeekOrigin.Begin);
-                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
-                    int headJunkSize = streamReader.Read<int>();
-
-                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += headJunkSize;
-                }
-
-                //Deal with afp header or aqo. prefixing as needed
-                if (type.Equals("afp\0"))
-                {
-                    set.afp = streamReader.Read<AquaPackage.AFPMain>();
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += 0x40;
-                }
-                else if (type.Equals("aqo\0") || type.Equals("tro\0"))
-                {
-                    streamReader.Seek(0x4, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += 0x4;
-                }
-
-                if (set.afp.fileCount == 0)
-                {
-                    set.afp.fileCount = 1;
-                }
-
-                //Proceed based on file variant
-                if (type.Equals("NIFL"))
-                {
-                    set.models = ReadNIFLModel(streamReader, set.afp.fileCount, offset, out var tpnFiles);
+                    set.models = models;
                     aquaModels.Add(set);
-                    tpnFiles.AddRange(tpnFiles);
-                    return true;
-                }
-                else if (type.Equals("VTBF"))
-                {
-                    set.models = ReadVTBFModel(streamReader, set.afp.fileCount, set.afp.afpBase.paddingOffset, out var tpnFiles);
-                    aquaModels.Add(set);
-                    tpnFiles.AddRange(tpnFiles);
-                    return true;
+                    tpnFiles.AddRange(tpns);
                 }
                 else
                 {
                     MessageBox.Show("Improper File Format!");
                 }
-                return false;
+                return success;
             }
         }
 
@@ -165,7 +115,7 @@ namespace AquaModelLibrary
                 AquaObject aqp = new NGSAquaObject();
 
                 AquaObject.VTXL vtxl = new AquaObject.VTXL();
-                for(int v = 0; v < prmModels[i].vertices.Count; v++)
+                for (int v = 0; v < prmModels[i].vertices.Count; v++)
                 {
                     var vertex = prmModels[i].vertices[v];
                     vtxl.vertPositions.Add(vertex.pos);
@@ -179,7 +129,61 @@ namespace AquaModelLibrary
                 var tris = new AquaObject.GenericTriangles(prmModels[i].faces);
                 tris.matIdList = new List<int>(new int[tris.triList.Count]);
                 aqp.tempTris.Add(tris);
-                aqp.tempMats.Add(new AquaObject.GenericMaterial() { matName = "PRMMat"});
+                aqp.tempMats.Add(new AquaObject.GenericMaterial() { matName = "PRMMat" });
+
+                aquaModels.Add(new ModelSet { models = new List<AquaObject> { aqp } });
+
+                AquaNode aqn = new AquaNode();
+                aqn.ndtr = new AquaNode.NDTR();
+                aqn.ndtr.boneCount = 1;
+                AquaNode.NODE node = new AquaNode.NODE();
+                node.boneName.SetString("Root Node");
+                node.m1 = new Vector4(1, 0, 0, 0);
+                node.m2 = new Vector4(0, 1, 0, 0);
+                node.m3 = new Vector4(0, 0, 1, 0);
+                node.m4 = new Vector4(0, 0, 0, 1);
+                node.parentId = -1;
+                node.nextSibling = -1;
+                node.firstChild = -1;
+
+                aqn.nodeList.Add(node);
+                aqn.nodeList.Add(node);
+                aquaBones.Add(aqn);
+            }
+            ConvertToNGSPSO2Mesh(false, true, false, true, false, false, false);
+        }
+
+        public unsafe void ConvertTCBToAquaObject()
+        {
+            aquaModels.Clear();
+            aquaBones.Clear();
+            for (int i = 0; i < tcbModels.Count; i++)
+            {
+                AquaObject aqp = new NGSAquaObject();
+
+                AquaObject.VTXL vtxl = new AquaObject.VTXL();
+                vtxl.vertPositions.AddRange(tcbModels[i].vertices);
+                aqp.vtxlList.Add(vtxl);
+
+                var tris = new AquaObject.GenericTriangles();
+                tris.matIdList = new List<int>();
+                for (int f = 0; f < tcbModels[i].faces.Count; f++)
+                {
+                    var face = tcbModels[i].faces[f];
+                    tris.triList.Add(new Vector3(face.vertex0, face.vertex1, face.vertex2));
+                    //tris.matIdList.Add(face.materialId);
+                }
+                tris.matIdList = new List<int>(new int[tris.triList.Count]);
+                aqp.tempTris.Add(tris);
+                aqp.tempMats.Add(new AquaObject.GenericMaterial() { matName = "TCBMat" });
+
+                //Uncomment when materials are read
+                /*
+                for(int m = 0; m < tcbModels[i].materials.Count; m++)
+                {
+                    var mat = tcbModels[i].materials[m];
+                    aqp.tempMats.Add(new AquaObject.GenericMaterial() { matName = $"TCBMat_{m}", diffuseRGBA = new Vector4((float)mat.color[0] / 255, (float)mat.color[1] / 255, (float)mat.color[2] / 255, 1) });
+                }*/
 
                 aquaModels.Add(new ModelSet { models = new List<AquaObject> { aqp } });
 
@@ -221,13 +225,14 @@ namespace AquaModelLibrary
                         VTXLFromFaceVerts(aquaModels[msI].models[aqI]);
                     }
                     //Fix weights
-                    if(useRigid == false)
+                    if (useRigid == false)
                     {
                         foreach (var vtxl in aquaModels[msI].models[aqI].vtxlList)
                         {
                             vtxl.processToPSO2Weights(true);
                         }
-                    } else
+                    }
+                    else
                     {
                         aquaModels[msI].models[aqI].bonePalette.Clear();
                         for (int v = 0; v < aquaModels[msI].models[aqI].vtxlList.Count; v++)
@@ -259,7 +264,7 @@ namespace AquaModelLibrary
                         //BatchSplitByBoneCount(matModelSplit, outModel, 255);
                         //RemoveAllUnusedBones(outModel);
                         outModel.bonePalette = aquaModels[msI].models[aqI].bonePalette;
-                        if(aquaModels[msI].models[aqI].bonePalette == null || aquaModels[msI].models[aqI].bonePalette.Count == 0)
+                        if (aquaModels[msI].models[aqI].bonePalette == null || aquaModels[msI].models[aqI].bonePalette.Count == 0)
                         {
                             GenerateGlobalBonePalette(outModel);
                         }
@@ -270,7 +275,7 @@ namespace AquaModelLibrary
                     }
 
                     //Set up materials and related data
-                    if(aquaModels[msI].models[aqI].mateList.Count > 0)
+                    if (aquaModels[msI].models[aqI].mateList.Count > 0)
                     {
                         outModel.mateList = aquaModels[msI].models[aqI].mateList;
                         outModel.tsetList = aquaModels[msI].models[aqI].tsetList;
@@ -278,8 +283,9 @@ namespace AquaModelLibrary
                         outModel.rendList = aquaModels[msI].models[aqI].rendList;
                         outModel.texfList = aquaModels[msI].models[aqI].texfList;
                         outModel.tstaList = aquaModels[msI].models[aqI].tstaList;
-                        
-                    } else
+
+                    }
+                    else
                     {
                         for (int mat = 0; mat < aquaModels[msI].models[aqI].tempMats.Count; mat++)
                         {
@@ -288,7 +294,7 @@ namespace AquaModelLibrary
                     }
 
 
-                   //outModel = matModelSplit;
+                    //outModel = matModelSplit;
 
                     //Set up PSETs and strips, and other per mesh data
                     for (int i = 0; i < outModel.tempTris.Count; i++)
@@ -353,15 +359,16 @@ namespace AquaModelLibrary
                         }
 
                         AquaObject.VSET vset = new AquaObject.VSET();
-                        vset.vtxeCount = outModel.vtxeList.Count -  1;
+                        vset.vtxeCount = outModel.vtxeList.Count - 1;
                         vset.vtxlCount = outModel.vtxlList[i].vertPositions.Count;
                         vset.vtxlStartVert = vertCounter;
                         vertCounter += vset.vtxlCount;
                         outModel.vtxlList[i].bonePalette.Sort();
-                        if(useRigid == true)
+                        if (useRigid == true)
                         {
                             vset.bonePaletteCount = 0;
-                        } else
+                        }
+                        else
                         {
                             vset.bonePaletteCount = -1; //Needs more research. This maybe works as a catch all for now?
                             //vset.bonePaletteCount = -(outModel.vtxlList[i].bonePalette[outModel.vtxlList[i].bonePalette.Count - 1] + 1); //This value seems to be the largest index in the used indices + 1 and then made negative.
@@ -371,7 +378,7 @@ namespace AquaModelLibrary
                     }
 
                     //Set sizes based on VTXE results
-                    for(int i = 0; i < outModel.vsetList.Count; i++)
+                    for (int i = 0; i < outModel.vsetList.Count; i++)
                     {
                         var vset = outModel.vsetList[i];
                         vset.vertDataSize = largestVertSize;
@@ -409,7 +416,7 @@ namespace AquaModelLibrary
                     }
                     outModel.objc = objc;
 
-                    if(useBiTangent)
+                    if (useBiTangent)
                     {
                         ComputeTangentSpace(outModel, false, true);
                     }
@@ -474,7 +481,8 @@ namespace AquaModelLibrary
                     {
                         BatchSplitByBoneCount(matModelSplit, outModel, 16);
                         RemoveAllUnusedBones(outModel);
-                    } else
+                    }
+                    else
                     {
                         outModel = matModelSplit;
                     }
@@ -518,7 +526,8 @@ namespace AquaModelLibrary
                         if (baHack)
                         {
                             mesh.baseMeshNodeId = 0;
-                        } else
+                        }
+                        else
                         {
                             mesh.baseMeshNodeId = outModel.tempTris[i].baseMeshNodeId;
                         }
@@ -527,7 +536,8 @@ namespace AquaModelLibrary
                         if (baHack)
                         {
                             mesh.baseMeshDummyId = 0;
-                        } else
+                        }
+                        else
                         {
                             mesh.baseMeshDummyId = outModel.tempTris[i].baseMeshDummyId;
                         }
@@ -899,7 +909,7 @@ namespace AquaModelLibrary
                 SetByteListInt(outBytes, objcGlobalTriOffset, outBytes.Count);
                 for (int i = 0; i < model.strips.Count; i++)
                 {
-                    foreach(var id in model.strips[i].triStrips)
+                    foreach (var id in model.strips[i].triStrips)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(id));
                     }
@@ -961,7 +971,7 @@ namespace AquaModelLibrary
                 {
                     SetByteListInt(outBytes, psetfirstOffsets[stripId], outBytes.Count);
 
-                    for(int id = 0; id < model.strips[stripId].faceGroups.Count; id++)
+                    for (int id = 0; id < model.strips[stripId].faceGroups.Count; id++)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(model.strips[stripId].faceGroups[id]));
                     }
@@ -1027,13 +1037,13 @@ namespace AquaModelLibrary
                 {
                     var shad = (NGSAquaObject.NGSSHAD)model.shadList[shadId];
 
-                    if(shad.shadDetailOffset != 0) 
+                    if (shad.shadDetailOffset != 0)
                     {
                         SetByteListInt(outBytes, shadDetailOffsets[shadId], outBytes.Count);
                         outBytes.AddRange(ConvertStruct(shad.shadDetail));
                     }
 
-                    if(shad.shadExtra.Count > 0)
+                    if (shad.shadExtra.Count > 0)
                     {
                         SetByteListInt(outBytes, shadExtraOffsets[shadId], outBytes.Count);
                         foreach (var extra in shad.shadExtra)
@@ -1164,7 +1174,7 @@ namespace AquaModelLibrary
                 }
 
                 //VTXE
-                if(model.vtxeList.Count > 0)
+                if (model.vtxeList.Count > 0)
                 {
                     SetByteListInt(outBytes, objcVtxeOffset, outBytes.Count);
                     for (int vt = 0; vt < model.vtxeList.Count; vt++)
@@ -1185,7 +1195,7 @@ namespace AquaModelLibrary
                 }
 
                 //BonePalette
-                if(model.bonePalette.Count > 0)
+                if (model.bonePalette.Count > 0)
                 {
                     SetByteListInt(outBytes, objcBonePaletteOffset, outBytes.Count);
                     NOF0Append(nof0PointerLocations, outBytes.Count + 4);
@@ -1204,7 +1214,7 @@ namespace AquaModelLibrary
                 if (model.unkStruct1List.Count > 0)
                 {
                     SetByteListInt(outBytes, objcUnkStruct1Offset, outBytes.Count);
-                    for(int unk = 0; unk < model.unkStruct1List.Count; unk++)
+                    for (int unk = 0; unk < model.unkStruct1List.Count; unk++)
                     {
                         outBytes.AddRange(ConvertStruct(model.unkStruct1List[unk]));
                     }
@@ -1212,8 +1222,8 @@ namespace AquaModelLibrary
 
                 //PSET 2
 
-                if(model.pset2List.Count > 0)
-                {                
+                if (model.pset2List.Count > 0)
+                {
                     //Write PSET 2 pointer
                     SetByteListInt(outBytes, objcPset2Offset, outBytes.Count);
 
@@ -1253,7 +1263,7 @@ namespace AquaModelLibrary
                 }
 
                 //Strip data 2, used for strip set 3 (strip set 2 pulls from the main index set)
-                if(model.strips3.Count > 0)
+                if (model.strips3.Count > 0)
                 {
                     SetByteListInt(outBytes, objcGlobalStrip3Offset, outBytes.Count);
 
@@ -1270,10 +1280,10 @@ namespace AquaModelLibrary
                 }
 
                 //Strip lengths (Strip set 3 seemingly uses a simplified method for storing these)
-                if(model.strips3Lengths.Count > 0)
+                if (model.strips3Lengths.Count > 0)
                 {
                     SetByteListInt(outBytes, objcGlobalStrip3LengthOffset3, outBytes.Count);
-                    for(int i = 0; i < model.strips3Lengths.Count; i++)
+                    for (int i = 0; i < model.strips3Lengths.Count; i++)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(model.strips3Lengths[i]));
                     }
@@ -1281,10 +1291,10 @@ namespace AquaModelLibrary
                 }
 
                 //Point arrays
-                if(model.unkPointArray1.Count > 0)
+                if (model.unkPointArray1.Count > 0)
                 {
                     SetByteListInt(outBytes, objcUnkPointArray1Offset, outBytes.Count);
-                    for(int i = 0; i < model.unkPointArray1.Count; i++)
+                    for (int i = 0; i < model.unkPointArray1.Count; i++)
                     {
                         outBytes.AddRange(ConvertStruct(model.unkPointArray1[i]));
                     }
@@ -1361,7 +1371,8 @@ namespace AquaModelLibrary
                 finalOutBytes.AddRange(BitConverter.GetBytes(aquaModels[0].models.Count + tpnFiles.Count));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
-            } else
+            }
+            else
             {
                 modelCount = 1;
             }
@@ -1423,7 +1434,8 @@ namespace AquaModelLibrary
                 if (model.unrms != null)
                 {
                     objcUnrmOffset = NOF0Append(nof0PointerLocations, outBytes.Count + 0xA0, 1);
-                } else
+                }
+                else
                 {
                     objcUnrmOffset = -1;
                 }
@@ -1651,7 +1663,8 @@ namespace AquaModelLibrary
                         {
                             outBytes.Add(0xFF);
                         }
-                    } else
+                    }
+                    else
                     {
                         for (int i = 0; i < model.tsetList[tsetId].texCount; i++)
                         {
@@ -1801,7 +1814,7 @@ namespace AquaModelLibrary
             bones.ndtr.effCount = bones.nodoList.Count;
             outBytes.AddRange(ConvertStruct(bones.ndtr));
             //Write nodes
-            if(bones.nodeList.Count > 0)
+            if (bones.nodeList.Count > 0)
             {
                 SetByteListInt(outBytes, nodeOffset, outBytes.Count);
                 for (int i = 0; i < bones.nodeList.Count; i++)
@@ -1867,112 +1880,32 @@ namespace AquaModelLibrary
         {
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             {
-                ReadBoneEnvelope(stream);
+                BeginReadBones(stream);
             }
         }
         public void ReadBones(byte[] file)
         {
             using (Stream stream = new MemoryStream(file))
             {
-                ReadBoneEnvelope(stream);
+                BeginReadBones(stream);
             }
         }
 
-        private void ReadBoneEnvelope(Stream stream)
+        private void BeginReadBones(Stream stream)
         {
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                int offset = 0x20; //Base offset due to NIFL header
+                var bones = ReadAquaBones(streamReader);
 
-                //Deal with deicer's extra header nonsense
-                if (type.Equals("aqn\0") || type.Equals("trn\0"))
-                {
-                    streamReader.Seek(0xC, SeekOrigin.Begin);
-                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
-                    int headJunkSize = streamReader.Read<int>();
-
-                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-                    offset += headJunkSize;
-                }
-
-                //Proceed based on file variant
-                if (type.Equals("NIFL"))
-                {
-                    aquaBones.Add(ReadNIFLBones(streamReader));
-                }
-                else if (type.Equals("VTBF"))
-                {
-                    aquaBones.Add(ReadVTBFBones(streamReader));
-                }
-                else
+                if (bones == null)
                 {
                     MessageBox.Show("Improper File Format!");
+                    return;
                 }
 
+                aquaBones.Add(bones);
+                return;
             }
-        }
-
-        public AquaNode ReadNIFLBones(BufferedStreamReader streamReader)
-        {
-            AquaNode bones = new AquaNode();
-
-            bones.nifl = streamReader.Read<AquaCommon.NIFL>();
-            bones.rel0 = streamReader.Read<AquaCommon.REL0>();
-            bones.ndtr = streamReader.Read<AquaNode.NDTR>();
-            for (int i = 0; i < bones.ndtr.boneCount; i++)
-            {
-                bones.nodeList.Add(streamReader.Read<AquaNode.NODE>());
-            }
-            for (int i = 0; i < bones.ndtr.effCount; i++)
-            {
-                bones.nodoList.Add(streamReader.Read<AquaNode.NODO>());
-            }
-            bones.nof0 = AquaCommon.readNOF0(streamReader);
-            AlignReader(streamReader, 0x10);
-            bones.nend = streamReader.Read<AquaCommon.NEND>();
-
-            return bones;
-        }
-
-        public AquaNode ReadVTBFBones(BufferedStreamReader streamReader)
-        {
-            AquaNode bones = new AquaNode();
-
-            int dataEnd = (int)streamReader.BaseStream().Length;
-
-            //Seek past vtbf tag
-            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
-
-            while (streamReader.Position() < dataEnd)
-            {
-                var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
-                switch (tagType)
-                {
-                    case "ROOT":
-                        //We don't do anything with this right now.
-                        break;
-                    case "NDTR":
-                        bones.ndtr = parseNDTR(data);
-                        break;
-                    case "NODE":
-                        bones.nodeList = parseNODE(data);
-                        break;
-                    case "NODO":
-                        bones.nodoList = parseNODO(data);
-                        break;
-                    default:
-                        //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
-                        if (data == null)
-                        {
-                            return bones;
-                        }
-                        throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
-                }
-            }
-
-            return bones;
         }
 
         public void ReadMotion(string inFilename)
@@ -2192,7 +2125,7 @@ namespace AquaModelLibrary
 
                         //Stream aligns to 0x10 after timings.
                         streamReader.Seek(motion.motionKeys[i].keyData[j].frameAddress + offset, SeekOrigin.Begin);
-                        
+
                         switch (motion.motionKeys[i].keyData[j].dataType)
                         {
                             //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
@@ -2510,56 +2443,80 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 tcbModels = new List<TCBTerrainConvex>();
-                TCBTerrainConvex tcbModel = new TCBTerrainConvex();
-                int type = streamReader.Peek<int>();
-                int offset = 0x20; //Base offset due to NIFL header
+                TCBTerrainConvex tcbModel = ReadTCB(streamReader);
 
-                //Deal with deicer's extra header nonsense
-                if (type.Equals(0x626374))
-                {
-                    streamReader.Seek(0x60, SeekOrigin.Current);
-                    type = streamReader.Peek<int>();
-                    offset += 0x60;
-                }
-
-                streamReader.Seek(0x28, SeekOrigin.Current);
-                int tcbPointer = streamReader.Read<int>() + offset;
-                streamReader.Seek(tcbPointer, SeekOrigin.Begin);
-                type = streamReader.Peek<int>();
-
-                //Proceed based on file variant
-                if (type.Equals(0x626374))
-                {
-                    tcbModel.tcbInfo = streamReader.Read<TCBTerrainConvex.TCB>();
-
-                    //Read main TCB verts
-                    streamReader.Seek(tcbModel.tcbInfo.vertexDataOffset + offset, SeekOrigin.Begin);
-                    List<Vector3> verts = new List<Vector3>();
-                    for (int i = 0; i < tcbModel.tcbInfo.vertexCount; i++)
-                    {
-                        verts.Add(streamReader.Read<Vector3>());
-                    }
-                    tcbModel.vertices = verts;
-
-                    //Read main TCB faces
-                    streamReader.Seek(tcbModel.tcbInfo.faceDataOffset + offset, SeekOrigin.Begin);
-                    List<TCBTerrainConvex.TCBFace> faces = new List<TCBTerrainConvex.TCBFace>();
-                    for (int i = 0; i < tcbModel.tcbInfo.faceCount; i++)
-                    {
-                        faces.Add(streamReader.Read<TCBTerrainConvex.TCBFace>());
-                    }
-                    tcbModel.faces = faces;
-
-                    //Read main TCB materials
-
-                    tcbModels.Add(tcbModel);
-                }
-                else
+                if (tcbModel == null)
                 {
                     MessageBox.Show("Improper File Format!");
+                    return;
                 }
-
+                tcbModels.Add(tcbModel);
             }
+        }
+
+        public void ReadCollision(byte[] file)
+        {
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                tcbModels = new List<TCBTerrainConvex>();
+                TCBTerrainConvex tcbModel = ReadTCB(streamReader);
+
+                if (tcbModel == null)
+                {
+                    MessageBox.Show("Improper File Format!");
+                    return;
+                }
+                tcbModels.Add(tcbModel);
+            }
+        }
+
+        public static TCBTerrainConvex ReadTCB(BufferedStreamReader streamReader)
+        {
+            TCBTerrainConvex tcbModel = new TCBTerrainConvex();
+            int type = streamReader.Peek<int>();
+            int offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals(0x626374))
+            {
+                streamReader.Seek(0x60, SeekOrigin.Current);
+                type = streamReader.Peek<int>();
+                offset += 0x60;
+            }
+
+            streamReader.Seek(0x28, SeekOrigin.Current);
+            int tcbPointer = streamReader.Read<int>() + offset;
+            streamReader.Seek(tcbPointer, SeekOrigin.Begin);
+            type = streamReader.Peek<int>();
+
+            //Proceed based on file variant
+            if (type.Equals(0x626374))
+            {
+                tcbModel.tcbInfo = streamReader.Read<TCBTerrainConvex.TCB>();
+
+                //Read main TCB verts
+                streamReader.Seek(tcbModel.tcbInfo.vertexDataOffset + offset, SeekOrigin.Begin);
+                List<Vector3> verts = new List<Vector3>();
+                for (int i = 0; i < tcbModel.tcbInfo.vertexCount; i++)
+                {
+                    verts.Add(streamReader.Read<Vector3>());
+                }
+                tcbModel.vertices = verts;
+
+                //Read main TCB faces
+                streamReader.Seek(tcbModel.tcbInfo.faceDataOffset + offset, SeekOrigin.Begin);
+                List<TCBTerrainConvex.TCBFace> faces = new List<TCBTerrainConvex.TCBFace>();
+                for (int i = 0; i < tcbModel.tcbInfo.faceCount; i++)
+                {
+                    faces.Add(streamReader.Read<TCBTerrainConvex.TCBFace>());
+                }
+                tcbModel.faces = faces;
+
+                //Read main TCB materials
+            }
+
+            return tcbModel;
         }
 
         //tcbModel components should be written before this
@@ -2635,7 +2592,7 @@ namespace AquaModelLibrary
             {
                 PRMModel prmModel;
                 ReadPRM(streamReader, out prmModel);
-                if(prmModel == null)
+                if (prmModel == null)
                 {
                     return;
                 }
@@ -2643,7 +2600,21 @@ namespace AquaModelLibrary
                 prmModels.Add(prmModel);
             }
         }
+        public void LoadPRM(byte[] file)
+        {
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                PRMModel prmModel;
+                ReadPRM(streamReader, out prmModel);
+                if (prmModel == null)
+                {
+                    return;
+                }
 
+                prmModels.Add(prmModel);
+            }
+        }
         public static void ReadPRM(BufferedStreamReader streamReader, out PRMModel prmModel)
         {
             int offset = 0x0; //No NIFL header
@@ -2694,14 +2665,15 @@ namespace AquaModelLibrary
                         prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
                     }
 
-                    if(prmModel.header.groupIndexCount > 0)
+                    if (prmModel.header.groupIndexCount > 0)
                     {
                         faceCount = prmModel.header.groupIndexCount / 3;
                         for (int i = 0; i < faceCount; i++)
                         {
                             prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
                         }
-                    } else
+                    }
+                    else
                     {
                         faceCount = PRMGenerateFacesFromVerts(prmModel);
                     }
@@ -2719,7 +2691,8 @@ namespace AquaModelLibrary
                         {
                             prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
                         }
-                    } else
+                    }
+                    else
                     {
                         faceCount = PRMGenerateFacesFromVerts(prmModel);
                     }
@@ -2877,7 +2850,8 @@ namespace AquaModelLibrary
             else if (ext.Equals(".trp") || ext.Equals(".tro"))
             {
                 return new byte[] { 0x74, 0x72, 0x6F, 0 };
-            } else
+            }
+            else
             {
                 throw new Exception("Invalid type");
             }
@@ -2930,7 +2904,8 @@ namespace AquaModelLibrary
                                 if (data == null)
                                 {
                                     goto FINISH;
-                                } else
+                                }
+                                else
                                 {
                                     if (!tagTracker.ContainsKey(tagType))
                                     {
@@ -2997,7 +2972,8 @@ namespace AquaModelLibrary
                                                             }
                                                         }
                                                         line += ">";
-                                                    } else
+                                                    }
+                                                    else
                                                     {
                                                         line += obj.ToString();
                                                     }
@@ -3013,7 +2989,8 @@ namespace AquaModelLibrary
                                                 if (line.Length < 80 && line != "")
                                                 {
                                                     output.AppendLine(line);
-                                                } else if (line == "")
+                                                }
+                                                else if (line == "")
                                                 {
                                                     output.AppendLine("");
                                                 }
@@ -3023,7 +3000,8 @@ namespace AquaModelLibrary
                                                 {
                                                     output.AppendLine(pair.Key.ToString("X") + "(string): " + Encoding.UTF8.GetString(((byte[])pair.Value)));
                                                 }
-                                            } else
+                                            }
+                                            else
                                             {
                                                 output.AppendLine(pair.Value.ToString());
                                             }
@@ -3055,7 +3033,8 @@ namespace AquaModelLibrary
                                 if (line == "")
                                 {
                                     output.AppendLine(",");
-                                } else
+                                }
+                                else
                                 {
                                     line += ", ";
                                 }
@@ -3226,15 +3205,16 @@ namespace AquaModelLibrary
             streamReader.Seek(offsetOffset + offset, SeekOrigin.Begin);
             isAlpha = rel0.REL0DataStart == 0x10 && offsetOffset == 0x14;
             AquaCommon musFile;
-            if(isAlpha)
+            if (isAlpha)
             {
                 var mus = new MusicFileAlpha();
                 mus.header = streamReader.Read<AquaStructs.MusicFileAlpha.musHeader>();
-                for(int i = 0; i < mus.header.sympathyPartCount; i++)
+                for (int i = 0; i < mus.header.sympathyPartCount; i++)
                 {
                     mus.parts.Add(streamReader.Read<MusicFileAlpha.sympathyPart>());
                 }
-            } else
+            }
+            else
             {
 
             }
@@ -3617,7 +3597,7 @@ namespace AquaModelLibrary
                 {
                     string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>()));
 
-                    switch(type)
+                    switch (type)
                     {
 
                         case NNObject.NXIF:
@@ -3628,7 +3608,7 @@ namespace AquaModelLibrary
                             break;
                     }
                 }
-                
+
             }
         }
 
@@ -3637,118 +3617,135 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                var end = stream.Length;
-                var set = new SetLayout();
-                set.fileName = Path.GetFileNameWithoutExtension(fileName);
-                set.header = streamReader.Read<SetLayout.SetHeader>();
-
-                //Read strings
-                for(int i = 0; i < set.header.entityStringCount; i++)
-                {
-                    var entityStr = new SetLayout.EntityString();
-                    entityStr.size = streamReader.Read<int>();
-                    var rawStr = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), entityStr.size - 4));
-                    rawStr = rawStr.Remove(rawStr.IndexOf(char.MinValue));
-
-                    //Entity strings are comma delimited
-                    var rawArray = rawStr.Split(',');
-                    for (int sub = 0; sub < rawArray.Length; sub++)
-                    {
-                        entityStr.subStrings.Add(rawArray[sub]);
-                    }
-
-                    set.entityStrings.Add(entityStr);
-                    streamReader.Seek(entityStr.size - 4, SeekOrigin.Current);
-                }
-
-                //Read entities
-                for(int i = 0; i < set.header.entityCount; i++)
-                {
-                    var entityStart = streamReader.Position();
-
-                    var entity = new SetLayout.SetEntity();
-                    entity.size = streamReader.Read<int>();
-                    entity.entity_variant_string0 = streamReader.Read<AquaCommon.PSO2String>();
-                    entity.int_str1Sum = streamReader.Read<int>();
-
-                    var strCount = streamReader.Read<int>();
-                    entity.entity_variant_string1 = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), strCount));
-                    streamReader.Seek(strCount, SeekOrigin.Current);
-
-                    strCount = streamReader.Read<int>();
-                    entity.entity_variant_stringJP = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), strCount));
-                    streamReader.Seek(strCount, SeekOrigin.Current);
-
-                    entity.subObjectCount = streamReader.Read<int>();
-
-                    int trueCount = entity.subObjectCount;
-                    //Gather variables
-                    for (int obj = 0; obj < trueCount; obj++)
-                    {
-                        var type = streamReader.Read<int>();
-                        int length; //Used for some types
-                        object data;
-                        switch(type)
-                        {
-                            case 0: //Int
-                                data = streamReader.Read<int>();
-                                break;
-                            case 1: //Float
-                                data = streamReader.Read<float>();
-                                break;
-                            case 2: //Utf8 String with size
-                                length = streamReader.Read<int>();
-                                data = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), length));
-                                streamReader.Seek(length, SeekOrigin.Current);
-                                break;
-                            case 3: //Unicode-16 String with size
-                                length = streamReader.Read<int>();
-                                data = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), length));
-                                streamReader.Seek(length, SeekOrigin.Current);
-                                break;
-                            case 4: //Null terminated, comma delimited string list
-                                string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Yeah idk if this has a limit. I tried.
-                                length = str.IndexOf(char.MinValue);
-                                data = str.Remove(length);
-                                streamReader.Seek(length + 1, SeekOrigin.Current);
-                                break;
-                            default:
-                                Console.WriteLine($"Unknown set type: {type} at position {streamReader.Position().ToString("X")}");
-                                throw new Exception();
-                        }
-
-                        //Name is always a utf8 string right after with a predefined length
-                        int nameLength = streamReader.Read<int>();
-                        string name = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), nameLength));
-                        streamReader.Seek(nameLength, SeekOrigin.Current);
-
-                        //Some things can denote further objects
-                        if(name == "edit")
-                        {
-                            trueCount += streamReader.Read<int>();
-                        }
-                        
-                        //I don't know if it's possible for there to be a dupe within these, but if it is, we'll check for it and note it
-                        if(entity.variables.ContainsKey(name))
-                        {
-                            Console.WriteLine($"Duplicate key: {name} at position {streamReader.Position().ToString("X")}");
-                            entity.variables.Add(name + $"({obj})", data);
-                        } else
-                        {
-                            entity.variables.Add(name, data);
-                        }
-                        
-                    }
-                    set.setEntities.Add(entity);
-                    //Make sure we move to the end properly
-                    if (streamReader.Position() != entityStart + entity.size)
-                    {
-                        streamReader.Seek(entityStart + entity.size, SeekOrigin.Begin);
-                    }
-                }
+                SetLayout set = LoadSet(fileName, stream.Length, streamReader);
 
                 aquaSets.Add(set);
             }
+        }
+
+        public static SetLayout LoadSet(string fileName, long end, BufferedStreamReader streamReader)
+        {
+            int offset = 0;
+            string fileType = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+
+            if (fileType == "set\0")
+            {
+                streamReader.Seek(0xC, SeekOrigin.Current);
+                var envelopeSize = streamReader.Read<int>() - 0x10;
+                streamReader.Seek(envelopeSize, SeekOrigin.Current);
+            }
+
+            var set = new SetLayout();
+            set.fileName = Path.GetFileNameWithoutExtension(fileName);
+            set.header = streamReader.Read<SetLayout.SetHeader>();
+
+            //Read strings
+            for (int i = 0; i < set.header.entityStringCount; i++)
+            {
+                var entityStr = new SetLayout.EntityString();
+                entityStr.size = streamReader.Read<int>();
+                var rawStr = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), entityStr.size - 4));
+                rawStr = rawStr.Remove(rawStr.IndexOf(char.MinValue));
+
+                //Entity strings are comma delimited
+                var rawArray = rawStr.Split(',');
+                for (int sub = 0; sub < rawArray.Length; sub++)
+                {
+                    entityStr.subStrings.Add(rawArray[sub]);
+                }
+
+                set.entityStrings.Add(entityStr);
+                streamReader.Seek(entityStr.size - 4, SeekOrigin.Current);
+            }
+
+            //Read entities
+            for (int i = 0; i < set.header.entityCount; i++)
+            {
+                var entityStart = streamReader.Position();
+
+                var entity = new SetLayout.SetEntity();
+                entity.size = streamReader.Read<int>();
+                entity.entity_variant_string0 = streamReader.Read<AquaCommon.PSO2String>();
+                entity.int_str1Sum = streamReader.Read<int>();
+
+                var strCount = streamReader.Read<int>();
+                entity.entity_variant_string1 = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), strCount));
+                streamReader.Seek(strCount, SeekOrigin.Current);
+
+                strCount = streamReader.Read<int>();
+                entity.entity_variant_stringJP = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), strCount));
+                streamReader.Seek(strCount, SeekOrigin.Current);
+
+                entity.subObjectCount = streamReader.Read<int>();
+                Console.WriteLine($"Position {(streamReader.Position() - offset).ToString("X")}");
+                int trueCount = entity.subObjectCount;
+                //Gather variables
+                for (int obj = 0; obj < trueCount; obj++)
+                {
+                    var type = streamReader.Read<int>();
+                    int length; //Used for some types
+                    object data;
+                    switch (type)
+                    {
+                        case 0: //Int
+                            data = streamReader.Read<int>();
+                            break;
+                        case 1: //Float
+                            data = streamReader.Read<float>();
+                            break;
+                        case 2: //Utf8 String with size
+                            length = streamReader.Read<int>();
+                            data = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), length));
+                            streamReader.Seek(length, SeekOrigin.Current);
+                            break;
+                        case 3: //Unicode-16 String with size
+                            length = streamReader.Read<int>();
+                            data = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), length));
+                            streamReader.Seek(length, SeekOrigin.Current);
+                            break;
+                        case 4: //Null terminated, comma delimited string list
+                            string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Yeah idk if this has a limit. I tried.
+                            length = str.IndexOf(char.MinValue);
+                            data = str.Remove(length);
+                            streamReader.Seek(length + 1, SeekOrigin.Current);
+                            break;
+                        default:
+                            Console.WriteLine($"Unknown set type: {type} at position {streamReader.Position().ToString("X")}");
+                            throw new Exception();
+                    }
+
+                    //Name is always a utf8 string right after with a predefined length
+                    int nameLength = streamReader.Read<int>();
+                    string name = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), nameLength));
+                    streamReader.Seek(nameLength, SeekOrigin.Current);
+
+                    //Some things can denote further objects
+                    if (name == "edit")
+                    {
+                        trueCount += streamReader.Read<int>();
+                    }
+
+                    //I don't know if it's possible for there to be a dupe within these, but if it is, we'll check for it and note it
+                    if (entity.variables.ContainsKey(name))
+                    {
+                        Console.WriteLine($"Duplicate key: {name} at position {streamReader.Position().ToString("X")}");
+                        entity.variables.Add(name + $"({obj})", data);
+                    }
+                    else
+                    {
+                        entity.variables.Add(name, data);
+                    }
+
+                }
+                set.setEntities.Add(entity);
+                //Make sure we move to the end properly
+                if (streamReader.Position() != entityStart + entity.size)
+                {
+                    streamReader.Seek(entityStart + entity.size, SeekOrigin.Begin);
+                }
+            }
+
+            return set;
         }
 
         public static CharacterMakingOffsets LoadCMO(string inFilename)
@@ -3771,18 +3768,18 @@ namespace AquaModelLibrary
                     int listOffset = streamReader.Read<int>();
                     streamReader.Seek(offset + listOffset, SeekOrigin.Begin);
 
-                    for(int i = 0; i < count; i++)
+                    for (int i = 0; i < count; i++)
                     {
                         cmo.nodeDataInfo.Add(streamReader.Read<CharacterMakingOffsets.NodeDataInfo>());
                     }
 
-                    foreach(var info in cmo.nodeDataInfo)
+                    foreach (var info in cmo.nodeDataInfo)
                     {
                         CharacterMakingOffsets.NodeData data = new CharacterMakingOffsets.NodeData();
 
                         //Read strings
                         streamReader.Seek(offset + info.strOffsetList, SeekOrigin.Begin);
-                        for(int i = 0; i < info.count; i++)
+                        for (int i = 0; i < info.count; i++)
                         {
                             int strOffset = streamReader.Read<int>();
                             long bookmark = streamReader.Position();
@@ -3794,7 +3791,7 @@ namespace AquaModelLibrary
 
                         //Read data
                         streamReader.Seek(offset + info.vectorListOffset, SeekOrigin.Begin);
-                        for(int i = 0; i < info.count; i++)
+                        for (int i = 0; i < info.count; i++)
                         {
                             data.nodeVectors.Add(streamReader.Read<Vector4>());
                         }
@@ -3805,11 +3802,11 @@ namespace AquaModelLibrary
 #if DEBUG
                     StringBuilder output = new StringBuilder();
                     output.AppendLine("CMO Data");
-                    for(int i = 0; i < cmo.nodeData.Count; i++)
+                    for (int i = 0; i < cmo.nodeData.Count; i++)
                     {
                         var node = cmo.nodeData[i];
                         output.AppendLine($"Set {i + 1}");
-                        for(int j = 0; j < node.nodeStrings.Count; j++)
+                        for (int j = 0; j < node.nodeStrings.Count; j++)
                         {
                             output.AppendLine($"{node.nodeStrings[j]} - {node.nodeVectors[j]}");
                         }
@@ -3841,6 +3838,178 @@ namespace AquaModelLibrary
             AquaMiscMethods.WriteBTI(bti, outFileName);
         }
 
+        public void ReadTXL(string inFilename)
+        {
+            LoadTXL(inFilename);
+        }
+
+        public static AquaTextureList LoadTXL(string inFilename)
+        {
+            string ext = Path.GetExtension(inFilename);
+            if (ext.Length > 5)
+            {
+                ext = ext.Substring(0, 5);
+            }
+            var file = File.ReadAllBytes(inFilename);
+            return LoadTXL(ext, file);
+        }
+
+        public static AquaTextureList LoadTXL(string ext, byte[] file)
+        {
+            AquaTextureList txl = null;
+            int offset;
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string variant = null;
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+
+                if (variant == "NIFL")
+                {
+                    txl = new AquaTextureList();
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    txl.header = streamReader.Read<AquaTextureList.TxlHeader>();
+
+                    if (txl.header.texOffsetListOffset != 0x10 && txl.header.texOffsetListOffset != 0)
+                    {
+                        streamReader.Seek(offset + txl.header.texOffsetListOffset, SeekOrigin.Begin);
+                        for (int i = 0; i < txl.header.texCount; i++)
+                        {
+                            var strOffset = streamReader.Read<int>();
+                            if (strOffset != 0x10 && strOffset != 0)
+                            {
+                                var bookmark = streamReader.Position();
+
+                                streamReader.Seek(offset + strOffset, SeekOrigin.Begin);
+                                txl.texList.Add(ReadCString(streamReader));
+
+                                streamReader.Seek(bookmark, SeekOrigin.Begin);
+                            }
+                        }
+                    }
+
+                    if (txl.header.iceOffsetListOffset != 0x10 && txl.header.iceOffsetListOffset != 0)
+                    {
+                        streamReader.Seek(offset + txl.header.iceOffsetListOffset, SeekOrigin.Begin);
+                        for (int i = 0; i < txl.header.iceCount; i++)
+                        {
+                            var strOffset = streamReader.Read<int>();
+                            if (strOffset != 0x10 && strOffset != 0)
+                            {
+                                var bookmark = streamReader.Position();
+
+                                streamReader.Seek(offset + strOffset, SeekOrigin.Begin);
+                                txl.iceList.Add(ReadCString(streamReader));
+
+                                streamReader.Seek(bookmark, SeekOrigin.Begin);
+                            }
+                        }
+                    }
+
+                    if (txl.header.dataOffsetListOffset != 0x10 && txl.header.dataOffsetListOffset != 0)
+                    {
+                        streamReader.Seek(offset + txl.header.dataOffsetListOffset, SeekOrigin.Begin);
+                        for (int i = 0; i < txl.header.texCount; i++)
+                        {
+                            var colorOffset = streamReader.Read<int>();
+                            if (colorOffset != 0x10 && colorOffset != 0)
+                            {
+                                var bookmark = streamReader.Position();
+
+                                List<byte[]> colorList = new List<byte[]>();
+                                for (int j = 0; j < 0x15; j++)
+                                {
+                                    colorList.Add(Read4Bytes(streamReader));
+                                }
+                                txl.dataList.Add(colorList);
+
+                                streamReader.Seek(bookmark, SeekOrigin.Begin);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return txl;
+        }
+
+        public void ReadLHI(string inFilename)
+        {
+            LoadLHI(inFilename);
+        }
+
+        public static LHIObjectDetailLayout LoadLHI(string inFilename)
+        {
+            string ext = Path.GetExtension(inFilename);
+            if (ext.Length > 5)
+            {
+                ext = ext.Substring(0, 5);
+            }
+            var file = File.ReadAllBytes(inFilename);
+            return LoadLHI(ext, file);
+        }
+
+        public static LHIObjectDetailLayout LoadLHI(string ext, byte[] file)
+        {
+            LHIObjectDetailLayout lhi = null;
+            int offset;
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string variant = null;
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+
+                if (variant == "NIFL")
+                {
+                    lhi = new LHIObjectDetailLayout();
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    lhi.header = streamReader.Read<LHIObjectDetailLayout.LHIHeader>();
+
+                    if (lhi.header.idFloatPointer != 0x10 && lhi.header.idFloatPointer != 0)
+                    {
+                        streamReader.Seek(offset + lhi.header.idFloatPointer, SeekOrigin.Begin);
+                        lhi.idFloats = streamReader.Read<LHIObjectDetailLayout.IDFloats>();
+                    }
+
+                    streamReader.Seek(offset + lhi.header.detailInfoPointer, SeekOrigin.Begin);
+                    for (int i = 0; i < lhi.header.objectTypeCount; i++)
+                    {
+                        lhi.detailInfoList.Add(ReadDetailInfo(streamReader, offset));
+                    }
+
+                }
+            }
+
+            return lhi;
+        }
+
+        public static LHIObjectDetailLayout.DetailInfoObject ReadDetailInfo(BufferedStreamReader streamReader, int offset)
+        {
+            LHIObjectDetailLayout.DetailInfoObject diObj = new LHIObjectDetailLayout.DetailInfoObject();
+
+            diObj.diStruct = streamReader.Read<LHIObjectDetailLayout.DetailInfo>();
+
+            var bookmark = streamReader.Position();
+            if (diObj.diStruct.objNamePointer != 0x10 && diObj.diStruct.objNamePointer != 0)
+            {
+                streamReader.Seek(offset + diObj.diStruct.objNamePointer, SeekOrigin.Begin);
+                diObj.objName = ReadCString(streamReader);
+            }
+
+            streamReader.Seek(offset + diObj.diStruct.matrixArrayPointer, SeekOrigin.Begin);
+            for (int i = 0; i < diObj.diStruct.matrixArrayCount; i++)
+            {
+                diObj.matrices.Add(ReadMatrix4(streamReader));
+            }
+
+            streamReader.Seek(bookmark, SeekOrigin.Begin);
+            return diObj;
+        }
+
         public void ReadFLTD(string inFilename)
         {
             LoadFLTD(inFilename);
@@ -3855,7 +4024,7 @@ namespace AquaModelLibrary
             {
                 ext = ext.Substring(0, 5);
             }
-            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (Stream stream = new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 variant = ReadAquaHeader(streamReader, ext, variant, out offset);
@@ -3870,12 +4039,63 @@ namespace AquaModelLibrary
 
                     //Read main nodes
                     streamReader.Seek(offset + fltd.header.mainPhysicsNodeOffset, SeekOrigin.Begin);
-                    for(int i = 0; i < fltd.header.mainPhysicsNodeCount; i++)
+                    for (int i = 0; i < fltd.header.mainPhysicsNodeCount; i++)
                     {
                         fltd.mainNodes.Add(ReadMainNode(streamReader, offset, fltd.header.version));
                     }
+
+                    //Read unk nodes
+                    streamReader.Seek(offset + fltd.header.unkStruct1Offset, SeekOrigin.Begin);
+                    for (int i = 0; i < fltd.header.unkStruct1Count; i++)
+                    {
+                        fltd.subStructs.Add(ReadSubStruct1(streamReader, offset, fltd.header.version));
+                    }
+
+                    //Read unk struct NGS
+
                 }
             }
+        }
+
+        public static FLTDPhysics.unkStruct1 ReadSubStruct1(BufferedStreamReader streamReader, int offset, int version)
+        {
+            var start = streamReader.Position();
+            FLTDPhysics.unkStruct1 unkStruct = new FLTDPhysics.unkStruct1();
+
+            unkStruct.unkByte0 = streamReader.Read<byte>();
+            unkStruct.unkByte1 = streamReader.Read<byte>();
+            unkStruct.unkByte2 = streamReader.Read<byte>();
+            unkStruct.unkByte3 = streamReader.Read<byte>();
+
+            unkStruct.unkByte4 = streamReader.Read<byte>();
+            unkStruct.unkByte5 = streamReader.Read<byte>();
+            unkStruct.unkByte6 = streamReader.Read<byte>();
+            unkStruct.unkByte7 = streamReader.Read<byte>();
+
+            unkStruct.unkPointer0 = streamReader.Read<int>();
+            unkStruct.unkStruct2Pointer = streamReader.Read<int>();
+            unkStruct.unkStruct3Pointer = streamReader.Read<int>();
+            unkStruct.unkConst01 = streamReader.Read<int>();
+            unkStruct.unkPointer4 = streamReader.Read<int>();
+
+            if (unkStruct.unkPointer0 != 0x10 && unkStruct.unkPointer0 != 0)
+            {
+                Debug.WriteLine($"ptr from struct at {start.ToString("X")} to {unkStruct.unkPointer0.ToString("X")}");
+            }
+            if (unkStruct.unkStruct2Pointer != 0x10 && unkStruct.unkStruct2Pointer != 0)
+            {
+                Debug.WriteLine($"ptr from struct at {start.ToString("X")} to {unkStruct.unkStruct2Pointer.ToString("X")}");
+            }
+            if (unkStruct.unkStruct3Pointer != 0x10 && unkStruct.unkStruct3Pointer != 0)
+            {
+                Debug.WriteLine($"ptr from struct at {start.ToString("X")} to {unkStruct.unkStruct3Pointer.ToString("X")}");
+            }
+            if (unkStruct.unkPointer4 != 0x10 && unkStruct.unkPointer4 != 0)
+            {
+                Debug.WriteLine($"ptr from struct at {start.ToString("X")} to {unkStruct.unkPointer4.ToString("X")}");
+            }
+
+            return unkStruct;
         }
 
         private static FLTDPhysics.FltdHeader ReadFLTDHeader(BufferedStreamReader streamReader)
@@ -3899,28 +4119,118 @@ namespace AquaModelLibrary
         {
             FLTDPhysics.MainPhysicsNode physicsNode = new FLTDPhysics.MainPhysicsNode();
 
-            physicsNode.index = streamReader.Read<byte>();
+            physicsNode.bt_00 = streamReader.Read<byte>();
             physicsNode.unkByte1 = streamReader.Read<byte>();
-            physicsNode.unkByte2 = streamReader.Read<byte>();
+            physicsNode.mainSubNodeCount = streamReader.Read<byte>();
             physicsNode.unkByte3 = streamReader.Read<byte>();
             physicsNode.namePointerPointer = streamReader.Read<int>();
-            physicsNode.unkPointer1 = streamReader.Read<int>();
+            physicsNode.mainSubNode = streamReader.Read<int>();
             physicsNode.int_0C = streamReader.Read<int>();
             physicsNode.int_10 = streamReader.Read<int>();
 
             var bookmark = streamReader.Position();
 
-            streamReader.Seek(offset + physicsNode.namePointerPointer, SeekOrigin.Begin);
-            var nameAddress = streamReader.Read<int>();
-            streamReader.Seek(offset + nameAddress, SeekOrigin.Begin);
-            physicsNode.name = ReadCString(streamReader);
+            if (physicsNode.namePointerPointer != 0x10 && physicsNode.namePointerPointer != 0)
+            {
+                streamReader.Seek(offset + physicsNode.namePointerPointer, SeekOrigin.Begin);
+                var nameAddress = streamReader.Read<int>();
+
+                if (nameAddress != 0x10 && nameAddress != 0)
+                {
+                    streamReader.Seek(offset + nameAddress, SeekOrigin.Begin);
+                    physicsNode.name = ReadCString(streamReader);
+                }
+            }
 
             //Read unkPointer node
-            streamReader.Seek(offset + physicsNode.unkPointer1, SeekOrigin.Begin);
+            streamReader.Seek(offset + physicsNode.mainSubNode, SeekOrigin.Begin);
+
+            for (int i = 0; i < physicsNode.mainSubNodeCount; i++)
+            {
+                physicsNode.subNodes.Add(ReadMainSubNode(streamReader, offset, version));
+            }
 
             streamReader.Seek(bookmark, SeekOrigin.Begin);
             return physicsNode;
         }
+
+        private static FLTDPhysics.MainSubNode ReadMainSubNode(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.MainSubNode node = new FLTDPhysics.MainSubNode();
+
+            node.unkByte0 = streamReader.Read<byte>();
+            node.unkByte1 = streamReader.Read<byte>();
+            node.unkByte2 = streamReader.Read<byte>();
+            node.unkByte3 = streamReader.Read<byte>();
+
+            node.flt_04 = streamReader.Read<float>();
+            node.flt_08 = streamReader.Read<float>();
+            node.flt_0C = streamReader.Read<float>();
+            node.flt_10 = streamReader.Read<float>();
+
+            node.flt_14 = streamReader.Read<float>();
+            node.flt_18 = streamReader.Read<float>();
+            node.flt_1C = streamReader.Read<float>();
+            node.flt_10 = streamReader.Read<float>();
+
+            node.flt_24 = streamReader.Read<float>();
+            node.flt_28 = streamReader.Read<float>();
+            node.flt_2C = streamReader.Read<float>();
+            node.vec3_30 = streamReader.Read<Vector3>();
+
+            node.flt_3C = streamReader.Read<float>();
+
+            node.flt_40 = streamReader.Read<float>();
+            node.nodePtr = streamReader.Read<int>();
+            node.ptr_48 = streamReader.Read<int>();
+            node.ptr_4C = streamReader.Read<int>();
+
+            node.unkNodePtrPtr = streamReader.Read<int>();
+            node.bt_54 = streamReader.Read<byte>();
+            node.bt_55 = streamReader.Read<byte>();
+            node.bt_56 = streamReader.Read<byte>();
+            node.bt_57 = streamReader.Read<byte>();
+            node.ptr_58 = streamReader.Read<int>();
+
+            var bookmark = streamReader.Position();
+
+            if (node.nodePtr != 0x10 && node.nodePtr != 0)
+            {
+                streamReader.Seek(offset + node.nodePtr, SeekOrigin.Begin);
+                node.nodeName = ReadCString(streamReader);
+            }
+            if (node.ptr_48 != 0x10 && node.ptr_48 != 0)
+            {
+                Debug.WriteLine("node.ptr_48 = " + node.ptr_48.ToString("X"));
+                streamReader.Seek(offset + node.ptr_48, SeekOrigin.Begin);
+                node.ptr48String = ReadCString(streamReader);
+            }
+            if (node.ptr_4C != 0x10 && node.ptr_4C != 0)
+            {
+                Debug.WriteLine("node.ptr_4C = " + node.ptr_4C.ToString("X"));
+                streamReader.Seek(offset + node.ptr_4C, SeekOrigin.Begin);
+                node.ptr4CString = ReadCString(streamReader);
+            }
+            if (node.unkNodePtrPtr != 0x10 && node.unkNodePtrPtr != 0)
+            {
+                streamReader.Seek(offset + node.unkNodePtrPtr, SeekOrigin.Begin);
+                var unkNodePtr = streamReader.Read<int>();
+
+                if (unkNodePtr != 0x10 && unkNodePtr != 0)
+                {
+                    streamReader.Seek(offset + unkNodePtr, SeekOrigin.Begin);
+                    node.nodeName2 = ReadCString(streamReader);
+                }
+            }
+            if (node.ptr_58 != 0x10 && node.ptr_58 != 0)
+            {
+                Debug.WriteLine("node.ptr_58 = " + node.ptr_58.ToString("X"));
+                streamReader.Seek(offset + node.ptr_58, SeekOrigin.Begin);
+                node.ptr58String = ReadCString(streamReader);
+            }
+
+            streamReader.Seek(bookmark, SeekOrigin.Begin);
+            return node;
+        }
     }
 }
- 

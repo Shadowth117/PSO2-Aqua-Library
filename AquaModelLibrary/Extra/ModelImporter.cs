@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
 using static AquaModelLibrary.Extra.MathExtras;
+using AquaModelLibrary.Utility;
 
 namespace AquaModelLibrary
 {
@@ -307,7 +308,7 @@ namespace AquaModelLibrary
             for(int i = 0; i < aqmList.Count; i++)
             {
                 var aqm = aqmList[i];
-                AquaUtil.AnimSet set = new AquaUtil.AnimSet();
+                AquaUtilData.AnimSet set = new AquaUtilData.AnimSet();
                 set.anims.Add(aqm);
                 aqua.aquaMotions.Add(set);
                 aqua.WriteNIFLMotion(initialFilePath + "_" + aqmNames[i]);
@@ -614,7 +615,7 @@ namespace AquaModelLibrary
             }
 
             //Assimp data is gathered, proceed to processing model data for PSO2
-            AquaUtil.ModelSet set = new AquaUtil.ModelSet();
+            AquaUtilData.ModelSet set = new AquaUtilData.ModelSet();
             set.models.Add(aqp);
             aquaUtil.aquaModels.Add(set);
             aquaUtil.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, true);

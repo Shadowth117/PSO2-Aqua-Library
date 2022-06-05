@@ -11,9 +11,7 @@ namespace AquaModelLibrary
     {
         public LHIHeader header;
         public IDFloats idFloats;
-        public List<DetailInfo> detailInfoList = new List<DetailInfo>();
-        public List<string> objNames = new List<string>();
-        public List<List<Matrix4x4>> matrixListList = new List<List<Matrix4x4>>();
+        public List<DetailInfoObject> detailInfoList = new List<DetailInfoObject>();
 
         public struct LHIHeader
         {
@@ -22,7 +20,7 @@ namespace AquaModelLibrary
             public int int_8;
             public int int_C;
 
-            public int int_10;
+            public int objectTypeCount;
             public int int_14;
             public int int_18;
             public int int_1C;
@@ -41,6 +39,14 @@ namespace AquaModelLibrary
             public float field_C;
         }
 
+        public class DetailInfoObject
+        {
+            public DetailInfo diStruct;
+
+            public string objName;
+            public List<Matrix4x4> matrices = new List<Matrix4x4>();
+        }
+
         public struct DetailInfo
         {
             public int objNamePointer;
@@ -49,8 +55,8 @@ namespace AquaModelLibrary
             public int int_C;
 
             public int matrixArrayCount;
-            public Vector3 unkVec3_0;
-            public Vector3 unkVec3_1;
+            public Vector3 BoundingMin;
+            public Vector3 BoundingMax;
             public float float_2C;
         }
     }

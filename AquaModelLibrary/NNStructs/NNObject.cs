@@ -1,5 +1,7 @@
-﻿using System;
+﻿using AquaModelLibrary.NNStructs.Structures;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -77,7 +79,6 @@ namespace AquaModelLibrary
             public Vector4 MAT_EMISSIVE;
             public float MAT_POWER;
         }
-
 
         //NNS Xbox vertex data. Also used for PC and PS3? In text data, type name is appended by vertex data type abbreviations of those that are used.
         /*

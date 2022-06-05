@@ -167,6 +167,11 @@ namespace AquaModelLibrary
                 }
             }
 
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
             public static PSO2String GeneratePSO2String(byte[] bytes)
             {
                 var str = new PSO2String();
@@ -181,6 +186,11 @@ namespace AquaModelLibrary
                 str.SetString(newString);
 
                 return str;
+            }
+
+            public override bool Equals(object o)
+            {
+                return Equals((PSO2String)o);
             }
 
             public bool Equals(PSO2String c)
@@ -306,6 +316,11 @@ namespace AquaModelLibrary
                     return GetString();
                 }
             }
+            
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
 
             public static PSO2Stringx30 GeneratePSO2String(byte[] bytes)
             {
@@ -321,6 +336,11 @@ namespace AquaModelLibrary
                 str.SetString(newString);
 
                 return str;
+            }
+
+            public override bool Equals(object o)
+            {
+                return Equals((PSO2Stringx30)o);
             }
 
             public bool Equals(PSO2Stringx30 c)

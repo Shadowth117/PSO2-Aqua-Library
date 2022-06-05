@@ -118,10 +118,10 @@ namespace AquaModelLibrary
             return offset;
         }
 
-        public struct njNode
+        public struct NJS_OBJECT
         {
             public uint flags;
-            public uint meshOffset;
+            public uint attachOffset;
 
             public Vector3 pos;
             public Vector3 rot;
@@ -402,12 +402,12 @@ namespace AquaModelLibrary
             }
         }
 
-        //Read njNode
+        //Read NJS_OBJECT
         public void readNode(Matrix4x4 parentMatrix, int parentId)
         {
-            njNode node = new njNode();
+            NJS_OBJECT node = new NJS_OBJECT();
             node.flags = streamReader.ReadBE<uint>(be);
-            node.meshOffset = streamReader.ReadBE<uint>(be);
+            node.attachOffset = streamReader.ReadBE<uint>(be);
             node.pos = streamReader.ReadBEV3(be);
             var rotX = streamReader.ReadBE<int>(be);
             var rotY = streamReader.ReadBE<int>(be);
@@ -460,15 +460,15 @@ namespace AquaModelLibrary
             nodes.Add(aqNode);
 
             //Not sure what it means when these happen, but sometimes they do. Maybe hardcoded logic?
-            if(node.meshOffset > fileSize || node.siblingOffset > fileSize || node.childOffset > fileSize)
+            if(node.attachOffset > fileSize || node.siblingOffset > fileSize || node.childOffset > fileSize)
             {
                 return;
             }
 
             //Read the attached Mesh
-            if (node.meshOffset != 0)
+            if (node.attachOffset != 0)
             {
-                streamReader.Seek(node.meshOffset, SeekOrigin.Begin);
+                streamReader.Seek(node.attachOffset, SeekOrigin.Begin);
                 readMesh(mat);
             }
 

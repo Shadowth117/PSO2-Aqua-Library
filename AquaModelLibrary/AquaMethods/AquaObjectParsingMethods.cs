@@ -2,19 +2,78 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using static AquaModelLibrary.AquaObjectMethods;
-using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
-using static AquaModelLibrary.VTBFMethods;
 using System.Numerics;
+using System.Text;
+using System.Windows;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using static AquaModelLibrary.AquaObjectMethods;
+using static AquaModelLibrary.Utility.AquaUtilData;
+using static AquaModelLibrary.VTBFMethods;
 
 namespace AquaModelLibrary
 {
     public static class AquaObjectParsingMethods
     {
+        public static List<AquaObject> ReadAQOModel(BufferedStreamReader streamReader)
+        {
+            List<AquaObject> aquaObjects = new List<AquaObject>();
+            List<TPNTexturePattern> tpns = new List<TPNTexturePattern>();
+            ReadAQOModel(streamReader, new ModelSet(), ref aquaObjects, ref tpns);
+
+            return aquaObjects;
+        }
+
+        public static bool ReadAQOModel(BufferedStreamReader streamReader, ModelSet set, ref List<AquaObject> models, ref List<TPNTexturePattern> tpns)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x20; //Base offset due to NIFL header
+            bool success = false;
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("aqp\0") || type.Equals("trp\0"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Deal with afp header or aqo. prefixing as needed
+            if (type.Equals("afp\0"))
+            {
+                set.afp = streamReader.Read<AquaPackage.AFPMain>();
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += 0x40;
+            }
+            else if (type.Equals("aqo\0") || type.Equals("tro\0"))
+            {
+                streamReader.Seek(0x4, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += 0x4;
+            }
+
+            if (set.afp.fileCount == 0)
+            {
+                set.afp.fileCount = 1;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                models = ReadNIFLModel(streamReader, set.afp.fileCount, offset, out tpns);
+                success = true;
+            }
+            else if (type.Equals("VTBF"))
+            {
+                models = ReadVTBFModel(streamReader, set.afp.fileCount, set.afp.afpBase.paddingOffset, out tpns);
+                success = true;
+            }
+
+            return success;
+        }
 
         public static List<AquaObject> ReadNIFLModel(BufferedStreamReader streamReader, int fileCount, int offset, out List<TPNTexturePattern> tpnList)
         {
@@ -532,7 +591,7 @@ namespace AquaModelLibrary
                     stripData.reserve0 = streamReader.Read<int>();
                     stripData.reserve1 = streamReader.Read<int>();
                     stripData.reserve2 = streamReader.Read<int>();
-                    if(model.objc.type == 0xC31)
+                    if (model.objc.type == 0xC31)
                     {
                         stripData.format0xC33 = true;
                     }

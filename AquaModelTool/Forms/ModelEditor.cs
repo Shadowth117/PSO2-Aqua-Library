@@ -1,12 +1,14 @@
 ﻿using AquaModelTool.Forms.ModelSubpanels;
 using System;
 using System.Windows.Forms;
+using static AquaModelLibrary.Utility.AquaUtilData;
+
 namespace AquaModelTool
 {
     public partial class ModelEditor : UserControl
     {
-        public AquaModelLibrary.AquaUtil.ModelSet modelset;
-        public ModelEditor(AquaModelLibrary.AquaUtil.ModelSet aquaModelset)
+        public ModelSet modelset;
+        public ModelEditor(ModelSet aquaModelset)
         {
             modelset = aquaModelset;
 

@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
+using static AquaModelLibrary.AquaUtil;
+using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelTool
 {
     public partial class AnimationEditor : UserControl
     {
-        private AquaModelLibrary.AquaUtil.AnimSet animSet;
+        private AnimSet animSet;
         private AquaMotion currentMotion;
         private TreeNode selectedNode;
         private TextBoxPopUp textWindow;
-        public AnimationEditor(AquaModelLibrary.AquaUtil.AnimSet aquaAnimSet)
+        public AnimationEditor(AnimSet aquaAnimSet)
         {
             InitializeComponent();
             animSet = aquaAnimSet;

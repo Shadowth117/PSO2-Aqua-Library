@@ -1,4 +1,5 @@
-﻿#include "FbxExporterCore.h"
+﻿#pragma warning( disable : 4244 4965)
+#include "FbxExporterCore.h"
 #include "Utf8String.h"
 
 using namespace Collections::Generic;

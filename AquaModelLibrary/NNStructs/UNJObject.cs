@@ -636,26 +636,6 @@ namespace AquaModelLibrary.NNStructs
                 nodes.nodeList.Add(node);
             }
             animNodeMap = nodeIntDict;
-            /*
-            //Fix node references
-            for(int i = 0; i < nodes.nodeList.Count; i++)
-            {
-                var node = nodes.nodeList[i];
-                if(node.parentId != -1)
-                {
-                    node.parentId = nodes.nodeList.IndexOf(nodeDict[node.parentId]);
-                }
-                if (node.firstChild != -1)
-                {
-                    node.firstChild = nodes.nodeList.IndexOf(nodeDict[node.firstChild]);
-                }
-                if (node.nextSibling != -1)
-                {
-                    node.nextSibling = nodes.nodeList.IndexOf(nodeDict[node.nextSibling]);
-                }
-
-                nodes.nodeList[i] = node;
-            }*/
         }
 
 

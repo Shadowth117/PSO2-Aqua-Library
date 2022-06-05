@@ -14,6 +14,27 @@ namespace AquaModelLibrary
         {
         }
 
+        public static AquaNode GenerateBasicAQN()
+        {
+            AquaNode aqn = new AquaNode();
+            aqn.ndtr = new AquaNode.NDTR();
+            aqn.ndtr.boneCount = 1;
+            AquaNode.NODE node = new AquaNode.NODE();
+            node.boneName.SetString("Root Node");
+            node.m1 = new Vector4(1, 0, 0, 0);
+            node.m2 = new Vector4(0, 1, 0, 0);
+            node.m3 = new Vector4(0, 0, 1, 0);
+            node.m4 = new Vector4(0, 0, 0, 1);
+            node.parentId = -1;
+            node.nextSibling = -1;
+            node.firstChild = -1;
+
+            aqn.nodeList.Add(node);
+            aqn.nodeList.Add(node);
+
+            return aqn;
+        }
+
         public struct NDTR
         {
             public int boneCount;    //0x1, type 0x8

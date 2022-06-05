@@ -32,14 +32,19 @@ namespace AquaModelLibrary.NNStructs.Structures
             var nameList = new List<string>();
             BufferedStreamReader sr = new BufferedStreamReader(new MemoryStream(File.ReadAllBytes(filePath)), 8192);
             int offset = 0;
+            offset = ReadBytes(entries, nameOffsetList, nameList, sr, offset);
+
+            return nameList;
+        }
+
+        private static int ReadBytes(List<NNTextureListEntry> entries, List<int> nameOffsetList, List<string> nameList, BufferedStreamReader sr, int offset)
+        {
             var magic = Encoding.ASCII.GetString(sr.ReadBytes(0, 4));
-            if (magic == "UNT\0")
-            {
-                sr.Seek(4, SeekOrigin.Begin);
-                var len = sr.Read<int>();
-                offset = len;
-                sr.Seek(len, SeekOrigin.Begin);
-            }
+            sr.Seek(4, SeekOrigin.Begin);
+            var len = sr.Read<int>();
+            offset = len;
+            sr.Seek(len, SeekOrigin.Begin);
+            
             sr.Seek(8, SeekOrigin.Current);
             //Find out if we're reading a big endian file. Before this is consistently little endian
             bool isBE = sr.Peek<int>() > 0xFFFF;
@@ -62,7 +67,8 @@ namespace AquaModelLibrary.NNStructs.Structures
                     entry.sht_0A = sr.ReadBE<short>(isBE);
                     entry.int_0C = sr.ReadBE<int>(isBE);
                     entry.int_10 = sr.ReadBE<int>(isBE);
-                } else
+                }
+                else
                 {
                     entry = sr.Read<NNTextureListEntry>();
                 }
@@ -75,7 +81,7 @@ namespace AquaModelLibrary.NNStructs.Structures
                 nameList.Add(AquaGeneralMethods.ReadCString(sr));
             }
 
-            return nameList;
+            return offset;
         }
     }
 }
