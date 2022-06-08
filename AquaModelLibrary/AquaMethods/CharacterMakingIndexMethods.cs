@@ -30,9 +30,6 @@ namespace AquaModelLibrary
 
         public static CharacterMakingIndex ReadCMX(byte[] file, CharacterMakingIndex cmx = null)
         {
-#if DEBUG
-            File.WriteAllBytes("C:\\Cmx.cmx", file);
-#endif
             using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
