@@ -30,6 +30,9 @@ namespace AquaModelLibrary
 
         public static CharacterMakingIndex ReadCMX(byte[] file, CharacterMakingIndex cmx = null)
         {
+#if DEBUG
+            File.WriteAllBytes("C:\\Cmx.cmx", file);
+#endif
             using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
@@ -241,12 +244,16 @@ namespace AquaModelLibrary
             ReadIndexLinks(streamReader, offset, cmx.cmxTable.castLegIdLinkAddress, cmx.cmxTable.castLegIdLinkCount, cmx.clegIdLink, cmx.rel0.REL0DataStart);
 
             //If after a oct 21, the order is changed and we need to read things differently as the addresses get shifted down
-            if (cmx.cmxTable.oct21UnkAddress != 0)
+             if (cmx.cmxTable.oct21UnkAddress != 0)
             {
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.castHeadIdLink, cmx.rel0.REL0DataStart);
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.baseWearIdLinkAddress, cmx.cmxTable.baseWearIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart);
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.innerWearIdLinkAddress, cmx.cmxTable.innerWearIdLinkCount, cmx.baseWearIdLink, cmx.rel0.REL0DataStart);
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.oct21UnkAddress, cmx.cmxTable.oct21UnkCount, cmx.innerWearIdLink, cmx.rel0.REL0DataStart);
+                if (cmx.cmxTable.jun7_22Address != 0)
+                {
+                    ReadPart6_7_22(streamReader, offset, cmx.cmxTable.jun7_22Address, cmx.cmxTable.jun7_22Count, cmx.part6_7_22Dict, cmx.rel0.REL0DataStart);
+                }
             } else
             {
                 ReadIndexLinks(streamReader, offset, cmx.cmxTable.outerIdLinkAddress, cmx.cmxTable.outerIdLinkCount, cmx.outerWearIdLink, cmx.rel0.REL0DataStart);
@@ -1544,7 +1551,11 @@ namespace AquaModelLibrary
             {
                 cmxTable.oct21UnkAddress = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
             }
-            if(headerOffset >= feb8_22TableAddressInt)
+            if (headerOffset >= jun7_22TableAddressInt)
+            {
+                cmxTable.jun7_22Address = streamReader.Read<int>(); //Only in feb 8, 2022 builds and forwared
+            }
+            if (headerOffset >= feb8_22TableAddressInt)
             {
                 cmxTable.feb8_22UnkAddress = streamReader.Read<int>(); //Only in feb 8, 2022 builds and forwared
             }
@@ -1589,12 +1600,21 @@ namespace AquaModelLibrary
             {
                 cmxTable.oct21UnkCount = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
             }
+            if (headerOffset >= jun7_22TableAddressInt)
+            {
+                cmxTable.jun7_22Count = streamReader.Read<int>(); //Only in feb 8, 2022 builds and forwared
+            }
             if (headerOffset >= feb8_22TableAddressInt)
             {
                 cmxTable.feb8_22UnkCount = streamReader.Read<int>(); //Only in feb 8, 2022 builds and forwared
             }
 
             return cmxTable;
+        }
+
+        public static bool IsValidOffset(int offset)
+        {
+            return offset > 0x10;
         }
 
         private static void ReadNGSHorn(BufferedStreamReader streamReader, int offset, CharacterMakingIndex cmx)
@@ -1708,26 +1728,41 @@ namespace AquaModelLibrary
 
                 long temp = streamReader.Position();
 
-                streamReader.Seek(body.body.dataStringPtr + offset, SeekOrigin.Begin);
-                body.dataString = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(body.body.texString1Ptr + offset, SeekOrigin.Begin);
-                body.texString1 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(body.body.texString2Ptr + offset, SeekOrigin.Begin);
-                body.texString2 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(body.body.texString3Ptr + offset, SeekOrigin.Begin);
-                body.texString3 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(body.body.texString4Ptr + offset, SeekOrigin.Begin);
-                body.texString4 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
-                body.texString5 = AquaGeneralMethods.ReadCString(streamReader);
-
-                streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
-                body.texString6 = AquaGeneralMethods.ReadCString(streamReader);
+                if(IsValidOffset(body.body.dataStringPtr))
+                {
+                    streamReader.Seek(body.body.dataStringPtr + offset, SeekOrigin.Begin);
+                    body.dataString = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body.texString1Ptr))
+                {
+                    streamReader.Seek(body.body.texString1Ptr + offset, SeekOrigin.Begin);
+                    body.texString1 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body.texString2Ptr))
+                {
+                    streamReader.Seek(body.body.texString2Ptr + offset, SeekOrigin.Begin);
+                    body.texString2 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body.texString3Ptr))
+                {
+                    streamReader.Seek(body.body.texString3Ptr + offset, SeekOrigin.Begin);
+                    body.texString3 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body.texString4Ptr))
+                {
+                    streamReader.Seek(body.body.texString4Ptr + offset, SeekOrigin.Begin);
+                    body.texString4 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body.texString5Ptr))
+                {
+                    streamReader.Seek(body.body.texString5Ptr + offset, SeekOrigin.Begin);
+                    body.texString5 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body.texString6Ptr))
+                {
+                    streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
+                    body.texString6 = AquaGeneralMethods.ReadCString(streamReader);
+                }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -2254,6 +2289,24 @@ namespace AquaModelLibrary
             }
         }
 
+        private static void ReadPart6_7_22(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, Part6_7_22Obj> dict, int rel0Start)
+        {
+            streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
+            for (int i = 0; i < count; i++)
+            {
+                Part6_7_22Obj part = new Part6_7_22Obj();
+                part.partStruct = streamReader.Read<Part6_7_22>();
+                if (!dict.ContainsKey(part.partStruct.id))
+                {
+                    dict.Add(part.partStruct.id, part); //Set like this so we can access it by id later if we want. 
+                }
+                else
+                {
+                    Console.WriteLine($"Duplicate key {part.partStruct.id} at {(streamReader.Position() - offset).ToString("X")}");
+                }
+            }
+        }       
+        
         private static void ReadIndexLinks(BufferedStreamReader streamReader, int offset, int baseAddress, int count, Dictionary<int, BCLNObject> dict, int rel0Start)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);

@@ -13,6 +13,7 @@ namespace AquaModelLibrary
         public static int oct21TableAddressInt = 0x2318B4; //Used for checking the version of the cmx in order to maintain legacy support
         public static int dec14_21TableAddressInt = 0x26B66C; //Ritem Update cmx. Some structs were reordered for this update.
         public static int feb8_22TableAddressInt = 0x2DAFD0; //Lv 40 update cmx
+        public static int jun7_22TableAddressInt = 0x2F6C44; //Kvaris update cmx
 
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -137,6 +138,8 @@ namespace AquaModelLibrary
         public Dictionary<int, BCLNObject> innerWearIdLink = new Dictionary<int, BCLNObject>();
         public Dictionary<int, BCLNObject> castHeadIdLink = new Dictionary<int, BCLNObject>();
         public Dictionary<int, BCLNObject> accessoryIdLink = new Dictionary<int, BCLNObject>();
+
+        public Dictionary<int, Part6_7_22Obj> part6_7_22Dict = new Dictionary<int, Part6_7_22Obj>();
 
         public CMXTable cmxTable;
 
@@ -808,16 +811,21 @@ namespace AquaModelLibrary
             public int int_04;
         }
 
-        public struct unkCap40Struct
+        public class Part6_7_22Obj
         {
-            public int strPtr0;
-            public int strPtr1;
+            public Part6_7_22 partStruct;
+        }
+
+        public struct Part6_7_22
+        {
+            public int id;
+            public int modelId; //Guess on this
             public int int_08;
-            public int int_0C;
+            public int int_0C; //The next 4 are always 1000 as of writing
 
             public int int_10;
             public int int_14;
-            public int int_18;
+            public int int_18; //End 1000
             public int int_1C;
 
             public int int_20;
@@ -862,6 +870,7 @@ namespace AquaModelLibrary
 
             public int innerWearIdLinkAddress; //BCLN innerwear ids for recolors
             public int oct21UnkAddress; //Only in October 12, 2021 builds and forward
+            public int jun7_22Address; //Only in June 7, 2022 builds and forward
             public int feb8_22UnkAddress; //Only in feb 8, 2022 builds and forwared
 
             public int bodyCount; 
@@ -901,6 +910,7 @@ namespace AquaModelLibrary
 
             public int innerWearIdLinkCount;
             public int oct21UnkCount; //Only in October 12, 2021 builds and forward
+            public int jun7_22Count; //Only in June 7, 2022 builds and forward
             public int feb8_22UnkCount; //Only in feb 8, 2022 builds and forwared
         }
     }
