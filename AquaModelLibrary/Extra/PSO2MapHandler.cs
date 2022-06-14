@@ -10,6 +10,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using zamboni;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMethods.AquaNodeParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.LHIObjectDetailLayout;

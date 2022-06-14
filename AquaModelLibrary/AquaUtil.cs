@@ -16,6 +16,7 @@ using static AquaModelLibrary.AquaObjectParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.VTBFMethods;
+using AquaModelLibrary.Extra;
 
 namespace AquaModelLibrary
 {
@@ -3084,9 +3085,9 @@ namespace AquaModelLibrary
             WritePSO2Text(outName, fileName);
         }
 
-        public void GenerateCharacterFileList(string pso2_binDir, string outputDirectory)
+        public void GenerateFileReferenceSheets(string pso2_binDir, string outputDirectory)
         {
-            OutputCharacterFileList(pso2_binDir, outputDirectory);
+            ReferenceConstructor.OutputFileLists(pso2_binDir, outputDirectory);
         }
 
         public void ReadItNameCacheAppendix(string fileName)
@@ -4067,32 +4068,36 @@ namespace AquaModelLibrary
             unkStruct.unkByte2 = streamReader.Read<byte>();
             unkStruct.unkByte3 = streamReader.Read<byte>();
 
-            unkStruct.unkByte4 = streamReader.Read<byte>();
+            unkStruct.byteListCount = streamReader.Read<byte>();
             unkStruct.unkByte5 = streamReader.Read<byte>();
             unkStruct.unkByte6 = streamReader.Read<byte>();
             unkStruct.unkByte7 = streamReader.Read<byte>();
 
-            unkStruct.unkPointer0 = streamReader.Read<int>();
+            unkStruct.byteListOffset = streamReader.Read<int>();
             unkStruct.unkStruct2Pointer = streamReader.Read<int>();
-            unkStruct.unkStruct3Pointer = streamReader.Read<int>();
+            unkStruct.unkStruct1_2Pointer = streamReader.Read<int>();
             unkStruct.unkConst01 = streamReader.Read<int>();
             unkStruct.unkPointer4 = streamReader.Read<int>();
 
             var bookmark = streamReader.Position();
 
-            if (unkStruct.unkPointer0 != 0x10 && unkStruct.unkPointer0 != 0)
+            if (unkStruct.byteListOffset != 0x10 && unkStruct.byteListOffset != 0)
             {
-                Debug.WriteLine($"ptr from struct at {start.ToString("X")} to {unkStruct.unkPointer0.ToString("X")}");
+                streamReader.Seek(offset + unkStruct.byteListOffset, SeekOrigin.Begin);
+                for (int i = 0; i < unkStruct.byteListCount; i++)
+                {
+                    unkStruct.byteList.Add(streamReader.Read<byte>());
+                }
             }
             if (unkStruct.unkStruct2Pointer != 0x10 && unkStruct.unkStruct2Pointer != 0)
             {
                 streamReader.Seek(offset + unkStruct.unkStruct2Pointer, SeekOrigin.Begin);
                 unkStruct.unkStr2 = ReadSubStruct2(streamReader, offset, version);
             }
-            if (unkStruct.unkStruct3Pointer != 0x10 && unkStruct.unkStruct3Pointer != 0)
+            if (unkStruct.unkStruct1_2Pointer != 0x10 && unkStruct.unkStruct1_2Pointer != 0)
             {
-                streamReader.Seek(offset + unkStruct.unkStruct3Pointer, SeekOrigin.Begin);
-                unkStruct.unkStr3 = ReadSubStruct3(streamReader, offset, version);
+                streamReader.Seek(offset + unkStruct.unkStruct1_2Pointer, SeekOrigin.Begin);
+                unkStruct.unkStr1_2 = ReadSubStruct1_2(streamReader, offset, version);
             }
             if (unkStruct.unkPointer4 != 0x10 && unkStruct.unkPointer4 != 0)
             {
@@ -4112,29 +4117,114 @@ namespace AquaModelLibrary
             unkStr2.unkFloat1 = streamReader.Read<float>();
             unkStr2.unkFloat2 = streamReader.Read<float>();
             unkStr2.unkByte0 = streamReader.Read<byte>();
-            unkStr2.unkStruct4Count = streamReader.Read<byte>();
-            unkStr2.unkStruct5Count = streamReader.Read<byte>();
+            unkStr2.unkByte1 = streamReader.Read<byte>();
+            unkStr2.unkByte2 = streamReader.Read<byte>();
             unkStr2.unkByte3 = streamReader.Read<byte>();
 
             unkStr2.unkByte4 = streamReader.Read<byte>();
-            unkStr2.unkByte5 = streamReader.Read<byte>();
-            unkStr2.unkByte6 = streamReader.Read<byte>();
-            unkStr2.unkByte7 = streamReader.Read<byte>();
+            unkStr2.unkStruct4Count = streamReader.Read<byte>();
+            unkStr2.unkStruct4_2Count = streamReader.Read<byte>();
+            unkStr2.unkStruct5Count = streamReader.Read<byte>();
             unkStr2.ptr_14 = streamReader.Read<int>();
             unkStr2.int_18 = streamReader.Read<int>();
             unkStr2.int_1C = streamReader.Read<int>();
 
             unkStr2.unkStruct4Pointer = streamReader.Read<int>();
+            unkStr2.unkStruct4_2Pointer = streamReader.Read<int>();
             unkStr2.unkStruct5Pointer = streamReader.Read<int>();
-            unkStr2.unkStruct6Pointer = streamReader.Read<int>();
             unkStr2.unkStruct7Pointer = streamReader.Read<int>();
             unkStr2.unkStruct8Pointer = streamReader.Read<int>();
             unkStr2.int_34 = streamReader.Read<int>();
-            unkStr2.ptr_38 = streamReader.Read<int>();
+            unkStr2.unkStruct3Pointer = streamReader.Read<int>();
+
+            if (unkStr2.unkStruct4Pointer != 0x10 && unkStr2.unkStruct4Pointer != 0)
+            {
+                streamReader.Seek(offset + unkStr2.unkStruct4Pointer, SeekOrigin.Begin);
+                for (int i = 0; i < unkStr2.unkStruct4Count; i++)
+                {
+                    unkStr2.unkStr4List.Add(ReadSubStruct4(streamReader, offset, version));
+                }
+            }
+            if (unkStr2.unkStruct4_2Pointer != 0x10 && unkStr2.unkStruct4_2Pointer != 0)
+            {
+                streamReader.Seek(offset + unkStr2.unkStruct4_2Pointer, SeekOrigin.Begin);
+                for (int i = 0; i < unkStr2.unkStruct4_2Count; i++)
+                {
+                    unkStr2.unkStr4_2List.Add(ReadSubStruct4(streamReader, offset, version));
+                }
+            }
+            if (unkStr2.unkStruct8Pointer != 0x10 && unkStr2.unkStruct8Pointer != 0)
+            {
+                streamReader.Seek(offset + unkStr2.unkStruct8Pointer, SeekOrigin.Begin);
+                for (int i = 0; i < unkStr2.unkStruct4_2Count * 2; i++)
+                {
+                    unkStr2.floatList.Add(streamReader.Read<float>());
+                }
+            }
+            if (unkStr2.unkStruct3Pointer != 0x10 && unkStr2.unkStruct3Pointer != 0)
+            {
+                streamReader.Seek(offset + unkStr2.unkStruct3Pointer, SeekOrigin.Begin);
+                unkStr2.unkStr3 = ReadSubStruct3(streamReader, offset, version, unkStr2.unkStruct4_2Count, unkStr2.unkStruct5Count);
+            }
+            if (unkStr2.unkStruct5Pointer != 0x10 && unkStr2.unkStruct5Pointer != 0)
+            {
+                streamReader.Seek(offset + unkStr2.unkStruct5Pointer, SeekOrigin.Begin);
+                for(int i = 0; i < unkStr2.unkStruct5Count; i++)
+                {
+                    unkStr2.unkStr5List.Add(ReadSubStruct5(streamReader, offset, version));
+                }
+            }
 
             return unkStr2;
         }
-        private static FLTDPhysics.unkStruct3 ReadSubStruct3(BufferedStreamReader streamReader, int offset, int version)
+
+        private static FLTDPhysics.unkStruct4 ReadSubStruct4(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.unkStruct4 unkStr4 = new FLTDPhysics.unkStruct4();
+
+            unkStr4.index = streamReader.Read<byte>();
+            unkStr4.unkByte1 = streamReader.Read<byte>();
+            unkStr4.unkByte2 = streamReader.Read<byte>();
+            unkStr4.unkByte3 = streamReader.Read<byte>();
+
+            unkStr4.int_04 = streamReader.Read<int>();
+            unkStr4.int_08 = streamReader.Read<int>();
+            unkStr4.int_0C = streamReader.Read<int>();
+            unkStr4.flt_10 = streamReader.Read<float>();
+            unkStr4.int_14 = streamReader.Read<int>();
+
+            return unkStr4;
+        }
+        
+        private static FLTDPhysics.unkStruct5 ReadSubStruct5(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.unkStruct5 unkStr5 = new FLTDPhysics.unkStruct5();
+
+            unkStr5.unkByte0 = streamReader.Read<byte>();
+            unkStr5.unkByte1 = streamReader.Read<byte>();
+            unkStr5.index = streamReader.Read<byte>();
+            unkStr5.unkByte3 = streamReader.Read<byte>();
+
+            unkStr5.int_04 = streamReader.Read<int>();
+            unkStr5.int_08 = streamReader.Read<int>();
+            unkStr5.int_0C = streamReader.Read<int>();
+            unkStr5.flt_10 = streamReader.Read<float>();
+
+            return unkStr5;
+        }
+
+        private static FLTDPhysics.unkStruct1_2 ReadSubStruct1_2(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.unkStruct1_2 unkStr1_2 = new FLTDPhysics.unkStruct1_2();
+
+            unkStr1_2.int_00 = streamReader.Read<int>();
+            unkStr1_2.flt_04 = streamReader.Read<int>();
+            unkStr1_2.ptr_08 = streamReader.Read<int>();
+
+            return unkStr1_2;
+        }
+
+        private static FLTDPhysics.unkStruct3 ReadSubStruct3(BufferedStreamReader streamReader, int offset, int version, int ptr_00Count, int ptr_04Count)
         {
             FLTDPhysics.unkStruct3 unkStr3 = new FLTDPhysics.unkStruct3();
 
@@ -4143,7 +4233,59 @@ namespace AquaModelLibrary
             unkStr3.int_08 = streamReader.Read<int>();
             unkStr3.ptr_0C = streamReader.Read<int>();
 
+            var bookmark = streamReader.Position();
+
+            if (unkStr3.ptr_00 != 0x10 && unkStr3.ptr_00 != 0)
+            {
+                streamReader.Seek(offset + unkStr3.ptr_00, SeekOrigin.Begin);
+                for (int i = 0; i < ptr_00Count * 2; i++)
+                {
+                    unkStr3.unkStr3_1List.Add(ReadUnkStr3_1(streamReader, offset, version));
+                }
+            }
+            if (unkStr3.ptr_04 != 0x10 && unkStr3.ptr_04 != 0)
+            {
+                streamReader.Seek(offset + unkStr3.ptr_04, SeekOrigin.Begin);
+                for (int i = 0; i < ptr_04Count; i++)
+                {
+                    unkStr3.unkStr3_2List.Add(ReadUnkStr3_2(streamReader, offset, version));
+                }
+            }
+
+            streamReader.Seek(bookmark, SeekOrigin.Begin);
+
             return unkStr3;
+        }
+
+        public static FLTDPhysics.unkStruct3_1 ReadUnkStr3_1(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.unkStruct3_1 unkStr31 = new FLTDPhysics.unkStruct3_1();
+
+            unkStr31.flt_00 = streamReader.Read<float>();
+            unkStr31.flt_04 = streamReader.Read<float>();
+            unkStr31.flt_08 = streamReader.Read<float>();
+            unkStr31.flt_0C = streamReader.Read<float>();
+
+            unkStr31.flt_10 = streamReader.Read<float>();
+            unkStr31.int_14 = streamReader.Read<int>();
+            unkStr31.int_18 = streamReader.Read<int>();
+            unkStr31.ptr_1C = streamReader.Read<int>();
+
+            return unkStr31;
+        }
+
+        public static FLTDPhysics.unkStruct3_2 ReadUnkStr3_2(BufferedStreamReader streamReader, int offset, int version)
+        {
+            FLTDPhysics.unkStruct3_2 unkStr32 = new FLTDPhysics.unkStruct3_2();
+
+            unkStr32.flt_00 = streamReader.Read<float>();
+            unkStr32.flt_04 = streamReader.Read<float>();
+            unkStr32.int_08 = streamReader.Read<int>();
+            unkStr32.int_0C = streamReader.Read<int>();
+
+            unkStr32.ptr_10 = streamReader.Read<int>();
+
+            return unkStr32;
         }
 
         private static FLTDPhysics.FltdHeader ReadFLTDHeader(BufferedStreamReader streamReader)

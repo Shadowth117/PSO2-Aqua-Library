@@ -166,6 +166,7 @@
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\MusicFileReboot.cs" />
     <Compile Include="AquaStructs\MusicFileAlpha.cs" />
+    <Compile Include="AquaStructs\MyRoomParameters.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\NGSShaderPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="Extra\PSO2MapHandler.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
+    <Compile Include="Extra\ReferenceConstructor.cs" />
     <Compile Include="Native\Fbx\FbxExporter.cs" />
     <Compile Include="Native\Fbx\Interfaces\IFbxExporter.cs" />
     <Compile Include="Native\Native.cs" />

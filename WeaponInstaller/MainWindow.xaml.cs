@@ -1,26 +1,16 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static AquaExtras.FilenameConstants;
-using Path = System.IO.Path;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using System.Diagnostics;
 using System.Windows.Forms;
+using static AquaExtras.FilenameConstants;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using MessageBox = System.Windows.MessageBox;
-using static AquaModelLibrary.CharacterMakingIndexMethods;
+using Path = System.IO.Path;
 
 namespace WeaponInstaller
 {
@@ -76,7 +66,7 @@ namespace WeaponInstaller
             Title = "Select pso2_bin",
         };
 
-        
+
         bool canUpdate = false;
         string win32Folder = null;
         string win32RebootFolder = null;
@@ -101,7 +91,7 @@ namespace WeaponInstaller
                 var settings = File.ReadAllLines(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Weapons\\weaponSettings.txt");
                 win32Folder = settings[0];
                 win32RebootFolder = settings[1];
-                if(settings.Length < 4)
+                if (settings.Length < 4)
                 {
                     MessageBox.Show("Re set your pso2bin please!");
                 }
@@ -110,7 +100,8 @@ namespace WeaponInstaller
                 AddRowsToList();
                 LoadWeaponRows();
                 UpdateList();
-            } else
+            }
+            else
             {
                 MessageBox.Show("Must set pso2_bin before attempting to install weapons!");
             }
@@ -122,14 +113,15 @@ namespace WeaponInstaller
             {
                 //Ensure paths are created and ready
                 List<string> pso2Bin = new List<string>();
-                if(Directory.Exists(pso2BinSelect.FileName + "\\Mods\\"))
+                if (Directory.Exists(pso2BinSelect.FileName + "\\Mods\\"))
                 {
                     pso2Bin.Add(pso2BinSelect.FileName + "\\Mods\\");
                     pso2Bin.Add(pso2BinSelect.FileName + "\\ModsReboot\\");
                     win32Folder = pso2BinSelect.FileName + "\\Mods\\";
                     win32RebootFolder = pso2BinSelect.FileName + "\\ModsReboot\\";
                     MessageBox.Show("Weapons will be installed to Tweaker Mods and ModsReboot folders");
-                } else
+                }
+                else
                 {
                     pso2Bin.Add(pso2BinSelect.FileName + "\\data\\win32\\");
                     pso2Bin.Add(pso2BinSelect.FileName + "\\data\\win32reboot\\");
@@ -154,7 +146,7 @@ namespace WeaponInstaller
         {
             WeaponList.Clear();
 
-            if(swordCheck.IsChecked == true)
+            if (swordCheck.IsChecked == true)
             {
                 AddList(WeaponList, swordList, swordNGSList);
             }
@@ -302,18 +294,18 @@ namespace WeaponInstaller
         /// </summary>
         public void LoadWeaponRows()
         {
-            for(int i = 0; i < wepListList.Count; i++)
+            for (int i = 0; i < wepListList.Count; i++)
             {
                 var file = csvFilenames[i];
                 int len = file.Length;
                 string type = file.Replace("NGSNames.csv", "");
                 bool isOldType = type.Length == len;
 
-                if(isOldType)
+                if (isOldType)
                 {
                     type = file.Replace("Names.csv", "");
                 }
-                if(type == "Tact")
+                if (type == "Tact")
                 {
                     type = type.Replace('c', 'k');
                 }
@@ -326,23 +318,25 @@ namespace WeaponInstaller
         {
             Dictionary<int, string> names = new Dictionary<int, string>();
             string pso2Path;
-            if(isOldType)
+            if (isOldType)
             {
                 pso2Path = trueWin32Folder;
-            } else
+            }
+            else
             {
                 pso2Path = trueWin32RebootFolder;
             }
 
             int typeInt = 0;
-            switch(type)
+            switch (type)
             {
                 case "Sword":
                     typeInt = 1;
-                    if(isOldType)
+                    if (isOldType)
                     {
                         names = swordNames;
-                    } else
+                    }
+                    else
                     {
                         names = swordNGSNames;
                     }
@@ -428,7 +422,7 @@ namespace WeaponInstaller
                     typeInt = 9;
                     if (isOldType)
                     {
-                        names = launcherNames ;
+                        names = launcherNames;
                     }
                     else
                     {
@@ -539,13 +533,13 @@ namespace WeaponInstaller
             //Clear in case of reloading names for a new pso2_bin
             rows.Clear();
 
-            for(int i = 0; i < 999; i++)
+            for (int i = 0; i < 999; i++)
             {
-                var idStr = ToCount(i, 3);
-                var weaponPreHash = $"item/weapon/it_wp_{ToCount(typeInt, 2)}_{idStr}.ice";
+                var idStr = $"{i:D3}";
+                var weaponPreHash = $"item/weapon/it_wp_{typeInt:D2}_{idStr}.ice";
                 var weapon = GetFileHash(weaponPreHash);
 
-                if(!isOldType)
+                if (!isOldType)
                 {
                     weapon = GetRebootHash(weapon);
                 }
@@ -553,7 +547,7 @@ namespace WeaponInstaller
                 if (File.Exists(pso2Path + weapon))
                 {
                     string[] nameArr = new string[] { "", "" };
-                    if(names.ContainsKey(i))
+                    if (names.ContainsKey(i))
                     {
                         nameArr = names[i].Split(",");
                     }
@@ -566,10 +560,10 @@ namespace WeaponInstaller
         {
             using (StreamReader reader = new(file))
             {
-                while(!reader.EndOfStream)
+                while (!reader.EndOfStream)
                 {
                     string[] line = reader.ReadLine().Split(',');
-                    if(line.Length > 0)
+                    if (line.Length > 0)
                     {
                         rows.Add(new WeaponRow(type, line[2].Substring(21, 3), line[1], line[0], line[2], line[3]));
                     }
@@ -587,7 +581,7 @@ namespace WeaponInstaller
             public string JpName { get; }
             public string Filename { get; }
             public string Md5Hash { get; }
-            
+
             public WeaponRow()
             {
             }
@@ -609,11 +603,11 @@ namespace WeaponInstaller
         {
             using (CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog())
             {
-                if(currentFile != null)
+                if (currentFile != null)
                 {
                     openFileDialog.InitialDirectory = Path.GetDirectoryName(currentFile);
                 }
-                if(openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     currentFile = openFileDialog.FileName;
                     currentFileLabel.Content = Path.GetFileName(currentFile);
@@ -623,10 +617,11 @@ namespace WeaponInstaller
 
         private void replaceButtonClick(object sender, RoutedEventArgs e)
         {
-            if(currentFile == null || win32Folder == null || win32RebootFolder == null)
+            if (currentFile == null || win32Folder == null || win32RebootFolder == null)
             {
                 MessageBox.Show("Be sure a file is selected and that your pso2Bin is set!");
-            } else
+            }
+            else
             {
                 ReplaceFiles(currentFile);
                 MessageBox.Show("Successfully Replaced!");
@@ -745,7 +740,7 @@ namespace WeaponInstaller
 
         private void check_Checked(object sender, RoutedEventArgs e)
         {
-            if(canUpdate)
+            if (canUpdate)
             {
                 canUpdate = false;
                 UpdateList();
@@ -755,7 +750,7 @@ namespace WeaponInstaller
 
         private void allCheck_Checked(object sender, RoutedEventArgs e)
         {
-            if(canUpdate == true)
+            if (canUpdate == true)
             {
                 foreach (var weapon in WeaponList)
                 {
@@ -783,52 +778,54 @@ namespace WeaponInstaller
                 return;
             }
             string startPath;
-            if(currentFile != null)
+            if (currentFile != null)
             {
                 startPath = Path.GetDirectoryName(currentFile);
-            } else
+            }
+            else
             {
                 startPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
-            using (OpenFileDialog openDialog = new OpenFileDialog(){
+            using (OpenFileDialog openDialog = new OpenFileDialog()
+            {
                 Filter = "Weapon Config (*.wepConfig)|*.wepConfig",
                 Title = "Select a Weapon Config file",
                 Multiselect = true,
                 InitialDirectory = startPath
             })
             {
-                if(openDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                if (openDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 {
                     return;
                 }
                 List<string> failedFiles = new List<string>();
-                foreach(var file in openDialog.FileNames)
+                foreach (var file in openDialog.FileNames)
                 {
                     var config = File.ReadAllLines(file);
                     var configDir = Path.GetDirectoryName(file) + "\\";
-                    foreach(var filesRaw in config)
+                    foreach (var filesRaw in config)
                     {
                         var iceFiles = filesRaw.Split('>');
-                        if(iceFiles.Length < 2)
+                        if (iceFiles.Length < 2)
                         {
                             continue;
                         }
 
                         //Fix spacing
-                        if(iceFiles[0].LastOrDefault() == ' ')
+                        if (iceFiles[0].LastOrDefault() == ' ')
                         {
                             iceFiles[0] = iceFiles[0][0..^1];
-                        } 
-                        if(iceFiles[1][0] == ' ')
+                        }
+                        if (iceFiles[1][0] == ' ')
                         {
                             iceFiles[1] = iceFiles[1][1..];
                         }
 
                         //Get path
                         var modPath = configDir + iceFiles[0];
-                        if(!File.Exists(modPath))
+                        if (!File.Exists(modPath))
                         {
-                            if(!failedFiles.Contains(iceFiles[0]))
+                            if (!failedFiles.Contains(iceFiles[0]))
                             {
                                 failedFiles.Add(iceFiles[0]);
                             }
@@ -837,7 +834,7 @@ namespace WeaponInstaller
 
                         //Get game
                         string game = "PSO2";
-                        if(iceFiles[1].Contains("\\"))
+                        if (iceFiles[1].Contains("\\"))
                         {
                             game = "NGS";
                         }
@@ -847,10 +844,10 @@ namespace WeaponInstaller
                 }
 
                 //Report failed files
-                if(failedFiles.Count > 0)
+                if (failedFiles.Count > 0)
                 {
                     string message = "Unable to load";
-                    foreach(var file in failedFiles)
+                    foreach (var file in failedFiles)
                     {
                         message += $" {file},";
                     }
@@ -867,7 +864,8 @@ namespace WeaponInstaller
                 MessageBox.Show("Be sure a file is selected!");
                 return;
             }
-            using (SaveFileDialog saveDialog = new SaveFileDialog() {
+            using (SaveFileDialog saveDialog = new SaveFileDialog()
+            {
                 Filter = "Weapon Config, save to same folder as the selected weapon file (*.wepConfig)|*.wepConfig",
                 InitialDirectory = Path.GetDirectoryName(currentFile),
                 Title = "Save the Weapon Config to same folder as the selected weapon file",
@@ -879,7 +877,7 @@ namespace WeaponInstaller
                     return;
                 }
                 List<string> lines = new List<string>();
-                if(File.Exists(saveDialog.FileName))
+                if (File.Exists(saveDialog.FileName))
                 {
                     if (MessageBox.Show("Would you like to add to the existing file?", "Append", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
@@ -889,7 +887,7 @@ namespace WeaponInstaller
 
                 foreach (var weapon in WeaponList)
                 {
-                    if(weapon.Replace == true)
+                    if (weapon.Replace == true)
                     {
                         lines.Add($"{Path.GetFileName(currentFile)} > {weapon.Md5Hash}");
                     }
@@ -897,7 +895,7 @@ namespace WeaponInstaller
 
                 File.WriteAllLines(saveDialog.FileName, lines);
             }
-                
+
         }
 
         public void ReplaceSelectedFromCheckedClick(object sender, RoutedEventArgs e)
@@ -908,7 +906,7 @@ namespace WeaponInstaller
                 return;
             }
 
-            foreach(var weapon in WeaponList)
+            foreach (var weapon in WeaponList)
             {
                 if (weapon.Replace == false)
                 {
@@ -916,11 +914,12 @@ namespace WeaponInstaller
                 }
 
                 var file = GetGameFilePath(weapon.Game, weapon.Md5Hash, true);
-                if(File.Exists(file))
+                if (File.Exists(file))
                 {
                     File.WriteAllBytes(currentFile, File.ReadAllBytes(file));
                     MessageBox.Show($"{Path.GetFileName(currentFile)} replaced with {weapon.Md5Hash}!");
-                } else
+                }
+                else
                 {
                     MessageBox.Show($"{Path.GetFileName(file)} not found!");
                 }

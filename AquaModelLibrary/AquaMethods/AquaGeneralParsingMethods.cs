@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.AquaStructs;
+using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -961,6 +962,126 @@ namespace AquaModelLibrary
             }
 
             return mgxIds;
+        }
+
+        public static MyRoomParameters ReadMyRoomParam(string fileName)
+        {
+            using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                int type = 0;
+                if(fileName.Contains("roomgoods"))
+                {
+                    type = 0;
+                } else if(fileName.Contains("chip"))
+                {
+                    type = 1;
+                }
+                return BeginReadMyRoomParam(streamReader, type);
+            }
+        }
+
+        public static MyRoomParameters ReadMyRoomParam(byte[] file, int type)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadMyRoomParam(streamReader, type);
+            }
+        }
+
+        public static MyRoomParameters BeginReadMyRoomParam(BufferedStreamReader streamReader, int mrpType)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("mrp\0"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                //NIFL
+                return ReadMyRoomParam(streamReader, offset, mrpType);
+            }
+            else if (type.Equals("VTBF"))
+            {
+                //Text should really never be VTBF...
+            }
+            else
+            {
+                MessageBox.Show("Improper File Format!");
+            }
+
+            return null;
+        }
+
+        public static MyRoomParameters ReadMyRoomParam(BufferedStreamReader streamReader, int offset, int mrpType)
+        {
+            var mrp = new MyRoomParameters();
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var end = nifl.NOF0Offset + offset;
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
+
+            var count = streamReader.Read<int>();
+            var mainOffset = streamReader.Read<int>();
+            long bookmark;
+
+            streamReader.Seek(mainOffset + offset, SeekOrigin.Begin);
+            for(int i = 0; i < count; i++)
+            {
+                switch(mrpType)
+                {
+                    case 0:
+                        MyRoomParameters.RoomGoodsObject rgobj = new MyRoomParameters.RoomGoodsObject();
+                        rgobj.goods = streamReader.Read<MyRoomParameters.RoomGoods>();
+                        bookmark = streamReader.Position();
+
+                        streamReader.Seek(rgobj.goods.categoryPtr + offset, SeekOrigin.Begin);
+                        rgobj.categoryString = ReadCString(streamReader);
+                        streamReader.Seek(rgobj.goods.allPtr + offset, SeekOrigin.Begin);
+                        rgobj.allString = ReadCString(streamReader);
+                        streamReader.Seek(rgobj.goods.categoryPtr2 + offset, SeekOrigin.Begin);
+                        rgobj.categoryString2 = ReadCString(streamReader);
+                        streamReader.Seek(rgobj.goods.functionStrPtr + offset, SeekOrigin.Begin);
+                        rgobj.functionString = ReadCString(streamReader);
+                        streamReader.Seek(rgobj.goods.motionPtr + offset, SeekOrigin.Begin);
+                        rgobj.motionType = ReadCString(streamReader);
+                        streamReader.Seek(rgobj.goods.unknownPtr + offset, SeekOrigin.Begin);
+                        rgobj.unknownString = ReadCString(streamReader);
+
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+                        mrp.roomGoodsList.Add(rgobj);
+                        break;
+                    case 1:
+                        MyRoomParameters.ChipObject chipobj = new MyRoomParameters.ChipObject();
+                        chipobj.chip = streamReader.Read<MyRoomParameters.Chip>();
+                        bookmark = streamReader.Position();
+
+                        streamReader.Seek(chipobj.chip.objectPtr + offset, SeekOrigin.Begin);
+                        chipobj.objectString = ReadCString(streamReader);
+                        streamReader.Seek(chipobj.chip.collisionTypePtr + offset, SeekOrigin.Begin);
+                        chipobj.collisionTypeString = ReadCString(streamReader);
+                        streamReader.Seek(chipobj.chip.unkStringPtr + offset, SeekOrigin.Begin);
+                        chipobj.unknownString = ReadCString(streamReader);
+
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+                        mrp.chipsList.Add(chipobj);
+                        break;
+                }
+            }
+
+            return mrp;
         }
     }
 }

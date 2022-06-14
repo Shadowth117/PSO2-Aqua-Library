@@ -67,6 +67,7 @@
             this.convertNATextToEnPatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.assembleNGSMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.computeTangentSpaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,9 +101,9 @@
             this.aqnDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readFLTDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readTXLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMRPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.assembleNGSMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -403,8 +404,8 @@
             // 
             this.generateCharacterFileSheetToolStripMenuItem.Name = "generateCharacterFileSheetToolStripMenuItem";
             this.generateCharacterFileSheetToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.generateCharacterFileSheetToolStripMenuItem.Text = "Generate Character FileSheet";
-            this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateCharacterFileSheetToolStripMenuItem_Click_1);
+            this.generateCharacterFileSheetToolStripMenuItem.Text = "Generate File Reference Sheets";
+            this.generateCharacterFileSheetToolStripMenuItem.Click += new System.EventHandler(this.generateFileReferenceSheetsToolStripMenuItem_Click_1);
             // 
             // parseVTBFToTextToolStripMenuItem
             // 
@@ -412,6 +413,13 @@
             this.parseVTBFToTextToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
             this.parseVTBFToTextToolStripMenuItem.Text = "Parse VTBF To Text";
             this.parseVTBFToTextToolStripMenuItem.Click += new System.EventHandler(this.parseVTBFToTextToolStripMenuItem_Click);
+            // 
+            // assembleNGSMapToolStripMenuItem
+            // 
+            this.assembleNGSMapToolStripMenuItem.Name = "assembleNGSMapToolStripMenuItem";
+            this.assembleNGSMapToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.assembleNGSMapToolStripMenuItem.Text = "NGS Map Dump (LONG process, MANY files)";
+            this.assembleNGSMapToolStripMenuItem.Click += new System.EventHandler(this.assembleNGSMapToolStripMenuItem_Click_1);
             // 
             // debugToolStripMenuItem
             // 
@@ -447,7 +455,8 @@
             this.aqnHighestXYZValuesToolStripMenuItem,
             this.aqnDumpToolStripMenuItem,
             this.readFLTDToolStripMenuItem,
-            this.readTXLToolStripMenuItem});
+            this.readTXLToolStripMenuItem,
+            this.readMRPToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 23);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -676,6 +685,13 @@
             this.readTXLToolStripMenuItem.Text = "ReadTXL";
             this.readTXLToolStripMenuItem.Click += new System.EventHandler(this.readTXLToolStripMenuItem_Click);
             // 
+            // readMRPToolStripMenuItem
+            // 
+            this.readMRPToolStripMenuItem.Name = "readMRPToolStripMenuItem";
+            this.readMRPToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readMRPToolStripMenuItem.Text = "ReadMRP";
+            this.readMRPToolStripMenuItem.Click += new System.EventHandler(this.readMRPToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -693,13 +709,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 253);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // assembleNGSMapToolStripMenuItem
-            // 
-            this.assembleNGSMapToolStripMenuItem.Name = "assembleNGSMapToolStripMenuItem";
-            this.assembleNGSMapToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.assembleNGSMapToolStripMenuItem.Text = "NGS Map Dump (LONG process, MANY files)";
-            this.assembleNGSMapToolStripMenuItem.Click += new System.EventHandler(this.assembleNGSMapToolStripMenuItem_Click_1);
             // 
             // AquaModelTool
             // 
@@ -797,6 +806,7 @@
         private System.Windows.Forms.ToolStripMenuItem testCMXBuild;
         private System.Windows.Forms.ToolStripMenuItem readTXLToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem assembleNGSMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readMRPToolStripMenuItem;
     }
 }
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace AquaModelLibrary.AquaMethods
@@ -331,5 +332,31 @@ namespace AquaModelLibrary.AquaMethods
 
             return outData;
         }
+
+        public static string GetFileHash(string str)
+        {
+            if (str == null)
+            {
+                return "";
+            }
+            byte[] hash = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(new UTF8Encoding().GetBytes(str));
+            return BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
+        }
+
+        public static string GetFileDataHash(string fileName)
+        {
+            if (fileName == null)
+            {
+                return "";
+            }
+            byte[] hash = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(File.ReadAllBytes(fileName));
+            return BitConverter.ToString(hash).Replace("-", string.Empty).ToLower();
+        }
+
+        public static string GetRebootHash(string fileName)
+        {
+            return fileName.Substring(0, 2) + "\\" + fileName.Substring(2, fileName.Length - 2);
+        }
+
     }
 }

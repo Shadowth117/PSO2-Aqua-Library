@@ -9,6 +9,7 @@ using AquaModelLibrary;
 using AquaModelLibrary.AquaMethods;
 using zamboni;
 using static AquaModelLibrary.CharacterMakingIndex;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 
 namespace CMXPatcher
 {
@@ -68,7 +69,7 @@ namespace CMXPatcher
             }
 
             //Write cmx to ice
-            string cmxPath = Path.Combine(pso2_binDir, dataDir, CharacterMakingIndexMethods.GetFileHash(classicCMX));
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
             if (File.Exists(cmxPath))
             {
                 var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
@@ -101,7 +102,7 @@ namespace CMXPatcher
                 try
                 {
                     Directory.CreateDirectory(moddedCMXPath);
-                    File.WriteAllBytes(moddedCMXPath + CharacterMakingIndexMethods.GetFileHash(classicCMX), rawData);
+                    File.WriteAllBytes(moddedCMXPath + GetFileHash(classicCMX), rawData);
                 }
                 catch
                 {
@@ -137,7 +138,7 @@ namespace CMXPatcher
                 cmx = CharacterMakingIndexMethods.ReadCMX(backupPath + "\\pl_data_info.cmx");
                 cmxRaw = File.ReadAllBytes(backupPath + "\\pl_data_info.cmx");
             }
-            string cmxPath = Path.Combine(pso2_binDir, dataDir, CharacterMakingIndexMethods.GetFileHash(classicCMX));
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
             if (File.Exists(cmxPath))
             {
                 var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
@@ -157,7 +158,7 @@ namespace CMXPatcher
             try
             {
                 Directory.CreateDirectory(downgradeCMXPath);
-                File.WriteAllBytes(downgradeCMXPath + CharacterMakingIndexMethods.GetFileHash(classicCMX), rawData);
+                File.WriteAllBytes(downgradeCMXPath + GetFileHash(classicCMX), rawData);
             }
             catch
             {
@@ -182,7 +183,7 @@ namespace CMXPatcher
         {
             bool isOldCmx = false;
             //Check original CMX to see if we need to do a new backup.
-            string cmxPath = Path.Combine(pso2_binDir, dataDir, CharacterMakingIndexMethods.GetFileHash(classicCMX));
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
             if (File.Exists(cmxPath))
             {
                 //bool foundCmx = false;

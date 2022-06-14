@@ -128,11 +128,13 @@ namespace AquaModelTool
 
             if((int)node.Tag == 0)
             {
-                textWindow.textBox1.Text = node.Text;
+                var textArr = node.Text.Split(')');
+                var num = textArr[0] + ")";
+                textWindow.textBox1.Text = node.Text.Split(')')[1];
                 
                 if(textWindow.ShowDialog() == DialogResult.OK)
                 {
-                    node.Text = textWindow.textBox1.Text;
+                    node.Text = num + textWindow.textBox1.Text;
                     currentMotion.motionKeys[node.Index].mseg.nodeName.SetString(textWindow.textBox1.Text);
                 }
             }
@@ -532,7 +534,7 @@ namespace AquaModelTool
             }
 
             //Make sure the user can't create empty node categories.
-            if (node.Parent.Nodes.Count < 2)
+            if (node.Parent?.Nodes.Count < 2)
             {
                 MessageBox.Show("You can't delete the only node in a category!");
                 return;
@@ -584,7 +586,13 @@ namespace AquaModelTool
                 default:
                     throw new Exception("Unexpected node tag!");
             }
-            node.Parent.Nodes.RemoveAt(node.Index);
+            if(node.Parent != null)
+            {
+                node.Parent.Nodes.RemoveAt(node.Index);
+            } else
+            {
+                animTreeView.Nodes.Remove(node);
+            }
         }
 
         private void animIDCB_SelectedIndexChanged(object sender, EventArgs e)

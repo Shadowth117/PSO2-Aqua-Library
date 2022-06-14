@@ -19,6 +19,7 @@ using System.Windows.Forms;
 using zamboni;
 using static AquaExtras.FilenameConstants;
 using static AquaModelLibrary.Utility.AquaUtilData;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 
 namespace AquaModelTool
 {
@@ -568,7 +569,7 @@ namespace AquaModelTool
             }
         }
 
-        private void generateCharacterFileSheetToolStripMenuItem_Click_1(object sender, EventArgs e)
+        private void generateFileReferenceSheetsToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
             {
@@ -585,7 +586,7 @@ namespace AquaModelTool
                     var outfolder = goodFolderDialog.FileName;
 
                     aquaUI.aqua.pso2_binDir = pso2_binDir;
-                    aquaUI.aqua.GenerateCharacterFileList(pso2_binDir, outfolder);
+                    aquaUI.aqua.GenerateFileReferenceSheets(pso2_binDir, outfolder);
                 }
             }
 
@@ -2930,6 +2931,53 @@ namespace AquaModelTool
                     {
                         PSO2MapHandler.pngMode = true;
                         PSO2MapHandler.DumpNGSMapData(goodFolderDialog.FileName, goodFolderDialog2.FileName, id);
+                    }
+                }
+            }
+        }
+
+        private void readMRPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var pso2_binDir = goodFolderDialog.FileName;
+
+                var filename = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash("myroom/myroom_param.ice"));
+                var iceFile = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(filename)));
+                List<byte[]> files = new List<byte[]>();
+                files.AddRange(iceFile.groupOneFiles);
+                files.AddRange(iceFile.groupTwoFiles);
+
+                for (int i = 0; i < files.Count; i++)
+                {
+                    var name = IceFile.getFileName(files[i]);
+                    if (name == "myroom_roomgoods.mrp")
+                    {
+                        var rg = AquaMiscMethods.ReadMyRoomParam(files[i], 0);
+                        foreach(var good in rg.roomGoodsList)
+                        {
+                            string obj = $"object/map_object/ob_1000_{good.goods.id:D4}.ice";
+                            string objFile = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash(obj));
+                            bool exists = false;
+                            exists = File.Exists(objFile);
+                            Debug.WriteLine($"{obj} Exists == {exists}");
+                        }
+                    }
+                    else if (name == "myroom_chip.mrp")
+                    {
+                        var chips = AquaMiscMethods.ReadMyRoomParam(files[i], 1);
+                        foreach (var chip in chips.chipsList)
+                        {
+                            string objFile = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash("object/map_object/" + chip.objectString + ".ice"));
+                            bool exists = false;
+                            exists = File.Exists(objFile);
+                            Debug.WriteLine("object/map_object/" + $"{chip.objectString}.ice Exists == {exists}");
+                        }
                     }
                 }
             }
