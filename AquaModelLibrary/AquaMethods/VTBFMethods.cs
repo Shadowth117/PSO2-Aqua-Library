@@ -5,16 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.AquaObject;
-using static AquaModelLibrary.AquaNode;
-using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
-using static AquaModelLibrary.AquaObjectMethods;
 using System.Windows;
-using static AquaModelLibrary.AquaMotion;
-using static AquaModelLibrary.ClassicAquaObject;
-using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.AquaCommon;
 using static AquaModelLibrary.AquaEffect;
+using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using static AquaModelLibrary.AquaMotion;
+using static AquaModelLibrary.AquaNode;
+using static AquaModelLibrary.AquaObject;
+using static AquaModelLibrary.AquaObjectMethods;
+using static AquaModelLibrary.AquaStructs.AddOnIndex;
+using static AquaModelLibrary.CharacterMakingIndex;
+using static AquaModelLibrary.ClassicAquaObject;
 
 namespace AquaModelLibrary
 {
@@ -26,7 +27,7 @@ namespace AquaModelLibrary
             bool listType = false;
 
             string vtc0 = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>())); //vtc0
-            if(vtc0 != "vtc0")
+            if (vtc0 != "vtc0")
             {
                 tagString = null;
                 entryCount = 0;
@@ -36,8 +37,8 @@ namespace AquaModelLibrary
             uint bodyLength = streamReader.Read<uint>();
             int mainTagType = streamReader.Read<int>();
             tagString = Encoding.UTF8.GetString(BitConverter.GetBytes(mainTagType));
-            #if DEBUG
-                        Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
+#if DEBUG
+            Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
 #endif
             ptrCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
             entryCount = streamReader.Read<short>();
@@ -51,13 +52,13 @@ namespace AquaModelLibrary
                 byte subDataType;
                 uint subDataAdditions;
 
-                if(i == 0 && dataId == 0xFC)
+                if (i == 0 && dataId == 0xFC)
                 {
                     listType = true;
                 }
 
                 //Check for special ids
-                if(listType)
+                if (listType)
                 {
                     switch (dataId)
                     {
@@ -72,7 +73,7 @@ namespace AquaModelLibrary
                             break;
                     }
                 }
-                
+
                 object data;
                 switch (dataType)
                 {
@@ -87,7 +88,8 @@ namespace AquaModelLibrary
                         if (strLen > 0)
                         {
                             data = streamReader.ReadBytes(streamReader.Position(), strLen);
-                        } else
+                        }
+                        else
                         {
                             data = new byte[0];
                         }
@@ -116,10 +118,10 @@ namespace AquaModelLibrary
                             ((byte[])data)[j] = streamReader.Read<byte>();
                         }
                         break;
-                    case 0x42: 
+                    case 0x42:
                     case 0x43: //Vector3 of bytes
                         subDataAdditions = streamReader.Read<byte>(); //Presumably the number of these consecutively
-                        if(subDataAdditions == 0)
+                        if (subDataAdditions == 0)
                         {
                             subDataAdditions = 4;
                         }
@@ -342,25 +344,26 @@ namespace AquaModelLibrary
                 }
 
                 //Really shouldn't happen, but they have this situation.
-                if(vtbfDict.ContainsKey(dataId))
+                if (vtbfDict.ContainsKey(dataId))
                 {
                     vtbfData.Add(vtbfDict);
                     vtbfDict = new Dictionary<int, object>();
                     vtbfDict.Add(dataId, data);
-                } else
+                }
+                else
                 {
                     vtbfDict.Add(dataId, data);
                 }
-            #if DEBUG
+#if DEBUG
                 //Console.WriteLine($"Processed { dataType.ToString("X")} around { streamReader.Position().ToString("X")}");
-            #endif
+#endif
             }
             //For non-list type tag data and non FD terminated lists (alpha has these)
             vtbfData.Add(vtbfDict);
 
-            #if DEBUG
-                //Console.WriteLine($"Processed {tagString} around { streamReader.Position().ToString("X")}");
-            #endif
+#if DEBUG
+            //Console.WriteLine($"Processed {tagString} around { streamReader.Position().ToString("X")}");
+#endif
 
             return vtbfData;
         }
@@ -472,10 +475,12 @@ namespace AquaModelLibrary
                     else if (rawBP is ushort[])
                     {
                         bonePalettes.Add(((ushort[])rawBP).ToList());
-                    } else if (rawBP is short)
+                    }
+                    else if (rawBP is short)
                     {
                         bonePalettes.Add(new List<ushort> { (ushort)((short)rawBP) });
-                    } else if (rawBP is short[])
+                    }
+                    else if (rawBP is short[])
                     {
                         var rawBPUshort = new List<ushort>();
                         var BPArr = (short[])rawBP;
@@ -497,7 +502,7 @@ namespace AquaModelLibrary
 
                 //EdgeVerts
                 vset.edgeVertsCount = (int)(vsetRaw[i][0xC9]);
-                if(vsetRaw[i].ContainsKey(0xCA))
+                if (vsetRaw[i].ContainsKey(0xCA))
                 {
                     var rawEV = (vsetRaw[i][0xCA]);
                     if (rawEV is ushort)
@@ -545,7 +550,8 @@ namespace AquaModelLibrary
                 if (i == 0)
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                } else
+                }
+                else
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
@@ -569,12 +575,14 @@ namespace AquaModelLibrary
                         {
                             outBytes.AddRange(BitConverter.GetBytes(vtxlList[i].bonePalette[j]));
                         }
-                    } else
+                    }
+                    else
                     {
                         addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes((int)0));
                     }
 
-                } else
+                }
+                else
                 {
                     addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes((int)0));
                 }
@@ -808,7 +816,8 @@ namespace AquaModelLibrary
                         outBytes.Add(0x10);
                         outBytes.AddRange(BitConverter.GetBytes((short)(strips[i].triStrips.Count - 1)));
                     }
-                } else
+                }
+                else
                 {
                     outBytes.Add(0x8);
                     outBytes.Add((byte)(strips[i].triStrips.Count - 1));
@@ -851,7 +860,7 @@ namespace AquaModelLibrary
                 mesh.baseMeshNodeId = (int)meshRaw[i][0xB5];
                 mesh.vsetIndex = (int)meshRaw[i][0xC0];
                 mesh.psetIndex = (int)meshRaw[i][0xC1];
-                if(meshRaw[i].ContainsKey(0xCD))
+                if (meshRaw[i].ContainsKey(0xCD))
                 {
                     mesh.unkInt0 = (int)meshRaw[i][0xCD];
                 }
@@ -962,7 +971,7 @@ namespace AquaModelLibrary
                 int matLen = mate.matName.GetLength();
                 byte[] matBytes = new byte[matLen];
                 byte[] tempMatBytes = mate.matName.GetBytes();
-                for(int strIndex = 0; strIndex < matLen; strIndex++)
+                for (int strIndex = 0; strIndex < matLen; strIndex++)
                 {
                     matBytes[strIndex] = tempMatBytes[strIndex];
                 }
@@ -1165,7 +1174,7 @@ namespace AquaModelLibrary
         public static unsafe byte[] toTSTA(List<TSTA> tstaList)
         {
             List<byte> outBytes = new List<byte>();
-            
+
             //Normally the FC tag is included in the count of the rest of these, but when there's no tags we account for it here.
             int emptyArray = 0;
             if (tstaList.Count == 0)
@@ -1223,7 +1232,7 @@ namespace AquaModelLibrary
                 using (Stream stream = new MemoryStream((byte[])tsetRaw[i][0x75]))
                 using (var streamReader = new BufferedStreamReader(stream, 8192))
                 {
-                    for(int j = 0; j < 4; j++)
+                    for (int j = 0; j < 4; j++)
                     {
                         tset.tstaTexIDs.Add(streamReader.Read<int>());
                     }
@@ -1257,12 +1266,13 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x73, 0x9, BitConverter.GetBytes(tset.unkInt2));
                 addBytes(outBytes, 0x74, 0x9, BitConverter.GetBytes(tset.unkInt3));
                 addBytes(outBytes, 0x75, 0x88, 0x8, 0x3, BitConverter.GetBytes(tset.tstaTexIDs[0]));
-                for(int j = 1; j < 4; j++)
+                for (int j = 1; j < 4; j++)
                 {
-                    if(tset.tstaTexIDs.Count > j)
+                    if (tset.tstaTexIDs.Count > j)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(tset.tstaTexIDs[j]));
-                    } else
+                    }
+                    else
                     {
                         outBytes.AddRange(BitConverter.GetBytes((int)-1));
                     }
@@ -1335,7 +1345,7 @@ namespace AquaModelLibrary
         {
             UNRM unrm = new UNRM();
 
-            if(unrmRaw.Count > 1)
+            if (unrmRaw.Count > 1)
             {
                 throw new Exception("Unexpected UNRM size! Please report the offending file!");
             }
@@ -1360,7 +1370,7 @@ namespace AquaModelLibrary
                     for (int j = 0; j < unrm.vertGroupCountCount; j++)
                     {
                         List<int> meshIds = new List<int>();
-                        for(int k = 0; k < unrm.unrmVertGroups[j]; k++)
+                        for (int k = 0; k < unrm.unrmVertGroups[j]; k++)
                         {
                             meshIds.Add(streamReader.Read<int>());
                         }
@@ -1457,11 +1467,12 @@ namespace AquaModelLibrary
             int vertIdCount = getListOfListOfIntsIntCount(unrm.unrmVertIds);
             if (vertIdCount - 1 > byte.MaxValue)
             {
-                if(vertIdCount - 1 > ushort.MaxValue)
+                if (vertIdCount - 1 > ushort.MaxValue)
                 {
                     outBytes.Add(0x18);
                     outBytes.AddRange(BitConverter.GetBytes(vertIdCount - 1));
-                } else
+                }
+                else
                 {
                     outBytes.Add(0x10);
                     outBytes.AddRange(BitConverter.GetBytes((ushort)(vertIdCount - 1)));
@@ -1539,7 +1550,7 @@ namespace AquaModelLibrary
         {
             List<NODE> nodeList = new List<NODE>();
 
-            for(int i = 0; i < nodeRaw.Count; i++)
+            for (int i = 0; i < nodeRaw.Count; i++)
             {
                 NODE node = new NODE();
 
@@ -1572,7 +1583,7 @@ namespace AquaModelLibrary
         {
             List<byte> outBytes = new List<byte>();
 
-            for(int i = 0; i < nodeList.Count; i++)
+            for (int i = 0; i < nodeList.Count; i++)
             {
                 NODE node = nodeList[i];
                 if (i == 0)
@@ -1743,7 +1754,7 @@ namespace AquaModelLibrary
             mseg.nodeName.SetBytes((byte[])msegRaw[0][0xE9]);
             mseg.nodeId = (int)msegRaw[0][0xEA];
 
-            return mseg; 
+            return mseg;
         }
 
         public static byte[] toMSEG(MSEG mseg)
@@ -1771,21 +1782,22 @@ namespace AquaModelLibrary
             mkey.dataType = (int)mkeyRaw[0][0xEC];
             mkey.unkInt0 = (int)mkeyRaw[0][0xF0];
             mkey.keyCount = (int)mkeyRaw[0][0xED];
-            
+
             //Get frame timings. Seemingly may not store a frame timing if there's only one frame.
-            if(mkey.keyCount > 1)
+            if (mkey.keyCount > 1)
             {
                 for (int j = 0; j < mkey.keyCount; j++)
                 {
                     mkey.frameTimings.Add(((ushort[])mkeyRaw[0][0xEF])[j]);
                 }
-            } else if (mkeyRaw[0].ContainsKey(0xEF))
+            }
+            else if (mkeyRaw[0].ContainsKey(0xEF))
             {
                 mkey.frameTimings.Add((ushort)mkeyRaw[0][0xEF]);
             }
 
             //Get frames. The data types stored are different depending on the key count.
-            switch(mkey.dataType)
+            switch (mkey.dataType)
             {
                 //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                 case 0x1:
@@ -1806,13 +1818,14 @@ namespace AquaModelLibrary
                 case 0x5:
                     if (mkey.keyCount > 1)
                     {
-                        if(mkeyRaw[0].ContainsKey(0xF3))
+                        if (mkeyRaw[0].ContainsKey(0xF3))
                         {
                             for (int j = 0; j < mkey.keyCount; j++)
                             {
                                 mkey.intKeys.Add(((int[])mkeyRaw[0][0xF3])[j]);
                             }
-                        } else
+                        }
+                        else
                         {
                             for (int j = 0; j < mkey.keyCount * 4; j += 4)
                             {
@@ -1825,7 +1838,8 @@ namespace AquaModelLibrary
                         if (mkeyRaw[0].ContainsKey(0xF3))
                         {
                             mkey.intKeys.Add((int)mkeyRaw[0][0xF3]);
-                        } else
+                        }
+                        else
                         {
                             for (int j = 0; j < mkey.keyCount * 4; j += 4)
                             {
@@ -1895,7 +1909,8 @@ namespace AquaModelLibrary
 
                             outBytes.AddRange(BitConverter.GetBytes(mkey.intKeys[j]));
                         }
-                    } else
+                    }
+                    else
                     {
                         outBytes.AddRange(mkey.byteKeys);
                     }
@@ -2074,7 +2089,7 @@ namespace AquaModelLibrary
             fcmn.faceAnim1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcmnRaw[0], 0xC1)).GetString();
 
             PSO2String[] faceAnims = new PSO2String[8];
-            if(fcmnRaw.Count > 1)
+            if (fcmnRaw.Count > 1)
             {
                 for (int i = 1; i < fcmnRaw.Count; i++)
                 {
@@ -2097,7 +2112,7 @@ namespace AquaModelLibrary
         {
             FCPObject fcp = new FCPObject();
             fcp.fcp.id = (int)fcp1Raw[0][0xFF];
-            
+
             fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x80)).GetString();
             fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x81)).GetString();
             fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp1Raw[0], 0x82)).GetString();
@@ -2114,7 +2129,7 @@ namespace AquaModelLibrary
             fcp.texString1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x90)).GetString();
             fcp.texString2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x92)).GetString();
             fcp.texString3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(fcp2Raw[0], 0x93)).GetString();
-            
+
             return fcp;
         }
 
@@ -2182,17 +2197,18 @@ namespace AquaModelLibrary
         {
             VTBF_COLObject vtbfCol = new VTBF_COLObject();
             vtbfCol.vtbfCol = new VTBF_COL();
-            if(colRaw[0].ContainsKey(0xFF))
+            if (colRaw[0].ContainsKey(0xFF))
             {
                 vtbfCol.vtbfCol.id = (int)colRaw[0][0xFF];
-            } else
+            }
+            else
             {
                 vtbfCol.vtbfCol.id = -1;
             }
             vtbfCol.vtbfCol.utf8String = (byte[])colRaw[0][0x31];
 
             //Convert shorts to be read as utf16 string
-            if(colRaw[0].ContainsKey(0x32))
+            if (colRaw[0].ContainsKey(0x32))
             {
                 var shorts = (short[])colRaw[0][0x32];
                 var bytes = new byte[shorts.Length * 2];
@@ -2417,17 +2433,18 @@ namespace AquaModelLibrary
         {
             List<KEYS> keyList = new List<KEYS>();
 
-            for(int i = 0; i < keysRaw.Count; i++)
+            for (int i = 0; i < keysRaw.Count; i++)
             {
                 var keys = new KEYS();
 
                 keys.type = GetObject<byte>(keysRaw[i], 0x72);
-                if(keysRaw[i].TryGetValue(0x78, out object value) == true)
+                if (keysRaw[i].TryGetValue(0x78, out object value) == true)
                 {
-                    if(value is float)
+                    if (value is float)
                     {
                         keys.time = (float)value;
-                    } else if(value is short)
+                    }
+                    else if (value is short)
                     {
                         keys.time = (short)value;
                     }
@@ -2442,14 +2459,40 @@ namespace AquaModelLibrary
 
             return keyList;
         }
+        
+        public static ADDO parseADDO(List<Dictionary<int, object>> addoRaw)
+        {
+            ADDO addo = new ADDO();
+            addo.id = GetObject<int>(addoRaw[0], 0xFF);
+            addo.leftName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF0));
+            addo.leftBoneAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF1));
+            addo.rightName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF2));
+            addo.rightBoneAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF3));
+            addo.unusedLeftName2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF4));
+            addo.unusedLeftBoneAttach2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF5));
+            addo.unusedRightName2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF6));
+            addo.unusedRightBoneAttach2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF7));
+            addo.F8 = GetObject<byte>(addoRaw[0], 0xF8);
+            addo.leftEffectName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF9));
+            addo.rightEffectName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xFA));
+            addo.leftEffectAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xFB));
+            addo.rightEffectAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xFC));
+            addo.FD = GetObject<byte>(addoRaw[0], 0xFD);
+            addo.FE = GetObject<byte>(addoRaw[0], 0xFE);
+            addo.E0 = GetObject<byte>(addoRaw[0], 0xE0);
+            addo.extraAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xE1));
+
+            return addo;
+        }
 
         //Safely retrieves objects in the case that they don't exist in the given dictionary
         public static T GetObject<T>(Dictionary<int, object> dict, int key)
         {
-            if(dict.ContainsKey(key))
+            if (dict.ContainsKey(key))
             {
                 return (T)dict[key];
-            } else
+            }
+            else
             {
                 return default(T);
             }
@@ -2468,7 +2511,7 @@ namespace AquaModelLibrary
         public static int getListOfListOfIntsIntCount(List<List<int>> intListlist)
         {
             int count = 0;
-            for(int i = 0; i < intListlist.Count; i++)
+            for (int i = 0; i < intListlist.Count; i++)
             {
                 count += intListlist[i].Count;
             }
@@ -2509,7 +2552,7 @@ namespace AquaModelLibrary
 
         public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
         {
-            outBytes.Add(id); 
+            outBytes.Add(id);
             outBytes.Add(dataType);
             outBytes.AddRange(data);
         }
@@ -2533,10 +2576,11 @@ namespace AquaModelLibrary
 
         public static ushort flagCheck(int check)
         {
-            if(check > 0)
+            if (check > 0)
             {
                 return 1;
-            } else
+            }
+            else
             {
                 return 0;
             }

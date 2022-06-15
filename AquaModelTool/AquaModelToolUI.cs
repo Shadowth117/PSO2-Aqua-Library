@@ -2936,7 +2936,7 @@ namespace AquaModelTool
             }
         }
 
-        private void readMRPToolStripMenuItem_Click(object sender, EventArgs e)
+        private void readAOXToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
             {
@@ -2947,7 +2947,7 @@ namespace AquaModelTool
             {
                 var pso2_binDir = goodFolderDialog.FileName;
 
-                var filename = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash("myroom/myroom_param.ice"));
+                var filename = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash(unitIndexIce));
                 var iceFile = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(filename)));
                 List<byte[]> files = new List<byte[]>();
                 files.AddRange(iceFile.groupOneFiles);
@@ -2956,29 +2956,11 @@ namespace AquaModelTool
                 for (int i = 0; i < files.Count; i++)
                 {
                     var name = IceFile.getFileName(files[i]);
-                    if (name == "myroom_roomgoods.mrp")
+                    if (name == unitIndexFilename)
                     {
-                        var rg = AquaMiscMethods.ReadMyRoomParam(files[i], 0);
-                        foreach(var good in rg.roomGoodsList)
-                        {
-                            string obj = $"object/map_object/ob_1000_{good.goods.id:D4}.ice";
-                            string objFile = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash(obj));
-                            bool exists = false;
-                            exists = File.Exists(objFile);
-                            Debug.WriteLine($"{obj} Exists == {exists}");
-                        }
+                        AquaUtil.LoadAOX(files[i]);
                     }
-                    else if (name == "myroom_chip.mrp")
-                    {
-                        var chips = AquaMiscMethods.ReadMyRoomParam(files[i], 1);
-                        foreach (var chip in chips.chipsList)
-                        {
-                            string objFile = Path.Combine(pso2_binDir, CharacterMakingIndex.dataDir, GetFileHash("object/map_object/" + chip.objectString + ".ice"));
-                            bool exists = false;
-                            exists = File.Exists(objFile);
-                            Debug.WriteLine("object/map_object/" + $"{chip.objectString}.ice Exists == {exists}");
-                        }
-                    }
+
                 }
             }
         }

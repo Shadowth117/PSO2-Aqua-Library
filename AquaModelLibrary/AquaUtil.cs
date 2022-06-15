@@ -3075,6 +3075,16 @@ namespace AquaModelLibrary
             aquaCMX = ReadCMX(fileName);
         }
 
+        public static AddOnIndex LoadAOX(string fileName)
+        {
+            return ReadAOX(fileName);
+        }
+
+        public static AddOnIndex LoadAOX(byte[] data)
+        {
+            return ReadAOX(data);
+        }
+
         public void LoadPSO2Text(string fileName)
         {
             aquaText = ReadPSO2Text(fileName);
@@ -3087,7 +3097,7 @@ namespace AquaModelLibrary
 
         public void GenerateFileReferenceSheets(string pso2_binDir, string outputDirectory)
         {
-            ReferenceConstructor.OutputFileLists(pso2_binDir, outputDirectory);
+            ReferenceGenerator.OutputFileLists(pso2_binDir, outputDirectory);
         }
 
         public void ReadItNameCacheAppendix(string fileName)

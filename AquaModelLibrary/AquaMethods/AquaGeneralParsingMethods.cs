@@ -964,6 +964,90 @@ namespace AquaModelLibrary
             return mgxIds;
         }
 
+        public static AddOnIndex ReadAOX(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadAOX(streamReader);
+            }
+        }
+        public static AddOnIndex ReadAOX(byte[] file)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadAOX(streamReader);
+            }
+        }
+
+        private static AddOnIndex BeginReadAOX(BufferedStreamReader streamReader)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("aox\0"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                //There shouldn't be a nifl variant of this for now.
+                MessageBox.Show("Error, NIFL .aox found");
+                return null;
+            }
+            else if (type.Equals("VTBF"))
+            {
+                return ReadVTBFAOX(streamReader);
+            }
+            else
+            {
+                MessageBox.Show("Improper File Format!");
+                return null;
+            }
+        }
+
+        public static AddOnIndex ReadVTBFAOX(BufferedStreamReader streamReader)
+        {
+            AddOnIndex aoi = new AddOnIndex();
+
+            int dataEnd = (int)streamReader.BaseStream().Length;
+
+            //Seek past vtbf tag
+            streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF tags
+
+            while (streamReader.Position() < dataEnd)
+            {
+                var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
+                switch (tagType)
+                {
+                    case "DOC ":
+                        break;
+                    case "ADDO":
+                        aoi.addonList.Add(parseADDO(data));
+                        break;
+                    default:
+                        //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
+                        if (data == null)
+                        {
+                            return aoi;
+                        }
+                        throw new System.Exception($"Unexpected tag at {streamReader.Position().ToString("X")}! {tagType} Please report!");
+                }
+            }
+
+            return aoi;
+        }
+
         public static MyRoomParameters ReadMyRoomParam(string fileName)
         {
             using (Stream stream = (Stream)new FileStream(fileName, FileMode.Open))

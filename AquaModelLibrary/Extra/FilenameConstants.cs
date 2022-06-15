@@ -5,14 +5,25 @@ namespace AquaExtras
     public static class FilenameConstants
     {
         public static string classicSystemData = "character/making/pl_system_data.ice"; //handles body proportions, unloaded player models, and subnormal textures
-        public static string mgxName = "setting.mgx";
         public static string pbCreatures = "photon_blast/photon_blast_";
         public static string db_vehicle = "vehicle/";
         public static string weaponDir = "item/weapon/";
         public static string baseWeaponString = "it_wp_00_base_";
         public static string weaponString = "it_wp_";
         public static string defaultWeaponString = "it_wp_xxx_";
-        public static string myRoomParameters = "myroom/myroom_param.ice";
+
+        //Indexing
+        public static string myRoomParametersIce = "myroom/myroom_param.ice";
+        public static string myRoomGoodsFilename = "myroom_roomgoods.mrp";
+        public static string myRoomChipFilename = "myroom_chip.mrp";
+        public static string unitIndexIce = "item/addon/it_ad_setting.ice";
+        public static string unitIndexFilename = "setting.aox";
+        public static string mgxName = "setting.mgx";
+        public static string magSettingIce = "item/mag/it_mg_setting.ice";
+
+        //UI
+        public static string loadTunnelClassic = "ui_playable_load.ice";
+        public static string loadTunnelReboot = "interface/ui_playable_load.ice";
 
         //Special
         public static string dashPanelIce = "character/pl_reboot_object_dashpanel.ice";
@@ -6086,6 +6097,18 @@ namespace AquaExtras
             { 196, "オッチャ,Ocha"},
 
             { 999, "Debug" }
+        };
+
+        public static Dictionary<int, string> unitNames = new Dictionary<int, string>()
+        {
+        };
+
+        public static Dictionary<string, string> roomNames = new Dictionary<string, string>()
+        { 
+        };
+
+        public static Dictionary<string, string> roomGoodsNames = new Dictionary<string, string>()
+        {
         };
     }
 }

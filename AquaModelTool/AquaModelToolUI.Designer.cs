@@ -689,8 +689,8 @@
             // 
             this.readMRPToolStripMenuItem.Name = "readMRPToolStripMenuItem";
             this.readMRPToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.readMRPToolStripMenuItem.Text = "ReadMRP";
-            this.readMRPToolStripMenuItem.Click += new System.EventHandler(this.readMRPToolStripMenuItem_Click);
+            this.readMRPToolStripMenuItem.Text = "ReadAOX";
+            this.readMRPToolStripMenuItem.Click += new System.EventHandler(this.readAOXToolStripMenuItem_Click);
             // 
             // filePanel
             // 

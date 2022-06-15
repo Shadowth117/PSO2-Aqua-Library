@@ -88,7 +88,6 @@ namespace AquaModelLibrary
         public static string rebootActorName = $"actor/ac_name_text.ice";
         public static string rebootActorNameNPC = $"npc/np_npc_actor_name.ice"; //Use this for actual cml names. Other one
         public static string rebootLobbyAction = $"f94e8bfb6ee674e39fa6bc1aa697bf82";
-        public static string magSetting = "item/mag/it_mg_setting.ice";
 
         public static string partsTextName = "ui_charamake_parts.text";
         public static string acceTextName = "ui_accessories_text.text";

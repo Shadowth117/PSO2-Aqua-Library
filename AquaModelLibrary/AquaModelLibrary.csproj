@@ -155,6 +155,7 @@
     <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
+    <Compile Include="AquaStructs\AddOnIndex.cs" />
     <Compile Include="AquaStructs\AquaBTI_MotionConfig.cs" />
     <Compile Include="AquaStructs\AquaFigure.cs" />
     <Compile Include="AquaStructs\AquaFigure\FigEffectMapStructs.cs" />
@@ -187,7 +188,7 @@
     <Compile Include="Extra\PSO2MapHandler.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
-    <Compile Include="Extra\ReferenceConstructor.cs" />
+    <Compile Include="Extra\ReferenceGenerator.cs" />
     <Compile Include="Native\Fbx\FbxExporter.cs" />
     <Compile Include="Native\Fbx\Interfaces\IFbxExporter.cs" />
     <Compile Include="Native\Native.cs" />
