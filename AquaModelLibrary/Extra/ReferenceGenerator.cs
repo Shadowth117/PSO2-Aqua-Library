@@ -26,14 +26,16 @@ namespace AquaModelLibrary.Extra
             string playerCAnimDirOut = Path.Combine(playerClassicDirOut, animsEffectsOut);
             string playerRebootDirOut = Path.Combine(playerDirOut, ngsOut);
             string playerRAnimDirOut = Path.Combine(playerRebootDirOut, animsEffectsOut);
+            string npcDirOut = Path.Combine(playerRebootDirOut, npcOut);
             string enemyDirOut = Path.Combine(outputDirectory, enemiesOut);
             string petsDirOut = Path.Combine(outputDirectory, petsOut);
-            Directory.CreateDirectory(playerDirOut);
+            Directory.CreateDirectory(enemyDirOut);
+            Directory.CreateDirectory(npcDirOut);
             Directory.CreateDirectory(playerClassicDirOut);
             Directory.CreateDirectory(playerCAnimDirOut);
+            Directory.CreateDirectory(playerDirOut);
             Directory.CreateDirectory(playerRebootDirOut);
             Directory.CreateDirectory(playerRAnimDirOut);
-            Directory.CreateDirectory(enemyDirOut);
             Directory.CreateDirectory(petsDirOut);
 
             var aquaCMX = new CharacterMakingIndex();
@@ -161,7 +163,9 @@ namespace AquaModelLibrary.Extra
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootNPCByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
 
             if (partsText != null)
             {
@@ -199,11 +203,25 @@ namespace AquaModelLibrary.Extra
                     commRebootByCat.Add(commonTextReboot.categoryNames[i], commonTextReboot.text[i]);
                 }
             }
+            if (actorNameText != null)
+            {
+                for (int i = 0; i < actorNameTextReboot.text.Count; i++)
+                {
+                    actorNameByCat.Add(actorNameText.categoryNames[i], actorNameText.text[i]);
+                }
+            }
             if (actorNameTextReboot != null)
             {
                 for (int i = 0; i < actorNameTextReboot.text.Count; i++)
                 {
                     actorNameRebootByCat.Add(actorNameTextReboot.categoryNames[i], actorNameTextReboot.text[i]);
+                }
+            }
+            if (actorNameTextReboot_NPC != null)
+            {
+                for (int i = 0; i < actorNameTextReboot_NPC.text.Count; i++)
+                {
+                    actorNameRebootNPCByCat.Add(actorNameTextReboot_NPC.categoryNames[i], actorNameTextReboot_NPC.text[i]);
                 }
             }
 
@@ -216,7 +234,7 @@ namespace AquaModelLibrary.Extra
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
-            GenerateVoiceLists(pso2_binDir, playerDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameTextReboot);
+            GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateMotionChangeLists(pso2_binDir, playerRAnimDirOut, commonTextReboot, commRebootByCat);
             GenerateAnimation_EffectLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, out genAnimList, out genAnimListNGS);
@@ -829,7 +847,9 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        private static void GenerateVoiceLists(string pso2_binDir, string playerDirOut, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts, PSO2Text actorNameTextReboot)
+        private static void GenerateVoiceLists(string pso2_binDir, string playerDirOut, string npcDirOut, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, 
+            List<int> masterIdList, List<Dictionary<int, string>> nameDicts, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts, 
+            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameText, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameTextReboot, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameTextNPCReboot)
         {
             //---------------------------Parse out voices 
             StringBuilder outputMaleVoices = new StringBuilder();
@@ -931,7 +951,108 @@ namespace AquaModelLibrary.Extra
             WriteCSV(playerDirOut, "CastVoices.csv", outputCastVoices);
             WriteCSV(playerDirOut, "CasealVoices.csv", outputCasealVoices);
 
-            //--------------------------NPC Voices Classic
+            //--------------------------NPC Battle Voices Classic
+            StringBuilder outputBattleVoices = new StringBuilder();
+            StringBuilder outputBattleVoicesNA = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            strNameDicts.Clear();
+            masterNameList.Clear();
+            GatherTextIdsStringRef(actorNameText, masterNameList, strNameDicts, "Npc", true);
+            foreach (var str in masterNameList)
+            {
+                if(str.Length > 7 || !Int32.TryParse(str.Substring(4), out int result))
+                {
+                    continue;
+                }
+                string languageVoices = "";
+                string output = "";
+                string outputNA = "";
+                foreach (var dict in strNameDicts)
+                {
+                    dict.TryGetValue(str, out string newStr);
+                    languageVoices += newStr + ",";
+                }
+                var voiceBase = npcBtVoiceStart + str.ToLower().Insert(4, "5") + ".ice"; //
+                var voiceStr = GetFileHash(voiceBase);
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, voiceStr)))
+                {
+                    output += languageVoices + voiceBase + "," + voiceStr + "\n";
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataNADir, voiceStr)))
+                {
+                    outputNA += languageVoices + voiceBase + "," + voiceStr + "\n";
+                }
+                if (output != "")
+                {
+                    outputBattleVoices.Append(output);
+                }
+                if (outputNA != "")
+                {
+                    outputBattleVoicesNA.Append(outputNA);
+                }
+            }
+            WriteCSV(npcDirOut, "NPC Battle Voices.csv", outputBattleVoices);
+            WriteCSV(npcDirOut, "NPC Battle Voices NA.csv", outputBattleVoicesNA);
+
+            //--------------------------NPC Battle Voices Reboot
+            StringBuilder outputRBBattleVoices = new StringBuilder();
+            StringBuilder outputRBBattleVoicesNA = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            strNameDicts.Clear();
+            masterNameList.Clear();
+            GatherTextIdsStringRef(actorNameTextReboot, masterNameList, strNameDicts, "Npc", true);
+            foreach(var str in masterNameList)
+            {
+                string languageVoices = "";
+                string output = "";
+                string outputNA = "";
+                foreach (var dict in strNameDicts)
+                {
+                    dict.TryGetValue(str, out string newStr);
+                    languageVoices += newStr + ",";
+                }
+                var voiceBase = npcBtVoiceStart + str.ToLower();
+                for(int i = 0; i < 200; i++)
+                {
+                    var voiceStrRaw = voiceBase + $"{i:D3}.ice";
+                    var voiceStr = GetRebootHash(GetFileHash(voiceStrRaw));
+                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, voiceStr)))
+                    {
+                        output += languageVoices + voiceStrRaw + "," + voiceStr + "\n"; 
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, voiceStr)))
+                    {
+                        outputNA += languageVoices + voiceStrRaw + "," + voiceStr + "\n";
+                    }
+                }
+                for (int i = 995; i < 999; i++)
+                {
+                    var voiceStrRaw = voiceBase + $"{i:D3}.ice";
+                    var voiceStr = GetRebootHash(GetFileHash(voiceStrRaw));
+                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, voiceStr)))
+                    {
+                        output += languageVoices + "," + voiceStrRaw + "," + voiceStr + "\n";
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, voiceStr)))
+                    {
+                        outputNA += languageVoices + voiceStrRaw + "," + voiceStr + "\n";
+                    }
+                }
+                if(output != "")
+                {
+                    outputRBBattleVoices.Append(output);
+                }
+                if (outputNA != "")
+                {
+                    outputRBBattleVoicesNA.Append(outputNA);
+                }
+            }
+            WriteCSV(npcDirOut, "NGS NPC Battle Voices.csv", outputRBBattleVoices);
+            WriteCSV(npcDirOut, "NGS NPC Battle Voices NA.csv", outputRBBattleVoicesNA);
         }
 
         private static void DumpPaletteData(string outputDirectory, CharacterMakingIndex aquaCMX)

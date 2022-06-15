@@ -21,6 +21,9 @@ namespace AquaExtras
         public static string mgxName = "setting.mgx";
         public static string magSettingIce = "item/mag/it_mg_setting.ice";
 
+        //NPC
+        public static string npcBtVoiceStart = "npc_bt_voice/11_sound_voice_bt_";
+
         //UI
         public static string loadTunnelClassic = "ui_playable_load.ice";
         public static string loadTunnelReboot = "interface/ui_playable_load.ice";
@@ -38,9 +41,10 @@ namespace AquaExtras
         public static string classicOut = @"Classic\";
         public static string colorPaletteOut = @"ColorPalettes\";
         public static string enemiesOut = @"Enemies\";
+        public static string ngsOut = @"NGS\";
+        public static string npcOut = @"NPC\";
         public static string petsOut = @"Pets\";
         public static string playerOut = @"Player\";
-        public static string ngsOut = @"NGS\";
 
 
         public static Dictionary<string, string> texNamePresetPatterns = new Dictionary<string, string>()
