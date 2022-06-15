@@ -26,9 +26,10 @@ namespace AquaModelLibrary.Extra
             string playerCAnimDirOut = Path.Combine(playerClassicDirOut, animsEffectsOut);
             string playerRebootDirOut = Path.Combine(playerDirOut, ngsOut);
             string playerRAnimDirOut = Path.Combine(playerRebootDirOut, animsEffectsOut);
-            string npcDirOut = Path.Combine(playerRebootDirOut, npcOut);
+            string npcDirOut = Path.Combine(outputDirectory, npcOut);
             string enemyDirOut = Path.Combine(outputDirectory, enemiesOut);
             string petsDirOut = Path.Combine(outputDirectory, petsOut);
+            string uiDirOut = Path.Combine(outputDirectory, uiOut);
             Directory.CreateDirectory(enemyDirOut);
             Directory.CreateDirectory(npcDirOut);
             Directory.CreateDirectory(playerClassicDirOut);
@@ -37,6 +38,7 @@ namespace AquaModelLibrary.Extra
             Directory.CreateDirectory(playerRebootDirOut);
             Directory.CreateDirectory(playerRAnimDirOut);
             Directory.CreateDirectory(petsDirOut);
+            Directory.CreateDirectory(uiDirOut);
 
             var aquaCMX = new CharacterMakingIndex();
             PSO2Text partsText = null;
@@ -205,7 +207,7 @@ namespace AquaModelLibrary.Extra
             }
             if (actorNameText != null)
             {
-                for (int i = 0; i < actorNameTextReboot.text.Count; i++)
+                for (int i = 0; i < actorNameText.text.Count; i++)
                 {
                     actorNameByCat.Add(actorNameText.categoryNames[i], actorNameText.text[i]);
                 }
@@ -232,9 +234,12 @@ namespace AquaModelLibrary.Extra
             List<string> genAnimList, genAnimListNGS;
 
             DumpPaletteData(outputDirectory, aquaCMX);
+            GenerateUILists(pso2_binDir, outputDirectory);
+            GenerateRoomLists(pso2_binDir, outputDirectory);
+            GenerateUnitLists(pso2_binDir, outputDirectory);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
-            GenerateWeaponLists(pso2_binDir, outputDirectory);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
+            GenerateWeaponLists(pso2_binDir, outputDirectory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateMotionChangeLists(pso2_binDir, playerRAnimDirOut, commonTextReboot, commRebootByCat);
             GenerateAnimation_EffectLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, out genAnimList, out genAnimListNGS);
@@ -243,8 +248,6 @@ namespace AquaModelLibrary.Extra
             GenerateVehicle_SpecialWeaponList(playerDirOut, playerCAnimDirOut, playerRAnimDirOut, genAnimList, genAnimListNGS);
             GeneratePetList(petsDirOut);
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
-            GenerateRoomLists(pso2_binDir, outputDirectory);
-            GenerateUnitLists(pso2_binDir, outputDirectory);
 
             //---------------------------Generate 
         }
@@ -265,7 +268,7 @@ namespace AquaModelLibrary.Extra
             List<string> aoxOut = new List<string>();
 
             //Load unit settings file
-            string aoxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(magSettingIce));
+            string aoxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(unitIndexIce));
             if (File.Exists(aoxPath))
             {
                 var strm = new MemoryStream(File.ReadAllBytes(aoxPath));
@@ -278,7 +281,7 @@ namespace AquaModelLibrary.Extra
                 //Loop through files to get what we need
                 foreach (byte[] file in files)
                 {
-                    if (IceFile.getFileName(file).ToLower().Contains(mgxName))
+                    if (IceFile.getFileName(file).ToLower().Contains(unitIndexFilename))
                     {
                         aox = ReadAOX(file);
                     }
@@ -291,7 +294,7 @@ namespace AquaModelLibrary.Extra
             {
                 string file = $"item/addon/it_ad_{addo.id:D5}.ice";
                 string fileHashed = GetFileHash(file);
-                if (File.Exists(fileHashed))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, fileHashed)))
                 {
                     string unitName = unitNames.ContainsKey(addo.id) ? unitNames[addo.id] : "";
                     aoxOut.Add(unitName + "," + file + "," + fileHashed);
@@ -322,18 +325,20 @@ namespace AquaModelLibrary.Extra
                     foreach (var good in rg.roomGoodsList)
                     {
                         string obj = $"object/map_object/ob_1000_{good.goods.id:D4}.ice";
+                        string objHash = GetFileHash(obj);
                         string objEx = $"object/map_object/ob_1000_{good.goods.id:D4}_ex.ice";
-                        string objFile = Path.Combine(pso2_binDir, dataDir, GetFileHash(obj));
-                        string objFileEx = Path.Combine(pso2_binDir, dataDir, GetFileHash(objEx));
+                        string objExHash = GetFileHash(objEx);
+                        string objFile = Path.Combine(pso2_binDir, dataDir, objHash);
+                        string objFileEx = Path.Combine(pso2_binDir, dataDir, objExHash);
                         
                         if(File.Exists(objFile))
                         {
                             string goodsName = roomGoodsNames.ContainsKey(obj) ? roomGoodsNames[obj] : "";
-                            roomGoodsOut.Add(goodsName + "," + objFile);
+                            roomGoodsOut.Add(goodsName + "," + obj + "," + objHash);
                         }
                         if (File.Exists(objFileEx))
                         {
-                            roomGoodsOut.Add("extra textures," + objFileEx);
+                            roomGoodsOut.Add("extra textures," + objEx + "," + objExHash);
                         }
                     }
                 }
@@ -345,17 +350,21 @@ namespace AquaModelLibrary.Extra
                         for(int id = 0; id < 105; id++)
                         {
                             string chipFinalString = chip.objectString.Substring(0, 8) + $"{id:D4}";
-                            string objFile = Path.Combine(pso2_binDir, dataDir, GetFileHash("object/map_object/" + chipFinalString + ".ice"));
-                            string objFileEx = Path.Combine(pso2_binDir, dataDir, GetFileHash("object/map_object/" + chipFinalString + "_ex.ice"));
+                            string chipBase = "object/map_object/" + chipFinalString + ".ice";
+                            string chipBaseEx = "object/map_object/" + chipFinalString + "_ex.ice";
+                            string chipObj = GetFileHash(chipBase);
+                            string chipObjEx = GetFileHash(chipBaseEx);
+                            string objFile = Path.Combine(pso2_binDir, dataDir, chipObj);
+                            string objFileEx = Path.Combine(pso2_binDir, dataDir, chipObjEx);
 
                             if (File.Exists(objFile))
                             {
                                 string roomName = roomNames.ContainsKey(chipFinalString) ? roomNames[chipFinalString] : "";
-                                roomGoodsOut.Add(roomName + "," + objFile);
-                            }
-                            if (File.Exists(objFileEx))
-                            {
-                                roomGoodsOut.Add("extra textures," + objFileEx);
+                                roomsOut.Add(roomName + "," + chipBase + "," + chipObj);
+                                if (File.Exists(objFileEx))
+                                {
+                                    roomsOut.Add("extra textures," + chipBaseEx + "," + chipObjEx);
+                                }
                             }
                         }
                     }
@@ -4730,8 +4739,8 @@ namespace AquaModelLibrary.Extra
         public static void ReadExtraText(string pso2_binDir, out PSO2Text actorNameText, out PSO2Text actorNameTextReboot, out PSO2Text actorNameTextReboot_NPC)
         {            
             //Load actor name text
-            string actorNameTextPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(classicActorName)));
-            string actorNameTextPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(classicActorName)));
+            string actorNameTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicActorName));
+            string actorNameTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicActorName));
 
             actorNameText = GetTextConditional(actorNameTextPath, actorNameTextPathhNA, actorNameName);
 

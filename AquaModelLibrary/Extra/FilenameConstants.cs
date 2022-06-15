@@ -45,6 +45,7 @@ namespace AquaExtras
         public static string npcOut = @"NPC\";
         public static string petsOut = @"Pets\";
         public static string playerOut = @"Player\";
+        public static string uiOut = @"UI\";
 
 
         public static Dictionary<string, string> texNamePresetPatterns = new Dictionary<string, string>()
