@@ -36,6 +36,13 @@ namespace AquaExtras
         public static string particleCannonIce = "character/pl_reboot_object_particlecannon.ice";
         public static string snowbowardIce = "character/pl_reboot_object_snowboard.ice";
 
+        //Stage
+        public static string effectPath = "stage/effect/"; //Used only for a few late game areas in classic
+        public static string radarPath = "stage/radar/"; //In NGS, only exists for trainia, though unused as of writing
+        public static string skyboxPath = "stage/weather/";
+        public static string lnAreaTemplateCommon = "stage/ln_area_template_common.ice" //LPS files inside tell the game what layout models exist etc.
+        public static string lnAreaTemplateCommonReboot = "stage/ln_area_template_common_reboot.ice" //LPS files inside tell the game what layout models exist etc. for NGS. Only applicable for areas like Trainia, open worlds use a different system
+
         //Out
         public static string animsEffectsOut = @"Animations and Effects\";
         public static string classicOut = @"Classic\";
@@ -6106,6 +6113,13 @@ namespace AquaExtras
 
         public static Dictionary<int, string> unitNames = new Dictionary<int, string>()
         {
+            {1,"リア／カルバリアウィング,Back / Calvaria Wings"},
+            {2,"アーム／カルバリアトール,Arms / Calvaria Tor"},
+            {3,"レッグ／カルバリアフィン,Legs / Calvaria Fin"},
+            {4,"リア／ヘラストゥラ,Back / Hera Stura"},
+            {5,"アーム／ヘラスラスト,Arms / Hera Thrust"},
+            {6,"レッグ／ヘラグラインド,Legs / Hera Grind"},
+            {7,"リア／ブルームフェザー,Back / Bloom Feather"},
         };
 
         public static Dictionary<string, string> roomNames = new Dictionary<string, string>()
@@ -6114,6 +6128,106 @@ namespace AquaExtras
 
         public static Dictionary<string, string> roomGoodsNames = new Dictionary<string, string>()
         {
+        };
+
+        public static Dictionary<int, string> areaNames = new Dictionary<int, string>()
+        {
+            {0007,"Shader Playground (デバッグ),Shader Playground (Debug)" },
+            {0008,"?,?" },
+            {0009,"Playground (デバッグ),Playground (Debug)" },
+            {0010,"? 青,? Blue" },
+            {0011,"?,?" },
+            {0012,"?,?" },
+            {0013,"?,?" },
+            {0014,"?,?" },
+            {0015,"プロトタイプ ハルファ,Prototype Halpha" },
+            {0016,"プロトタイプ ハルファ,Prototype Halpha" },
+            {0017,"プロトタイプ ハルファ,Prototype Halpha" },
+            {0018,"プロトタイプ ハルファ,Prototype Halpha" },
+            {0019,"プロトタイプ ハルファ,Prototype Halpha" },
+            {0020,"プロトタイプ ハルファ,Prototype Halpha" },
+            {0100,"ロッビ (1st版),Lobby (1st Demo)" },
+            {0101,"ロッビ (アルファ),Lobby (Alpha)" },
+            {0102,"ロッビ (Ep1),Lobby (Ep1)" },
+            {0103,"チャレンジモードロッビ,Challenge Mode Lobby" },
+            {0104,"カジノ,Casino" },
+            {0105,"カジノメセタンシューター,Casino Mesetan Shooter" },
+            {0106,"ロッビ (Ep3),Lobby (Ep3)" },
+            {0107,"船橋,Ship Bridge" },
+            {0108,"バトルモードロッビ,Battle Mode Lobby" },
+            {0109,"ロッビ (Ep3 コピ),Lobby (Ep3 Copy)" },
+            {0150,"キャンプシップ,Campship" },
+            {0160,"フランカ’s カフェ,Franka's Cafe" },
+            {0161,"海のカフェ,Franka's Cafe (Coast)" },
+            {0162,"夜のカフェ,Franka's Cafe (Night View)" },
+            {0163,"雪のカフェ,Franka's Cafe (Tundra)" },
+            {0164,"桜のカフェ,Franka's Cafe (Shironia)" },
+            {0170,"病室/カットシーンの水の背景,Hospital Room/Cutscene Water Background" },
+            {0171,"Ep3 クレジット,Ep3 Credits" },
+            {0172,"Ep4 オープニング,Ep4 Opening Sequence" },
+            {0173,"外宇宙 (Ep5),Outer Space (Ep5 Rift)" },
+            {0174,"カシナ/カットシーンの水の背景,Kashina Central Core/Cutscene Water Background" },
+            {0175,"?,?" },
+            {0176,"クロマキー,Chroma Key" },
+            {0177,"船橋 (コピ),Ship Bridge (Copy)" },
+            {0180,"チームルーム (初期ルーム),Team Room (Default)" },
+            {0181,"チームルーム (森林),Team Room (Forest)" },
+            {0182,"チームルーム (温泉),Team Room (Hot Springs)" },
+            {0183,"チームルーム (砂漠),Team Room (Desert)" },
+            {0184,"チームルーム (海岸),Team Room (Coast)" },
+            {0185,"チームルーム (夜景),Team Room (Night View)" },
+            {0186,"チームルーム (凍土),Team Room (Tundra)" },
+            {0187,"チームルーム (浮遊),Team Room (Floating)" },
+            {0188,"チームルーム (和風),Team Room (Japanese-Style)" },
+            {0189,"チームルーム (水上遺跡),Team Room (Water Ruins)" },
+            {0190,"チームルーム (パイオニア2),Team Room (Pioneer II)" },
+            {0191,"チームルーム (妖精の尻尾のギルド),Team Room (Fairy Tail Guild)" },
+            {0192,"チームルーム (東京),Team Room (Tokyo)" },
+            {0193,"チームルーム (戦艦),Team Room (Battleship)" },
+            {0194,"チームルーム (月面),Team Room (Moon Surface)" },
+            {0195,"チームルーム (渓流),Team Room (Mountain Stream)" },
+            {0210,"市街地 (1st版),Urban Streets(1st Demo)" },
+            {0211,"市街地 (エリア１),Urban Streets (Area 1)" },
+            {0212,"市街地 (エリア２),Urban Streets (Area 2)" },
+            {0213,"星芒喰らう闇の狂宴 (ボス),Dark Revelry Consumes Starlight (Boss)" },
+            {0214,"第６使徒殲滅作戦,Operation To Eliminate the 6th Angel" },
+            {0220,"ダーカーの巣窟 (エリア１),Darker Nest (Area 1)" },
+            {0221,"ダーカーの巣窟 (エリア２),Darker Nest (Area 2)" },
+            {0230,"マザーシップ (エリア１),Mothership (Area 1)" },
+            {0231,"マザーシップ (エリア２),Mothership (Area 2)" },
+            {0232,"マザーシップ (シャオ),Mothership (Xiao)" },
+            {0233,"マザーシップ (シバ),Mothership (Shiva)" },
+            {0240,"内的宇宙,Double's Inner Universe" },
+            {0290,"市街地 (ボス),Urban Streets (Boss)" },
+            {0291,"ダークファルス・ルーサー,Dark Falz Luther" },
+            {0292,"マザーシップ (シバ),Mothership (Shiva)" },
+            {0310,"森林 (エリア１/ボス),Forest (Area 1/Boss)" },
+            {0311,"森林 (エリア２),Forest (Area 2)" },
+            {0320,"凍土 (エリア２/ボス),Tundra (Area 2/Boss)" },
+            {0321,"凍土 (エリア１),Tundra (Area 1)" },
+            {0330,"遺跡,Ruins" },
+            {0390,"ダークファルスアーム,Dark Falz Arms" },
+            {0391,"ダークファルスエルダ,Dark Falz Elder" },
+            {0392,"ダークファルスダブル,Dark Falz Double" },
+            {0393,"深遠なる闇,Profound Darkness" },
+            {0410,"砂漠 (エリア２/ボス),Desert (Area 2/Boss)" },
+            {0411,"砂漠 (エリア１),Desert (Area 1)" },
+            {0420,"地下坑道 (エリア１),Underground Shafts (Area 1)" },
+            {0421,"地下坑道 (エリア２),Underground Shafts (Area 2)" },
+            {0430,"採掘場跡 (エリア１),Abandoned Mine (Area 1)" },
+            {0431,"採掘場跡 (エリア２/ボス),Abandoned Mine (Area 2/Boss)" },
+            {0490,"地下坑道 (ボス),Underground Shafts (Boss)" },
+            {0491,"砂漠 (ビッグヴァーダー１),Desert (Big Varder 1)" },
+            {0492,"砂漠 (ビッグヴァーダー２),Desert (Big Varder 2)" },
+            {0493,"砂漠 (ビッグヴァーダー３),Desert (Big Varder 3)" },
+            {0494,"砂漠 (ビッグヴァーダー４),Desert (Big Varder 4)" },
+
+            {5000,"ハルファ,Halpha" },
+            {5001,"ハルファ (エアリオタウン),Halpha (Aelio Town)" },
+            {5100,"トレイニア,Trainia" },
+            {5101,"トレイニア,Trainia" },
+            {6000,"?,?" },
+            {9000,"?,?" },
         };
     }
 }

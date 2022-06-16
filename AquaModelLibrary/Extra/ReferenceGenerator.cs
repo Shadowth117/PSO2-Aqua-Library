@@ -266,6 +266,7 @@ namespace AquaModelLibrary.Extra
         {
             AddOnIndex aox = null;
             List<string> aoxOut = new List<string>();
+            aoxOut.Add("Data is laid out as follows:\nUnit name (if known), 1st model attach bone, 2nd model attach bone, Extra model attach bone, object unhashed name, object hashed name\n\n");
 
             //Load unit settings file
             string aoxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(unitIndexIce));
@@ -297,7 +298,7 @@ namespace AquaModelLibrary.Extra
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, fileHashed)))
                 {
                     string unitName = unitNames.ContainsKey(addo.id) ? unitNames[addo.id] : "";
-                    aoxOut.Add(unitName + "," + file + "," + fileHashed);
+                    aoxOut.Add($"{unitName},{addo.leftBoneAttach},{addo.rightBoneAttach},{addo.extraAttach},{file},{fileHashed}");
                 }
             }
 
@@ -316,6 +317,7 @@ namespace AquaModelLibrary.Extra
             files.AddRange(iceFile.groupOneFiles);
             files.AddRange(iceFile.groupTwoFiles);
 
+            roomGoodsOut.Add("Data is laid out as follows:\nObject Name (if known), Object Function, Animation type, category 1, category 2, object unhashed name, object hashed name, object _ex textures hashed name\n\n");
             for (int i = 0; i < files.Count; i++)
             {
                 var name = IceFile.getFileName(files[i]);
@@ -334,11 +336,12 @@ namespace AquaModelLibrary.Extra
                         if(File.Exists(objFile))
                         {
                             string goodsName = roomGoodsNames.ContainsKey(obj) ? roomGoodsNames[obj] : "";
-                            roomGoodsOut.Add(goodsName + "," + obj + "," + objHash);
-                        }
-                        if (File.Exists(objFileEx))
-                        {
-                            roomGoodsOut.Add("extra textures," + objEx + "," + objExHash);
+                            string output = goodsName + $",{good.functionString},{good.motionType},{good.categoryString},{good.categoryString2}," + obj + "," + objHash;
+                            if (File.Exists(objFileEx))
+                            {
+                                output += "," + objExHash;
+                            }
+                            roomGoodsOut.Add(output);
                         }
                     }
                 }
@@ -360,11 +363,12 @@ namespace AquaModelLibrary.Extra
                             if (File.Exists(objFile))
                             {
                                 string roomName = roomNames.ContainsKey(chipFinalString) ? roomNames[chipFinalString] : "";
-                                roomsOut.Add(roomName + "," + chipBase + "," + chipObj);
+                                string output = roomName + "," + chipBase + "," + chipObj;
                                 if (File.Exists(objFileEx))
                                 {
-                                    roomsOut.Add("extra textures," + chipBaseEx + "," + chipObjEx);
+                                    output += "," + chipObjEx;
                                 }
+                                roomsOut.Add(output);
                             }
                         }
                     }
