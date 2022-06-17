@@ -6130,6 +6130,8 @@ namespace AquaExtras
         {
         };
 
+        //Some names may differ on areas and objects. Notably, my room rooms.
+        //Immense thanks to Arredoval for this
         public static Dictionary<int, string> areaNames = new Dictionary<int, string>()
         {
             {0007,"Shader Playground (デバッグ),Shader Playground (Debug)" },
@@ -6221,6 +6223,28 @@ namespace AquaExtras
             {0492,"砂漠 (ビッグヴァーダー２),Desert (Big Varder 2)" },
             {0493,"砂漠 (ビッグヴァーダー３),Desert (Big Varder 3)" },
             {0494,"砂漠 (ビッグヴァーダー４),Desert (Big Varder 4)" },
+            {0510,"火山洞窟 (エリア１),Volcanic Caves (Area 1)" },
+            {0511,"火山洞窟 (エリア２/ボス),Volcanic Caves (Area 2/Boss)" },
+            {0520,"浮遊大陸 (エリア２),Floating Continent (Area 2)" },
+            {0521,"浮遊大陸 (エリア１),Floating Continent (Area 1)" },
+            {0530,"龍祭壇,Dragon Altar" },
+            {0590,"浮遊大陸 (ボス),Floating Continent (Boss)" },
+            {0610,"海岸 (エリア１),Coast (Area 1)" },
+            {0611,"海岸 (エリア２),Coast (Area 2)" },
+            {0620,"海底 (エリア１),Seabed (Area 1)" },
+            {0621,"海底 (エリア２/ボス),Seabed (Area 2/Boss)" },
+            {0630,"浮上施設,Floating Facility" },
+            {0590,"海岸 (ボス),Coast (Boss)" },
+            {0710,"白ノ領域,Daybreak Province" },
+            {0711,"天地を葬る災禍の凶神,Death, Destroyer of Worlds" },
+            {0720,"黒ノ領域,Nightfall Province" },
+            {0790,"白ノ領域 (ボス),Daybreak Province (Boss)" },
+            {0791,"マガツ印鑑,Magatsu Seal" },
+            {0792,"幽世,Kakuriyo" },
+            {0810,"東京,Tokyo" },
+            {0820,"ラスベガス (パリホテル),Las Vegas (Paris Hotel)" },
+            {0821,"ラスベガス (ニューヨーク・ニューヨーク・ホテル),Las Vegas (New York New York Hotel)" },
+            {0822,"ラスベガス (フリーモントストリート),Las Vegas (Fremont Street)" },
 
             {5000,"ハルファ,Halpha" },
             {5001,"ハルファ (エアリオタウン),Halpha (Aelio Town)" },
