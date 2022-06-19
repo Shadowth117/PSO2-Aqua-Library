@@ -234,6 +234,8 @@ namespace AquaModelLibrary.Extra
             List<string> genAnimList, genAnimListNGS;
 
             DumpPaletteData(outputDirectory, aquaCMX);
+            GenerateCasinoData(pso2_binDir, outputDirectory);
+            GenerateAreaData(pso2_binDir, outputDirectory);
             GenerateUILists(pso2_binDir, outputDirectory);
             GenerateRoomLists(pso2_binDir, outputDirectory);
             GenerateUnitLists(pso2_binDir, outputDirectory);
@@ -248,18 +250,69 @@ namespace AquaModelLibrary.Extra
             GenerateVehicle_SpecialWeaponList(playerDirOut, playerCAnimDirOut, playerRAnimDirOut, genAnimList, genAnimListNGS);
             GeneratePetList(petsDirOut);
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
-
             //---------------------------Generate 
         }
 
         private static void GenerateUILists(string pso2_binDir, string outputDirectory)
         {            
-            //---------------------------Generate Load Tunnel
+            //---------------------------Generate Load Tunnel Lists
             List<string> loadTunnels = new List<string>();
             loadTunnels.Add($"PSO2 Classic Load Tunnel,{loadTunnelClassic},{GetFileHash(loadTunnelClassic)}");
             loadTunnels.Add($"NGS Load Tunnel,{loadTunnelReboot},{GetRebootHash(GetFileHash(loadTunnelReboot))}");
 
             File.WriteAllLines(Path.Combine(outputDirectory, "UI", "LoadTunnels.csv"), loadTunnels);
+        }
+
+        private static void GenerateCasinoData(string pso2_binDir, string outputDirectory)
+        {
+            //--------------------------Casino Load Tunnel
+
+            //--------------------------Casino Stuff
+        }
+
+        private static void GenerateAreaData(string pso2_binDir, string outputDirectory)
+        {
+            //---------------------------Load Area Template Commons
+
+            //---------------------------Generate Template Lists
+
+            //---------------------------Generate Radar Model Lists
+
+            //---------------------------Generate Effect Folder List
+
+            //---------------------------Generate Skybox Lists
+
+            //---------------------------Generate Classic Terrain Model + Common + (Texture) Pack List
+
+            /*
+            if(lps.fVarDict.Contains("tex_ice_num"))
+            {
+                lpsOut.AppendLine("Texture Packs:");
+                var packCount = lps.fVarDict["tex_ice_num"];
+                for(int p = 0; p < packCount; p++)
+                {
+                    var packIceName = $"stage/sn_{lpsNum}/pack/ln_{lpsNum}_pack_{p:D2}.ice";
+                    var packIceHash = GetFileHash(packIceName);
+                    var filePath = Path.Combine(pso2_binDir, dataDir, packIceHash);
+                    if(File.Exists(filePath))
+                    {
+                        lpsOut.Append(packIceHash);
+                    }
+                }
+            }
+            */
+
+            //---------------------------Generate Reboot Terrain Model + Common + Texture List
+
+            //---------------------------Generate Reboot Navmesh List
+
+            //---------------------------Generate list of stage set and set folder set ices
+
+            //---------------------------Generate Enlighten List
+
+            //---------------------------Generate Sitpoint List
+
+            //---------------------------Generate Instancing (LHI data) List
         }
 
         private static void GenerateUnitLists(string pso2_binDir, string outputDirectory)

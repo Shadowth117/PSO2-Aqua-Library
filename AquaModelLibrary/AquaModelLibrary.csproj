@@ -165,6 +165,7 @@
     <Compile Include="AquaStructs\FLTDPhysics.cs" />
     <Compile Include="AquaStructs\LHIObjectDetailLayout.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
+    <Compile Include="AquaStructs\LandPieceSettings.cs" />
     <Compile Include="AquaStructs\MusicFileReboot.cs" />
     <Compile Include="AquaStructs\MusicFileAlpha.cs" />
     <Compile Include="AquaStructs\MyRoomParameters.cs" />

@@ -41,6 +41,7 @@ namespace AquaModelLibrary
             public int NIFLLength; //Length of NIFL after first 0x8
             public int unkInt0; //Always 1
             public int offsetAddition; //Full size of NIFL
+
             public int NOF0Offset; //Offset of NOF0 from NIFL header end
             public int NOF0OffsetFull; //Offset of NOF0 from NIFL header start
             public int NOF0BlockSize; //Size of NOF0 struct
@@ -494,6 +495,19 @@ namespace AquaModelLibrary
             }
 
             return nof0;
+        }
+
+        public static List<uint> GetNOF0PointedValues(NOF0 nof0, BufferedStreamReader streamReader, int offset)
+        {
+            List<uint> addresses = new List<uint>();
+
+            for(int i = 0; i < nof0.relAddresses.Count; i++)
+            {
+                streamReader.Seek(nof0.relAddresses[i] + offset, System.IO.SeekOrigin.Begin);
+                addresses.Add(streamReader.Read<uint>());
+            }
+
+            return addresses;
         }
     }
 }

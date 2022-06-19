@@ -3085,6 +3085,16 @@ namespace AquaModelLibrary
             return ReadAOX(data);
         }
 
+        public static LandPieceSettings LoadLPS(string fileName)
+        {
+            return ReadLPS(fileName);
+        }
+
+        public static LandPieceSettings LoadLPS(byte[] data)
+        {
+            return ReadLPS(data);
+        }
+
         public void LoadPSO2Text(string fileName)
         {
             aquaText = ReadPSO2Text(fileName);

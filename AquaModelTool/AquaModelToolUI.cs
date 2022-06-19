@@ -2964,6 +2964,20 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readLPSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 LPS file(s)",
+                Filter = "PSO2 LPS Files (*.lps)|*.lps|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil.LoadLPS(openFileDialog.FileName);
+            }
+        }
     }
 }
 

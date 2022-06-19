@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows;
 using zamboni;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using static AquaModelLibrary.AquaStructs.LandPieceSettings;
 using static AquaModelLibrary.VTBFMethods;
 
 namespace AquaModelLibrary
@@ -1166,6 +1167,200 @@ namespace AquaModelLibrary
             }
 
             return mrp;
+        }
+
+        public static LandPieceSettings ReadLPS(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadLPS(streamReader);
+            }
+        }
+        public static LandPieceSettings ReadLPS(byte[] file)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadLPS(streamReader);
+            }
+        }
+
+        private static LandPieceSettings BeginReadLPS(BufferedStreamReader streamReader)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x20; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("aox\0"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            //Proceed based on file variant
+            if (type.Equals("NIFL"))
+            {
+                return ReadNIFLLPS(streamReader, offset);
+            }
+            else if (type.Equals("VTBF"))
+            {
+                MessageBox.Show("Error, VTBF .lps found");
+                return null;
+            }
+            else
+            {
+                MessageBox.Show("Improper File Format!");
+                return null;
+            }
+        }
+
+        public static LandPieceSettings ReadNIFLLPS(BufferedStreamReader streamReader, int offset)
+        {
+            var lps = new LandPieceSettings();
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
+            streamReader.Seek(nifl.NOF0OffsetFull + offset - 0x20, SeekOrigin.Begin);
+            var nof0 = AquaCommon.readNOF0(streamReader);
+            var nof0Values = AquaCommon.GetNOF0PointedValues(nof0, streamReader, offset);
+            nof0Values.Sort();
+            streamReader.Seek(rel0.REL0DataStart + offset, SeekOrigin.Begin);
+
+            lps.header = streamReader.Read<LandPieceSettings.LPSHeader>();
+
+            streamReader.Seek(lps.header.floatVariablesPtr + offset, SeekOrigin.Begin);
+            for (int i = 0; i < lps.header.floatVariablesCount; i++)
+            {
+                var strPtr = streamReader.Read<int>();
+                float flt = streamReader.Read<float>();
+                var bookmark = streamReader.Position();
+                streamReader.Seek(strPtr + offset, SeekOrigin.Begin);
+                var str = ReadCString(streamReader);
+                
+                lps.fVarDict.Add(str, flt);
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+            streamReader.Seek(lps.header.stringVariablesPtr + offset, SeekOrigin.Begin);
+            for (int i = 0; i < lps.header.stringVariablesCount; i++)
+            {
+                var strPtr = streamReader.Read<int>();
+                var strPtr2 = streamReader.Read<int>();
+                var bookmark = streamReader.Position();
+                streamReader.Seek(strPtr + offset, SeekOrigin.Begin);
+                var str = ReadCString(streamReader);
+                streamReader.Seek(strPtr2 + offset, SeekOrigin.Begin);
+                var str2 = ReadCString(streamReader);
+
+                lps.stringVarDict.Add(str, str2);
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+            streamReader.Seek(lps.header.areaEntryExitDefaultsPtr + offset, SeekOrigin.Begin);
+            for (int i = 0; i < lps.header.areaEntryExitDefaultsCount; i++)
+            {
+                var strPtr = streamReader.Read<int>();
+                var strPtr2 = streamReader.Read<int>();
+                var bookmark = streamReader.Position();
+                streamReader.Seek(strPtr + offset, SeekOrigin.Begin);
+                var str = ReadCString(streamReader);
+                streamReader.Seek(strPtr2 + offset, SeekOrigin.Begin);
+                var str2 = ReadCString(streamReader);
+
+                lps.areaEntryExitDefaults.Add(str, str2);
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+            streamReader.Seek(lps.header.areaEntryExitDefaults2Ptr + offset, SeekOrigin.Begin);
+            for (int i = 0; i < lps.header.areaEntryExitDefaults2Count; i++)
+            {
+                var strPtr = streamReader.Read<int>();
+                var strPtr2 = streamReader.Read<int>();
+                var bookmark = streamReader.Position();
+                streamReader.Seek(strPtr + offset, SeekOrigin.Begin);
+                var str = ReadCString(streamReader);
+                streamReader.Seek(strPtr2 + offset, SeekOrigin.Begin);
+                var str2 = ReadCString(streamReader);
+
+                lps.areaEntryExitDefaults2.Add(str, str2);
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+            }
+            streamReader.Seek(lps.header.pieceSetsPtr + offset, SeekOrigin.Begin);
+            for (int i = 0; i < lps.header.pieceSetsCount; i++)
+            {
+                var pieceSetObj = new PieceSetObj();
+                pieceSetObj.offset = streamReader.Position() - offset;
+
+                var pieceSet = streamReader.Read<PieceSet>();
+                var bookmark = streamReader.Position();
+                streamReader.Seek(pieceSet.namePtr + offset, SeekOrigin.Begin);
+                pieceSetObj.name = ReadCString(streamReader);
+                streamReader.Seek(pieceSet.fullNamePtr + offset, SeekOrigin.Begin);
+                pieceSetObj.fullName = ReadCString(streamReader);
+
+                //Read data 1 - Hack for now. Seems like it's when pieceSet.int_10 is 0xB, but hard to say
+                var nofIdData1 = nof0Values.IndexOf((uint)pieceSet.data1Ptr);
+
+                int data1Size;
+                if (nofIdData1 + 1 != nof0Values.Count)
+                {
+                    data1Size = (int)(nof0Values[nofIdData1 + 1] - nof0Values[nofIdData1]);
+                }
+                else
+                {
+                    data1Size = pieceSet.data1Ptr == 0xB ? 0x8 : 0x4;
+                }
+                switch (data1Size)
+                {
+                    case 0x8:
+                        pieceSetObj.data1 = streamReader.ReadBytes(pieceSet.data1Ptr + offset, 0x8);
+                        break;
+                    case 0x4:
+                        pieceSetObj.data1 = streamReader.ReadBytes(pieceSet.data1Ptr + offset, 0x4);
+                        break;
+                    default:
+                        Debug.WriteLine($"Piece Set at {pieceSetObj.offset:X} had a data 1 size of {data1Size}");
+                        pieceSetObj.data1 = streamReader.ReadBytes(pieceSet.data1Ptr + offset, data1Size);
+                        break;
+                }
+
+                //Read data 2
+                var nofIdData2 = nof0Values.IndexOf((uint)pieceSet.data2Ptr);
+                int data2Size;
+                if (nofIdData2 + 1 != nof0Values.Count)
+                {
+                    data2Size = (int)(nof0Values[nofIdData2 + 1] - nof0Values[nofIdData2]);
+                } else
+                {
+                    data2Size = 0x4;
+                }
+                switch (data2Size)
+                {
+                    case 0x8:
+                        pieceSetObj.data2 = streamReader.ReadBytes(pieceSet.data2Ptr + offset, 0x8);
+                        break;
+                    case 0x4:
+                        pieceSetObj.data2 = streamReader.ReadBytes(pieceSet.data2Ptr + offset, 0x4);
+                        break;
+                    default:
+                        Debug.WriteLine($"Piece Set at {pieceSetObj.offset:X} had a data 2 size of {data2Size}");
+                        pieceSetObj.data2 = streamReader.ReadBytes(pieceSet.data2Ptr + offset, data2Size);
+                        break;
+                }
+
+                streamReader.Seek(bookmark, SeekOrigin.Begin);
+
+                pieceSetObj.pieceSet = pieceSet;
+                lps.pieceSets.Add(pieceSetObj.name, pieceSetObj);
+            }
+
+            return lps;
         }
     }
 }

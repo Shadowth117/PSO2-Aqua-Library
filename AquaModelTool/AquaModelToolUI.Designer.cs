@@ -83,8 +83,6 @@
             this.readCMXFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readFIGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dumpFigShapesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.readLacToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.readLacToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMAnalyzerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMJankTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMFaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -104,6 +102,7 @@
             this.readMRPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.readLPSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -438,8 +437,6 @@
             this.readCMXFileToolStripMenuItem,
             this.readFIGToolStripMenuItem,
             this.dumpFigShapesToolStripMenuItem,
-            this.readLacToolStripMenuItem,
-            this.readLacToolStripMenuItem1,
             this.proportionAQMAnalyzerToolStripMenuItem,
             this.proportionAQMJankTestToolStripMenuItem,
             this.proportionAQMFaceTestToolStripMenuItem,
@@ -456,7 +453,8 @@
             this.aqnDumpToolStripMenuItem,
             this.readFLTDToolStripMenuItem,
             this.readTXLToolStripMenuItem,
-            this.readMRPToolStripMenuItem});
+            this.readMRPToolStripMenuItem,
+            this.readLPSToolStripMenuItem});
             this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
             this.debugToolStripMenuItem.Size = new System.Drawing.Size(54, 23);
             this.debugToolStripMenuItem.Text = "Debug";
@@ -558,20 +556,6 @@
             this.dumpFigShapesToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.dumpFigShapesToolStripMenuItem.Text = "DumpFigShapes";
             this.dumpFigShapesToolStripMenuItem.Click += new System.EventHandler(this.dumpFigShapesToolStripMenuItem_Click);
-            // 
-            // readLacToolStripMenuItem
-            // 
-            this.readLacToolStripMenuItem.Name = "readLacToolStripMenuItem";
-            this.readLacToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.readLacToolStripMenuItem.Text = "ReadRebootLac";
-            this.readLacToolStripMenuItem.Click += new System.EventHandler(this.readRebootLacToolStripMenuItem_Click);
-            // 
-            // readLacToolStripMenuItem1
-            // 
-            this.readLacToolStripMenuItem1.Name = "readLacToolStripMenuItem1";
-            this.readLacToolStripMenuItem1.Size = new System.Drawing.Size(231, 22);
-            this.readLacToolStripMenuItem1.Text = "ReadLac";
-            this.readLacToolStripMenuItem1.Click += new System.EventHandler(this.readLacToolStripMenuItem1_Click);
             // 
             // proportionAQMAnalyzerToolStripMenuItem
             // 
@@ -710,6 +694,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // readLPSToolStripMenuItem
+            // 
+            this.readLPSToolStripMenuItem.Name = "readLPSToolStripMenuItem";
+            this.readLPSToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readLPSToolStripMenuItem.Text = "ReadLPS";
+            this.readLPSToolStripMenuItem.Click += new System.EventHandler(this.readLPSToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -774,8 +765,6 @@
         private System.Windows.Forms.ToolStripMenuItem readCMXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readFIGToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpFigShapesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem readLacToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem readLacToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem readCMXFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMAnalyzerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMTesterToolStripMenuItem;
@@ -807,6 +796,7 @@
         private System.Windows.Forms.ToolStripMenuItem readTXLToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem assembleNGSMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMRPToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readLPSToolStripMenuItem;
     }
 }
 
