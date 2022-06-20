@@ -17,6 +17,7 @@ using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.VTBFMethods;
 using AquaModelLibrary.Extra;
+using AquaModelLibrary.OtherStructs;
 
 namespace AquaModelLibrary
 {
@@ -3093,6 +3094,15 @@ namespace AquaModelLibrary
         public static LandPieceSettings LoadLPS(byte[] data)
         {
             return ReadLPS(data);
+        }
+        public static ELPR_EnlightenParam LoadELPR(string fileName)
+        {
+            return ReadELPR(fileName);
+        }
+
+        public static ELPR_EnlightenParam LoadELPR(byte[] data)
+        {
+            return ReadELPR(data);
         }
 
         public void LoadPSO2Text(string fileName)

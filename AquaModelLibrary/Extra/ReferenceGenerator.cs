@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using zamboni;
@@ -29,6 +30,7 @@ namespace AquaModelLibrary.Extra
             string npcDirOut = Path.Combine(outputDirectory, npcOut);
             string enemyDirOut = Path.Combine(outputDirectory, enemiesOut);
             string petsDirOut = Path.Combine(outputDirectory, petsOut);
+            string stageDirOut = Path.Combine(outputDirectory, stageOut);
             string uiDirOut = Path.Combine(outputDirectory, uiOut);
             Directory.CreateDirectory(enemyDirOut);
             Directory.CreateDirectory(npcDirOut);
@@ -38,6 +40,7 @@ namespace AquaModelLibrary.Extra
             Directory.CreateDirectory(playerRebootDirOut);
             Directory.CreateDirectory(playerRAnimDirOut);
             Directory.CreateDirectory(petsDirOut);
+            Directory.CreateDirectory(stageDirOut);
             Directory.CreateDirectory(uiDirOut);
 
             var aquaCMX = new CharacterMakingIndex();
@@ -235,7 +238,7 @@ namespace AquaModelLibrary.Extra
 
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateCasinoData(pso2_binDir, outputDirectory);
-            GenerateAreaData(pso2_binDir, outputDirectory);
+            GenerateAreaData(pso2_binDir, stageDirOut);
             GenerateUILists(pso2_binDir, outputDirectory);
             GenerateRoomLists(pso2_binDir, outputDirectory);
             GenerateUnitLists(pso2_binDir, outputDirectory);
@@ -272,47 +275,522 @@ namespace AquaModelLibrary.Extra
 
         private static void GenerateAreaData(string pso2_binDir, string outputDirectory)
         {
+            Dictionary<int, LandPieceSettings> lpsList = new Dictionary<int, LandPieceSettings>();
+            Dictionary<int, LandPieceSettings> lpsRbList = new Dictionary<int, LandPieceSettings>();
+            List<int> lpsKeys = new List<int>();
+            List<int> lpsRbKeys = new List<int>();
+
             //---------------------------Load Area Template Commons
-
-            //---------------------------Generate Template Lists
-
-            //---------------------------Generate Radar Model Lists
-
-            //---------------------------Generate Effect Folder List
-
-            //---------------------------Generate Skybox Lists
-
-            //---------------------------Generate Classic Terrain Model + Common + (Texture) Pack List
-
-            /*
-            if(lps.fVarDict.Contains("tex_ice_num"))
+            string lpsPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(lnAreaTemplateCommon));
+            if (File.Exists(lpsPath))
             {
-                lpsOut.AppendLine("Texture Packs:");
-                var packCount = lps.fVarDict["tex_ice_num"];
-                for(int p = 0; p < packCount; p++)
+                var strm = new MemoryStream(File.ReadAllBytes(lpsPath));
+                var lpsIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = new List<byte[]>(lpsIce.groupOneFiles);
+                files.AddRange(lpsIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
                 {
-                    var packIceName = $"stage/sn_{lpsNum}/pack/ln_{lpsNum}_pack_{p:D2}.ice";
-                    var packIceHash = GetFileHash(packIceName);
-                    var filePath = Path.Combine(pso2_binDir, dataDir, packIceHash);
-                    if(File.Exists(filePath))
+                    var fname = IceFile.getFileName(file).ToLower();
+                    if (fname.Contains(".lps"))
                     {
-                        lpsOut.Append(packIceHash);
+                        lpsList.Add(Int32.Parse(fname.Substring(3, 4)), ReadLPS(file));
                     }
                 }
+
+                lpsIce = null;
             }
-            */
+            string lpsRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(lnAreaTemplateCommonReboot)));
+            if (File.Exists(lpsRebootPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(lpsRebootPath));
+                var lpsIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
 
-            //---------------------------Generate Reboot Terrain Model + Common + Texture List
+                List<byte[]> files = new List<byte[]>(lpsIce.groupOneFiles);
+                files.AddRange(lpsIce.groupTwoFiles);
 
-            //---------------------------Generate Reboot Navmesh List
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    var fname = IceFile.getFileName(file).ToLower();
+                    if (fname.Contains(".lps"))
+                    {
+                        lpsRbList.Add(Int32.Parse(fname.Substring(3, 4)), ReadLPS(file));
+                    }
+                }
 
-            //---------------------------Generate list of stage set and set folder set ices
+                lpsIce = null;
+            }
+            lpsKeys = lpsList.Keys.ToList();
+            lpsRbKeys = lpsRbList.Keys.ToList();
+            lpsKeys.Sort();
+            lpsRbKeys.Sort();
 
-            //---------------------------Generate Enlighten List
+            Dictionary<string, StringBuilder> enlightenDict = new Dictionary<string, StringBuilder>();
+            Dictionary<string, StringBuilder> lhiDict = new Dictionary<string, StringBuilder>();
+            Dictionary<string, StringBuilder> navMeshDict = new Dictionary<string, StringBuilder>();
+            Dictionary<string, StringBuilder> stageDataDict = new Dictionary<string, StringBuilder>();
+            Dictionary<string, StringBuilder> stageDataRBDict = new Dictionary<string, StringBuilder>();
+            StringBuilder templateList = new StringBuilder();
+            StringBuilder templateListRb = new StringBuilder();
 
-            //---------------------------Generate Sitpoint List
+            //Classic
+            foreach(var lpsNum in lpsKeys)
+            {
+                StringBuilder stageData = new StringBuilder();
+                var lpsName = areaNames.ContainsKey(lpsNum) ? areaNames[lpsNum] : $"{lpsNum:D4}";
+                lpsName = lpsName.Contains("?") ? "" : lpsName;
 
-            //---------------------------Generate Instancing (LHI data) List
+                //---------------------------Generate Template Lists
+                string templateName = $"stage/ln_area_template_{lpsNum:D4}.ice";
+                string templateHash = GetFileHash(templateName);
+                if(File.Exists(Path.Combine(pso2_binDir, dataDir, templateHash)))
+                {
+                    var templateLpsName = lpsName + " template,";
+                    templateList.AppendLine( templateLpsName + templateName + "," + templateHash);
+                }
+
+                //---------------------------Generate Classic Terrain Model + Common + (Texture) Pack List
+                var lps = lpsList[lpsNum];
+                var pieceKeys = lps.pieceSets.Keys.ToList();
+                pieceKeys.Sort();
+                foreach(var key in pieceKeys)
+                {
+                    var piece = lps.pieceSets[key];
+                    var varCount = piece.pieceSet.variantCount;
+                    var var80Count = piece.pieceSet.variant80Count;
+                    for (int i = 0; i < varCount; i++)
+                    {
+                        var trIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_{key}_{i:D2}.ice";
+                        var trIceHash = GetFileHash(trIceName);
+                        var filePath = Path.Combine(pso2_binDir, dataDir, trIceHash);
+                        if (File.Exists(filePath))
+                        {
+                            stageData.AppendLine(trIceName + "," + trIceHash);
+                        }
+
+                        //Check pgd
+                        var pgdIceName = trIceName.Replace(".ice", "_pgd.ice");
+                        var pgdIceHash = GetFileHash(pgdIceName);
+                        var filePath2 = Path.Combine(pso2_binDir, dataDir, pgdIceHash);
+                        if (File.Exists(filePath2))
+                        {
+                            stageData.AppendLine(pgdIceName + "," + pgdIceHash);
+                        }
+                    }
+                    for (int i = 0; i < var80Count; i++)
+                    {
+                        var trIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_{key}_{i + 80:D2}.ice";
+                        var trIceHash = GetFileHash(trIceName);
+                        var filePath = Path.Combine(pso2_binDir, dataDir, trIceHash);
+                        if (File.Exists(filePath))
+                        {
+                            stageData.AppendLine(trIceName + "," + trIceHash);
+                        }
+
+                        //Check pgd
+                        var pgdIceName = trIceName.Replace(".ice", "_pgd.ice");
+                        var pgdIceHash = GetFileHash(pgdIceName);
+                        var filePath2 = Path.Combine(pso2_binDir, dataDir, pgdIceHash);
+                        if (File.Exists(filePath2))
+                        {
+                            stageData.AppendLine(pgdIceName + "," + pgdIceHash);
+                        }
+                    }
+                }
+
+                //Check shared files
+                foreach(var str in LandPieceSettings.sharedFiles)
+                {
+                    var sharedIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_{str}.ice";
+                    var sharedIceHash = GetFileHash(sharedIceName);
+                    var filePath = Path.Combine(pso2_binDir, dataDir, sharedIceHash);
+                    if (File.Exists(filePath))
+                    {
+                        stageData.AppendLine(sharedIceName + "," + sharedIceHash);
+                    }
+                }
+
+                if (lps.fVarDict.ContainsKey("tex_ice_num"))
+                {
+                    var packCount = lps.fVarDict["tex_ice_num"];
+                    for (int p = 0; p < packCount; p++)
+                    {
+                        var packIceName = $"stage/sn_{lpsNum:D4}/pack/ln_{lpsNum:D4}_pack_{p:D2}.ice";
+                        var packIceHash = GetFileHash(packIceName);
+                        var filePath = Path.Combine(pso2_binDir, dataDir, packIceHash);
+                        if (File.Exists(filePath))
+                        {
+                            stageData.AppendLine(packIceName + "," + packIceHash);
+                        }
+                    }
+                }
+
+                //Search ALL for block and flag texture packs. Seems like something Sega might have referenced through objects, and not directly, as the LPS files do NOT contain references to these.
+                //Probably possible to only search these in ep5+, but can't hurt to check
+                for(int p = 0; p < 5; p++)
+                {
+                    var packIceName = $"stage/sn_{lpsNum:D4}/pack/ln_{lpsNum:D4}_block_pack_{p:D2}.ice";
+                    var packIceHash = GetFileHash(packIceName);
+                    var filePath = Path.Combine(pso2_binDir, dataDir, packIceHash);
+                    if (File.Exists(filePath))
+                    {
+                        stageData.AppendLine(packIceName + "," + packIceHash);
+                    }
+                    var pack2IceName = $"stage/sn_{lpsNum:D4}/pack/ln_{lpsNum:D4}_flag_pack_{p:D2}.ice";
+                    var pack2IceHash = GetFileHash(pack2IceName);
+                    var file2Path = Path.Combine(pso2_binDir, dataDir, pack2IceHash);
+                    if (File.Exists(file2Path))
+                    {
+                        stageData.AppendLine(pack2IceName + "," + pack2IceHash);
+                    }
+                }
+
+                //---------------------------Check for Effects
+                var effectIceName = $"stage/effect/ef_sn_{lpsNum:D4}.ice";
+                var effectIceHash = GetFileHash(effectIceName);
+                var effectfilePath = Path.Combine(pso2_binDir, dataDir, effectIceHash);
+                if (File.Exists(effectfilePath))
+                {
+                    stageData.AppendLine(effectIceName + "," + effectIceHash);
+                }
+
+                //---------------------------Get Radar models
+                var radarIceName = $"stage/radar/ln_{lpsNum:D4}.ice";
+                var radarIceHash = GetFileHash(radarIceName);
+                var radarfilePath = Path.Combine(pso2_binDir, dataDir, radarIceHash);
+                if (File.Exists(radarfilePath))
+                {
+                    stageData.AppendLine(radarIceName + "," + radarIceHash);
+                }
+
+                //---------------------------Get Skybox models
+                var weatherIceName = $"stage/weather/ln_{lpsNum:D4}_wtr.ice";
+                var weatherIceHash = GetFileHash(weatherIceName);
+                var weatherfilePath = Path.Combine(pso2_binDir, dataDir, weatherIceHash);
+                if (File.Exists(weatherfilePath))
+                {
+                    stageData.AppendLine(weatherIceName + "," + weatherIceHash);
+                }
+                var weatherExIceName = weatherIceName.Insert(weatherIceName.Length - 5, "_ex");
+                var weatherExIceHash = GetFileHash(weatherExIceName);
+                var weatherExfilePath = Path.Combine(pso2_binDir, dataDir, weatherExIceHash);
+                if (File.Exists(weatherExfilePath))
+                {
+                    stageData.AppendLine(weatherExIceName + "," + weatherExIceHash);
+                }
+
+                if (stageData.Length > 0)
+                {
+                    stageDataDict.Add($"{lpsNum:D4}_{lpsName}", stageData);
+                }
+            }
+
+            //NGS
+            foreach (var lpsNum in lpsRbKeys)
+            {
+                StringBuilder stageDataRb = new StringBuilder();
+                List<string> enlStrings = new List<string>();
+                StringBuilder enlightenOut = new StringBuilder();
+                StringBuilder lhiOut = new StringBuilder();
+                StringBuilder navMeshOut = new StringBuilder();
+                var lpsName = areaNames.ContainsKey(lpsNum) ? areaNames[lpsNum] : $"{lpsNum:D4}";
+                lpsName = lpsName.Contains("?") ? "" : lpsName;
+                var lps = lpsRbList[lpsNum];
+
+                //---------------------------Generate Template Lists
+                string templateName = $"stage/ln_area_template_{lpsNum:D4}.ice";
+                string templateHash = GetRebootHash(GetFileHash(templateName));
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, templateHash)))
+                {
+                    var name = lpsName + " template,";
+                    templateListRb.AppendLine(name + templateName + "," + templateHash);
+                }
+
+                //Get models
+                var pieceKeys = lps.pieceSets.Keys.ToList();
+                pieceKeys.Sort();
+                if (lps.pieceSets.Count > 1)
+                {
+                    foreach (var key in pieceKeys)
+                    {
+                        var piece = lps.pieceSets[key];
+                        var varCount = piece.pieceSet.variantCount;
+                        var var80Count = piece.pieceSet.variant80Count;
+                        for (int i = 0; i < varCount; i++)
+                        {
+                            var trIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_{key}_{i:D2}.ice";
+                            var trIceHash = GetRebootHash(GetFileHash(trIceName));
+                            var filePath = Path.Combine(pso2_binDir, dataReboot, trIceHash);
+                            if (File.Exists(filePath))
+                            {
+                                stageDataRb.AppendLine(trIceName + "," + trIceHash);
+                            }
+                        }
+                        for (int i = 0; i < var80Count; i++)
+                        {
+                            var trIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_{key}_{i + 80:D2}.ice";
+                            var trIceHash = GetRebootHash(GetFileHash(trIceName));
+                            var filePath = Path.Combine(pso2_binDir, dataReboot, trIceHash);
+                            if (File.Exists(filePath))
+                            {
+                                stageDataRb.AppendLine(trIceName + "," + trIceHash);
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+                    for(int i = 0; i < 100; i++)
+                    {
+                        var trIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_f0_{i:D2}.ice";
+                        var trIceHash = GetRebootHash(GetFileHash(trIceName));
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, trIceHash)))
+                        {
+                            stageDataRb.AppendLine(trIceName + "," + trIceHash);
+                        }
+                        var d2IceName = trIceName.Insert(trIceName.Length - 5, "_d2");
+                        var d2IceHash = GetRebootHash(GetFileHash(d2IceName));
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, d2IceHash)))
+                        {
+                            stageDataRb.AppendLine(d2IceName + "," + d2IceHash);
+                        }
+                        var d3IceName = trIceName.Insert(trIceName.Length - 5, "_d3");
+                        var d3IceHash = GetRebootHash(GetFileHash(d3IceName));
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, d3IceHash)))
+                        {
+                            stageDataRb.AppendLine(d3IceName + "," + d3IceHash);
+                        }
+                        var d4IceName = trIceName.Insert(trIceName.Length - 5, "_d4");
+                        var d4IceHash = GetRebootHash(GetFileHash(d4IceName));
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, d4IceHash)))
+                        {
+                            stageDataRb.AppendLine(d4IceName + "," + d4IceHash);
+                        }
+                        var colIceName = trIceName.Insert(trIceName.Length - 5, "_col");
+                        var colIceHash = GetRebootHash(GetFileHash(colIceName));
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, colIceHash)))
+                        {
+                            stageDataRb.AppendLine(colIceName + "," + colIceHash);
+                        }
+                        var txlIceName = trIceName.Insert(trIceName.Length - 5, "_txl");
+                        var txlIceHash = GetRebootHash(GetFileHash(txlIceName));
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, txlIceHash)))
+                        {
+                            stageDataRb.AppendLine(txlIceName + "," + txlIceHash);
+                        }
+
+                        //Enlighten
+                        var enIceName = $"stage/sn_{lpsNum:D4}/enlighten/ln_{lpsNum:D4}_f0_{i:D2}_enl.ice";
+                        var enIceHash = GetRebootHash(GetFileHash(enIceName));
+                        var enPath = Path.Combine(pso2_binDir, dataReboot, enIceHash);
+                        if (File.Exists(enPath))
+                        {
+                            enlightenOut.AppendLine(enIceName + "," + enIceHash);
+                            var enl = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(enPath)));
+                            var files = new List<byte[]>();
+                            files.AddRange(enl.groupOneFiles);
+                            files.AddRange(enl.groupTwoFiles);
+
+                            foreach(var file in files)
+                            {
+                                var name = IceFile.getFileName(file);
+                                if(name.Contains(".elpr"))
+                                {
+                                    var elpr = ReadELPR(file);
+                                    foreach(var piece in elpr.elprList)
+                                    {
+                                        if (!enlStrings.Contains(piece.name0x18))
+                                        {
+                                            enlStrings.Add(piece.name0x18);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                    //---------------------------Generate Enlighten List
+                    enlStrings.Sort();
+                    foreach(var str in enlStrings)
+                    {
+                        var enIceName = $"stage/sn_{lpsNum:D4}/enlighten/{str}.ice";
+                        var enIceHash = GetRebootHash(GetFileHash(enIceName));
+                        var enPath = Path.Combine(pso2_binDir, dataReboot, enIceHash);
+                        if(File.Exists(enPath))
+                        {
+                            enlightenOut.AppendLine(enIceName + "," + enIceHash);
+                        }
+                    }
+                    if (enlStrings.Count > 0)
+                    {
+                        enlightenOut.AppendLine($"sn_{lpsNum:D4}_****_****_enl.ice files omitted due to unknown naming method and lengthy brute forcing.");
+                        /*
+                        for(int i = 0; i < 500; i++)
+                        {
+                            for(int j = 0; j < 10000; j++)
+                            {
+                                var enIceName = $"stage/sn_{lpsNum:D4}/enlighten/sn_{lpsNum:D4}_{i:D4}_{j:D4}.ice";
+                                var enIceHash = GetRebootHash(GetFileHash(enIceName));
+                                var enPath = Path.Combine(pso2_binDir, dataReboot, enIceHash);
+                                if (File.Exists(enPath))
+                                {
+                                    enlightenOut.AppendLine(enIceName + "," + enIceHash);
+                                }
+                            }
+                        }*/
+                    }
+
+                    if (enlightenOut.Length > 0)
+                    {
+                        enlightenDict.Add($"{lpsNum:D4}_{lpsName}", enlightenOut);
+                    }
+
+                    //---------------------------Generate Instancing (LHI data) List
+                    for (int i = 0; i < 1000; i++)
+                    {
+                        var lhiIceName = $"stage/sn_{lpsNum:D4}/instancing/ln_{lpsNum:D4}_instancing_{i:D4}.ice";
+                        var lhiIceHash = GetRebootHash(GetFileHash(lhiIceName));
+                        var lhiFilePath = Path.Combine(pso2_binDir, dataReboot, lhiIceHash);
+                        if (File.Exists(lhiFilePath))
+                        {
+                            lhiOut.AppendLine(lhiIceName + "," + lhiIceHash);
+                        }
+                    }
+
+                    var lhiOtherIceName = $"stage/sn_{lpsNum:D4}/instancing/ln_{lpsNum:D4}_instancing_other.ice";
+                    var lhiOtherIceHash = GetRebootHash(GetFileHash(lhiOtherIceName));
+                    var lhiOtherFilePath = Path.Combine(pso2_binDir, dataReboot, lhiOtherIceHash);
+                    if (File.Exists(lhiOtherFilePath))
+                    {
+                        lhiOut.AppendLine(lhiOtherIceName + "," + lhiOtherIceHash);
+                    }
+
+                    if(lhiOut.Length > 0)
+                    {
+                        lhiDict.Add($"{lpsNum:D4}_{lpsName}", lhiOut);
+                    }
+
+                    //---------------------------Generate Reboot Navmesh List
+                    for (int i = 0; i < 1000; i++)
+                    {
+                        var navIceName = $"stage/sn_{lpsNum:D4}/navmesh/ln_{lpsNum:D4}_nav_{i:D4}.ice";
+                        var navIceHash = GetRebootHash(GetFileHash(navIceName));
+                        var navFilePath = Path.Combine(pso2_binDir, dataReboot, navIceHash);
+                        if (File.Exists(navFilePath))
+                        {
+                            navMeshOut.AppendLine(navIceName + "," + navIceHash);
+                        }
+                    }
+
+                    var navComIceName = $"stage/sn_{lpsNum:D4}/navmesh/ln_{lpsNum:D4}_nav_common.ice";
+                    var navComIceHash = GetRebootHash(GetFileHash(navComIceName));
+                    var navComFilePath = Path.Combine(pso2_binDir, dataReboot, navComIceHash);
+                    if (File.Exists(navComFilePath))
+                    {
+                        navMeshOut.AppendLine(navComIceName + "," + navComIceHash);
+                    }
+
+                    if (navMeshOut.Length > 0)
+                    {
+                        navMeshDict.Add($"{lpsNum:D4}_{lpsName}", navMeshOut);
+                    }
+
+                }
+
+                //Check shared files
+                foreach (var str in LandPieceSettings.sharedFiles)
+                {
+                    var sharedIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_{str}.ice";
+                    var sharedIceHash = GetRebootHash(GetFileHash(sharedIceName));
+                    var filePath = Path.Combine(pso2_binDir, dataReboot, sharedIceHash);
+                    if (File.Exists(filePath))
+                    {
+                        stageDataRb.AppendLine(sharedIceName + "," + sharedIceHash);
+                    }
+                }
+
+                //---------------------------Get Radar models
+                var radarIceName = $"stage/radar/ln_{lpsNum:D4}_rad.ice";
+                var radarIceHash = GetRebootHash(GetFileHash(radarIceName));
+                var radarfilePath = Path.Combine(pso2_binDir, dataReboot, radarIceHash);
+                if (File.Exists(radarfilePath))
+                {
+                    stageDataRb.AppendLine(radarIceName + "," + radarIceHash);
+                }
+
+                //---------------------------Get Skybox Models
+                var weatherIceName = $"stage/weather/ln_{lpsNum:D4}_wtr.ice";
+                var weatherIceHash = GetRebootHash(GetFileHash(weatherIceName));
+                var weatherfilePath = Path.Combine(pso2_binDir, dataReboot, weatherIceHash);
+                if (File.Exists(weatherfilePath))
+                {
+                    stageDataRb.AppendLine(weatherIceName + "," + weatherIceHash);
+                }
+
+                //---------------------------Get Sitpoint
+                var spIceName = $"stage/sn_{lpsNum:D4}/ln_{lpsNum:D4}_sitpoint.ice";
+                var spIceHash = GetRebootHash(GetFileHash(spIceName));
+                var spfilePath = Path.Combine(pso2_binDir, dataReboot, spIceHash);
+                if (File.Exists(spfilePath))
+                {
+                    stageDataRb.AppendLine(spIceName + "," + spIceHash);
+                }
+
+                //---------------------------Get DesignSet
+                var dsIceName = $"stage/sn_{lpsNum:D4}/designset/ln_{lpsNum:D4}_designset.ice";
+                var dsIceHash = GetRebootHash(GetFileHash(dsIceName));
+                var dsfilePath = Path.Combine(pso2_binDir, dataReboot, dsIceHash);
+                if (File.Exists(dsfilePath))
+                {
+                    stageDataRb.AppendLine(dsIceName + "," + dsIceHash);
+                }
+                var dsdIceName = dsIceName.Insert(dsIceName.Length - 5, "_dynamic");
+                var dsdIceHash = GetRebootHash(GetFileHash(dsdIceName));
+                var dsdfilePath = Path.Combine(pso2_binDir, dataReboot, dsdIceHash);
+                if (File.Exists(dsdfilePath))
+                {
+                    stageDataRb.AppendLine(dsdIceName + "," + dsdIceHash);
+                }
+
+                if (stageDataRb.Length > 0)
+                {
+                    stageDataRBDict.Add($"{lpsNum:D4}_{lpsName}", stageDataRb);
+                }
+            }
+            WriteCSV(outputDirectory, $"StageTemplates.csv", templateList);
+            WriteCSV(outputDirectory, $"StageTemplatesNGS.csv", templateListRb);
+
+            var classicDirOut = Path.Combine(outputDirectory, "Classic");
+            var ngsDirOut = Path.Combine(outputDirectory, "NGS");
+            Directory.CreateDirectory(classicDirOut);
+            Directory.CreateDirectory(ngsDirOut);
+            foreach (var stgOut in stageDataDict)
+            {
+                WriteCSV(classicDirOut, $"{stgOut.Key}_StageData.csv", stgOut.Value);
+            }
+            foreach (var stgRbOut in stageDataRBDict)
+            {
+                WriteCSV(ngsDirOut, $"{stgRbOut.Key}_StageDataNGS.csv", stgRbOut.Value);
+            }
+            foreach (var enOut in enlightenDict)
+            {
+                WriteCSV(ngsDirOut, $"{enOut.Key}_EnlightenDataList.csv", enOut.Value);
+            }
+            foreach (var lhiOut in lhiDict)
+            {
+                WriteCSV(ngsDirOut, $"{lhiOut.Key}_DetailObjectList.csv", lhiOut.Value);
+            }
+            foreach (var navOut in navMeshDict)
+            {
+                WriteCSV(ngsDirOut, $"{navOut.Key}_NavMeshList.csv", navOut.Value);
+            }
         }
 
         private static void GenerateUnitLists(string pso2_binDir, string outputDirectory)

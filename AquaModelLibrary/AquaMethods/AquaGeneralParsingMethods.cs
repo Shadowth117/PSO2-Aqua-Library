@@ -1,10 +1,12 @@
 ﻿using AquaModelLibrary.AquaStructs;
+using AquaModelLibrary.OtherStructs;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Windows;
 using zamboni;
@@ -1192,7 +1194,7 @@ namespace AquaModelLibrary
             int offset = 0x20; //Base offset due to NIFL header
 
             //Deal with deicer's extra header nonsense
-            if (type.Equals("aox\0"))
+            if (type.Equals("lps\0"))
             {
                 streamReader.Seek(0xC, SeekOrigin.Begin);
                 //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
@@ -1361,6 +1363,70 @@ namespace AquaModelLibrary
             }
 
             return lps;
+        }
+
+        public static ELPR_EnlightenParam ReadELPR(string inFilename)
+        {
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadELPR(streamReader);
+            }
+        }
+        public static ELPR_EnlightenParam ReadELPR(byte[] file)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return BeginReadELPR(streamReader);
+            }
+        }
+
+        private static ELPR_EnlightenParam BeginReadELPR(BufferedStreamReader streamReader)
+        {
+            string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+            int offset = 0x0; //Base offset due to NIFL header
+
+            //Deal with deicer's extra header nonsense
+            if (type.Equals("elpr"))
+            {
+                streamReader.Seek(0xC, SeekOrigin.Begin);
+                //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                int headJunkSize = streamReader.Read<int>();
+
+                streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                offset += headJunkSize;
+            }
+
+            return ReadELPR(streamReader, offset);
+        }
+
+        private static ELPR_EnlightenParam ReadELPR(BufferedStreamReader streamReader, int offset)
+        {
+            ELPR_EnlightenParam elpr = new ELPR_EnlightenParam();
+            var type = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), 4));
+            streamReader.Seek(0x6, SeekOrigin.Current);
+            var count = streamReader.Read<ushort>();
+            streamReader.Seek(0x8, SeekOrigin.Current);
+
+            for (int i = 0; i < count; i++)
+            {
+                ELPR_EnlightenParam.ElprPiece piece = new ELPR_EnlightenParam.ElprPiece();
+                piece.name0x18 = ReadCString(streamReader);
+                streamReader.Seek(0x18, SeekOrigin.Current);
+                piece.usht_18 = streamReader.Read<ushort>();
+                piece.usht_1A = streamReader.Read<ushort>();
+                piece.int_1C = streamReader.Read<int>();
+                piece.vec3_20 = streamReader.Read<Vector3>();
+                piece.int_2C = streamReader.Read<int>();
+                piece.vec3_30 = streamReader.Read<Vector3>();
+                piece.int_3C = streamReader.Read<int>();
+
+                elpr.elprList.Add(piece);
+            }
+
+            return elpr;
         }
     }
 }

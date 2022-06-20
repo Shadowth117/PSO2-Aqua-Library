@@ -11,6 +11,15 @@ namespace AquaModelLibrary.AquaStructs
         public Dictionary<string, string> areaEntryExitDefaults2 = new Dictionary<string, string>(); //Stored as pairs of string ptrs; Somewhat unsure on this, but they specify a land formation file.
         public Dictionary<string, PieceSetObj> pieceSets = new Dictionary<string, PieceSetObj>();
 
+        public static List<string> sharedFiles = new List<string>()
+        {
+            "common",
+            "common_ex",
+            "epgd",
+            "ex",
+            "pgd",
+        };
+
         //Has V3 and V4 variants. V3 encompasses the alpha version to nearly the end of classic PSO2. V4 seems to be for NGS forward.
         public struct LPSHeader
         {
@@ -50,7 +59,7 @@ namespace AquaModelLibrary.AquaStructs
             public ushort variantCount; //Count of files, ex ln_0310_i0_00, ln_0310_i0_01 etc. Only a single '80' file if 0?
             public ushort usht_06;
             public ushort usht_08;
-            public ushort usht_0A;
+            public ushort variant80Count;
             public int fullNamePtr;
 
             public int int_10;

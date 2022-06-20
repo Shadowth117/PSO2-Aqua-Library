@@ -222,6 +222,7 @@
     <Compile Include="Nova\Structures\stamData.cs" />
     <Compile Include="Nova\Structures\XgmiStruct.cs" />
     <Compile Include="Nova\Structures\ydbmStruct.cs" />
+    <Compile Include="OtherStructs\ELPR_EnlightenParam.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
     <Compile Include="OtherStructs\PRMModel.cs" />
     <Compile Include="AquaUtil.cs" />
