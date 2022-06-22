@@ -9,6 +9,8 @@ using System.Text;
 using System.Windows;
 using zamboni;
 using static AquaExtras.FilenameConstants;
+using static AquaModelLibrary.Extra.MusicFilenameConstants;
+using static AquaModelLibrary.Extra.StageFilenameConstants;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;
@@ -29,6 +31,7 @@ namespace AquaModelLibrary.Extra
             string playerRAnimDirOut = Path.Combine(playerRebootDirOut, animsEffectsOut);
             string npcDirOut = Path.Combine(outputDirectory, npcOut);
             string enemyDirOut = Path.Combine(outputDirectory, enemiesOut);
+            string musicDirOut = Path.Combine(outputDirectory, musicOut);
             string petsDirOut = Path.Combine(outputDirectory, petsOut);
             string stageDirOut = Path.Combine(outputDirectory, stageOut);
             string uiDirOut = Path.Combine(outputDirectory, uiOut);
@@ -39,6 +42,7 @@ namespace AquaModelLibrary.Extra
             Directory.CreateDirectory(playerDirOut);
             Directory.CreateDirectory(playerRebootDirOut);
             Directory.CreateDirectory(playerRAnimDirOut);
+            Directory.CreateDirectory(musicDirOut);
             Directory.CreateDirectory(petsDirOut);
             Directory.CreateDirectory(stageDirOut);
             Directory.CreateDirectory(uiDirOut);
@@ -237,6 +241,7 @@ namespace AquaModelLibrary.Extra
             List<string> genAnimList, genAnimListNGS;
 
             DumpPaletteData(outputDirectory, aquaCMX);
+            GenerateMusicData(pso2_binDir, musicDirOut);
             GenerateCasinoData(pso2_binDir, outputDirectory);
             GenerateAreaData(pso2_binDir, stageDirOut);
             GenerateUILists(pso2_binDir, outputDirectory);
@@ -265,11 +270,101 @@ namespace AquaModelLibrary.Extra
 
             File.WriteAllLines(Path.Combine(outputDirectory, "UI", "LoadTunnels.csv"), loadTunnels);
         }
+        private static void GenerateMusicData(string pso2_binDir, string outputDirectory)
+        {
+            StringBuilder streamList = new StringBuilder();
+            StringBuilder streamListRb = new StringBuilder();
+            StringBuilder adaptiveList = new StringBuilder();
+            StringBuilder adaptiveListRb = new StringBuilder();
+
+            foreach (var str in classicStreamNames)
+            {
+                var hash = GetFileHash(streamPath + str.Key);
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hash)))
+                {
+                    streamList.AppendLine($"{str.Value},{str.Key}, {hash}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataNADir, hash)))
+                {
+                    streamList.AppendLine($"{str.Value},{str.Key}, {hash},NA");
+                }
+            }
+            foreach (var str in classicStreamHashes)
+            {
+                if(File.Exists(Path.Combine(pso2_binDir, dataDir, str.Key)))
+                {
+                    streamList.AppendLine($"{str.Value},,{str.Key}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataNADir, str.Key)))
+                {
+                    streamList.AppendLine($"{str.Value},,{str.Key},NA");
+                }
+            }
+            foreach (var str in classicAdaptiveNames)
+            {
+                var hash = GetFileHash(adaptivePath + str.Key);
+                var strCpk = str.Key.Replace(".ice", ".cpk");
+                var cpkHash = GetFileHash(adaptivePath + strCpk);
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hash)))
+                {
+                    adaptiveList.AppendLine($"{str.Value},{str.Key}, {hash}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataNADir, hash)))
+                {
+                    adaptiveList.AppendLine($"{str.Value},{str.Key}, {hash},NA");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, cpkHash)))
+                {
+                    adaptiveList.AppendLine($"{str.Value},{strCpk}, {cpkHash}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataNADir, cpkHash)))
+                {
+                    adaptiveList.AppendLine($"{str.Value},{strCpk}, {cpkHash},NA");
+                }
+            }
+            foreach (var str in ngsStreamNames)
+            {
+                var hash = GetRebootHash(GetFileHash(streamPath + str.Key));
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, hash)))
+                {
+                    streamListRb.AppendLine($"{str.Value},{str.Key}, {hash}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, hash)))
+                {
+                    streamListRb.AppendLine($"{str.Value},{str.Key}, {hash},NA");
+                }
+            }
+            foreach (var str in ngsAdaptiveNames)
+            {
+                var hash = GetRebootHash(GetFileHash(adaptivePath + str.Key));
+                var strCpk = str.Key.Replace(".ice", ".cpk");
+                var cpkHash = GetFileHash(adaptivePath + strCpk);
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, hash)))
+                {
+                    adaptiveListRb.AppendLine($"{str.Value},{str.Key}, {hash}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, hash)))
+                {
+                    adaptiveListRb.AppendLine($"{str.Value},{str.Key}, {hash},NA");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, cpkHash)))
+                {
+                    adaptiveListRb.AppendLine($"{str.Value},{strCpk}, {cpkHash}");
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, cpkHash)))
+                {
+                    adaptiveListRb.AppendLine($"{str.Value},{strCpk}, {cpkHash},NA");
+                }
+            }
+
+            WriteCSV(outputDirectory, $"StreamList.csv", streamList);
+            WriteCSV(outputDirectory, $"StreamListNGS.csv", streamListRb);
+            WriteCSV(outputDirectory, $"AdaptiveList.csv", adaptiveList);
+            WriteCSV(outputDirectory, $"AdaptiveListNGS.csv", adaptiveListRb);
+        }
 
         private static void GenerateCasinoData(string pso2_binDir, string outputDirectory)
         {
-            //--------------------------Casino Load Tunnel
-
             //--------------------------Casino Stuff
         }
 

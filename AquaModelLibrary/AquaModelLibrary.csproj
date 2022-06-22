@@ -172,6 +172,7 @@
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\NGSShaderPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
+    <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
     <Compile Include="Extra\DDS\DirectXUtil.cs" />
@@ -185,11 +186,13 @@
     <Compile Include="Extra\MathExtras.cs" />
     <Compile Include="Extra\ModelExporter.cs" />
     <Compile Include="Extra\ModelImporter.cs" />
+    <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="Extra\PSO2MapHandler.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="Extra\ReferenceGenerator.cs" />
+    <Compile Include="Extra\StageFilenameConstants.cs" />
     <Compile Include="Native\Fbx\FbxExporter.cs" />
     <Compile Include="Native\Fbx\Interfaces\IFbxExporter.cs" />
     <Compile Include="Native\Native.cs" />

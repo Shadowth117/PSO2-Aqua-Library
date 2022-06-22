@@ -20,6 +20,7 @@ using zamboni;
 using static AquaExtras.FilenameConstants;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using static AquaModelLibrary.AquaStructs.ShaderPresetDefaults;
 
 namespace AquaModelTool
 {
