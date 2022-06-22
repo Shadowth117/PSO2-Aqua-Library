@@ -4,6 +4,8 @@ namespace AquaModelLibrary.Extra
 {
     public static class StageFilenameConstants
     {
+        public static string charCreatorRoom = "sn_0000_chararea1.ice";
+
         //Some names may differ on areas and objects. Notably, my room rooms.
         //Immense thanks to Arredoval for this
         public static Dictionary<int, string> areaNames = new Dictionary<int, string>()

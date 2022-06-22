@@ -886,6 +886,9 @@ namespace AquaModelLibrary.Extra
             {
                 WriteCSV(ngsDirOut, $"{navOut.Key}_NavMeshList.csv", navOut.Value);
             }
+
+            string outCharCreatorRoom = $"NGS エステ,NGS Salon,{charCreatorRoom},{GetFileHash(charCreatorRoom)}";
+            File.WriteAllText(Path.Combine(outputDirectory, "CharacterCreator_LoginRoom.csv"), outCharCreatorRoom);
         }
 
         private static void GenerateUnitLists(string pso2_binDir, string outputDirectory)
