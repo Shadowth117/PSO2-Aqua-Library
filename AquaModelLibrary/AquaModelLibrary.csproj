@@ -154,6 +154,7 @@
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
+    <Compile Include="AquaMethods\FLTDPhysicsMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AddOnIndex.cs" />
     <Compile Include="AquaStructs\AquaBTI_MotionConfig.cs" />
@@ -170,7 +171,11 @@
     <Compile Include="AquaStructs\MusicFileAlpha.cs" />
     <Compile Include="AquaStructs\MyRoomParameters.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
-    <Compile Include="AquaStructs\NGSShaderPresets.cs" />
+    <Compile Include="AquaStructs\NGSShaderPresets\NGSShaderDetailPresets.cs" />
+    <Compile Include="AquaStructs\NGSShaderPresets\NGSShaderExtraPresets.cs" />
+    <Compile Include="AquaStructs\NGSShaderPresets\NGSShaderUnk0ValuesPresets.cs" />
+    <Compile Include="AquaStructs\NGSShaderPresets\PSO2ShaderTexInfoPresets.cs" />
+    <Compile Include="AquaStructs\NGSShaderPresets\PSO2ShaderTexSetPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />

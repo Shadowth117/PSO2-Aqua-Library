@@ -9,7 +9,6 @@ using System.Windows;
 using SystemHalf;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
-using static AquaModelLibrary.NGSShaderPresets;
 
 namespace AquaModelLibrary
 {
@@ -2077,6 +2076,12 @@ namespace AquaModelLibrary
                     case (int)NGSAquaObject.NGSVertFlags.Vert0x23:
                         size += 0x4;
                         break;
+                    case (int)NGSAquaObject.NGSVertFlags.Vert0x24:
+                        size += 0x4;
+                        break;
+                    case (int)NGSAquaObject.NGSVertFlags.Vert0x25:
+                        size += 0x4;
+                        break;
                     default:
                         MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
                         throw new Exception("Not implemented!");
@@ -2307,22 +2312,22 @@ namespace AquaModelLibrary
             shad.vertexShader.SetString(mat.shaderNames[1]);
 
             //Only in NGS shaders, but in theory could come up in others. Otherwise 0. No idea what this is.
-            if(ShaderUnk0Values.ContainsKey(key))
+            if(AquaModelLibrary.AquaStructs.NGSShaderPresets.NGSShaderUnk0ValuesPresets.ShaderUnk0Values.TryGetValue(key, out var unk0Val))
             {
-                shad.unk0 = ShaderUnk0Values[key];
+                shad.unk0 = unk0Val;
             }
 
             if(ngsMat)
             {
                 var ngsShad = (NGSAquaObject.NGSSHAD)shad;
-                if(NGSShaderDetailPresets.ContainsKey(key))
+                if(AquaModelLibrary.AquaStructs.NGSShaderPresets.NGSShaderDetailPresets.NGSShaderDetail.TryGetValue(key, out var detailVal))
                 {
-                    ngsShad.shadDetail = NGSShaderDetailPresets[key];
+                    ngsShad.shadDetail = detailVal;
                     ngsShad.shadDetailOffset = 1; 
                 }
-                if (NGSShaderExtraPresets.ContainsKey(key))
+                if (AquaModelLibrary.AquaStructs.NGSShaderPresets.NGSShaderExtraPresets.NGSShaderExtra.TryGetValue(key, out var extraVal))
                 {
-                    ngsShad.shadExtra = NGSShaderExtraPresets[key];
+                    ngsShad.shadExtra = extraVal;
                     ngsShad.shadExtraOffset = 1;
                 }
             }

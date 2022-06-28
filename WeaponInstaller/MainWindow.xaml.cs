@@ -623,12 +623,15 @@ namespace WeaponInstaller
             }
             else
             {
-                ReplaceFiles(currentFile);
-                MessageBox.Show("Successfully Replaced!");
+                bool success = ReplaceFiles(currentFile);
+                if(success)
+                {
+                    MessageBox.Show("Successfully Replaced!");
+                }
             }
         }
 
-        private void ReplaceFiles(string selectedFile)
+        private bool ReplaceFiles(string selectedFile)
         {
             var bytes = File.ReadAllBytes(selectedFile);
             bool checkSomethingPlease = true;
@@ -649,6 +652,8 @@ namespace WeaponInstaller
             {
                 MessageBox.Show("Please select a file to replace!");
             }
+
+            return checkSomethingPlease;
         }
 
         private void ReplaceFile(byte[] bytes, string game, string hash)

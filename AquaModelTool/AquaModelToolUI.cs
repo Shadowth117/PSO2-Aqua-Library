@@ -21,6 +21,7 @@ using static AquaExtras.FilenameConstants;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaStructs.ShaderPresetDefaults;
+using AquaModelLibrary.AquaMethods;
 
 namespace AquaModelTool
 {
@@ -41,6 +42,7 @@ namespace AquaModelTool
             this.DragDrop += new DragEventHandler(AquaUI_DragDrop);
 #if !DEBUG
             debugToolStripMenuItem.Visible = false;        
+            debug2ToolStripMenuItem.Visible = false;        
 #endif
         }
 
@@ -2873,7 +2875,7 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                AquaUtil.LoadFLTD(openFileDialog.FileName);
+                FLTDPhysicsMethods.LoadFLTD(openFileDialog.FileName);
             }
         }
 
@@ -2977,6 +2979,30 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 AquaUtil.LoadLPS(openFileDialog.FileName);
+            }
+        }
+
+        private void boneFlagTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 AQN file(s)",
+                Filter = "PSO2 AQN Files (*.aqn)|*.aqn|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil aqu = new AquaUtil();
+                aqu.ReadBones(openFileDialog.FileName);
+                for(int i = 0; i < aqu.aquaBones[0].nodeList.Count; i++)
+                {
+                    var bone = aqu.aquaBones[0].nodeList[i];
+                    bone.boneShort2 = 0xFFFF;
+
+                    aqu.aquaBones[0].nodeList[i] = bone;
+                }
+
+                AquaUtil.WriteBones(openFileDialog.FileName, aqu.aquaBones[0]);
             }
         }
     }

@@ -4,7 +4,6 @@ using System.Numerics;
 namespace AquaModelLibrary
 {
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
-
     public unsafe class AquaNode : AquaCommon
     {
         public NDTR ndtr;
@@ -47,6 +46,50 @@ namespace AquaModelLibrary
             public int const0_3;
             public int const0_4;
         }
+
+        /*
+         * BoneShort1 values:
+         * Disable PositionX Inheritance? 0x1
+         * Disable PositionY Inheritance? 0x2
+         * Disable PositionZ Inheritance? 0x4
+         * Disable RotationX Inheritance  0x8
+         * Disable RotationY Inheritance  0x10
+         * Disable RotationZ Inheritance  0x20
+         * Disable ScaleX Inheritance     0x40
+         * Disable ScaleY Inheritance     0x80
+         * Disable ScaleZ Inheritance     0x100
+         * Disable Positional Animation   0x200
+         * Disable Rotational Animation   0x400
+         * ?                              0x800
+         * ?                              0x1000
+         * ?                              0x2000
+         * Disable Node?                  0x4000
+         * ?                              0x8000
+         * 
+         * Default is typically 0x1C0, which disables all scale inheritance from the parent. Many of these seem hardcoded off during gameplay, at least on the player. The salon allows the enablement of the 0x8-0x100
+        */
+
+        /*
+         * BoneShort2 values:
+         *                                0x1
+         *                                0x2
+         *                                0x4
+         *                                0x8
+         *                                0x10
+         *                                0x20
+         *                                0x40
+         *                                0x80
+         *                                0x100
+         *                                0x200
+         *                                0x400
+         *                                0x800
+         *                                0x1000
+         *                                0x2000
+         *                                0x4000
+         *                                0x8000
+         * 
+         * Default is typically 0x1C0, which disables all scale inheritance from the parent. Many of these seem hardcoded off during gameplay, at least on the player. The salon allows the enablement of the 0x8-0x100
+        */
 
         //Technically, the structs in this are all in the one big NODE struct, but it seemed more logical to separate it out a bit more.
         public struct NODE

@@ -100,9 +100,11 @@
             this.readFLTDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readTXLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMRPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readLPSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readLPSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.debug2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.boneFlagTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,7 +115,8 @@
             this.extraToolStripMenuItem,
             this.toolStripSeparator2,
             this.toolsToolStripMenuItem,
-            this.debugToolStripMenuItem});
+            this.debugToolStripMenuItem,
+            this.debug2ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(384, 27);
@@ -676,6 +679,13 @@
             this.readMRPToolStripMenuItem.Text = "ReadAOX";
             this.readMRPToolStripMenuItem.Click += new System.EventHandler(this.readAOXToolStripMenuItem_Click);
             // 
+            // readLPSToolStripMenuItem
+            // 
+            this.readLPSToolStripMenuItem.Name = "readLPSToolStripMenuItem";
+            this.readLPSToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readLPSToolStripMenuItem.Text = "ReadLPS";
+            this.readLPSToolStripMenuItem.Click += new System.EventHandler(this.readLPSToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -694,12 +704,20 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readLPSToolStripMenuItem
+            // debug2ToolStripMenuItem
             // 
-            this.readLPSToolStripMenuItem.Name = "readLPSToolStripMenuItem";
-            this.readLPSToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.readLPSToolStripMenuItem.Text = "ReadLPS";
-            this.readLPSToolStripMenuItem.Click += new System.EventHandler(this.readLPSToolStripMenuItem_Click);
+            this.debug2ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.boneFlagTestToolStripMenuItem});
+            this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
+            this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
+            this.debug2ToolStripMenuItem.Text = "Debug2";
+            // 
+            // boneFlagTestToolStripMenuItem
+            // 
+            this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
+            this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -797,6 +815,8 @@
         private System.Windows.Forms.ToolStripMenuItem assembleNGSMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMRPToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readLPSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem debug2ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem boneFlagTestToolStripMenuItem;
     }
 }
 
