@@ -33,8 +33,8 @@ namespace AquaModelTool
             this.rendIDCB = new System.Windows.Forms.ComboBox();
             this.rendLabel = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.unk1UD = new System.Windows.Forms.NumericUpDown();
-            this.unk1Label = new System.Windows.Forms.Label();
+            this.sourceAlphaUD = new System.Windows.Forms.NumericUpDown();
+            this.sourceAlphaLabel = new System.Windows.Forms.Label();
             this.int0CUD = new System.Windows.Forms.NumericUpDown();
             this.int0CLabel = new System.Windows.Forms.Label();
             this.twoSidedUD = new System.Windows.Forms.NumericUpDown();
@@ -47,8 +47,8 @@ namespace AquaModelTool
             this.unk4Label = new System.Windows.Forms.Label();
             this.unk3UD = new System.Windows.Forms.NumericUpDown();
             this.unk3Label = new System.Windows.Forms.Label();
-            this.unk2UD = new System.Windows.Forms.NumericUpDown();
-            this.unk2Label = new System.Windows.Forms.Label();
+            this.destinationAlphaUD = new System.Windows.Forms.NumericUpDown();
+            this.destAlphaLabel = new System.Windows.Forms.Label();
             this.unk9UD = new System.Windows.Forms.NumericUpDown();
             this.unk9Label = new System.Windows.Forms.Label();
             this.unk8UD = new System.Windows.Forms.NumericUpDown();
@@ -74,14 +74,14 @@ namespace AquaModelTool
             this.label4 = new System.Windows.Forms.Label();
             this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
             this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.unk1UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sourceAlphaUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.int0CUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.twoSidedUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk0UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk5UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk4UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk3UD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.unk2UD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.destinationAlphaUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk9UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk8UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk7UD)).BeginInit();
@@ -134,32 +134,32 @@ namespace AquaModelTool
             this.panel2.Size = new System.Drawing.Size(73, 51);
             this.panel2.TabIndex = 11;
             // 
-            // unk1UD
+            // sourceAlphaUD
             // 
-            this.unk1UD.Location = new System.Drawing.Point(246, 75);
-            this.unk1UD.Maximum = new decimal(new int[] {
+            this.sourceAlphaUD.Location = new System.Drawing.Point(246, 75);
+            this.sourceAlphaUD.Maximum = new decimal(new int[] {
             1569325056,
             23283064,
             0,
             0});
-            this.unk1UD.Minimum = new decimal(new int[] {
+            this.sourceAlphaUD.Minimum = new decimal(new int[] {
             1569325056,
             23283064,
             0,
             -2147483648});
-            this.unk1UD.Name = "unk1UD";
-            this.unk1UD.Size = new System.Drawing.Size(76, 20);
-            this.unk1UD.TabIndex = 31;
-            this.unk1UD.ValueChanged += new System.EventHandler(this.unk1UD_ValueChanged);
+            this.sourceAlphaUD.Name = "sourceAlphaUD";
+            this.sourceAlphaUD.Size = new System.Drawing.Size(76, 20);
+            this.sourceAlphaUD.TabIndex = 31;
+            this.sourceAlphaUD.ValueChanged += new System.EventHandler(this.sourceAlphaUD_ValueChanged);
             // 
-            // unk1Label
+            // sourceAlphaLabel
             // 
-            this.unk1Label.AutoSize = true;
-            this.unk1Label.Location = new System.Drawing.Point(243, 58);
-            this.unk1Label.Name = "unk1Label";
-            this.unk1Label.Size = new System.Drawing.Size(33, 13);
-            this.unk1Label.TabIndex = 30;
-            this.unk1Label.Text = "Unk1";
+            this.sourceAlphaLabel.AutoSize = true;
+            this.sourceAlphaLabel.Location = new System.Drawing.Point(243, 58);
+            this.sourceAlphaLabel.Name = "sourceAlphaLabel";
+            this.sourceAlphaLabel.Size = new System.Drawing.Size(71, 13);
+            this.sourceAlphaLabel.TabIndex = 30;
+            this.sourceAlphaLabel.Text = "Source Alpha";
             // 
             // int0CUD
             // 
@@ -317,38 +317,38 @@ namespace AquaModelTool
             // unk3Label
             // 
             this.unk3Label.AutoSize = true;
-            this.unk3Label.Location = new System.Drawing.Point(79, 98);
+            this.unk3Label.Location = new System.Drawing.Point(86, 98);
             this.unk3Label.Name = "unk3Label";
             this.unk3Label.Size = new System.Drawing.Size(33, 13);
             this.unk3Label.TabIndex = 34;
             this.unk3Label.Text = "Unk3";
             // 
-            // unk2UD
+            // destinationAlphaUD
             // 
-            this.unk2UD.Location = new System.Drawing.Point(0, 115);
-            this.unk2UD.Maximum = new decimal(new int[] {
+            this.destinationAlphaUD.Location = new System.Drawing.Point(0, 115);
+            this.destinationAlphaUD.Maximum = new decimal(new int[] {
             1569325056,
             23283064,
             0,
             0});
-            this.unk2UD.Minimum = new decimal(new int[] {
+            this.destinationAlphaUD.Minimum = new decimal(new int[] {
             1569325056,
             23283064,
             0,
             -2147483648});
-            this.unk2UD.Name = "unk2UD";
-            this.unk2UD.Size = new System.Drawing.Size(76, 20);
-            this.unk2UD.TabIndex = 33;
-            this.unk2UD.ValueChanged += new System.EventHandler(this.unk2UD_ValueChanged);
+            this.destinationAlphaUD.Name = "destinationAlphaUD";
+            this.destinationAlphaUD.Size = new System.Drawing.Size(76, 20);
+            this.destinationAlphaUD.TabIndex = 33;
+            this.destinationAlphaUD.ValueChanged += new System.EventHandler(this.destinationAlphaUD_ValueChanged);
             // 
-            // unk2Label
+            // destAlphaLabel
             // 
-            this.unk2Label.AutoSize = true;
-            this.unk2Label.Location = new System.Drawing.Point(-3, 98);
-            this.unk2Label.Name = "unk2Label";
-            this.unk2Label.Size = new System.Drawing.Size(33, 13);
-            this.unk2Label.TabIndex = 32;
-            this.unk2Label.Text = "Unk2";
+            this.destAlphaLabel.AutoSize = true;
+            this.destAlphaLabel.Location = new System.Drawing.Point(-3, 98);
+            this.destAlphaLabel.Name = "destAlphaLabel";
+            this.destAlphaLabel.Size = new System.Drawing.Size(90, 13);
+            this.destAlphaLabel.TabIndex = 32;
+            this.destAlphaLabel.Text = "Destination Alpha";
             // 
             // unk9UD
             // 
@@ -679,6 +679,7 @@ namespace AquaModelTool
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
+            this.Controls.Add(this.destAlphaLabel);
             this.Controls.Add(this.numericUpDown4);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.unk13UD);
@@ -709,10 +710,9 @@ namespace AquaModelTool
             this.Controls.Add(this.unk4Label);
             this.Controls.Add(this.unk3UD);
             this.Controls.Add(this.unk3Label);
-            this.Controls.Add(this.unk2UD);
-            this.Controls.Add(this.unk2Label);
-            this.Controls.Add(this.unk1UD);
-            this.Controls.Add(this.unk1Label);
+            this.Controls.Add(this.destinationAlphaUD);
+            this.Controls.Add(this.sourceAlphaUD);
+            this.Controls.Add(this.sourceAlphaLabel);
             this.Controls.Add(this.int0CUD);
             this.Controls.Add(this.int0CLabel);
             this.Controls.Add(this.twoSidedUD);
@@ -725,14 +725,14 @@ namespace AquaModelTool
             this.Size = new System.Drawing.Size(378, 230);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.unk1UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sourceAlphaUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.int0CUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.twoSidedUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk0UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk5UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk4UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk3UD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.unk2UD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.destinationAlphaUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk9UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk8UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk7UD)).EndInit();
@@ -755,8 +755,8 @@ namespace AquaModelTool
         private System.Windows.Forms.ComboBox rendIDCB;
         private System.Windows.Forms.Label rendLabel;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.NumericUpDown unk1UD;
-        private System.Windows.Forms.Label unk1Label;
+        private System.Windows.Forms.NumericUpDown sourceAlphaUD;
+        private System.Windows.Forms.Label sourceAlphaLabel;
         private System.Windows.Forms.NumericUpDown int0CUD;
         private System.Windows.Forms.Label int0CLabel;
         private System.Windows.Forms.NumericUpDown twoSidedUD;
@@ -769,8 +769,8 @@ namespace AquaModelTool
         private System.Windows.Forms.Label unk4Label;
         private System.Windows.Forms.NumericUpDown unk3UD;
         private System.Windows.Forms.Label unk3Label;
-        private System.Windows.Forms.NumericUpDown unk2UD;
-        private System.Windows.Forms.Label unk2Label;
+        private System.Windows.Forms.NumericUpDown destinationAlphaUD;
+        private System.Windows.Forms.Label destAlphaLabel;
         private System.Windows.Forms.NumericUpDown unk9UD;
         private System.Windows.Forms.Label unk9Label;
         private System.Windows.Forms.NumericUpDown unk8UD;

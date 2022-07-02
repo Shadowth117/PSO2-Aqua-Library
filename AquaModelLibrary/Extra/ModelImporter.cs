@@ -1,13 +1,11 @@
-﻿using System;
+﻿using AquaModelLibrary.Utility;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Numerics;
+using static AquaModelLibrary.AquaObjectMethods;
 using static AquaModelLibrary.Extra.MathExtras;
-using AquaModelLibrary.Utility;
 
 namespace AquaModelLibrary
 {
@@ -29,9 +27,9 @@ namespace AquaModelLibrary
             int animatedNodeCount = nodeKeys.Last() + 1;
             AquaUtil aqua = new AquaUtil();
 
-            for(int i = 0; i < aiScene.Animations.Count; i++)
+            for (int i = 0; i < aiScene.Animations.Count; i++)
             {
-                if(aiScene.Animations[i] == null)
+                if (aiScene.Animations[i] == null)
                 {
                     continue;
                 }
@@ -39,19 +37,21 @@ namespace AquaModelLibrary
                 var anim = aiScene.Animations[i];
                 int animEndFrame = 0; //We'll fill this later. Assumes frame 0 to be the start
 
-                if(anim.Name != null && anim.Name != "")
+                if (anim.Name != null && anim.Name != "")
                 {
                     //Make sure we're not overwriting anims that somehow have duplicate names
-                    if(aqmNames.Contains(anim.Name))
+                    if (aqmNames.Contains(anim.Name))
                     {
                         aqmNames.Add($"Anim_{i}_" + anim.Name + ".aqm");
-                    } else
+                    }
+                    else
                     {
                         aqmNames.Add(anim.Name + ".aqm");
                     }
-                } else
+                }
+                else
                 {
-                    aqmNames.Add($"Anim_{i}_"  + inputFilename + ".aqm");
+                    aqmNames.Add($"Anim_{i}_" + inputFilename + ".aqm");
                 }
 
                 aqm.moHeader = new AquaMotion.MOHeader();
@@ -61,11 +61,12 @@ namespace AquaModelLibrary
                 {
                     //Default to 30
                     aqm.moHeader.frameSpeed = 30;
-                } else
+                }
+                else
                 {
                     aqm.moHeader.frameSpeed = (float)anim.TicksPerSecond;
                 }
-                
+
                 aqm.moHeader.unkInt0 = 2; //Always, always 2 for NIFL
                 aqm.moHeader.variant = 0x2; //These are flags for the animation to tell the game what type it is. Since this is a skeletal animation, we always put 2 here.
                 //If it's a player one specifically, the game generally adds 0x10 to this.
@@ -79,9 +80,9 @@ namespace AquaModelLibrary
 
                 //Set this ahead of time in case these are out of order
                 aqm.motionKeys = new List<AquaMotion.KeyData>(new AquaMotion.KeyData[aqm.moHeader.nodeCount]);
-                
+
                 //Nodes
-                foreach(var animNode in anim.NodeAnimationChannels)
+                foreach (var animNode in anim.NodeAnimationChannels)
                 {
                     if (animNode == null)
                     {
@@ -164,11 +165,12 @@ namespace AquaModelLibrary
                             sclKeys.vector4Keys.Add(new Vector4(scl.Value.X, scl.Value.Y, scl.Value.Z, 0));
 
                             //Account for first frame difference
-                            if(first)
+                            if (first)
                             {
                                 sclKeys.frameTimings.Add(1);
                                 first = false;
-                            } else
+                            }
+                            else
                             {
                                 sclKeys.frameTimings.Add((ushort)(scl.Time * 0x10));
                             }
@@ -182,7 +184,7 @@ namespace AquaModelLibrary
                 }
 
                 //NodeTreeFlag
-                if(playerExport)
+                if (playerExport)
                 {
                     var node = aqm.motionKeys[aqm.motionKeys.Count - 1] = new AquaMotion.KeyData();
                     node.mseg.nodeName.SetString("__NodeTreeFlag__");
@@ -195,15 +197,17 @@ namespace AquaModelLibrary
                     posKeys.keyType = 0x10;
                     posKeys.dataType = 5;
                     posKeys.keyCount = animEndFrame + 1;
-                    for(int frame = 0; frame < posKeys.keyCount; frame++)
+                    for (int frame = 0; frame < posKeys.keyCount; frame++)
                     {
-                        if(frame == 0)
+                        if (frame == 0)
                         {
                             posKeys.frameTimings.Add(0x9);
-                        } else if(frame == posKeys.keyCount - 1)
+                        }
+                        else if (frame == posKeys.keyCount - 1)
                         {
                             posKeys.frameTimings.Add((ushort)((frame * 0x10) + 0xA));
-                        } else
+                        }
+                        else
                         {
                             posKeys.frameTimings.Add((ushort)((frame * 0x10) + 0x8));
                         }
@@ -262,11 +266,11 @@ namespace AquaModelLibrary
                 }
 
                 //Sanity check
-                foreach(var aiPair in aiNodes)
+                foreach (var aiPair in aiNodes)
                 {
                     var node = aqm.motionKeys[aiPair.Key];
                     var aiNode = aiPair.Value;
-                    if(node == null)
+                    if (node == null)
                     {
                         node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
 
@@ -283,9 +287,10 @@ namespace AquaModelLibrary
 
                         //Scale
                         AddOneScaleFrame(useScaleFrames, node);
-                    } else
+                    }
+                    else
                     {
-                        if(node.keyData[0].vector4Keys.Count < 1)
+                        if (node.keyData[0].vector4Keys.Count < 1)
                         {
                             AddOnePosFrame(node, aiNode, baseScale);
                         }
@@ -305,7 +310,7 @@ namespace AquaModelLibrary
                 aqmList.Add(aqm);
             }
 
-            for(int i = 0; i < aqmList.Count; i++)
+            for (int i = 0; i < aqmList.Count; i++)
             {
                 var aqm = aqmList[i];
                 AquaUtilData.AnimSet set = new AquaUtilData.AnimSet();
@@ -325,10 +330,11 @@ namespace AquaModelLibrary
                 sclKeys.keyType = 3;
                 sclKeys.dataType = 1;
                 sclKeys.keyCount = 1;
-                if(aiNode == null)
+                if (aiNode == null)
                 {
                     sclKeys.vector4Keys = new List<Vector4>() { new Vector4(1.0f, 1.0f, 1.0f, 0) };
-                } else
+                }
+                else
                 {
                     Matrix4x4.Invert(GetMat4FromAssimpMat4(aiNode.Transform), out Matrix4x4 mat4);
                     sclKeys.vector4Keys = new List<Vector4>() { new Vector4(mat4.M11, mat4.M22, mat4.M33, 0) };
@@ -378,11 +384,12 @@ namespace AquaModelLibrary
                 return -1;
             }
             string num = nameArr[0];
-            
-            if(Int32.TryParse(num, out int result))
+
+            if (Int32.TryParse(num, out int result))
             {
                 return result;
-            } else
+            }
+            else
             {
                 return -1;
             }
@@ -392,7 +399,7 @@ namespace AquaModelLibrary
         {
             Dictionary<int, Assimp.Node> nodes = new Dictionary<int, Assimp.Node>();
 
-            foreach(var node in aiScene.RootNode.Children)
+            foreach (var node in aiScene.RootNode.Children)
             {
                 CollectAnimated(node, nodes);
             }
@@ -404,7 +411,7 @@ namespace AquaModelLibrary
         {
             //Be extra sure that this isn't an effect node
             if (IsAnimatedNode(node, out string name, out int num))
-            {  
+            {
                 //For now, assume animated node is numbered and we can add it directly
                 nodes.Add(num, node);
             }
@@ -427,7 +434,7 @@ namespace AquaModelLibrary
         {
             name = node.Name;
             num = -1;
-            if(node.Name[0] == '(' && node.Name.Contains(')'))
+            if (node.Name[0] == '(' && node.Name.Contains(')'))
             {
                 if (!int.TryParse(name.Split('(')[1].Split(')')[0], out num))
                 {
@@ -445,7 +452,7 @@ namespace AquaModelLibrary
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
-            
+
             PRMModel prm = new PRMModel();
 
             int totalVerts = 0;
@@ -459,14 +466,14 @@ namespace AquaModelLibrary
         {
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(node.Transform));
             nodeMat = Matrix4x4.Multiply(nodeMat, parentTfm);
-            
+
             foreach (int meshId in node.MeshIndices)
             {
                 var mesh = aiScene.Meshes[meshId];
                 AddAiMeshToPRM(prm, ref totalVerts, mesh, nodeMat);
             }
 
-            foreach(var childNode in node.Children)
+            foreach (var childNode in node.Children)
             {
                 IterateAiNodesPRM(prm, ref totalVerts, aiScene, childNode, nodeMat);
             }
@@ -551,20 +558,23 @@ namespace AquaModelLibrary
             if (isNGS)
             {
                 aqp = new NGSAquaObject();
-            } else {
+            }
+            else
+            {
                 aqp = new ClassicAquaObject();
             }
 
             //Construct Materials
             Dictionary<string, int> matNameTracker = new Dictionary<string, int>();
-            foreach(var aiMat in aiScene.Materials)
+            foreach (var aiMat in aiScene.Materials)
             {
                 string name;
                 if (matNameTracker.ContainsKey(aiMat.Name))
                 {
                     name = $"{aiMat.Name} ({matNameTracker[aiMat.Name]})";
                     matNameTracker[aiMat.Name] += 1;
-                } else
+                }
+                else
                 {
                     name = aiMat.Name;
                     matNameTracker.Add(aiMat.Name, 1);
@@ -585,14 +595,16 @@ namespace AquaModelLibrary
                 if (genMat.specialType != null)
                 {
                     AquaObjectMethods.GenerateSpecialMaterialParameters(genMat);
-                } else if(aiMat.TextureDiffuse.FilePath != null)
+                }
+                else if (aiMat.TextureDiffuse.FilePath != null)
                 {
                     genMat.texNames.Add(Path.GetFileName(aiMat.TextureDiffuse.FilePath));
-                } else
+                }
+                else
                 {
                     genMat.texNames.Add("tex0_d.dds");
                 }
-                genMat.texUVSets.Add(0); 
+                genMat.texUVSets.Add(0);
 
                 AquaObjectMethods.GenerateMaterial(aqp, genMat, true);
             }
@@ -606,10 +618,10 @@ namespace AquaModelLibrary
                 BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
             }
             IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale);
-            
+
             //Generate bonepalette. No real reason not to just put in every bone at the moment.
             aqp.bonePalette = new List<uint>();
-            for(uint i = 0; i < aqn.nodeList.Count; i++)
+            for (uint i = 0; i < aqn.nodeList.Count; i++)
             {
                 aqp.bonePalette.Add(i);
             }
@@ -630,7 +642,7 @@ namespace AquaModelLibrary
             var nodeCountName = GetNodeNumber(aiNode.Name);
             if (nodeCountName != -1)
             {
-                if(nodeCountName == 0)
+                if (nodeCountName == 0)
                 {
                     return aiNode;
                 }
@@ -638,7 +650,7 @@ namespace AquaModelLibrary
             foreach (var childNode in aiNode.Children)
             {
                 var node = GetRootNode(childNode);
-                if(node != null)
+                if (node != null)
                 {
                     return node;
                 }
@@ -653,7 +665,8 @@ namespace AquaModelLibrary
             {
                 useNameNodeNum = true;
                 boneDict.Add(aiNode.Name, nodeCountName);
-            } else if(useNameNodeNum == false)
+            }
+            else if (useNameNodeNum == false)
             {
                 boneDict.Add(aiNode.Name, nodeCounter);
             }
@@ -672,7 +685,7 @@ namespace AquaModelLibrary
             //Decide if this is an effect node or not
             string nodeName = aiNode.Name;
             var nodeParent = aiNode.Parent;
-            if(ParseNodeId(nodeName, out string finalName, out int nodeId))
+            if (ParseNodeId(nodeName, out string finalName, out int nodeId))
             {
                 AquaNode.NODE node = new AquaNode.NODE();
                 node.boneName.SetString(finalName);
@@ -756,7 +769,7 @@ namespace AquaModelLibrary
             else
             {
                 //Nodo nodes can't have nodo parents. Therefore, we skip anything below another nodo or nodes that aren't in the proper hierarchy.
-                if(aiNode.Parent != null && ParseNodeId(aiNode.Parent.Name, out string parentName, out int parNodeId) == true)
+                if (aiNode.Parent != null && ParseNodeId(aiNode.Parent.Name, out string parentName, out int parNodeId) == true)
                 {
                     if (aiNode.HasChildren)
                     {
@@ -832,7 +845,7 @@ namespace AquaModelLibrary
                 genTris.vertCount = mesh.Vertices.Count;
                 AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
 
-                foreach(var v in faceVerts) //Expects triangles, not quads or polygons
+                foreach (var v in faceVerts) //Expects triangles, not quads or polygons
                 {
                     faceVtxl.rawFaceId.Add(faceId);
                     faceVtxl.rawVertId.Add(v);
@@ -840,7 +853,7 @@ namespace AquaModelLibrary
                     vertPos = Vector3.Transform(vertPos, nodeMat);
                     vertPos = new Vector3(vertPos.X * baseScale, vertPos.Y * baseScale, vertPos.Z * baseScale);
                     faceVtxl.vertPositions.Add(vertPos);
-                    if(mesh.HasNormals)
+                    if (mesh.HasNormals)
                     {
                         faceVtxl.vertNormals.Add(new Vector3(mesh.Normals[v].X * baseScale, mesh.Normals[v].Y * baseScale, mesh.Normals[v].Z * baseScale));
                     }
@@ -877,7 +890,7 @@ namespace AquaModelLibrary
                     if (mesh.HasTextureCoords(4))
                     {
                         var uv = mesh.TextureCoordinateChannels[4][v];
-                        faceVtxl.vert0x22.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y)});
+                        faceVtxl.vert0x22.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y) });
                     }
                     if (mesh.HasTextureCoords(5))
                     {
@@ -900,12 +913,12 @@ namespace AquaModelLibrary
                     {
                         List<int> vertWeightIds = new List<int>();
                         List<float> vertWeights = new List<float>();
-                        foreach(var bone in mesh.Bones)
+                        foreach (var bone in mesh.Bones)
                         {
                             var boneId = GetNodeNumber(bone.Name);
-                            foreach(var weight in bone.VertexWeights)
+                            foreach (var weight in bone.VertexWeights)
                             {
-                                if(weight.VertexID == v)
+                                if (weight.VertexID == v)
                                 {
                                     vertWeightIds.Add(boneId);
                                     vertWeights.Add(weight.Weight);
@@ -925,16 +938,16 @@ namespace AquaModelLibrary
 
         public static List<int> GetMeshIds(string name)
         {
-            if(name.Substring(name.Length - 5, 5) == "_mesh")
+            if (name.Substring(name.Length - 5, 5) == "_mesh")
             {
                 name = name.Substring(name.Length - 5);
             }
             List<int> ids = new List<int>();
             var split = name.Split('#');
-            if(split.Length > 1)
+            if (split.Length > 1)
             {
                 ids.Add(Int32.Parse(split[1]));
-                if(split.Length > 2)
+                if (split.Length > 2)
                 {
                     ids.Add(Int32.Parse(split[2]));
                 }
@@ -961,7 +974,7 @@ namespace AquaModelLibrary
             boneShort1 = 0x1C0;
             boneShort2 = 0;
             var numParse = nodeName.Split('#');
-            if(numParse.Length > 1)
+            if (numParse.Length > 1)
             {
                 numParse[1] = numParse[1].Replace("0x", "");
                 try
@@ -979,7 +992,8 @@ namespace AquaModelLibrary
                         {
                         }
                     }
-                } catch
+                }
+                catch
                 {
                 }
             }
@@ -989,7 +1003,7 @@ namespace AquaModelLibrary
         {
             nodeNameSeparated = nodeName;
             var numParse = nodeName.Split('(', ')');
-            if(numParse.Length == 1)
+            if (numParse.Length == 1)
             {
                 id = -1;
                 return false;
@@ -1000,7 +1014,8 @@ namespace AquaModelLibrary
             {
                 id = result;
                 return true;
-            } else
+            }
+            else
             {
                 id = -1;
                 return false;
@@ -1045,10 +1060,11 @@ namespace AquaModelLibrary
         {
             double dbl = flt * 255;
             byte fltByte;
-            if(dbl > 255)
+            if (dbl > 255)
             {
                 fltByte = 255;
-            } else
+            }
+            else
             {
                 fltByte = (byte)dbl;
             }

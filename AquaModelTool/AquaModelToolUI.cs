@@ -772,7 +772,28 @@ namespace AquaModelTool
                                         {
                                             try
                                             {
+                                                aquaUI.aqua.aquaModels.Clear();
                                                 aquaUI.aqua.ReadModel(iceFileBytes);
+                                                /*
+                                                var model = aquaUI.aqua.aquaModels[0].models[0];
+                                                for(int j = 0; j < model.mateList.Count; j++)
+                                                {
+                                                    var mat = model.mateList[j];
+                                                    switch(mat.alphaType.GetString())
+                                                    {
+                                                        case "blendalpha":
+                                                        case "opaque":
+                                                        case "hollow":
+                                                            break;
+                                                        case "add":
+                                                            Debug.WriteLine($"{Path.GetFileName(file)} {IceFile.getFileName(iceFileBytes)} {mat.matName.GetString()} {mat.alphaType.GetString()}");
+                                                            break;
+                                                        default:
+                                                            Debug.WriteLine($"Unexpected mat type {mat.alphaType.GetString()} {Path.GetFileName(file)} {IceFile.getFileName(iceFileBytes)} {mat.matName.GetString()} {mat.alphaType.GetString()}");
+                                                            break;
+                                                    }
+                                                }
+                                                */
                                                 ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, name);
                                                 GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, shaderTexListCode, shaderTexDataCode, name);
                                             }

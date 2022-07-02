@@ -118,6 +118,7 @@ namespace AquaModelTool
 
         private void opaqueRB_CheckedChanged(object sender, EventArgs e)
         {
+            RENDhackOpaque();
             var mate = model.mateList[matIDCB.SelectedIndex];
             mate.alphaType.SetString("opaque");
             model.mateList[matIDCB.SelectedIndex] = mate;
@@ -125,7 +126,7 @@ namespace AquaModelTool
 
         private void blendAlphaRB_CheckedChanged(object sender, EventArgs e)
         {
-            RENDhack();
+            RENDhackBlendAlpha();
             var mate = model.mateList[matIDCB.SelectedIndex];
             mate.alphaType.SetString("blendalpha");
             model.mateList[matIDCB.SelectedIndex] = mate;
@@ -133,7 +134,7 @@ namespace AquaModelTool
 
         private void hollowRB_CheckedChanged(object sender, EventArgs e)
         {
-            RENDhack();
+            RENDhackHollow();
             var mate = model.mateList[matIDCB.SelectedIndex];
             mate.alphaType.SetString("hollow");
             model.mateList[matIDCB.SelectedIndex] = mate;
@@ -141,14 +142,70 @@ namespace AquaModelTool
 
         private void addRB_CheckedChanged(object sender, EventArgs e)
         {
-            RENDhack();
+            RENDhackAdd();
             var mate = model.mateList[matIDCB.SelectedIndex];
             mate.alphaType.SetString("add");
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
         //Since normally materials are divorced from REND structs in offical models, we'll just fix the necessary REND areas for all that are used with this MATE 
-        private void RENDhack()
+        private void RENDhackOpaque()
+        {
+            if (loaded)
+            {
+                List<int> rendIds = new List<int>();
+                for (int i = 0; i < model.meshList.Count; i++)
+                {
+                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
+                    {
+                        if (!rendIds.Contains(model.meshList[i].rendIndex))
+                        {
+                            rendIds.Add(model.meshList[i].rendIndex);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < rendIds.Count; i++)
+                {
+                    var rend = model.rendList[rendIds[i]];
+                    rend.int_0C = 0;
+                    rend.unk8 = 0;
+                    rend.alphaCutoff = 0;
+                    rend.destinationAlpha = 6;
+                    rend.unk0 = 3;
+                    model.rendList[rendIds[i]] = rend;
+                }
+            }
+        }
+        private void RENDhackAdd()
+        {
+            if (loaded)
+            {
+                List<int> rendIds = new List<int>();
+                for (int i = 0; i < model.meshList.Count; i++)
+                {
+                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
+                    {
+                        if (!rendIds.Contains(model.meshList[i].rendIndex))
+                        {
+                            rendIds.Add(model.meshList[i].rendIndex);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < rendIds.Count; i++)
+                {
+                    var rend = model.rendList[rendIds[i]];
+                    rend.int_0C = 1;
+                    rend.unk8 = 1;
+                    rend.alphaCutoff = 0;
+                    rend.destinationAlpha = 2;
+                    rend.unk0 = 1;
+                    model.rendList[rendIds[i]] = rend;
+                }
+            }
+        }
+        private void RENDhackBlendAlpha()
         {
             if(loaded)
             {
@@ -170,11 +227,40 @@ namespace AquaModelTool
                     rend.int_0C = 1;
                     rend.unk8 = 1;
                     rend.alphaCutoff = 0;
+                    rend.destinationAlpha = 6;
+                    rend.unk0 = 3;
                     model.rendList[rendIds[i]] = rend;
                 }
             }
         }
+        private void RENDhackHollow()
+        {
+            if (loaded)
+            {
+                List<int> rendIds = new List<int>();
+                for (int i = 0; i < model.meshList.Count; i++)
+                {
+                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
+                    {
+                        if (!rendIds.Contains(model.meshList[i].rendIndex))
+                        {
+                            rendIds.Add(model.meshList[i].rendIndex);
+                        }
+                    }
+                }
 
+                for (int i = 0; i < rendIds.Count; i++)
+                {
+                    var rend = model.rendList[rendIds[i]];
+                    rend.int_0C = 0;
+                    rend.unk8 = 1;
+                    rend.alphaCutoff = 0;
+                    rend.destinationAlpha = 6;
+                    rend.unk0 = 3;
+                    model.rendList[rendIds[i]] = rend;
+                }
+            }
+        }
         private static Color ARGBFromRGBAVector4(Vector4 vec4)
         {
             //Limit input. It can technically be higher than this in theory, but usually it wouldn't be.

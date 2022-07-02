@@ -998,8 +998,8 @@ namespace AquaModelLibrary
                 rend.twosided = (int)rendRaw[i][0x42];
                 rend.int_0C = (int)rendRaw[i][0x43];
 
-                rend.unk1 = (int)rendRaw[i][0x44];
-                rend.unk2 = (int)rendRaw[i][0x45];
+                rend.sourceAlpha = (int)rendRaw[i][0x44];
+                rend.destinationAlpha = (int)rendRaw[i][0x45];
                 rend.unk3 = (int)rendRaw[i][0x46];
                 rend.unk4 = (int)rendRaw[i][0x47];
 
@@ -1040,8 +1040,8 @@ namespace AquaModelLibrary
                 addBytes(outBytes, 0x42, 0x9, BitConverter.GetBytes(rendList[i].twosided));
                 addBytes(outBytes, 0x43, 0x9, BitConverter.GetBytes(rendList[i].int_0C));
 
-                addBytes(outBytes, 0x44, 0x9, BitConverter.GetBytes(rendList[i].unk1));
-                addBytes(outBytes, 0x45, 0x9, BitConverter.GetBytes(rendList[i].unk2));
+                addBytes(outBytes, 0x44, 0x9, BitConverter.GetBytes(rendList[i].sourceAlpha));
+                addBytes(outBytes, 0x45, 0x9, BitConverter.GetBytes(rendList[i].destinationAlpha));
                 addBytes(outBytes, 0x46, 0x9, BitConverter.GetBytes(rendList[i].unk3));
                 addBytes(outBytes, 0x47, 0x9, BitConverter.GetBytes(rendList[i].unk4));
 

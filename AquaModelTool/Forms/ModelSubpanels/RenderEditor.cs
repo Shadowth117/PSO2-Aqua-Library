@@ -41,9 +41,9 @@ namespace AquaModelTool
             unk0UD.Value = model.rendList[currentRenderId].unk0;
             twoSidedUD.Value = model.rendList[currentRenderId].twosided;
             int0CUD.Value = model.rendList[currentRenderId].int_0C;
-            unk1UD.Value = model.rendList[currentRenderId].unk1;
+            sourceAlphaUD.Value = model.rendList[currentRenderId].sourceAlpha;
 
-            unk2UD.Value = model.rendList[currentRenderId].unk2;
+            destinationAlphaUD.Value = model.rendList[currentRenderId].destinationAlpha;
             unk3UD.Value = model.rendList[currentRenderId].unk3;
             unk4UD.Value = model.rendList[currentRenderId].unk4;
             unk5UD.Value = model.rendList[currentRenderId].unk5;
@@ -87,17 +87,17 @@ namespace AquaModelTool
             model.rendList[currentRenderId] = ngsRend;
         }
 
-        private void unk1UD_ValueChanged(object sender, EventArgs e)
+        private void sourceAlphaUD_ValueChanged(object sender, EventArgs e)
         {
             AquaObject.REND ngsRend = model.rendList[currentRenderId];
-            ngsRend.unk1 = (int)unk1UD.Value;
+            ngsRend.sourceAlpha = (int)sourceAlphaUD.Value;
             model.rendList[currentRenderId] = ngsRend;
         }
 
-        private void unk2UD_ValueChanged(object sender, EventArgs e)
+        private void destinationAlphaUD_ValueChanged(object sender, EventArgs e)
         {
             AquaObject.REND ngsRend = model.rendList[currentRenderId];
-            ngsRend.unk2 = (int)unk2UD.Value;
+            ngsRend.destinationAlpha = (int)destinationAlphaUD.Value;
             model.rendList[currentRenderId] = ngsRend;
         }
 

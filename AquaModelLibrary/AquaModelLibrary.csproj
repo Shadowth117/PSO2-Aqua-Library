@@ -181,6 +181,7 @@
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
     <Compile Include="Extra\DDS\DirectXUtil.cs" />
+    <Compile Include="Extra\DirectX\D3DEnums.cs" />
     <Compile Include="Extra\EnemyData.cs" />
     <Compile Include="Extra\FilenameConstants.cs" />
     <Compile Include="Extra\Half.cs" />

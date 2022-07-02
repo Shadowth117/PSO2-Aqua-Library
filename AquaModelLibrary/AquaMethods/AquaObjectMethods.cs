@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using SystemHalf;
+using AquaModelLibrary.AquaStructs.NGSShaderPresets;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 
@@ -2206,6 +2207,10 @@ namespace AquaModelLibrary
             {
                 GenerateSpecialMaterialParameters(mat);
             }
+            if (mat.shaderNames == null || mat.shaderNames.Count < 2)
+            {
+                mat.shaderNames = DefaultShaderNames;
+            }
             int texArrayStartIndex = model.tstaList.Count;
             List<int> tempTexIds = new List<int>();
             TSET tset = new TSET();
@@ -2221,67 +2226,136 @@ namespace AquaModelLibrary
             REND rend = new REND();
 
             //Set up textures
-            if(mat.texNames != null)
+            var shaderKey = $"{mat.shaderNames[0]} {mat.shaderNames[1]}";
+            if(PSO2ShaderTexSetPresets.shaderTexSet.ContainsKey(shaderKey))
             {
-                for (int i = 0; i < mat.texNames.Count; i++)
+                Dictionary<string, int> setTracker = new Dictionary<string, int>();
+                var set = PSO2ShaderTexSetPresets.shaderTexSet[shaderKey];
+                var info = PSO2ShaderTexInfoPresets.tstaTexSet[shaderKey];
+                string firstTexName; //Base tex string in the case we need to generate the others
+                if(mat.texNames?.Count > 0)
                 {
-                    bool foundCopy = false;
-                    for(int texIndex = 0; texIndex < model.texfList.Count; texIndex++)
+                    firstTexName = mat.texNames[0];
+                    if(firstTexName.Contains("_"))
                     {
-                        if(mat.texNames[i].Equals(model.texfList[texIndex].texName.GetString()))
+                        int _index = -1;
+                        for(int i = firstTexName.Length - 1; i > 0; i--)
                         {
-                            tempTexIds.Add(texIndex);
-                            foundCopy = true;
-                            break;
+                            if(firstTexName[i] == '_')
+                            {
+                                _index = i;
+                                break;
+                            }
+                        }
+                        if(_index == 0)
+                        {
+                            firstTexName = "";
+                        } else
+                        {
+                            firstTexName = firstTexName.Substring(0, _index);
                         }
                     }
-
-                    if(foundCopy == true)
+                } else
+                {
+                    firstTexName = "tex";
+                }
+                for(int i = 0; i < set.Count; i++)
+                {
+                    var tex = set[i];
+                    string curTexStr = "";
+                    if(setTracker.ContainsKey(tex))
                     {
-                        continue;
+                        int curNum = setTracker[tex] = setTracker[tex] + 1;
+                        curTexStr = tex + curNum.ToString();
+                    } else
+                    {
+                        curTexStr = tex + "0";
+                        setTracker.Add(tex, 0);
                     }
 
                     TEXF texf = new TEXF();
-                    TSTA tsta = new TSTA();
-
-                    texf.texName.SetString(mat.texNames[i]);
-
-                    tsta.tag = 0x16; //Reexamine this one when possible, these actually vary a bit in 0xC33 variants.
-                    //NGS does some funny things with the tex usage order int
-                    if(mat.texNames[i].Contains("subnormal_"))
+                    TSTA tsta = info[curTexStr];
+                    if (mat.texNames?.Count > i)
                     {
-                        tsta.texUsageOrder = 0xA;
+                        tsta.texName.SetString(mat.texNames[i]);
+                        texf.texName.SetString(mat.texNames[i]);
                     } else
                     {
-                        tsta.texUsageOrder = texArrayStartIndex + i;
+                        string texName = firstTexName + "_" + tex + ".dds";
+                        tsta.texName.SetString(texName);
+                        texf.texName.SetString(texName);
                     }
-                    if (mat.texUVSets == null)
-                    {
-                        tsta.modelUVSet = 0;
-                    } else
-                    {
-                        tsta.modelUVSet = mat.texUVSets[i];
-                    }
-                    var unkVector0 = new Vector3();
-                    if (ngsMat == true)
-                    {
-                        unkVector0.Z = 1;
-                    }
-
-                    tsta.unkVector0 = unkVector0;
-                    tsta.unkFloat2 = 0;
-                    tsta.unkFloat3 = 0;
-                    tsta.unkFloat4 = 0;
-                    tsta.unkInt3 = 1;
-                    tsta.unkInt4 = 1;
-                    tsta.unkInt5 = 1;
-                    tsta.unkFloat0 = 0f;
-                    tsta.unkFloat1 = 0f;
-                    tsta.texName = texf.texName;
 
                     model.texfList.Add(texf);
                     model.tstaList.Add(tsta);
                     tempTexIds.Add(model.texfList.Count - 1);
+                }
+            } else
+            {
+                if (mat.texNames != null)
+                {
+                    for (int i = 0; i < mat.texNames.Count; i++)
+                    {
+                        bool foundCopy = false;
+                        for (int texIndex = 0; texIndex < model.texfList.Count; texIndex++)
+                        {
+                            if (mat.texNames[i].Equals(model.texfList[texIndex].texName.GetString()))
+                            {
+                                tempTexIds.Add(texIndex);
+                                foundCopy = true;
+                                break;
+                            }
+                        }
+
+                        if (foundCopy == true)
+                        {
+                            continue;
+                        }
+
+                        TEXF texf = new TEXF();
+                        TSTA tsta = new TSTA();
+
+                        texf.texName.SetString(mat.texNames[i]);
+
+                        tsta.tag = 0x16; //Reexamine this one when possible, these actually vary a bit in 0xC33 variants.
+                                         //NGS does some funny things with the tex usage order int
+                        if (mat.texNames[i].Contains("subnormal_"))
+                        {
+                            tsta.texUsageOrder = 0xA;
+                        }
+                        else
+                        {
+                            tsta.texUsageOrder = texArrayStartIndex + i;
+                        }
+                        if (mat.texUVSets == null)
+                        {
+                            tsta.modelUVSet = 0;
+                        }
+                        else
+                        {
+                            tsta.modelUVSet = mat.texUVSets[i];
+                        }
+                        var unkVector0 = new Vector3();
+                        if (ngsMat == true)
+                        {
+                            unkVector0.Z = 1;
+                        }
+
+                        tsta.unkVector0 = unkVector0;
+                        tsta.unkFloat2 = 0;
+                        tsta.unkFloat3 = 0;
+                        tsta.unkFloat4 = 0;
+                        tsta.unkInt3 = 1;
+                        tsta.unkInt4 = 1;
+                        tsta.unkInt5 = 1;
+                        tsta.unkFloat0 = 0f;
+                        tsta.unkFloat1 = 0f;
+                        tsta.texName = texf.texName;
+
+                        model.texfList.Add(texf);
+                        model.tstaList.Add(tsta);
+                        tempTexIds.Add(model.texfList.Count - 1);
+                    }
                 }
             }
 
@@ -2290,10 +2364,6 @@ namespace AquaModelLibrary
             tset.texCount = tempTexIds.Count;
 
             //Set up material
-            if (mat.shaderNames == null)
-            {
-                mat.shaderNames = DefaultShaderNames;
-            }
             mate.diffuseRGBA = mat.diffuseRGBA;
             mate.unkRGBA0 = mat.unkRGBA0;
             mate._sRGBA = mat._sRGBA;
@@ -2312,7 +2382,7 @@ namespace AquaModelLibrary
             shad.vertexShader.SetString(mat.shaderNames[1]);
 
             //Only in NGS shaders, but in theory could come up in others. Otherwise 0. No idea what this is.
-            if(AquaModelLibrary.AquaStructs.NGSShaderPresets.NGSShaderUnk0ValuesPresets.ShaderUnk0Values.TryGetValue(key, out var unk0Val))
+            if(NGSShaderUnk0ValuesPresets.ShaderUnk0Values.TryGetValue(key, out var unk0Val))
             {
                 shad.unk0 = unk0Val;
             }
@@ -2320,12 +2390,12 @@ namespace AquaModelLibrary
             if(ngsMat)
             {
                 var ngsShad = (NGSAquaObject.NGSSHAD)shad;
-                if(AquaModelLibrary.AquaStructs.NGSShaderPresets.NGSShaderDetailPresets.NGSShaderDetail.TryGetValue(key, out var detailVal))
+                if(NGSShaderDetailPresets.NGSShaderDetail.TryGetValue(key, out var detailVal))
                 {
                     ngsShad.shadDetail = detailVal;
                     ngsShad.shadDetailOffset = 1; 
                 }
-                if (AquaModelLibrary.AquaStructs.NGSShaderPresets.NGSShaderExtraPresets.NGSShaderExtra.TryGetValue(key, out var extraVal))
+                if (NGSShaderExtraPresets.NGSShaderExtra.TryGetValue(key, out var extraVal))
                 {
                     ngsShad.shadExtra = extraVal;
                     ngsShad.shadExtraOffset = 1;
@@ -2337,34 +2407,45 @@ namespace AquaModelLibrary
             rend.unk0 = 3;
             rend.twosided = mat.twoSided;
 
-            switch(mat.blendType)
-            {
-                case "opaque":
-                    rend.int_0C = 0;
-                    rend.unk8 = 0;
-                    rend.alphaCutoff = 0;
-                    break;
-                default:
-                    rend.int_0C = 1;
-                    rend.unk8 = 1;
-                    rend.alphaCutoff = 0;
-                    break;
-            }
-
-            rend.unk1 = 5;
-            rend.unk2 = 6;
+            rend.sourceAlpha = 5;
+            rend.destinationAlpha = 6;
             rend.unk3 = 1;
             rend.unk4 = 0;
 
             rend.unk5 = 5;
             rend.unk6 = 6;
             rend.unk7 = 1;
-            rend.unk8 = 1;
+            //rend.unk8 = 1;
 
             rend.unk9 = 5;
+            rend.alphaCutoff = 0;
             rend.unk11 = 1;
             rend.unk12 = 4;
             rend.unk13 = 1;
+
+            switch (mat.blendType)
+            {
+                case "add":
+                    rend.unk0 = 1;
+                    rend.int_0C = 1;
+                    rend.unk8 = 1;
+                    rend.destinationAlpha = 2;
+                    break;
+                case "opaque":
+                    rend.int_0C = 0;
+                    rend.unk8 = 0;
+                    break;
+                case "hollow":
+                    rend.int_0C = 0;
+                    rend.unk8 = 1;
+                    rend.twosided = 2;
+                    break;
+                case "blendalpha":
+                default:
+                    rend.int_0C = 1;
+                    rend.unk8 = 1;
+                    break;
+            }
 
             model.tsetList.Add(tset);
             model.mateList.Add(mate);

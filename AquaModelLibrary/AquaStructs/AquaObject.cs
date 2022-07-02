@@ -308,8 +308,8 @@ namespace AquaModelLibrary
             public int int_0C { get; set; }  //0x43, type 0x9 //Maybe related to blend sort order? I'm not sure...
 
             //Next 12 values appear related, maybe to some texture setting? There are 3 sets that start with 5, first two go to 6, all go to 1, thhen 4th is typically different.
-            public int unk1 { get; set; }  //0x44, type 0x9 //5 usually
-            public int unk2 { get; set; }  //0x45, type 0x9 //6 usually
+            public int sourceAlpha { get; set; }  //0x44, type 0x9 //5 usually
+            public int destinationAlpha { get; set; }  //0x45, type 0x9 //6 usually
             public int unk3 { get; set; }  //0x46, type 0x9 //1 usually
             public int unk4 { get; set; }  //0x47, type 0x9 //0 usually
 
@@ -350,7 +350,7 @@ namespace AquaModelLibrary
                     return false;
                 }
 
-                return (tag == c.tag) && (unk0 == c.unk0) && (twosided == c.twosided) && (int_0C == c.int_0C) && (unk1 == c.unk1) && (unk2 == c.unk2) && (unk3 == c.unk3) 
+                return (tag == c.tag) && (unk0 == c.unk0) && (twosided == c.twosided) && (int_0C == c.int_0C) && (sourceAlpha == c.sourceAlpha) && (destinationAlpha == c.destinationAlpha) && (unk3 == c.unk3) 
                     && (unk4 == c.unk4) && (unk5 == c.unk5) && (unk6 == c.unk6) && (unk7 == c.unk7) && (unk8 == c.unk8) && (unk9 == c.unk9) && (alphaCutoff == c.alphaCutoff) && (unk11 == c.unk11) 
                     && (unk12 == c.unk12) && (unk13 == c.unk13);
             }
