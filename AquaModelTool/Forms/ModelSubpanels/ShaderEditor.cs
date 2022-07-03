@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AquaModelLibrary;
+using System;
 using System.Windows.Forms;
-using AquaModelLibrary;
 
 namespace AquaModelTool
 {
     public partial class ShaderEditor : UserControl
     {
-        private AquaModelLibrary.AquaObject model;
+        private AquaObject model;
         private int currentShaderId = 0;
         private int currentExtraId = 0;
         private NGSAquaObject.NGSSHAD ngsShad = null;
-        public ShaderEditor(AquaModelLibrary.AquaObject aquaModel)
+        public ShaderEditor(AquaObject aquaModel)
         {
             model = aquaModel;
             InitializeComponent();
@@ -72,18 +65,19 @@ namespace AquaModelTool
             vShaderTB.Text = model.shadList[currentShaderId].vertexShader.GetString();
             unk0UD.Value = model.shadList[currentShaderId].unk0;
 
-            if(model.shadList[currentShaderId].GetType().Equals(typeof(NGSAquaObject.NGSSHAD)))
+            if (model.shadList[currentShaderId].GetType().Equals(typeof(NGSAquaObject.NGSSHAD)))
             {
                 ngsShad = (NGSAquaObject.NGSSHAD)model.shadList[currentShaderId];
-                
+
                 //Populate listbox
-                for(int i = 0; i < ngsShad.shadExtra.Count; i++)
+                for (int i = 0; i < ngsShad.shadExtra.Count; i++)
                 {
                     shaderExtraLB.Items.Add(ngsShad.shadExtra[i].entryString.GetString());
                 }
 
                 UpdateShaderExtraDisplay();
-            } else
+            }
+            else
             {
                 ngsShad = null;
                 ResetExtras();
@@ -92,7 +86,7 @@ namespace AquaModelTool
 
         public void UpdateShaderExtraDisplay()
         {
-            if(ngsShad.shadExtra.Count > 0)
+            if (ngsShad.shadExtra.Count > 0)
             {
                 SetExtraState(true);
 
@@ -130,10 +124,11 @@ namespace AquaModelTool
         private void shaderExtraLB_SelectedIndexChanged(object sender, EventArgs e)
         {
             currentExtraId = shaderExtraLB.SelectedIndex;
-            if(currentExtraId >= 0 && ngsShad != null)
+            if (currentExtraId >= 0 && ngsShad != null)
             {
                 UpdateShaderExtraDisplay();
-            } else
+            }
+            else
             {
                 ResetExtras();
             }
@@ -141,7 +136,7 @@ namespace AquaModelTool
 
         private void flags0UD_ValueChanged(object sender, EventArgs e)
         {
-            if(ngsShad != null && shaderExtraLB.SelectedIndex != -1)
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1)
             {
                 var extra = ngsShad.shadExtra[currentExtraId];
                 extra.entryFlag0 = (short)flags0UD.Value;

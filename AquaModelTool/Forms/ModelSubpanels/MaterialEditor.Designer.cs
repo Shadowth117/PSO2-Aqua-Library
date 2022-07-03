@@ -30,10 +30,6 @@
         {
             this.materialsLabel = new System.Windows.Forms.Label();
             this.matIDCB = new System.Windows.Forms.ComboBox();
-            this.opaqueRB = new System.Windows.Forms.RadioButton();
-            this.blendAlphaRB = new System.Windows.Forms.RadioButton();
-            this.hollowRB = new System.Windows.Forms.RadioButton();
-            this.addRB = new System.Windows.Forms.RadioButton();
             this.blendTypeLabel = new System.Windows.Forms.Label();
             this.matNameTextBox = new System.Windows.Forms.TextBox();
             this.materialNameLabel = new System.Windows.Forms.Label();
@@ -57,6 +53,8 @@
             this.unkInt0Label = new System.Windows.Forms.Label();
             this.unkInt1UD = new System.Windows.Forms.NumericUpDown();
             this.unkInt1Label = new System.Windows.Forms.Label();
+            this.alphaTextBox = new System.Windows.Forms.TextBox();
+            this.blendTypePresetButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.diffuseUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tex2UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tex3SpecUD)).BeginInit();
@@ -85,66 +83,18 @@
             this.matIDCB.TabIndex = 1;
             this.matIDCB.SelectedIndexChanged += new System.EventHandler(this.matIDCB_SelectedIndexChanged);
             // 
-            // opaqueRB
-            // 
-            this.opaqueRB.AutoSize = true;
-            this.opaqueRB.Location = new System.Drawing.Point(145, 21);
-            this.opaqueRB.Name = "opaqueRB";
-            this.opaqueRB.Size = new System.Drawing.Size(63, 17);
-            this.opaqueRB.TabIndex = 2;
-            this.opaqueRB.TabStop = true;
-            this.opaqueRB.Text = "Opaque";
-            this.opaqueRB.UseVisualStyleBackColor = true;
-            this.opaqueRB.CheckedChanged += new System.EventHandler(this.opaqueRB_CheckedChanged);
-            // 
-            // blendAlphaRB
-            // 
-            this.blendAlphaRB.AutoSize = true;
-            this.blendAlphaRB.Location = new System.Drawing.Point(204, 21);
-            this.blendAlphaRB.Name = "blendAlphaRB";
-            this.blendAlphaRB.Size = new System.Drawing.Size(78, 17);
-            this.blendAlphaRB.TabIndex = 3;
-            this.blendAlphaRB.TabStop = true;
-            this.blendAlphaRB.Text = "Blendalpha";
-            this.blendAlphaRB.UseVisualStyleBackColor = true;
-            this.blendAlphaRB.CheckedChanged += new System.EventHandler(this.blendAlphaRB_CheckedChanged);
-            // 
-            // hollowRB
-            // 
-            this.hollowRB.AutoSize = true;
-            this.hollowRB.Location = new System.Drawing.Point(278, 21);
-            this.hollowRB.Name = "hollowRB";
-            this.hollowRB.Size = new System.Drawing.Size(57, 17);
-            this.hollowRB.TabIndex = 4;
-            this.hollowRB.TabStop = true;
-            this.hollowRB.Text = "Hollow";
-            this.hollowRB.UseVisualStyleBackColor = true;
-            this.hollowRB.CheckedChanged += new System.EventHandler(this.hollowRB_CheckedChanged);
-            // 
-            // addRB
-            // 
-            this.addRB.AutoSize = true;
-            this.addRB.Location = new System.Drawing.Point(331, 21);
-            this.addRB.Name = "addRB";
-            this.addRB.Size = new System.Drawing.Size(44, 17);
-            this.addRB.TabIndex = 5;
-            this.addRB.TabStop = true;
-            this.addRB.Text = "Add";
-            this.addRB.UseVisualStyleBackColor = true;
-            this.addRB.CheckedChanged += new System.EventHandler(this.addRB_CheckedChanged);
-            // 
             // blendTypeLabel
             // 
             this.blendTypeLabel.AutoSize = true;
-            this.blendTypeLabel.Location = new System.Drawing.Point(145, 4);
+            this.blendTypeLabel.Location = new System.Drawing.Point(5, 70);
             this.blendTypeLabel.Name = "blendTypeLabel";
-            this.blendTypeLabel.Size = new System.Drawing.Size(61, 13);
+            this.blendTypeLabel.Size = new System.Drawing.Size(108, 13);
             this.blendTypeLabel.TabIndex = 6;
-            this.blendTypeLabel.Text = "Blend Type";
+            this.blendTypeLabel.Text = "Blendtype(Text Only):";
             // 
             // matNameTextBox
             // 
-            this.matNameTextBox.Location = new System.Drawing.Point(88, 41);
+            this.matNameTextBox.Location = new System.Drawing.Point(111, 41);
             this.matNameTextBox.MaxLength = 32;
             this.matNameTextBox.Name = "matNameTextBox";
             this.matNameTextBox.Size = new System.Drawing.Size(262, 20);
@@ -163,7 +113,7 @@
             // diffuseRGBButton
             // 
             this.diffuseRGBButton.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.diffuseRGBButton.Location = new System.Drawing.Point(7, 82);
+            this.diffuseRGBButton.Location = new System.Drawing.Point(7, 133);
             this.diffuseRGBButton.Name = "diffuseRGBButton";
             this.diffuseRGBButton.Size = new System.Drawing.Size(31, 23);
             this.diffuseRGBButton.TabIndex = 10;
@@ -173,7 +123,7 @@
             // diffuseRGBALabel
             // 
             this.diffuseRGBALabel.AutoSize = true;
-            this.diffuseRGBALabel.Location = new System.Drawing.Point(5, 67);
+            this.diffuseRGBALabel.Location = new System.Drawing.Point(5, 118);
             this.diffuseRGBALabel.Name = "diffuseRGBALabel";
             this.diffuseRGBALabel.Size = new System.Drawing.Size(73, 13);
             this.diffuseRGBALabel.TabIndex = 11;
@@ -187,7 +137,7 @@
             0,
             0,
             65536});
-            this.diffuseUD.Location = new System.Drawing.Point(45, 84);
+            this.diffuseUD.Location = new System.Drawing.Point(45, 135);
             this.diffuseUD.Maximum = new decimal(new int[] {
             -402653184,
             -1613725636,
@@ -211,7 +161,7 @@
             0,
             0,
             65536});
-            this.tex2UD.Location = new System.Drawing.Point(136, 84);
+            this.tex2UD.Location = new System.Drawing.Point(136, 135);
             this.tex2UD.Maximum = new decimal(new int[] {
             -402653184,
             -1613725636,
@@ -230,7 +180,7 @@
             // tex2RGBALabel
             // 
             this.tex2RGBALabel.AutoSize = true;
-            this.tex2RGBALabel.Location = new System.Drawing.Point(96, 67);
+            this.tex2RGBALabel.Location = new System.Drawing.Point(96, 118);
             this.tex2RGBALabel.Name = "tex2RGBALabel";
             this.tex2RGBALabel.Size = new System.Drawing.Size(64, 13);
             this.tex2RGBALabel.TabIndex = 14;
@@ -239,7 +189,7 @@
             // tex2RGBAButton
             // 
             this.tex2RGBAButton.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.tex2RGBAButton.Location = new System.Drawing.Point(98, 82);
+            this.tex2RGBAButton.Location = new System.Drawing.Point(98, 133);
             this.tex2RGBAButton.Name = "tex2RGBAButton";
             this.tex2RGBAButton.Size = new System.Drawing.Size(31, 23);
             this.tex2RGBAButton.TabIndex = 13;
@@ -254,7 +204,7 @@
             0,
             0,
             65536});
-            this.tex3SpecUD.Location = new System.Drawing.Point(225, 84);
+            this.tex3SpecUD.Location = new System.Drawing.Point(225, 135);
             this.tex3SpecUD.Maximum = new decimal(new int[] {
             -402653184,
             -1613725636,
@@ -273,7 +223,7 @@
             // tex3RGBALabel
             // 
             this.tex3RGBALabel.AutoSize = true;
-            this.tex3RGBALabel.Location = new System.Drawing.Point(185, 67);
+            this.tex3RGBALabel.Location = new System.Drawing.Point(185, 118);
             this.tex3RGBALabel.Name = "tex3RGBALabel";
             this.tex3RGBALabel.Size = new System.Drawing.Size(94, 13);
             this.tex3RGBALabel.TabIndex = 17;
@@ -282,7 +232,7 @@
             // tex3RGBAButton
             // 
             this.tex3RGBAButton.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.tex3RGBAButton.Location = new System.Drawing.Point(187, 82);
+            this.tex3RGBAButton.Location = new System.Drawing.Point(187, 133);
             this.tex3RGBAButton.Name = "tex3RGBAButton";
             this.tex3RGBAButton.Size = new System.Drawing.Size(31, 23);
             this.tex3RGBAButton.TabIndex = 16;
@@ -297,7 +247,7 @@
             0,
             0,
             65536});
-            this.tex4UD.Location = new System.Drawing.Point(315, 84);
+            this.tex4UD.Location = new System.Drawing.Point(315, 135);
             this.tex4UD.Maximum = new decimal(new int[] {
             -402653184,
             -1613725636,
@@ -316,7 +266,7 @@
             // tex4RGBALabel
             // 
             this.tex4RGBALabel.AutoSize = true;
-            this.tex4RGBALabel.Location = new System.Drawing.Point(275, 67);
+            this.tex4RGBALabel.Location = new System.Drawing.Point(275, 118);
             this.tex4RGBALabel.Name = "tex4RGBALabel";
             this.tex4RGBALabel.Size = new System.Drawing.Size(64, 13);
             this.tex4RGBALabel.TabIndex = 20;
@@ -325,7 +275,7 @@
             // tex4RGBAButton
             // 
             this.tex4RGBAButton.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.tex4RGBAButton.Location = new System.Drawing.Point(277, 82);
+            this.tex4RGBAButton.Location = new System.Drawing.Point(277, 133);
             this.tex4RGBAButton.Name = "tex4RGBAButton";
             this.tex4RGBAButton.Size = new System.Drawing.Size(31, 23);
             this.tex4RGBAButton.TabIndex = 19;
@@ -335,7 +285,7 @@
             // specLevelLabel
             // 
             this.specLevelLabel.AutoSize = true;
-            this.specLevelLabel.Location = new System.Drawing.Point(4, 112);
+            this.specLevelLabel.Location = new System.Drawing.Point(4, 163);
             this.specLevelLabel.Name = "specLevelLabel";
             this.specLevelLabel.Size = new System.Drawing.Size(84, 13);
             this.specLevelLabel.TabIndex = 22;
@@ -344,7 +294,7 @@
             // specLevelUD
             // 
             this.specLevelUD.DecimalPlaces = 6;
-            this.specLevelUD.Location = new System.Drawing.Point(4, 129);
+            this.specLevelUD.Location = new System.Drawing.Point(4, 180);
             this.specLevelUD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -363,7 +313,7 @@
             // unkF32UD
             // 
             this.unkF32UD.DecimalPlaces = 6;
-            this.unkF32UD.Location = new System.Drawing.Point(5, 169);
+            this.unkF32UD.Location = new System.Drawing.Point(168, 180);
             this.unkF32UD.Maximum = new decimal(new int[] {
             -402653184,
             -1613725636,
@@ -382,7 +332,7 @@
             // unkF32Label
             // 
             this.unkF32Label.AutoSize = true;
-            this.unkF32Label.Location = new System.Drawing.Point(5, 152);
+            this.unkF32Label.Location = new System.Drawing.Point(168, 163);
             this.unkF32Label.Name = "unkF32Label";
             this.unkF32Label.Size = new System.Drawing.Size(74, 13);
             this.unkF32Label.TabIndex = 24;
@@ -391,7 +341,7 @@
             // unkInt0UD
             // 
             this.unkInt0UD.DecimalPlaces = 6;
-            this.unkInt0UD.Location = new System.Drawing.Point(88, 129);
+            this.unkInt0UD.Location = new System.Drawing.Point(88, 180);
             this.unkInt0UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -410,7 +360,7 @@
             // unkInt0Label
             // 
             this.unkInt0Label.AutoSize = true;
-            this.unkInt0Label.Location = new System.Drawing.Point(88, 112);
+            this.unkInt0Label.Location = new System.Drawing.Point(88, 163);
             this.unkInt0Label.Name = "unkInt0Label";
             this.unkInt0Label.Size = new System.Drawing.Size(74, 13);
             this.unkInt0Label.TabIndex = 26;
@@ -419,7 +369,7 @@
             // unkInt1UD
             // 
             this.unkInt1UD.DecimalPlaces = 6;
-            this.unkInt1UD.Location = new System.Drawing.Point(88, 169);
+            this.unkInt1UD.Location = new System.Drawing.Point(248, 180);
             this.unkInt1UD.Maximum = new decimal(new int[] {
             10000000,
             0,
@@ -438,16 +388,38 @@
             // unkInt1Label
             // 
             this.unkInt1Label.AutoSize = true;
-            this.unkInt1Label.Location = new System.Drawing.Point(88, 152);
+            this.unkInt1Label.Location = new System.Drawing.Point(248, 163);
             this.unkInt1Label.Name = "unkInt1Label";
             this.unkInt1Label.Size = new System.Drawing.Size(74, 13);
             this.unkInt1Label.TabIndex = 28;
             this.unkInt1Label.Text = "Unknown Int1";
             // 
+            // alphaTextBox
+            // 
+            this.alphaTextBox.Location = new System.Drawing.Point(111, 67);
+            this.alphaTextBox.MaxLength = 32;
+            this.alphaTextBox.Name = "alphaTextBox";
+            this.alphaTextBox.Size = new System.Drawing.Size(262, 20);
+            this.alphaTextBox.TabIndex = 30;
+            this.alphaTextBox.TextChanged += new System.EventHandler(this.alphaTextBox_TextChanged);
+            // 
+            // blendTypePresetButton
+            // 
+            this.blendTypePresetButton.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.blendTypePresetButton.Location = new System.Drawing.Point(8, 92);
+            this.blendTypePresetButton.Name = "blendTypePresetButton";
+            this.blendTypePresetButton.Size = new System.Drawing.Size(138, 23);
+            this.blendTypePresetButton.TabIndex = 31;
+            this.blendTypePresetButton.Text = "Set Blend Preset Data";
+            this.blendTypePresetButton.UseVisualStyleBackColor = false;
+            this.blendTypePresetButton.Click += new System.EventHandler(this.blendTypePresetButton_Click);
+            // 
             // MaterialEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.blendTypePresetButton);
+            this.Controls.Add(this.alphaTextBox);
             this.Controls.Add(this.unkInt1UD);
             this.Controls.Add(this.unkInt1Label);
             this.Controls.Add(this.unkInt0UD);
@@ -471,10 +443,6 @@
             this.Controls.Add(this.materialNameLabel);
             this.Controls.Add(this.matNameTextBox);
             this.Controls.Add(this.blendTypeLabel);
-            this.Controls.Add(this.addRB);
-            this.Controls.Add(this.hollowRB);
-            this.Controls.Add(this.blendAlphaRB);
-            this.Controls.Add(this.opaqueRB);
             this.Controls.Add(this.matIDCB);
             this.Controls.Add(this.materialsLabel);
             this.Name = "MaterialEditor";
@@ -496,10 +464,6 @@
 
         private System.Windows.Forms.Label materialsLabel;
         private System.Windows.Forms.ComboBox matIDCB;
-        private System.Windows.Forms.RadioButton opaqueRB;
-        private System.Windows.Forms.RadioButton blendAlphaRB;
-        private System.Windows.Forms.RadioButton hollowRB;
-        private System.Windows.Forms.RadioButton addRB;
         private System.Windows.Forms.Label blendTypeLabel;
         private System.Windows.Forms.TextBox matNameTextBox;
         private System.Windows.Forms.Label materialNameLabel;
@@ -523,5 +487,7 @@
         private System.Windows.Forms.Label unkInt0Label;
         private System.Windows.Forms.NumericUpDown unkInt1UD;
         private System.Windows.Forms.Label unkInt1Label;
+        private System.Windows.Forms.TextBox alphaTextBox;
+        private System.Windows.Forms.Button blendTypePresetButton;
     }
 }

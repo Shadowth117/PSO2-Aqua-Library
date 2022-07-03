@@ -1,14 +1,17 @@
-﻿using System;
+﻿using AquaModelTool.Forms.ModelSubpanels.Material;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Numerics;
 using System.Windows.Forms;
+using static AquaModelLibrary.Utility.ColorUtility;
 
 namespace AquaModelTool
 {
     public partial class MaterialEditor : UserControl
     {
-        private ColorDialog colorDialog = new ColorDialog();
+        private BlendTypePresetPicker blendDialog = new BlendTypePresetPicker();
+        public MaterialVec3Editor colorEditor = null;
+        public List<Form> windows = new List<Form>();
         AquaModelLibrary.AquaObject model;
         bool loaded = false;
         public MaterialEditor(AquaModelLibrary.AquaObject aquaModel)
@@ -36,25 +39,7 @@ namespace AquaModelTool
         {
             var mat = model.mateList[matIDCB.SelectedIndex];
             loaded = false;
-            string blendType = mat.alphaType.GetString();
-            switch (blendType)
-            {
-                case "opaque":
-                    opaqueRB.Checked = true;
-                    break;
-                case "hollow":
-                    hollowRB.Checked = true;
-                    break;
-                case "blendalpha":
-                    blendAlphaRB.Checked = true;
-                    break;
-                case "add":
-                    addRB.Checked = true;
-                    break;
-                default:
-                    blendAlphaRB.Checked = true;
-                    break;
-            }
+            alphaTextBox.Text = mat.alphaType.GetString();
             matNameTextBox.Text = mat.matName.GetString();
             diffuseRGBButton.BackColor = ARGBFromRGBAVector4(mat.diffuseRGBA);
             tex2RGBAButton.BackColor = ARGBFromRGBAVector4(mat.unkRGBA0);
@@ -74,209 +59,165 @@ namespace AquaModelTool
 
         private void diffuseRGBButton_Click(object sender, EventArgs e)
         {
-            var mate = model.mateList[matIDCB.SelectedIndex];
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            if (colorEditor != null)
             {
-                diffuseRGBButton.BackColor = colorDialog.Color;
-                mate.diffuseRGBA = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.diffuseRGBA.W);
+                windows.Remove(colorEditor);
+                colorEditor.Close();
             }
-            model.mateList[matIDCB.SelectedIndex] = mate;
+            colorEditor = new MaterialVec3Editor(model.mateList, matIDCB.SelectedIndex, 0, diffuseRGBButton);
+            windows.Add(colorEditor);
+            colorEditor.Show();
         }
 
         private void tex2RGBAButton_Click(object sender, EventArgs e)
         {
-            var mate = model.mateList[matIDCB.SelectedIndex];
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            if (colorEditor != null)
             {
-                tex2RGBAButton.BackColor = colorDialog.Color;
-                mate.unkRGBA0 = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.unkRGBA0.W);
+                windows.Remove(colorEditor);
+                colorEditor.Close();
             }
-            model.mateList[matIDCB.SelectedIndex] = mate;
+            colorEditor = new MaterialVec3Editor(model.mateList, matIDCB.SelectedIndex, 1, tex2RGBAButton);
+            windows.Add(colorEditor);
+            colorEditor.Show();
         }
 
         private void tex3RGBAButton_Click(object sender, EventArgs e)
         {
-            var mate = model.mateList[matIDCB.SelectedIndex];
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            if (colorEditor != null)
             {
-                tex3RGBAButton.BackColor = colorDialog.Color;
-                mate._sRGBA = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate._sRGBA.W);
+                windows.Remove(colorEditor);
+                colorEditor.Close();
             }
-            model.mateList[matIDCB.SelectedIndex] = mate;
+            colorEditor = new MaterialVec3Editor(model.mateList, matIDCB.SelectedIndex, 2, tex3RGBAButton);
+            windows.Add(colorEditor);
+            colorEditor.Show();
         }
 
         private void tex4RGBAButton_Click(object sender, EventArgs e)
         {
-            var mate = model.mateList[matIDCB.SelectedIndex];
-            if (colorDialog.ShowDialog() == DialogResult.OK)
+            if (colorEditor != null)
             {
-                tex4RGBAButton.BackColor = colorDialog.Color;
-                mate.unkRGBA1 = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.unkRGBA1.W);
+                windows.Remove(colorEditor);
+                colorEditor.Close();
             }
-            model.mateList[matIDCB.SelectedIndex] = mate;
+            colorEditor = new MaterialVec3Editor(model.mateList, matIDCB.SelectedIndex, 3, tex4RGBAButton);
+            windows.Add(colorEditor);
+            colorEditor.Show();
         }
 
-        private void opaqueRB_CheckedChanged(object sender, EventArgs e)
+        private void opaqueRB_CheckedChanged()
         {
-            RENDhackOpaque();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.alphaType.SetString("opaque");
+            alphaTextBox.Text = "opaque";
+            AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
-        private void blendAlphaRB_CheckedChanged(object sender, EventArgs e)
+        private void blendAlphaRB_CheckedChanged()
         {
-            RENDhackBlendAlpha();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.alphaType.SetString("blendalpha");
+            alphaTextBox.Text = "blendalpha";
+            AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
-        private void hollowRB_CheckedChanged(object sender, EventArgs e)
+        private void hollowRB_CheckedChanged()
         {
-            RENDhackHollow();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.alphaType.SetString("hollow");
+            alphaTextBox.Text = "hollow";
+            AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
-        private void addRB_CheckedChanged(object sender, EventArgs e)
+        private void addRB_CheckedChanged()
         {
-            RENDhackAdd();
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate.alphaType.SetString("add");
+            alphaTextBox.Text = "add";
+            AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
-        //Since normally materials are divorced from REND structs in offical models, we'll just fix the necessary REND areas for all that are used with this MATE 
-        private void RENDhackOpaque()
+        //Checks through the various meshes for instances of the material being paired with a particular REND.
+        //If another material is also using the same rend, we duplicate it to make a unique vrsion and set the mesh to use it
+        private void AdjustRends(string type)
         {
             if (loaded)
             {
+                Dictionary<int, List<int>> rendDict = new Dictionary<int, List<int>>(); //Contains the render ids matched to a list of meshes they're used in
                 List<int> rendIds = new List<int>();
+
                 for (int i = 0; i < model.meshList.Count; i++)
                 {
                     if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
                     {
-                        if (!rendIds.Contains(model.meshList[i].rendIndex))
+                        if (!rendDict.ContainsKey(model.meshList[i].rendIndex))
                         {
-                            rendIds.Add(model.meshList[i].rendIndex);
+                            rendDict.Add(model.meshList[i].rendIndex, new List<int>() { i });
+                        }
+                        else
+                        {
+                            rendDict[model.meshList[i].rendIndex].Add(i);
                         }
                     }
                 }
 
-                for (int i = 0; i < rendIds.Count; i++)
-                {
-                    var rend = model.rendList[rendIds[i]];
-                    rend.int_0C = 0;
-                    rend.unk8 = 0;
-                    rend.alphaCutoff = 0;
-                    rend.destinationAlpha = 6;
-                    rend.unk0 = 3;
-                    model.rendList[rendIds[i]] = rend;
-                }
-            }
-        }
-        private void RENDhackAdd()
-        {
-            if (loaded)
-            {
-                List<int> rendIds = new List<int>();
                 for (int i = 0; i < model.meshList.Count; i++)
                 {
-                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
+                    //Check if there's another material using the same rend. If so, we need to duplicate this one and fix the indices
+                    if (model.meshList[i].mateIndex != matIDCB.SelectedIndex && rendDict.ContainsKey(model.meshList[i].rendIndex))
                     {
-                        if (!rendIds.Contains(model.meshList[i].rendIndex))
+                        var meshIdList = rendDict[model.meshList[i].rendIndex];
+                        rendDict.Remove(model.meshList[i].rendIndex);
+                        model.rendList.Add(model.rendList[model.meshList[i].rendIndex]);
+                        rendDict.Add(model.rendList.Count - 1, meshIdList);
+
+                        foreach (var id in meshIdList)
                         {
-                            rendIds.Add(model.meshList[i].rendIndex);
+                            var mesh = model.meshList[id];
+                            mesh.rendIndex = model.rendList.Count - 1;
+                            model.meshList[id] = mesh;
                         }
                     }
                 }
 
-                for (int i = 0; i < rendIds.Count; i++)
+                foreach (var key in rendDict.Keys)
                 {
-                    var rend = model.rendList[rendIds[i]];
-                    rend.int_0C = 1;
-                    rend.unk8 = 1;
-                    rend.alphaCutoff = 0;
-                    rend.destinationAlpha = 2;
-                    rend.unk0 = 1;
-                    model.rendList[rendIds[i]] = rend;
-                }
-            }
-        }
-        private void RENDhackBlendAlpha()
-        {
-            if(loaded)
-            {
-                List<int> rendIds = new List<int>();
-                for (int i = 0; i < model.meshList.Count; i++)
-                {
-                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
+                    var rend = model.rendList[key];
+                    switch (type)
                     {
-                        if (!rendIds.Contains(model.meshList[i].rendIndex))
-                        {
-                            rendIds.Add(model.meshList[i].rendIndex);
-                        }
+                        case "opaque":
+                            rend.int_0C = 0;
+                            rend.unk8 = 0;
+                            rend.alphaCutoff = 0;
+                            rend.destinationAlpha = 6;
+                            rend.unk0 = 3;
+                            break;
+                        case "blendalpha":
+                            rend.int_0C = 1;
+                            rend.unk8 = 1;
+                            rend.alphaCutoff = 0;
+                            rend.destinationAlpha = 6;
+                            rend.unk0 = 3;
+                            break;
+                        case "hollow":
+                            rend.int_0C = 0;
+                            rend.unk8 = 1;
+                            rend.alphaCutoff = 0;
+                            rend.destinationAlpha = 6;
+                            rend.unk0 = 3;
+                            break;
+                        case "add":
+                            rend.int_0C = 1;
+                            rend.unk8 = 1;
+                            rend.alphaCutoff = 0;
+                            rend.destinationAlpha = 2;
+                            rend.unk0 = 1;
+                            break;
                     }
-                }
 
-                for (int i = 0; i < rendIds.Count; i++)
-                {
-                    var rend = model.rendList[rendIds[i]];
-                    rend.int_0C = 1;
-                    rend.unk8 = 1;
-                    rend.alphaCutoff = 0;
-                    rend.destinationAlpha = 6;
-                    rend.unk0 = 3;
-                    model.rendList[rendIds[i]] = rend;
+                    model.rendList[key] = rend;
                 }
             }
-        }
-        private void RENDhackHollow()
-        {
-            if (loaded)
-            {
-                List<int> rendIds = new List<int>();
-                for (int i = 0; i < model.meshList.Count; i++)
-                {
-                    if (model.meshList[i].mateIndex == matIDCB.SelectedIndex)
-                    {
-                        if (!rendIds.Contains(model.meshList[i].rendIndex))
-                        {
-                            rendIds.Add(model.meshList[i].rendIndex);
-                        }
-                    }
-                }
-
-                for (int i = 0; i < rendIds.Count; i++)
-                {
-                    var rend = model.rendList[rendIds[i]];
-                    rend.int_0C = 0;
-                    rend.unk8 = 1;
-                    rend.alphaCutoff = 0;
-                    rend.destinationAlpha = 6;
-                    rend.unk0 = 3;
-                    model.rendList[rendIds[i]] = rend;
-                }
-            }
-        }
-        private static Color ARGBFromRGBAVector4(Vector4 vec4)
-        {
-            //Limit input. It can technically be higher than this in theory, but usually it wouldn't be.
-            if(vec4.X > 1.0f)
-            {
-                vec4.X = 1.0f;
-            }
-            if (vec4.Y > 1.0f)
-            {
-                vec4.Y = 1.0f;
-            }
-            if (vec4.Z > 1.0f)
-            {
-                vec4.Z = 1.0f;
-            }
-            return Color.FromArgb(1, (int)(vec4.X * 255), (int)(vec4.Y * 255), (int)(vec4.Z * 255));
         }
 
         private void matNameTextBox_TextChanged(object sender, EventArgs e)
@@ -308,7 +249,7 @@ namespace AquaModelTool
         private void tex3SpecUD_ValueChanged(object sender, EventArgs e)
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
-            mate._sRGBA= new Vector4(mate._sRGBA.X, mate._sRGBA.Y, mate._sRGBA.Z, (float)tex3SpecUD.Value);
+            mate._sRGBA = new Vector4(mate._sRGBA.X, mate._sRGBA.Y, mate._sRGBA.Z, (float)tex3SpecUD.Value);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
@@ -347,5 +288,38 @@ namespace AquaModelTool
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
 
+        private void alphaTextBox_TextChanged(object sender, EventArgs e)
+        {
+            var mate = model.mateList[matIDCB.SelectedIndex];
+            mate.alphaType.SetString(alphaTextBox.Text);
+            model.mateList[matIDCB.SelectedIndex] = mate;
+        }
+
+        private void blendTypePresetButton_Click(object sender, EventArgs e)
+        {
+            if (blendDialog.ShowDialog() == DialogResult.OK)
+            {
+                if (blendDialog.opaqueRB.Checked)
+                {
+                    opaqueRB_CheckedChanged();
+                    return;
+                }
+                if (blendDialog.blendAlphaRB.Checked)
+                {
+                    blendAlphaRB_CheckedChanged();
+                    return;
+                }
+                if (blendDialog.hollowRB.Checked)
+                {
+                    hollowRB_CheckedChanged();
+                    return;
+                }
+                if (blendDialog.addRB.Checked)
+                {
+                    addRB_CheckedChanged();
+                    return;
+                }
+            }
+        }
     }
 }

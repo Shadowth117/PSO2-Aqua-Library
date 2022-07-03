@@ -252,6 +252,13 @@ namespace AquaModelTool
                 currentFile = file;
                 this.Text = "Aqua Model Tool - " + Path.GetFileName(currentFile);
 
+                foreach(var ctrl in filePanel.Controls)
+                {
+                    if(ctrl is ModelEditor)
+                    {
+                        ((ModelEditor)ctrl).CloseControlWindows();
+                    }
+                }
                 filePanel.Controls.Clear();
                 switch (Path.GetExtension(file))
                 {
@@ -263,39 +270,6 @@ namespace AquaModelTool
                         aquaUI.aqua.ReadModel(file, true);
 #if DEBUG
                         var test = aquaUI.aqua.aquaModels[0].models[0];
-                        /*
-                        for (int i = 0; i < test.tstaList.Count; i++)
-                        {
-                            string tex = test.texfList[i].texName.GetString();
-                            string tex2 = tex.Replace(".dds", "_d.dds");
-                            var texf = test.texfList[i];
-                            var tsta = test.tstaList[i];
-                            texf.texName = PSO2String.GeneratePSO2String(tex2);
-
-                            tsta.texName = PSO2String.GeneratePSO2String(tex2);
-                            test.texfList[i] = texf;
-                            test.tstaList[i] = tsta;
-                        }*/
-                        //aquaUI.aqua.aquaModels[0].models[0].splitVSETPerMesh();
-                        /*for(int i = 0; i < test.tstaList.Count; i++)
-                        {
-                            Console.WriteLine(i + " " + test.tstaList[i].texName.GetString());
-                        }
-                        */
-
-                        //Spirefier 
-                        /*
-                        for(int j = 0; j < test.vtxlList[0].vertPositions.Count; j++)
-                        {
-                            var vec3 = test.vtxlList[0].vertPositions[j];
-                            if (vec3.Y > 0.85)
-                            {
-                                vec3.Y *= 10000;
-                                test.vtxlList[0].vertPositions[j] = vec3;
-                            }
-                        }*/
-
-                        //test.objc.bounds = AquaObjectMethods.GenerateBounding(test.vtxlList);
 #endif
                         control = new ModelEditor(aquaUI.aqua.aquaModels[0]);
                         if (aquaUI.aqua.aquaModels[0].models[0].nifl.magic != 0)

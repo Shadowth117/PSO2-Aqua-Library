@@ -168,6 +168,18 @@
     <Compile Include="Forms\ModelEditor.Designer.cs">
       <DependentUpon>ModelEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ModelSubpanels\Material\BlendTypePresetPicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\Material\BlendTypePresetPicker.Designer.cs">
+      <DependentUpon>BlendTypePresetPicker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\Material\MaterialVec3Editor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ModelSubpanels\Material\MaterialVec3Editor.Designer.cs">
+      <DependentUpon>MaterialVec3Editor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ModelSubpanels\MeshStructEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -244,6 +256,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\MaterialEditor.resx">
       <DependentUpon>MaterialEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\Material\BlendTypePresetPicker.resx">
+      <DependentUpon>BlendTypePresetPicker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ModelSubpanels\Material\MaterialVec3Editor.resx">
+      <DependentUpon>MaterialVec3Editor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ModelSubpanels\MeshStructEditor.resx">
       <DependentUpon>MeshStructEditor.cs</DependentUpon>

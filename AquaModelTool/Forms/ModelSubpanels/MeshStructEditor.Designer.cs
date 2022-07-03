@@ -179,6 +179,7 @@ namespace AquaModelTool
             this.shadIDCB.Name = "shadIDCB";
             this.shadIDCB.Size = new System.Drawing.Size(49, 21);
             this.shadIDCB.TabIndex = 3;
+            this.shadIDCB.SelectedIndexChanged += new System.EventHandler(this.shadIDCB_SelectedIndexChanged);
             // 
             // texSetIDLabel
             // 

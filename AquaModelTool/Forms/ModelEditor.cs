@@ -78,10 +78,9 @@ namespace AquaModelTool
 
         private void UdpateEditor()
         {
-            //Default to material editor
+            CloseControlWindows();
             modelPanel.Controls.Clear();
             UserControl control;
-
             switch (editorCB.Items[editorCB.SelectedIndex].ToString())
             {
                 case "Bounding":
@@ -94,7 +93,7 @@ namespace AquaModelTool
                     control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].meshList);
                     break;
                 case "Mesh2s":
-                    control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].mesh2List);
+                    control = new MeshStructEditor(modelset.models[modelIDCB.SelectedIndex], modelset.models[modelIDCB.SelectedIndex].mesh2List, true);
                     break;
                 case "Render":
                     control = new RenderEditor(modelset.models[modelIDCB.SelectedIndex]);
@@ -108,6 +107,20 @@ namespace AquaModelTool
 
             modelPanel.Controls.Add(control);
             control.Dock = DockStyle.Fill;
+        }
+
+        public void CloseControlWindows()
+        {
+            foreach(var control in modelPanel.Controls)
+            {
+                if(control is MaterialEditor)
+                {
+                    foreach(var window in ((MaterialEditor)control).windows)
+                    {
+                        window.Close();
+                    }
+                }
+            }
         }
     }
 }

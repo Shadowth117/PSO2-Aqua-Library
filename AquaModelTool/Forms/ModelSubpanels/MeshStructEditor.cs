@@ -1,13 +1,7 @@
-﻿using System;
+﻿using AquaModelLibrary;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using AquaModelLibrary;
 
 namespace AquaModelTool
 {
@@ -21,26 +15,26 @@ namespace AquaModelTool
         {
             InitializeComponent();
 
-            if(isList2)
+            if (isList2)
             {
                 meshLabel.Text = meshLabel.Text.Replace("Mesh", "Mesh2");
             }
-//test
+            //test
             model = newModel;
             meshList = newMeshList;
 
             //Populate comboboxes. Check if id is within combobox's range and if not, add to the combobox
             //In the case of mesh2s with negative ids, the combobox will NOT get populated.
             var mesh = meshList[0];
-            int matCount = (mesh.mateIndex > newModel.mateList.Count) || (mesh.mateIndex == -1) ? mesh.mateIndex : newModel.mateList.Count;
-            int rendCount = (mesh.rendIndex > newModel.rendList.Count) || (mesh.rendIndex == -1) ? mesh.rendIndex : newModel.rendList.Count;
-            int shadCount = (mesh.shadIndex > newModel.shadList.Count) || (mesh.shadIndex == -1) ? mesh.shadIndex : newModel.shadList.Count;
-            int tsetCount = (mesh.tsetIndex > newModel.tsetList.Count) || (mesh.tsetIndex == -1) ? mesh.tsetIndex : newModel.tsetList.Count;
+            int matCount = newModel.mateList.Count;
+            int rendCount = newModel.rendList.Count;
+            int shadCount = newModel.shadList.Count;
+            int tsetCount = newModel.tsetList.Count;
 
-            int vsetCount = (mesh.vsetIndex > newModel.vsetList.Count) || (mesh.vsetIndex == -1) ? mesh.vsetIndex : newModel.vsetList.Count;
-            int psetCount = (mesh.psetIndex > newModel.psetList.Count) || (mesh.psetIndex == -1) ? mesh.psetIndex : newModel.psetList.Count;
+            int vsetCount = newModel.vsetList.Count;
+            int psetCount = newModel.psetList.Count;
 
-            SetComboBox(meshIDCB, meshList.Count);
+            SetComboBox(meshIDCB, meshList.Count, true);
 
             SetComboBox(matIDCB, matCount);
             SetComboBox(renderIDCB, rendCount);
@@ -53,17 +47,16 @@ namespace AquaModelTool
             meshIDCB.SelectedIndex = 0;
         }
 
-        public void SetComboBox(ComboBox cb, int count)
+        public void SetComboBox(ComboBox cb, int count, bool meshCB = false)
         {
             for (int i = 0; i < count; i++)
             {
                 cb.Items.Add(i);
             }
 
-            //Disable if there's no items to use
-            if(cb.Items.Count == 0)
+            if (meshCB == false)
             {
-                cb.Enabled = false;
+                cb.Items.Add(-1);
             }
         }
 
@@ -80,12 +73,24 @@ namespace AquaModelTool
             baseMeshNodeIdUD.Value = mesh.baseMeshNodeId;
             baseMeshDummyIdUD.Value = mesh.baseMeshDummyId;
 
-            matIDCB.SelectedIndex = mesh.mateIndex;
-            renderIDCB.SelectedIndex = mesh.rendIndex;
-            shadIDCB.SelectedIndex = mesh.shadIndex;
-            tsetIDCB.SelectedIndex = mesh.tsetIndex;
-            vsetIDCB.SelectedIndex = mesh.vsetIndex;
-            faceSetIDCB.SelectedIndex = mesh.psetIndex;
+            SetLastIfNegativeOne(matIDCB, mesh.mateIndex);
+            SetLastIfNegativeOne(renderIDCB, mesh.rendIndex);
+            SetLastIfNegativeOne(shadIDCB, mesh.shadIndex);
+            SetLastIfNegativeOne(tsetIDCB, mesh.tsetIndex);
+            SetLastIfNegativeOne(vsetIDCB, mesh.vsetIndex);
+            SetLastIfNegativeOne(faceSetIDCB, mesh.psetIndex);
+        }
+
+        private void SetLastIfNegativeOne(ComboBox cb, int index)
+        {
+            if (index == -1)
+            {
+                cb.SelectedIndex = cb.Items.Count - 1;
+            }
+            else
+            {
+                cb.SelectedIndex = index;
+            }
         }
 
         private void flagsUD_ValueChanged(object sender, EventArgs e)
@@ -152,35 +157,42 @@ namespace AquaModelTool
         private void matIDCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             var mesh = meshList[meshIDCB.SelectedIndex];
-            mesh.mateIndex = matIDCB.SelectedIndex;
+            mesh.mateIndex = matIDCB.SelectedIndex == matIDCB.Items.Count - 1 ? -1 : matIDCB.SelectedIndex;
             meshList[meshIDCB.SelectedIndex] = mesh;
         }
 
         private void renderIDCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             var mesh = meshList[meshIDCB.SelectedIndex];
-            mesh.rendIndex = renderIDCB.SelectedIndex;
+            mesh.rendIndex = renderIDCB.SelectedIndex == renderIDCB.Items.Count - 1 ? -1 : renderIDCB.SelectedIndex;
             meshList[meshIDCB.SelectedIndex] = mesh;
         }
 
         private void tsetIDCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             var mesh = meshList[meshIDCB.SelectedIndex];
-            mesh.tsetIndex = tsetIDCB.SelectedIndex;
+            mesh.tsetIndex = tsetIDCB.SelectedIndex == tsetIDCB.Items.Count - 1 ? -1 : tsetIDCB.SelectedIndex;
             meshList[meshIDCB.SelectedIndex] = mesh;
         }
 
         private void vsetIDCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             var mesh = meshList[meshIDCB.SelectedIndex];
-            mesh.vsetIndex = vsetIDCB.SelectedIndex;
+            mesh.vsetIndex = vsetIDCB.SelectedIndex == vsetIDCB.Items.Count - 1 ? -1 : vsetIDCB.SelectedIndex;
             meshList[meshIDCB.SelectedIndex] = mesh;
         }
 
         private void faceSetIDCB_SelectedIndexChanged(object sender, EventArgs e)
         {
             var mesh = meshList[meshIDCB.SelectedIndex];
-            mesh.psetIndex = faceSetIDCB.SelectedIndex;
+            mesh.psetIndex = faceSetIDCB.SelectedIndex == faceSetIDCB.Items.Count - 1 ? -1 : faceSetIDCB.SelectedIndex;
+            meshList[meshIDCB.SelectedIndex] = mesh;
+        }
+
+        private void shadIDCB_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var mesh = meshList[meshIDCB.SelectedIndex];
+            mesh.shadIndex = shadIDCB.SelectedIndex == shadIDCB.Items.Count - 1 ? -1 : shadIDCB.SelectedIndex;
             meshList[meshIDCB.SelectedIndex] = mesh;
         }
     }

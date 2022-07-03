@@ -14,7 +14,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 
             //NGS models are allowed 
             //Note for NGS textures, texUsageOrder param is seemingly more of a type. In Classic PSO2 models, it's an actual order id. Unsure of importance, but may need study
-            if(_aqp.tsetList.Count > 0)
+            if (_aqp.tsetList.Count > 0)
             {
                 SetTsetTexLimit(aqp);
                 //SetTstaData();
@@ -59,7 +59,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 
         private void texListCB_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-  
+
         }
 
 

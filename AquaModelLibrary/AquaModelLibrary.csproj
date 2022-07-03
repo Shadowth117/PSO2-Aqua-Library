@@ -246,6 +246,7 @@
     <Compile Include="OtherStructs\TPNTexturePattern.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\AquaUtilData.cs" />
+    <Compile Include="Utility\ColorUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
