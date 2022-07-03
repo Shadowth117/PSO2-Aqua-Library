@@ -862,11 +862,6 @@ namespace AquaModelLibrary
                         var color = mesh.VertexColorChannels[0][v];
                         faceVtxl.vertColors.Add(new byte[] { floatToColor(color.B), floatToColor(color.G), floatToColor(color.R), floatToColor(color.A) });
                     }
-                    if (mesh.HasVertexColors(1))
-                    {
-                        var color = mesh.VertexColorChannels[1][v];
-                        faceVtxl.vertColor2s.Add(new byte[] { floatToColor(color.B), floatToColor(color.G), floatToColor(color.R), floatToColor(color.A) });
-                    }
                     if (mesh.HasTextureCoords(0))
                     {
                         var uv = mesh.TextureCoordinateChannels[0][v];
@@ -906,6 +901,15 @@ namespace AquaModelLibrary
                     {
                         var uv = mesh.TextureCoordinateChannels[7][v];
                         faceVtxl.vert0x25.Add(new short[] { floatToShort(uv.X), floatToShort(uv.Y) });
+                    }
+                    if (mesh.HasTextureCoords(8))
+                    {
+                        if(mesh.HasTextureCoords(9))
+                        {
+                            var uv = mesh.TextureCoordinateChannels[8][v];
+                            var uv2 = mesh.TextureCoordinateChannels[9][v];
+                            faceVtxl.vertColor2s.Add(new byte[] { floatToColor(uv.X), floatToColor(uv.Y), floatToColor(uv2.X), floatToColor(uv2.Y) });
+                        }
                     }
 
                     //Bone weights and indices

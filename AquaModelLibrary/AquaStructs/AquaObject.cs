@@ -2061,6 +2061,58 @@ namespace AquaModelLibrary
             }
         }
 
+        public void addUnfilledUVs()
+        {
+            for(int i = 0; i < vtxlList.Count; i++)
+            {
+                var vtxl = vtxlList[i];
+                bool addUV1 = !(vtxl.uv1List.Count > 0);
+                bool addUV2 = !(vtxl.uv2List.Count > 0);
+                bool addUV3 = !(vtxl.uv3List.Count > 0);
+                bool addUV4 = !(vtxl.uv4List.Count > 0);
+                bool addUV5 = !(vtxl.vert0x22.Count > 0);
+                bool addUV6 = !(vtxl.vert0x23.Count > 0);
+                bool addUV7 = !(vtxl.vert0x24.Count > 0);
+                bool addUV8 = !(vtxl.vert0x25.Count > 0);
+
+                for(int v = 0; v < vtxl.vertPositions.Count; v++)
+                {
+                    if(addUV1)
+                    {
+                        vtxl.uv1List.Add(new Vector2());
+                    }
+                    if (addUV2)
+                    {
+                        vtxl.uv2List.Add(new Vector2());
+                    }
+                    if (addUV3)
+                    {
+                        vtxl.uv3List.Add(new Vector2());
+                    }
+                    if (addUV4)
+                    {
+                        vtxl.uv4List.Add(new Vector2());
+                    }
+                    if (addUV5)
+                    {
+                        vtxl.vert0x22.Add(new short[2]);
+                    }
+                    if (addUV6)
+                    {
+                        vtxl.vert0x23.Add(new short[2]);
+                    }
+                    if (addUV7)
+                    {
+                        vtxl.vert0x24.Add(new short[2]);
+                    }
+                    if (addUV8)
+                    {
+                        vtxl.vert0x25.Add(new short[2]);
+                    }
+                }
+            }
+        }
+
         public abstract AquaObject Clone();
 
     }

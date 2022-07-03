@@ -3000,6 +3000,49 @@ namespace AquaModelTool
                 AquaUtil.WriteBones(openFileDialog.FileName, aqu.aquaBones[0]);
             }
         }
+
+        private void importNGSShaderDetailsAndExtrasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 Aqua Model file(s)",
+                Filter = "PSO2 Aqua Model Files (*.aqp,*.trp,*.aqo,*.tro)|*.aqp;*.trp;*.aqo;*.tro|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (aquaUI.aqua.aquaModels.Count > 0 && openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                AquaUtil aqu = new AquaUtil();
+                Dictionary<string, NGSAquaObject.NGSSHAD> ngsShaders = new Dictionary<string, NGSAquaObject.NGSSHAD>();
+                aqu.ReadModel(openFileDialog.FileName);
+                
+                for(int i = 0; i < aqu.aquaModels[0].models[0].shadList.Count; i++)
+                {
+                    var shad = aqu.aquaModels[0].models[0].shadList[i];
+                    if (shad is NGSAquaObject.NGSSHAD)
+                    {
+                        ngsShaders.Add($"{shad.pixelShader.GetString()} {shad.vertexShader.GetString()}", (NGSAquaObject.NGSSHAD)shad);
+                    }
+
+                    foreach(var model in aquaUI.aqua.aquaModels[0].models)
+                    {
+                        foreach(var curShader in model.shadList)
+                        {
+                            string shadKey = $"{curShader.pixelShader} {curShader.vertexShader}";
+                            if(ngsShaders.TryGetValue(shadKey, out var value))
+                            {
+                                NGSAquaObject.NGSSHAD ngsCurShad = ((NGSAquaObject.NGSSHAD)curShader);
+                                ngsCurShad.shadDetail = value.shadDetail;
+                                ngsCurShad.shadDetailOffset = value.shadDetailOffset;
+                                ngsCurShad.shadExtra = value.shadExtra;
+                                ngsCurShad.shadExtraOffset = value.shadExtraOffset;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+            }
+        }
     }
 }
 

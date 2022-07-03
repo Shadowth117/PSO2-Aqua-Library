@@ -101,10 +101,11 @@
             this.readTXLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMRPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readLPSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filePanel = new System.Windows.Forms.Panel();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.debug2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.boneFlagTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePanel = new System.Windows.Forms.Panel();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -194,7 +195,8 @@
             // 
             this.extraToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem,
-            this.toolStripSeparator1});
+            this.toolStripSeparator1,
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem});
             this.extraToolStripMenuItem.Name = "extraToolStripMenuItem";
             this.extraToolStripMenuItem.Size = new System.Drawing.Size(45, 23);
             this.extraToolStripMenuItem.Text = "Extra";
@@ -686,6 +688,21 @@
             this.readLPSToolStripMenuItem.Text = "ReadLPS";
             this.readLPSToolStripMenuItem.Click += new System.EventHandler(this.readLPSToolStripMenuItem_Click);
             // 
+            // debug2ToolStripMenuItem
+            // 
+            this.debug2ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.boneFlagTestToolStripMenuItem});
+            this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
+            this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
+            this.debug2ToolStripMenuItem.Text = "Debug2";
+            // 
+            // boneFlagTestToolStripMenuItem
+            // 
+            this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
+            this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -704,20 +721,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // debug2ToolStripMenuItem
+            // importNGSShaderDetailsAndExtrasToolStripMenuItem
             // 
-            this.debug2ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.boneFlagTestToolStripMenuItem});
-            this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
-            this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
-            this.debug2ToolStripMenuItem.Text = "Debug2";
-            // 
-            // boneFlagTestToolStripMenuItem
-            // 
-            this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
-            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
-            this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Name = "importNGSShaderDetailsAndExtrasToolStripMenuItem";
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Text = "Import NGS Shader Details and Extras";
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Click += new System.EventHandler(this.importNGSShaderDetailsAndExtrasToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -817,6 +826,7 @@
         private System.Windows.Forms.ToolStripMenuItem readLPSToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem debug2ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem boneFlagTestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importNGSShaderDetailsAndExtrasToolStripMenuItem;
     }
 }
 

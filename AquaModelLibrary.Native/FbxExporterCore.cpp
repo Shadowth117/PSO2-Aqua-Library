@@ -88,7 +88,8 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         }
 
         FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
-        FbxGeometryElementVertexColor* lElementVertexColor2 = nullptr;
+        FbxGeometryElementUV* lElementVertexColor2_1 = nullptr;
+        FbxGeometryElementUV* lElementVertexColor2_2 = nullptr;
 
         if (vtxl->vertColors->Count > 0)
         {
@@ -102,7 +103,9 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             for each (array<unsigned char>^ color in vtxl->vertColors)
                 lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
         }
-        
+
+        //Having a second vertex color channel breaks things because Autodesk doesn't even support their own schema :)
+        /*
         if (vtxl->vertColor2s->Count > 0)
         {
             lElementVertexColor2 = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 1)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
@@ -114,94 +117,38 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
             for each (array<unsigned char> ^ color in vtxl->vertColor2s)
                 lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
-        }
-        
-        if (vtxl->uv1List->Count > 0)
+        }*/
+
+        SetUVChannel(lMesh, vtxl->uv1List, vtxl->vertPositions->Count, 1);
+        SetUVChannel(lMesh, vtxl->uv2List, vtxl->vertPositions->Count, 2);
+        SetUVChannel(lMesh, vtxl->uv3List, vtxl->vertPositions->Count, 3);
+        SetUVChannel(lMesh, vtxl->uv4List, vtxl->vertPositions->Count, 4);
+        SetUVChannelShorts(lMesh, vtxl->vert0x22, vtxl->vertPositions->Count, 5);
+        SetUVChannelShorts(lMesh, vtxl->vert0x23, vtxl->vertPositions->Count, 6);
+        SetUVChannelShorts(lMesh, vtxl->vert0x24, vtxl->vertPositions->Count, 7);
+        SetUVChannelShorts(lMesh, vtxl->vert0x25, vtxl->vertPositions->Count, 8);
+
+        if (vtxl->vertColor2s->Count > 0)
         {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_1")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+            lElementVertexColor2_1 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 9)->CreateLayerElementOfType(FbxLayerElement::eUV);
 
-            for each (Vector2 texCoord in vtxl->uv1List)
-                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
-        }
+            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+            lElementVertexColor2_1->SetName(Utf8String(String::Format("UVChannel_9")).ToCStr());
+            lElementVertexColor2_1->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementVertexColor2_1->SetReferenceMode(FbxLayerElement::eDirect);
 
-        if (vtxl->uv2List->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 1)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_2")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+            for each (array<unsigned char> ^ color in vtxl->vertColor2s)
+                lElementVertexColor2_1->GetDirectArray().Add(FbxVector2(((float)color[2]) / 255, ((float)color[1]) / 255));
 
-            for each (Vector2 texCoord in vtxl->uv2List)
-                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
-        }
+            lElementVertexColor2_2 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 10)->CreateLayerElementOfType(FbxLayerElement::eUV);
 
-        if (vtxl->uv3List->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 2)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_3")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+            lElementVertexColor2_2->SetName(Utf8String(String::Format("UVChannel_10")).ToCStr());
+            lElementVertexColor2_2->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementVertexColor2_2->SetReferenceMode(FbxLayerElement::eDirect);
 
-            for each (Vector2 texCoord in vtxl->uv3List)
-                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
-        }
-
-        if (vtxl->uv4List->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 3)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_4")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (Vector2 texCoord in vtxl->uv4List)
-                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
-        }
-
-        if (vtxl->vert0x22->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 4)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_5")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (array<short>^ texCoord in vtxl->vert0x22)
-                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767,texCoord[1] / 32767));
-        }
-
-        if (vtxl->vert0x23->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 5)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_6")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (array<short> ^ texCoord in vtxl->vert0x23)
-                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, texCoord[1] / 32767));
-        }
-
-        if (vtxl->vert0x24->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 6)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_7")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (array<short> ^ texCoord in vtxl->vert0x24)
-                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, texCoord[1] / 32767));
-        }
-
-        if (vtxl->vert0x25->Count > 0)
-        {
-            FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 7)->CreateLayerElementOfType(FbxLayerElement::eUV);
-            lElementUV->SetName(Utf8String(String::Format("UVChannel_8")).ToCStr());
-            lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (array<short> ^ texCoord in vtxl->vert0x25)
-                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, texCoord[1] / 32767));
+            for each (array<unsigned char> ^ color in vtxl->vertColor2s)
+                lElementVertexColor2_2->GetDirectArray().Add(FbxVector2(((float)color[0]) / 255, ((float)color[3]) / 255));
         }
 
         FbxGeometryElementMaterial* lElementMaterial = ( FbxGeometryElementMaterial* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eMaterial );
@@ -240,12 +187,6 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 lElementVertexColor->GetIndexArray().Add( triangle.X ); 
                 lElementVertexColor->GetIndexArray().Add( triangle.Y ); 
                 lElementVertexColor->GetIndexArray().Add( triangle.Z ); 
-            }
-            if (lElementVertexColor2)
-            {
-                lElementVertexColor->GetIndexArray().Add(triangle.X);
-                lElementVertexColor->GetIndexArray().Add(triangle.Y);
-                lElementVertexColor->GetIndexArray().Add(triangle.Z);
             }
         }
 
@@ -327,6 +268,50 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         lNode->SetShadingMode( FbxNode::eTextureShading );
 
         return lNode;
+    }
+
+    void SetUVChannel(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<System::Numerics::Vector2>^ uvList, int count, int uvNum)
+    {
+        FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, uvNum - 1)->CreateLayerElementOfType(FbxLayerElement::eUV);
+        lElementUV->SetName(Utf8String(String::Format("UVChannel_" + uvNum.ToString())).ToCStr());
+        lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+        lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+        if (uvList->Count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                System::Numerics::Vector2 texCoord = uvList[i];
+                lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
+            }
+        }
+        else {
+            for (int i = 0; i < count; i++)
+            {
+                lElementUV->GetDirectArray().Add(FbxVector2(0.0, 0.0));
+            }
+        }
+    }
+
+    void SetUVChannelShorts(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<array<short>^ >^ uvList, int count, int uvNum)
+    {
+        FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, uvNum - 1)->CreateLayerElementOfType(FbxLayerElement::eUV);
+        lElementUV->SetName(Utf8String(String::Format("UVChannel_" + uvNum.ToString())).ToCStr());
+        lElementUV->SetMappingMode(FbxLayerElement::eByControlPoint);
+        lElementUV->SetReferenceMode(FbxLayerElement::eDirect);
+        if (uvList->Count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                array<short>^ texCoord = uvList[i];
+                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, (float)texCoord[1] / 32767));
+            }
+        }
+        else {
+            for (int i = 0; i < count; i++)
+            {
+                lElementUV->GetDirectArray().Add(FbxVector2(0.0f, 0.0f));
+            }
+        }
     }
 
     FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( AquaObject::GenericMaterial^ aqMat, String^ texturesDirectoryPath, FbxScene* lScene, bool includeMetadata)
