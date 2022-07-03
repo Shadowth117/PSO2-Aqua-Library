@@ -1898,44 +1898,6 @@ namespace AquaModelTool
             }
         }
 
-        private void importModelToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (var ctx = new Assimp.AssimpContext())
-            {
-                var formats = ctx.GetSupportedImportFormats().ToList();
-                formats.Sort();
-
-                OpenFileDialog openFileDialog;
-                openFileDialog = new OpenFileDialog()
-                {
-                    Title = "Import model file",
-                    Filter = ""
-                };
-                string tempFilter = "All supported formats|";
-                string tempFilter2 = "";
-                foreach (var str in formats)
-                {
-                    tempFilter += $"*{str};";
-                    tempFilter2 += $"|(*{str})|*{str}";
-                }
-                openFileDialog.Filter = tempFilter + tempFilter2;
-
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    AquaUtil aqua = new AquaUtil();
-                    ModelSet modelSet = new ModelSet();
-                    modelSet.models.Add(ModelImporter.AssimpAquaConvertFull(openFileDialog.FileName, 1, false, true, out AquaNode aqn));
-                    aqua.aquaModels.Add(modelSet);
-                    var ext = Path.GetExtension(openFileDialog.FileName);
-                    var outStr = openFileDialog.FileName.Replace(ext, "_out.aqp");
-                    aqua.WriteNGSNIFLModel(outStr, outStr);
-                    AquaUtil.WriteBones(Path.ChangeExtension(outStr, ".aqn"), aqn);
-                    aqua.aquaModels.Clear();
-                    AquaUIOpenFile(outStr);
-                }
-            }
-        }
-
         private void pSOXVMDumpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -3041,6 +3003,45 @@ namespace AquaModelTool
                     }
                 }
                 
+            }
+        }
+
+        private void importModelToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            using (var ctx = new Assimp.AssimpContext())
+            {
+                var formats = ctx.GetSupportedImportFormats().ToList();
+                formats.Sort();
+
+                OpenFileDialog openFileDialog;
+                openFileDialog = new OpenFileDialog()
+                {
+                    Title = "Import model file (output .aqp and .aqn will write to import directory)",
+                    Filter = ""
+                };
+                string tempFilter = "(*.fbx,*.dae,*.blend,*.glb,*.gltf,*.pmx,*.smd)|*.fbx;*.dae;*.blend;*.glb;*.gltf;*.pmx;*.smd";
+                string tempFilter2 = "";
+                /*foreach (var str in formats)
+                {
+                    tempFilter += $"*{str};";
+                    tempFilter2 += $"|(*{str})|*{str}";
+                }*/
+                openFileDialog.Filter = tempFilter + tempFilter2;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    AquaUtil aqua = new AquaUtil();
+                    ModelSet modelSet = new ModelSet();
+                    modelSet.models.Add(ModelImporter.AssimpAquaConvertFull(openFileDialog.FileName, 1, false, true, out AquaNode aqn));
+                    aqua.aquaModels.Add(modelSet);
+                    var ext = Path.GetExtension(openFileDialog.FileName);
+                    var outStr = openFileDialog.FileName.Replace(ext, "_out.aqp");
+                    aqua.WriteNGSNIFLModel(outStr, outStr);
+                    AquaUtil.WriteBones(Path.ChangeExtension(outStr, ".aqn"), aqn);
+
+                    aqua.aquaModels.Clear();
+                    AquaUIOpenFile(outStr);
+                }
             }
         }
     }

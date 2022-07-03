@@ -40,6 +40,7 @@
             this.extraToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.spirefierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -88,7 +89,6 @@
             this.proportionAQMFaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMNGSFaceTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.proportionAQMTesterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSOXVMDumpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSOXVRConvertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importAXSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -105,7 +105,7 @@
             this.boneFlagTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -128,6 +128,7 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
+            this.importModelToolStripMenuItem,
             this.exportModelToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
@@ -139,7 +140,7 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -149,7 +150,7 @@
             this.exportFBXToolStripMenuItem,
             this.includeMetadataToolStripMenuItem});
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportModelToolStripMenuItem.Text = "Export Model";
             // 
             // exportFBXToolStripMenuItem
@@ -173,21 +174,21 @@
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAsToolStripMenuItem.Text = "Save As";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -212,6 +213,13 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(306, 6);
+            // 
+            // importNGSShaderDetailsAndExtrasToolStripMenuItem
+            // 
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Name = "importNGSShaderDetailsAndExtrasToolStripMenuItem";
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Text = "Import NGS Shader Details and Extras";
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Click += new System.EventHandler(this.importNGSShaderDetailsAndExtrasToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -447,7 +455,6 @@
             this.proportionAQMFaceTestToolStripMenuItem,
             this.proportionAQMNGSFaceTestToolStripMenuItem,
             this.proportionAQMTesterToolStripMenuItem,
-            this.importModelToolStripMenuItem,
             this.pSOXVMDumpToolStripMenuItem,
             this.pSOXVRConvertToolStripMenuItem,
             this.importAXSToolStripMenuItem,
@@ -597,13 +604,6 @@
             this.proportionAQMTesterToolStripMenuItem.Text = "ProportionAQMTester";
             this.proportionAQMTesterToolStripMenuItem.Click += new System.EventHandler(this.proportionAQMTesterToolStripMenuItem_Click);
             // 
-            // importModelToolStripMenuItem
-            // 
-            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
-            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.importModelToolStripMenuItem.Text = "Import Model";
-            this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click);
-            // 
             // pSOXVMDumpToolStripMenuItem
             // 
             this.pSOXVMDumpToolStripMenuItem.Name = "pSOXVMDumpToolStripMenuItem";
@@ -721,12 +721,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // importNGSShaderDetailsAndExtrasToolStripMenuItem
+            // importModelToolStripMenuItem
             // 
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Name = "importNGSShaderDetailsAndExtrasToolStripMenuItem";
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Text = "Import NGS Shader Details and Extras";
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Click += new System.EventHandler(this.importNGSShaderDetailsAndExtrasToolStripMenuItem_Click);
+            this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
+            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.importModelToolStripMenuItem.Text = "Import Model";
+            this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click_1);
             // 
             // AquaModelTool
             // 
@@ -795,7 +795,6 @@
         private System.Windows.Forms.ToolStripMenuItem readCMXFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMAnalyzerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem proportionAQMTesterToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem importModelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSOXVMDumpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSOXVRConvertToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importAXSToolStripMenuItem;
@@ -827,6 +826,7 @@
         private System.Windows.Forms.ToolStripMenuItem debug2ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem boneFlagTestToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importNGSShaderDetailsAndExtrasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importModelToolStripMenuItem;
     }
 }
 
