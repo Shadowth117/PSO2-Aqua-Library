@@ -264,7 +264,7 @@ namespace AquaModelLibrary
 
             public int unkInt1;         //0x38, type 0x9 //Usually 0, sometimes other things
             public PSO2String alphaType; //0x3A, type 0x2 //Fixed length string for the alpha type of the mat. "opaque", "hollow", "blendalpha", and "add" are
-                                         //all valid. Add is additive, and uses diffuse alpha for glow effects.
+                                         //all valid. Add is additive, and uses diffuse alpha for glow effects. Others may be used to denote collision types
             public PSO2String matName;   //0x39, type 0x2 
 
             public override int GetHashCode()
@@ -506,6 +506,36 @@ namespace AquaModelLibrary
             public float unkFloat0; //0x6A, type 0xA //0
             public float unkFloat1; //0x6B, type 0xA //0
             public PSO2String texName; //0x6C, type 0x2 //Texture filename (includes extension)
+            public override bool Equals(object obj)
+            {
+                return Equals((TSTA)obj);
+            }
+
+            public bool Equals(TSTA c)
+            {
+
+                // Optimization for a common success case.
+                if (Object.ReferenceEquals(this, c))
+                {
+                    return true;
+                }
+
+                // If run-time types are not exactly the same, return false.
+                if (this.GetType() != c.GetType())
+                {
+                    return false;
+                }
+
+                return (tag == c.tag) && (texUsageOrder == c.texUsageOrder) && (modelUVSet == c.modelUVSet) && (unkVector0 == c.unkVector0) && (unkFloat2 == c.unkFloat2) && (unkFloat3 == c.unkFloat3) && (unkFloat4 == c.unkFloat4)
+                    && (unkInt3 == c.unkInt3) && (unkInt4 == c.unkInt4) && (unkInt5 == c.unkInt5) && (unkFloat0 == c.unkFloat0) && (unkFloat1 == c.unkFloat1) && (texName == c.texName);
+            }
+
+            public static bool operator ==(TSTA lhs, TSTA rhs)
+            {
+                return lhs.Equals(rhs);
+            }
+
+            public static bool operator !=(TSTA lhs, TSTA rhs) => !(lhs == rhs);
         }
 
         //Laid out in same order as TSTA. Seemingly redundant.
@@ -2030,7 +2060,7 @@ namespace AquaModelLibrary
                     mat.texUVSets = texUvSets;
                     mat.shaderNames = shadNames;
                     mat.blendType = curMate.alphaType.GetString();
-                    mat.specialType = "";
+                    mat.specialType = AquaObjectMethods.GetSpecialMatType(texNames);
                     mat.matName = curMate.matName.GetString();
                     mat.twoSided = curRend.twosided;
 

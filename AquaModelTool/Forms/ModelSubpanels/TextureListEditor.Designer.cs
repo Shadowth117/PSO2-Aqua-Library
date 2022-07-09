@@ -34,16 +34,14 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.texListSelectPanel = new System.Windows.Forms.Panel();
             this.texSlotCB = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.removeButton = new System.Windows.Forms.Button();
             this.addSlotButton = new System.Windows.Forms.Button();
-            this.removeSlotButton = new System.Windows.Forms.Button();
-            this.insertSlotButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.label2 = new System.Windows.Forms.Label();
             this.insertListButton = new System.Windows.Forms.Button();
             this.removeListButton = new System.Windows.Forms.Button();
             this.addListButton = new System.Windows.Forms.Button();
+            this.insertButton = new System.Windows.Forms.Button();
             this.texListSelectPanel.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // texListCB
@@ -71,73 +69,53 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.texListSelectPanel.Controls.Add(this.texListLabel);
             this.texListSelectPanel.Location = new System.Drawing.Point(-1, -1);
             this.texListSelectPanel.Name = "texListSelectPanel";
-            this.texListSelectPanel.Size = new System.Drawing.Size(77, 51);
+            this.texListSelectPanel.Size = new System.Drawing.Size(171, 81);
             this.texListSelectPanel.TabIndex = 11;
             // 
             // texSlotCB
             // 
             this.texSlotCB.FormattingEnabled = true;
-            this.texSlotCB.Location = new System.Drawing.Point(176, 29);
+            this.texSlotCB.Location = new System.Drawing.Point(177, 21);
             this.texSlotCB.Name = "texSlotCB";
-            this.texSlotCB.Size = new System.Drawing.Size(113, 21);
+            this.texSlotCB.Size = new System.Drawing.Size(198, 21);
             this.texSlotCB.TabIndex = 12;
             this.texSlotCB.SelectedIndexChanged += new System.EventHandler(this.texSlotCB_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(173, 13);
+            this.label1.Location = new System.Drawing.Point(174, 5);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(64, 13);
             this.label1.TabIndex = 14;
             this.label1.Text = "Texture Slot";
             // 
-            // addButton
+            // removeButton
             // 
-            this.addSlotButton.Location = new System.Drawing.Point(295, 3);
-            this.addSlotButton.Name = "addButton";
-            this.addSlotButton.Size = new System.Drawing.Size(83, 23);
-            this.addSlotButton.TabIndex = 16;
-            this.addSlotButton.Text = "Add Slot";
+            this.removeButton.Location = new System.Drawing.Point(310, 48);
+            this.removeButton.Name = "removeButton";
+            this.removeButton.Size = new System.Drawing.Size(60, 23);
+            this.removeButton.TabIndex = 17;
+            this.removeButton.Text = "Remove";
+            this.removeButton.UseVisualStyleBackColor = true;
+            this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
+            // 
+            // addSlotButton
+            // 
+            this.addSlotButton.Location = new System.Drawing.Point(178, 48);
+            this.addSlotButton.Name = "addSlotButton";
+            this.addSlotButton.Size = new System.Drawing.Size(60, 23);
+            this.addSlotButton.TabIndex = 18;
+            this.addSlotButton.Text = "Add";
             this.addSlotButton.UseVisualStyleBackColor = true;
             this.addSlotButton.Click += new System.EventHandler(this.addButton_Click);
             // 
-            // removeButton
-            // 
-            this.removeSlotButton.Location = new System.Drawing.Point(295, 53);
-            this.removeSlotButton.Name = "removeButton";
-            this.removeSlotButton.Size = new System.Drawing.Size(83, 23);
-            this.removeSlotButton.TabIndex = 17;
-            this.removeSlotButton.Text = "Remove Slot";
-            this.removeSlotButton.UseVisualStyleBackColor = true;
-            this.removeSlotButton.Click += new System.EventHandler(this.removeButton_Click);
-            // 
-            // insertButton
-            // 
-            this.insertSlotButton.Location = new System.Drawing.Point(295, 28);
-            this.insertSlotButton.Name = "insertButton";
-            this.insertSlotButton.Size = new System.Drawing.Size(83, 23);
-            this.insertSlotButton.TabIndex = 18;
-            this.insertSlotButton.Text = "Insert Slot";
-            this.insertSlotButton.UseVisualStyleBackColor = true;
-            this.insertSlotButton.Click += new System.EventHandler(this.insertButton_Click);
-            // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.label2);
             this.panel1.Location = new System.Drawing.Point(-1, 82);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(379, 171);
             this.panel1.TabIndex = 19;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 4);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(35, 13);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "label2";
             // 
             // insertListButton
             // 
@@ -147,6 +125,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.insertListButton.TabIndex = 22;
             this.insertListButton.Text = "Insert List";
             this.insertListButton.UseVisualStyleBackColor = true;
+            this.insertListButton.Click += new System.EventHandler(this.insertListButton_Click);
             // 
             // removeListButton
             // 
@@ -156,6 +135,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.removeListButton.TabIndex = 21;
             this.removeListButton.Text = "Remove List";
             this.removeListButton.UseVisualStyleBackColor = true;
+            this.removeListButton.Click += new System.EventHandler(this.removeListButton_Click);
             // 
             // addListButton
             // 
@@ -165,18 +145,29 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.addListButton.TabIndex = 20;
             this.addListButton.Text = "Add List";
             this.addListButton.UseVisualStyleBackColor = true;
+            this.addListButton.Click += new System.EventHandler(this.addListButton_Click);
+            // 
+            // insertButton
+            // 
+            this.insertButton.Location = new System.Drawing.Point(244, 48);
+            this.insertButton.Name = "insertButton";
+            this.insertButton.Size = new System.Drawing.Size(60, 23);
+            this.insertButton.TabIndex = 23;
+            this.insertButton.Text = "Insert";
+            this.insertButton.UseVisualStyleBackColor = true;
+            this.insertButton.Click += new System.EventHandler(this.insertButton_Click);
             // 
             // TextureListEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.insertButton);
             this.Controls.Add(this.insertListButton);
             this.Controls.Add(this.removeListButton);
             this.Controls.Add(this.addListButton);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.insertSlotButton);
-            this.Controls.Add(this.removeSlotButton);
             this.Controls.Add(this.addSlotButton);
+            this.Controls.Add(this.removeButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.texSlotCB);
             this.Controls.Add(this.texListSelectPanel);
@@ -184,8 +175,6 @@ namespace AquaModelTool.Forms.ModelSubpanels
             this.Size = new System.Drawing.Size(378, 253);
             this.texListSelectPanel.ResumeLayout(false);
             this.texListSelectPanel.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -198,13 +187,12 @@ namespace AquaModelTool.Forms.ModelSubpanels
         private System.Windows.Forms.Panel texListSelectPanel;
         private System.Windows.Forms.ComboBox texSlotCB;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button removeButton;
         private System.Windows.Forms.Button addSlotButton;
-        private System.Windows.Forms.Button removeSlotButton;
-        private System.Windows.Forms.Button insertSlotButton;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button insertListButton;
         private System.Windows.Forms.Button removeListButton;
         private System.Windows.Forms.Button addListButton;
+        private System.Windows.Forms.Button insertButton;
     }
 }

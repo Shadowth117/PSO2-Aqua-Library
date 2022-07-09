@@ -161,6 +161,7 @@
     <Compile Include="AquaStructs\AquaFigure.cs" />
     <Compile Include="AquaStructs\AquaFigure\FigEffectMapStructs.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
+    <Compile Include="AquaStructs\AquaObjectExtras\TSTATypePresets.cs" />
     <Compile Include="AquaStructs\AquaTextureList.cs" />
     <Compile Include="AquaStructs\CharacterMakingOffsets.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />

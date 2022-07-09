@@ -68,6 +68,11 @@ namespace AquaModelTool
             {
                 editorCB.Items.Add("Shaders");
             }
+            if (modelset.models[modelIDCB.SelectedIndex].tsetList.Count > 0)
+            {
+                editorCB.Items.Add("Texture Sets");
+            }
+
             editorCB.SelectedIndex = 0;
         }
 
@@ -100,6 +105,9 @@ namespace AquaModelTool
                     break;
                 case "Shaders":
                     control = new ShaderEditor(modelset.models[modelIDCB.SelectedIndex]);
+                    break;
+                case "Texture Sets":
+                    control = new TextureListEditor(modelset.models[modelIDCB.SelectedIndex]);
                     break;
                 default:
                     throw new Exception("Unexpected selection!");

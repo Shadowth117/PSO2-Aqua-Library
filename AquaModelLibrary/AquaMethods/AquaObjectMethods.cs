@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using SystemHalf;
 using AquaModelLibrary.AquaStructs.NGSShaderPresets;
+using AquaModelLibrary.AquaStructs.AquaObjectExtras;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 
@@ -2274,7 +2275,20 @@ namespace AquaModelLibrary
                     }
 
                     TEXF texf = new TEXF();
-                    TSTA tsta = info[curTexStr];
+                    TSTA tsta = new TSTA();
+                    if(info.ContainsKey(curTexStr))
+                    {
+                        tsta = info[curTexStr];
+                    } else
+                    {
+                        if(TSTATypePresets.tstaTypeDict.ContainsKey(curTexStr))
+                        {
+                            tsta = TSTATypePresets.tstaTypeDict[curTexStr];
+                        } else
+                        {
+                            tsta = TSTATypePresets.defaultPreset;
+                        }
+                    }
                     if (mat.texNames?.Count > i)
                     {
                         tsta.texName.SetString(mat.texNames[i]);
@@ -2286,9 +2300,38 @@ namespace AquaModelLibrary
                         texf.texName.SetString(texName);
                     }
 
-                    model.texfList.Add(texf);
-                    model.tstaList.Add(tsta);
-                    tempTexIds.Add(model.texfList.Count - 1);
+                    //Make sure the texf list only has unique entries
+                    int texId = -1;
+                    bool isUniqueTexname = true;
+                    for(int t = 0; t < model.texfList.Count; t++)
+                    {
+                        var tempTex = model.texfList[t];
+                        if(tempTex.texName == texf.texName)
+                        {
+                            isUniqueTexname = false;
+                        }
+                    }
+                    if(isUniqueTexname)
+                    {
+                        model.texfList.Add(texf);
+                    }
+
+                    //Cull full duplicates of tsta
+                    bool isUniqueTsta = true;
+                    for (int t = 0; t < model.tstaList.Count; t++)
+                    {
+                        var tempTex = model.tstaList[t];
+                        if (tempTex == tsta)
+                        {
+                            texId = t;
+                            isUniqueTsta = false;
+                        }
+                    }
+                    if (isUniqueTsta)
+                    {
+                        model.tstaList.Add(tsta);
+                    }
+                    tempTexIds.Add(texId == -1 ? model.texfList.Count - 1 : texId);
                 }
             } else
             {
@@ -2528,11 +2571,42 @@ namespace AquaModelLibrary
             return uvList;
         }
 
-        public static void GetMaterialNameData(ref string name, ref List<string> shaderNames, out string alphaType, out string playerFlag)
+        public static string GetSpecialMatType(List<string> names)
+        {
+            if(names.Count > 0)
+            {
+                var name = names[0];
+                switch (name)
+                {
+                    case "pl_eye_diffuse.dds":
+                        return "ey";
+                    case "pl_hair_diffuse.dds":
+                        return "hr";
+                    case "pl_face_diffuse.dds":
+                        return "fc";
+                    case "pl_body_diffuse.dds":
+                        return "pl";
+                    case "pl_body_base_diffuse.dds":
+                        return "rbd";
+                    case "pl_body_skin_diffuse.dds":
+                        return "rbd_sk";
+                    default:
+                        return "";
+                }
+
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public static void GetMaterialNameData(ref string name, ref List<string> shaderNames, out string alphaType, out string playerFlag, out int twoSided)
         {
             shaderNames = new List<string>();
             alphaType = null;
             playerFlag = null;
+            twoSided = 0;
 
             //Get shader names
             string[] nameArr = name.Split(')');
@@ -2560,8 +2634,16 @@ namespace AquaModelLibrary
             nameArr = name.Split(']');
             if (nameArr.Length > 1)
             {
-                playerFlag = nameArr[1].Split('[')[1];
+                playerFlag = nameArr[0].Split('[')[1];
                 name = nameArr[1];
+            }
+
+            //Get two-sided
+            nameArr = name.Split('@');
+            if(nameArr.Length > 1)
+            {
+                twoSided = Int32.Parse(nameArr[1]);
+                name = nameArr[0];
             }
         }
 

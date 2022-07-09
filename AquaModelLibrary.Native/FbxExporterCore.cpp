@@ -317,9 +317,10 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( AquaObject::GenericMaterial^ aqMat, String^ texturesDirectoryPath, FbxScene* lScene, bool includeMetadata)
     {
         const char* name;
+        System::String^ specialType = aqMat->specialType->Length > 0 ? "[" + aqMat->specialType + "]": "";
         if (includeMetadata)
         {
-            name = Utf8String("(" + aqMat->shaderNames[0] + "," + aqMat->shaderNames[1] + ")" + "{" + aqMat->blendType + "}" + aqMat->matName + "@" + aqMat->twoSided.ToString()).ToCStr();
+            name = Utf8String("(" + aqMat->shaderNames[0] + "," + aqMat->shaderNames[1] + ")" + "{" + aqMat->blendType + "}" + specialType + aqMat->matName + "@" + aqMat->twoSided.ToString()).ToCStr();
         }
         else {
             name = Utf8String(aqMat->matName).ToCStr();

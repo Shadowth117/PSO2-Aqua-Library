@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -550,8 +551,17 @@ namespace AquaModelLibrary
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
-            double scale = (double)aiScene.Metadata["UnitScaleFactor"].Data;
-            float orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
+
+            double scale = 100;
+            float orgScale = 100;
+            if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
+            {
+                scale = (double)aiScene.Metadata["UnitScaleFactor"].Data;
+            }
+            if (aiScene.Metadata.ContainsKey("OriginalUnitScaleFactor"))
+            {
+                orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
+            }
             float baseScale = (float)(scale / 100.0);
             AquaObject aqp;
             aqn = new AquaNode();
@@ -582,11 +592,12 @@ namespace AquaModelLibrary
 
                 AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
                 List<string> shaderList = new List<string>();
-                AquaObjectMethods.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag);
+                AquaObjectMethods.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag, out int twoSided);
                 genMat.matName = name;
                 genMat.shaderNames = shaderList;
                 genMat.blendType = alphaType;
                 genMat.specialType = playerFlag;
+                genMat.twoSided = twoSided;
                 genMat.texNames = new List<string>();
                 genMat.texUVSets = new List<int>();
 
@@ -773,7 +784,7 @@ namespace AquaModelLibrary
                 {
                     if (aiNode.HasChildren)
                     {
-                        throw new Exception("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
+                        Debug.WriteLine("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
                     }
                     AquaNode.NODO nodo = new AquaNode.NODO();
                     nodo.boneName.SetString(finalName);
