@@ -574,7 +574,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select PSO1 n.rel map file",
-                Filter = "PSO1 Map (*n.rel)|*n.rel"
+                Filter = "PSO1 Map|*n.rel"
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {

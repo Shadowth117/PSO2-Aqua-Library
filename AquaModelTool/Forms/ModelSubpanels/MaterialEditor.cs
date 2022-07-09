@@ -109,6 +109,7 @@ namespace AquaModelTool
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
             alphaTextBox.Text = "opaque";
+            mate.alphaType.SetString(alphaTextBox.Text);
             AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -117,6 +118,7 @@ namespace AquaModelTool
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
             alphaTextBox.Text = "blendalpha";
+            mate.alphaType.SetString(alphaTextBox.Text);
             AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -125,6 +127,7 @@ namespace AquaModelTool
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
             alphaTextBox.Text = "hollow";
+            mate.alphaType.SetString(alphaTextBox.Text);
             AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
@@ -133,6 +136,7 @@ namespace AquaModelTool
         {
             var mate = model.mateList[matIDCB.SelectedIndex];
             alphaTextBox.Text = "add";
+            mate.alphaType.SetString(alphaTextBox.Text);
             AdjustRends(alphaTextBox.Text);
             model.mateList[matIDCB.SelectedIndex] = mate;
         }
