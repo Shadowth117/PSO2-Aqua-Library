@@ -59,7 +59,7 @@ namespace AquaModelLibrary.Extra
                 //Models
                 foreach(var mdlName in lhiPair.Value.aqos.Keys)
                 {
-                    FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], Path.Combine(lhiPath, mdlName + ".fbx"), false);
+                    FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + ".fbx"), new List<string>(), false);
                 }
 
                 //Textures
@@ -346,7 +346,7 @@ namespace AquaModelLibrary.Extra
 
                     if(lhiData == null)
                     {
-                        FbxExporter.ExportToFile(models[model], bones[model], Path.Combine(outFolder, model + ".fbx"), false);
+                        FbxExporter.ExportToFile(models[model], bones[model], new List<AquaMotion>(), Path.Combine(outFolder, model + ".fbx"), new List<string>(), false);
                     } else
                     {
                         if(!lhiData[outFolder].aqos.ContainsKey(model))

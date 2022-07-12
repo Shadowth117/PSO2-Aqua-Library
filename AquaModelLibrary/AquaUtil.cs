@@ -296,6 +296,32 @@ namespace AquaModelLibrary
                         }
                     }
 
+                    //Find and condense materials with same name. These would have been split due to render/shader differences
+                    Dictionary<string, List<int>> matDict = new Dictionary<string, List<int>>();
+                    Dictionary<int, int> newMatReferences = new Dictionary<int, int>();
+                    List<AquaObject.MATE> newMateList = new List<AquaObject.MATE>();
+                    var oldMatArr = outModel.mateList.ToArray();
+                    for (int mat = 0; mat < outModel.mateList.Count; mat++)
+                    {
+                        var matName = outModel.mateList[mat].matName.GetString();
+                        if (matDict.ContainsKey(matName))
+                        {
+                            matDict[matName].Add(mat);
+                        }
+                        else
+                        {
+                            matDict.Add(matName, new List<int>() { mat });
+                        }
+                    }
+                    foreach (var pair in matDict)
+                    {
+                        newMateList.Add(oldMatArr[pair.Value[0]]);
+                        foreach (var val in pair.Value)
+                        {
+                            newMatReferences.Add(val, newMateList.Count - 1);
+                        }
+                    }
+                    outModel.mateList = newMateList;
 
                     //outModel = matModelSplit;
 
@@ -344,6 +370,14 @@ namespace AquaModelLibrary
                         mesh.unkInt0 = 0;
                         mesh.reserve0 = 0;
                         outModel.meshList.Add(mesh);
+                    }
+
+                    //Finalize material assignment fixes
+                    for (int msh = 0; msh < outModel.meshList.Count; msh++)
+                    {
+                        var mesh = outModel.meshList[msh];
+                        mesh.mateIndex = newMatReferences[mesh.mateIndex];
+                        outModel.meshList[msh] = mesh;
                     }
 
                     //Generate VTXEs and VSETs

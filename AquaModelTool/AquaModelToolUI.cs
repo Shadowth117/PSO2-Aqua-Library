@@ -569,39 +569,6 @@ namespace AquaModelTool
 
         }
 
-        private void pSOnrelTotrpToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PSO1 PC n.rel map file",
-                Filter = "PSO1 PC Map|*n.rel"
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                bool useSubPath = true;
-                string subPath = "";
-                string fname = openFileDialog.FileName;
-                string outFolder = null;
-                if (useSubPath == true)
-                {
-                    subPath = Path.GetFileNameWithoutExtension(openFileDialog.FileName) + "\\";
-                    var info = Directory.CreateDirectory(Path.GetDirectoryName(openFileDialog.FileName) + "\\" + subPath);
-                    fname = info.FullName + Path.GetFileName(openFileDialog.FileName);
-                    outFolder = info.FullName;
-                }
-
-                var rel = new PSONRelConvert(File.ReadAllBytes(openFileDialog.FileName), openFileDialog.FileName, 0.1f, outFolder);
-                var aqua = new AquaUtil();
-                var set = new ModelSet();
-                set.models.Add(rel.aqObj);
-                aqua.aquaModels.Add(set);
-                aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false, false);
-
-                fname = fname.Replace(".rel", ".trp");
-                aqua.WriteClassicNIFLModel(fname, fname);
-            }
-        }
-
         private void batchParsePSO2SetToTextToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
@@ -1211,6 +1178,7 @@ namespace AquaModelTool
                     }
 
                     var bonePath = currentFile.Replace(ext, boneExt);
+                    aquaUI.aqua.aquaBones.Clear();
                     if (!File.Exists(bonePath))
                     {
                         OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -1221,22 +1189,24 @@ namespace AquaModelTool
                         if (openFileDialog.ShowDialog() == DialogResult.OK)
                         {
                             bonePath = openFileDialog.FileName;
+                            aquaUI.aqua.ReadBones(bonePath);
                         }
                         else
                         {
-                            MessageBox.Show("Must be able to read bones to export!");
-                            return;
+                            MessageBox.Show("Must be able to read bones to export properly! Defaulting to single node placeholder.");
+                            aquaUI.aqua.aquaBones.Add(AquaNode.GenerateBasicAQN());
                         }
+                    } else
+                    {
+                        aquaUI.aqua.ReadBones(bonePath);
                     }
 
-                    aquaUI.aqua.aquaBones.Clear();
-                    aquaUI.aqua.ReadBones(bonePath);
                     var model = aquaUI.aqua.aquaModels[0].models[0];
                     if (model.objc.type > 0xC32)
                     {
                         model.splitVSETPerMesh();
                     }
-                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], saveFileDialog.FileName, includeMetadata);
+                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], new List<AquaMotion>(), saveFileDialog.FileName, new List<string>(), includeMetadata);
                 }
                 /*using (var ctx = new Assimp.AssimpContext())
                 {
@@ -1918,43 +1888,6 @@ namespace AquaModelTool
 
             }
         }
-
-        private void pSOXVMDumpToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PSO xvm file(s)",
-                Filter = "PSO xvm Files (*.xvm)|*.xvm",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                //Read Xvms
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    PSOXVMConvert.ExtractXVM(file);
-                }
-            }
-        }
-
-        private void pSOXVRConvertToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PSO xvr file(s)",
-                Filter = "PSO xvr Files (*.xvr)|*.xvr|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                //Read Xvrs
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    PSOXVMConvert.ConvertLooseXVR(file);
-                }
-            }
-        }
-
         private void importAXSToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -2013,41 +1946,6 @@ namespace AquaModelTool
                 foreach (var file in openFileDialog.FileNames)
                 {
                     AAIMethods.ReadAAI(file);
-                }
-            }
-        }
-
-        private void convertPSNovaaxsaifToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PS Nova axs/aif file(s)",
-                Filter = "PS Nova model and texture Files (*.axs,*.aif)|*.axs;*.aif|PS Nova model files (*.axs)|*.axs|PS Nova Texture files (*.aif)|*.aif|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                List<string> failedFiles = new List<string>();
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    try
-                    {
-                        aquaUI.aqua.aquaModels.Clear();
-                        ModelSet set = new ModelSet();
-                        set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
-                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
-                        {
-                            aquaUI.aqua.aquaModels.Add(set);
-                            aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
-
-                            var outName = Path.ChangeExtension(file, ".aqp");
-                            aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
-                            AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
-                        }
-                    }
-                    catch
-                    {
-                    }
                 }
             }
         }
@@ -2306,7 +2204,7 @@ namespace AquaModelTool
                             model.splitVSETPerMesh();
                         }
                     }
-                    FbxExporter.ExportToFile(model, aqua.aquaBones[0], Path.ChangeExtension(filename, ".fbx"), includeMetadataToolStripMenuItem.Checked);
+                    FbxExporter.ExportToFile(model, aqua.aquaBones[0], new List<AquaMotion>(), Path.ChangeExtension(filename, ".fbx"), new List<string>(), includeMetadataToolStripMenuItem.Checked);
                     aqua.aquaBones.Clear();
                     aqua.aquaModels.Clear();
                 }
@@ -2798,51 +2696,6 @@ namespace AquaModelTool
             }
         }
 
-        private void convertPSPortableunjToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PS Portable unj file(s)",
-                Filter = "PS Portable unj Files (*.unj)|*.unj|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                List<string> failedFiles = new List<string>();
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    //try
-                    //{
-                    aquaUI.aqua.aquaModels.Clear();
-                    ModelSet set = new ModelSet();
-                    UNJObject unj = new UNJObject();
-                    unj.ReadUNJ(file);
-                    set.models.Add(unj.ConvertToBasicAquaobject(out var aqn));
-                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
-                    {
-                        aquaUI.aqua.aquaModels.Add(set);
-                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
-
-                        var outName = Path.ChangeExtension(file, ".aqp");
-                        aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
-                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
-                    }
-                    /*}
-                    catch (Exception exc)
-                    {
-                        failedFiles.Add(file);
-                        failedFiles.Add(exc.Message);
-                    }*/
-                }
-
-#if DEBUG
-                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
-#endif
-                System.Diagnostics.Debug.Unindent();
-                System.Diagnostics.Debug.Flush();
-            }
-        }
-
         private void readFLTDToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -3062,6 +2915,155 @@ namespace AquaModelTool
 
                     aqua.aquaModels.Clear();
                     AquaUIOpenFile(outStr);
+                }
+            }
+        }
+
+        private void convertPSNovaaxsaifToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PS Nova axs/aif file(s)",
+                Filter = "PS Nova model and texture Files (*.axs,*.aif)|*.axs;*.aif|PS Nova model files (*.axs)|*.axs|PS Nova Texture files (*.aif)|*.aif|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    try
+                    {
+                        aquaUI.aqua.aquaModels.Clear();
+                        ModelSet set = new ModelSet();
+                        set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
+                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                        {
+                            aquaUI.aqua.aquaModels.Add(set);
+                            aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                            var outName = Path.ChangeExtension(file, ".aqp");
+                            aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                            AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+
+        private void convertPSPortableunjToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PS Portable unj file(s)",
+                Filter = "PS Portable unj Files (*.unj)|*.unj|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    //try
+                    //{
+                    aquaUI.aqua.aquaModels.Clear();
+                    ModelSet set = new ModelSet();
+                    UNJObject unj = new UNJObject();
+                    unj.ReadUNJ(file);
+                    set.models.Add(unj.ConvertToBasicAquaobject(out var aqn));
+                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                    {
+                        aquaUI.aqua.aquaModels.Add(set);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                        var outName = Path.ChangeExtension(file, ".aqp");
+                        aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                    }
+                    /*}
+                    catch (Exception exc)
+                    {
+                        failedFiles.Add(file);
+                        failedFiles.Add(exc.Message);
+                    }*/
+                }
+
+#if DEBUG
+                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
+#endif
+                System.Diagnostics.Debug.Unindent();
+                System.Diagnostics.Debug.Flush();
+            }
+        }
+
+        private void convertPSOnrelTotrpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO1 PC n.rel map file",
+                Filter = "PSO1 PC Map|*n.rel"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                bool useSubPath = true;
+                string subPath = "";
+                string fname = openFileDialog.FileName;
+                string outFolder = null;
+                if (useSubPath == true)
+                {
+                    subPath = Path.GetFileNameWithoutExtension(openFileDialog.FileName) + "\\";
+                    var info = Directory.CreateDirectory(Path.GetDirectoryName(openFileDialog.FileName) + "\\" + subPath);
+                    fname = info.FullName + Path.GetFileName(openFileDialog.FileName);
+                    outFolder = info.FullName;
+                }
+
+                var rel = new PSONRelConvert(File.ReadAllBytes(openFileDialog.FileName), openFileDialog.FileName, 0.1f, outFolder);
+                var aqua = new AquaUtil();
+                var set = new ModelSet();
+                set.models.Add(rel.aqObj);
+                aqua.aquaModels.Add(set);
+                aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false, false);
+
+                fname = fname.Replace(".rel", ".trp");
+                aqua.WriteClassicNIFLModel(fname, fname);
+            }
+        }
+
+        private void convertPSOxvrToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO xvr file(s)",
+                Filter = "PSO xvr Files (*.xvr)|*.xvr|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read Xvrs
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    PSOXVMConvert.ConvertLooseXVR(file);
+                }
+            }
+        }
+
+        private void dumpPSOxvmToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO xvm file(s)",
+                Filter = "PSO xvm Files (*.xvm)|*.xvm",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read Xvms
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    PSOXVMConvert.ExtractXVM(file);
                 }
             }
         }

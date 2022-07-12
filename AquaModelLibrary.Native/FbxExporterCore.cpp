@@ -480,7 +480,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     }
     
     //Expects pre VSET split model
-    void FbxExporterCore::ExportToFile( AquaObject^ aqo, AquaNode^ aqn, String^ destinationFilePath, bool includeMetadata)
+    void FbxExporterCore::ExportToFile( AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, bool includeMetadata)
     {
         String^ texturesDirectoryPath = Path::GetDirectoryName( destinationFilePath );
         String^ aqoName = Path::GetFileNameWithoutExtension ( destinationFilePath );
@@ -572,6 +572,12 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         
 
         lScene->AddPose( lBindPose );
+
+        //Animations
+        if (aqmList->Count > 0)
+        {
+
+        }
 
         lScene->GetGlobalSettings().SetAxisSystem( FbxAxisSystem::OpenGL );
         lScene->GetGlobalSettings().SetSystemUnit( FbxSystemUnit::m );

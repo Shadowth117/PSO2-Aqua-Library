@@ -2601,8 +2601,34 @@ namespace AquaModelLibrary
             }
         }
 
+        public static string RemoveBlendersShitDuplicateDenoterAndAssimpDuplicate(string name)
+        {
+            if(name[name.Length - 4] == '.')
+            {
+                return name.Substring(0, name.Length - 4);
+            }
+            if(name[name.Length - 1] == ')')
+            {
+                if(name.Contains('('))
+                {
+                    int index = name.Length - 1;
+                    for(int i = name.Length - 1; i > 0; i--)
+                    {
+                        if(name[i] == '(')
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                    return name.Substring(0, index);
+                }
+            }
+            return name;
+        }
+
         public static void GetMaterialNameData(ref string name, ref List<string> shaderNames, out string alphaType, out string playerFlag, out int twoSided)
         {
+            name = RemoveBlendersShitDuplicateDenoterAndAssimpDuplicate(name);
             shaderNames = new List<string>();
             alphaType = null;
             playerFlag = null;
