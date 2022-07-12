@@ -1210,10 +1210,10 @@ namespace AquaModelLibrary.Extra
                         }
 
                         output += ToThree(i);
-                        output += "," + humanHash;
-                        output += "," + castHash;
-                        output += "," + casealHash;
-                        output += "," + figHash;
+                        output += "," + GetRebootHash(humanHash);
+                        output += "," + GetRebootHash(castHash);
+                        output += "," + GetRebootHash(casealHash);
+                        output += "," + GetRebootHash(figHash);
 
                         output += "\n";
 
@@ -1852,7 +1852,7 @@ namespace AquaModelLibrary.Extra
                     }
 
                     output += "\n";
-                    output = AddBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
+                    output = AddHQBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
                         output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
@@ -2035,7 +2035,7 @@ namespace AquaModelLibrary.Extra
                     }
 
                     output += "\n";
-                    output = AddBasewearExtraFiles(output, rebEx, pso2_binDir, false);
+                    output = AddHQBasewearExtraFiles(output, rebEx, pso2_binDir, false);
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
                         output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
@@ -4076,12 +4076,12 @@ namespace AquaModelLibrary.Extra
                     string mgFileName = magItem + $"{id:D5}" + ".ice";
                     string exists = "";
 
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, GetFileHash(mgFileName))))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(mgFileName)))))
                     {
                         exists = ",(Not found)";
                     }
 
-                    magOut.Add(names + mgFileName + "," + GetFileHash(mgFileName) + exists);
+                    magOut.Add(names + mgFileName + "," + GetRebootHash(GetFileHash(mgFileName)) + exists);
                 }
                 File.WriteAllLines(Path.Combine(playerDirOut, $"MagsNGS.csv"), magOut);
             }
@@ -4289,9 +4289,9 @@ namespace AquaModelLibrary.Extra
 
                             string actorName = $"{rg}{_0}{fc}{_1}{nm}{_2}{ed}";
                             string file = $"{EnemyData.rebootEnemy}{actorName}.ice";
-                            string fileHash = GetFileHash(file);
+                            string fileHash = GetRebootHash(GetFileHash(file));
                             string vetFile = file.Replace(".ice", "_ag.ice");
-                            string vetFileHash = GetFileHash(vetFile);
+                            string vetFileHash = GetRebootHash(GetFileHash(vetFile));
                             string nameString = "";
 
                             //Fix for cases where the internal name for actor_name.text uses the r01 designator, but not the file proper
@@ -4312,13 +4312,13 @@ namespace AquaModelLibrary.Extra
                                 }
                             }
 
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(fileHash))))
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, fileHash)))
                             {
                                 ngsEnemyOutput.Add(nameString + file.Replace("enemy/", "") + "," + fileHash);
                                 validEndings.Add(ed);
                                 enemyFound = true;
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(vetFileHash))))
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, vetFileHash)))
                             {
                                 ngsEnemyOutput.Add(nameString + vetFile.Replace("enemy/", "") + "," + vetFileHash + ",ベテラン,Veteran");
                                 if (!validEndings.Contains(ed))
@@ -4335,8 +4335,8 @@ namespace AquaModelLibrary.Extra
                         //Duplicates are fine if it makes sense for an enemy, but otherwise avoid them
                         if (!processedMotions.ContainsKey(motion))
                         {
-                            string motionHash = GetFileHash(motion);
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(motionHash))))
+                            string motionHash = GetRebootHash(GetFileHash(motion));
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, motionHash)))
                             {
                                 string motString = motion.Replace("enemy/", "") + "," + motionHash;
                                 processedMotions.Add(motion, motString);
@@ -4347,8 +4347,8 @@ namespace AquaModelLibrary.Extra
                         string effect3 = $"{EnemyData.rebootEnemy}{fc}_{nm}_{EnemyData.rebootEndOther[1]}_{EnemyData.rebootEndOther[0]}.ice";
                         if (!processedEffects.ContainsKey(effect))
                         {
-                            string effectHash = GetFileHash(effect);
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(effectHash))))
+                            string effectHash = GetRebootHash(GetFileHash(effect));
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, effectHash)))
                             {
                                 string effString = effect.Replace("enemy/", "") + "," + effectHash;
                                 processedEffects.Add(effect, effString);
@@ -4359,8 +4359,8 @@ namespace AquaModelLibrary.Extra
                             effect = effect2;
                             if (!processedEffects.ContainsKey(effect))
                             {
-                                string effectHash = GetFileHash(effect);
-                                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(effectHash))))
+                                string effectHash = GetRebootHash(GetFileHash(effect));
+                                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, effectHash)))
                                 {
                                     string effString = effect.Replace("enemy/", "") + "," + effectHash;
                                     processedEffects.Add(effect, effString);
@@ -4372,8 +4372,8 @@ namespace AquaModelLibrary.Extra
                             effect = effect3;
                             if (!processedEffects.ContainsKey(effect))
                             {
-                                string effectHash = GetFileHash(effect);
-                                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(effectHash))))
+                                string effectHash = GetRebootHash(GetFileHash(effect));
+                                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, effectHash)))
                                 {
                                     string effString = effect.Replace("enemy/", "") + "," + effectHash;
                                     processedEffects.Add(effect, effString);
@@ -4434,8 +4434,8 @@ namespace AquaModelLibrary.Extra
 
             foreach (var file in EnemyData.rebootEnemyMisc)
             {
-                var hash = GetFileHash(file);
-                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(hash))))
+                var hash = GetRebootHash(GetFileHash(file));
+                if (File.Exists(Path.Combine(pso2_binDir, dataReboot, hash)))
                 {
                     ngsMiscOutput.Add(file + "," + hash);
                 }
@@ -4890,6 +4890,42 @@ namespace AquaModelLibrary.Extra
             return output;
         }
 
+        public static string AddHQBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
+        {
+            string rpCheck, bmCheck, hnCheck;
+            GetHQBodyExtraFileStrings(fname, typeString, out rpCheck, out bmCheck, out hnCheck);
+
+            //_rp alt model
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
+            {
+                output += $",[HQ Alt Model],{rpCheck}\n";
+            }
+            //Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
+            {
+                output += $",[HQ Aqv],{bmCheck}\n";
+            }
+
+            //NGS doesn't have these sorts of files
+            if (isClassic)
+            {
+                //Hand textures
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
+                {
+                    output += $",[HQ Hand Textures],{hnCheck}\n";
+                }
+            }
+
+            return output;
+        }
+        public static void GetHQBodyExtraFileStrings(string fname, string typeString, out string rpCheck, out string bmCheck, out string hnCheck)
+        {
+            rpCheck = GetFileHash(fname.Replace("_ex.ice", "_rp_ex.ice"));
+            bmCheck = GetFileHash(fname.Replace(typeString, "_bm_"));
+            hnCheck = GetFileHash(fname.Replace(typeString, "_hn_"));
+            //If not basewear, hn. If basewear, ho
+        }
+
         public static void GetBodyExtraFileStrings(string fname, string typeString, out string rpCheck, out string bmCheck, out string hnCheck)
         {
             rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
@@ -4921,10 +4957,40 @@ namespace AquaModelLibrary.Extra
 
             return output;
         }
+        public static string AddHQBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
+        {
+            string rpCheck, hnCheck;
+            GetHQBasewearExtraFileStrings(fname, out rpCheck, out hnCheck);
+
+            //_rp alt model
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
+            {
+                output += $",[HQ Alt Model],{rpCheck}\n";
+            }
+
+            //NGS doesn't have these sorts of files
+            if (isClassic)
+            {
+                //Hand textures
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
+                {
+                    output += $",[HQ Hand Textures],{hnCheck}\n";
+                }
+            }
+
+            return output;
+        }
 
         public static void GetBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck)
         {
             rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
+            hnCheck = GetFileHash(fname.Replace("bw", "ho"));
+            //If not basewear, hn. If basewear, ho
+        }
+
+        public static void GetHQBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck)
+        {
+            rpCheck = GetFileHash(fname.Replace("_ex.ice", "_rp_ex.ice"));
             hnCheck = GetFileHash(fname.Replace("bw", "ho"));
             //If not basewear, hn. If basewear, ho
         }
