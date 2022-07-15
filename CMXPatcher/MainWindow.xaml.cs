@@ -161,8 +161,14 @@ namespace CMXPatcher
 
         private void cmxDowngradeClick(object sender, RoutedEventArgs e)
         {
-            patcher.DowngradeCmx();
-            MessageBox.Show("CMX successfully downgraded. Output ice written CMXPatcher BenchmarkCMX subfolder.");
+            var success = patcher.DowngradeCmx();
+            if(success)
+            {
+                MessageBox.Show("CMX successfully downgraded. Output ice written CMXPatcher BenchmarkCMX subfolder.");
+            } else
+            {
+                MessageBox.Show("CMX downgrade failed.");
+            }
         }
     }
 }

@@ -47,6 +47,12 @@
             this.spirefierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateClassicPlayerAnimToNGSAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.otherGamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSNovaaxsaifToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSPortableunjToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSOxvrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpPSOxvmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,12 +106,7 @@
             this.boneFlagTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.otherGamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertPSNovaaxsaifToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertPSPortableunjToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertPSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dumpPSOxvmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertPSOxvrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cMTTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -282,6 +283,53 @@
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(326, 6);
+            // 
+            // otherGamesToolStripMenuItem
+            // 
+            this.otherGamesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.convertPSNovaaxsaifToolStripMenuItem1,
+            this.convertPSPortableunjToolStripMenuItem1,
+            this.convertPSOnrelTotrpToolStripMenuItem,
+            this.convertPSOxvrToolStripMenuItem,
+            this.dumpPSOxvmToolStripMenuItem});
+            this.otherGamesToolStripMenuItem.Name = "otherGamesToolStripMenuItem";
+            this.otherGamesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.otherGamesToolStripMenuItem.Text = "Other Games";
+            // 
+            // convertPSNovaaxsaifToolStripMenuItem1
+            // 
+            this.convertPSNovaaxsaifToolStripMenuItem1.Name = "convertPSNovaaxsaifToolStripMenuItem1";
+            this.convertPSNovaaxsaifToolStripMenuItem1.Size = new System.Drawing.Size(207, 22);
+            this.convertPSNovaaxsaifToolStripMenuItem1.Text = "Convert PS Nova .axs/.aif";
+            this.convertPSNovaaxsaifToolStripMenuItem1.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem1_Click);
+            // 
+            // convertPSPortableunjToolStripMenuItem1
+            // 
+            this.convertPSPortableunjToolStripMenuItem1.Name = "convertPSPortableunjToolStripMenuItem1";
+            this.convertPSPortableunjToolStripMenuItem1.Size = new System.Drawing.Size(207, 22);
+            this.convertPSPortableunjToolStripMenuItem1.Text = "Convert PS Portable .unj";
+            this.convertPSPortableunjToolStripMenuItem1.Click += new System.EventHandler(this.convertPSPortableunjToolStripMenuItem1_Click);
+            // 
+            // convertPSOnrelTotrpToolStripMenuItem
+            // 
+            this.convertPSOnrelTotrpToolStripMenuItem.Name = "convertPSOnrelTotrpToolStripMenuItem";
+            this.convertPSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.convertPSOnrelTotrpToolStripMenuItem.Text = "Convert PC PSO *n.rel";
+            this.convertPSOnrelTotrpToolStripMenuItem.Click += new System.EventHandler(this.convertPSOnrelTotrpToolStripMenuItem_Click);
+            // 
+            // convertPSOxvrToolStripMenuItem
+            // 
+            this.convertPSOxvrToolStripMenuItem.Name = "convertPSOxvrToolStripMenuItem";
+            this.convertPSOxvrToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.convertPSOxvrToolStripMenuItem.Text = "Convert PSO .xvr";
+            this.convertPSOxvrToolStripMenuItem.Click += new System.EventHandler(this.convertPSOxvrToolStripMenuItem_Click);
+            // 
+            // dumpPSOxvmToolStripMenuItem
+            // 
+            this.dumpPSOxvmToolStripMenuItem.Name = "dumpPSOxvmToolStripMenuItem";
+            this.dumpPSOxvmToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.dumpPSOxvmToolStripMenuItem.Text = "Dump PSO .xvm";
+            this.dumpPSOxvmToolStripMenuItem.Click += new System.EventHandler(this.dumpPSOxvmToolStripMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
@@ -651,7 +699,8 @@
             // debug2ToolStripMenuItem
             // 
             this.debug2ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.boneFlagTestToolStripMenuItem});
+            this.boneFlagTestToolStripMenuItem,
+            this.cMTTestToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -659,7 +708,7 @@
             // boneFlagTestToolStripMenuItem
             // 
             this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
-            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
             this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
             // 
@@ -681,52 +730,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // otherGamesToolStripMenuItem
+            // cMTTestToolStripMenuItem
             // 
-            this.otherGamesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.convertPSNovaaxsaifToolStripMenuItem1,
-            this.convertPSPortableunjToolStripMenuItem1,
-            this.convertPSOnrelTotrpToolStripMenuItem,
-            this.convertPSOxvrToolStripMenuItem,
-            this.dumpPSOxvmToolStripMenuItem});
-            this.otherGamesToolStripMenuItem.Name = "otherGamesToolStripMenuItem";
-            this.otherGamesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.otherGamesToolStripMenuItem.Text = "Other Games";
-            // 
-            // convertPSNovaaxsaifToolStripMenuItem1
-            // 
-            this.convertPSNovaaxsaifToolStripMenuItem1.Name = "convertPSNovaaxsaifToolStripMenuItem1";
-            this.convertPSNovaaxsaifToolStripMenuItem1.Size = new System.Drawing.Size(207, 22);
-            this.convertPSNovaaxsaifToolStripMenuItem1.Text = "Convert PS Nova .axs/.aif";
-            this.convertPSNovaaxsaifToolStripMenuItem1.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem1_Click);
-            // 
-            // convertPSPortableunjToolStripMenuItem1
-            // 
-            this.convertPSPortableunjToolStripMenuItem1.Name = "convertPSPortableunjToolStripMenuItem1";
-            this.convertPSPortableunjToolStripMenuItem1.Size = new System.Drawing.Size(207, 22);
-            this.convertPSPortableunjToolStripMenuItem1.Text = "Convert PS Portable .unj";
-            this.convertPSPortableunjToolStripMenuItem1.Click += new System.EventHandler(this.convertPSPortableunjToolStripMenuItem1_Click);
-            // 
-            // convertPSOnrelTotrpToolStripMenuItem
-            // 
-            this.convertPSOnrelTotrpToolStripMenuItem.Name = "convertPSOnrelTotrpToolStripMenuItem";
-            this.convertPSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.convertPSOnrelTotrpToolStripMenuItem.Text = "Convert PC PSO *n.rel";
-            this.convertPSOnrelTotrpToolStripMenuItem.Click += new System.EventHandler(this.convertPSOnrelTotrpToolStripMenuItem_Click);
-            // 
-            // dumpPSOxvmToolStripMenuItem
-            // 
-            this.dumpPSOxvmToolStripMenuItem.Name = "dumpPSOxvmToolStripMenuItem";
-            this.dumpPSOxvmToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.dumpPSOxvmToolStripMenuItem.Text = "Dump PSO .xvm";
-            this.dumpPSOxvmToolStripMenuItem.Click += new System.EventHandler(this.dumpPSOxvmToolStripMenuItem_Click);
-            // 
-            // convertPSOxvrToolStripMenuItem
-            // 
-            this.convertPSOxvrToolStripMenuItem.Name = "convertPSOxvrToolStripMenuItem";
-            this.convertPSOxvrToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.convertPSOxvrToolStripMenuItem.Text = "Convert PSO .xvr";
-            this.convertPSOxvrToolStripMenuItem.Click += new System.EventHandler(this.convertPSOxvrToolStripMenuItem_Click);
+            this.cMTTestToolStripMenuItem.Name = "cMTTestToolStripMenuItem";
+            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cMTTestToolStripMenuItem.Text = "CMTTest";
+            this.cMTTestToolStripMenuItem.Click += new System.EventHandler(this.cMTTestToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -827,6 +836,7 @@
         private System.Windows.Forms.ToolStripMenuItem convertPSOnrelTotrpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertPSOxvrToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpPSOxvmToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cMTTestToolStripMenuItem;
     }
 }
 

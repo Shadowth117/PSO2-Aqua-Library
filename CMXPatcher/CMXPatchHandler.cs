@@ -125,11 +125,12 @@ namespace CMXPatcher
             }
         }
 
-        public void DowngradeCmx()
+        public bool DowngradeCmx()
         {
             if (readyToMod == false)
             {
                 MessageBox.Show("Please set all paths properly and attempt this again.");
+                return false;
             }
 
             //Reload backup cmx
@@ -159,11 +160,13 @@ namespace CMXPatcher
             {
                 Directory.CreateDirectory(downgradeCMXPath);
                 File.WriteAllBytes(downgradeCMXPath + GetFileHash(classicCMX), rawData);
+                return true;
             }
             catch
             {
                 MessageBox.Show("Unable to write cmx to patcher directory. Check file permissions.");
             }
+            return false;
         }
 
         public byte[] PatchACCE(CharacterMakingIndex cmx, byte[] cmxRaw)

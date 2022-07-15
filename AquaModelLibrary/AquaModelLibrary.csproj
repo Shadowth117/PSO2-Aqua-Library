@@ -154,6 +154,7 @@
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
     <Compile Include="AquaMethods\CharacterMakingIndexMethods.cs" />
+    <Compile Include="AquaMethods\CharacterMakingTemplateMethods.cs" />
     <Compile Include="AquaMethods\FLTDPhysicsMethods.cs" />
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AddOnIndex.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="AquaStructs\AquaObjectExtras\TSTATypePresets.cs" />
     <Compile Include="AquaStructs\AquaTextureList.cs" />
     <Compile Include="AquaStructs\CharacterMakingOffsets.cs" />
+    <Compile Include="AquaStructs\CharacterMakingTemplate.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />
     <Compile Include="AquaStructs\LHIObjectDetailLayout.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />

@@ -999,7 +999,15 @@ namespace AquaModelLibrary
             {
                 outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.faceRitem));
             }
-            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face.face2));
+            var face2Temp = face.face2;
+
+            //Backwards compatibility
+            if(mode == 0)
+            {
+                face2Temp.unkInt0 = face.faceRitem.unkIntRT0;
+                face2Temp.unkInt1 = face.faceRitem.unkIntRT1 + (face.face2.unkInt0 * 0x10000); 
+            }
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(face2Temp));
             if (mode >= 1)
             {
                 outBytes.AddRange(BitConverter.GetBytes(face.unkFloatRitem));
@@ -1841,6 +1849,17 @@ namespace AquaModelLibrary
                     face.faceRitem = streamReader.Read<FACERitem>();
                 }
                 face.face2 = streamReader.Read<FACE2>();
+
+                //Handle backwards compatibility
+                if (rel0DataStart < dec14_21TableAddressInt)
+                {
+                    face.faceRitem = new FACERitem();
+                    face.faceRitem.unkIntRT0 = face.face2.unkInt0;
+                    var bytes = BitConverter.GetBytes(face.face2.unkInt1);
+                    face.faceRitem.unkIntRT1 = BitConverter.ToInt16(bytes, 0);
+                    face.face2.unkInt0 = BitConverter.ToInt16(bytes, 2);
+                    face.face2.unkInt1 = 0;
+                }
                 if (rel0DataStart > dec14_21TableAddressInt)
                 {
                     face.unkFloatRitem = streamReader.Read<float>();
@@ -2256,7 +2275,7 @@ namespace AquaModelLibrary
                 streamReader.Seek(hair.hair.texString4Ptr + offset, SeekOrigin.Begin);
                 hair.texString4 = AquaGeneralMethods.ReadCString(streamReader);
 
-                streamReader.Seek(hair.hair.texString6Ptr + offset, SeekOrigin.Begin);
+                streamReader.Seek(hair.hair.texString5Ptr + offset, SeekOrigin.Begin);
                 hair.texString5 = AquaGeneralMethods.ReadCString(streamReader);
 
                 streamReader.Seek(hair.hair.texString6Ptr + offset, SeekOrigin.Begin);

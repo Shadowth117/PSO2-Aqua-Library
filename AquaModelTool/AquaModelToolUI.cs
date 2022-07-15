@@ -3067,6 +3067,23 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void cMTTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select CMT file",
+                Filter = "PSO CMT Files (*.cmt)|*.cmt",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read CMT
+                var cmt = CharacterMakingTemplateMethods.ReadCMT(openFileDialog.FileName);
+                CharacterMakingTemplateMethods.ConvertToNGSBenchmark1(cmt);
+                CharacterMakingTemplateMethods.SetNGSBenchmarkEnableFlag(cmt);
+                File.WriteAllBytes("C:\\CMT.cmt", CharacterMakingTemplateMethods.CMTToBytes(cmt));
+            }
+        }
     }
 }
 
