@@ -18,15 +18,16 @@ namespace CMXPatcher
             IsFolderPicker = true,
             Title = "Select pso2_bin",
         };
+        CommonOpenFileDialog benchmarkPso2BinSelect = new CommonOpenFileDialog()
+        {
+            IsFolderPicker = true,
+            Title = "Select Benchmark pso2_bin",
+        };
 
         public MainWindow()
         {
             InitializeComponent();
             SetFunctionality();
-#if !DEBUG
-            downgradeButton.IsEnabled = false;
-            downgradeButton.Visibility = Visibility.Hidden;
-#endif
         }
 
         private void SetPSO2Bin(object sender, RoutedEventArgs e)
@@ -149,25 +150,52 @@ namespace CMXPatcher
 
         private void cmxPatchClick(object sender, RoutedEventArgs e)
         {
-            patcher.InjectCMXMods();
-            MessageBox.Show("CMX successfully patched.");
+            if(patcher.InjectCMXMods())
+            {
+                MessageBox.Show("CMX successfully patched.");
+            } else
+            {
+                MessageBox.Show("Problem patching CMX.");
+            }
         }
 
         private void cmxRestoreClick(object sender, RoutedEventArgs e)
         {
-            patcher.InjectCMXMods(true);
-            MessageBox.Show("CMX successfully restored.");
+            if (patcher.InjectCMXMods(true))
+            {
+                MessageBox.Show("CMX successfully restored.");
+            }
+            else
+            {
+                MessageBox.Show("Problem patching CMX.");
+            }
         }
 
         private void cmxDowngradeClick(object sender, RoutedEventArgs e)
         {
-            var success = patcher.DowngradeCmx();
-            if(success)
+            if(patcher.DowngradeCmx())
             {
                 MessageBox.Show("CMX successfully downgraded. Output ice written CMXPatcher BenchmarkCMX subfolder.");
             } else
             {
                 MessageBox.Show("CMX downgrade failed.");
+            }
+        }
+
+        private void benchmarkJailbreakClick(object sender, RoutedEventArgs e)
+        {
+            if(benchmarkPso2BinSelect.ShowDialog() == CommonFileDialogResult.Ok && Directory.Exists(benchmarkPso2BinSelect.FileName + "\\data\\win32\\") && !File.Exists(benchmarkPso2BinSelect.FileName + "\\GameGuard.des"))
+            {
+                if(patcher.JailBreakBenchmark(benchmarkPso2BinSelect.FileName))
+                {
+                    MessageBox.Show("Benchmark Jailbreak successful!");
+                } else
+                {
+                    MessageBox.Show("Benchmark Jailbreak failed.");
+                }
+            } else
+            {
+                MessageBox.Show("Please select a valid character creator benchmark pso2_bin path!");
             }
         }
     }

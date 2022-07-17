@@ -10,6 +10,9 @@ using AquaModelLibrary.AquaMethods;
 using zamboni;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using AquaModelLibrary.AquaStructs;
+using AquaModelLibrary.Extra;
+using AquaExtras;
 
 namespace CMXPatcher
 {
@@ -54,11 +57,12 @@ namespace CMXPatcher
             }
         }
 
-        public void InjectCMXMods(bool restoreMode = false)
+        public bool InjectCMXMods(bool restoreMode = false)
         {
             if(readyToMod == false)
             {
                 MessageBox.Show("Please set all paths properly and attempt this again.");
+                return false;
             }
 
             //Reload backup cmx
@@ -94,6 +98,7 @@ namespace CMXPatcher
             try
             {
                 File.WriteAllBytes(cmxPath, rawData);
+                return true;
             }
             catch
             {
@@ -103,10 +108,12 @@ namespace CMXPatcher
                 {
                     Directory.CreateDirectory(moddedCMXPath);
                     File.WriteAllBytes(moddedCMXPath + GetFileHash(classicCMX), rawData);
+                    return false;
                 }
                 catch
                 {
                     MessageBox.Show("Unable to write cmx to patcher directory. Check file permissions.");
+                    return false;
                 }
             }
         }
@@ -120,6 +127,32 @@ namespace CMXPatcher
                 {
                     group[i] = cmxRaw;
                     //We can break here since we're really only expecting an NGS cmx and there's only one of those.
+                    break;
+                }
+            }
+        }
+
+        private void InjectCmtToIceGroup(byte[][] group, byte[] cmtRaw)
+        {
+            //Loop through files to get what we need
+            for (int i = 0; i < group.Length; i++)
+            {
+                if (IceFile.getFileName(group[i]).ToLower().Contains(".cmt"))
+                {
+                    group[i] = cmtRaw;
+                    break;
+                }
+            }
+        }
+
+        private void InjectNamedFileToIceGroup(byte[][] group, byte[] fileRaw, string fileName)
+        {
+            //Loop through files to get what we need
+            for (int i = 0; i < group.Length; i++)
+            {
+                if (IceFile.getFileName(group[i]).ToLower() == fileName)
+                {
+                    group[i] = fileRaw;
                     break;
                 }
             }
@@ -175,7 +208,7 @@ namespace CMXPatcher
             foreach(var acceKey in cmx.accessoryDict.Keys)
             {
                 acceBytes.AddRange(AquaGeneralMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce));
-                acceBytes.AddRange(AquaGeneralMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce2));
+                acceBytes.AddRange(AquaGeneralMethods.ConvertStruct(cmx.accessoryDict[acceKey].acce2a));
             }
             Array.Copy(acceBytes.ToArray(), 0, cmxRaw, cmx.cmxTable.accessoryAddress, acceBytes.Count);
 
@@ -327,6 +360,132 @@ namespace CMXPatcher
             }
             cmxType = null;
             cmxId = -1;
+        }
+
+        public bool JailBreakBenchmark(string benchmarkPSO2Bin)
+        {
+            string classicColorPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicColor));
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCMX));
+            string collectPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCollect));
+            string partsTextPath;
+            string acceTextpath;
+            if(Directory.Exists(Path.Combine(pso2_binDir, dataNADir)) && Directory.Exists(Path.Combine(benchmarkPSO2Bin + "\\", dataNADir)))
+            {
+                partsTextPath = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicPartText));
+                acceTextpath = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicAcceText));
+            } else
+            {
+                partsTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicPartText));
+                acceTextpath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicAcceText));
+            }
+            IceFile cmxIce;
+            IceFile collectIce;
+            CharacterMakingIndex cmx = new CharacterMakingIndex();
+            CharacterMakingTemplate cmt = new CharacterMakingTemplate();
+            List<byte> ccoOut = new List<byte>();
+            List<byte> cmtOut = new List<byte>();
+            List<byte> cmxOut = new List<byte>();
+
+            if (File.Exists(cmxPath))
+            {
+                cmxIce = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(cmxPath)));
+            }
+            else
+            {
+                MessageBox.Show($"Error, could not read {cmxPath}");
+                return false;
+            }
+
+            //Get the CMX and CMT
+            List<byte[]> files = (new List<byte[]>(cmxIce.groupOneFiles));
+            files.AddRange(cmxIce.groupTwoFiles);
+
+            //Loop through files to get what we need
+            foreach (byte[] file in files)
+            {
+                var ext = Path.GetExtension(IceFile.getFileName(file).ToLower());
+
+                switch (ext)
+                {
+                    case ".cmt":
+                        cmt = CharacterMakingTemplateMethods.ReadCMT(file);
+                        CharacterMakingTemplateMethods.ConvertToNGSBenchmark1(cmt);
+                        CharacterMakingTemplateMethods.SetNGSBenchmarkEnableFlag(cmt);
+                        break;
+                    case ".cmx":
+                        cmx = CharacterMakingIndexMethods.ReadCMX(file, cmx);
+                        break;
+                }
+            }
+
+            //Generate a new CCO. They're so simple it's not worth keeping what's in the old one, especially since we're gutting the old values
+            ccoOut.AddRange(CharacterMakingIndexMethods.GenerateAccessoryCCO(cmx));
+            ccoOut.InsertRange(0, (new IceHeaderStructures.IceFileHeader(accessoryCostName, (uint)ccoOut.Count)).GetBytes());
+            cmtOut.AddRange(CharacterMakingTemplateMethods.CMTToBytes(cmt));
+            cmtOut.InsertRange(0, (new IceHeaderStructures.IceFileHeader(cmtName, (uint)cmtOut.Count)).GetBytes());
+            cmxOut.AddRange(CharacterMakingIndexMethods.CMXToBytes(cmx));
+            cmxOut.InsertRange(0, (new IceHeaderStructures.IceFileHeader(cmxName, (uint)cmxOut.Count)).GetBytes());
+
+            if (File.Exists(collectPath))
+            {
+                collectIce = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(collectPath)));
+            }
+            else
+            {
+                MessageBox.Show($"Error, could not read {collectPath}");
+                return false;
+            }
+
+            //Write system collect ice
+            var ccoRaw = ccoOut.ToArray();
+            InjectNamedFileToIceGroup(collectIce.groupOneFiles, ccoRaw, accessoryCostName);
+            InjectNamedFileToIceGroup(collectIce.groupTwoFiles, ccoRaw, accessoryCostName);
+            byte[] rawDataSystemCollect = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), collectIce.groupOneFiles, collectIce.groupTwoFiles).getRawData(false, false);
+            File.WriteAllBytes(Path.Combine(benchmarkPSO2Bin, dataDir, GetFileHash(classicCollect)), rawDataSystemCollect);
+
+            //Write system ice
+            var cmxRaw = cmxOut.ToArray();
+            var cmtRaw = cmtOut.ToArray();
+            InjectCmxToIceGroup(cmxIce.groupOneFiles, cmxRaw);
+            InjectCmxToIceGroup(cmxIce.groupTwoFiles, cmxRaw);
+            InjectCmtToIceGroup(cmxIce.groupOneFiles, cmtRaw);
+            InjectCmtToIceGroup(cmxIce.groupTwoFiles, cmtRaw);
+            byte[] rawDataSystem = new IceV4File((new IceHeaderStructures.IceArchiveHeader()).GetBytes(), cmxIce.groupOneFiles, cmxIce.groupTwoFiles).getRawData(false, false);
+            File.WriteAllBytes(Path.Combine(benchmarkPSO2Bin, dataDir, GetFileHash(classicCMX)), rawDataSystem);
+
+            TryCopy(benchmarkPSO2Bin, pso2_binDir, classicColorPath);
+            TryCopy(benchmarkPSO2Bin, pso2_binDir, partsTextPath);
+            TryCopy(benchmarkPSO2Bin, pso2_binDir, acceTextpath);
+
+            //Copy aaaaaaaaaaaaaaaaaaaaaaall the player shit if it's not there already
+            var namesDicts = ReferenceGenerator.OutputCharacterPartFileStringDict(pso2_binDir, cmx);
+            foreach (var namesDict in namesDicts.Values)
+            {
+                foreach (var list in namesDict.Values)
+                {
+                    foreach (var part in list)
+                    {
+                        part.CopyFiles(pso2_binDir, benchmarkPSO2Bin);
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool TryCopy(string benchmarkPSO2Bin, string pso2BinDir, string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                File.Copy(filePath, filePath.Replace(pso2BinDir, benchmarkPSO2Bin + "\\"), true);
+            }
+            else
+            {
+                MessageBox.Show($"Error, could not read {filePath}");
+                return true;
+            }
+
+            return false;
         }
     }
 }

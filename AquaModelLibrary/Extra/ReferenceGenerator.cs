@@ -1845,7 +1845,7 @@ namespace AquaModelLibrary.Extra
                     output = AddBodyExtraFiles(output, reb, pso2_binDir, "_" + typeString, false);
 
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -1858,7 +1858,7 @@ namespace AquaModelLibrary.Extra
                         output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
                     }
 
-                    output += AddOutfitSound(pso2_binDir, $"{rebootStart}bs_", soundId);
+                    output += AddOutfitSound(pso2_binDir, soundId);
                 }
                 else
                 {
@@ -1878,7 +1878,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
                     output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
-                    output += AddOutfitSound(pso2_binDir, $"{classicStart}bs_", soundId);
+                    output += AddOutfitSound(pso2_binDir, soundId);
                 }
 
                 //Decide which type this is
@@ -1989,9 +1989,11 @@ namespace AquaModelLibrary.Extra
 
                 //Get SoundID
                 int soundId = -1;
+                int linkedInnerId = -1;
                 if (aquaCMX.baseWearDict.ContainsKey(id))
                 {
                     soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
+                    linkedInnerId = aquaCMX.outerDict[id].body2.linkedInnerId;
                 }
 
                 //Double check these ids and use an adjustedId if needed
@@ -2007,8 +2009,8 @@ namespace AquaModelLibrary.Extra
                     string rebEx = $"{rebootExStart}bw_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
-                    string rebLinkedInner = $"{rebootStart}b1_{adjustedId + 50000}.ice";
-                    string rebLinkedInnerEx = $"{rebootExStart}b1_{adjustedId + 50000}_ex.ice";
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
@@ -2028,7 +2030,7 @@ namespace AquaModelLibrary.Extra
                     output += "\n";
                     output = AddBasewearExtraFiles(output, reb, pso2_binDir, false);
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -2040,7 +2042,7 @@ namespace AquaModelLibrary.Extra
                     {
                         output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
                     }
-                    output += AddOutfitSound(pso2_binDir, $"{rebootStart}bs_", soundId);
+                    output += AddOutfitSound(pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2065,7 +2067,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
                     output = AddBasewearExtraFiles(output, classic, pso2_binDir, true);
-                    output += AddOutfitSound(pso2_binDir, $"{classicStart}bs_", soundId);
+                    output += AddOutfitSound(pso2_binDir, soundId);
                 }
 
                 //Decide which type this is
@@ -2168,7 +2170,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -2297,7 +2299,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -2426,7 +2428,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -2555,7 +2557,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -2693,7 +2695,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -3336,7 +3338,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -3434,7 +3436,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -3544,7 +3546,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -3665,7 +3667,7 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
-                    output += ",[HQ Texture Ice]," + rebExHash;
+                    output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
@@ -4995,11 +4997,18 @@ namespace AquaModelLibrary.Extra
             //If not basewear, hn. If basewear, ho
         }
 
-        public static string AddOutfitSound(string pso2_binDir, string partialFilename, int soundId)
+        public static string AddOutfitSound(string pso2_binDir, int soundId)
         {
             if (soundId != -1)
             {
-                var soundFileUnhash = partialFilename + $"{soundId:D5}" + ".ice";
+                string soundFileUnhash;
+                if (soundId >= 100000)
+                {
+                    soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
+                } else
+                {
+                    soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                }
                 string soundFile = GetFileHash(soundFileUnhash);
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
                 {
@@ -5360,6 +5369,7 @@ namespace AquaModelLibrary.Extra
         {
             var iconStr = GetFileHash(icon + costumeIcon + finalId + ".ice");
             var iconStr2 = GetFileHash(icon + castPartIcon + finalId + ".ice");
+            var iconStr3 = GetFileHash(icon + outerwearIcon + GetIconGender(Int32.Parse(finalId)) + finalId + ".ice");
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
             {
                 return iconStr;
@@ -5367,6 +5377,9 @@ namespace AquaModelLibrary.Extra
             else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
             {
                 return iconStr2;
+            } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr3)))
+            {
+                return iconStr3;
             }
 
             return "";
@@ -5462,5 +5475,2044 @@ namespace AquaModelLibrary.Extra
                 actorNameTextReboot_NPC = null;
             }
         }
+
+        public class PartData
+        {
+            public int id;
+            public List<string> namesByLanguage = new List<string>();
+            public string iconName = "";
+            public string iconHash = "";
+            public string iconCastName = "";
+            public string iconCastHash = "";
+            public string iconOuterName = "";
+            public string iconOuterHash = "";
+            public string partName = "";
+            public string partHash = "";
+            public string partRpName = "";
+            public string partRpHash = "";
+            public string partExName = "";
+            public string partExHash = "";
+            public string partRpExName = "";
+            public string partRpExHash = "";
+            public string handsName = "";
+            public string handsHash = "";
+            public string handsExName = "";
+            public string handsExHash = "";
+            public string soundName = "";
+            public string soundHash = "";
+            public string matAnimName = "";
+            public string matAnimHash = "";
+            public string matAnimExName = "";
+            public string matAnimExHash = "";
+            public string linkedInnerName = "";
+            public string linkedInnerHash = "";
+            public string linkedInnerExName = "";
+            public string linkedInnerExHash = "";
+
+            public void CopyFiles(string pso2BinDir, string destinationPso2BinDir)
+            {
+                CopyFile(pso2BinDir, destinationPso2BinDir, iconHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, iconCastHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, iconOuterHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, partHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, partRpHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, partExHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, partRpExHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, handsHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, handsExHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, soundHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, matAnimHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, matAnimExHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, linkedInnerHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, linkedInnerExHash);
+            }
+
+            private void CopyFile(string pso2BinDir, string destinationPso2BinDir, string name)
+            {
+                var filePath = Path.Combine(pso2BinDir, dataDir, name);
+                var destPath = Path.Combine(destinationPso2BinDir, dataDir, name);
+                if (!File.Exists(destPath))
+                {
+                    if(File.Exists(filePath))
+                    {
+                        File.Copy(filePath, destPath);
+                    }
+                }
+            }
+        }
+
+        public unsafe static Dictionary<string, Dictionary<string, List<PartData>>> OutputCharacterPartFileStringDict(string pso2_binDir, CharacterMakingIndex aquaCMX)
+        {
+            Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<int, string> faceIds = new Dictionary<int, string>();
+            ReadCMXText(pso2_binDir, out var partsText, out var acceText, out var commonText, out var commonTextReboot);
+            faceIds = GetFaceVariationLuaNameDict(pso2_binDir, faceIds);
+
+            if (partsText != null)
+            {
+                for (int i = 0; i < partsText.text.Count; i++)
+                {
+                    textByCat.Add(partsText.categoryNames[i], partsText.text[i]);
+                }
+            }
+            if (acceText != null)
+            {
+                for (int i = 0; i < acceText.text.Count; i++)
+                {
+                    //Handle dummy decoy entry in old versions
+                    if (textByCat.ContainsKey(acceText.categoryNames[i]) && textByCat[acceText.categoryNames[i]][0].Count == 0)
+                    {
+                        textByCat[acceText.categoryNames[i]] = acceText.text[i];
+                    }
+                    else
+                    {
+                        textByCat.Add(acceText.categoryNames[i], acceText.text[i]);
+                    }
+                }
+            }
+            
+            return GenerateCharacterPartFileStrings(pso2_binDir, aquaCMX, faceIds, textByCat);
+        }
+
+        //Returns a dictionary of part filenames, the top key string being the category and the next level's key string being the gender, race, and game variant (PSO2 vs NGS)
+        public static Dictionary<string, Dictionary<string, List<PartData>>> GenerateCharacterPartFileStrings(string pso2_binDir, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat)
+        {
+            Dictionary<string, Dictionary<string, List<PartData>>> partListsDict = new Dictionary<string, Dictionary<string, List<PartData>>>();
+
+            List<int> masterIdList;
+            List<string> masterNameList;
+            List<Dictionary<int, string>> nameDicts;
+            List<Dictionary<string, string>> strNameDicts;
+
+            //---------------------------Parse out costume and body (includes outers and cast bodies)
+            string costumeBodyKey = "costume";
+            Dictionary<string, List<PartData>> costumeBodyDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputCostumeMale = new List<PartData>();
+            List<PartData> outputCostumeFemale = new List<PartData>();
+            List<PartData> outputCastBody = new List<PartData>();
+            List<PartData> outputCasealBody = new List<PartData>();
+            List<PartData> outputOuterMale = new List<PartData>();
+            List<PartData> outputOuterFemale = new List<PartData>();
+            List<PartData> outputNGSOuterMale = new List<PartData>();
+            List<PartData> outputNGSOuterFemale = new List<PartData>();
+            List<PartData> outputNGSCastBody = new List<PartData>();
+            List<PartData> outputNGSCasealBody = new List<PartData>();
+            //List<PartData> outputNGSCostumeMale = new List<PartData>();   //Replaced by Set type basewear maybe?
+            //List<PartData> outputNGSCostumeFemale = new List<PartData>();
+            List<PartData> outputUnknownWearables = new List<PartData>();
+
+            //Build text Dict
+            masterIdList = new List<int>();
+            nameDicts = new List<Dictionary<int, string>>();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "costume", true);
+            GatherTextIds(textByCat, masterIdList, nameDicts, "body", false);
+
+            //Add potential cmx ids that wouldn't be stored in this
+            GatherDictKeys(masterIdList, aquaCMX.costumeDict.Keys);
+            GatherDictKeys(masterIdList, aquaCMX.outerDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            //Check as well in pso2_bin directory if _rp version of outfit exists and note as well if there's a bm file for said bd file. (Hairs similar have hm files to complement hr files)
+            //There may also be hn files for these while basewear would have ho files for hand textures
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.costumeIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.costumeIdLink[id].bcln.fileId;
+                }
+                else if (aquaCMX.outerWearIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.outerWearIdLink[id].bcln.fileId;
+                }
+
+                //Decide if bd or ow
+                int soundId = -1;
+                int linkedInnerId = id + 50000;
+                string typeString = "bd_";
+                bool classicOwCheck = id >= 20000 && id < 40000;
+                bool rebootOwCheck = id >= 100000 && id < 300000;
+                if (classicOwCheck == true || rebootOwCheck == true)
+                {
+                    typeString = "ow_";
+                    if (aquaCMX.outerDict.ContainsKey(id))
+                    {
+                        soundId = aquaCMX.outerDict[id].body2.costumeSoundId;
+                        linkedInnerId = aquaCMX.outerDict[id].body2.linkedInnerId;
+                    }
+                }
+                else
+                {
+                    if (aquaCMX.costumeDict.ContainsKey(id))
+                    {
+                        soundId = aquaCMX.costumeDict[id].body2.costumeSoundId;
+                        linkedInnerId = aquaCMX.costumeDict[id].body2.linkedInnerId;
+                    }
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{adjustedId}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+                    data.linkedInnerName = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    data.linkedInnerExName = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    data.linkedInnerHash = GetFileHash(data.linkedInnerName);
+                    data.linkedInnerExHash = GetFileHash(data.linkedInnerExName);
+
+                    //Set icon string
+                    data.iconName = icon + costumeIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                    data.iconCastName = icon + castPartIcon + id + ".ice";
+                    data.iconCastHash = GetFileHash(data.iconCastName);
+                    data.iconOuterName = icon + outerwearIcon + GetIconGender(id) + id + ".ice";
+                    data.iconOuterHash = GetFileHash(data.iconOuterName);
+                    data.partRpName = data.partName.Replace(".ice", "_rp.ice");
+                    data.matAnimName = data.partName.Replace("_" + typeString, "_bm_");
+                    data.handsName = data.partName.Replace("_" + typeString, "_hn_");
+                    data.partRpHash = GetFileHash(data.partRpName);
+                    data.matAnimHash = GetFileHash(data.matAnimName);
+                    data.handsHash = GetFileHash(data.handsName);
+
+                    data.partRpExName = data.partExName.Replace("_ex.ice", "_rp_ex.ice");
+                    data.matAnimExName = data.partExName.Replace("_" + typeString, "_bm_");
+                    data.handsExName = data.partExName.Replace("_" + typeString, "_hn_");
+                    data.partRpExHash = GetFileHash(data.partRpExName);
+                    data.matAnimExHash = GetFileHash(data.matAnimExName);
+                    data.handsExHash = GetFileHash(data.handsExName);
+
+                    if(soundId != -1)
+                    {
+                        string soundFileUnhash;
+                        if (soundId >= 100000)
+                        {
+                            soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
+                        }
+                        else
+                        {
+                            soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                        }
+                        data.soundName = soundFileUnhash;
+                        data.soundHash = GetFileHash(soundFileUnhash);
+                    }
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.iconName = icon + costumeIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                    data.iconCastName = icon + castPartIcon + finalIdIcon + ".ice";
+                    data.iconCastHash = GetFileHash(data.iconCastName);
+                    data.iconOuterName = icon + outerwearIcon + GetIconGender(id) + finalIdIcon + ".ice";
+                    data.iconOuterHash = GetFileHash(data.iconOuterName);
+                    data.partRpName = data.partName.Replace(".ice", "_rp.ice");
+                    data.matAnimName = data.partName.Replace("_" + typeString, "_bm_");
+                    data.handsName = data.partName.Replace("_" + typeString, "_hn_");
+                    data.partRpHash = GetFileHash(data.partRpName);
+                    data.matAnimHash = GetFileHash(data.matAnimName);
+                    data.handsHash = GetFileHash(data.handsName);
+
+                    if (soundId != -1)
+                    {
+                        string soundFileUnhash;
+                        if (soundId >= 100000)
+                        {
+                            soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
+                        }
+                        else
+                        {
+                            soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                        }
+                        data.soundName = soundFileUnhash;
+                        data.soundHash = GetFileHash(soundFileUnhash);
+                    }
+                }
+
+                //Decide which type this is
+                if (id < 10000)
+                {
+                    outputCostumeMale.Add(data);
+                }
+                else if (id < 20000)
+                {
+                    outputCostumeFemale.Add(data);
+                }
+                else if (id < 30000)
+                {
+                    outputOuterMale.Add(data);
+                }
+                else if (id < 40000)
+                {
+                    outputOuterFemale.Add(data);
+                }
+                else if (id < 50000)
+                {
+                    outputCastBody.Add(data);
+                }
+                else if (id < 100000)
+                {
+                    outputCasealBody.Add(data);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSOuterMale.Add(data);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSOuterFemale.Add(data);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastBody.Add(data);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCasealBody.Add(data);
+                }
+                else
+                {
+                    outputUnknownWearables.Add(data);
+                }
+            }
+            costumeBodyDict.Add("MaleCostumes", outputCostumeMale);
+            costumeBodyDict.Add("FemaleCostumes", outputCostumeFemale);
+            costumeBodyDict.Add("MaleOuters", outputOuterMale);
+            costumeBodyDict.Add("FemaleOuters", outputOuterFemale);
+            costumeBodyDict.Add("CastBodies", outputCastBody);
+            costumeBodyDict.Add("CasealBodies", outputCasealBody);
+            costumeBodyDict.Add("NGSMaleOuters", outputNGSOuterMale);
+            costumeBodyDict.Add("NGSFemaleOuters", outputNGSOuterFemale);
+            costumeBodyDict.Add("NGSCastBodies", outputNGSCastBody);
+            costumeBodyDict.Add("NGSCasealBodies", outputNGSCasealBody);
+
+            if (outputUnknownWearables.Count > 0)
+            {
+                costumeBodyDict.Add("UnknownOutfits", outputUnknownWearables);
+            }
+            partListsDict.Add(costumeBodyKey, costumeBodyDict);
+
+            //---------------------------Parse out basewear
+            string basewearKey = "basewear";
+            Dictionary<string, List<PartData>> basewearDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputBasewearMale = new List<PartData>();
+            List<PartData> outputBasewearFemale = new List<PartData>();
+            List<PartData> outputNGSBasewearMale = new List<PartData>();
+            List<PartData> outputNGSBasewearFemale = new List<PartData>();
+            List<PartData> outputNGSGenderlessBasewear = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "basewear", true);
+
+            //Add potential cmx ids that wouldn't be stored in this
+            GatherDictKeys(masterIdList, aquaCMX.baseWearDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            //Check as well in pso2_bin directory if _rp version of outfit exists and note as well if there's a bm file for said bd file. (Hairs similar have hm files to complement hr files)
+            //There may also be hn files for these while basewear would have ho files for hand textures
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Get SoundID
+                int soundId = -1;
+                int linkedInnerId = -1;
+                if (aquaCMX.baseWearDict.ContainsKey(id))
+                {
+                    soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
+                    linkedInnerId = aquaCMX.baseWearDict[id].body2.linkedInnerId;
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.baseWearIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.baseWearIdLink[id].bcln.fileId;
+                }
+                //Decide if it needs to be handled as a reboot file or not
+                var typeString = "bw_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{adjustedId}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+                    data.linkedInnerName = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    data.linkedInnerExName = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    data.linkedInnerHash = GetFileHash(data.linkedInnerName);
+                    data.linkedInnerExHash = GetFileHash(data.linkedInnerExName);
+
+                    //Set icon string
+                    data.iconName = icon + basewearIcon + GetIconGender(id) + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                    data.iconCastName = icon + castPartIcon + id + ".ice";
+                    data.iconCastHash = GetFileHash(data.iconCastName);
+                    data.iconOuterName = icon + outerwearIcon + GetIconGender(id) + id + ".ice";
+                    data.iconOuterHash = GetFileHash(data.iconOuterName);
+                    data.partRpName = data.partName.Replace(".ice", "_rp.ice");
+                    data.handsName = data.partName.Replace("_" + typeString, "_ho_");
+                    data.partRpHash = GetFileHash(data.partRpName);
+                    data.matAnimHash = GetFileHash(data.matAnimName);
+                    data.handsHash = GetFileHash(data.handsName);
+
+                    data.partRpExName = data.partExName.Replace("_ex.ice", "_rp_ex.ice");
+                    data.handsExName = data.partExName.Replace("_" + typeString, "_ho_");
+                    data.partRpExHash = GetFileHash(data.partRpExName);
+                    data.matAnimExHash = GetFileHash(data.matAnimExName);
+                    data.handsExHash = GetFileHash(data.handsExName);
+
+                    if(soundId != -1)
+                    {
+                        string soundFileUnhash;
+                        if (soundId >= 100000)
+                        {
+                            soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
+                        }
+                        else
+                        {
+                            soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                        }
+                        data.soundName = soundFileUnhash;
+                        data.soundHash = GetFileHash(soundFileUnhash);
+                    }
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.iconName = icon + basewearIcon + GetIconGender(id) + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                    data.iconCastName = icon + castPartIcon + finalIdIcon + ".ice";
+                    data.iconCastHash = GetFileHash(data.iconCastName);
+                    data.iconOuterName = icon + outerwearIcon + GetIconGender(id) + finalIdIcon + ".ice";
+                    data.iconOuterHash = GetFileHash(data.iconOuterName);
+                    data.partRpName = data.partName.Replace(".ice", "_rp.ice");
+                    data.handsName = data.partName.Replace("_" + typeString, "_hn_");
+                    data.partRpHash = GetFileHash(data.partRpName);
+                    data.handsHash = GetFileHash(data.handsName);
+
+                    if (soundId != -1)
+                    {
+                        string soundFileUnhash;
+                        if (soundId >= 100000)
+                        {
+                            soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
+                        }
+                        else
+                        {
+                            soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                        }
+                        data.soundName = soundFileUnhash;
+                        data.soundHash = GetFileHash(soundFileUnhash);
+                    }
+                }
+
+                //Decide which type this is
+                if (id < 30000)
+                {
+                    outputBasewearMale.Add(data);
+                }
+                else if (id < 40000)
+                {
+                    outputBasewearFemale.Add(data);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSBasewearMale.Add(data);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSBasewearFemale.Add(data);
+                }
+                else if (id < 600000)
+                {
+                    outputNGSGenderlessBasewear.Add(data);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown bw with id: " + id);
+                }
+            }
+            basewearDict.Add("MaleBasewear", outputBasewearMale);
+            basewearDict.Add("FemaleBasewear", outputBasewearFemale);
+            basewearDict.Add("MaleNGSBasewear", outputNGSBasewearMale);
+            basewearDict.Add("FemaleNGSBasewear", outputNGSBasewearFemale);
+            basewearDict.Add("GenderlessNGSBasewear", outputNGSGenderlessBasewear);
+            partListsDict.Add(basewearKey, basewearDict);
+
+            //---------------------------Parse out innerwear
+            string innerwearKey = "innerwear";
+            Dictionary<string, List<PartData>> innerWearDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputInnerwearMale = new List<PartData>();
+            List<PartData> outputInnerwearFemale = new List<PartData>();
+            List<PartData> outputNGSInnerwearMale = new List<PartData>();
+            List<PartData> outputNGSInnerwearFemale = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "innerwear", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.innerWearDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.innerWearIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.innerWearIdLink[id].bcln.fileId;
+                }
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "iw_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{adjustedId}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + innerwearIcon + GetIconGender(id) + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + innerwearIcon + GetIconGender(id) + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+
+                }
+
+                //Decide which type this is
+                if (id < 30000)
+                {
+                    outputInnerwearMale.Add(data);
+                }
+                else if (id < 40000)
+                {
+                    outputInnerwearFemale.Add(data);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSInnerwearMale.Add(data);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSInnerwearFemale.Add(data);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown iw with id: " + id);
+                }
+            }
+            innerWearDict.Add("MaleInnerwear", outputInnerwearMale);
+            innerWearDict.Add("FemaleInnerwear", outputInnerwearFemale);
+            innerWearDict.Add("MaleNGSInnerwear", outputNGSInnerwearMale);
+            innerWearDict.Add("FemaleNGSInnerwear", outputNGSInnerwearFemale);
+            partListsDict.Add(innerwearKey, innerWearDict);
+
+            //---------------------------Parse out cast arms
+            string castArmKey = "castArm";
+            Dictionary<string, List<PartData>> castArmDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputCastArmMale = new List<PartData>();
+            List<PartData> outputCastArmFemale = new List<PartData>();
+            List<PartData> outputNGSCastArmMale = new List<PartData>();
+            List<PartData> outputNGSCastArmFemale = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "arm", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.carmDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.castArmIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.castArmIdLink[id].bcln.fileId;
+                }
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "am_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{adjustedId}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + castPartIcon + castArmIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + castPartIcon + castArmIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                //Decide which type this is
+                if (id < 50000)
+                {
+                    outputCastArmMale.Add(data);
+                }
+                else if (id < 60000)
+                {
+                    outputCastArmFemale.Add(data);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastArmMale.Add(data);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCastArmFemale.Add(data);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown am with id: " + id);
+                }
+            }
+            castArmDict.Add("CastArms", outputCastArmMale);
+            castArmDict.Add("CasealArms", outputCastArmFemale);
+            castArmDict.Add("CastArmsNGS", outputNGSCastArmMale);
+            castArmDict.Add("CasealArmsNGS", outputNGSCastArmFemale);
+            partListsDict.Add(castArmKey, castArmDict);
+
+            //---------------------------Parse out cast legs
+            string castLegKey = "castLeg";
+            Dictionary<string, List<PartData>> castLegDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputCastLegMale = new List<PartData>();
+            List<PartData> outputCastLegFemale = new List<PartData>();
+            List<PartData> outputNGSCastLegMale = new List<PartData>();
+            List<PartData> outputNGSCastLegFemale = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "Leg", true); //Yeah for some reason this string starts capitalized while none of the others do... don't ask me.
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.clegDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.clegIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.clegIdLink[id].bcln.fileId;
+                }
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "lg_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{adjustedId}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + castPartIcon + castLegIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + castPartIcon + castLegIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                //Decide which type this is
+                if (id < 50000)
+                {
+                    outputCastLegMale.Add(data);
+                }
+                else if (id < 60000)
+                {
+                    outputCastLegFemale.Add(data);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastLegMale.Add(data);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCastLegFemale.Add(data);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown lg with id: " + id);
+                }
+            }
+            castLegDict.Add("CastLegs", outputCastLegMale);
+            castLegDict.Add("CasealLegs", outputCastLegFemale);
+            castLegDict.Add("CastLegsNGS", outputNGSCastLegMale);
+            castLegDict.Add("CasealLegsNGS", outputNGSCastLegFemale);
+            partListsDict.Add(castLegKey, castLegDict);
+
+            //---------------------------Parse out body paint
+            string bodyPaintKey = "bodyPaint";
+            Dictionary<string, List<PartData>> bodyPaintDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputMaleBodyPaint = new List<PartData>();
+            List<PartData> outputFemaleBodyPaint = new List<PartData>();
+            List<PartData> outputMaleLayeredBodyPaint = new List<PartData>();
+            List<PartData> outputFemaleLayeredBodyPaint = new List<PartData>();
+            List<PartData> outputNGSMaleBodyPaint = new List<PartData>();
+            List<PartData> outputNGSFemaleBodyPaint = new List<PartData>();
+            List<PartData> outputNGSCastMaleBodyPaint = new List<PartData>();
+            List<PartData> outputNGSCastFemaleBodyPaint = new List<PartData>();
+            List<PartData> outputNGSGenderlessBodyPaint = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint1", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.bodyPaintDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "b1_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + bodyPaintIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + bodyPaintIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                //Decide which type this is
+                if (id < 10000)
+                {
+                    outputMaleBodyPaint.Add(data);
+                }
+                else if (id < 20000)
+                {
+                    outputFemaleBodyPaint.Add(data);
+                }
+                else if (id < 30000)
+                {
+                    outputMaleLayeredBodyPaint.Add(data);
+                }
+                else if (id < 100000)
+                {
+                    outputFemaleLayeredBodyPaint.Add(data);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSMaleBodyPaint.Add(data);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSFemaleBodyPaint.Add(data);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastMaleBodyPaint.Add(data);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCastFemaleBodyPaint.Add(data);
+                }
+                else if (id < 600000)
+                {
+                    outputNGSGenderlessBodyPaint.Add(data);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown b1 with id: " + id);
+                }
+            }
+            bodyPaintDict.Add("MaleBodyPaint", outputMaleBodyPaint);
+            bodyPaintDict.Add("FemaleBodyPaint", outputFemaleBodyPaint);
+            bodyPaintDict.Add("MaleLayeredBodyPaint", outputMaleLayeredBodyPaint);
+            bodyPaintDict.Add("FemaleLayeredBodyPaint", outputFemaleLayeredBodyPaint);
+            bodyPaintDict.Add("MaleNGSBodyPaint", outputNGSMaleBodyPaint);
+            bodyPaintDict.Add("FemaleNGSBodyPaint", outputNGSFemaleBodyPaint);
+            bodyPaintDict.Add("CastNGSBodyPaint", outputNGSCastMaleBodyPaint);
+            bodyPaintDict.Add("CasealNGSBodyPaint", outputNGSCastFemaleBodyPaint);
+            bodyPaintDict.Add("GenderlessNGSBodyPaint", outputNGSGenderlessBodyPaint);
+            partListsDict.Add(bodyPaintKey, bodyPaintDict);
+
+            //---------------------------Parse out stickers
+            string stickerKey = "stickers";
+            Dictionary<string, List<PartData>> stickerDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputStickers = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint2", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "b2_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + stickerIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + stickerIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                outputStickers.Add(data);
+            }
+            stickerDict.Add("Stickers", outputStickers);
+            partListsDict.Add(stickerKey, stickerDict);
+
+            //---------------------------Parse out hair
+            string hairKey = "hair";
+            Dictionary<string, List<PartData>> hairDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputMaleHair = new List<PartData>();
+            List<PartData> outputFemaleHair = new List<PartData>();
+            List<PartData> outputCasealHair = new List<PartData>();
+            List<PartData> outputNGSHair = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "hair", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.hairDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}hr_{id}.ice";
+                    data.partExName = $"{rebootExStart}hr_{id}_ex.ice";
+
+                    //Cast heads
+                    if (id >= 300000 && id < 500000)
+                    {
+                        data.partName = data.partName.Replace("hr", "fc");
+                        data.partExName = data.partExName.Replace("hr", "fc");
+                    }
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Cast heads
+                    if (id >= 300000 && id < 500000)
+                    {
+                        data.iconName = "_";
+                        data.iconOuterName = "_";
+                        data.iconCastName = icon + faceIcon + id + ".ice";
+                    }
+                    else
+                    {
+                        data.iconName = icon + hairIcon + iconMale + id + ".ice";
+                        data.iconOuterName = icon + hairIcon + iconFemale + id + ".ice";
+                        data.iconCastName = icon + hairIcon + iconCast + id + ".ice";
+                    }
+                    data.iconHash = GetFileHash(data.iconName);
+                    data.iconOuterHash = GetFileHash(data.iconOuterName);
+                    data.iconCastHash = GetFileHash(data.iconCastName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    data.partName = $"{classicStart}hr_{finalId}.ice";
+
+                    //Set icon string
+                    data.iconName = icon + hairIcon + iconMale + finalId + ".ice";
+                    data.iconOuterName = icon + hairIcon + iconFemale + finalId + ".ice";
+                    data.iconCastName = icon + hairIcon + iconCast + finalId + ".ice";
+                
+                    data.iconHash = GetFileHash(data.iconName);
+                    data.iconOuterHash = GetFileHash(data.iconOuterName);
+                    data.iconCastHash = GetFileHash(data.iconCastName);
+                }
+
+                //Decide which type this is
+                if (id < 10000)
+                {
+                    outputMaleHair.Add(data);
+                }
+                else if (id < 20000)
+                {
+                    outputFemaleHair.Add(data);
+                }
+                else if (id < 60000)
+                {
+                    outputCasealHair.Add(data);
+                }
+                else
+                {
+                    outputNGSHair.Add(data);
+                }
+            }
+            hairDict.Add("MaleHair", outputMaleHair);
+            hairDict.Add("FemaleHair", outputFemaleHair);
+            hairDict.Add("CasealHair", outputCasealHair);
+            hairDict.Add("AllHairNGS", outputNGSHair);
+            partListsDict.Add(hairKey, hairDict);
+
+            //---------------------------Parse out Eye
+            string eyeKey = "eye";
+            Dictionary<string, List<PartData>> eyeDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputEyes = new List<PartData>();
+            List<PartData> outputNGSEyes = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "eye", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.eyeDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "ey_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + eyeIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + eyeIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                if (id < 100000)
+                {
+                    outputEyes.Add(data);
+                }
+                else
+                {
+                    outputNGSEyes.Add(data);
+                }
+            }
+            eyeDict.Add("Eyes", outputEyes);
+            eyeDict.Add("EyesNGS", outputNGSEyes);
+            partListsDict.Add(eyeKey, eyeDict);
+
+            //---------------------------Parse out EYEB
+            string eyeBKey = "eyebrows";
+            Dictionary<string, List<PartData>> eyeBDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputEyebrows = new List<PartData>();
+            List<PartData> outputNGSEyebrows = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "eyebrows", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.eyebrowDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "eb_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + eyebrowsIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + eyebrowsIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                if (id <= 100000)
+                {
+                    outputEyebrows.Add(data);
+                }
+                else
+                {
+                    outputNGSEyebrows.Add(data);
+                }
+            }
+            eyeBDict.Add("Eyebrows", outputEyebrows);
+            eyeBDict.Add("EyebrowsNGS", outputNGSEyebrows);
+            partListsDict.Add(eyeBKey, eyeDict);
+
+            //---------------------------Parse out EYEL
+            string eyeLKey = "eyelashes";
+            Dictionary<string, List<PartData>> eyeLDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputEyelashes = new List<PartData>();
+            List<PartData> outputNGSEyelashes = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "eyelashes", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.eyelashDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "el_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + eyelashesIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + eyelashesIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                if (id <= 100000)
+                {
+                    outputEyelashes.Add(data);
+                }
+                else
+                {
+                    outputNGSEyelashes.Add(data);
+                }
+            }
+            eyeLDict.Add("Eyebrows", outputEyelashes);
+            eyeLDict.Add("EyebrowsNGS", outputNGSEyelashes);
+            partListsDict.Add(eyeLKey, eyeLDict);
+
+            //---------------------------Parse out ACCE //Stored under decoy in a99be286e3a7e1b45d88a3ea4d6c18c4
+            string acceKey = "accessory";
+            Dictionary<string, List<PartData>> acceDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputAccessories = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "decoy", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.accessoryDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.accessoryIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.accessoryIdLink[id].bcln.fileId;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "ac_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + accessoryIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + accessoryIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                outputAccessories.Add(data);
+            }
+            acceDict.Add("Accessory", outputAccessories);
+            partListsDict.Add(acceKey, acceDict);
+
+            //---------------------------Parse out skin
+            string skinKey = "skin";
+            Dictionary<string, List<PartData>> skinDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputSkin = new List<PartData>();
+            List<PartData> outputNGSSkin = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "skin", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.ngsSkinDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.accessoryIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.accessoryIdLink[id].bcln.fileId;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "sk_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+                }
+
+                if (id < 100000)
+                {
+                    outputSkin.Add(data);
+                }
+                else
+                {
+                    outputNGSSkin.Add(data);
+                }
+            }
+            skinDict.Add("Skin", outputSkin);
+            skinDict.Add("SkinNGS", outputNGSSkin);
+            partListsDict.Add(skinKey, skinDict);
+
+            //---------------------------Parse out FCP1, Face Textures
+            string faceTexKey = "faceTextures";
+            Dictionary<string, List<PartData>> faceTexDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputFCP1 = new List<PartData>();
+            List<PartData> outputNGSFCP1 = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint1", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "f1_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + faceIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + faceIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                if (id <= 100000)
+                {
+                    outputFCP1.Add(data);
+                }
+                else
+                {
+                    outputNGSFCP1.Add(data);
+                }
+            }
+            faceTexDict.Add("FaceTextures", outputFCP1);
+            faceTexDict.Add("FaceTexturesNGS", outputNGSFCP1);
+            partListsDict.Add(faceTexKey, faceTexDict);
+
+            //---------------------------Parse out FCP2
+            string facePaintKey = "facePaint";
+            Dictionary<string, List<PartData>> facePaintDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputFCP2 = new List<PartData>();
+            List<PartData> outputNGSFCP2 = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint2", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "f2_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + facepainticon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + facepainticon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                if (id <= 100000)
+                {
+                    outputFCP2.Add(data);
+                }
+                else
+                {
+                    outputNGSFCP2.Add(data);
+                }
+            }
+            facePaintDict.Add("FacePaint", outputFCP2);
+            if (outputNGSFCP2.Count > 0)
+            {
+                facePaintDict.Add("FacePaintNGS", outputNGSFCP2);
+            }
+            partListsDict.Add(facePaintKey, facePaintDict);
+
+            //---------------------------Parse out FACE //face_variation.cmp.lua in 75b1632526cd6a1039625349df6ee8dd used to map file face ids to .text ids
+            //This targets facevariations specifically. face seems to be redundant and not actually particularly useful at a glance.
+            string faceKey = "face";
+            Dictionary<string, List<PartData>> faceDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputHumanMaleFace = new List<PartData>();
+            List<PartData> outputHumanFemaleFace = new List<PartData>();
+            List<PartData> outputNewmanMaleFace = new List<PartData>();
+            List<PartData> outputNewmanFemaleFace = new List<PartData>();
+            List<PartData> outputCastMaleFace = new List<PartData>();
+            List<PartData> outputCastFemaleFace = new List<PartData>();
+            List<PartData> outputDewmanMaleFace = new List<PartData>();
+            List<PartData> outputDewmanFemaleFace = new List<PartData>();
+            List<PartData> outputNGSFace = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+
+            masterNameList = new List<string>();
+            strNameDicts = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "facevariation", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.faceDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+
+                string realId = "";
+                if (!faceIds.TryGetValue(id, out realId))
+                {
+                    realId = "No" + id;
+                }
+
+
+                foreach (var dict in strNameDicts)
+                {
+                    if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name for a face
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "fc_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + faceIcon + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + faceIcon + finalIdIcon + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
+                }
+
+                if (id < 10000)
+                {
+                    outputHumanMaleFace.Add(data);
+                }
+                else if (id < 20000)
+                {
+                    outputHumanFemaleFace.Add(data);
+                }
+                else if (id < 30000)
+                {
+                    outputNewmanMaleFace.Add(data);
+                }
+                else if (id < 40000)
+                {
+                    outputNewmanFemaleFace.Add(data);
+                }
+                else if (id < 50000)
+                {
+                    outputCastMaleFace.Add(data);
+                }
+                else if (id < 60000)
+                {
+                    outputCastFemaleFace.Add(data);
+                }
+                else if (id < 70000)
+                {
+                    outputDewmanMaleFace.Add(data);
+                }
+                else if (id < 100000)
+                {
+                    outputDewmanFemaleFace.Add(data);
+                }
+                else
+                {
+                    outputNGSFace.Add(data);
+                }
+            }
+            faceDict.Add("HumanMaleFace", outputHumanMaleFace);
+            faceDict.Add("HumanFemaleFace", outputHumanFemaleFace);
+            faceDict.Add("NewmanMaleFace", outputNewmanMaleFace);
+            faceDict.Add("NewmanFemaleFace", outputNewmanFemaleFace);
+            faceDict.Add("CastFace", outputCastMaleFace);
+            faceDict.Add("CasealFace", outputCastFemaleFace);
+            faceDict.Add("DewmanMaleFace", outputDewmanMaleFace);
+            faceDict.Add("DewmanFemaleFace", outputDewmanFemaleFace);
+            faceDict.Add("NGSFace", outputNGSFace);
+            partListsDict.Add(faceKey, faceDict);
+
+
+            //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "ears", true);
+
+            if (aquaCMX.ngsEarDict.Count > 0 || masterIdList.Count > 0)
+            {
+                string earKey = "ear";
+                Dictionary<string, List<PartData>> earDict = new Dictionary<string, List<PartData>>();
+                List<PartData> outputNGSEars = new List<PartData>();
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    PartData data = new PartData();
+                    data.id = id;
+                    bool named = false;
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            named = true;
+                            data.namesByLanguage.Add(str);
+                        }
+                        else
+                        {
+                            data.namesByLanguage.Add("");
+                        }
+                    }
+
+                    //Account for lack of a name on an outfit
+                    if (named == false)
+                    {
+                        data.namesByLanguage.Add($"[Unnamed {id}]");
+                    }
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    string typeString = "ea_";
+                    if (id >= 100000)
+                    {
+                        data.partName = $"{rebootStart}{typeString}{id}.ice";
+                        data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                        data.partHash = GetFileHash(data.partName);
+                        data.partExHash = GetFileHash(data.partExName);
+
+                        //Set icon string
+                        data.iconName = icon + earIcon + id + ".ice";
+                        data.iconHash = GetFileHash(data.iconName);
+                    }
+                    else
+                    {
+                        string finalId = $"{id:D5}";
+                        string finalIdIcon = $"{id:D5}";
+                        data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                        data.partHash = GetFileHash(data.partName);
+
+                        //Set icon string
+                        data.iconName = icon + earIcon + finalIdIcon + ".ice";
+                        data.iconHash = GetFileHash(data.iconName);
+                    }
+
+                    outputNGSEars.Add(data);
+
+                }
+                earDict.Add("NGSEars", outputNGSEars);
+                partListsDict.Add(earKey, earDict);
+            }
+
+            //---------------------------Parse out NGS teeth 
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
+
+            if (aquaCMX.ngsTeethDict.Count > 0 || masterIdList.Count > 0)
+            {
+                string teethKey = "teeth";
+                Dictionary<string, List<PartData>> teethDict = new Dictionary<string, List<PartData>>();
+                List<PartData> outputNGSTeeth = new List<PartData>();
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    PartData data = new PartData();
+                    data.id = id;
+                    bool named = false;
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            named = true;
+                            data.namesByLanguage.Add(str);
+                        }
+                        else
+                        {
+                            data.namesByLanguage.Add("");
+                        }
+                    }
+
+                    //Account for lack of a name on an outfit
+                    if (named == false)
+                    {
+                        data.namesByLanguage.Add($"[Unnamed {id}]");
+                    }
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    string typeString = "de_";
+                    if (id >= 100000)
+                    {
+                        data.partName = $"{rebootStart}{typeString}{id}.ice";
+                        data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                        data.partHash = GetFileHash(data.partName);
+                        data.partExHash = GetFileHash(data.partExName);
+
+                        //Set icon string
+                        data.iconName = icon + teethIcon + id + ".ice";
+                        data.iconHash = GetFileHash(data.iconName);
+                    }
+                    else
+                    {
+                        string finalId = $"{id:D5}";
+                        string finalIdIcon = $"{id:D5}";
+                        data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                        data.partHash = GetFileHash(data.partName);
+
+                        //Set icon string
+                        data.iconName = icon + teethIcon + finalIdIcon + ".ice";
+                        data.iconHash = GetFileHash(data.iconName);
+                    }
+
+                    outputNGSTeeth.Add(data);
+                }
+
+                teethDict.Add("NGSTeeth", outputNGSTeeth);
+                partListsDict.Add(teethKey, teethDict);
+            }
+
+            //---------------------------Parse out NGS horns 
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
+
+            if (aquaCMX.ngsHornDict.Count > 0 || masterIdList.Count > 0)
+            {
+                string hornKey = "horn";
+                Dictionary<string, List<PartData>> hornDict = new Dictionary<string, List<PartData>>();
+                List<PartData> outputNGSHorns = new List<PartData>();
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsHornDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    //Skip the なし horn entry. I'm not even sure why that's in there.
+                    if (id == 0)
+                    {
+                        continue;
+                    }
+                    PartData data = new PartData();
+                    data.id = id;
+                    bool named = false;
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            named = true;
+                            data.namesByLanguage.Add(str);
+                        }
+                        else
+                        {
+                            data.namesByLanguage.Add("");
+                        }
+                    }
+
+                    //Account for lack of a name on an outfit
+                    if (named == false)
+                    {
+                        data.namesByLanguage.Add($"[Unnamed {id}]");
+                    }
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    string typeString = "hn_";
+                    if (id >= 100000)
+                    {
+                        data.partName = $"{rebootStart}{typeString}{id}.ice";
+                        data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                        data.partHash = GetFileHash(data.partName);
+                        data.partExHash = GetFileHash(data.partExName);
+
+                        //Set icon string
+                        data.iconName = icon + hornIcon + id + ".ice";
+                        data.iconHash = GetFileHash(data.iconName);
+                    }
+                    else
+                    {
+                        string finalId = $"{id:D5}";
+                        string finalIdIcon = $"{id:D5}";
+                        data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                        data.partHash = GetFileHash(data.partName);
+
+                        //Set icon string
+                        data.iconName = icon + hornIcon + finalIdIcon + ".ice";
+                        data.iconHash = GetFileHash(data.iconName);
+                    }
+
+                    outputNGSHorns.Add(data);
+
+                }
+                hornDict.Add("NGSHorns", outputNGSHorns);
+                partListsDict.Add(hornKey, hornDict);
+            }
+            //---------------------------------------------------------------------------------------//End CMX related ids
+
+            return partListsDict;
+        }
+
     }
 }

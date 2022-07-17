@@ -881,32 +881,42 @@ namespace AquaModelLibrary
             AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach2);
             AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach3);
             AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach4);
-            AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach5);
-            AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach6);
-            AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach7);
-            AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach8);
+            if(mode >= 1)
+            {
+                AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach5);
+                AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach6);
+                AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach7);
+                AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach8);
+            } else 
+            {
+                //Reordering happened at some point
+                AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach6);
+                AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach7);
+                AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach8);
+                AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach9);
+            }
 
             outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acce));
             if (mode >= 1)
             {
-                AddNIFLText(outBytes.Count + 0x0, nof0PointerLocations, textAddressDict, textList, acce.acceString1);
-                AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, acce.acceString2);
+                AddNIFLText(outBytes.Count + 0x0, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach9);
+                AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach10);
 
-                AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, acce.acceString3);
-                AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, acce.acceString4);
-                AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, acce.acceString5);
-                AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, acce.acceString6);
+                AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach11);
+                AddNIFLText(outBytes.Count + 0xC, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach12);
+                AddNIFLText(outBytes.Count + 0x10, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach13);
+                AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach14);
 
-                AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.acceString7);
-                AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.acceString8);
+                AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach15);
                 outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acceFeb8_22));
             }
             outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acceB));
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acce2a));
             if (mode >= 1)
             {
-                outBytes.AddRange(BitConverter.GetBytes(acce.int_54));
+                outBytes.AddRange(BitConverter.GetBytes(acce.flt_54));
             }
-            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acce2));
+            outBytes.AddRange(AquaGeneralMethods.ConvertStruct(acce.acce2b));
             if (mode >= 1)
             {
                 for (int i = 0; i < 3; i++)
@@ -1252,12 +1262,14 @@ namespace AquaModelLibrary
                 }
                 pointerCheck(position, nof0.relAddresses, sizeof(ACCE_B), AcceBPtrs, start);
                 position += sizeof(ACCE_B);
+                pointerCheck(position, nof0.relAddresses, sizeof(ACCE2A), Acce2Ptrs, start);
+                position += sizeof(ACCE2A);
                 if (rel0DataStart >= oct21TableAddressInt)
                 {
                     position += sizeof(int);
                 }
-                pointerCheck(position, nof0.relAddresses, sizeof(ACCE2), Acce2Ptrs, start);
-                position += sizeof(ACCE2);
+                pointerCheck(position, nof0.relAddresses, sizeof(ACCE2B), Acce2Ptrs, start);
+                position += sizeof(ACCE2B);
                 if (rel0DataStart >= feb8_22TableAddressInt)
                 {
                     pointerCheck(position, nof0.relAddresses, 0x60, Acce12Ptrs, start, true);
@@ -2043,12 +2055,13 @@ namespace AquaModelLibrary
                     acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();
                 }
                 acce.acceB = streamReader.Read<ACCE_B>();
+                acce.acce2a = streamReader.Read<ACCE2A>();
                 //This int was added to the middle of these in the Aug_3_2021 patch
                 if (count >= 5977)
                 {
-                    acce.int_54 = streamReader.Read<int>();
+                    acce.flt_54 = streamReader.Read<int>();
                 }
-                acce.acce2 = streamReader.Read<ACCE2>();
+                acce.acce2b = streamReader.Read<ACCE2B>();
                 for (int j = 0; j < 3; j++)
                 {
                     acce.acce12List.Add(ReadAcce12Object(streamReader, count));
@@ -2100,6 +2113,44 @@ namespace AquaModelLibrary
                 {
                     streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach8 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (cmxDateSize >= feb8_22TableAddressInt)
+                {
+                    if (acce.acceFeb8_22.acceString9Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString9Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach9 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+                    if (acce.acceFeb8_22.acceString10Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString10Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach10 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+                    if (acce.acceFeb8_22.acceString11Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString11Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach11 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+                    if (acce.acceFeb8_22.acceString12Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString12Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach12 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+                    if (acce.acceFeb8_22.acceString13Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString13Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach13 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+                    if (acce.acceFeb8_22.acceString14Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString14Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach14 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+                    if (acce.acceFeb8_22.acceString15Ptr + offset > 0)
+                    {
+                        streamReader.Seek(acce.acceFeb8_22.acceString15Ptr + offset, SeekOrigin.Begin);
+                        acce.nodeAttach15 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
                 }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
@@ -2381,6 +2432,79 @@ namespace AquaModelLibrary
             }
 
             return aquaCMX;
+        }
+
+        //Generates a CCO that defaults part counts to 1
+        public static byte[] GenerateAccessoryCCO(CharacterMakingIndex cmx)
+        {
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+            int rel0SizeOffset = 0;
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            outBytes.AddRange(BitConverter.GetBytes(-1));
+
+            //Write data
+            foreach (var acce in cmx.accessoryDict.Keys)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(acce));
+                outBytes.AddRange(BitConverter.GetBytes(1));
+            }
+
+            //Write header data
+            SetByteListInt(outBytes, rel0SizeOffset + 4, outBytes.Count);
+            outBytes.AddRange(BitConverter.GetBytes(cmx.accessoryDict.Count));
+            NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+            outBytes.AddRange(BitConverter.GetBytes(0x14));
+            AlignWriter(outBytes, 0x10);
+
+            //Write REL0 Size
+            SetByteListInt(outBytes, rel0SizeOffset, outBytes.Count - 0x8);
+
+            //Write NOF0
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));//Write pointer offsets
+
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += AlignWriter(outBytes, 0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            AquaCommon.NIFL nifl = new AquaCommon.NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, ConvertStruct(nifl));
+
+            return outBytes.ToArray();
         }
     }
 }

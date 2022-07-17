@@ -28,6 +28,13 @@ namespace AquaExtras
         public static string loadTunnelClassic = "ui_playable_load.ice";
         public static string loadTunnelReboot = "interface/ui_playable_load.ice";
 
+        //Shaders
+        public static string syShader = "sy_shader.ice";
+        public static string syShaderModel = "sy_shader_model.ice";
+        public static string syShaderModelOld = "sy_shader_model_old.ice";
+        public static string syShaderModelOldItem = "sy_shader_model_old_item.ice";
+        public static string syShaderPrimitive = "sy_shader_primitive.ice";
+
         //Special
         public static string dashPanelIce = "character/pl_reboot_object_dashpanel.ice";
         public static string gatlingIce = "character/pl_reboot_object_gatlinggun.ice";

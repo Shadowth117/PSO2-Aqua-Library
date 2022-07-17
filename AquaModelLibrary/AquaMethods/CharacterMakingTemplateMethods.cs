@@ -35,7 +35,7 @@ namespace AquaModelLibrary.AquaMethods
             int offset = 0x20; //Base offset due to NIFL header
 
             //Deal with deicer's extra header nonsense
-            if (type.Equals("cmx\0"))
+            if (type.Equals("cmt\0"))
             {
                 streamReader.Seek(0xC, SeekOrigin.Begin);
                 //Basically always 0x60, but some deicer files from the Alpha have 0x50... 

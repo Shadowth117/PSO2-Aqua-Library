@@ -6,12 +6,12 @@
         xmlns:local="clr-namespace:CMXPatcher"
         mc:Ignorable="d"
         Title="CMX Patcher" Height="179" Width="190">
-    <Grid Margin="0,0,0,0" VerticalAlignment="Top">
+    <Grid VerticalAlignment="Top" Height="165">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="133*"/>
-            <ColumnDefinition Width="67*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <Grid Margin="0,0,0,0" Height="18" VerticalAlignment="Top" Grid.ColumnSpan="2">
+        <Grid Height="18" VerticalAlignment="Top">
             <Menu x:Name="menu" Height="18" Margin="0,0,0,0" VerticalAlignment="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="Set pso2_bin directory" Click="SetPSO2Bin"/>
@@ -26,8 +26,8 @@
                 </MenuItem>
             </Menu>
         </Grid>
-        <Button x:Name="patchCmxButton" Content="Patch CMX" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="73" Click="cmxPatchClick"/>
-        <Button x:Name="downgradeButton" Content="Create benchmark CMX" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Width="133" Click="cmxDowngradeClick" Grid.ColumnSpan="2"/>
-        <Button x:Name="restoreCmxButton" Content="Restore CMX" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="73" Click="cmxRestoreClick"/>
+        <Button x:Name="patchCmxButton" Content="Patch CMX" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" Width="73" Click="cmxPatchClick" Height="20"/>
+        <Button x:Name="restoreCmxButton" Content="Restore CMX" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="73" Click="cmxRestoreClick" Height="20"/>
+        <Button x:Name="jailBreakBenchmarkButton" Content="Jailbreak Benchmark" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Width="116" Click="benchmarkJailbreakClick" Height="20"/>
     </Grid>
 </Window>

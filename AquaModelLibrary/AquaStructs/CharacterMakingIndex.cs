@@ -79,6 +79,8 @@ namespace AquaModelLibrary
         public static string subIdle = "idle_";
 
         public static string classicCMX = $"character/making/pl_system.ice";
+        public static string classicColor = $"character/making/pl_system_color.ice";
+        public static string classicCollect = $"character/making/pl_system_collect.ice";
         public static string classicPartText = $"ui_charamake_text.ice";
         public static string classicAcceText = $"ui_fashion_text.ice";
         public static string classicCharCreate = $"ui_character_making.ice";
@@ -96,6 +98,9 @@ namespace AquaModelLibrary
         public static string actorNameNPCName = "actor_name_npc.text";
         public static string faceVarName = "face_variation.cmp.lua";
         public static string lacName = "lobby_action_setting.lac";
+        public static string accessoryCostName = "pl_accessory.cco";
+        public static string cmtName = "pl_making_table.cmt";
+        public static string cmxName = "pl_data_info.cmx";
 
         public Dictionary<int, BODYObject> costumeDict = new Dictionary<int, BODYObject>();
         public Dictionary<int, BODYObject> carmDict = new Dictionary<int, BODYObject>();
@@ -416,8 +421,9 @@ namespace AquaModelLibrary
             public ACCE acce;
             public ACCE_B acceB;
             public ACCE_Feb8_22 acceFeb8_22;
-            public int int_54;
-            public ACCE2 acce2;
+            public ACCE2A acce2a;
+            public float flt_54;
+            public ACCE2B acce2b;
             public List<ACCE_12Object> acce12List = new List<ACCE_12Object>();
             public string dataString;
             public string nodeAttach1;
@@ -432,16 +438,16 @@ namespace AquaModelLibrary
             public string nodeAttach8;
 
             //Feb 8 2022 strings
-            public string acceString1;
-            public string acceString2;
+            public string nodeAttach9;
+            public string nodeAttach10;
 
-            public string acceString3;
-            public string acceString4;
-            public string acceString5;
-            public string acceString6;
+            public string nodeAttach11;
+            public string nodeAttach12;
+            public string nodeAttach13;
+            public string nodeAttach14;
 
-            public string acceString7;
-            public string acceString8;
+            public string nodeAttach15;
+            public string nodeAttach16;
         }
 
         public struct ACCE
@@ -486,10 +492,9 @@ namespace AquaModelLibrary
             public int unkInt6;
         }
 
-
-        public struct ACCE2
+        public struct ACCE2A
         {
-            public int unkInt7;
+            public float unkFloatNeg1;
             public float unkFloat0;
             public float unkFloat1;
 
@@ -497,7 +502,9 @@ namespace AquaModelLibrary
             public float unkFloat3;
             public float unkFloat4;
             public float unkFloat5;
-
+        }
+        public struct ACCE2B
+        {
             public int unkInt8;
             public int unkInt9;
             public int unkInt10;
