@@ -29,7 +29,10 @@ Aqua Model Tool - A tool for editing PSO2 models, along with various other utili
   
   The library allows for many more PSO2 specific features, however.  
   
+  
 CMX Patcher - A tool for patching PSO2 .cmx files in order to expand what can be modified.  
+  -Patches .cmx files to make life easier for character part mods
+  -Can 'jailbreak' the character creator benchmark, allowing access to all character parts from the current game
   
 Weapon Installer - A tool for listing out existing weapon files for PSO2 and NGS as well as swapping them at a basic level. Weapon swaps between categories may work better for old PSO2.  
   
