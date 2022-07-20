@@ -15,6 +15,7 @@
             <Menu x:Name="menu" Height="18" Margin="0,0,0,0" VerticalAlignment="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="Set pso2_bin directory" Click="SetPSO2Bin"/>
+                    <MenuItem Header="Check current pso2_bin directory" Click="CheckPSO2Bin"/>
                 </MenuItem>
                 <MenuItem Name ="ExtractMenu" Header="Extract" IsEnabled="False">
                     <MenuItem Header="Extract Costume entry" Click="ExtractCostumeEntry"/>

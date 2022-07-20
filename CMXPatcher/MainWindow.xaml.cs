@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using AquaModelLibrary.Forms.CommonForms;
+using System;
 
 namespace CMXPatcher
 {
@@ -35,12 +36,25 @@ namespace CMXPatcher
             if (pso2BinSelect.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 //Ensure paths are created and ready
-                Directory.CreateDirectory(settingsPath);
                 File.WriteAllText(settingsPath + "settings.txt", pso2BinSelect.FileName + "\\");
-
-                patcher.InitializeCMX();
+                try
+                {
+                    patcher.InitializeCMX();
+                }
+                catch(Exception exc)
+                {
+                    patcher.pso2_binDir = null;
+                    File.Delete(settingsPath + "settings.txt");
+                    File.WriteAllText(settingsPath + "log.txt", exc.ToString());
+                    MessageBox.Show("Unable to to read CMX.\nIf this path leads to a modified benchmark pso2_bin, please choose a current PSO2 pso2_bin and update the benchmark via the Jailbreak Benchmark button.");
+                }
                 SetFunctionality();
             }
+        }
+
+        private void CheckPSO2Bin(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(patcher.pso2_binDir);
         }
 
         private void SetFunctionality()
@@ -48,6 +62,7 @@ namespace CMXPatcher
             ExtractMenu.IsEnabled = patcher.readyToMod;
             patchCmxButton.IsEnabled = patcher.readyToMod;
             restoreCmxButton.IsEnabled = patcher.readyToMod;
+            jailBreakBenchmarkButton.IsEnabled = patcher.readyToMod;
         }
 
         private void CloseProgram(object sender, RoutedEventArgs e)
@@ -186,12 +201,30 @@ namespace CMXPatcher
         {
             if(benchmarkPso2BinSelect.ShowDialog() == CommonFileDialogResult.Ok && Directory.Exists(benchmarkPso2BinSelect.FileName + "\\data\\win32\\") && !File.Exists(benchmarkPso2BinSelect.FileName + "\\GameGuard.des"))
             {
-                if(patcher.JailBreakBenchmark(benchmarkPso2BinSelect.FileName))
+                Character_Making_File_Tool.WIPBox box = new("Please wait while part files are copied.\n This may take a moment.");
+                box.Show();
+                box.CenterWindowOnScreen();
+                try
                 {
-                    MessageBox.Show("Benchmark Jailbreak successful!");
-                } else
+                    if (patcher.JailBreakBenchmark(benchmarkPso2BinSelect.FileName))
+                    {
+                        box.Hide();
+                        box.Close();
+                        MessageBox.Show("Benchmark Jailbreak successful!");
+                    } else
+                    {
+                        box.Hide();
+                        box.Close();
+                        MessageBox.Show("Benchmark Jailbreak failed.");
+                    }
+
+                }
+                catch(Exception exc)
                 {
-                    MessageBox.Show("Benchmark Jailbreak failed.");
+                    box.Hide();
+                    box.Close();
+                    File.WriteAllText(settingsPath + "log.txt", exc.ToString());
+                    MessageBox.Show("Exception occured trying to jailbreak benchmark. See log.txt for details.");
                 }
             } else
             {

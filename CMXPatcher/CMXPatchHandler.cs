@@ -13,6 +13,8 @@ using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary.Extra;
 using AquaExtras;
+using System.ComponentModel;
+using System.Windows.Threading;
 
 namespace CMXPatcher
 {
@@ -24,7 +26,7 @@ namespace CMXPatcher
         public string moddedCMXPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\ModdedCMX\\";
         public string downgradeCMXPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\BenchmarkCMX\\";
         public string modPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\Mods\\";
-        public string pso2_binDir;
+        public string pso2_binDir = null;
         public IceFile cmxIce;
         public CharacterMakingIndex cmx;
         public byte[] cmxRaw; //Would be nice to reassemble these at some point, but it's it's a large format and it's easier to just edit a few things directly.
@@ -458,7 +460,7 @@ namespace CMXPatcher
             TryCopy(benchmarkPSO2Bin, pso2_binDir, acceTextpath);
 
             //Copy aaaaaaaaaaaaaaaaaaaaaaall the player shit if it's not there already
-            var namesDicts = ReferenceGenerator.OutputCharacterPartFileStringDict(pso2_binDir, cmx);
+            var namesDicts = ReferenceGenerator.OutputCharacterPartFileStringDict(pso2_binDir, cmx, out int totalCount);
             foreach (var namesDict in namesDicts.Values)
             {
                 foreach (var list in namesDict.Values)

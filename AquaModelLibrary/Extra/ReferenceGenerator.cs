@@ -5541,7 +5541,7 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        public unsafe static Dictionary<string, Dictionary<string, List<PartData>>> OutputCharacterPartFileStringDict(string pso2_binDir, CharacterMakingIndex aquaCMX)
+        public unsafe static Dictionary<string, Dictionary<string, List<PartData>>> OutputCharacterPartFileStringDict(string pso2_binDir, CharacterMakingIndex aquaCMX, out int totalCount)
         {
             Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
@@ -5571,12 +5571,14 @@ namespace AquaModelLibrary.Extra
                 }
             }
             
-            return GenerateCharacterPartFileStrings(pso2_binDir, aquaCMX, faceIds, textByCat);
+            return GenerateCharacterPartFileStrings(pso2_binDir, aquaCMX, faceIds, textByCat, out totalCount);
         }
 
         //Returns a dictionary of part filenames, the top key string being the category and the next level's key string being the gender, race, and game variant (PSO2 vs NGS)
-        public static Dictionary<string, Dictionary<string, List<PartData>>> GenerateCharacterPartFileStrings(string pso2_binDir, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat)
+        //Total count is a count of all partsData entities, not potential filestrings, since this doesn't check for legitimacy here
+        public static Dictionary<string, Dictionary<string, List<PartData>>> GenerateCharacterPartFileStrings(string pso2_binDir, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, out int totalCount)
         {
+            totalCount = 0;
             Dictionary<string, Dictionary<string, List<PartData>>> partListsDict = new Dictionary<string, Dictionary<string, List<PartData>>>();
 
             List<int> masterIdList;
@@ -5804,6 +5806,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputUnknownWearables.Add(data);
                 }
+                totalCount++;
             }
             costumeBodyDict.Add("MaleCostumes", outputCostumeMale);
             costumeBodyDict.Add("FemaleCostumes", outputCostumeFemale);
@@ -5988,6 +5991,7 @@ namespace AquaModelLibrary.Extra
                 {
                     Console.WriteLine("Unknown bw with id: " + id);
                 }
+                totalCount++;
             }
             basewearDict.Add("MaleBasewear", outputBasewearMale);
             basewearDict.Add("FemaleBasewear", outputBasewearFemale);
@@ -6092,6 +6096,7 @@ namespace AquaModelLibrary.Extra
                 {
                     Console.WriteLine("Unknown iw with id: " + id);
                 }
+                totalCount++;
             }
             innerWearDict.Add("MaleInnerwear", outputInnerwearMale);
             innerWearDict.Add("FemaleInnerwear", outputInnerwearFemale);
@@ -6193,6 +6198,7 @@ namespace AquaModelLibrary.Extra
                 {
                     Console.WriteLine("Unknown am with id: " + id);
                 }
+                totalCount++;
             }
             castArmDict.Add("CastArms", outputCastArmMale);
             castArmDict.Add("CasealArms", outputCastArmFemale);
@@ -6294,6 +6300,7 @@ namespace AquaModelLibrary.Extra
                 {
                     Console.WriteLine("Unknown lg with id: " + id);
                 }
+                totalCount++;
             }
             castLegDict.Add("CastLegs", outputCastLegMale);
             castLegDict.Add("CasealLegs", outputCastLegFemale);
@@ -6414,6 +6421,7 @@ namespace AquaModelLibrary.Extra
                 {
                     Console.WriteLine("Unknown b1 with id: " + id);
                 }
+                totalCount++;
             }
             bodyPaintDict.Add("MaleBodyPaint", outputMaleBodyPaint);
             bodyPaintDict.Add("FemaleBodyPaint", outputFemaleBodyPaint);
@@ -6491,6 +6499,7 @@ namespace AquaModelLibrary.Extra
                 }
 
                 outputStickers.Add(data);
+                totalCount++;
             }
             stickerDict.Add("Stickers", outputStickers);
             partListsDict.Add(stickerKey, stickerDict);
@@ -6601,6 +6610,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSHair.Add(data);
                 }
+                totalCount++;
             }
             hairDict.Add("MaleHair", outputMaleHair);
             hairDict.Add("FemaleHair", outputFemaleHair);
@@ -6681,6 +6691,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSEyes.Add(data);
                 }
+                totalCount++;
             }
             eyeDict.Add("Eyes", outputEyes);
             eyeDict.Add("EyesNGS", outputNGSEyes);
@@ -6759,10 +6770,11 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSEyebrows.Add(data);
                 }
+                totalCount++;
             }
             eyeBDict.Add("Eyebrows", outputEyebrows);
             eyeBDict.Add("EyebrowsNGS", outputNGSEyebrows);
-            partListsDict.Add(eyeBKey, eyeDict);
+            partListsDict.Add(eyeBKey, eyeBDict);
 
             //---------------------------Parse out EYEL
             string eyeLKey = "eyelashes";
@@ -6837,6 +6849,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSEyelashes.Add(data);
                 }
+                totalCount++;
             }
             eyeLDict.Add("Eyebrows", outputEyelashes);
             eyeLDict.Add("EyebrowsNGS", outputNGSEyelashes);
@@ -6914,6 +6927,7 @@ namespace AquaModelLibrary.Extra
                 }
 
                 outputAccessories.Add(data);
+                totalCount++;
             }
             acceDict.Add("Accessory", outputAccessories);
             partListsDict.Add(acceKey, acceDict);
@@ -6989,6 +7003,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSSkin.Add(data);
                 }
+                totalCount++;
             }
             skinDict.Add("Skin", outputSkin);
             skinDict.Add("SkinNGS", outputNGSSkin);
@@ -7067,6 +7082,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSFCP1.Add(data);
                 }
+                totalCount++;
             }
             faceTexDict.Add("FaceTextures", outputFCP1);
             faceTexDict.Add("FaceTexturesNGS", outputNGSFCP1);
@@ -7145,6 +7161,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSFCP2.Add(data);
                 }
+                totalCount++;
             }
             facePaintDict.Add("FacePaint", outputFCP2);
             if (outputNGSFCP2.Count > 0)
@@ -7273,6 +7290,7 @@ namespace AquaModelLibrary.Extra
                 {
                     outputNGSFace.Add(data);
                 }
+                totalCount++;
             }
             faceDict.Add("HumanMaleFace", outputHumanMaleFace);
             faceDict.Add("HumanFemaleFace", outputHumanFemaleFace);
@@ -7357,6 +7375,7 @@ namespace AquaModelLibrary.Extra
                 }
                 earDict.Add("NGSEars", outputNGSEars);
                 partListsDict.Add(earKey, earDict);
+                totalCount++;
             }
 
             //---------------------------Parse out NGS teeth 
@@ -7430,6 +7449,7 @@ namespace AquaModelLibrary.Extra
 
                 teethDict.Add("NGSTeeth", outputNGSTeeth);
                 partListsDict.Add(teethKey, teethDict);
+                totalCount++;
             }
 
             //---------------------------Parse out NGS horns 
@@ -7508,6 +7528,7 @@ namespace AquaModelLibrary.Extra
                 }
                 hornDict.Add("NGSHorns", outputNGSHorns);
                 partListsDict.Add(hornKey, hornDict);
+                totalCount++;
             }
             //---------------------------------------------------------------------------------------//End CMX related ids
 
