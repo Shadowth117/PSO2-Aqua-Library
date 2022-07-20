@@ -201,7 +201,7 @@ namespace CMXPatcher
         {
             if(benchmarkPso2BinSelect.ShowDialog() == CommonFileDialogResult.Ok && Directory.Exists(benchmarkPso2BinSelect.FileName + "\\data\\win32\\") && !File.Exists(benchmarkPso2BinSelect.FileName + "\\GameGuard.des"))
             {
-                Character_Making_File_Tool.WIPBox box = new("Please wait while part files are copied.\n This may take a moment.");
+                Character_Making_File_Tool.WIPBox box = new("Please wait while part files are copied. \nThis may take a moment");
                 box.Show();
                 box.CenterWindowOnScreen();
                 try

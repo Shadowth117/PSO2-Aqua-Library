@@ -1993,7 +1993,7 @@ namespace AquaModelLibrary.Extra
                 if (aquaCMX.baseWearDict.ContainsKey(id))
                 {
                     soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
-                    linkedInnerId = aquaCMX.outerDict[id].body2.linkedInnerId;
+                    linkedInnerId = aquaCMX.baseWearDict[id].body2.linkedInnerId;
                 }
 
                 //Double check these ids and use an adjustedId if needed
@@ -3040,7 +3040,7 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + eyebrowsIcon + id + ".ice");
+                    var iconStr = GetFileHash(icon + eyeBrowsIcon + id + ".ice");
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -3062,7 +3062,7 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + eyebrowsIcon + finalId + ".ice");
+                    var iconStr = GetFileHash(icon + eyeBrowsIcon + finalId + ".ice");
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -3336,6 +3336,15 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
+                    //Set icon string
+                    string iconStrTest = icon + skinIcon + GetIconGender(id) + id + ".ice";
+                    var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
+
                     output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
@@ -3359,6 +3368,15 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
+
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
+                    output += "," + iconStr;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        output += ", (Not found)";
+                    }
+
                     output += "\n";
 
                 }
@@ -3537,7 +3555,7 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + facepainticon + id + ".ice");
+                    var iconStr = GetFileHash(icon + facePaintIcon + id + ".ice");
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -3568,7 +3586,7 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + facepainticon + finalId + ".ice");
+                    var iconStr = GetFileHash(icon + facePaintIcon + finalId + ".ice");
                     output += "," + iconStr;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
@@ -5295,6 +5313,11 @@ namespace AquaModelLibrary.Extra
             return GetFileHash(icon + basewearIcon + GetIconGender(Int32.Parse(id)) + id + ".ice");
         }
 
+        public static string GetSkinIconString(string id)
+        {
+            return GetFileHash(icon + skinIcon + GetIconGender(Int32.Parse(id)) + id + ".ice");
+        }
+
         public static string GetBodyPaintIconString(string id)
         {
             return GetFileHash(icon + bodyPaintIcon + id + ".ice");
@@ -5317,7 +5340,7 @@ namespace AquaModelLibrary.Extra
 
         public static string GetEyebrowsIconString(string id)
         {
-            return GetFileHash(icon + eyebrowsIcon + id + ".ice");
+            return GetFileHash(icon + eyeBrowsIcon + id + ".ice");
         }
 
         public static string GetEyelashesIconString(string id)
@@ -5332,7 +5355,7 @@ namespace AquaModelLibrary.Extra
 
         public static string GetFacePaintIconString(string id)
         {
-            return GetFileHash(icon + facepainticon + id + ".ice");
+            return GetFileHash(icon + facePaintIcon + id + ".ice");
         }
 
         public static string GetHairCastIconString(string id)
@@ -6747,7 +6770,7 @@ namespace AquaModelLibrary.Extra
                     data.partExHash = GetFileHash(data.partExName);
 
                     //Set icon string
-                    data.iconName = icon + eyebrowsIcon + id + ".ice";
+                    data.iconName = icon + eyeBrowsIcon + id + ".ice";
                     data.iconHash = GetFileHash(data.iconName);
                 }
                 else
@@ -6758,7 +6781,7 @@ namespace AquaModelLibrary.Extra
                     data.partHash = GetFileHash(data.partName);
 
                     //Set icon string
-                    data.iconName = icon + eyebrowsIcon + finalIdIcon + ".ice";
+                    data.iconName = icon + eyeBrowsIcon + finalIdIcon + ".ice";
                     data.iconHash = GetFileHash(data.iconName);
                 }
 
@@ -6987,12 +7010,20 @@ namespace AquaModelLibrary.Extra
                     data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
                     data.partHash = GetFileHash(data.partName);
                     data.partExHash = GetFileHash(data.partExName);
+
+                    //Set icon string
+                    data.iconName = icon + skinIcon + GetIconGender(id) + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
                 }
                 else
                 {
                     string finalId = $"{id:D5}";
                     data.partName = $"{classicStart}{typeString}{finalId}.ice";
                     data.partHash = GetFileHash(data.partName);
+
+                    //Set icon string
+                    data.iconName = icon + skinIcon + GetIconGender(id) + id + ".ice";
+                    data.iconHash = GetFileHash(data.iconName);
                 }
 
                 if (id < 100000)
@@ -7138,7 +7169,7 @@ namespace AquaModelLibrary.Extra
                     data.partExHash = GetFileHash(data.partExName);
 
                     //Set icon string
-                    data.iconName = icon + facepainticon + id + ".ice";
+                    data.iconName = icon + facePaintIcon + id + ".ice";
                     data.iconHash = GetFileHash(data.iconName);
                 }
                 else
@@ -7149,7 +7180,7 @@ namespace AquaModelLibrary.Extra
                     data.partHash = GetFileHash(data.partName);
 
                     //Set icon string
-                    data.iconName = icon + facepainticon + finalIdIcon + ".ice";
+                    data.iconName = icon + facePaintIcon + finalIdIcon + ".ice";
                     data.iconHash = GetFileHash(data.iconName);
                 }
 

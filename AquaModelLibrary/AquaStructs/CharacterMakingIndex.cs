@@ -42,15 +42,16 @@ namespace AquaModelLibrary
         public static string accessoryIcon = $"decoy01_";
         public static string earIcon = $"ears01_";
         public static string eyeIcon = $"eye01_";
-        public static string eyebrowsIcon = $"eyebrows01_";
+        public static string eyeBrowsIcon = $"eyebrows01_";
         public static string eyelashesIcon = $"eyelashes01_";
         public static string faceIcon = $"face01_";             //aka facepaint01
-        public static string facepainticon = $"facepaint02_";
+        public static string facePaintIcon = $"facepaint02_";
         public static string hairIcon = $"hair01_";
         public static string hornIcon = $"horn01_";
         public static string innerwearIcon = $"innerwear01_";
         public static string outerwearIcon = $"outerwear01_";
         public static string teethIcon = $"dental01_";
+        public static string skinIcon = $"skin01_";
 
         public static string iconCast = "cast_"; //Only used for hair? Idk
         public static string iconMale = "man_";
