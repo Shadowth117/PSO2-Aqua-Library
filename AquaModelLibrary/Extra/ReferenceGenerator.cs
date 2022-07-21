@@ -6610,7 +6610,8 @@ namespace AquaModelLibrary.Extra
                     data.iconName = icon + hairIcon + iconMale + finalId + ".ice";
                     data.iconOuterName = icon + hairIcon + iconFemale + finalId + ".ice";
                     data.iconCastName = icon + hairIcon + iconCast + finalId + ".ice";
-                
+
+                    data.partHash = GetFileHash(data.partName);
                     data.iconHash = GetFileHash(data.iconName);
                     data.iconOuterHash = GetFileHash(data.iconOuterName);
                     data.iconCastHash = GetFileHash(data.iconCastName);

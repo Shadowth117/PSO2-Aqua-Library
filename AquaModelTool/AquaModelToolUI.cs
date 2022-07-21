@@ -2678,14 +2678,24 @@ namespace AquaModelTool
                     }
                     sb.AppendLine($"Pos {node.pos.X} {node.pos.Y} {node.pos.Z}");
                     sb.AppendLine($"Euler Rot {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}");
-                    var quat = AquaModelLibrary.Extra.MathExtras.EulerToQuaternion(node.eulRot.X, node.eulRot.Y, node.eulRot.Z);
+                    var quat = MathExtras.EulerToQuaternion(node.eulRot.X, node.eulRot.Y, node.eulRot.Z);
                     sb.AppendLine($"Euler Rot to Quat {quat.X} {quat.Y} {quat.Z} {quat.W}");
                     sb.AppendLine($"Scale {node.scale.X} {node.scale.Y} {node.scale.Z}");
                     sb.AppendLine($"");
 
                     Matrix4x4.Invert(node.GetInverseBindPoseMatrix(), out var mat);
                     Matrix4x4.Decompose(mat, out var scale, out var rotation, out var pos);
+                    Vector3 localEulRot;
+                    if(i != 0)
+                    {
+                        Matrix4x4.Decompose(bn.nodeList[node.parentId].GetInverseBindPoseMatrix(), out var invParScale, out var invParRot, out var invParPos);
+                        localEulRot = MathExtras.QuaternionToEuler(rotation * invParRot);
+                    } else
+                    {
+                        localEulRot = MathExtras.QuaternionToEuler(rotation);
+                    }
                     sb.AppendLine($"Inv Bind World Pos {pos.X} {pos.Y} {pos.Z}");
+                    sb.AppendLine($"Inv Bind Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}");
                     sb.AppendLine($"Inv Bind World Quat Rot {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
                     sb.AppendLine($"Inv Bind World Scale {scale.X} {scale.Y} {scale.Z}");
                     sb.AppendLine($"===");
