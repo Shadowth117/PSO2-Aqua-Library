@@ -3758,6 +3758,81 @@ namespace AquaModelLibrary.Extra
             WriteCSV(playerClassicDirOut, "FemaleDeumanFaces.csv", outputDewmanFemaleFace);
             WriteCSV(playerRebootDirOut, "AllFacesNGS.csv", outputNGSFace);
 
+            //---------------------------Parse out Face motions
+            StringBuilder outputFcmn = new StringBuilder();
+            StringBuilder outputFcmnNGS = new StringBuilder();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcmnDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += str + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+                output += $"{id},";
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "fm_";
+                if (id >= 100000)
+                {
+                    var partName = $"{rebootStart}{typeString}{id}.ice";
+                    var partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    var partHash = GetFileHash(partName);
+                    var partExHash = GetFileHash(partExName);
+                    output += partHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    var partName = $"{classicStart}{typeString}{finalId}.ice";
+                    var partHash = GetFileHash(partName);
+                    output += partHash;
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
+                    {
+                        output += ", (Not found)";
+                    }
+                }
+
+                if (id < 100000)
+                {
+                    outputFcmn.AppendLine(output);
+                }
+                else
+                {
+                    outputFcmnNGS.AppendLine(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "FaceMotions.csv", outputFcmn);
+            WriteCSV(playerRebootDirOut, "FaceMotionsNGS.csv", outputFcmnNGS);
+
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
             masterIdList.Clear();
             nameDicts.Clear();
@@ -6918,13 +6993,6 @@ namespace AquaModelLibrary.Extra
                     data.namesByLanguage.Add($"[Unnamed {id}]");
                 }
 
-                //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
-                if (aquaCMX.accessoryIdLink.ContainsKey(id))
-                {
-                    adjustedId = aquaCMX.accessoryIdLink[id].bcln.fileId;
-                }
-
                 //Decide if it needs to be handled as a reboot file or not
                 string typeString = "ac_";
                 if (id >= 100000)
@@ -7335,6 +7403,74 @@ namespace AquaModelLibrary.Extra
             faceDict.Add("NGSFace", outputNGSFace);
             partListsDict.Add(faceKey, faceDict);
 
+            //---------------------------Parse out Face motions
+            string fcmnKey = "faceMotion";
+            Dictionary<string, List<PartData>> fcmnDict = new Dictionary<string, List<PartData>>();
+            List<PartData> outputFcmn = new List<PartData>();
+            List<PartData> outputFcmnNGS = new List<PartData>();
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcmnDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData data = new PartData();
+                data.id = id;
+                bool named = false;
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else
+                    {
+                        data.namesByLanguage.Add("");
+                    }
+                }
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    data.namesByLanguage.Add($"[Unnamed {id}]");
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "fm_";
+                if (id >= 100000)
+                {
+                    data.partName = $"{rebootStart}{typeString}{id}.ice";
+                    data.partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    data.partHash = GetFileHash(data.partName);
+                    data.partExHash = GetFileHash(data.partExName);
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    data.partName = $"{classicStart}{typeString}{finalId}.ice";
+                    data.partHash = GetFileHash(data.partName);
+                }
+
+                if (id < 100000)
+                {
+                    outputFcmn.Add(data);
+                }
+                else
+                {
+                    outputFcmnNGS.Add(data);
+                }
+                totalCount++;
+            }
+            fcmnDict.Add("FaceMotions", outputFcmn);
+            fcmnDict.Add("FaceMotionsNGS", outputFcmnNGS);
+            partListsDict.Add(fcmnKey, fcmnDict);
 
             //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
             masterIdList.Clear();
