@@ -14,7 +14,7 @@ namespace AquaModelLibrary
     {
         public static void AssimpAQMConvert(string initialFilePath, bool playerExport, bool useScaleFrames, float scaleFactor)
         {
-            float baseScale = 2.54f * scaleFactor; //We assume that this will be 39.37008f * the true scale
+            float baseScale = scaleFactor;
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
