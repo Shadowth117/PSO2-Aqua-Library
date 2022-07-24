@@ -61,7 +61,6 @@
             this.legacyAqp2objObjImportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectModelExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.prmEffectFromModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.convertTxtToPSO2TextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertTxtToPSO2TextFolderSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -104,9 +103,10 @@
             this.readLPSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debug2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.boneFlagTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cMTTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.cMTTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertAnimationToAQMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -130,6 +130,7 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
             this.importModelToolStripMenuItem,
+            this.convertAnimationToAQMToolStripMenuItem,
             this.exportModelToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
@@ -141,14 +142,14 @@
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // importModelToolStripMenuItem
             // 
             this.importModelToolStripMenuItem.Name = "importModelToolStripMenuItem";
-            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.importModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.importModelToolStripMenuItem.Text = "Import Model";
             this.importModelToolStripMenuItem.Click += new System.EventHandler(this.importModelToolStripMenuItem_Click_1);
             // 
@@ -158,7 +159,7 @@
             this.exportFBXToolStripMenuItem,
             this.includeMetadataToolStripMenuItem});
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
-            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportModelToolStripMenuItem.Text = "Export Model";
             // 
             // exportFBXToolStripMenuItem
@@ -182,21 +183,21 @@
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAsToolStripMenuItem.Text = "Save As";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -249,7 +250,6 @@
             this.legacyAqp2objObjImportToolStripMenuItem,
             this.prmEffectModelExportToolStripMenuItem,
             this.prmEffectFromModelToolStripMenuItem,
-            this.convertAnimationToAQMToolStripMenuItem,
             this.toolStripSeparator3,
             this.convertTxtToPSO2TextToolStripMenuItem,
             this.convertTxtToPSO2TextFolderSelectToolStripMenuItem,
@@ -384,13 +384,6 @@
             this.prmEffectFromModelToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
             this.prmEffectFromModelToolStripMenuItem.Text = "prm Effect From Model";
             this.prmEffectFromModelToolStripMenuItem.Click += new System.EventHandler(this.prmEffectFromModelToolStripMenuItem_Click);
-            // 
-            // convertAnimationToAQMToolStripMenuItem
-            // 
-            this.convertAnimationToAQMToolStripMenuItem.Name = "convertAnimationToAQMToolStripMenuItem";
-            this.convertAnimationToAQMToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Animation to AQM";
-            this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
@@ -708,9 +701,16 @@
             // boneFlagTestToolStripMenuItem
             // 
             this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
-            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
             this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
+            // 
+            // cMTTestToolStripMenuItem
+            // 
+            this.cMTTestToolStripMenuItem.Name = "cMTTestToolStripMenuItem";
+            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.cMTTestToolStripMenuItem.Text = "CMTTest";
+            this.cMTTestToolStripMenuItem.Click += new System.EventHandler(this.cMTTestToolStripMenuItem_Click);
             // 
             // filePanel
             // 
@@ -730,12 +730,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // cMTTestToolStripMenuItem
+            // convertAnimationToAQMToolStripMenuItem
             // 
-            this.cMTTestToolStripMenuItem.Name = "cMTTestToolStripMenuItem";
-            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.cMTTestToolStripMenuItem.Text = "CMTTest";
-            this.cMTTestToolStripMenuItem.Click += new System.EventHandler(this.cMTTestToolStripMenuItem_Click);
+            this.convertAnimationToAQMToolStripMenuItem.Name = "convertAnimationToAQMToolStripMenuItem";
+            this.convertAnimationToAQMToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.convertAnimationToAQMToolStripMenuItem.Text = "Convert Anim(s) to AQM";
+            this.convertAnimationToAQMToolStripMenuItem.Click += new System.EventHandler(this.convertAnimationToAQMToolStripMenuItem_Click_1);
             // 
             // AquaModelTool
             // 
@@ -792,7 +792,6 @@
         private System.Windows.Forms.ToolStripMenuItem prmEffectModelExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem prmEffectFromModelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMagIndicesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem convertAnimationToAQMToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readCMOToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem legacyAqp2objBatchExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpFigEffectTypesToolStripMenuItem;
@@ -837,6 +836,7 @@
         private System.Windows.Forms.ToolStripMenuItem convertPSOxvrToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpPSOxvmToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cMTTestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertAnimationToAQMToolStripMenuItem;
     }
 }
 

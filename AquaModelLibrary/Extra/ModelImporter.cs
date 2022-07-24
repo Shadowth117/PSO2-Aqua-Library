@@ -38,22 +38,31 @@ namespace AquaModelLibrary
                 var anim = aiScene.Animations[i];
                 int animEndFrame = 0; //We'll fill this later. Assumes frame 0 to be the start
 
+                string name;
                 if (anim.Name != null && anim.Name != "")
                 {
                     //Make sure we're not overwriting anims that somehow have duplicate names
                     if (aqmNames.Contains(anim.Name))
                     {
-                        aqmNames.Add($"Anim_{i}_" + anim.Name + ".aqm");
+                        name = $"Anim_{i}_" + anim.Name;
                     }
                     else
                     {
-                        aqmNames.Add(anim.Name + ".aqm");
+                        name = anim.Name;
                     }
                 }
                 else
                 {
-                    aqmNames.Add($"Anim_{i}_" + inputFilename + ".aqm");
+                    name = $"Anim_{i}_" + inputFilename;
                 }
+
+                //Double check it has the pso2 extension
+                var ext = Path.GetExtension(name);
+                if ( ext != ".aqm" && ext != ".trm")
+                {
+                    name += ".aqm";
+                }
+                aqmNames.Add(name);
 
                 aqm.moHeader = new AquaMotion.MOHeader();
 

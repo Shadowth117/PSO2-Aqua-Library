@@ -1228,112 +1228,6 @@ namespace AquaModelTool
                     }
                     FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], aqms, saveFileDialog.FileName, aqmFileNames, includeMetadata);
                 }
-                /*using (var ctx = new Assimp.AssimpContext())
-                {
-                    var formats = ctx.GetSupportedExportFormats();
-                    List<(string ext,string desc)> filterKeys = new List<(string ext,string desc)>();
-                    foreach(var format in formats)
-                    {
-                        filterKeys.Add((format.FileExtension,format.Description));
-                    }
-                    filterKeys.Sort();
-
-                    SaveFileDialog saveFileDialog;
-                    saveFileDialog = new SaveFileDialog()
-                    {
-                        Title = "Export model file",
-                        Filter = ""
-                    };
-                    string tempFilter = "";
-                    foreach(var fileExt in filterKeys)
-                    {
-                        tempFilter += $"{fileExt.desc} (*.{fileExt.ext})|*.{fileExt.ext}|";
-                    }
-                    tempFilter = tempFilter.Remove(tempFilter.Length - 1, 1);
-                    saveFileDialog.Filter = tempFilter;
-                    saveFileDialog.FileName = "";
-
-                    //Get bone ext
-                    string boneExt = "";
-                    switch(ext)
-                    {
-                        case ".aqo":
-                        case ".aqp":
-                            boneExt = ".aqn";
-                            break;
-                        case ".tro":
-                        case ".trp":
-                            boneExt = ".trn";
-                            break;
-                        default:
-                            break;
-                    }
-                    var bonePath = currentFile.Replace(ext,boneExt);
-                    if (!File.Exists(bonePath))
-                    {
-                        OpenFileDialog openFileDialog = new OpenFileDialog() 
-                        { 
-                            Title = "Select PSO2 bones",
-                            Filter = "PSO2 Bones (*.aqn,*.trn)|*.aqn;*.trn"
-                        };
-                        if(openFileDialog.ShowDialog() == DialogResult.OK)
-                        {
-                            bonePath = openFileDialog.FileName;
-                        } else
-                        {
-                            MessageBox.Show("Must be able to read bones to export!");
-                            return;
-                        }
-                    }
-                    aquaUI.aqua.aquaBones.Clear();
-                    aquaUI.aqua.ReadBones(bonePath);
-
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        var id = saveFileDialog.FilterIndex - 1;
-                        var scene = ModelExporter.AssimpExport(saveFileDialog.FileName, aquaUI.aqua.aquaModels[0].models[0], aquaUI.aqua.aquaBones[0]);
-                        Assimp.ExportFormatDescription exportFormat = null;
-                        for(int i = 0; i < formats.Length; i++)
-                        {
-                            if(formats[i].Description == filterKeys[id].desc && formats[i].FileExtension == filterKeys[id].ext)
-                            {
-                                exportFormat = formats[i];
-                                break;
-                            }
-                        }
-                        if(exportFormat  == null)
-                        {
-                            return;
-                        }
-
-                        try
-                        {
-                            ctx.ExportFile(scene, saveFileDialog.FileName, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs);
-
-                            //Dae fix because Assimp 4 and 5.X can't seem to properly get a root node.
-                            if (Path.GetExtension(saveFileDialog.FileName) == ".dae")
-                            {
-                                string replacementLine = $"<skeleton>(0)#" + aquaUI.aqua.aquaBones[0].nodeList[0].boneName.GetString() + "</skeleton>";
-
-                                var dae = File.ReadAllLines(saveFileDialog.FileName);
-                                for (int i = 0; i < dae.Length; i++)
-                                {
-                                    if (dae[i].Contains("<skeleton>"))
-                                    {
-                                        dae[i] = replacementLine;
-                                    }
-                                }
-                                File.WriteAllLines(saveFileDialog.FileName, dae);
-                            }
-                        }
-                        catch (Win32Exception w)
-                        {
-                            MessageBox.Show($"Exception encountered: {w.Message}");
-                        }
-
-                    }
-                }*/
-
             }
         }
 
@@ -1515,66 +1409,6 @@ namespace AquaModelTool
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 List<int> magIds = AquaMiscMethods.ReadMGX(openFileDialog.FileName);
-            }
-        }
-
-        private void convertAnimationToAQMToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select Model file",
-                Filter = "Assimp Model Files (*.*)|*.*"
-            };
-            List<string> filters = new List<string>();
-            using (var ctx = new Assimp.AssimpContext())
-            {
-                foreach (var format in ctx.GetSupportedExportFormats())
-                {
-                    if (!filters.Contains(format.FileExtension))
-                    {
-                        filters.Add(format.FileExtension);
-                    }
-                }
-            }
-            filters.Sort();
-
-            StringBuilder filterString = new StringBuilder("Assimp Model Files(");
-            StringBuilder filterStringTypes = new StringBuilder("|");
-            StringBuilder filterStringSections = new StringBuilder();
-            foreach (var filter in filters)
-            {
-                filterString.Append($"*.{filter},");
-                filterStringTypes.Append($"*.{filter};");
-                filterStringSections.Append($"|{filter} Files ({filter})|*.{filter}");
-            }
-
-            //Get rid of comma, add parenthesis 
-            filterString.Remove(filterString.Length - 1, 1);
-            filterString.Append(")");
-
-            //Get rid of unneeded semicolon
-            filterStringTypes.Remove(filterStringTypes.Length - 1, 1);
-            filterString.Append(filterStringTypes);
-
-            //Add final section
-            filterString.Append(filterStringSections);
-
-            openFileDialog.Filter = filterString.ToString();
-            openFileDialog.Multiselect = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                //Handle maxscript scale differences from meters vs max's imperial feet based units
-                float scaleFactor = 1;
-                /*if(MessageBox.Show("Are the model(s) Maxscript model exports?", "Maxscript Model(s)?", MessageBoxButtons.YesNo) == DialogResult.No)
-                {
-                    scaleFactor = 0.3048f;
-                }*/
-
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    ModelImporter.AssimpAQMConvert(file, false, true, scaleFactor);
-                }
             }
         }
 
@@ -3120,6 +2954,37 @@ namespace AquaModelTool
                 CharacterMakingTemplateMethods.ConvertToNGSBenchmark1(cmt);
                 CharacterMakingTemplateMethods.SetNGSBenchmarkEnableFlag(cmt);
                 File.WriteAllBytes("C:\\CMT.cmt", CharacterMakingTemplateMethods.CMTToBytes(cmt));
+            }
+        }
+
+        private void convertAnimationToAQMToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            using (var ctx = new Assimp.AssimpContext())
+            {
+                var formats = ctx.GetSupportedImportFormats().ToList();
+                formats.Sort();
+
+                OpenFileDialog openFileDialog;
+                openFileDialog = new OpenFileDialog()
+                {
+                    Title = "Convert animation model file(s), fbx recommended (output .aqm(s) will be written to same directory)",
+                    Filter = ""
+                };
+                string tempFilter = "(*.fbx,*.dae,*.glb,*.gltf,*.pmx,*.smd)|*.fbx;*.dae;*.glb;*.gltf;*.pmx;*.smd";
+                string tempFilter2 = "";
+
+                openFileDialog.Filter = tempFilter + tempFilter2;
+
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    float scaleFactor = 1;
+
+                    foreach (var file in openFileDialog.FileNames)
+                    {
+                        ModelImporter.AssimpAQMConvert(file, false, true, scaleFactor);
+                    }
+                }
             }
         }
     }
