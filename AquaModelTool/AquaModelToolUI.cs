@@ -1200,13 +1200,33 @@ namespace AquaModelTool
                     {
                         aquaUI.aqua.ReadBones(bonePath);
                     }
+                    OpenFileDialog aqmOpenFileDialog = new OpenFileDialog()
+                    {
+                        Title = "Select PSO2 skeletal animations",
+                        Filter = "PSO2 skeletal Animations (*.aqm,*.trm)|*.aqm;*.trm",
+                        Multiselect = true,
+                    };
+                    List<AquaMotion> aqms = new List<AquaMotion>();
+                    List<string> aqmFileNames = new List<string>();
+                    if (aqmOpenFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        AquaUtil aqmUt = new AquaUtil();
+                        
+                        foreach(var fname in aqmOpenFileDialog.FileNames)
+                        {
+                            aqmUt.aquaMotions.Clear();
+                            aqmUt.ReadMotion(fname);
+                            aqms.Add(aqmUt.aquaMotions[0].anims[0]);
+                            aqmFileNames.Add(Path.GetFileName(fname));
+                        }
+                    }
 
                     var model = aquaUI.aqua.aquaModels[0].models[0];
                     if (model.objc.type > 0xC32)
                     {
                         model.splitVSETPerMesh();
                     }
-                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], new List<AquaMotion>(), saveFileDialog.FileName, new List<string>(), includeMetadata);
+                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], aqms, saveFileDialog.FileName, aqmFileNames, includeMetadata);
                 }
                 /*using (var ctx = new Assimp.AssimpContext())
                 {
@@ -2686,16 +2706,24 @@ namespace AquaModelTool
                     Matrix4x4.Invert(node.GetInverseBindPoseMatrix(), out var mat);
                     Matrix4x4.Decompose(mat, out var scale, out var rotation, out var pos);
                     Vector3 localEulRot;
-                    if(i != 0)
+                    Vector3 worldEulRot = MathExtras.QuaternionToEuler(rotation);
+                    Quaternion localQuat;
+                    if (i != 0)
                     {
-                        Matrix4x4.Decompose(bn.nodeList[node.parentId].GetInverseBindPoseMatrix(), out var invParScale, out var invParRot, out var invParPos);
+                        Matrix4x4.Invert(bn.nodeList[node.parentId].GetInverseBindPoseMatrix(), out var parMat);
+                        Matrix4x4.Decompose(parMat, out var parScale, out var parRot, out var parPos);
+                        var invParRot = Quaternion.Inverse(parRot);
+                        localQuat = rotation * invParRot;
                         localEulRot = MathExtras.QuaternionToEuler(rotation * invParRot);
                     } else
                     {
-                        localEulRot = MathExtras.QuaternionToEuler(rotation);
+                        localEulRot = worldEulRot;
+                        localQuat = rotation;
                     }
                     sb.AppendLine($"Inv Bind World Pos {pos.X} {pos.Y} {pos.Z}");
                     sb.AppendLine($"Inv Bind Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}");
+                    sb.AppendLine($"Inv Bind World Euler Rot {worldEulRot.X} {worldEulRot.Y} {worldEulRot.Z}");
+                    sb.AppendLine($"Inv Bind Local Quat Rot {localQuat.X} {localQuat.Y} {localQuat.Z} {localQuat.W}");
                     sb.AppendLine($"Inv Bind World Quat Rot {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
                     sb.AppendLine($"Inv Bind World Scale {scale.X} {scale.Y} {scale.Z}");
                     sb.AppendLine($"===");
