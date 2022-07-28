@@ -15,6 +15,8 @@ using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace AquaModelLibrary.Extra
 {
@@ -240,11 +242,11 @@ namespace AquaModelLibrary.Extra
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
+            GenerateUILists(pso2_binDir, outputDirectory);
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateMusicData(pso2_binDir, musicDirOut);
             GenerateCasinoData(pso2_binDir, outputDirectory);
             GenerateAreaData(pso2_binDir, stageDirOut);
-            GenerateUILists(pso2_binDir, outputDirectory);
             GenerateRoomLists(pso2_binDir, outputDirectory);
             GenerateUnitLists(pso2_binDir, outputDirectory);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
@@ -262,14 +264,127 @@ namespace AquaModelLibrary.Extra
         }
 
         private static void GenerateUILists(string pso2_binDir, string outputDirectory)
-        {            
-            //---------------------------Generate Load Tunnel Lists
-            List<string> loadTunnels = new List<string>();
-            loadTunnels.Add($"PSO2 Classic Load Tunnel,{loadTunnelClassic},{GetFileHash(loadTunnelClassic)}");
-            loadTunnels.Add($"NGS Load Tunnel,{loadTunnelReboot},{GetRebootHash(GetFileHash(loadTunnelReboot))}");
+        {
+            string outputStampDirectory = Path.Combine(outputDirectory, "UI", "Stamps");
+            Directory.CreateDirectory(outputStampDirectory);
 
-            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "LoadTunnels.csv"), loadTunnels);
+            //---------------------------Generate Load Tunnel Lists
+            List<string> loadTunnelsOut = new List<string>();
+            loadTunnelsOut.Add($"PSO2 Classic Load Tunnel,{loadTunnelClassic},{GetFileHash(loadTunnelClassic)}");
+            loadTunnelsOut.Add($"NGS Load Tunnel,{loadTunnelReboot},{GetRebootHash(GetFileHash(loadTunnelReboot))}");
+
+            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "LoadTunnels.csv"), loadTunnelsOut);
+
+            //---------------------------Stamps
+            List<string> stampsOut = new List<string>();
+            List<string> stampsNAOut = new List<string>();
+            for (int i = 0; i < 10000; i++)
+            {
+                string name = stampPath + $"{i:D4}.ice";
+                string hash = GetFileHash(name);
+                string path = Path.Combine(pso2_binDir, dataDir, hash);
+                string pathNA = Path.Combine(pso2_binDir, dataNADir, hash);
+                if (File.Exists(path))
+                {
+                    stampsOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(path);
+                    if(image != null)
+                    {
+                        var imagePath = Path.Combine(outputStampDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+                if (File.Exists(pathNA))
+                {
+                    stampsNAOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(pathNA);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputStampDirectory, Path.ChangeExtension(Path.GetFileName(name), "NA.png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+
+            File.WriteAllLines(Path.Combine(outputStampDirectory, "stamps.csv"), stampsOut);
+            if(stampsNAOut.Count > 0)
+            {
+                stampsNAOut.Insert(0, "These stamp files are used specifically for the Global version when English language options are selected.");
+                File.WriteAllLines(Path.Combine(outputStampDirectory, "stampsNA.csv"), stampsNAOut);
+            }
+
         }
+        public unsafe static Bitmap GetFirstImageFromIce(string fileName)
+        {
+            IceFile ice;
+            using (var strm = new MemoryStream(File.ReadAllBytes(fileName)))
+            {
+                try
+                {
+                    ice = IceFile.LoadIceFile(strm);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            List<byte[]> files = (new List<byte[]>(ice.groupOneFiles));
+            files.AddRange(ice.groupTwoFiles);
+
+            foreach (byte[] file in files)
+            {
+                if (IceFile.getFileName(file).ToLower().Contains(".dds"))
+                {
+                    int int32 = BitConverter.ToInt32(file, 16);
+                    string str = Encoding.ASCII.GetString(file, 64, int32).TrimEnd(new char[1]);
+
+                    int iceHeaderSize = BitConverter.ToInt32(file, 0xC);
+                    int newLength = file.Length - iceHeaderSize;
+                    byte[] trueFile = new byte[newLength];
+                    Array.ConstrainedCopy(file, iceHeaderSize, trueFile, 0, newLength);
+
+                    return GetDDSBitMap(trueFile);
+
+                }
+            }
+
+            return null;
+        }
+
+        private unsafe static Bitmap GetDDSBitMap(byte[] trueFile)
+        {
+            using (var image = Pfim.Pfim.FromStream(new MemoryStream(trueFile)))
+            {
+                PixelFormat format;
+
+                // Convert from Pfim's backend agnostic image format into GDI+'s image format
+                switch (image.Format)
+                {
+                    case Pfim.ImageFormat.Rgba32:
+                        format = PixelFormat.Format32bppArgb;
+                        break;
+                    default:
+                        // see the sample for more details
+                        throw new NotImplementedException();
+                }
+
+                // Pin pfim's data array so that it doesn't get reaped by GC, unnecessary
+                // in this snippet but useful technique if the data was going to be used in
+                // control like a picture box
+                var handle = GCHandle.Alloc(image.Data, GCHandleType.Pinned);
+                try
+                {
+                    var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+                    var bitmap = new Bitmap(image.Width, image.Height, image.Stride, format, data);
+                    return bitmap;
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+        }
+
         private static void GenerateMusicData(string pso2_binDir, string outputDirectory)
         {
             StringBuilder streamList = new StringBuilder();

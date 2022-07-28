@@ -50,6 +50,9 @@ namespace AquaExtras
         public static string lnAreaTemplateCommon = "stage/ln_area_template_common.ice"; //LPS files inside tell the game what layout models exist etc.
         public static string lnAreaTemplateCommonReboot = "stage/ln_area_template_common_reboot.ice"; //LPS files inside tell the game what layout models exist etc. for NGS. Only applicable for areas like Trainia, open worlds use a different system
 
+        //UI
+        public static string stampPath = "ui_stamp/ui_stamp_";
+
         //Out
         public static string animsEffectsOut = @"Animations and Effects\";
         public static string classicOut = @"Classic\";
