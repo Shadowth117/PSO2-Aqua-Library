@@ -696,9 +696,18 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         for (int i = 0; i < aqn->nodoList->Count; i++) 
         {
             AquaNode::NODO nodo = aqn->nodoList[i];
-            //All effect nodes need a parent. 
-            FbxNode* parentNode = (FbxNode*)convertedBones[nodo.parentId].ToPointer();
-            Matrix4x4 parentInvTfm = aqn->nodeList[nodo.parentId].GetInverseBindPoseMatrix();
+            FbxNode* parentNode;
+            Matrix4x4 parentInvTfm;
+            //Almost all effect nodes need a parent. 
+            if (nodo.parentId != -1)
+            {
+                parentNode = (FbxNode*)convertedBones[nodo.parentId].ToPointer();
+                parentInvTfm = aqn->nodeList[nodo.parentId].GetInverseBindPoseMatrix();
+            }
+            else {
+                parentNode = lRootNode;
+                parentInvTfm = Matrix4x4::Identity;
+            }
             
             FbxNode* fbxNode = CreateFbxNodeFromAqnNodo(nodo, parentInvTfm, lScene, lBindPose, includeMetadata);
             parentNode->AddChild(fbxNode);
