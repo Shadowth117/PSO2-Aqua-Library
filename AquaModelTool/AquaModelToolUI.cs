@@ -2957,7 +2957,25 @@ namespace AquaModelTool
             }
         }
 
-        private void convertAnimationToAQMToolStripMenuItem_Click_1(object sender, EventArgs e)
+        private void pSZTextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSZ text bin file",
+                Filter = "PSZ text bin Files (*.bin)|*.bin",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                //Read psz
+                foreach(var filename in openFileDialog.FileNames)
+                {
+                    PSZTextBin.DumpNameBin(filename);
+                }
+            }
+        }
+
+        private void convertAnimToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (var ctx = new Assimp.AssimpContext())
             {
@@ -2982,7 +3000,7 @@ namespace AquaModelTool
 
                     foreach (var file in openFileDialog.FileNames)
                     {
-                        ModelImporter.AssimpAQMConvert(file, false, true, scaleFactor);
+                        ModelImporter.AssimpAQMConvert(file, forceNoCharacterMetadataCheckBox.Checked, true, scaleFactor);
                     }
                 }
             }

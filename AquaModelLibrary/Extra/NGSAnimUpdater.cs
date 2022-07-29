@@ -207,6 +207,7 @@ namespace AquaModelLibrary
 
             if(nodeTree != null)
             {
+                nodeTree.mseg.nodeId = 0;
                 motion.motionKeys.Add(nodeTree);
             } else
             {

@@ -12,13 +12,18 @@ namespace AquaModelLibrary
 {
     public class ModelImporter
     {
-        public static void AssimpAQMConvert(string initialFilePath, bool playerExport, bool useScaleFrames, float scaleFactor)
+        public static void AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
         {
             float baseScale = scaleFactor;
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
+            bool playerExport = aiScene.RootNode.Children[0].Name.Contains("pl_");
+            if(playerExport && forceNoPlayerExport)
+            {
+                playerExport = false;
+            }
             string inputFilename = Path.GetFileNameWithoutExtension(initialFilePath);
             List<string> aqmNames = new List<string>(); //Leave off extensions in case we want this to be .trm later
             List<AquaMotion> aqmList = new List<AquaMotion>();
@@ -83,7 +88,7 @@ namespace AquaModelLibrary
                 aqm.moHeader.nodeCount = animatedNodeCount;
                 if (playerExport)
                 {
-                    aqm.moHeader.variant += 0x10;
+                    aqm.moHeader.variant += 0x10010;
                     aqm.moHeader.nodeCount++; //Add an extra for the nodeTreeFlag 'node'
                 }
                 aqm.moHeader.testString.SetString("test");
@@ -99,11 +104,11 @@ namespace AquaModelLibrary
                         continue;
                     }
 
-                    int id = GetNodeNumber(animNode.NodeName);
-
+                    int id;
+                    ParseNodeId(animNode.NodeName, out string finalName, out id);
                     var node = aqm.motionKeys[id] = new AquaMotion.KeyData();
 
-                    node.mseg.nodeName.SetString(animNode.NodeName.Split('#')[0]);
+                    node.mseg.nodeName.SetString(finalName);
                     node.mseg.nodeId = id;
                     node.mseg.nodeType = 2;
                     node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
@@ -117,22 +122,24 @@ namespace AquaModelLibrary
                         foreach (var pos in animNode.PositionKeys)
                         {
                             posKeys.vector4Keys.Add(new Vector4(pos.Value.X * baseScale, pos.Value.Y * baseScale, pos.Value.Z * baseScale, 0));
-
-                            //Account for first frame difference
-                            if (first)
+                            if(animNode.PositionKeys.Count > 1)
                             {
-                                posKeys.frameTimings.Add(1);
-                                first = false;
-                            }
-                            else
-                            {
-                                posKeys.frameTimings.Add((ushort)(pos.Time * 0x10));
+                                //Account for first frame difference
+                                if (first)
+                                {
+                                    posKeys.frameTimings.Add(1);
+                                    first = false;
+                                }
+                                else
+                                {
+                                    posKeys.frameTimings.Add((ushort)(pos.Time * 0x10));
+                                }
                             }
                             posKeys.keyCount++;
                         }
                         posKeys.frameTimings[posKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
-                        animEndFrame = Math.Max(animEndFrame, posKeys.keyCount);
+                        animEndFrame = Math.Max(animEndFrame, posKeys.frameTimings[posKeys.keyCount - 1] / 0x10);
                         node.keyData.Add(posKeys);
                     }
 
@@ -145,50 +152,54 @@ namespace AquaModelLibrary
                         foreach (var rot in animNode.RotationKeys)
                         {
                             rotKeys.vector4Keys.Add(new Vector4(rot.Value.X, rot.Value.Y, rot.Value.Z, rot.Value.W));
-
-                            //Account for first frame difference
-                            if (first)
+                            if (animNode.RotationKeys.Count > 1)
                             {
-                                rotKeys.frameTimings.Add(1);
-                                first = false;
-                            }
-                            else
-                            {
-                                rotKeys.frameTimings.Add((ushort)(rot.Time * 0x10));
+                                //Account for first frame difference
+                                if (first)
+                                {
+                                    rotKeys.frameTimings.Add(1);
+                                    first = false;
+                                }
+                                else
+                                {
+                                    rotKeys.frameTimings.Add((ushort)(rot.Time * 0x10));
+                                }
                             }
                             rotKeys.keyCount++;
                         }
                         rotKeys.frameTimings[rotKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
-                        animEndFrame = Math.Max(animEndFrame, rotKeys.keyCount);
+                        animEndFrame = Math.Max(animEndFrame, rotKeys.frameTimings[rotKeys.keyCount - 1] / 0x10);
                         node.keyData.Add(rotKeys);
                     }
 
                     if (animNode.HasScalingKeys)
                     {
                         AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
-                        sclKeys.keyType = 2;
-                        sclKeys.dataType = 3;
+                        sclKeys.keyType = 3;
+                        sclKeys.dataType = 1;
                         var first = true;
                         foreach (var scl in animNode.ScalingKeys)
                         {
                             sclKeys.vector4Keys.Add(new Vector4(scl.Value.X, scl.Value.Y, scl.Value.Z, 0));
-
-                            //Account for first frame difference
-                            if (first)
+                            if (animNode.ScalingKeys.Count > 1)
                             {
-                                sclKeys.frameTimings.Add(1);
-                                first = false;
-                            }
-                            else
-                            {
-                                sclKeys.frameTimings.Add((ushort)(scl.Time * 0x10));
+                                //Account for first frame difference
+                                if (first)
+                                {
+                                    sclKeys.frameTimings.Add(1);
+                                    first = false;
+                                }
+                                else
+                                {
+                                    sclKeys.frameTimings.Add((ushort)(scl.Time * 0x10));
+                                }
                             }
                             sclKeys.keyCount++;
                         }
                         sclKeys.frameTimings[sclKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
-                        animEndFrame = Math.Max(animEndFrame, sclKeys.keyCount);
+                        animEndFrame = Math.Max(animEndFrame, sclKeys.frameTimings[sclKeys.keyCount - 1] / 0x10);
                         node.keyData.Add(sclKeys);
                     }
                 }
@@ -198,7 +209,7 @@ namespace AquaModelLibrary
                 {
                     var node = aqm.motionKeys[aqm.motionKeys.Count - 1] = new AquaMotion.KeyData();
                     node.mseg.nodeName.SetString("__NodeTreeFlag__");
-                    node.mseg.nodeId = aqm.motionKeys.Count - 1;
+                    node.mseg.nodeId = 0;
                     node.mseg.nodeType = 0x10;
                     node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
 
@@ -283,9 +294,10 @@ namespace AquaModelLibrary
                     if (node == null)
                     {
                         node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
-
-                        node.mseg.nodeName.SetString(aiNode.Name);
-                        node.mseg.nodeId = aiPair.Key;
+                        int id;
+                        ParseNodeId(aiNode.Name, out string finalName, out id);
+                        node.mseg.nodeName.SetString(finalName);
+                        node.mseg.nodeId = id != -1 ? id : aiPair.Key;
                         node.mseg.nodeType = 2;
                         node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
 
@@ -316,7 +328,7 @@ namespace AquaModelLibrary
                         }
                     }
                 }
-
+                aqm.moHeader.endFrame = animEndFrame;
                 aqmList.Add(aqm);
             }
 
@@ -788,13 +800,15 @@ namespace AquaModelLibrary
             }
             else
             {
-                //Nodo nodes can't have nodo parents. Therefore, we skip anything below another nodo or nodes that aren't in the proper hierarchy.
-                if (aiNode.Parent != null && ParseNodeId(aiNode.Parent.Name, out string parentName, out int parNodeId) == true)
+                //Most nodos should have parents, but sometimes sega is crazy
+                int parNodeId = -1;
+                if (aiNode.Parent != null)
                 {
-                    if (aiNode.HasChildren)
-                    {
-                        Debug.WriteLine("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
-                    }
+                    ParseNodeId(aiNode.Parent.Name, out string parentName, out parNodeId);
+                }
+                //Nodo nodes can't have nodo parents. Therefore, we skip anything below another nodo or nodes that aren't in the proper hierarchy.
+                if (!aiNode.HasChildren)
+                {
                     AquaNode.NODO nodo = new AquaNode.NODO();
                     nodo.boneName.SetString(finalName);
                     nodo.animatedFlag = 1;
@@ -809,6 +823,9 @@ namespace AquaModelLibrary
                     nodo.eulRot = QuaternionToEuler(Quaternion.CreateFromRotationMatrix(localMat));
 
                     aqn.nodoList.Add(nodo);
+                } else
+                {
+                    Debug.WriteLine("Error: Effect nodes CANNOT have children. Add an id to the name to treat it as a standard node instead.");
                 }
             }
 

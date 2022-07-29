@@ -105,7 +105,7 @@ namespace AquaModelLibrary.AquaMethods
                     List<string> output = new List<string>();
                     output.Add(Path.GetFileName(inFilename));
                     output.Add("");
-                    output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(rel.magic))} {rel.REL0Size:X} {rel.REL0DataStart:X} {rel.padding0:X}");
+                    output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(rel.magic))} {rel.REL0Size:X} {rel.REL0DataStart:X} {rel.version:X}");
                     output.Add("");
                     output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(nof0.magic))} {nof0.NOF0Size:X} {nof0.NOF0EntryCount:X} {nof0.NOF0DataSizeStart:X}");
                     foreach (var entry in nof0.relAddresses)
@@ -297,6 +297,15 @@ namespace AquaModelLibrary.AquaMethods
             return ConvertStruct(ref str);
         }
 
+        public static string ReadCStringPSZ(BufferedStreamReader streamReader)
+        {
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x60)); //Shouldn't ever be more than 0x60... in theory
+            if(str.IndexOf(char.MinValue) == -1)
+            {
+                return str.Remove(str.IndexOf((char)0xA));
+            } 
+            return str.Remove(str.IndexOf(char.MinValue));
+        }
 
         public static string ReadCString(BufferedStreamReader streamReader)
         {
