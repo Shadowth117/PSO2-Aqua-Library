@@ -108,8 +108,11 @@
             this.boneFlagTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cMTTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSZTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSZEnemyZoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.pSZObjZoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pSZEnemyDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -191,7 +194,7 @@
             // exportFBXToolStripMenuItem
             // 
             this.exportFBXToolStripMenuItem.Name = "exportFBXToolStripMenuItem";
-            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.exportFBXToolStripMenuItem.Text = "Export FBX";
             this.exportFBXToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
             // 
@@ -201,7 +204,7 @@
             this.includeMetadataToolStripMenuItem.CheckOnClick = true;
             this.includeMetadataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.includeMetadataToolStripMenuItem.Name = "includeMetadataToolStripMenuItem";
-            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.includeMetadataToolStripMenuItem.Text = "Include Metadata";
             this.includeMetadataToolStripMenuItem.ToolTipText = "Leave this on for modding PSO2/NGS. Determines if the data appended in #s and sim" +
     "ilar elements should be added to the final bone, mesh, and material names.";
@@ -720,7 +723,10 @@
             this.debug2ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.boneFlagTestToolStripMenuItem,
             this.cMTTestToolStripMenuItem,
-            this.pSZTextToolStripMenuItem});
+            this.pSZTextToolStripMenuItem,
+            this.pSZEnemyZoneToolStripMenuItem,
+            this.pSZObjZoneToolStripMenuItem,
+            this.pSZEnemyDataToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -728,23 +734,30 @@
             // boneFlagTestToolStripMenuItem
             // 
             this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
-            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
             this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
             // 
             // cMTTestToolStripMenuItem
             // 
             this.cMTTestToolStripMenuItem.Name = "cMTTestToolStripMenuItem";
-            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.cMTTestToolStripMenuItem.Text = "CMTTest";
             this.cMTTestToolStripMenuItem.Click += new System.EventHandler(this.cMTTestToolStripMenuItem_Click);
             // 
             // pSZTextToolStripMenuItem
             // 
             this.pSZTextToolStripMenuItem.Name = "pSZTextToolStripMenuItem";
-            this.pSZTextToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.pSZTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZTextToolStripMenuItem.Text = "PSZText";
             this.pSZTextToolStripMenuItem.Click += new System.EventHandler(this.pSZTextToolStripMenuItem_Click);
+            // 
+            // pSZEnemyZoneToolStripMenuItem
+            // 
+            this.pSZEnemyZoneToolStripMenuItem.Name = "pSZEnemyZoneToolStripMenuItem";
+            this.pSZEnemyZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.pSZEnemyZoneToolStripMenuItem.Text = "PSZEnemyZone";
+            this.pSZEnemyZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyZoneToolStripMenuItem_Click);
             // 
             // filePanel
             // 
@@ -763,6 +776,20 @@
             this.splitter1.Size = new System.Drawing.Size(3, 253);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
+            // 
+            // pSZObjZoneToolStripMenuItem
+            // 
+            this.pSZObjZoneToolStripMenuItem.Name = "pSZObjZoneToolStripMenuItem";
+            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.pSZObjZoneToolStripMenuItem.Text = "PSZObjZone";
+            this.pSZObjZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZObjZoneToolStripMenuItem_Click);
+            // 
+            // pSZEnemyDataToolStripMenuItem
+            // 
+            this.pSZEnemyDataToolStripMenuItem.Name = "pSZEnemyDataToolStripMenuItem";
+            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.pSZEnemyDataToolStripMenuItem.Text = "PSZEnemyData";
+            this.pSZEnemyDataToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyDataToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -867,6 +894,9 @@
         private System.Windows.Forms.ToolStripMenuItem pSZTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertAnimToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem forceNoCharacterMetadataCheckBox;
+        private System.Windows.Forms.ToolStripMenuItem pSZEnemyZoneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pSZObjZoneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pSZEnemyDataToolStripMenuItem;
     }
 }
 

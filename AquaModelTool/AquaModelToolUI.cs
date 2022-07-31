@@ -22,6 +22,7 @@ using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaStructs.ShaderPresetDefaults;
 using AquaModelLibrary.AquaMethods;
+using AquaModelLibrary.Zero;
 
 namespace AquaModelTool
 {
@@ -3002,6 +3003,217 @@ namespace AquaModelTool
                     {
                         ModelImporter.AssimpAQMConvert(file, forceNoCharacterMetadataCheckBox.Checked, true, scaleFactor);
                     }
+                }
+            }
+        }
+
+        private void pSZEnemyZoneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog;
+            openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select enemy_zone_*.rel(s)",
+                Filter = "(enemy_zone_*.rel)|enemy_zone_*.rel",
+                Multiselect = true
+            };
+            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                Dictionary<int, string> itemNames = new Dictionary<int, string>();
+                OpenFileDialog openFileDialog2;
+                openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select ids file",
+                    Filter = "(*.txt)|*.txt",
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    var txt = File.ReadAllLines(openFileDialog2.FileName);
+                    for(int i = 0; i < txt.Length; i++)
+                    {
+                        var line = txt[i];
+
+                        if(line == "")
+                        {
+                            continue;
+                        }
+                        if (line[0] < '0' || line[0] > '9')
+                        {
+                            continue;
+                        }
+                        var separatorArea = line.IndexOf(' ');
+                        if (line.Length > separatorArea + 1)
+                        {
+                            string startNum = line.Substring(0, separatorArea);
+                            string insertNumLate = separatorArea > 7 ? "" : "00";
+                            int finalNum = Convert.ToInt32("0x" + startNum + insertNumLate, 16);
+
+                            itemNames.Add(finalNum, line.Substring(separatorArea + 1, line.Length - separatorArea - 1));
+                        }
+                    }
+                }
+
+                foreach (var fname in openFileDialog.FileNames)
+                {
+                    var drops = new EnemyZoneDrops(File.ReadAllBytes(fname));
+                    List<string> dropData = new List<string>();
+                    dropData.Add("Item Name,Item Id,Rate");
+                    for(int i = 0; i < drops.itemCount; i++)
+                    {
+                        string itemName;
+                        itemNames.TryGetValue(drops.itemIds[i], out itemName);
+
+                        dropData.Add($"{itemName},{drops.itemIds[i]:X8},1/{drops.rates[i]}");
+                    }
+
+                    File.WriteAllLines(fname + ".csv", dropData);
+                }
+            }
+        }
+
+        private void pSZObjZoneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog;
+            openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select obj_zone_*.rel(s)",
+                Filter = "(obj_zone_*.rel)|obj_zone_*.rel",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                Dictionary<int, string> itemNames = new Dictionary<int, string>();
+                OpenFileDialog openFileDialog2;
+                openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select ids file",
+                    Filter = "(*.txt)|*.txt",
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    var txt = File.ReadAllLines(openFileDialog2.FileName);
+                    for (int i = 0; i < txt.Length; i++)
+                    {
+                        var line = txt[i];
+
+                        if (line == "")
+                        {
+                            continue;
+                        }
+                        if (line[0] < '0' || line[0] > '9')
+                        {
+                            continue;
+                        }
+                        var separatorArea = line.IndexOf(' ');
+                        if (line.Length > separatorArea + 1)
+                        {
+                            string startNum = line.Substring(0, separatorArea);
+                            string insertNumLate = separatorArea > 7 ? "" : "00";
+                            int finalNum = Convert.ToInt32("0x" + startNum + insertNumLate, 16);
+
+                            itemNames.Add(finalNum, line.Substring(separatorArea + 1, line.Length - separatorArea - 1));
+                        }
+                    }
+                }
+
+                foreach (var fname in openFileDialog.FileNames)
+                {
+                    var drops = new ObjZoneDrops(File.ReadAllBytes(fname));
+                    List<string> dropData = new List<string>();
+                    dropData.Add("Item Name,Item Id,Rate");
+                    for (int i = 0; i < drops.itemCount; i++)
+                    {
+                        string itemName;
+                        itemNames.TryGetValue(drops.itemIds[i], out itemName);
+
+                        dropData.Add($"{itemName},{drops.itemIds[i]:X8},1/{drops.rates[i]}");
+                    }
+
+                    File.WriteAllLines(fname + ".csv", dropData);
+                }
+            }
+        }
+
+        private void pSZEnemyDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog;
+            openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select enemy_*.rel(s)",
+                Filter = "(enemy_*.rel)|enemy_*.rel",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                Dictionary<int, string> itemNames = new Dictionary<int, string>();
+                OpenFileDialog openFileDialog2;
+                openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select ids file",
+                    Filter = "(*.txt)|*.txt",
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    var txt = File.ReadAllLines(openFileDialog2.FileName);
+                    for (int i = 0; i < txt.Length; i++)
+                    {
+                        var line = txt[i];
+
+                        if (line == "")
+                        {
+                            continue;
+                        }
+                        if (line[0] < '0' || line[0] > '9')
+                        {
+                            continue;
+                        }
+                        var separatorArea = line.IndexOf(' ');
+                        if (line.Length > separatorArea + 1)
+                        {
+                            string startNum = line.Substring(0, separatorArea);
+                            string insertNumLate = separatorArea > 7 ? "" : "00";
+                            int finalNum = Convert.ToInt32("0x" + startNum + insertNumLate, 16);
+
+                            itemNames.Add(finalNum, line.Substring(separatorArea + 1, line.Length - separatorArea - 1));
+                        }
+                    }
+                }
+
+                foreach (var fname in openFileDialog.FileNames)
+                {
+                    var drops = new EnemyDrops(File.ReadAllBytes(fname));
+                    List<string> dropData = new List<string>();
+                    dropData.Add("Item0 Name,Item0 Id,Item1 Name,Item1 Id,Item2 Name,Item2 Id,Item3 Name,Item3 Id,Rate0,Rate1,Rate2,Rate3");
+                    for (int i = 0; i < drops.enemyDropSets.Count; i++)
+                    {
+                        string item0Name;
+                        itemNames.TryGetValue(drops.enemyDropSets[i].item0Id, out item0Name);
+                        string item1Name;
+                        itemNames.TryGetValue(drops.enemyDropSets[i].item1Id, out item1Name);
+                        string item2Name;
+                        itemNames.TryGetValue(drops.enemyDropSets[i].item2Id, out item2Name);
+                        string item3Name;
+                        itemNames.TryGetValue(drops.enemyDropSets[i].item3Id, out item3Name);
+
+                        dropData.Add($"{item0Name},{drops.enemyDropSets[i].item0Id:X8},{item1Name},{drops.enemyDropSets[i].item1Id:X8},{item2Name},{drops.enemyDropSets[i].item2Id:X8},{item3Name},{drops.enemyDropSets[i].item3Id:X8}," +
+                            $"1/{drops.enemyDropSets[i].item0Rate},1/{drops.enemyDropSets[i].item1Rate},1/{drops.enemyDropSets[i].item2Rate},1/{drops.enemyDropSets[i].item3Rate}");
+                    }
+                    dropData.Add("\nId,Item0 Name,Item0 Id,Item1 Name,Item1 Id,Item2 Name,Item2 Id,Item3 Name,Item3 Id,u16_14,u16_16,u16_18,u16_1A,u16_1C,u16_1E,u16_20,u16_22");
+                    for (int i = 0; i < drops.enemyData.Count; i++)
+                    {
+                        string item0Name;
+                        itemNames.TryGetValue(drops.enemyData[i].item0Id, out item0Name);
+                        string item1Name;
+                        itemNames.TryGetValue(drops.enemyData[i].item1Id, out item1Name);
+                        string item2Name;
+                        itemNames.TryGetValue(drops.enemyData[i].item2Id, out item2Name);
+                        string item3Name;
+                        itemNames.TryGetValue(drops.enemyData[i].item3Id, out item3Name);
+
+                        dropData.Add($"{item0Name},{drops.enemyData[i].item0Id:X8},{item1Name},{drops.enemyData[i].item1Id:X8},{item2Name},{drops.enemyData[i].item2Id:X8},{item3Name},{drops.enemyData[i].item3Id:X8}," +
+                            $"{drops.enemyData[i].u16_14},{drops.enemyData[i].u16_16},{drops.enemyData[i].u16_18},{drops.enemyData[i].u16_1A},{drops.enemyData[i].u16_1C},{drops.enemyData[i].u16_1E},{drops.enemyData[i].u16_20},{drops.enemyData[i].u16_22}");
+                    }
+
+                    File.WriteAllLines(fname + ".csv", dropData);
                 }
             }
         }

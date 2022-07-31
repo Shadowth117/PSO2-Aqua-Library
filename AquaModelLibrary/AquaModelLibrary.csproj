@@ -251,6 +251,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\AquaUtilData.cs" />
     <Compile Include="Utility\ColorUtility.cs" />
+    <Compile Include="Zero\EnemyDrops.cs" />
+    <Compile Include="Zero\EnemyZoneDrops.cs" />
+    <Compile Include="Zero\ObjZoneDrops.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
