@@ -2564,7 +2564,6 @@ namespace AquaModelTool
                     sb.AppendLine($"===");
                     sb.AppendLine($"");
                 }
-
                 File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}.txt", sb.ToString());
             }
         }

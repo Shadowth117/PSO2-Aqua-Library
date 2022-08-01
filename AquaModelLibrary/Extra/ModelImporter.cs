@@ -981,7 +981,7 @@ namespace AquaModelLibrary
         {
             if (name.Substring(name.Length - 5, 5) == "_mesh")
             {
-                name = name.Substring(name.Length - 5);
+                name = name.Substring(0, name.Length - 5);
             }
             List<int> ids = new List<int>();
             var split = name.Split('#');
