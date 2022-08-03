@@ -2,6 +2,7 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ namespace AquaModelLibrary.AquaMethods
 
         public static CharacterMakingTemplate ReadCMT(byte[] file)
         {
+            File.WriteAllBytes("C:\\Cmt.cmt", file);
             using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
@@ -79,7 +81,15 @@ namespace AquaModelLibrary.AquaMethods
                 streamReader.Seek(cmt.cmtTable.addresses[i] + offset, SeekOrigin.Begin);
                 for (int j = 0; j < cmt.cmtTable.counts[i]; j++)
                 {
-                    dict.Add(streamReader.Read<int>(), streamReader.Read<int>());
+                    var id = streamReader.Read<int>();
+                    var value = streamReader.Read<int>();
+                    if(!dict.ContainsKey(id))
+                    {
+                        dict.Add(id, value);
+                    } else
+                    {
+                        Debug.WriteLine($"Duplicate entry for: {id}. Value was: {value:X}");
+                    }
                 }
 
                 cmt.cmtData.Add(dict);
