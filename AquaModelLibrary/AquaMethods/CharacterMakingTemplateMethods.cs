@@ -24,7 +24,6 @@ namespace AquaModelLibrary.AquaMethods
 
         public static CharacterMakingTemplate ReadCMT(byte[] file)
         {
-            File.WriteAllBytes("C:\\Cmt.cmt", file);
             using (Stream stream = (Stream)new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {

@@ -485,6 +485,17 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         int boneCount = System::Math::Min(aqm->motionKeys->Count, convertedBones->Count);
         for (int i = 0; i < boneCount; i++)
         {
+            FbxNode* bone = ((FbxNode*)convertedBones[i].ToPointer());
+            FbxAnimCurve* curveTX = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+            FbxAnimCurve* curveTY = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+            FbxAnimCurve* curveTZ = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+            FbxAnimCurve* curveRX = bone->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+            FbxAnimCurve* curveRY = bone->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+            FbxAnimCurve* curveRZ = bone->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+            FbxAnimCurve* curveSX = bone->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+            FbxAnimCurve* curveSY = bone->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+            FbxAnimCurve* curveSZ = bone->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+
             for (int keySetId = 0; keySetId < aqm->motionKeys[i]->keyData->Count; keySetId++)
             {
                 AquaMotion::MKEY^ keySet = aqm->motionKeys[i]->keyData[keySetId];
@@ -495,21 +506,39 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 {
                     continue;
                 }
-                FbxNode* bone = ((FbxNode*)convertedBones[i].ToPointer());
-                FbxAnimCurve* curveTX;
-                FbxAnimCurve* curveTY;
-                FbxAnimCurve* curveTZ;
-                FbxAnimCurve* curveRX;
-                FbxAnimCurve* curveRY;
-                FbxAnimCurve* curveRZ;
-                FbxAnimCurve* curveSX;
-                FbxAnimCurve* curveSY;
-                FbxAnimCurve* curveSZ;
-                for (int t = 0; t < keySet->frameTimings->Count; t++)
+
+                //Open keys for modification
+                switch (keySet->keyType)
+                {
+                    case 1:
+                        curveTX->KeyModifyBegin();
+                        curveTY->KeyModifyBegin();
+                        curveTZ->KeyModifyBegin();
+                        break;
+                    case 2:
+                        curveRX->KeyModifyBegin();
+                        curveRY->KeyModifyBegin();
+                        curveRZ->KeyModifyBegin();
+                        break;
+                    case 3:
+                        curveSX->KeyModifyBegin();
+                        curveSY->KeyModifyBegin();
+                        curveSZ->KeyModifyBegin();
+                        break;
+                }
+
+                //Set keys
+                for (int t = 0; t < keySet->vector4Keys->Count; t++)
                 {
                     // Set animation time
                     FbxTime lTime;
-                    lTime.SetFrame(keySet->frameTimings[t] / 0x10);
+                    if (keySet->frameTimings->Count > 0)
+                    {
+                        lTime.SetFrame(keySet->frameTimings[t] / 0x10);
+                    }
+                    else {
+                        lTime.SetFrame(0);
+                    }
                     System::Numerics::Vector4 netVec4 = keySet->vector4Keys[t]; //We can expect all transform types to use this type of keydata
 
                     FbxVector4 lcl_rotation;
@@ -519,78 +548,68 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                     switch (keySet->keyType)
                     {
                         case 1:
-                            curveTX = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
-                            curveTY = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-                            curveTZ = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-                            curveTX->KeyModifyBegin();
                             lKeyIndex = curveTX->KeyAdd(lTime);
                             curveTX->KeySetValue(lKeyIndex, netVec4.X);
                             curveTX->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveTX->KeyModifyEnd();
 
-                            curveTY->KeyModifyBegin();
                             lKeyIndex = curveTY->KeyAdd(lTime);
                             curveTY->KeySetValue(lKeyIndex, netVec4.Y);
                             curveTY->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveTY->KeyModifyEnd();
 
-                            curveTZ->KeyModifyBegin();
                             lKeyIndex = curveTZ->KeyAdd(lTime);
                             curveTZ->KeySetValue(lKeyIndex, netVec4.Z);
                             curveTZ->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveTZ->KeyModifyEnd();
                             break;
                         case 2:
-                            curveRX = bone->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
-                            curveRY = bone->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-                            curveRZ = bone->LclRotation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
                             lcl_quat = FbxQuaternion(netVec4.X, netVec4.Y, netVec4.Z, netVec4.W);
                             lcl_rotation.SetXYZ(lcl_quat);
 
-                            curveRX->KeyModifyBegin();
                             lKeyIndex = curveRX->KeyAdd(lTime);
                             curveRX->KeySetValue(lKeyIndex, lcl_rotation[0]);
                             curveRX->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveRX->KeyModifyEnd();
 
-                            curveRY->KeyModifyBegin();
                             lKeyIndex = curveRY->KeyAdd(lTime);
                             curveRY->KeySetValue(lKeyIndex, lcl_rotation[1]);
                             curveRY->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveRY->KeyModifyEnd();
 
-                            curveRZ->KeyModifyBegin();
                             lKeyIndex = curveRZ->KeyAdd(lTime);
                             curveRZ->KeySetValue(lKeyIndex, lcl_rotation[2]);
                             curveRZ->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveRZ->KeyModifyEnd();
                             break;
                         case 3:
-                            curveSX = bone->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
-                            curveSY = bone->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-                            curveSZ = bone->LclScaling.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-                            curveSX->KeyModifyBegin();
                             lKeyIndex = curveSX->KeyAdd(lTime);
                             curveSX->KeySetValue(lKeyIndex, netVec4.X);
                             curveSX->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveSX->KeyModifyEnd();
 
-                            curveSY->KeyModifyBegin();
                             lKeyIndex = curveSY->KeyAdd(lTime);
                             curveSY->KeySetValue(lKeyIndex, netVec4.Y);
                             curveSY->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveSY->KeyModifyEnd();
 
-                            curveSZ->KeyModifyBegin();
                             lKeyIndex = curveSZ->KeyAdd(lTime);
                             curveSZ->KeySetValue(lKeyIndex, netVec4.Z);
                             curveSZ->KeySetInterpolation(lKeyIndex, FbxAnimCurveDef::eInterpolationLinear);
-                            curveSZ->KeyModifyEnd();
                             break;
                     }
+                }
+
+                //End Modification
+                switch (keySet->keyType)
+                {
+                    case 1:
+                        curveTX->KeyModifyEnd();
+                        curveTY->KeyModifyEnd();
+                        curveTZ->KeyModifyEnd();
+                        break;
+                    case 2:
+                        curveRX->KeyModifyEnd();
+                        curveRY->KeyModifyEnd();
+                        curveRZ->KeyModifyEnd();
+                        break;
+                    case 3:
+                        curveSX->KeyModifyEnd();
+                        curveSY->KeyModifyEnd();
+                        curveSZ->KeyModifyEnd();
+                        break;
                 }
             }
         }
@@ -731,6 +750,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             lScene->GetGlobalSettings().SetTimeMode(FbxTime::EMode::eFrames30);
             for (int i = 0; i < aqmList->Count; i++)
             {
+                //aqmList[i]->PrepareScalingForExport(aqn);
                 CreateAnimationTakeFromAquaMotion(lScene, convertedBones, aqmList[i], aqmNameList[i]);
             }
         }

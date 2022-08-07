@@ -135,6 +135,93 @@ namespace AquaModelLibrary
             public List<byte> byteKeys = new List<byte>();   //0xF2. Only observed in Alpha PSO2 animations. Appear to be int arrays rendered in bytes... for some reason.
                                                              //Also uses the designator for int keys in newer iterations. Combine every 4 to convert to an int array.
             public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
+
+            //Expects only to be used on a populated MKEY with vector4Keys.
+            public Vector4 GetLinearInterpolatedVec4Key(double time)
+            {
+                if (frameTimings.Count == 0 || time == frameTimings[0] || vector4Keys.Count == 1)
+                {
+                    return vector4Keys[0];
+                }
+                if (time > frameTimings[frameTimings.Count - 1] || time < 0)
+                {
+                    throw new System.Exception("Time out of range");
+                }
+
+                //Get high and low times
+                Vector4 lowValue = vector4Keys[0];
+                int lowTime = 0;
+                Vector4 highValue = vector4Keys[vector4Keys.Count - 1];
+                int highTime = frameTimings[frameTimings.Count - 1];
+                for(int i = 0; i < frameTimings.Count; i++)
+                {
+                    var frameTime = frameTimings[i];
+                    if(frameTime <= time)
+                    {
+                        lowTime = frameTime;
+                        lowValue = vector4Keys[i];
+                    }
+                    if(frameTime >= time)
+                    {
+                        highTime = frameTime;
+                        highValue = vector4Keys[i];
+                    }
+                }
+                if(lowValue == highValue)
+                {
+                    return lowValue;
+                }
+
+                //Interpolate based on results
+                time /= 0x10;
+                highTime /= 0x10;
+                lowTime /= 0x10;
+                double ratio = (time - lowTime) / (highTime - lowTime);
+                return Vector4.Lerp(lowValue, highValue, (float)ratio);
+            }
+
+            public void CreateVec4KeysAtTimes(List<ushort> timesToAdd)
+            {
+                int t = 0;
+                int timings = frameTimings.Count;
+                for (int i = 0; i < timings; i++)
+                {
+                    if(t >= timesToAdd.Count)
+                    {
+                        break;
+                    }
+                    //Don't add if it's there already
+                    if (frameTimings[i] == timesToAdd[t])
+                    {
+                        continue;
+                        t++;
+                    }
+
+                    //Add our missing frames when we reach the first frame that exists after them
+                    if (frameTimings[i] > timesToAdd[t])
+                    {
+                        var vec4 = GetLinearInterpolatedVec4Key(timesToAdd[t] / 0x10);
+                        vector4Keys.Insert(i, vec4);
+                        frameTimings.Insert(i, timesToAdd[t]);
+                        t++;
+                        timings++;
+                    }
+                }
+            }
+
+            public void RemoveParentScaleInfluenceAtTime(int time, Vector4 value)
+            {
+                for (int i = 0; i < frameTimings.Count; i++)
+                {
+                    if (frameTimings[i] == time)
+                    {
+                        var vec4 = vector4Keys[i];
+                        vec4 /= value;
+                        vector4Keys[i] = vec4;
+                        break;
+                    }
+                }
+            }
         }
 
         public class KeyData
@@ -155,6 +242,18 @@ namespace AquaModelLibrary
             //Node Tree Flag - Special subsection of data for player animations with an unknown purpose. Not necessary to include, but can be filled
             //with somewhat valid data if the user wishes
             //Pos, Rot data
+            public MKEY GetMKEYofType(int type)
+            {
+                for(int i = 0; i < keyData.Count; i++)
+                {
+                    if (keyData[i].keyType == type)
+                    {
+                        return keyData[i];
+                    }
+                }
+
+                return null;
+            }
         }
 
         public static int GetKeyDataType(int keyType)
@@ -198,6 +297,56 @@ namespace AquaModelLibrary
                     System.Console.WriteLine($"Unknown key type: {keyType}. Returning 1");
                     return 0x1;
             }
+        }
+
+        //Converts scale keys to the more typical absolute scaling so they can be edited in a nice way externally.
+        public void PrepareScalingForExport(AquaNode aqn)
+        {
+            int boneCount = System.Math.Min(motionKeys.Count, aqn.nodeList.Count);
+            for (int i = 0; i < boneCount; i++)
+            {
+                var node = aqn.nodeList[i];
+                if (node.parentId >= 0)
+                {
+                    var nodeScale = motionKeys[i].GetMKEYofType(3);
+                    var parentNodeScale = motionKeys[node.parentId].GetMKEYofType(3);
+                    if (nodeScale == null)
+                    {
+                        continue;
+                    }
+
+                    //Fix up the keyset in case there's only one key
+                    //Normally, there's no frametimings at all with single keys, so this simplifies the next part
+                    if (parentNodeScale.frameTimings.Count > 1 && nodeScale.frameTimings.Count < 2)
+                    {
+                        nodeScale.frameTimings.Clear();
+                        nodeScale.frameTimings.Add(0x1);
+                        nodeScale.frameTimings.Add((ushort)(moHeader.endFrame * 0x10 + 0x2));
+                        nodeScale.vector4Keys.Add(nodeScale.vector4Keys[0]); //If there's scale, there should always be at least one key for it
+                    }
+
+                    //Create keyframes for each parent key so we can cancel them all
+                    List<ushort> timingsToAdd = new List<ushort>();
+                    for (int t = 0; t < parentNodeScale.frameTimings.Count; t++)
+                    {
+                        if (!nodeScale.frameTimings.Contains(parentNodeScale.frameTimings[t]))
+                        {
+                            timingsToAdd.Add(parentNodeScale.frameTimings[t]);
+                        }
+                    }
+                    nodeScale.CreateVec4KeysAtTimes(timingsToAdd);
+
+                    //Get rid of parental influence
+                    for (int t = 0; t < nodeScale.frameTimings.Count; t++)
+                    {
+                        var currentTime = nodeScale.frameTimings[t];
+                        var value = parentNodeScale.GetLinearInterpolatedVec4Key(currentTime);
+
+                        nodeScale.RemoveParentScaleInfluenceAtTime(currentTime, value);
+                    }
+                }
+            }
+
         }
 
     }

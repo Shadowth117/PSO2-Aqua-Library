@@ -2420,7 +2420,7 @@ namespace AquaModelLibrary
             mate.matName.SetString(mat.matName);
 
             //Set up SHAD
-            string key = shad.pixelShader.GetString() + " " + shad.vertexShader.GetString();
+            string key = mat.shaderNames[0] + " " + mat.shaderNames[1];
             shad.pixelShader.SetString(mat.shaderNames[0]);
             shad.vertexShader.SetString(mat.shaderNames[1]);
 

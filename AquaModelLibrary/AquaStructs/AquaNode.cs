@@ -164,5 +164,17 @@ namespace AquaModelLibrary
                 return matrix;
             }
         }
+
+        public Dictionary<int, int> GetNodeToParentIdDict()
+        {
+            Dictionary<int, int> dict = new Dictionary<int, int>();
+            for(int i = 0; i < nodeList.Count; i++)
+            {
+                var node = nodeList[i];
+                dict.Add(i, node.parentId);
+            }
+
+            return dict;
+        }
     }
 }

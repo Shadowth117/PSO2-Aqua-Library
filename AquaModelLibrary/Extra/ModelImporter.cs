@@ -181,7 +181,24 @@ namespace AquaModelLibrary
                         var first = true;
                         foreach (var scl in animNode.ScalingKeys)
                         {
-                            sclKeys.vector4Keys.Add(new Vector4(scl.Value.X, scl.Value.Y, scl.Value.Z, 0));
+                            var sclKey = new Vector4(scl.Value.X, scl.Value.Y, scl.Value.Z, 0);
+                            if (float.IsNaN(sclKey.X))
+                            {
+                                sclKey.X = 1.0f;
+                            }
+                            if (float.IsNaN(sclKey.Y))
+                            {
+                                sclKey.Y = 1.0f;
+                            }
+                            if (float.IsNaN(sclKey.Z))
+                            {
+                                sclKey.Z = 1.0f;
+                            }
+                            if (float.IsNaN(sclKey.W))
+                            {
+                                sclKey.W = 0f;
+                            }
+                            sclKeys.vector4Keys.Add(sclKey);
                             if (animNode.ScalingKeys.Count > 1)
                             {
                                 //Account for first frame difference
@@ -287,6 +304,7 @@ namespace AquaModelLibrary
                 }
 
                 //Sanity check
+                Dictionary<int, int> ids = new Dictionary<int, int>();
                 foreach (var aiPair in aiNodes)
                 {
                     var node = aqm.motionKeys[aiPair.Key];
@@ -294,8 +312,13 @@ namespace AquaModelLibrary
                     if (node == null)
                     {
                         node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
-                        int id;
+                        int id, parId;
                         ParseNodeId(aiNode.Name, out string finalName, out id);
+                        if(aiNode.Parent != null)
+                        {
+                            ParseNodeId(aiNode.Parent.Name, out string parName, out parId);
+                            ids.Add(id, parId);
+                        }
                         node.mseg.nodeName.SetString(finalName);
                         node.mseg.nodeId = id != -1 ? id : aiPair.Key;
                         node.mseg.nodeType = 2;
@@ -328,6 +351,30 @@ namespace AquaModelLibrary
                         }
                     }
                 }
+                /*
+                if(useScaleFrames)
+                {
+                    for (int k = 0; k < aqm.motionKeys.Count; k++)
+                    {
+                        if(ids.ContainsKey(k) && ids[k] >= 0)
+                        {
+                            var scaleKeys = aqm.motionKeys[k].GetMKEYofType(3);
+                            var parScaleKeys = aqm.motionKeys[ids[k]].GetMKEYofType(3);
+
+                            if(scaleKeys == null || parScaleKeys == null)
+                            {
+                                continue;
+                            }
+
+                            for(int t = 0; t < scaleKeys.vector4Keys.Count; t++)
+                            {
+                                var time = scaleKeys.frameTimings.Count > 0 ? scaleKeys.frameTimings[t] : 1;
+                                scaleKeys.vector4Keys[t] = scaleKeys.vector4Keys[t] * parScaleKeys.GetLinearInterpolatedVec4Key(time);
+                            }
+                        }
+                    }
+                }*/
+
                 aqm.moHeader.endFrame = animEndFrame;
                 aqmList.Add(aqm);
             }
@@ -359,6 +406,18 @@ namespace AquaModelLibrary
                 else
                 {
                     Matrix4x4.Invert(GetMat4FromAssimpMat4(aiNode.Transform), out Matrix4x4 mat4);
+                    if(float.IsNaN(mat4.M11))
+                    {
+                        mat4.M11 = 1.0f;
+                    }
+                    if (float.IsNaN(mat4.M22))
+                    {
+                        mat4.M22 = 1.0f;
+                    }
+                    if (float.IsNaN(mat4.M33))
+                    {
+                        mat4.M33 = 1.0f;
+                    }
                     sclKeys.vector4Keys = new List<Vector4>() { new Vector4(mat4.M11, mat4.M22, mat4.M33, 0) };
                 }
                 node.keyData.Add(sclKeys);

@@ -204,8 +204,8 @@ namespace CMXPatcher
                 Character_Making_File_Tool.WIPBox box = new("Please wait while part files are copied. \nThis may take a moment");
                 box.Show();
                 box.CenterWindowOnScreen();
-                //try
-                //{
+                try
+                {
                     if (patcher.JailBreakBenchmark(benchmarkPso2BinSelect.FileName))
                     {
                         box.Hide();
@@ -218,14 +218,14 @@ namespace CMXPatcher
                         MessageBox.Show("Benchmark Jailbreak failed.");
                     }
 
-                /*}
+                }
                 catch(Exception exc)
                 {
                     box.Hide();
                     box.Close();
                     File.WriteAllText(settingsPath + "log.txt", exc.ToString());
                     MessageBox.Show("Exception occured trying to jailbreak benchmark. See log.txt for details.");
-                }*/
+                }
             } else
             {
                 MessageBox.Show("Please select a valid character creator benchmark pso2_bin path!");
