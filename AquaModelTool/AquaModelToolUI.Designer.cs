@@ -256,7 +256,7 @@
             // 
             this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Name = "importNGSShaderDetailsAndExtrasToolStripMenuItem";
             this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Text = "Import NGS Shader Details and Extras";
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Text = "Import NGS Shader Details and Extras from another model";
             this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Click += new System.EventHandler(this.importNGSShaderDetailsAndExtrasToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
