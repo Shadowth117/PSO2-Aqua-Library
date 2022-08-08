@@ -309,16 +309,17 @@ namespace AquaModelLibrary
                 {
                     var node = aqm.motionKeys[aiPair.Key];
                     var aiNode = aiPair.Value;
+                    int id, parId;
+                    ParseNodeId(aiNode.Name, out string finalName, out id);
+                    if (aiNode.Parent != null)
+                    {
+                        ParseNodeId(aiNode.Parent.Name, out string parName, out parId);
+                        ids.Add(id, parId);
+                    }
+
                     if (node == null)
                     {
                         node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
-                        int id, parId;
-                        ParseNodeId(aiNode.Name, out string finalName, out id);
-                        if(aiNode.Parent != null)
-                        {
-                            ParseNodeId(aiNode.Parent.Name, out string parName, out parId);
-                            ids.Add(id, parId);
-                        }
                         node.mseg.nodeName.SetString(finalName);
                         node.mseg.nodeId = id != -1 ? id : aiPair.Key;
                         node.mseg.nodeType = 2;
@@ -351,7 +352,7 @@ namespace AquaModelLibrary
                         }
                     }
                 }
-                /*
+                
                 if(useScaleFrames)
                 {
                     for (int k = 0; k < aqm.motionKeys.Count; k++)
@@ -373,7 +374,7 @@ namespace AquaModelLibrary
                             }
                         }
                     }
-                }*/
+                }
 
                 aqm.moHeader.endFrame = animEndFrame;
                 aqmList.Add(aqm);
