@@ -150,7 +150,7 @@ namespace AquaModelLibrary
 
                 //Get high and low times
                 Vector4 lowValue = vector4Keys[0];
-                int lowTime = 0;
+                int lowTime = 1;
                 Vector4 highValue = vector4Keys[vector4Keys.Count - 1];
                 int highTime = frameTimings[frameTimings.Count - 1];
                 for(int i = 0; i < frameTimings.Count; i++)
@@ -167,9 +167,12 @@ namespace AquaModelLibrary
                         highValue = vector4Keys[i];
                     }
                 }
-                if(lowValue == highValue)
+                if(lowTime == time)
                 {
                     return lowValue;
+                } else if(highTime == time)
+                {
+                    return highValue;
                 }
 
                 //Interpolate based on results
@@ -177,6 +180,10 @@ namespace AquaModelLibrary
                 highTime /= 0x10;
                 lowTime /= 0x10;
                 double ratio = (time - lowTime) / (highTime - lowTime);
+                if(double.IsInfinity(ratio) || double.IsNaN(ratio) || ratio < 0 || ratio == 0)
+                {
+                    var a = 0;
+                }
                 return Vector4.Lerp(lowValue, highValue, (float)ratio);
             }
 
@@ -335,6 +342,17 @@ namespace AquaModelLibrary
                         }
                     }
                     nodeScale.CreateVec4KeysAtTimes(timingsToAdd);
+                }
+            }
+
+            //Loop backwards through and use the relative scaling of the parent to cancel the child scaling
+            for(int i = (boneCount - 1); i > 0; i--)
+            {
+                var node = aqn.nodeList[i];
+                if (node.parentId >= 0)
+                {
+                    var nodeScale = motionKeys[i].GetMKEYofType(3);
+                    var parentNodeScale = motionKeys[node.parentId].GetMKEYofType(3);
 
                     //Get rid of parental influence
                     for (int t = 0; t < nodeScale.frameTimings.Count; t++)
@@ -342,11 +360,10 @@ namespace AquaModelLibrary
                         var currentTime = nodeScale.frameTimings[t];
                         var value = parentNodeScale.GetLinearInterpolatedVec4Key(currentTime);
 
-                        nodeScale.RemoveParentScaleInfluenceAtTime(currentTime, value);
+                        nodeScale.RemoveParentScaleInfluenceAtTime(nodeScale.frameTimings[t], value);
                     }
                 }
             }
-
         }
 
     }

@@ -750,7 +750,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             lScene->GetGlobalSettings().SetTimeMode(FbxTime::EMode::eFrames30);
             for (int i = 0; i < aqmList->Count; i++)
             {
-                //aqmList[i]->PrepareScalingForExport(aqn);
+                aqmList[i]->PrepareScalingForExport(aqn);
                 CreateAnimationTakeFromAquaMotion(lScene, convertedBones, aqmList[i], aqmNameList[i]);
             }
         }
