@@ -207,7 +207,7 @@ namespace AquaModelLibrary
                     //Add our missing frames when we reach the first frame that exists after them
                     if (frameTimings[i] > timesToAdd[t])
                     {
-                        var vec4 = GetLinearInterpolatedVec4Key(timesToAdd[t] / 0x10);
+                        var vec4 = GetLinearInterpolatedVec4Key(timesToAdd[t]);
                         vector4Keys.Insert(i, vec4);
                         frameTimings.Insert(i, timesToAdd[t]);
                         t++;
