@@ -12,6 +12,37 @@ namespace AquaModelLibrary
 {
     public class ModelImporter
     {
+        public static Dictionary<char, char> illegalChars = new Dictionary<char, char>() {
+            { '<', '[' },
+            { '>', ']'},
+            {':', '-'},
+            {'"', '\''},
+            {'/', '_'},
+            {'\\', '_'},
+            {'|', '_'},
+            {'?', '_'},
+            {'*', '_'},
+        };
+
+        public static string GetLastPipeString(string str)
+        {
+            var split = str.Split('|');
+            return split[split.Length - 1];
+        }
+
+        public static string NixIllegalCharacters(string str)
+        {
+            foreach (var ch in illegalChars.Keys)
+            {
+                if (str.Contains(ch))
+                {
+                    str = str.Replace(ch, illegalChars[ch]);
+                }
+            }
+
+            return str;
+        }
+
         public static void AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
         {
             float baseScale = scaleFactor;
@@ -62,12 +93,17 @@ namespace AquaModelLibrary
                 }
 
                 //Double check it has the pso2 extension
-                var ext = Path.GetExtension(name);
+                var nameCleaned = NixIllegalCharacters(GetLastPipeString(name));
+                var ext = Path.GetExtension(nameCleaned);
+                if (aqmNames.Contains(nameCleaned) || aqmNames.Contains(nameCleaned + ".aqm"))
+                {
+                    nameCleaned = $"Anim_{i}_" + nameCleaned;
+                }
                 if ( ext != ".aqm" && ext != ".trm")
                 {
-                    name += ".aqm";
+                    nameCleaned += ".aqm";
                 }
-                aqmNames.Add(name);
+                aqmNames.Add(nameCleaned);
 
                 aqm.moHeader = new AquaMotion.MOHeader();
 
@@ -106,6 +142,10 @@ namespace AquaModelLibrary
 
                     int id;
                     ParseNodeId(animNode.NodeName, out string finalName, out id);
+                    if(id < 0)
+                    {
+                        continue;
+                    }
                     var node = aqm.motionKeys[id] = new AquaMotion.KeyData();
 
                     node.mseg.nodeName.SetString(finalName);
