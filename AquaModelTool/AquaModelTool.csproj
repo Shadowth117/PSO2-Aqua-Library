@@ -308,7 +308,7 @@
       <Name>AquaModelLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">
-      <Project>{F0C5B71B-5956-42FE-8DAC-10759CF6BEE0}</Project>
+      <Project>{f0c5b71b-5956-42fe-8dac-10759cf6bee0}</Project>
       <Name>ZamboniLib</Name>
     </ProjectReference>
   </ItemGroup>

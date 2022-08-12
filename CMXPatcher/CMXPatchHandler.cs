@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using AquaModelLibrary;
 using AquaModelLibrary.AquaMethods;
-using zamboni;
+using Zamboni;
 using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using AquaModelLibrary.AquaStructs;
@@ -15,6 +15,7 @@ using AquaModelLibrary.Extra;
 using AquaExtras;
 using System.ComponentModel;
 using System.Windows.Threading;
+using Zamboni.IceFileFormats;
 
 namespace CMXPatcher
 {

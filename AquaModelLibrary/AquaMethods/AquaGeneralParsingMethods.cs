@@ -9,7 +9,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Windows;
-using zamboni;
+using Zamboni;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaStructs.LandPieceSettings;
 using static AquaModelLibrary.VTBFMethods;

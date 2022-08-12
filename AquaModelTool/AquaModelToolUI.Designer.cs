@@ -109,10 +109,11 @@
             this.cMTTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSZTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSZEnemyZoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filePanel = new System.Windows.Forms.Panel();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.pSZObjZoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSZEnemyDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePanel = new System.Windows.Forms.Panel();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.dumpAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -243,19 +244,19 @@
             // averageNormalsOnSharedPositionVerticesToolStripMenuItem
             // 
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Name = "averageNormalsOnSharedPositionVerticesToolStripMenuItem";
-            this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
+            this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Size = new System.Drawing.Size(380, 22);
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Text = "Average Normals on shared position vertices";
             this.averageNormalsOnSharedPositionVerticesToolStripMenuItem.Click += new System.EventHandler(this.averageNormalsOnSharedPositionVerticesToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(306, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(377, 6);
             // 
             // importNGSShaderDetailsAndExtrasToolStripMenuItem
             // 
             this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Name = "importNGSShaderDetailsAndExtrasToolStripMenuItem";
-            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Size = new System.Drawing.Size(309, 22);
+            this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Size = new System.Drawing.Size(380, 22);
             this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Text = "Import NGS Shader Details and Extras from another model";
             this.importNGSShaderDetailsAndExtrasToolStripMenuItem.Click += new System.EventHandler(this.importNGSShaderDetailsAndExtrasToolStripMenuItem_Click);
             // 
@@ -726,7 +727,8 @@
             this.pSZTextToolStripMenuItem,
             this.pSZEnemyZoneToolStripMenuItem,
             this.pSZObjZoneToolStripMenuItem,
-            this.pSZEnemyDataToolStripMenuItem});
+            this.pSZEnemyDataToolStripMenuItem,
+            this.dumpAllTextToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -759,6 +761,20 @@
             this.pSZEnemyZoneToolStripMenuItem.Text = "PSZEnemyZone";
             this.pSZEnemyZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyZoneToolStripMenuItem_Click);
             // 
+            // pSZObjZoneToolStripMenuItem
+            // 
+            this.pSZObjZoneToolStripMenuItem.Name = "pSZObjZoneToolStripMenuItem";
+            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.pSZObjZoneToolStripMenuItem.Text = "PSZObjZone";
+            this.pSZObjZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZObjZoneToolStripMenuItem_Click);
+            // 
+            // pSZEnemyDataToolStripMenuItem
+            // 
+            this.pSZEnemyDataToolStripMenuItem.Name = "pSZEnemyDataToolStripMenuItem";
+            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.pSZEnemyDataToolStripMenuItem.Text = "PSZEnemyData";
+            this.pSZEnemyDataToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyDataToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -777,19 +793,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // pSZObjZoneToolStripMenuItem
+            // dumpAllTextToolStripMenuItem
             // 
-            this.pSZObjZoneToolStripMenuItem.Name = "pSZObjZoneToolStripMenuItem";
-            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.pSZObjZoneToolStripMenuItem.Text = "PSZObjZone";
-            this.pSZObjZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZObjZoneToolStripMenuItem_Click);
-            // 
-            // pSZEnemyDataToolStripMenuItem
-            // 
-            this.pSZEnemyDataToolStripMenuItem.Name = "pSZEnemyDataToolStripMenuItem";
-            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.pSZEnemyDataToolStripMenuItem.Text = "PSZEnemyData";
-            this.pSZEnemyDataToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyDataToolStripMenuItem_Click);
+            this.dumpAllTextToolStripMenuItem.Name = "dumpAllTextToolStripMenuItem";
+            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dumpAllTextToolStripMenuItem.Text = "DumpAllText";
+            this.dumpAllTextToolStripMenuItem.Click += new System.EventHandler(this.dumpAllTextToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -897,6 +906,7 @@
         private System.Windows.Forms.ToolStripMenuItem pSZEnemyZoneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSZObjZoneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSZEnemyDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dumpAllTextToolStripMenuItem;
     }
 }
 

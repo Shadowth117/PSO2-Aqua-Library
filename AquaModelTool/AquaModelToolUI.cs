@@ -16,13 +16,14 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using zamboni;
+using Zamboni;
 using static AquaExtras.FilenameConstants;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaStructs.ShaderPresetDefaults;
 using AquaModelLibrary.AquaMethods;
 using AquaModelLibrary.Zero;
+using Zamboni.IceFileFormats;
 
 namespace AquaModelTool
 {
@@ -406,23 +407,23 @@ namespace AquaModelTool
         {
             foreach (var fileName in fileNames)
             {
-                aquaUI.aqua.LoadPSO2Text(fileName);
+                var text = AquaMiscMethods.ReadPSO2Text(fileName);
 
                 StringBuilder output = new StringBuilder();
                 output.AppendLine(Path.GetFileName(fileName) + " was created: " + File.GetCreationTime(fileName).ToString());
                 output.AppendLine("Filesize is: " + new FileInfo(fileName).Length.ToString() + " bytes");
                 output.AppendLine();
-                for (int i = 0; i < aquaUI.aqua.aquaText.text.Count; i++)
+                for (int i = 0; i < text.text.Count; i++)
                 {
-                    output.AppendLine(aquaUI.aqua.aquaText.categoryNames[i]);
+                    output.AppendLine(text.categoryNames[i]);
 
-                    for (int j = 0; j < aquaUI.aqua.aquaText.text[i].Count; j++)
+                    for (int j = 0; j < text.text[i].Count; j++)
                     {
                         output.AppendLine($"Group {j}");
 
-                        for (int k = 0; k < aquaUI.aqua.aquaText.text[i][j].Count; k++)
+                        for (int k = 0; k < text.text[i][j].Count; k++)
                         {
-                            var pair = aquaUI.aqua.aquaText.text[i][j][k];
+                            var pair = text.text[i][j][k];
                             output.AppendLine($"{pair.name} - {pair.str}");
                         }
                         output.AppendLine();
@@ -3223,6 +3224,131 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void dumpAllTextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select NA pso2_bin",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var pso2_binDir = goodFolderDialog.FileName;
+                goodFolderDialog.Title = "Select jp pso2_bin";
+                if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    var jpPso2_binDir = goodFolderDialog.FileName;
+                    goodFolderDialog.Title = "Select output directory";
+                    if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                    {
+                        var outfolder = goodFolderDialog.FileName;
+                        string inWin32 = pso2_binDir + "\\data\\win32_na\\";
+                        string inWin32Reboot = pso2_binDir + "\\data\\win32reboot_na\\";
+                        string inWin32Jp = jpPso2_binDir + "\\data\\win32\\";
+                        string inWin32RebootJp = jpPso2_binDir + "\\data\\win32reboot\\";
+                        string outWin32 = outfolder + "\\win32_jp\\";
+                        string outWin32Reboot = outfolder + "\\win32reboot_jp\\";
+                        string outWin32NA = outfolder + "\\win32_na\\";
+                        string outWin32RebootNA = outfolder + "\\win32reboot_na\\";
+
+                        var files = new List<string>(Directory.GetFiles(inWin32));
+                        files.AddRange(Directory.GetFiles(inWin32Reboot, "*", SearchOption.AllDirectories));
+                        files.AddRange(Directory.GetFiles(inWin32Jp));
+                        files.AddRange(Directory.GetFiles(inWin32RebootJp, "*", SearchOption.AllDirectories));
+
+                        Parallel.ForEach(files, file =>
+                        {
+                            long len;
+                            IceFile iceFile = null;
+                            using (Stream strm = new FileStream(file, FileMode.Open))
+                            {
+                                len = strm.Length;
+                                if (len <= 0)
+                                {
+                                    return;
+                                }
+
+                                //Check if this is even an ICE file
+                                byte[] arr = new byte[4];
+                                strm.Read(arr, 0, 4);
+                                bool isIce = arr[0] == 0x49 && arr[1] == 0x43 && arr[2] == 0x45 && arr[3] == 0;
+                                if (isIce == false)
+                                {
+                                    return;
+                                }
+
+                                try
+                                {
+                                    iceFile = IceFile.LoadIceFile(strm);
+                                }
+                                catch
+                                {
+                                    return;
+                                }
+
+                                var innerFiles = new List<byte[]>(iceFile.groupOneFiles);
+                                innerFiles.AddRange(iceFile.groupTwoFiles);
+                                string outpath = null;
+
+                                for (int i = 0; i < innerFiles.Count; i++)
+                                {
+                                    string baseName;
+                                    /*try
+                                    {*/
+                                        baseName = IceFile.getFileName(innerFiles[i]);
+                                    /*}
+                                    catch
+                                    {
+                                        Debug.WriteLine($"{file} inner file {i} could not have its name read!");
+                                        continue;
+                                    }*/
+                                    if (baseName.Contains(".text") || baseName == "namelessFile.bin")
+                                    {
+                                        if(outpath == null)
+                                        {
+                                            if (file.Contains("_na"))
+                                            {
+                                                if (file.Contains("reboot"))
+                                                {
+                                                    outpath = outWin32RebootNA;
+                                                }
+                                                else
+                                                {
+                                                    outpath = outWin32NA;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (file.Contains("reboot"))
+                                                {
+                                                    outpath = outWin32Reboot;
+                                                }
+                                                else
+                                                {
+                                                    outpath = outWin32;
+                                                }
+                                            }
+
+                                            var dirName = Path.Combine(outpath, Path.GetFileName(file));
+                                            Directory.CreateDirectory(dirName);
+                                            var text = AquaMiscMethods.ReadPSO2Text(innerFiles[i]);
+
+                                            var output = (baseName + ".txt was created: " + File.GetCreationTime(file).ToString()) + "\nFilesize is: " + len + " bytes\n";
+                                            output += text.ToString();
+                                            File.WriteAllText(Path.Combine(dirName, baseName + ".txt"), output);
+                                        }
+
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+
+            }
+        }
+
     }
 }
 

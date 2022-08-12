@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using zamboni;
+using Zamboni;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMiscMethods;
 using static AquaModelLibrary.CharacterMakingIndex;

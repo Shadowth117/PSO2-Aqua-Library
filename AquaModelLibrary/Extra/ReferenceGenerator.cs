@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using zamboni;
+using Zamboni;
 using static AquaExtras.FilenameConstants;
 using static AquaModelLibrary.Extra.MusicFilenameConstants;
 using static AquaModelLibrary.Extra.StageFilenameConstants;

@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using zamboni;
+using Zamboni;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMethods.AquaNodeParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
