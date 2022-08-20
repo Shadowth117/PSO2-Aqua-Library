@@ -468,7 +468,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lNode;
     }
 
-    void CreateAnimationTakeFromAquaMotion(FbxScene* lScene, List<IntPtr>^ convertedBones, AquaMotion^ aqm, String^ name)
+    void CreateAnimationTakeFromAquaMotion(FbxScene* lScene, List<IntPtr>^ convertedBones, AquaNode^ aqn, AquaMotion^ aqm, String^ name)
     {
         AquaMotion::MOHeader header = aqm->moHeader;
         const char* cStrName = Utf8String(name).ToCStr();
@@ -485,6 +485,8 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         int boneCount = System::Math::Min(aqm->motionKeys->Count, convertedBones->Count);
         for (int i = 0; i < boneCount; i++)
         {
+            ushort bs1 = aqn->nodeList[i].boneShort1;
+            ushort bs2 = aqn->nodeList[i].boneShort2;
             FbxNode* bone = ((FbxNode*)convertedBones[i].ToPointer());
             FbxAnimCurve* curveTX = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
             FbxAnimCurve* curveTY = bone->LclTranslation.GetCurve(animBaseLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
@@ -751,7 +753,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             for (int i = 0; i < aqmList->Count; i++)
             {
                 aqmList[i]->PrepareScalingForExport(aqn);
-                CreateAnimationTakeFromAquaMotion(lScene, convertedBones, aqmList[i], aqmNameList[i]);
+                CreateAnimationTakeFromAquaMotion(lScene, convertedBones, aqn, aqmList[i], aqmNameList[i]);
             }
         }
 

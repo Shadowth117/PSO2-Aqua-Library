@@ -216,13 +216,26 @@ namespace AquaModelLibrary
                 }
             }
 
-            public void RemoveParentScaleInfluenceAtTime(int time, Vector4 value)
+            public void RemoveParentScaleInfluenceAtTime(int time, int mode, Vector4 value)
             {
                 for (int i = 0; i < frameTimings.Count; i++)
                 {
                     if (frameTimings[i] == time)
                     {
                         var vec4 = vector4Keys[i];
+                        /*switch (mode)
+                        {
+                            case 1: //ZXY order - rotates forward
+                                var temp = vec4.X;
+                                vec4.X = vec4.Z;
+                                vec4.Z = vec4.Y;
+                                vec4.Y = temp;
+                                break;
+                            default:
+                                vec4 /= value;
+                                break;
+                        }*/
+
                         vec4 /= value;
                         vector4Keys[i] = vec4;
                         break;
@@ -353,6 +366,13 @@ namespace AquaModelLibrary
                 {
                     var nodeScale = motionKeys[i].GetMKEYofType(3);
                     var parentNodeScale = motionKeys[node.parentId].GetMKEYofType(3);
+                    int mode = 0;
+
+                    //Check order flags
+                    if ((node.boneShort1 & 1) > 0)
+                    {
+                        mode = 1;
+                    }
 
                     //Get rid of parental influence
                     for (int t = 0; t < nodeScale.frameTimings.Count; t++)
@@ -360,7 +380,7 @@ namespace AquaModelLibrary
                         var currentTime = nodeScale.frameTimings[t];
                         var value = parentNodeScale.GetLinearInterpolatedVec4Key(currentTime);
 
-                        nodeScale.RemoveParentScaleInfluenceAtTime(nodeScale.frameTimings[t], value);
+                        nodeScale.RemoveParentScaleInfluenceAtTime(nodeScale.frameTimings[t], mode, value);
                     }
                 }
             }

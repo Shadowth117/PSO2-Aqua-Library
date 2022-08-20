@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AquaModelLibrary\AquaModelLibrary.csproj" />
+    <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj" />
   </ItemGroup>
 
 </Project>

@@ -194,7 +194,7 @@ namespace AquaModelLibrary
             cmx.rel0 = streamReader.Read<AquaCommon.REL0>();
 
             streamReader.Seek(cmx.rel0.REL0Size + offset, SeekOrigin.Begin);
-            AquaGeneralMethods.AlignReader(streamReader, 0x10);
+            AlignReader(streamReader, 0x10);
             cmx.nof0 = AquaCommon.readNOF0(streamReader);
 
             streamReader.Seek(cmx.rel0.REL0DataStart + offset, SeekOrigin.Begin);
@@ -954,6 +954,10 @@ namespace AquaModelLibrary
                     outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort2));
                     outBytes.AddRange(BitConverter.GetBytes(acce12.unkShort3));
                 }
+            }
+            if(mode >= 1)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(acce.flt_8C));
             }
         }
 
@@ -2049,22 +2053,27 @@ namespace AquaModelLibrary
                 ACCEObject acce = new ACCEObject();
                 acce.num = i;
                 acce.originalOffset = streamReader.Position();
-                acce.acce = streamReader.Read<ACCE>();
+                acce.acce = streamReader.Read<ACCE>();                      //0x28
                 if (cmxDateSize >= feb8_22TableAddressInt)
                 {
-                    acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();
+                    acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();   //0x1C
                 }
-                acce.acceB = streamReader.Read<ACCE_B>();
-                acce.acce2a = streamReader.Read<ACCE2A>();
+                acce.acceB = streamReader.Read<ACCE_B>();                   //0x1C
+                acce.acce2a = streamReader.Read<ACCE2A>();                  //0x1C
                 //This int was added to the middle of these in the Aug_3_2021 patch
                 if (count >= 5977)
                 {
-                    acce.flt_54 = streamReader.Read<int>();
+                    acce.flt_54 = streamReader.Read<float>();                 //0x4
                 }
-                acce.acce2b = streamReader.Read<ACCE2B>();
-                for (int j = 0; j < 3; j++)
-                {
+                acce.acce2b = streamReader.Read<ACCE2B>();                  //0xC
+                for (int j = 0; j < 3; j++)                                 //0x60
+                { 
                     acce.acce12List.Add(ReadAcce12Object(streamReader, count));
+                }
+
+                if(cmxDateSize >= aug17_22TableAddressInt)
+                {
+                    acce.flt_8C = streamReader.Read<float>();
                 }
 
                 long temp = streamReader.Position();

@@ -14,6 +14,7 @@ namespace AquaModelLibrary
         public static int dec14_21TableAddressInt = 0x26B66C; //Ritem Update cmx. Some structs were reordered for this update.
         public static int feb8_22TableAddressInt = 0x2DAFD0; //Lv 40 update cmx
         public static int jun7_22TableAddressInt = 0x2F6C44; //Kvaris update cmx
+        public static int aug17_22TableAddressInt = 0x307D6C; //August 17th 2022 update cmx
 
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -426,6 +427,8 @@ namespace AquaModelLibrary
             public float flt_54;
             public ACCE2B acce2b;
             public List<ACCE_12Object> acce12List = new List<ACCE_12Object>();
+            public float flt_8C;
+
             public string dataString;
             public string nodeAttach1;
             public string nodeAttach2;
