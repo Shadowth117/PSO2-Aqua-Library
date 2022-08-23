@@ -66,13 +66,9 @@ namespace AquaModelTool
             this.alphaCutoffUD = new System.Windows.Forms.NumericUpDown();
             this.alphaCutoffLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
-            this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
-            this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sourceAlphaUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.int0CUD)).BeginInit();
@@ -90,10 +86,6 @@ namespace AquaModelTool
             ((System.ComponentModel.ISupportInitialize)(this.unk12UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk11UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.alphaCutoffUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -575,24 +567,6 @@ namespace AquaModelTool
             this.label1.TabIndex = 48;
             this.label1.Text = "Alpha Cutoff";
             // 
-            // numericUpDown1
-            // 
-            this.numericUpDown1.Location = new System.Drawing.Point(0, 195);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            0});
-            this.numericUpDown1.Minimum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            -2147483648});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(76, 20);
-            this.numericUpDown1.TabIndex = 49;
-            this.numericUpDown1.ValueChanged += new System.EventHandler(this.alphaCutoffUD_ValueChanged);
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -601,24 +575,6 @@ namespace AquaModelTool
             this.label2.Size = new System.Drawing.Size(39, 13);
             this.label2.TabIndex = 50;
             this.label2.Text = "Unk11";
-            // 
-            // numericUpDown2
-            // 
-            this.numericUpDown2.Location = new System.Drawing.Point(82, 195);
-            this.numericUpDown2.Maximum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            0});
-            this.numericUpDown2.Minimum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            -2147483648});
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(76, 20);
-            this.numericUpDown2.TabIndex = 51;
-            this.numericUpDown2.ValueChanged += new System.EventHandler(this.unk11UD_ValueChanged);
             // 
             // label3
             // 
@@ -629,24 +585,6 @@ namespace AquaModelTool
             this.label3.TabIndex = 52;
             this.label3.Text = "Unk12";
             // 
-            // numericUpDown3
-            // 
-            this.numericUpDown3.Location = new System.Drawing.Point(164, 195);
-            this.numericUpDown3.Maximum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            0});
-            this.numericUpDown3.Minimum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            -2147483648});
-            this.numericUpDown3.Name = "numericUpDown3";
-            this.numericUpDown3.Size = new System.Drawing.Size(76, 20);
-            this.numericUpDown3.TabIndex = 53;
-            this.numericUpDown3.ValueChanged += new System.EventHandler(this.unk12UD_ValueChanged);
-            // 
             // label4
             // 
             this.label4.AutoSize = true;
@@ -656,42 +594,20 @@ namespace AquaModelTool
             this.label4.TabIndex = 54;
             this.label4.Text = "Unk13";
             // 
-            // numericUpDown4
-            // 
-            this.numericUpDown4.Location = new System.Drawing.Point(246, 195);
-            this.numericUpDown4.Maximum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            0});
-            this.numericUpDown4.Minimum = new decimal(new int[] {
-            1569325056,
-            23283064,
-            0,
-            -2147483648});
-            this.numericUpDown4.Name = "numericUpDown4";
-            this.numericUpDown4.Size = new System.Drawing.Size(76, 20);
-            this.numericUpDown4.TabIndex = 55;
-            this.numericUpDown4.ValueChanged += new System.EventHandler(this.unk13UD_ValueChanged);
-            // 
             // RenderEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.Controls.Add(this.destAlphaLabel);
-            this.Controls.Add(this.numericUpDown4);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.unk13UD);
-            this.Controls.Add(this.numericUpDown3);
             this.Controls.Add(this.unk13Label);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.unk12UD);
-            this.Controls.Add(this.numericUpDown2);
             this.Controls.Add(this.unk12Label);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.unk11UD);
-            this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.unk11Label);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.alphaCutoffUD);
@@ -741,10 +657,6 @@ namespace AquaModelTool
             ((System.ComponentModel.ISupportInitialize)(this.unk12UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.unk11UD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.alphaCutoffUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -788,12 +700,8 @@ namespace AquaModelTool
         private System.Windows.Forms.NumericUpDown alphaCutoffUD;
         private System.Windows.Forms.Label alphaCutoffLabel;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.NumericUpDown numericUpDown3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.NumericUpDown numericUpDown4;
     }
 }

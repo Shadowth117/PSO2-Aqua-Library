@@ -23,6 +23,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
             halfZUD.Value = (decimal)model.objc.bounds.halfExtents.Z;
             reserve0UD.Value = (decimal)model.objc.bounds.reserve0;
             reserve1UD.Value = (decimal)model.objc.bounds.reserve1;
+            boundingUD.Value = (decimal)model.objc.bounds.boundingRadius;
             unkCount0UD.Value = (decimal)model.objc.unkCount0;
         }
 
