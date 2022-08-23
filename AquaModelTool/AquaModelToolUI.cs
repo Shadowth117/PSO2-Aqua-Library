@@ -1233,6 +1233,8 @@ namespace AquaModelTool
                     {
                         model.splitVSETPerMesh();
                     }
+
+                    model.FixHollowMatNaming();
                     FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], aqms, saveFileDialog.FileName, aqmFileNames, includeMetadata);
                 }
             }
@@ -2065,6 +2067,7 @@ namespace AquaModelTool
                             model.splitVSETPerMesh();
                         }
                     }
+                    model.FixHollowMatNaming();
                     FbxExporter.ExportToFile(model, aqua.aquaBones[0], new List<AquaMotion>(), Path.ChangeExtension(filename, ".fbx"), new List<string>(), includeMetadataToolStripMenuItem.Checked);
                     aqua.aquaBones.Clear();
                     aqua.aquaModels.Clear();

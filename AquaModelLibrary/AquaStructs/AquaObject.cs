@@ -2143,6 +2143,37 @@ namespace AquaModelLibrary
             }
         }
 
+        public void FixHollowMatNaming()
+        {
+            //Set wrongly assigned blendalphas to hollow for reexport purposes
+            for (int i = 0; i < meshList.Count; i++)
+            {
+                var mesh = meshList[i];
+                var mate = mateList[mesh.mateIndex];
+                var rend = rendList[mesh.rendIndex];
+                if ((mate.alphaType.GetString() == "opaque" || mate.alphaType.GetString() == "blendalpha") && rend.int_0C == 0 && rend.unk8 == 1 && rend.twosided == 2)
+                {
+                    //Account for recycled material, but separate rend
+                    for (int j = 0; j < meshList.Count; j++)
+                    {
+                        var mesh2 = meshList[i];
+                        if (mesh.mateIndex == mesh2.mateIndex && mesh.rendIndex != mesh2.rendIndex)
+                        {
+                            mesh.mateIndex = mateList.Count;
+                            mateList.Add(mate);
+                            mate = mateList[mateList.Count - 1];
+                            objc.mateCount += 1;
+                            meshList[i] = mesh;
+                            break;
+                        }
+                    }
+
+                    mate.alphaType.SetString("hollow");
+                    mateList[mesh.mateIndex] = mate;
+                }
+            }
+        }
+
         public abstract AquaObject Clone();
 
     }
