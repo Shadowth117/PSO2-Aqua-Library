@@ -1244,7 +1244,7 @@ namespace AquaModelLibrary.Extra
 
             //---------------------------Generate Reboot General Player effect List
             var effRebOut = new List<string>();
-            var effRebList = playerEffects;
+            var effRebList = playerNGSEffects;
 
             foreach (var eff in effRebList)
             {

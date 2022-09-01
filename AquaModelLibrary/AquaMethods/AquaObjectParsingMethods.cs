@@ -591,7 +591,7 @@ namespace AquaModelLibrary
                     stripData.reserve0 = streamReader.Read<int>();
                     stripData.reserve1 = streamReader.Read<int>();
                     stripData.reserve2 = streamReader.Read<int>();
-                    if (model.objc.type == 0xC31)
+                    if (model.objc.type == 0xC31 && model.psetList[psetIndex].tag != 0x2100)
                     {
                         stripData.format0xC33 = true;
                     }

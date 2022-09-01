@@ -5527,6 +5527,8 @@ namespace AquaExtras
             "actor/effect/effect_lnch.ice",
             "actor/effect/effect_object_gatlinggun.ice",
             "actor/effect/effect_object_snowboard.ice",
+            "actor/effect/effect_object_particlecannon.ice",
+            "actor/effect/effect_object_particlecannon.ice",
             "actor/effect/effect_parti.ice",
             "actor/effect/effect_pot_countpow.ice",
             "actor/effect/effect_pot_dmgbarrier.ice",

@@ -2163,7 +2163,6 @@ namespace AquaModelLibrary
                 case "reboot_pl":
                 case "reboot_player":
                 case "reboot_ba":
-                case "reboot_ou":
                     if (mat.shaderNames == null)
                     {
                         mat.shaderNames = new List<string>() { "1102p", "1102" };
@@ -2195,10 +2194,71 @@ namespace AquaModelLibrary
                     texNames.Add("pl_body_skin_subnormal_02.dds");
                     texNames.Add("pl_body_skin_subnormal_03.dds");
                     break;
+                case "rbd_ou":
+                case "reboot_ou":
+                case "reboot_outer":
+                    texNames.Add("pl_body_outer_diffuse.dds");
+                    texNames.Add("pl_body_outer_multi.dds");
+                    texNames.Add("pl_body_outer_normal.dds");
+                    texNames.Add("pl_body_outer_mask.dds");
+                    texNames.Add("pl_body_outer_subnormal_01.dds");
+                    texNames.Add("pl_body_outer_subnormal_02.dds");
+                    texNames.Add("pl_body_outer_subnormal_03.dds");
+                    break;
+                case "rbd_ou_d":
+                case "rbd_ou_decal":
+                case "reboot_outer_decal":
+                    texNames.Add("pl_body_outer_diffuse.dds");
+                    texNames.Add("pl_body_outer_multi.dds");
+                    texNames.Add("pl_body_outer_normal.dds");
+                    texNames.Add("pl_body_outer_mask.dds");
+                    texNames.Add("pl_body_outer_subnormal_01.dds");
+                    texNames.Add("pl_body_outer_subnormal_02.dds");
+                    texNames.Add("pl_body_outer_subnormal_03.dds");
+                    texNames.Add("pl_body_decal.dds");
+                    break;
                 default:
                     break;
             }
             mat.texNames = texNames;
+        }
+
+        public static string GetSpecialMatType(List<string> names)
+        {
+            if (names.Count > 0)
+            {
+                var name = names[0];
+                switch (name)
+                {
+                    case "pl_eye_diffuse.dds":
+                        return "ey";
+                    case "pl_hair_diffuse.dds":
+                        return "hr";
+                    case "pl_face_diffuse.dds":
+                        return "fc";
+                    case "pl_body_diffuse.dds":
+                        return "pl";
+                    case "pl_body_base_diffuse.dds":
+                        return "rbd";
+                    case "pl_body_skin_diffuse.dds":
+                        return "rbd_sk";
+                    case "pl_body_outer_diffuse.dds":
+                        switch(names[names.Count - 1])
+                        {
+                            case "pl_body_decal.dds":
+                                return "rbd_ou_d";
+                            default:
+                                return "rbd_ou";
+                        }
+                    default:
+                        return "";
+                }
+
+            }
+            else
+            {
+                return "";
+            }
         }
 
         //Used to generate standard materials in which the texture names are used. 
@@ -2569,36 +2629,6 @@ namespace AquaModelLibrary
             }
 
             return uvList;
-        }
-
-        public static string GetSpecialMatType(List<string> names)
-        {
-            if(names.Count > 0)
-            {
-                var name = names[0];
-                switch (name)
-                {
-                    case "pl_eye_diffuse.dds":
-                        return "ey";
-                    case "pl_hair_diffuse.dds":
-                        return "hr";
-                    case "pl_face_diffuse.dds":
-                        return "fc";
-                    case "pl_body_diffuse.dds":
-                        return "pl";
-                    case "pl_body_base_diffuse.dds":
-                        return "rbd";
-                    case "pl_body_skin_diffuse.dds":
-                        return "rbd_sk";
-                    default:
-                        return "";
-                }
-
-            }
-            else
-            {
-                return "";
-            }
         }
 
         public static string RemoveBlendersShitDuplicateDenoterAndAssimpDuplicate(string name)
