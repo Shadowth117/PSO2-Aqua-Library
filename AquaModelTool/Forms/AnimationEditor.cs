@@ -66,7 +66,7 @@ namespace AquaModelTool
                     {
                         for (int k = 0; k < currentMotion.motionKeys[i].keyData[j].frameTimings.Count; k++)
                         {
-                            TreeNode lowNode = new TreeNode("Frame " + (currentMotion.motionKeys[i].keyData[j].frameTimings[k] / 0x10));
+                            TreeNode lowNode = new TreeNode("Frame " + (currentMotion.motionKeys[i].keyData[j].frameTimings[k] / currentMotion.motionKeys[i].keyData[j].GetTimeMultiplier()));
                             lowNode.Tag = 2;
                             animTreeView.Nodes[i].Nodes[j].Nodes.Add(lowNode);
                         }
@@ -215,7 +215,13 @@ namespace AquaModelTool
                     {
                         
                     }
-                    switch (keySet.dataType)
+
+                    var dataType = keySet.dataType;
+                    if ((dataType & 0x80) > 0)
+                    {
+                        dataType -= 0x80;
+                    }
+                    switch (dataType)
                     {
                         //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:
@@ -292,7 +298,13 @@ namespace AquaModelTool
             newMkey.dataType = AquaMotion.GetKeyDataType(transformType);
             newMkey.unkInt0 = 0;
             newMkey.keyCount = 1;
-            switch (newMkey.dataType)
+
+            var dataType = newMkey.dataType;
+            if ((dataType & 0x80) > 0)
+            {
+                dataType -= 0x80;
+            }
+            switch (dataType)
             {
                 //0x1 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                 case 0x1:
@@ -496,7 +508,13 @@ namespace AquaModelTool
                     {
                         keySet.frameTimings.Insert(node.Index, currentMotion.motionKeys[node.Parent.Parent.Index].keyData[node.Parent.Index].frameTimings[node.Index]);
                     }
-                    switch (keySet.dataType)
+
+                    var dataType = keySet.dataType;
+                    if ((dataType & 0x80) > 0)
+                    {
+                        dataType -= 0x80;
+                    }
+                    switch (dataType)
                     {
                         //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:
@@ -561,8 +579,12 @@ namespace AquaModelTool
                     {
                         keySet.frameTimings.Clear();
                     }
-
-                    switch (keySet.dataType)
+                    var dataType = keySet.dataType;
+                    if ((dataType & 0x80) > 0)
+                    {
+                        dataType -= 0x80;
+                    }
+                    switch (dataType)
                     {
                         //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                         case 0x1:

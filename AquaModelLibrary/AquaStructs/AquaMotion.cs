@@ -15,6 +15,7 @@ namespace AquaModelLibrary
         public const int stdPlayerAnim = 0x10012;
         public const int cameraAnim = 0x10004;
         public const int materialAnim = 0x20;
+        public const int ushortThreshold = 4095; //Threshold to change over to uints for timing. Times are multiplied by 0x10 and so 65535 / 0x10 leaves 4095 as the integer sans remainder
       
         public Dictionary<int, string> keyTypeNames = new Dictionary<int, string>() 
         {
@@ -128,13 +129,24 @@ namespace AquaModelLibrary
             public int frameAddress;
             public int timeAddress;
             public List<Vector4> vector4Keys = new List<Vector4>(); //0xEE, type 0x4A or 0xCA if multiple
-            public List<ushort> frameTimings = new List<ushort>(); //0xEF, type 0x06 or 0x86 if multiple //Frame timings start with 0 + 0x1 to represent the first frame.
+            public List<uint> frameTimings = new List<uint>(); //0xEF, type 0x06 or 0x86 if multiple //Frame timings start with 0 + 0x1 to represent the first frame.
                                                                                 //Subsequent frames are multiplied by 0x10 and the final frame will have 0x2 added.
                                                                                 //Ex. frame 0x14 would be stored as 0x140 (0x142 if it's the final frame)
             public List<float> floatKeys = new List<float>(); //0xF1, type 0xA or 0x8A if multiple
             public List<byte> byteKeys = new List<byte>();   //0xF2. Only observed in Alpha PSO2 animations. Appear to be int arrays rendered in bytes... for some reason.
                                                              //Also uses the designator for int keys in newer iterations. Combine every 4 to convert to an int array.
             public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
+
+            public int GetTimeMultiplier()
+            {
+                if((dataType & 0x80) > 0)
+                {
+                    return 0x100;
+                } else
+                {
+                    return 0x10;
+                }
+            }
 
             //Expects only to be used on a populated MKEY with vector4Keys.
             public Vector4 GetLinearInterpolatedVec4Key(double time)
@@ -150,12 +162,12 @@ namespace AquaModelLibrary
 
                 //Get high and low times
                 Vector4 lowValue = vector4Keys[0];
-                int lowTime = 1;
+                uint lowTime = 1;
                 Vector4 highValue = vector4Keys[vector4Keys.Count - 1];
-                int highTime = frameTimings[frameTimings.Count - 1];
+                uint highTime = frameTimings[frameTimings.Count - 1];
                 for(int i = 0; i < frameTimings.Count; i++)
                 {
-                    var frameTime = frameTimings[i];
+                    uint frameTime = (uint)frameTimings[i];
                     if(frameTime <= time)
                     {
                         lowTime = frameTime;
@@ -187,7 +199,7 @@ namespace AquaModelLibrary
                 return Vector4.Lerp(lowValue, highValue, (float)ratio);
             }
 
-            public void CreateVec4KeysAtTimes(List<ushort> timesToAdd)
+            public void CreateVec4KeysAtTimes(List<uint> timesToAdd)
             {
                 int t = 0;
                 int timings = frameTimings.Count;
@@ -216,7 +228,7 @@ namespace AquaModelLibrary
                 }
             }
 
-            public void RemoveParentScaleInfluenceAtTime(int time, int mode, Vector4 value)
+            public void RemoveParentScaleInfluenceAtTime(uint time, int mode, Vector4 value)
             {
                 for (int i = 0; i < frameTimings.Count; i++)
                 {
@@ -346,12 +358,12 @@ namespace AquaModelLibrary
                     }
 
                     //Create keyframes for each parent key so we can cancel them all
-                    List<ushort> timingsToAdd = new List<ushort>();
+                    List<uint> timingsToAdd = new List<uint>();
                     for (int t = 0; t < parentNodeScale.frameTimings.Count; t++)
                     {
                         if (!nodeScale.frameTimings.Contains(parentNodeScale.frameTimings[t]))
                         {
-                            timingsToAdd.Add(parentNodeScale.frameTimings[t]);
+                            timingsToAdd.Add((uint)parentNodeScale.frameTimings[t]);
                         }
                     }
                     nodeScale.CreateVec4KeysAtTimes(timingsToAdd);

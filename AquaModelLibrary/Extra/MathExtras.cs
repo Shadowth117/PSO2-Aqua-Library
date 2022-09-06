@@ -59,17 +59,11 @@ namespace AquaModelLibrary.Extra
             return angles;
         }
 
-        public static double CopySign(double valMain, double valSign)
+        public static double CopySign(double x, double y)
         {
-            double final = Math.Abs(valMain);
-            if (valSign >= 0)
-            {
-                return final;
-            }
-            else
-            {
-                return -final;
-            }
+            if ((x < 0 && y > 0) || (x > 0 && y < 0))
+                return -x;
+            return x;
         }
         public static float Get(this Vector3 vec3, int id)
         {

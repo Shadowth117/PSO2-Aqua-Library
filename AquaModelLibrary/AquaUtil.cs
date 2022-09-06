@@ -2156,14 +2156,25 @@ namespace AquaModelLibrary
                         {
                             for (int m = 0; m < motion.motionKeys[i].keyData[j].keyCount; m++)
                             {
-                                motion.motionKeys[i].keyData[j].frameTimings.Add(streamReader.Read<ushort>());
+                                if((motion.motionKeys[i].keyData[j].dataType & 0x80) > 0)
+                                {
+                                    motion.motionKeys[i].keyData[j].frameTimings.Add(streamReader.Read<uint>());
+                                } else
+                                {
+                                    motion.motionKeys[i].keyData[j].frameTimings.Add(streamReader.Read<ushort>());
+                                }
                             }
                         }
 
                         //Stream aligns to 0x10 after timings.
                         streamReader.Seek(motion.motionKeys[i].keyData[j].frameAddress + offset, SeekOrigin.Begin);
 
-                        switch (motion.motionKeys[i].keyData[j].dataType)
+                        var dataType = motion.motionKeys[i].keyData[j].dataType;
+                        if((dataType & 0x80) > 0)
+                        {
+                            dataType -= 0x80;
+                        }
+                        switch (dataType)
                         {
                             //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                             case 0x1:
@@ -2362,6 +2373,10 @@ namespace AquaModelLibrary
                         {
                             timeOffsets[keySet] = NOF0Append(nof0PointerLocations, outBytes.Count + 0x14);
                         }
+                        if (motion.moHeader.endFrame > AquaMotion.ushortThreshold)
+                        {
+                            motion.motionKeys[i].keyData[keySet].dataType |= 0x80;
+                        }
                         outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].keyType));
                         outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].dataType));
                         outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].unkInt0));
@@ -2381,7 +2396,13 @@ namespace AquaModelLibrary
                             for (int time = 0; time < motion.motionKeys[i].keyData[keySet].keyCount; time++)
                             {
                                 //Beginning time should internally be 0x1 while ending time should have a 2 in the ones decimal place
-                                outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].frameTimings[time]));
+                                if(motion.moHeader.endFrame > AquaMotion.ushortThreshold)
+                                {
+                                    outBytes.AddRange(BitConverter.GetBytes(motion.motionKeys[i].keyData[keySet].frameTimings[time]));
+                                } else
+                                {
+                                    outBytes.AddRange(BitConverter.GetBytes((ushort)motion.motionKeys[i].keyData[keySet].frameTimings[time]));
+                                }
                             }
                             AlignWriter(outBytes, 0x10);
                         }

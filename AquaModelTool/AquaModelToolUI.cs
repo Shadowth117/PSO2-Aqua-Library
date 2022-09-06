@@ -717,26 +717,6 @@ namespace AquaModelTool
                                             {
                                                 aquaUI.aqua.aquaModels.Clear();
                                                 aquaUI.aqua.ReadModel(iceFileBytes);
-                                                /*
-                                                var model = aquaUI.aqua.aquaModels[0].models[0];
-                                                for(int j = 0; j < model.mateList.Count; j++)
-                                                {
-                                                    var mat = model.mateList[j];
-                                                    switch(mat.alphaType.GetString())
-                                                    {
-                                                        case "blendalpha":
-                                                        case "opaque":
-                                                        case "hollow":
-                                                            break;
-                                                        case "add":
-                                                            Debug.WriteLine($"{Path.GetFileName(file)} {IceFile.getFileName(iceFileBytes)} {mat.matName.GetString()} {mat.alphaType.GetString()}");
-                                                            break;
-                                                        default:
-                                                            Debug.WriteLine($"Unexpected mat type {mat.alphaType.GetString()} {Path.GetFileName(file)} {IceFile.getFileName(iceFileBytes)} {mat.matName.GetString()} {mat.alphaType.GetString()}");
-                                                            break;
-                                                    }
-                                                }
-                                                */
                                                 ParseModelShaderInfo(shaderUnk0, shaderCombinations, shaderModelFiles, shaderDetails, shaderExtras, name);
                                                 GetTexSheetData(shaderCombinationsTexSheet, shaderModelFilesTexSheet, shaderTexListCode, shaderTexDataCode, name);
                                             }
@@ -1662,7 +1642,7 @@ namespace AquaModelTool
             {
                 StringBuilder outStr = new StringBuilder();
                 StringBuilder endStr = new StringBuilder();
-                Dictionary<int, List<int>> timeSorted = new Dictionary<int, List<int>>();
+                Dictionary<uint, List<uint>> timeSorted = new Dictionary<uint, List<uint>>();
                 aquaUI.aqua.aquaMotions.Clear();
                 aquaUI.aqua.ReadMotion(goodFolderDialog.FileName);
 
@@ -1673,14 +1653,14 @@ namespace AquaModelTool
                     {
                         foreach (var time in data.frameTimings)
                         {
-                            var trueTime = time / 0x10;
+                            uint trueTime = (uint)(time / data.GetTimeMultiplier());
                             if (!timeSorted.ContainsKey(trueTime))
                             {
-                                timeSorted[trueTime] = new List<int>();
+                                timeSorted[trueTime] = new List<uint>();
                             }
-                            if (!timeSorted[trueTime].Contains(keySet.mseg.nodeId))
+                            if (!timeSorted[trueTime].Contains((uint)keySet.mseg.nodeId))
                             {
-                                timeSorted[trueTime].Add(keySet.mseg.nodeId);
+                                timeSorted[trueTime].Add((uint)keySet.mseg.nodeId);
                             }
                         }
                     }
@@ -1694,7 +1674,7 @@ namespace AquaModelTool
                     outStr.AppendLine("Frame Time: " + key);
                     foreach (var node in timeSorted[key])
                     {
-                        outStr.AppendLine($"  {node} - {aquaUI.aqua.aquaMotions[0].anims[0].motionKeys[node].mseg.nodeName.GetString()}");
+                        outStr.AppendLine($"  {node} - {aquaUI.aqua.aquaMotions[0].anims[0].motionKeys[(int)node].mseg.nodeName.GetString()}");
                     }
                     endStr.AppendLine(key + "");
                     outStr.AppendLine();
@@ -1730,7 +1710,7 @@ namespace AquaModelTool
                             int frameIndex = -1;
                             for (int j = 0; j < data.frameTimings.Count; j++)
                             {
-                                if (data.frameTimings[j] / 0x10 == i)
+                                if (data.frameTimings[j] / data.GetTimeMultiplier() == i)
                                 {
                                     frameIndex = j;
                                 }
@@ -1899,7 +1879,7 @@ namespace AquaModelTool
                             int frameIndex = -1;
                             for (int j = 0; j < data.frameTimings.Count; j++)
                             {
-                                if (data.frameTimings[j] / 0x10 == frame)
+                                if (data.frameTimings[j] / data.GetTimeMultiplier() == frame)
                                 {
                                     frameIndex = j;
                                 }
@@ -3352,6 +3332,53 @@ namespace AquaModelTool
             }
         }
 
+        private void convertSoulsflverToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select Souls flver file(s)",
+                Filter = "Souls flver Files (*.flver)|*.flver|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.aquaModels.Clear();
+                    ModelSet set = new ModelSet();
+                    set.models.Add(SoulsConvert.ReadFlver(file, out AquaNode aqn));
+                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                    {
+                        aquaUI.aqua.aquaModels.Add(set);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                        var outName = Path.ChangeExtension(file, ".aqp");
+                        aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                    }
+                    /*
+                    try
+                    {
+                        aquaUI.aqua.aquaModels.Clear();
+                        ModelSet set = new ModelSet();
+                        set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
+                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                        {
+                            aquaUI.aqua.aquaModels.Add(set);
+                            aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                            var outName = Path.ChangeExtension(file, ".aqp");
+                            aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                            AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                        }
+                    }
+                    catch
+                    {
+                    }*/
+                }
+            }
+        }
     }
 }
 

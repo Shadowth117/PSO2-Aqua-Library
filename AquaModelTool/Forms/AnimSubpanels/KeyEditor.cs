@@ -26,10 +26,14 @@ namespace AquaModelTool
             if(motion.motionKeys[nodeId].keyData[keyDataId].frameTimings.Count > 0)
             {
                 internalTimeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId];
-                timeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId] / 0x10;
+                timeUD.Value = motion.motionKeys[nodeId].keyData[keyDataId].frameTimings[keyId] / motion.motionKeys[nodeId].keyData[keyDataId].GetTimeMultiplier();
             }
-
-            switch (motion.motionKeys[nodeId].keyData[keyDataId].dataType)
+            var dataType = motion.motionKeys[nodeId].keyData[keyDataId].dataType;
+            if ((dataType & 0x80) > 0)
+            {
+                dataType -= 0x80;
+            }
+            switch (dataType)
             {
                 //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                 case 0x1:
@@ -121,7 +125,7 @@ namespace AquaModelTool
         {
             if (motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.Count > 0)
             {
-                motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId] = (ushort)(timeUD.Value * 0x10);
+                motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId] = ((uint)(timeUD.Value * motion.motionKeys[keyNodeId].keyData[keyDataId].GetTimeMultiplier()));
                 internalTimeUD.Value = motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId];
             }
             else
@@ -141,7 +145,7 @@ namespace AquaModelTool
         {
             //Handle node ordering
             motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.Sort();
-            int index = motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.IndexOf((ushort)internalTimeUD.Value);
+            int index = motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.IndexOf((uint)internalTimeUD.Value);
 
             var parent = node.Parent;
             parent.Nodes.RemoveAt(nodeIndex);
@@ -185,8 +189,8 @@ namespace AquaModelTool
         {
             if(motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings.Count > 0)
             {
-                motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId] = (ushort)internalTimeUD.Value;
-                timeUD.Value = internalTimeUD.Value / 0x10;
+                motion.motionKeys[keyNodeId].keyData[keyDataId].frameTimings[keyId] = (uint)internalTimeUD.Value;
+                timeUD.Value = internalTimeUD.Value / motion.motionKeys[keyNodeId].keyData[keyDataId].GetTimeMultiplier();
             } else
             {
                 MessageBox.Show("Cannot change frame time when there is only one keyframe in this section!");

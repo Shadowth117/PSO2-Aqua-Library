@@ -202,6 +202,7 @@
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="Extra\PSZTextBin.cs" />
     <Compile Include="Extra\ReferenceGenerator.cs" />
+    <Compile Include="Extra\SoulsConvert.cs" />
     <Compile Include="Extra\StageFilenameConstants.cs" />
     <Compile Include="Native\Fbx\FbxExporter.cs" />
     <Compile Include="Native\Fbx\Interfaces\IFbxExporter.cs" />
@@ -235,6 +236,7 @@
     <Compile Include="Nova\Structures\stamData.cs" />
     <Compile Include="Nova\Structures\XgmiStruct.cs" />
     <Compile Include="Nova\Structures\ydbmStruct.cs" />
+    <Compile Include="OtherStructs\DNAVNavmesh.cs" />
     <Compile Include="OtherStructs\ELPR_EnlightenParam.cs" />
     <Compile Include="OtherStructs\NexusMesh.cs" />
     <Compile Include="OtherStructs\PRMModel.cs" />
@@ -267,6 +269,10 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj">
+      <Project>{640dc10b-6dcd-4295-8d41-2be08fb053f1}</Project>
+      <Name>SoulsFormats</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">
       <Project>{f0c5b71b-5956-42fe-8dac-10759cf6bee0}</Project>
       <Name>ZamboniLib</Name>

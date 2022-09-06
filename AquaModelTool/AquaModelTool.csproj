@@ -307,6 +307,10 @@
       <Project>{ac648cf6-3e5c-4c7a-8a6e-083ae962fa1c}</Project>
       <Name>AquaModelLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj">
+      <Project>{640dc10b-6dcd-4295-8d41-2be08fb053f1}</Project>
+      <Name>SoulsFormats</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">
       <Project>{f0c5b71b-5956-42fe-8dac-10759cf6bee0}</Project>
       <Name>ZamboniLib</Name>

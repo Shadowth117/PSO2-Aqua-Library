@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30225.117
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AquaModelLibrary", "AquaModelLibrary\AquaModelLibrary.csproj", "{AC648CF6-3E5C-4C7A-8A6E-083AE962FA1C}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeaponInstaller", "WeaponInstaller\WeaponInstaller.csproj", "{6F33F7F5-87AD-4DD9-A086-6AFEB6131CF9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AquaModelLibrary.Native", "AquaModelLibrary.Native\AquaModelLibrary.Native.vcxproj", "{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsFormats", "SoulsFormats\SoulsFormats\SoulsFormats.csproj", "{640DC10B-6DCD-4295-8D41-2BE08FB053F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -156,6 +158,24 @@ Global
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.x86|x64.Build.0 = Debug|x64
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.x86|x86.ActiveCfg = Debug|Win32
 		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}.x86|x86.Build.0 = Debug|Win32
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Debug|x64.Build.0 = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Debug|x86.Build.0 = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Release|x64.ActiveCfg = Release|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Release|x64.Build.0 = Release|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Release|x86.ActiveCfg = Release|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.Release|x86.Build.0 = Release|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.x86|Any CPU.Build.0 = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.x86|x64.ActiveCfg = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.x86|x64.Build.0 = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.x86|x86.ActiveCfg = Debug|Any CPU
+		{640DC10B-6DCD-4295-8D41-2BE08FB053F1}.x86|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

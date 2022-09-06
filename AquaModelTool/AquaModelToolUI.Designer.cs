@@ -111,9 +111,10 @@
             this.pSZEnemyZoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSZObjZoneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pSZEnemyDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.dumpAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -321,7 +322,8 @@
             this.convertPSPortableunjToolStripMenuItem1,
             this.convertPSOnrelTotrpToolStripMenuItem,
             this.convertPSOxvrToolStripMenuItem,
-            this.dumpPSOxvmToolStripMenuItem});
+            this.dumpPSOxvmToolStripMenuItem,
+            this.convertSoulsflverToolStripMenuItem});
             this.otherGamesToolStripMenuItem.Name = "otherGamesToolStripMenuItem";
             this.otherGamesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
             this.otherGamesToolStripMenuItem.Text = "Other Games";
@@ -775,6 +777,13 @@
             this.pSZEnemyDataToolStripMenuItem.Text = "PSZEnemyData";
             this.pSZEnemyDataToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyDataToolStripMenuItem_Click);
             // 
+            // dumpAllTextToolStripMenuItem
+            // 
+            this.dumpAllTextToolStripMenuItem.Name = "dumpAllTextToolStripMenuItem";
+            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dumpAllTextToolStripMenuItem.Text = "DumpAllText";
+            this.dumpAllTextToolStripMenuItem.Click += new System.EventHandler(this.dumpAllTextToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -793,12 +802,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // dumpAllTextToolStripMenuItem
+            // convertSoulsflverToolStripMenuItem
             // 
-            this.dumpAllTextToolStripMenuItem.Name = "dumpAllTextToolStripMenuItem";
-            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.dumpAllTextToolStripMenuItem.Text = "DumpAllText";
-            this.dumpAllTextToolStripMenuItem.Click += new System.EventHandler(this.dumpAllTextToolStripMenuItem_Click);
+            this.convertSoulsflverToolStripMenuItem.Name = "convertSoulsflverToolStripMenuItem";
+            this.convertSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.convertSoulsflverToolStripMenuItem.Text = "Convert Souls .flver";
+            this.convertSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -907,6 +916,7 @@
         private System.Windows.Forms.ToolStripMenuItem pSZObjZoneToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pSZEnemyDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpAllTextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertSoulsflverToolStripMenuItem;
     }
 }
 

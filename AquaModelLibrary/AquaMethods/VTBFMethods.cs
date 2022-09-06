@@ -1884,7 +1884,7 @@ namespace AquaModelLibrary
             //Write the actual timings
             for (int j = 0; j < mkey.frameTimings.Count; j++)
             {
-                outBytes.AddRange(BitConverter.GetBytes(mkey.frameTimings[j]));
+                outBytes.AddRange(BitConverter.GetBytes((ushort)mkey.frameTimings[j]));
             }
 
             //Write frame data. Types will vary.

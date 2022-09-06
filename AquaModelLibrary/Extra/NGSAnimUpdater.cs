@@ -231,11 +231,11 @@ namespace AquaModelLibrary
                             mkey.frameTimings.Add(0x9);
                         } else if(key == mkey.keyCount - 1)
                         {
-                            mkey.frameTimings.Add((ushort)((key * 0x10) + 0xA));
+                            mkey.frameTimings.Add((uint)((key * mkey.GetTimeMultiplier()) + 0xA));
                         }
                         else
                         {
-                            mkey.frameTimings.Add((ushort)((key * 0x10) + 0x8));
+                            mkey.frameTimings.Add((uint)((key * mkey.GetTimeMultiplier()) + 0x8));
                         }
                         mkey.intKeys.Add(0x31);
                     }

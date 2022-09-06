@@ -536,7 +536,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                     FbxTime lTime;
                     if (keySet->frameTimings->Count > 0)
                     {
-                        lTime.SetFrame(keySet->frameTimings[t] / 0x10);
+                        lTime.SetFrame(keySet->frameTimings[t] / keySet->GetTimeMultiplier());
                     }
                     else {
                         lTime.SetFrame(0);
