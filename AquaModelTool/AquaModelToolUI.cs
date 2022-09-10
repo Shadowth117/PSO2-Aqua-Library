@@ -3337,7 +3337,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select Souls flver file(s)",
-                Filter = "Souls flver Files (*.flver)|*.flver|All Files (*.*)|*",
+                Filter = "Souls flver Files (*.flver, *.flv)|*.flver;*.flv|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -3348,15 +3348,14 @@ namespace AquaModelTool
                     aquaUI.aqua.aquaModels.Clear();
                     ModelSet set = new ModelSet();
                     set.models.Add(SoulsConvert.ReadFlver(file, out AquaNode aqn));
+                    var outName = Path.ChangeExtension(file, ".aqp");
                     if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
                     {
                         aquaUI.aqua.aquaModels.Add(set);
                         aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
-
-                        var outName = Path.ChangeExtension(file, ".aqp");
                         aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
-                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                     }
+                    AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                     /*
                     try
                     {

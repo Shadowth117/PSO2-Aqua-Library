@@ -60,6 +60,7 @@ namespace AquaModelLibrary.Extra
 
                 //Create AQN node
                 NODE aqNode = new NODE();
+                aqNode.boneShort1 = 0x1C0;
                 aqNode.animatedFlag = 1;
                 aqNode.parentId = parentId;
                 aqNode.unkNode = -1;
@@ -88,16 +89,7 @@ namespace AquaModelLibrary.Extra
                 var mesh = flver.Meshes[i];
                 
                 var nodeMatrix = Matrix4x4.Identity;
-                //for (int bn = 0; bn < eertNodes.boneCount; bn++)
-                //{
-                //    var node = eertNodes.rttaList[bn];
-                //    if (node.meshNodePtr == mesh.oaPos)
-                //    {
-                //        nodeMatrix = node.nodeMatrix;
-                //        break;
-                //    }
-                //}
-                
+
                 //Vert data
                 var vertCount = mesh.Vertices.Count;
                 AquaObject.VTXL vtxl = new AquaObject.VTXL();
@@ -144,7 +136,13 @@ namespace AquaModelLibrary.Extra
                 {
                     var vert = mesh.Vertices[v];
                     vtxl.vertPositions.Add(vert.Position);
-                    vtxl.vertNormals.Add(-vert.Normal);
+                    if(flver is FLVER0)
+                    {
+                        vtxl.vertNormals.Add(-vert.Normal);
+                    } else
+                    {
+                        vtxl.vertNormals.Add(vert.Normal);
+                    }
 
                     if (vert.UVs.Count > 0)
                     {
@@ -193,15 +191,6 @@ namespace AquaModelLibrary.Extra
                     }
                 }
 
-                //Fix vert transforms
-                /*for (int p = 0; p < vtxl.vertPositions.Count; p++)
-                {
-                    vtxl.vertPositions[p] = Vector3.Transform(vtxl.vertPositions[p], nodeMatrix);
-                    if (vtxl.vertNormals.Count > 0)
-                    {
-                        vtxl.vertNormals[p] = Vector3.TransformNormal(vtxl.vertNormals[p], nodeMatrix);
-                    }
-                }*/
                 vtxl.convertToLegacyTypes();
                 aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(vtxl, out int vc));
                 aqp.vtxlList.Add(vtxl);
