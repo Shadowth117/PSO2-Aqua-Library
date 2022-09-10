@@ -625,12 +625,10 @@ namespace AquaModelLibrary
                                 case 0x3:
                                     vtxl.vertPositions.Add(streamReader.Read<Vector3>());
                                     break;
-                                case 0x99: //For nova
-                                    var half0 = streamReader.Read<Half>();
-                                    var half1 = streamReader.Read<Half>();
-                                    var half2 = streamReader.Read<Half>();
-                                    streamReader.Read<Half>();
-                                    vtxl.vertPositions.Add(new Vector3(HalfHelper.HalfToSingle(half0), HalfHelper.HalfToSingle(half1), HalfHelper.HalfToSingle(half2)));
+                                case 0x13:
+                                case 0x99: //Nova
+                                    vtxl.vertPositions.Add(new Vector3(streamReader.Read<Half>(), streamReader.Read<Half>(), streamReader.Read<Half>()));
+                                    var fillerHalf = streamReader.Read<ushort>(); //Technically another half float. Should always be 1.
                                     break;
                                 default:
                                     break;
@@ -658,6 +656,10 @@ namespace AquaModelLibrary
                                 case 0xF:
                                     vtxl.vertNormalsNGS.Add(Read4Shorts(streamReader));
                                     break;
+                                case 0x13:
+                                    vtxl.vertNormals.Add(new Vector3(streamReader.Read<Half>(), streamReader.Read<Half>(), streamReader.Read<Half>()));
+                                    var fillerHalf = streamReader.Read<ushort>(); //Technically another half float. Should always be 1.
+                                    break;
                                 default:
                                     throw new Exception($"Unexpected vert normal struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
                             }
@@ -680,6 +682,9 @@ namespace AquaModelLibrary
                                 case 0xE:
                                     vtxl.uv1ListNGS.Add(Read2Shorts(streamReader));
                                     break;
+                                case 0x12:
+                                    vtxl.uv1List.Add(new Vector2(streamReader.Read<Half>(), streamReader.Read<Half>()));
+                                    break;
                                 case 0x99: //For nova
                                     vtxl.uv1List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
                                     break;
@@ -695,6 +700,9 @@ namespace AquaModelLibrary
                                     break;
                                 case 0xE:
                                     vtxl.uv2ListNGS.Add(Read2Shorts(streamReader));
+                                    break;
+                                case 0x12:
+                                    vtxl.uv2List.Add(new Vector2(streamReader.Read<Half>(), streamReader.Read<Half>()));
                                     break;
                                 case 0x99: //For nova
                                     vtxl.uv2List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
@@ -712,6 +720,9 @@ namespace AquaModelLibrary
                                 case 0xE:
                                     vtxl.uv3ListNGS.Add(Read2Shorts(streamReader));
                                     break;
+                                case 0x12:
+                                    vtxl.uv3List.Add(new Vector2(streamReader.Read<Half>(), streamReader.Read<Half>()));
+                                    break;
                                 case 0x99: //For nova
                                     vtxl.uv3List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
                                     break;
@@ -727,6 +738,9 @@ namespace AquaModelLibrary
                                     break;
                                 case 0xE:
                                     vtxl.uv4ListNGS.Add(Read2Shorts(streamReader));
+                                    break;
+                                case 0x12:
+                                    vtxl.uv4List.Add(new Vector2(streamReader.Read<Half>(), streamReader.Read<Half>()));
                                     break;
                                 case 0x99: //For nova
                                     vtxl.uv4List.Add(UshortsToVector2(Read2Ushorts(streamReader)));
@@ -744,6 +758,10 @@ namespace AquaModelLibrary
                                 case 0xF:
                                     vtxl.vertTangentListNGS.Add(Read4Shorts(streamReader));
                                     break;
+                                case 0x13:
+                                    vtxl.vertTangentList.Add(new Vector3(streamReader.Read<Half>(), streamReader.Read<Half>(), streamReader.Read<Half>()));
+                                    var fillerHalf = streamReader.Read<ushort>(); //Technically another half float. Should always be 1.
+                                    break;
                                 default:
                                     throw new Exception($"Unexpected vert tangent struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
                             }
@@ -756,6 +774,10 @@ namespace AquaModelLibrary
                                     break;
                                 case 0xF:
                                     vtxl.vertBinormalListNGS.Add(Read4Shorts(streamReader));
+                                    break;
+                                case 0x13:
+                                    vtxl.vertBinormalList.Add(new Vector3(streamReader.Read<Half>(), streamReader.Read<Half>(), streamReader.Read<Half>()));
+                                    var fillerHalf = streamReader.Read<ushort>(); //Technically another half float. Should always be 1.
                                     break;
                                 default:
                                     throw new Exception($"Unexpected vert binormal struct type {vtxeSet.vertDataTypes[vtxeIndex].structVariation}");
