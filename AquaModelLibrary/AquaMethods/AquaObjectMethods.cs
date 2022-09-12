@@ -2197,6 +2197,18 @@ namespace AquaModelLibrary
                     texNames.Add("pl_body_base_subnormal_02.dds");
                     texNames.Add("pl_body_base_subnormal_03.dds");
                     break;
+                case "rhr":
+                case "reboot_hair":
+                    if (mat.shaderNames == null)
+                    {
+                        mat.shaderNames = new List<string>() { "1103p", "1103" };
+                    }
+                    texNames.Add("pl_hair_diffuse.dds");
+                    texNames.Add("pl_hair_multi.dds");
+                    texNames.Add("pl_hair_normal.dds");
+                    texNames.Add("pl_hair_alpha.dds");
+                    texNames.Add("pl_hair_noise.dds");
+                    break;
                 case "rbd_sk":
                 case "rbd_skin":
                 case "reboot_bd_skin":
@@ -2255,7 +2267,13 @@ namespace AquaModelLibrary
                     case "pl_eye_diffuse.dds":
                         return "ey";
                     case "pl_hair_diffuse.dds":
-                        return "hr";
+                        switch (names[names.Count - 1])
+                        {
+                            case "pl_hair_noise.dds":
+                                return "rhr";
+                            default:
+                                return "hr";
+                        }
                     case "pl_face_diffuse.dds":
                         return "fc";
                     case "pl_body_diffuse.dds":
