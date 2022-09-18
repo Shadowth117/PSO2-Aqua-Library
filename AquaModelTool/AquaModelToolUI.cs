@@ -1731,50 +1731,6 @@ namespace AquaModelTool
 
             }
         }
-        private void importAXSToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PS Nova axs file(s)",
-                Filter = "PS Nova axs Files (*.axs,*.aif)|*.axs;*.aif|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                //System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("C:\\axsout.txt"));
-                //Read Xvrs
-                List<string> failedFiles = new List<string>();
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    try
-                    {
-                        aquaUI.aqua.aquaModels.Clear();
-                        ModelSet set = new ModelSet();
-                        set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
-                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
-                        {
-                            aquaUI.aqua.aquaModels.Add(set);
-                            aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
-
-                            var outName = Path.ChangeExtension(file, ".aqp");
-                            aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
-                            AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
-                        }
-                    }
-                    catch (Exception exc)
-                    {
-                        failedFiles.Add(file);
-                        failedFiles.Add(exc.Message);
-                    }
-                }
-
-#if DEBUG
-                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
-#endif
-                System.Diagnostics.Debug.Unindent();
-                System.Diagnostics.Debug.Flush();
-            }
-        }
 
         private void importAAIToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2792,6 +2748,7 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                //System.Diagnostics.Debug.Listeners.Add(new System.Diagnostics.TextWriterTraceListener("C:\\axsout.txt"));
                 List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
@@ -2799,7 +2756,7 @@ namespace AquaModelTool
                     {
                         aquaUI.aqua.aquaModels.Clear();
                         ModelSet set = new ModelSet();
-                        set.models.Add(AXSMethods.ReadAXS(file, out AquaNode aqn));
+                        set.models.Add(AXSMethods.ReadAXS(file, true, out AquaNode aqn));
                         if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
                         {
                             aquaUI.aqua.aquaModels.Add(set);
@@ -2810,10 +2767,18 @@ namespace AquaModelTool
                             AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                         }
                     }
-                    catch
+                    catch (Exception exc)
                     {
+                        failedFiles.Add(file);
+                        failedFiles.Add(exc.Message);
                     }
                 }
+
+#if DEBUG
+                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
+#endif
+                System.Diagnostics.Debug.Unindent();
+                System.Diagnostics.Debug.Flush();
             }
         }
 

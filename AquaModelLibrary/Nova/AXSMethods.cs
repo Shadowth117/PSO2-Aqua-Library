@@ -19,7 +19,7 @@ namespace AquaModelLibrary.Nova
     {
         //We're not realistically going to fully convert everything, but we can get vertex data and bones if nothing else
         //Returns an aqp ready for the ConvertToNGSPSO2Mesh method
-        public static AquaObject ReadAXS(string filePath, out AquaNode aqn)
+        public static AquaObject ReadAXS(string filePath, bool writeTextures, out AquaNode aqn)
         {
             AquaObject aqp = new NGSAquaObject();
             aqn = new AquaNode();
@@ -122,7 +122,7 @@ namespace AquaModelLibrary.Nova
                         //If there's a parent, multiply by it
                         if (i != 0)
                         {
-                            if(rttaNode.parentNodeId == -1)
+                            if(rttaNode.parentNodeId < 0)
                             {
                                 parentId = 0;
                             }
@@ -213,8 +213,12 @@ namespace AquaModelLibrary.Nova
                     {
                         string name = Path.GetFileName(filePath);
                         Debug.WriteLine($"{name}_xgmi_{ i}");
-                        var image = AIFMethods.GetImage(xgmiData, buffer);
-                        File.WriteAllBytes(filePath.Replace(ext, $"_tex_{i}" + ".dds"), image);
+
+                        if (writeTextures)
+                        {
+                            var image = AIFMethods.GetImage(xgmiData, buffer);
+                            File.WriteAllBytes(filePath.Replace(ext, $"_tex_{i}" + ".dds"), image);
+                        }
                     }
                     catch(Exception exc)
                     {
@@ -228,7 +232,8 @@ namespace AquaModelLibrary.Nova
                     }
                     buffer = null;
                 }
-                
+
+
 
                 //Read model data - Since ffubs are initialized, they default to 0. 
                 int vertFfubPadding = imgFfub.structSize;
@@ -257,7 +262,17 @@ namespace AquaModelLibrary.Nova
                     AquaObject.VTXL vtxl = new AquaObject.VTXL();
 
                     streamReader.Seek((meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset), SeekOrigin.Begin);
+                    Debug.WriteLine(streamReader.Position().ToString("X"));
                     AquaObjectMethods.ReadVTXL(streamReader, mesh.vtxe, vtxl, vertCount, mesh.vtxe.vertDataTypes.Count);
+                    
+                    //Account for indices without weights
+                    /*if(vtxl.vertWeightIndices.Count > 0 && vtxl.vertWeights.Count == 0)
+                    {
+                        for(int v = 0; v < vtxl.vertWeightIndices.Count; v++)
+                        {
+                            vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+                        }
+                    }*/
                     vtxl.convertToLegacyTypes();
 
                     //Fix vert transforms
@@ -353,7 +368,7 @@ namespace AquaModelLibrary.Nova
             return texNames;
         }
 
-        public static AquaObject.VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, int vertData4, int trueLength)
+        public static AquaObject.VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, byte vertData4, byte vertData5, byte vertData6, byte vertData7, int trueLength)
         {
             AquaObject.VTXE vtxe = new AquaObject.VTXE();
             int curLength = 0;
@@ -471,8 +486,11 @@ namespace AquaModelLibrary.Nova
             //Weights and Weight Indices
             if ((vertData3 & 0x40) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x1, 0x11, curLength));
-                curLength += 0x8;
+                if((vertData5 & 0x1) > 0)
+                {
+                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x1, 0x11, curLength));
+                    curLength += 0x8;
+                }
                 vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0xb, 0x7, curLength));
                 curLength += 0x4;
             }
@@ -486,9 +504,10 @@ namespace AquaModelLibrary.Nova
                 curLength += 0x4;
             }
 
-            if(curLength != trueLength)
+            if(curLength != trueLength || vertData6 > 0 || vertData7 > 0)
             {
-                Debug.WriteLine(curLength + " != " + trueLength + " " + vertData0.ToString("X") + " " + vertData1.ToString("X") + " " + vertData2.ToString("X") + " " + vertData3.ToString("X"));
+                Debug.WriteLine(curLength + " != " + trueLength + " " + vertData0.ToString("X") + " " + vertData1.ToString("X") + " " + vertData2.ToString("X") + " " + vertData3.ToString("X") 
+                    + " " + vertData4.ToString("X") + " " + vertData5.ToString("X") + " " + vertData6.ToString("X") + " " + vertData7.ToString("X"));
             }
 
             return vtxe;
@@ -669,7 +688,8 @@ namespace AquaModelLibrary.Nova
                         break;
                     case salv:
                         mesh.salvStr = streamReader.ReadSalv();
-                        mesh.vtxe = GenerateGenericPSO2VTXE(mesh.salvStr.vertDef0, mesh.salvStr.vertDef1, mesh.salvStr.vertDef2, mesh.salvStr.vertDef3, mesh.salvStr.vertDef4, mesh.salvStr.vertLen);
+                        mesh.vtxe = GenerateGenericPSO2VTXE(mesh.salvStr.vertDef0, mesh.salvStr.vertDef1, mesh.salvStr.vertDef2, mesh.salvStr.vertDef3, mesh.salvStr.vertDef4, mesh.salvStr.vertDef5, 
+                            mesh.salvStr.vertDef6, mesh.salvStr.vertDef7, mesh.salvStr.vertLen);
                         break;
                     case ipnb:
                         mesh.ipnbStr = streamReader.ReadIpnb();
@@ -739,7 +759,10 @@ namespace AquaModelLibrary.Nova
             salvStr.vertDef1 = streamReader.Read<byte>();
             salvStr.vertDef2 = streamReader.Read<byte>();
             salvStr.vertDef3 = streamReader.Read<byte>();
-            salvStr.vertDef4 = streamReader.Read<int>();
+            salvStr.vertDef4 = streamReader.Read<byte>();
+            salvStr.vertDef5 = streamReader.Read<byte>();
+            salvStr.vertDef6 = streamReader.Read<byte>();
+            salvStr.vertDef7 = streamReader.Read<byte>();
             salvStr.vertLen = streamReader.Read<int>();
             salvStr.int_1C = streamReader.Read<int>();
 
@@ -755,8 +778,10 @@ namespace AquaModelLibrary.Nova
             salvStr.md5_2_2 = streamReader.Read<long>();
 
 #if DEBUG
-
-            Debug.WriteLine($"vertDef4 == {salvStr.vertDef4}");
+            if(salvStr.vertDef4 > 0)
+            {
+                Debug.WriteLine($"vertDef4 == {salvStr.vertDef4}");
+            }
             if ((salvStr.vertDef0 & 0x2) > 0)
             {
                 Debug.WriteLine("vertDef0 & 0x2 == true");

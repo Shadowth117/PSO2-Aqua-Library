@@ -52,7 +52,7 @@ namespace AquaModelLibrary
             if (magic == 0x41534620) //Nova axs FSA magic
             {
                 ModelSet set = new ModelSet();
-                set.models.Add(Nova.AXSMethods.ReadAXS(inFilename, out var bones));
+                set.models.Add(Nova.AXSMethods.ReadAXS(inFilename, true, out var bones));
                 aquaBones.Add(bones);
 
                 return false;
