@@ -633,7 +633,7 @@ namespace AquaModelLibrary
                 PRMModel.PRMVert vert = new PRMModel.PRMVert();
                 var aiPos = aiMesh.Vertices[vertId];
                 var newPos = (new Vector3(aiPos.X, aiPos.Y, aiPos.Z));
-                vert.pos = (Vector3.Transform(newPos, nodeMat) * 2.54f);
+                vert.pos = (Vector3.Transform(newPos, nodeMat));
 
                 if (aiMesh.HasVertexColors(0))
                 {
