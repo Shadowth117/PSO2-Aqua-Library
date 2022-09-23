@@ -1680,7 +1680,6 @@ namespace AquaModelLibrary
                     }
                 }
             }
-
             model.bonePalette = newBonePalette;
         }
 

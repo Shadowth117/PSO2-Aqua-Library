@@ -3397,6 +3397,7 @@ namespace AquaModelTool
                     {
                         aquaUI.aqua.aquaModels.Add(set);
                         aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                        set.models[0].ConvertToLegacyTypes();
                         set.models[0].CreateTrueVertWeights();
 
                         FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), false);

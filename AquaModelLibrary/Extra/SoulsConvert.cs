@@ -31,6 +31,7 @@ namespace AquaModelLibrary.Extra
         
         public static AquaObject FlverToAqua(IFlver flver, out AquaNode aqn)
         {
+            StringBuilder dbLog = new StringBuilder();
             AquaObject aqp = new NGSAquaObject();
             //aqp.bonePalette = new List<uint>();
             aqn = new AquaNode();
@@ -42,6 +43,17 @@ namespace AquaModelLibrary.Extra
             {
                 //aqp.bonePalette.Add((uint)i);
                 var flverBone = flver.Bones[i];
+                
+                //Translation adjustment
+                var boneTranslation = flverBone.Translation;
+                boneTranslation.X = -flverBone.Translation.X;
+                flverBone.Translation = boneTranslation;
+                
+                //Rotation adjustment
+                var boneRotation = flverBone.Rotation;
+                boneRotation.Z = -boneRotation.Z;
+                flverBone.Rotation = boneRotation;
+
                 Matrix4x4 mat = flverBone.ComputeLocalTransform();
                 Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
                 var parentId = flverBone.ParentIndex;
@@ -162,13 +174,14 @@ namespace AquaModelLibrary.Extra
                     throw new Exception("Unexpected flver variant");
                 }
 
+                dbLog.AppendLine($"Mesh {i}");
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
                     vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMat));
                     if(flver is FLVER0)
                     {
-                        vtxl.vertNormals.Add(-vert.Normal);
+                        vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
                     } else
                     {
                         vtxl.vertNormals.Add(vert.Normal);
@@ -210,6 +223,7 @@ namespace AquaModelLibrary.Extra
                     {
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
                         vtxl.vertWeightIndices.Add(new byte[] { (byte)vert.BoneIndices[0], (byte)vert.BoneIndices[1], (byte)vert.BoneIndices[2], (byte)vert.BoneIndices[3] });
+                        dbLog.AppendLine($"{vert.BoneIndices[0]} {vert.BoneIndices[1]} {vert.BoneIndices[2]} {vert.BoneIndices[3] } | {vert.BoneWeights[0]} {vert.BoneWeights[1]} {vert.BoneWeights[2]} {vert.BoneWeights[3]}");
                     } else if(vert.BoneIndices.Length > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
@@ -233,7 +247,7 @@ namespace AquaModelLibrary.Extra
                 {
                     for (int id = 0; id < indices.Count - 2; id += 3)
                     {
-                        triList.Add(new Vector3(indices[id], indices[id + 2], indices[id + 1]));
+                        triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
                     }
                 }
                 else
@@ -268,6 +282,7 @@ namespace AquaModelLibrary.Extra
                 aqp.tempMats.Add(mat);
             }
 
+            File.WriteAllText("C:\\testlog.txt", dbLog.ToString());
             return aqp;
         }
     }

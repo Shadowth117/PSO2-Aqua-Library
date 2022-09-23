@@ -454,6 +454,7 @@ namespace AquaModelLibrary
                     objc.fBlock3 = -1;
                     objc.globalStrip3LengthCount = 1;
                     objc.unkCount3 = 1;
+                    objc.bonePaletteOffset = 1;
                     if (!zeroBounds)
                     {
                         objc.bounds = GenerateBounding(outModel.vtxlList);

@@ -2104,6 +2104,13 @@ namespace AquaModelLibrary
                 vtxlList[i].fixWeightsFromBoneCount(maxBone);
             }
         }
+        public void ConvertToLegacyTypes()
+        {
+            for (int i = 0; i < vtxlList.Count; i++)
+            {
+                vtxlList[i].convertToLegacyTypes();
+            }
+        }
 
         public void addUnfilledUVs()
         {
