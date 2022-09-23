@@ -46,7 +46,9 @@ namespace AquaModelLibrary
             { (int)NGSVertFlags.VertTangent, 0xF }, //(0x20 Tangents)
             { (int)NGSVertFlags.VertBinormal, 0xF }, //(0x21 Binormals)
             { (int)NGSVertFlags.Vert0x22, 0xC}, //(0x22 VertUnk0)
-            { (int)NGSVertFlags.Vert0x23, 0xC}  //(0x23 VertUnk1)
+            { (int)NGSVertFlags.Vert0x23, 0xC},  //(0x23 VertUnk1)
+            { (int)NGSVertFlags.Vert0x24, 0xC}, //(0x24 VertUnk0)
+            { (int)NGSVertFlags.Vert0x25, 0xC}  //(0x25 VertUnk1)
         };
 
         public struct unkStruct1
@@ -157,6 +159,16 @@ namespace AquaModelLibrary
             ext.entryFlag1 = entryFlag1;
             ext.entryFlag2 = entryFlag2;
             ext.entryFloats = entryFloats;
+
+            return ext;
+        }
+        public static SHADExtraEntry CreateExtra(short entryFlag0, string entryString, short entryFlag1, short entryFlag2)
+        {
+            SHADExtraEntry ext = new SHADExtraEntry();
+            ext.entryFlag0 = entryFlag0;
+            ext.entryString.SetString(entryString);
+            ext.entryFlag1 = entryFlag1;
+            ext.entryFlag2 = entryFlag2;
 
             return ext;
         }
