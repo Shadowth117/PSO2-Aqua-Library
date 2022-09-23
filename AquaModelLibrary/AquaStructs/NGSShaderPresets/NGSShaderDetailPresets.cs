@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using static AquaModelLibrary.NGSAquaObject;
 
 namespace AquaModelLibrary.AquaStructs.NGSShaderPresets

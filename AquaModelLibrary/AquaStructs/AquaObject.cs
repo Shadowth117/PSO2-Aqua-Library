@@ -1570,6 +1570,14 @@ namespace AquaModelLibrary
             }
         }
 
+        public void CreateTrueVertWeights()
+        {
+            foreach(var vtxl in vtxlList)
+            {
+                vtxl.createTrueVertWeights();
+            }
+        }
+
         public class stripData
         {
             public bool psoTris = false;
@@ -1582,6 +1590,8 @@ namespace AquaModelLibrary
             //The strip data is in a separate place in 0xC33, but will be placed here for convenience
             //Triangles should be interpreted as 0, 1, 2 followed by 0, 2, 1. While this results in degenerate faces, wireframe views ingame show they are rendered with these.
             public List<ushort> triStrips = new List<ushort>(); //0xB8, type 0x86 
+
+            public List<Vector3> largeTriSet = new List<Vector3>(); //Shouldn't normally be used, mainly for special cases.
 
             public List<int> faceGroups = new List<int>(); //Count should match parent PSET's faceGroupCount. Unknown use. Seemingly groups sets of faces by order.
 
@@ -1606,6 +1616,10 @@ namespace AquaModelLibrary
 
             public List<Vector3> GetTriangles(bool removeDegenFaces = true)
             {
+                if(largeTriSet.Count > 0)
+                {
+                    return largeTriSet;
+                }
                 List<Vector3> tris = new List<Vector3>();
                 if (format0xC33 == false)
                 {

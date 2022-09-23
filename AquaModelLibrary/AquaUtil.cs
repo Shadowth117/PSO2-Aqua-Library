@@ -211,7 +211,8 @@ namespace AquaModelLibrary
         }
 
         //Temp material, vtxlList data or tempTri vertex data, and temptris are expected to be populated prior to this process. This should ALWAYS be run before any write attempts.
-        public void ConvertToNGSPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true)
+        //High count faces is a hack for data storage. NGS at this time does NOT support face counts greater than 65536!
+        public void ConvertToNGSPSO2Mesh(bool useUnrms, bool useFaceNormals, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true, bool useHighCountFaces = false)
         {
             for (int msI = 0; msI < aquaModels.Count; msI++)
             {
@@ -332,6 +333,12 @@ namespace AquaModelLibrary
                         var strips = new AquaObject.stripData();
                         strips.format0xC33 = true;
                         strips.triStrips = new List<ushort>(outModel.tempTris[i].toUshortArray());
+
+                        //Hack for specific situations. Should be removed if PSO2 ever clearly and officially adds support for this
+                        if(useHighCountFaces && strips.triStrips.Count > 65536)
+                        {
+                            strips.largeTriSet = outModel.tempTris[i].triList;
+                        }
                         strips.triIdCount = strips.triStrips.Count;
                         strips.faceGroups.Add(strips.triStrips.Count);
                         outModel.strips.Add(strips);

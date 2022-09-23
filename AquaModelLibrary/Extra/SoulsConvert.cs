@@ -34,6 +34,10 @@ namespace AquaModelLibrary.Extra
             AquaObject aqp = new NGSAquaObject();
             //aqp.bonePalette = new List<uint>();
             aqn = new AquaNode();
+            var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
+                                        0, 1, 0, 0,
+                                        0, 0, 1, 0,
+                                        0, 0, 0, 1);
             for (int i = 0; i < flver.Bones.Count; i++)
             {
                 //aqp.bonePalette.Add((uint)i);
@@ -50,6 +54,7 @@ namespace AquaModelLibrary.Extra
                                                   pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
                                                   pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
                                                   pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
+                    
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
                 }
@@ -87,13 +92,38 @@ namespace AquaModelLibrary.Extra
             for (int i = 0; i < flver.Meshes.Count; i++)
             {
                 var mesh = flver.Meshes[i];
-                
+
                 var nodeMatrix = Matrix4x4.Identity;
 
                 //Vert data
                 var vertCount = mesh.Vertices.Count;
                 AquaObject.VTXL vtxl = new AquaObject.VTXL();
 
+                if (mesh.Dynamic > 0)
+                {
+                    if(mesh is FLVER0.Mesh flv)
+                    {
+
+                        for (int b = 0; b < flv.BoneIndices.Length; b++)
+                        {
+                            if (flv.BoneIndices[b] == -1)
+                            {
+                                break;
+                            }
+                            vtxl.bonePalette.Add((ushort)flv.BoneIndices[b]);
+                        }
+                    } else if (mesh is FLVER2.Mesh flv2)
+                    {
+                        for (int b = 0; b < flv2.BoneIndices.Count; b++)
+                        {
+                            if (flv2.BoneIndices[b] == -1)
+                            {
+                                break;
+                            }
+                            vtxl.bonePalette.Add((ushort)flv2.BoneIndices[b]);
+                        }
+                    }
+                }
                 List<int> indices = new List<int>();
                 if (flver is FLVER0)
                 {
@@ -135,7 +165,7 @@ namespace AquaModelLibrary.Extra
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
-                    vtxl.vertPositions.Add(vert.Position);
+                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMat));
                     if(flver is FLVER0)
                     {
                         vtxl.vertNormals.Add(-vert.Normal);
@@ -199,13 +229,21 @@ namespace AquaModelLibrary.Extra
                 AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
 
                 List<Vector3> triList = new List<Vector3>();
-                for (int id = 0; id < indices.Count - 2; id += 3)
+                if (flver is FLVER0)
                 {
-                    ushort vi1 = (ushort)indices[id];
-                    ushort vi2 = (ushort)indices[id + 1];
-                    ushort vi3 = (ushort)indices[id + 2];
-                    triList.Add(new Vector3(vi1, vi2, vi3));
+                    for (int id = 0; id < indices.Count - 2; id += 3)
+                    {
+                        triList.Add(new Vector3(indices[id], indices[id + 2], indices[id + 1]));
+                    }
                 }
+                else
+                {
+                    for (int id = 0; id < indices.Count - 2; id += 3)
+                    {
+                        triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
+                    }
+                }
+
 
                 genMesh.triList = triList;
 

@@ -56,6 +56,8 @@
             this.convertPSOnrelTotrpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertPSOxvrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dumpPSOxvmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertSoulsflverTofbxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -114,7 +116,7 @@
             this.dumpAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.convertSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.assimpExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -323,7 +325,8 @@
             this.convertPSOnrelTotrpToolStripMenuItem,
             this.convertPSOxvrToolStripMenuItem,
             this.dumpPSOxvmToolStripMenuItem,
-            this.convertSoulsflverToolStripMenuItem});
+            this.convertSoulsflverToolStripMenuItem,
+            this.convertSoulsflverTofbxToolStripMenuItem});
             this.otherGamesToolStripMenuItem.Name = "otherGamesToolStripMenuItem";
             this.otherGamesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
             this.otherGamesToolStripMenuItem.Text = "Other Games";
@@ -331,37 +334,51 @@
             // convertPSNovaaxsaifToolStripMenuItem1
             // 
             this.convertPSNovaaxsaifToolStripMenuItem1.Name = "convertPSNovaaxsaifToolStripMenuItem1";
-            this.convertPSNovaaxsaifToolStripMenuItem1.Size = new System.Drawing.Size(207, 22);
+            this.convertPSNovaaxsaifToolStripMenuItem1.Size = new System.Drawing.Size(244, 22);
             this.convertPSNovaaxsaifToolStripMenuItem1.Text = "Convert PS Nova .axs/.aif";
             this.convertPSNovaaxsaifToolStripMenuItem1.Click += new System.EventHandler(this.convertPSNovaaxsaifToolStripMenuItem1_Click);
             // 
             // convertPSPortableunjToolStripMenuItem1
             // 
             this.convertPSPortableunjToolStripMenuItem1.Name = "convertPSPortableunjToolStripMenuItem1";
-            this.convertPSPortableunjToolStripMenuItem1.Size = new System.Drawing.Size(207, 22);
+            this.convertPSPortableunjToolStripMenuItem1.Size = new System.Drawing.Size(244, 22);
             this.convertPSPortableunjToolStripMenuItem1.Text = "Convert PS Portable .unj";
             this.convertPSPortableunjToolStripMenuItem1.Click += new System.EventHandler(this.convertPSPortableunjToolStripMenuItem1_Click);
             // 
             // convertPSOnrelTotrpToolStripMenuItem
             // 
             this.convertPSOnrelTotrpToolStripMenuItem.Name = "convertPSOnrelTotrpToolStripMenuItem";
-            this.convertPSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.convertPSOnrelTotrpToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.convertPSOnrelTotrpToolStripMenuItem.Text = "Convert PC PSO *n.rel";
             this.convertPSOnrelTotrpToolStripMenuItem.Click += new System.EventHandler(this.convertPSOnrelTotrpToolStripMenuItem_Click);
             // 
             // convertPSOxvrToolStripMenuItem
             // 
             this.convertPSOxvrToolStripMenuItem.Name = "convertPSOxvrToolStripMenuItem";
-            this.convertPSOxvrToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.convertPSOxvrToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.convertPSOxvrToolStripMenuItem.Text = "Convert PSO .xvr";
             this.convertPSOxvrToolStripMenuItem.Click += new System.EventHandler(this.convertPSOxvrToolStripMenuItem_Click);
             // 
             // dumpPSOxvmToolStripMenuItem
             // 
             this.dumpPSOxvmToolStripMenuItem.Name = "dumpPSOxvmToolStripMenuItem";
-            this.dumpPSOxvmToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.dumpPSOxvmToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
             this.dumpPSOxvmToolStripMenuItem.Text = "Dump PSO .xvm";
             this.dumpPSOxvmToolStripMenuItem.Click += new System.EventHandler(this.dumpPSOxvmToolStripMenuItem_Click);
+            // 
+            // convertSoulsflverToolStripMenuItem
+            // 
+            this.convertSoulsflverToolStripMenuItem.Name = "convertSoulsflverToolStripMenuItem";
+            this.convertSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.convertSoulsflverToolStripMenuItem.Text = "Convert Souls .flver to .aqp/.aqn";
+            this.convertSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverToolStripMenuItem_Click);
+            // 
+            // convertSoulsflverTofbxToolStripMenuItem
+            // 
+            this.convertSoulsflverTofbxToolStripMenuItem.Name = "convertSoulsflverTofbxToolStripMenuItem";
+            this.convertSoulsflverTofbxToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.convertSoulsflverTofbxToolStripMenuItem.Text = "Convert Souls .flver to .fbx";
+            this.convertSoulsflverTofbxToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverTofbxToolStripMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
@@ -730,7 +747,8 @@
             this.pSZEnemyZoneToolStripMenuItem,
             this.pSZObjZoneToolStripMenuItem,
             this.pSZEnemyDataToolStripMenuItem,
-            this.dumpAllTextToolStripMenuItem});
+            this.dumpAllTextToolStripMenuItem,
+            this.assimpExportToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -802,12 +820,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // convertSoulsflverToolStripMenuItem
+            // assimpExportToolStripMenuItem
             // 
-            this.convertSoulsflverToolStripMenuItem.Name = "convertSoulsflverToolStripMenuItem";
-            this.convertSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.convertSoulsflverToolStripMenuItem.Text = "Convert Souls .flver";
-            this.convertSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverToolStripMenuItem_Click);
+            this.assimpExportToolStripMenuItem.Name = "assimpExportToolStripMenuItem";
+            this.assimpExportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.assimpExportToolStripMenuItem.Text = "AssimpExport";
+            this.assimpExportToolStripMenuItem.Click += new System.EventHandler(this.assimpExportToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -917,6 +935,8 @@
         private System.Windows.Forms.ToolStripMenuItem pSZEnemyDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dumpAllTextToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertSoulsflverToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertSoulsflverTofbxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem assimpExportToolStripMenuItem;
     }
 }
 
