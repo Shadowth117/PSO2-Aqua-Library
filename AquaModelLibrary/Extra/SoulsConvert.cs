@@ -31,7 +31,6 @@ namespace AquaModelLibrary.Extra
         
         public static AquaObject FlverToAqua(IFlver flver, out AquaNode aqn)
         {
-            StringBuilder dbLog = new StringBuilder();
             AquaObject aqp = new NGSAquaObject();
             //aqp.bonePalette = new List<uint>();
             aqn = new AquaNode();
@@ -174,7 +173,6 @@ namespace AquaModelLibrary.Extra
                     throw new Exception("Unexpected flver variant");
                 }
 
-                dbLog.AppendLine($"Mesh {i}");
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
@@ -223,7 +221,6 @@ namespace AquaModelLibrary.Extra
                     {
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
                         vtxl.vertWeightIndices.Add(new byte[] { (byte)vert.BoneIndices[0], (byte)vert.BoneIndices[1], (byte)vert.BoneIndices[2], (byte)vert.BoneIndices[3] });
-                        dbLog.AppendLine($"{vert.BoneIndices[0]} {vert.BoneIndices[1]} {vert.BoneIndices[2]} {vert.BoneIndices[3] } | {vert.BoneWeights[0]} {vert.BoneWeights[1]} {vert.BoneWeights[2]} {vert.BoneWeights[3]}");
                     } else if(vert.BoneIndices.Length > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
@@ -282,7 +279,6 @@ namespace AquaModelLibrary.Extra
                 aqp.tempMats.Add(mat);
             }
 
-            File.WriteAllText("C:\\testlog.txt", dbLog.ToString());
             return aqp;
         }
     }
