@@ -148,7 +148,7 @@ namespace AquaModelLibrary.Extra
                         }
                         vtxl.bonePalette.Add((ushort)mesh0.BoneIndices[b]);
                     }
-                    indices = mesh0.Triangulate(((FLVER0)flver).Version);
+                    indices = mesh0.Triangulate(((FLVER0)flver).Header.Version);
                 }
                 else if (flver is FLVER2)
                 {

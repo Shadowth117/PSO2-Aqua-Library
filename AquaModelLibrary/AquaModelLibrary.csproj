@@ -270,7 +270,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj">
-      <Project>{640dc10b-6dcd-4295-8d41-2be08fb053f1}</Project>
+      <Project>{7abbe830-6de3-4ade-915c-2feeb20a45d4}</Project>
       <Name>SoulsFormats</Name>
     </ProjectReference>
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">

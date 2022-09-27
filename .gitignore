@@ -417,3 +417,7 @@ AquaModelLibrary.Native/Dependencies/FBX/include/
 AquaModelLibrary.Native/Dependencies/FBX/lib/
 
 WeaponInstaller/bin/
+
+obj/Release/net46/
+
+obj/Release/netstandard2.1/
