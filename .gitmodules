@@ -1,3 +1,6 @@
 [submodule "ZamboniLib"]
 	path = ZamboniLib
 	url = https://github.com/Shadowth117/ZamboniLib
+[submodule "SoulsFormats"]
+	path = SoulsFormats
+	url = https://github.com/JKAnderson/SoulsFormats.git
