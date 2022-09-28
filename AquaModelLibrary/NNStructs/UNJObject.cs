@@ -422,10 +422,10 @@ namespace AquaModelLibrary.NNStructs
             {
                 //Weight reading
                 Vector4 weights = new Vector4();
-                byte[] weightIndices = new byte[4];
+                int[] weightIndices = new int[4];
                 for (int j = 0; j < boneCount; j++)
                 {
-                    weightIndices[j] = (byte)animNodeMap[bonePalette[j]];
+                    weightIndices[j] = animNodeMap[bonePalette[j]];
                     switch (weightFormat)
                     {
                         case UINT8:

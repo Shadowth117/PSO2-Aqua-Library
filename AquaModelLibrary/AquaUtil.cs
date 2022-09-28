@@ -271,6 +271,9 @@ namespace AquaModelLibrary
                         if (aquaModels[msI].models[aqI].bonePalette == null || aquaModels[msI].models[aqI].bonePalette.Count == 0)
                         {
                             GenerateGlobalBonePalette(outModel);
+                        } else
+                        {
+                            OptimizeGlobalBonePalette(outModel);
                         }
                     }
                     if (splitVerts)
@@ -487,7 +490,6 @@ namespace AquaModelLibrary
                     {
                         VTXLFromFaceVerts(aquaModels[msI].models[aqI]);
                     }
-                    //Fix weights
                     //Fix weights
                     if (useRigid == false)
                     {

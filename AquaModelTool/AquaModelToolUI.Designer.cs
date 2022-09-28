@@ -58,6 +58,7 @@
             this.dumpPSOxvmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertSoulsflverTofbxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertModelToDemonsSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.batchPSO2ToFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchParsePSO2SetToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -115,9 +116,9 @@
             this.pSZEnemyDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dumpAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.assimpExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filenameButton = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.convertModelToDemonsSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -128,6 +129,7 @@
             this.extraToolStripMenuItem,
             this.toolStripSeparator2,
             this.toolsToolStripMenuItem,
+            this.filenameButton,
             this.debugToolStripMenuItem,
             this.debug2ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -381,6 +383,13 @@
             this.convertSoulsflverTofbxToolStripMenuItem.Size = new System.Drawing.Size(277, 22);
             this.convertSoulsflverTofbxToolStripMenuItem.Text = "Convert Souls .flver to .fbx";
             this.convertSoulsflverTofbxToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverTofbxToolStripMenuItem_Click);
+            // 
+            // convertModelToDemonsSoulsflverToolStripMenuItem
+            // 
+            this.convertModelToDemonsSoulsflverToolStripMenuItem.Name = "convertModelToDemonsSoulsflverToolStripMenuItem";
+            this.convertModelToDemonsSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(277, 22);
+            this.convertModelToDemonsSoulsflverToolStripMenuItem.Text = "Convert model to Demon\'s Souls .flver";
+            this.convertModelToDemonsSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertModelToDemonsSoulsflverToolStripMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
@@ -811,6 +820,12 @@
             this.assimpExportToolStripMenuItem.Text = "AssimpExport";
             this.assimpExportToolStripMenuItem.Click += new System.EventHandler(this.assimpExportToolStripMenuItem_Click);
             // 
+            // filenameButton
+            // 
+            this.filenameButton.Name = "filenameButton";
+            this.filenameButton.Size = new System.Drawing.Size(67, 23);
+            this.filenameButton.Text = "Filename";
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -828,13 +843,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 253);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // convertModelToDemonsSoulsflverToolStripMenuItem
-            // 
-            this.convertModelToDemonsSoulsflverToolStripMenuItem.Name = "convertModelToDemonsSoulsflverToolStripMenuItem";
-            this.convertModelToDemonsSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(277, 22);
-            this.convertModelToDemonsSoulsflverToolStripMenuItem.Text = "Convert model to Demon\'s Souls .flver";
-            this.convertModelToDemonsSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertModelToDemonsSoulsflverToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -947,6 +955,7 @@
         private System.Windows.Forms.ToolStripMenuItem convertSoulsflverTofbxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem assimpExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertModelToDemonsSoulsflverToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filenameButton;
     }
 }
 

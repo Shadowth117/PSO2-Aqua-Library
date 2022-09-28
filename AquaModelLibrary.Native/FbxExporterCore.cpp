@@ -221,7 +221,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
                 for each ( unsigned int index in vertexIndices )
                 {
-                    array<unsigned char>^ weightIndices = vtxl->trueVertWeightIndices[index];
+                    array<int>^ weightIndices = vtxl->trueVertWeightIndices[index];
                     Vector4 weights = vtxl->trueVertWeights[index];
 
                     for (int wt = 0; wt < weightIndices->Length; wt++)
@@ -320,7 +320,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         System::String^ specialType = aqMat->specialType->Length > 0 ? "[" + aqMat->specialType + "]": "";
         if (includeMetadata)
         {
-            name = Utf8String("(" + aqMat->shaderNames[0] + "," + aqMat->shaderNames[1] + ")" + "{" + aqMat->blendType + "}" + specialType + aqMat->matName + "@" + aqMat->twoSided.ToString()).ToCStr();
+            name = Utf8String("(" + aqMat->shaderNames[0] + "," + aqMat->shaderNames[1] + ")" + "{" + aqMat->blendType + "}" + specialType + aqMat->matName + "@" + aqMat->twoSided.ToString() + "@" + aqMat->alphaCutoff.ToString()).ToCStr();
         }
         else {
             name = Utf8String(aqMat->matName).ToCStr();
@@ -677,7 +677,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             name = Utf8String(node0.boneName.GetString()).ToCStr();
         }
 
-        FbxNode* lSkeletonNode = FbxNode::Create( lScene, name);
+        FbxNode* lSkeletonNode = CreateFbxNodeFromAqnNode(node0, Matrix4x4::Identity, lScene, lBindPose, 0, includeMetadata);
         convertedBones->Add(IntPtr(lSkeletonNode));
 
         FbxSkeleton* lSkeleton = FbxSkeleton::Create( lScene, name);

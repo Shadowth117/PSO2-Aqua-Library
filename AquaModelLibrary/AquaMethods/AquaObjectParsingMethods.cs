@@ -126,6 +126,18 @@ namespace AquaModelLibrary
             model.rel0 = streamReader.Read<AquaCommon.REL0>();
             model.objc = AquaObject.ReadOBJC(streamReader);
 
+            //Read Bone Palette
+            if (model.objc.bonePaletteOffset > 0)
+            {
+                streamReader.Seek(model.objc.bonePaletteOffset + offset, SeekOrigin.Begin);
+                int boneCount = streamReader.Read<int>();
+                streamReader.Seek(streamReader.Read<int>() + offset, SeekOrigin.Begin); //Should start literally right after this anyways, but in case it changes or w/e
+                for (int boneIndex = 0; boneIndex < boneCount; boneIndex++)
+                {
+                    model.bonePalette.Add(streamReader.Read<uint>());
+                }
+            }
+
             if (model.objc.vsetOffset > 0)
             {
                 streamReader.Seek(model.objc.vsetOffset + offset, SeekOrigin.Begin);
@@ -375,18 +387,6 @@ namespace AquaModelLibrary
                     model.unrms.unrmVertIds.Add(vertGroupVertList);
                 }
                 AlignReader(streamReader, 0x10);
-            }
-
-            //Read Bone Palette
-            if (model.objc.bonePaletteOffset > 0)
-            {
-                streamReader.Seek(model.objc.bonePaletteOffset + offset, SeekOrigin.Begin);
-                int boneCount = streamReader.Read<int>();
-                streamReader.Seek(streamReader.Read<int>() + offset, SeekOrigin.Begin); //Should start literally right after this anyways, but in case it changes or w/e
-                for (int boneIndex = 0; boneIndex < boneCount; boneIndex++)
-                {
-                    model.bonePalette.Add(streamReader.Read<uint>());
-                }
             }
 
             //Read PSET2

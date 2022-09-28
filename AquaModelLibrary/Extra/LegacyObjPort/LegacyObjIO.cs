@@ -19,7 +19,7 @@ namespace LegacyObj
         public struct SkinData
         {
             public Vector3 pos;
-            public byte[] indices;
+            public int[] indices;
             public Vector4 weights;
         }
 
@@ -49,10 +49,10 @@ namespace LegacyObj
                     {
                         SkinData skin = new SkinData();
                         skin.pos = vtxl.vertPositions[i];
-                        List<byte> indices = new List<byte>(new byte[4]);
+                        List<int> indices = new List<int>(new int[4]);
                         for (int id = 0; id < 4; id++)
                         {
-                            var temp = (byte)aqo.bonePalette.IndexOf(vtxl.bonePalette[vtxl.vertWeightIndices[i][id]]);
+                            var temp = aqo.bonePalette.IndexOf(vtxl.bonePalette[vtxl.vertWeightIndices[i][id]]);
                             if (indices.Contains(temp)) //Repeats should only occur for index 0
                             {
                                 temp = 0;

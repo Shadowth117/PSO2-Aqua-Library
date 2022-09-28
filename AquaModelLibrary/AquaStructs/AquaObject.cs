@@ -734,10 +734,10 @@ namespace AquaModelLibrary
                 } else if(modelVtxl.vertWeights.Count > 0)
                 {
                     vertWeights = new List<Vector4>(new Vector4[vertCount]);
-                    vertWeightIndices = new List<byte[]>(new byte[vertCount][]);
+                    vertWeightIndices = new List<int[]>(new int[vertCount][]);
                     for(int i = 0; i < vertCount; i++)
                     {
-                        vertWeightIndices[i] = new byte[4];
+                        vertWeightIndices[i] = new int[4];
                     }
                 }
                 if(modelVtxl.vertWeightsNGS.Count > 0)
@@ -756,7 +756,7 @@ namespace AquaModelLibrary
             public List<short[]> vertNormalsNGS = new List<short[]>(); //4 16 bit values, value 4 being 0 always.
             public List<byte[]> vertColors = new List<byte[]>(); //4 bytes, BGRA
             public List<byte[]> vertColor2s = new List<byte[]>(); //4 bytes, BGRA?
-            public List<byte[]> vertWeightIndices = new List<byte[]>(); //4 bytes
+            public List<int[]> vertWeightIndices = new List<int[]>(); //4 bytes when written. Prior to processing, store as ints
             public List<short[]> uv1ListNGS = new List<short[]>(); //2 16 bit values. UVs probably need to be vertically flipped for most software. I usually just import v as -v.
             public List<short[]> uv2ListNGS = new List<short[]>(); //Uncommon NGS uv2 variation
             public List<short[]> uv3ListNGS = new List<short[]>();
@@ -796,7 +796,7 @@ namespace AquaModelLibrary
 
             //Holds processed weight info for accessing in external applications
             public List<Vector4> trueVertWeights = new List<Vector4>();
-            public List<byte[]> trueVertWeightIndices = new List<byte[]>();
+            public List<int[]> trueVertWeightIndices = new List<int[]>();
 
             public void convertFromLegacyTypes()
             {
@@ -1019,17 +1019,17 @@ namespace AquaModelLibrary
                         if (vertWeightIndices[i][1] == 0 && vertWeights[i].Y != 0 && vertWeightIndices[i][2] == 0)
                         {
                             vertWeights[i] = new Vector4(vertWeights[i].Y, vertWeights[i].X, vertWeights[i].Z, vertWeights[i].W);
-                            vertWeightIndices[i] = new byte[] { vertWeightIndices[i][1], vertWeightIndices[i][0], vertWeightIndices[i][2], vertWeightIndices[i][3] };
+                            vertWeightIndices[i] = new int[] { vertWeightIndices[i][1], vertWeightIndices[i][0], vertWeightIndices[i][2], vertWeightIndices[i][3] };
                         }
                         if (vertWeightIndices[i][2] == 0 && vertWeights[i].Z != 0 && vertWeightIndices[i][3] == 0)
                         {
                             vertWeights[i] = new Vector4(vertWeights[i].Z, vertWeights[i].X, vertWeights[i].Y, vertWeights[i].W);
-                            vertWeightIndices[i] = new byte[] { vertWeightIndices[i][2], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][3] };
+                            vertWeightIndices[i] = new int[] { vertWeightIndices[i][2], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][3] };
                         }
                         if (vertWeightIndices[i][3] == 0 && vertWeights[i].W != 0)
                         {
                             vertWeights[i] = new Vector4(vertWeights[i].W, vertWeights[i].X, vertWeights[i].Y, vertWeights[i].Z);
-                            vertWeightIndices[i] = new byte[] { vertWeightIndices[i][3], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][2] };
+                            vertWeightIndices[i] = new int[] { vertWeightIndices[i][3], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][2] };
                         }
                     }
                 }
@@ -1046,17 +1046,17 @@ namespace AquaModelLibrary
                         if (vertWeightIndices[i][1] == 0 && vertWeights[i].Y != 0)
                         {
                             vertWeights[i] = new Vector4(vertWeights[i].Y, vertWeights[i].X, vertWeights[i].Z, vertWeights[i].W);
-                            vertWeightIndices[i] = new byte[] { vertWeightIndices[i][1], vertWeightIndices[i][0], vertWeightIndices[i][2], vertWeightIndices[i][3] };
+                            vertWeightIndices[i] = new int[] { vertWeightIndices[i][1], vertWeightIndices[i][0], vertWeightIndices[i][2], vertWeightIndices[i][3] };
                         }
                         if (vertWeightIndices[i][2] == 0 && vertWeights[i].Z != 0)
                         {
                             vertWeights[i] = new Vector4(vertWeights[i].Z, vertWeights[i].X, vertWeights[i].Y, vertWeights[i].W);
-                            vertWeightIndices[i] = new byte[] { vertWeightIndices[i][2], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][3] };
+                            vertWeightIndices[i] = new int[] { vertWeightIndices[i][2], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][3] };
                         }
                         if (vertWeightIndices[i][3] == 0 && vertWeights[i].W != 0)
                         {
                             vertWeights[i] = new Vector4(vertWeights[i].W, vertWeights[i].X, vertWeights[i].Y, vertWeights[i].Z);
-                            vertWeightIndices[i] = new byte[] { vertWeightIndices[i][3], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][2] };
+                            vertWeightIndices[i] = new int[] { vertWeightIndices[i][3], vertWeightIndices[i][0], vertWeightIndices[i][1], vertWeightIndices[i][2] };
                         }
                     }
                 }
@@ -1083,52 +1083,52 @@ namespace AquaModelLibrary
                     for (int i = 0; i < vertWeights.Count; i++)
                     {
                         Vector4 trueWeight = new Vector4();
-                        List<byte> trueBytes = new List<byte>();
+                        List<int> trueIds = new List<int>();
                         if (vertWeightIndices[i][0] != 0 || vertWeights[i].X != 0)
                         {
-                            trueWeight = addById(trueWeight, vertWeights[i].X, trueBytes.Count);
-                            trueBytes.Add(vertWeightIndices[i][0]);
+                            trueWeight = addById(trueWeight, vertWeights[i].X, trueIds.Count);
+                            trueIds.Add(vertWeightIndices[i][0]);
                         }
                         if (vertWeightIndices[i][1] != 0 || vertWeights[i].Y != 0)
                         {
-                            if(trueBytes.Contains(vertWeightIndices[i][1]))
+                            if(trueIds.Contains(vertWeightIndices[i][1]))
                             {
-                                trueWeight = addToId(trueWeight, vertWeights[i].Y, trueBytes.IndexOf(vertWeightIndices[i][1]));
+                                trueWeight = addToId(trueWeight, vertWeights[i].Y, trueIds.IndexOf(vertWeightIndices[i][1]));
                             } else
                             {
-                                trueWeight = addById(trueWeight, vertWeights[i].Y, trueBytes.Count);
-                                trueBytes.Add(vertWeightIndices[i][1]);
+                                trueWeight = addById(trueWeight, vertWeights[i].Y, trueIds.Count);
+                                trueIds.Add(vertWeightIndices[i][1]);
                             }
                         }
                         if (vertWeightIndices[i][2] != 0 || vertWeights[i].Z != 0)
                         {
-                            if (trueBytes.Contains(vertWeightIndices[i][2]))
+                            if (trueIds.Contains(vertWeightIndices[i][2]))
                             {
-                                trueWeight = addToId(trueWeight, vertWeights[i].Z, trueBytes.IndexOf(vertWeightIndices[i][2]));
+                                trueWeight = addToId(trueWeight, vertWeights[i].Z, trueIds.IndexOf(vertWeightIndices[i][2]));
                             }
                             else
                             {
-                                trueWeight = addById(trueWeight, vertWeights[i].Z, trueBytes.Count);
-                                trueBytes.Add(vertWeightIndices[i][2]);
+                                trueWeight = addById(trueWeight, vertWeights[i].Z, trueIds.Count);
+                                trueIds.Add(vertWeightIndices[i][2]);
                             }
                         }
                         if (vertWeightIndices[i][3] != 0 || vertWeights[i].W != 0)
                         {
-                            if (trueBytes.Contains(vertWeightIndices[i][3]))
+                            if (trueIds.Contains(vertWeightIndices[i][3]))
                             {
-                                trueWeight = addToId(trueWeight, vertWeights[i].W, trueBytes.IndexOf(vertWeightIndices[i][3]));
+                                trueWeight = addToId(trueWeight, vertWeights[i].W, trueIds.IndexOf(vertWeightIndices[i][3]));
                             }
                             else
                             {
-                                trueWeight = addById(trueWeight, vertWeights[i].W, trueBytes.Count);
-                                trueBytes.Add(vertWeightIndices[i][3]);
+                                trueWeight = addById(trueWeight, vertWeights[i].W, trueIds.Count);
+                                trueIds.Add(vertWeightIndices[i][3]);
                             }
                         }
                         //Ensure sum is as close as possible to 1.0.
                         trueWeight = SumWeightsTo1(trueWeight);
 
                         trueVertWeights.Add(trueWeight);
-                        trueVertWeightIndices.Add(trueBytes.ToArray());
+                        trueVertWeightIndices.Add(trueIds.ToArray());
                     }
                 }
 
@@ -1306,7 +1306,7 @@ namespace AquaModelLibrary
                 //Should be the same count for both lists, go through and populate as needed to cull weight counts that are too large
                 for (int wt = 0; wt < rawVertWeights.Count; wt++)
                 {
-                    byte[] vertIds = new byte[4];
+                    int[] vertIds = new int[4];
                     Vector4 vertWts = new Vector4();
 
                     //Descending sort to get 
@@ -1333,31 +1333,31 @@ namespace AquaModelLibrary
                             break;
                         case 1:
                             vertWts.X = rawVertWeights[wt][0];
-                            vertIds[0] = (byte)rawVertWeightIds[wt][0];
+                            vertIds[0] = rawVertWeightIds[wt][0];
                             break;
                         case 2:
                             vertWts.X = rawVertWeights[wt][0];
                             vertWts.Y = rawVertWeights[wt][1];
-                            vertIds[0] = (byte)rawVertWeightIds[wt][0];
-                            vertIds[1] = (byte)rawVertWeightIds[wt][1];
+                            vertIds[0] = rawVertWeightIds[wt][0];
+                            vertIds[1] = rawVertWeightIds[wt][1];
                             break;
                         case 3:
                             vertWts.X = rawVertWeights[wt][0];
                             vertWts.Y = rawVertWeights[wt][1];
                             vertWts.Z = rawVertWeights[wt][2];
-                            vertIds[0] = (byte)rawVertWeightIds[wt][0];
-                            vertIds[1] = (byte)rawVertWeightIds[wt][1];
-                            vertIds[2] = (byte)rawVertWeightIds[wt][2];
+                            vertIds[0] = rawVertWeightIds[wt][0];
+                            vertIds[1] = rawVertWeightIds[wt][1];
+                            vertIds[2] = rawVertWeightIds[wt][2];
                             break;
                         default:
                             vertWts.X = rawVertWeights[wt][0];
                             vertWts.Y = rawVertWeights[wt][1];
                             vertWts.Z = rawVertWeights[wt][2];
                             vertWts.W = rawVertWeights[wt][3];
-                            vertIds[0] = (byte)rawVertWeightIds[wt][0];
-                            vertIds[1] = (byte)rawVertWeightIds[wt][1];
-                            vertIds[2] = (byte)rawVertWeightIds[wt][2];
-                            vertIds[3] = (byte)rawVertWeightIds[wt][3];
+                            vertIds[0] = rawVertWeightIds[wt][0];
+                            vertIds[1] = rawVertWeightIds[wt][1];
+                            vertIds[2] = rawVertWeightIds[wt][2];
+                            vertIds[3] = rawVertWeightIds[wt][3];
                             break;
                     }
                     vertWts = SumWeightsTo1(vertWts);
@@ -1511,10 +1511,10 @@ namespace AquaModelLibrary
                 {
                     int start = vertWeights.Count;
                     vertWeights.AddRange(new Vector4[vertCount]);
-                    vertWeightIndices.AddRange(new byte[vertCount][]);
+                    vertWeightIndices.AddRange(new int[vertCount][]);
                     for (int i = start; i < start + vertCount; i++)
                     {
-                        vertWeightIndices[i] = new byte[4];
+                        vertWeightIndices[i] = new int[4];
                     }
                 }
                 if (modelVtxl.vertWeightsNGS.Count > 0)
@@ -1538,7 +1538,7 @@ namespace AquaModelLibrary
                 newVTXL.vertNormalsNGS = vertNormalsNGS.ConvertAll(nrm => (short[])nrm.Clone()).ToList();
                 newVTXL.vertColors = vertColors.ConvertAll(clr => (byte[])clr.Clone()).ToList();
                 newVTXL.vertColor2s = vertColor2s.ConvertAll(clr => (byte[])clr.Clone()).ToList();
-                newVTXL.vertWeightIndices = vertWeightIndices.ConvertAll(wt => (byte[])wt.Clone()).ToList();
+                newVTXL.vertWeightIndices = vertWeightIndices.ConvertAll(wt => (int[])wt.Clone()).ToList();
                 newVTXL.uv1ListNGS = uv1ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
                 newVTXL.uv2ListNGS = uv2ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
                 newVTXL.uv3ListNGS = uv3ListNGS.ConvertAll(uv => (short[])uv.Clone()).ToList();
@@ -1564,7 +1564,7 @@ namespace AquaModelLibrary
                 newVTXL.rawVertId = new List<int>(rawVertId);
                 newVTXL.rawFaceId = new List<int>(rawFaceId);
                 newVTXL.trueVertWeights = new List<Vector4>(trueVertWeights);
-                newVTXL.trueVertWeightIndices = trueVertWeightIndices.ConvertAll(wt => (byte[])wt.Clone()).ToList();
+                newVTXL.trueVertWeightIndices = trueVertWeightIndices.ConvertAll(wt => (int[])wt.Clone()).ToList();
 
                 return newVTXL;
             }
@@ -1793,6 +1793,7 @@ namespace AquaModelLibrary
             public string specialType = null;
             public string matName = null;
             public int twoSided = 0; //0 False, 1 True. Higher values give unknown results
+            public int alphaCutoff = 0; //0-255, defines when an alhpa value should cull out a pixel entirely
 
             public Vector4 diffuseRGBA = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
             public Vector4 unkRGBA0 = new Vector4(.9f, .9f, .9f, 1.0f);
@@ -2077,6 +2078,7 @@ namespace AquaModelLibrary
                     mat.specialType = AquaObjectMethods.GetSpecialMatType(texNames);
                     mat.matName = curMate.matName.GetString();
                     mat.twoSided = curRend.twosided;
+                    mat.alphaCutoff = curRend.alphaCutoff;
 
                     mat.diffuseRGBA = curMate.diffuseRGBA;
                     mat.unkRGBA0 = curMate.unkRGBA0;

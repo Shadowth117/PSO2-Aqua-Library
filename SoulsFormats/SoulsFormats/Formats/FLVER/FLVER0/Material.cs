@@ -16,6 +16,11 @@ namespace SoulsFormats
 
             public List<BufferLayout> Layouts { get; set; }
 
+            public Material(bool useUnicode)
+            {
+
+            }
+
             internal Material(BinaryReaderEx br, bool useUnicode)
             {
                 int nameOffset = br.ReadInt32();

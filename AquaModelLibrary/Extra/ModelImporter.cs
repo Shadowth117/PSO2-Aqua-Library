@@ -737,12 +737,13 @@ namespace AquaModelLibrary
 
                 AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
                 List<string> shaderList = new List<string>();
-                AquaObjectMethods.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag, out int twoSided);
+                AquaObjectMethods.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag, out int twoSided, out int alphaCutoff);
                 genMat.matName = name;
                 genMat.shaderNames = shaderList;
                 genMat.blendType = alphaType;
                 genMat.specialType = playerFlag;
                 genMat.twoSided = twoSided;
+                genMat.alphaCutoff = alphaCutoff;
                 genMat.texNames = new List<string>();
                 genMat.texUVSets = new List<int>();
 

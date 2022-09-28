@@ -13,6 +13,16 @@ namespace AquaModelLibrary.Extra
 {
     public static class SoulsConvert
     {
+        public enum SoulsGame
+        {
+            DemonsSouls,
+            DarkSouls1,
+            DarkSouls2,
+            Bloodborne,
+            DarkSouls3,
+            Sekiro
+        }
+
         public static AquaObject ReadFlver(string filePath, out AquaNode aqn)
         {
             SoulsFormats.IFlver flver = null;
@@ -32,6 +42,17 @@ namespace AquaModelLibrary.Extra
         public static AquaObject FlverToAqua(IFlver flver, out AquaNode aqn)
         {
             AquaObject aqp = new NGSAquaObject();
+
+            if(flver is FLVER2 flver2)
+            {
+                if(flver2.Header.Version > 20010)
+                {
+                    for(int i = 0; i < flver2.Bones.Count; i++)
+                    {
+                        aqp.bonePalette.Add((uint)i);
+                    }
+                }
+            }
             //aqp.bonePalette = new List<uint>();
             aqn = new AquaNode();
             var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
@@ -42,20 +63,30 @@ namespace AquaModelLibrary.Extra
             {
                 //aqp.bonePalette.Add((uint)i);
                 var flverBone = flver.Bones[i];
-                
-                //Translation adjustment
-                var boneTranslation = flverBone.Translation;
-                boneTranslation.X = -flverBone.Translation.X;
-                flverBone.Translation = boneTranslation;
-                
-                //Rotation adjustment
-                var boneRotation = flverBone.Rotation;
-                boneRotation.Z = -boneRotation.Z;
-                flverBone.Rotation = boneRotation;
-
-                Matrix4x4 mat = flverBone.ComputeLocalTransform();
-                Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
                 var parentId = flverBone.ParentIndex;
+
+                FLVER.Bone.RotationOrder order = FLVER.Bone.RotationOrder.XZY;
+                var tfmMat = Matrix4x4.Identity;
+                if(flver is FLVER2)
+                {
+                } else
+                {
+                    //Translation adjustment
+                    var boneTranslation = flverBone.Translation;
+                    boneTranslation.X = -flverBone.Translation.X;
+                    flverBone.Translation = boneTranslation;
+
+                    //Rotation adjustment
+                    var boneRotation = flverBone.Rotation;
+                    boneRotation.Z = -boneRotation.Z;
+                    flverBone.Rotation = boneRotation;
+                }
+
+                Matrix4x4 mat = flverBone.ComputeLocalTransform(order);
+
+                mat *= tfmMat;
+
+                Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
 
                 //If there's a parent, multiply by it
                 if (parentId != -1)
@@ -97,7 +128,7 @@ namespace AquaModelLibrary.Extra
                 aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
                 aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
                 aqNode.boneName.SetString(flverBone.Name);
-                Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
+                //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                 aqn.nodeList.Add(aqNode);
             }
             for (int i = 0; i < flver.Meshes.Count; i++)
@@ -220,15 +251,15 @@ namespace AquaModelLibrary.Extra
                     if(vert.BoneWeights.Length > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
-                        vtxl.vertWeightIndices.Add(new byte[] { (byte)vert.BoneIndices[0], (byte)vert.BoneIndices[1], (byte)vert.BoneIndices[2], (byte)vert.BoneIndices[3] });
+                        vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], vert.BoneIndices[1], vert.BoneIndices[2], vert.BoneIndices[3] });
                     } else if(vert.BoneIndices.Length > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
-                        vtxl.vertWeightIndices.Add(new byte[] { (byte)vert.BoneIndices[0], 0, 0, 0 });
+                        vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], 0, 0, 0 });
                     } else if(vert.NormalW < 65535)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
-                        vtxl.vertWeightIndices.Add(new byte[] { (byte)vert.NormalW, 0, 0, 0 });
+                        vtxl.vertWeightIndices.Add(new int[] { vert.NormalW, 0, 0, 0 });
                     }
                 }
 
@@ -280,6 +311,63 @@ namespace AquaModelLibrary.Extra
             }
 
             return aqp;
+        }
+
+        public static IFlver ConvertModelToFlver(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, SoulsGame game, IFlver matReferenceFlver = null)
+        {
+            return AquaToFlver(initialFilePath, ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn), aqn, game, matReferenceFlver);
+        }
+
+        public static IFlver AquaToFlver(string initialFilePath, AquaObject aqp, AquaNode aqn, SoulsGame game, IFlver matReferenceFlver)
+        {
+            FLVER0 flver = new FLVER0();
+            flver.Header = new FLVER0Header();
+            flver.Header.BigEndian = true;
+            flver.Header.Unicode = true;
+            flver.Header.Version = 0x15;
+            flver.Header.Unk4A = 0x1;
+            flver.Header.Unk4B = 0;
+            flver.Header.Unk4C = 0xFFFF;
+            flver.Header.Unk5C = 0;
+
+            List<string> usedMaterials = new List<string>();
+            if (matReferenceFlver == null)
+            {
+            } else
+            {
+                Dictionary<string, FLVER0.Material> matDict = new Dictionary<string, FLVER0.Material>();
+                for(int i = 0; i < matReferenceFlver.Materials.Count; i++)
+                {
+                    matDict.Add(matReferenceFlver.Materials[i].Name, (FLVER0.Material)matReferenceFlver.Materials[i]);
+                }
+                
+                for (int i = 0; i < aqp.mateList.Count; i++)
+                {
+                    var matIndex = usedMaterials.IndexOf(aqp.mateList[i].matName.GetString());
+                    if (matIndex != -1)
+                    {
+                        continue;
+                    } else
+                    {
+                        var name = aqp.mateList[i].matName.GetString();
+                        usedMaterials.Add(name);
+                        if(matDict.TryGetValue(name, out var mat))
+                        {
+                            flver.Materials.Add(mat);
+                        } else
+                        {
+                            var flvMat = new FLVER0.Material(true);
+                            flvMat.Name = name;
+                            flvMat.MTD = "u:\\nlimited\\based\\works\\p_metal[dsb].mtd";
+                            flvMat.Layouts = new List<FLVER0.BufferLayout>();
+                            //flvMat.Layouts.Add(new FLVER0.BufferLayout());
+                            //flvMat.Textures
+                        }
+                    }
+                }
+            }
+
+            return flver;
         }
     }
 }

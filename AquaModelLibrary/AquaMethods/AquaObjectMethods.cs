@@ -231,7 +231,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.vertWeightIndices[destinationIndex] = (byte[])sourceVTXL.vertWeightIndices[sourceIndex].Clone();
+                destinationVTXL.vertWeightIndices[destinationIndex] = (int[])sourceVTXL.vertWeightIndices[sourceIndex].Clone();
             }
             if (sourceVTXL.uv1ListNGS.Count > sourceIndex)
             {
@@ -311,7 +311,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.trueVertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.trueVertWeightIndices[destinationIndex] = (byte[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone();
+                destinationVTXL.trueVertWeightIndices[destinationIndex] = (int[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone();
             }
             if (sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
             {
@@ -351,7 +351,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.vertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.vertWeightIndices.Add((byte[])sourceVTXL.vertWeightIndices[sourceIndex].Clone());
+                destinationVTXL.vertWeightIndices.Add((int[])sourceVTXL.vertWeightIndices[sourceIndex].Clone());
             }
             if (sourceVTXL.uv1ListNGS.Count > sourceIndex)
             {
@@ -423,7 +423,7 @@ namespace AquaModelLibrary
             }
             if (sourceVTXL.trueVertWeightIndices.Count > sourceIndex)
             {
-                destinationVTXL.trueVertWeightIndices.Add((byte[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone());
+                destinationVTXL.trueVertWeightIndices.Add((int[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone());
             }
             if(sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
             {
@@ -671,7 +671,7 @@ namespace AquaModelLibrary
                             vtxl.vertColor2s.Add(Read4Bytes(streamReader));
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertWeightIndex:
-                            vtxl.vertWeightIndices.Add(Read4Bytes(streamReader));
+                            vtxl.vertWeightIndices.Add(Read4BytesToIntArray(streamReader));
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV1:
                             switch (vtxeSet.vertDataTypes[vtxeIndex].structVariation)
@@ -1636,23 +1636,27 @@ namespace AquaModelLibrary
 
         }*/
 
-        public static void GenerateGlobalBonePalette(AquaObject model)
+        public static void OptimizeGlobalBonePalette(AquaObject model)
         {
             List<uint> newBonePalette = new List<uint>();
             //Construct the bone palette
             for (int i = 0; i < model.vtxlList.Count; i++)
             {
-                if (model.vtxlList[i].bonePalette.Count > 0)
+                if (model.vtxlList[i].vertWeightIndices.Count > 0)
                 {
-                    for (int j = 0; j < model.vtxlList[i].bonePalette.Count; j++)
+                    for (int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
                     {
-                        if (!newBonePalette.Contains(model.vtxlList[i].bonePalette[j]))
+                        for(int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
                         {
-                            newBonePalette.Add(model.vtxlList[i].bonePalette[j]);
+                            if (!newBonePalette.Contains((uint)model.vtxlList[i].vertWeightIndices[j][k]))
+                            {
+                                newBonePalette.Add((uint)model.vtxlList[i].vertWeightIndices[j][k]);
+                            }
                         }
                     }
                 }
             }
+
             newBonePalette.Sort();
             if(newBonePalette.Count == 0)
             {
@@ -1675,7 +1679,73 @@ namespace AquaModelLibrary
                         } else
                         {
                             usedIds.Add(model.vtxlList[i].vertWeightIndices[j][k]);
-                            model.vtxlList[i].vertWeightIndices[j][k] = (byte)newBonePalette.IndexOf(model.vtxlList[i].bonePalette[model.vtxlList[i].vertWeightIndices[j][k]]);
+                            model.vtxlList[i].vertWeightIndices[j][k] = newBonePalette.IndexOf(model.bonePalette[model.vtxlList[i].vertWeightIndices[j][k]]);
+                        }
+                    }
+                }
+            }
+            model.bonePalette = newBonePalette;
+        }
+
+        public static void GenerateGlobalBonePalette(AquaObject model)
+        {
+            List<uint> newBonePalette = new List<uint>();
+            //Construct the bone palette
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                if (model.vtxlList[i].vertWeightIndices.Count > 0)
+                {
+                    for (int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
+                    {
+                        for (int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
+                        {
+                            if (!newBonePalette.Contains((uint)model.vtxlList[i].vertWeightIndices[j][k]))
+                            {
+                                newBonePalette.Add((uint)model.vtxlList[i].vertWeightIndices[j][k]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Construct from vtxl bonepalettes. More efficient, but doesn't optimize the list like we need for large bonecounts
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                if (model.vtxlList[i].bonePalette.Count > 0)
+                {
+                    for (int j = 0; j < model.vtxlList[i].bonePalette.Count; j++)
+                    {
+                        if (!newBonePalette.Contains(model.vtxlList[i].bonePalette[j]))
+                        {
+                            newBonePalette.Add(model.vtxlList[i].bonePalette[j]);
+                        }
+                    }
+                }
+            }
+            newBonePalette.Sort();
+            if (newBonePalette.Count == 0)
+            {
+#if DEBUG
+                Console.WriteLine("No bones to set up");
+#endif
+                return;
+            }
+            //Reassign indices
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                for (int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
+                {
+                    List<int> usedIds = new List<int>();
+                    for (int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
+                    {
+                        if (usedIds.Contains(model.vtxlList[i].vertWeightIndices[j][k]))
+                        {
+                            model.vtxlList[i].vertWeightIndices[j][k] = 0;
+                        }
+                        else
+                        {
+                            usedIds.Add(model.vtxlList[i].vertWeightIndices[j][k]);
+                            model.vtxlList[i].vertWeightIndices[j][k] = newBonePalette.IndexOf(model.vtxlList[i].bonePalette[model.vtxlList[i].vertWeightIndices[j][k]]);
                         }
                     }
                 }
@@ -1790,11 +1860,11 @@ namespace AquaModelLibrary
                         {
                             newBonePaletteCheck.Add(vtxl.vertWeightIndices[v][vi]);
                             newBonePalette.Add(vtxl.bonePalette[vtxl.vertWeightIndices[v][vi]]);
-                            vtxl.vertWeightIndices[v][vi] = (byte)(newBonePaletteCheck.Count - 1);
+                            vtxl.vertWeightIndices[v][vi] = (newBonePaletteCheck.Count - 1);
                         }
                         else
                         {
-                            vtxl.vertWeightIndices[v][vi] = (byte)newBonePaletteCheck.IndexOf(vtxl.vertWeightIndices[v][vi]);
+                            vtxl.vertWeightIndices[v][vi] = newBonePaletteCheck.IndexOf(vtxl.vertWeightIndices[v][vi]);
                         }
                     }
                 }
@@ -1866,7 +1936,7 @@ namespace AquaModelLibrary
                         case (int)ClassicAquaObject.VertFlags.VertWeightIndex:
                             for (int weight = 0; weight < 4; weight++)
                             {
-                                outBytes2.Add(vtxl.vertWeightIndices[i][weight]);
+                                outBytes2.Add((byte)vtxl.vertWeightIndices[i][weight]);
                             }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertUV1:
@@ -2560,7 +2630,7 @@ namespace AquaModelLibrary
             //rend.unk8 = 1;
 
             rend.unk9 = 5;
-            rend.alphaCutoff = 0;
+            rend.alphaCutoff = mat.alphaCutoff;
             rend.unk11 = 1;
             rend.unk12 = 4;
             rend.unk13 = 1;
@@ -2695,11 +2765,12 @@ namespace AquaModelLibrary
             return name;
         }
 
-        public static void GetMaterialNameData(ref string name, ref List<string> shaderNames, out string alphaType, out string playerFlag, out int twoSided)
+        public static void GetMaterialNameData(ref string name, ref List<string> shaderNames, out string alphaType, out string playerFlag, out int twoSided, out int alphaCutoff)
         {
             name = RemoveBlendersShitDuplicateDenoterAndAssimpDuplicate(name);
             shaderNames = new List<string>();
             alphaType = null;
+            alphaCutoff = 0;
             playerFlag = null;
             twoSided = 0;
 
@@ -2733,12 +2804,22 @@ namespace AquaModelLibrary
                 name = nameArr[1];
             }
 
-            //Get two-sided
+            //Get two-sided and alphaCutoff
             nameArr = name.Split('@');
             if(nameArr.Length > 1)
             {
-                twoSided = Int32.Parse(nameArr[1]);
-                name = nameArr[0];
+                for(int i = 1; i < nameArr.Length; i++)
+                {
+                    switch(i)
+                    {
+                        case 1:
+                            twoSided = Int32.Parse(nameArr[i]);
+                            break;
+                        case 2:
+                            alphaCutoff = Int32.Parse(nameArr[i]);
+                            break;
+                    }
+                }
             }
         }
 

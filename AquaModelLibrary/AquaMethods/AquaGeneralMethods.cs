@@ -221,6 +221,13 @@ namespace AquaModelLibrary.AquaMethods
                 }
             }
         }
+
+        public static int[] Read4BytesToIntArray(BufferedStreamReader streamReader)
+        {
+            var bytes = Read4Bytes(streamReader);
+            return new int[] { bytes[0], bytes[1], bytes[2], bytes[3] };
+        }
+
         public static byte[] Read4Bytes(BufferedStreamReader streamReader)
         {
             byte[] bytes = new byte[4];
