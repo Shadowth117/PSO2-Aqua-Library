@@ -2585,6 +2585,10 @@ namespace AquaModelLibrary
             mate.unkFloat1 = mat.unkFloat1;
             mate.unkInt0 = mat.unkInt0;
             mate.unkInt1 = mat.unkInt1;
+            if(mat.blendType == null || mat.blendType == "")
+            {
+                mat.blendType = "blendalpha";
+            }
             mate.alphaType.SetString(mat.blendType);
             mate.matName.SetString(mat.matName);
 
