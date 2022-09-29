@@ -45,7 +45,7 @@ namespace AquaModelLibrary.Extra
 
             if(flver is FLVER2 flver2)
             {
-                if(flver2.Header.Version > 20010)
+                if(flver2.Header.Version > 0x20010)
                 {
                     for(int i = 0; i < flver2.Bones.Count; i++)
                     {
@@ -53,7 +53,6 @@ namespace AquaModelLibrary.Extra
                     }
                 }
             }
-            //aqp.bonePalette = new List<uint>();
             aqn = new AquaNode();
             var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
@@ -61,26 +60,11 @@ namespace AquaModelLibrary.Extra
                                         0, 0, 0, 1);
             for (int i = 0; i < flver.Bones.Count; i++)
             {
-                //aqp.bonePalette.Add((uint)i);
                 var flverBone = flver.Bones[i];
                 var parentId = flverBone.ParentIndex;
 
                 FLVER.Bone.RotationOrder order = FLVER.Bone.RotationOrder.XZY;
                 var tfmMat = Matrix4x4.Identity;
-                if(flver is FLVER2)
-                {
-                } else
-                {
-                    //Translation adjustment
-                    var boneTranslation = flverBone.Translation;
-                    boneTranslation.X = -flverBone.Translation.X;
-                    flverBone.Translation = boneTranslation;
-
-                    //Rotation adjustment
-                    var boneRotation = flverBone.Rotation;
-                    boneRotation.Z = -boneRotation.Z;
-                    flverBone.Rotation = boneRotation;
-                }
 
                 Matrix4x4 mat = flverBone.ComputeLocalTransform(order);
 
@@ -111,17 +95,9 @@ namespace AquaModelLibrary.Extra
                 aqNode.animatedFlag = 1;
                 aqNode.parentId = parentId;
                 aqNode.unkNode = -1;
-                aqNode.pos = translation;
-                aqNode.eulRot = MathExtras.QuaternionToEuler(quatRot);
 
-                if (Math.Abs(aqNode.eulRot.Y) > 120)
-                {
-                    aqNode.scale = new Vector3(-1, -1, -1);
-                }
-                else
-                {
-                    aqNode.scale = new Vector3(1, 1, 1);
-                }
+                aqNode.scale = new Vector3(1, 1, 1);
+
                 Matrix4x4.Invert(mat, out var invMat);
                 aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                 aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
@@ -131,6 +107,22 @@ namespace AquaModelLibrary.Extra
                 //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                 aqn.nodeList.Add(aqNode);
             }
+
+            //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
+            for(int i = 0; i < aqn.nodeList.Count; i++)
+            {
+                var bone = aqn.nodeList[i];
+                Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
+                mat *= mirrorMat;
+                Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
+                bone.pos = translation;
+                bone.eulRot = MathExtras.QuaternionToEuler(rot);
+
+                Matrix4x4.Invert(mat, out var invMat);
+                bone.SetInverseBindPoseMatrix(invMat);
+                aqn.nodeList[i] = bone;
+            }
+
             for (int i = 0; i < flver.Meshes.Count; i++)
             {
                 var mesh = flver.Meshes[i];
