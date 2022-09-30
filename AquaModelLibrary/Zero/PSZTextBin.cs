@@ -3,7 +3,7 @@ using Reloaded.Memory.Streams;
 using System.Collections.Generic;
 using System.IO;
 
-namespace AquaModelLibrary.Extra
+namespace AquaModelLibrary.Zero
 {
     public static class PSZTextBin
     {
