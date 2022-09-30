@@ -2535,10 +2535,6 @@ namespace AquaModelLibrary.Extra
                 {
                     linkedInnerId = aquaCMX.clegDict[id].body2.linkedInnerId;
                     soundId = aquaCMX.clegDict[id].body2.costumeSoundId;
-                    if(linkedInnerId != -1)
-                    {
-                        var a = 0;
-                    }
                 }
                 if (aquaCMX.clegIdLink.ContainsKey(id))
                 {
