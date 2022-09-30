@@ -1972,7 +1972,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
                     }
-
                     output += AddOutfitSound(pso2_binDir, soundId);
                 }
                 else
@@ -2388,6 +2387,11 @@ namespace AquaModelLibrary.Extra
 
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
+                int linkedInnerId = -1;
+                if (aquaCMX.carmDict.ContainsKey(id))
+                {
+                    linkedInnerId = aquaCMX.carmDict[id].body2.linkedInnerId;
+                }
                 if (aquaCMX.castArmIdLink.ContainsKey(id))
                 {
                     adjustedId = aquaCMX.castArmIdLink[id].bcln.fileId;
@@ -2399,6 +2403,10 @@ namespace AquaModelLibrary.Extra
                     string rebEx = $"{rebootExStart}am_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
@@ -2422,6 +2430,10 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                    }
                 }
                 else
                 {
@@ -2516,7 +2528,18 @@ namespace AquaModelLibrary.Extra
                 }
 
                 //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
+                int adjustedId = id; 
+                int linkedInnerId = -1;
+                int soundId = -1;
+                if (aquaCMX.clegDict.ContainsKey(id))
+                {
+                    linkedInnerId = aquaCMX.clegDict[id].body2.linkedInnerId;
+                    soundId = aquaCMX.clegDict[id].body2.costumeSoundId;
+                    if(linkedInnerId != -1)
+                    {
+                        var a = 0;
+                    }
+                }
                 if (aquaCMX.clegIdLink.ContainsKey(id))
                 {
                     adjustedId = aquaCMX.clegIdLink[id].bcln.fileId;
@@ -2528,6 +2551,10 @@ namespace AquaModelLibrary.Extra
                     string rebEx = $"{rebootExStart}lg_{adjustedId}_ex.ice";
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
                     output += rebHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
@@ -2551,6 +2578,11 @@ namespace AquaModelLibrary.Extra
 
                     output += "\n";
 
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                    }
+                    output += AddOutfitSound(pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2574,6 +2606,7 @@ namespace AquaModelLibrary.Extra
                     }
 
                     output += "\n";
+                    output += AddOutfitSound(pso2_binDir, soundId);
 
                 }
 
@@ -5209,16 +5242,22 @@ namespace AquaModelLibrary.Extra
         {
             if (soundId != -1)
             {
-                string soundFileUnhash;
+                string soundFileUnhash = "";
+                string soundFileLegUnhash = "";
                 if (soundId >= 100000)
                 {
                     soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
                 } else
                 {
                     soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                    soundFileLegUnhash = $"{classicStart}ls_{soundId:D5}.ice";
                 }
                 string soundFile = GetFileHash(soundFileUnhash);
-                if (File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
+                string castSoundFile = GetFileHash(soundFileLegUnhash);
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, castSoundFile)))
+                {
+                    return $",[Footstep sounds],{castSoundFile}\n";
+                } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
                 {
                     return $",[Footstep sounds],{soundFile}\n";
                 }
@@ -5713,6 +5752,8 @@ namespace AquaModelLibrary.Extra
             public string handsExHash = "";
             public string soundName = "";
             public string soundHash = "";
+            public string castSoundName = "";
+            public string castSoundHash = "";
             public string matAnimName = "";
             public string matAnimHash = "";
             public string matAnimExName = "";
@@ -6365,6 +6406,11 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.castArmIdLink[id].bcln.fileId;
                 }
+                int linkedInnerId = -1;
+                if (aquaCMX.carmDict.ContainsKey(id))
+                {
+                    linkedInnerId = aquaCMX.carmDict[id].body2.linkedInnerId;
+                }
                 //Decide if it needs to be handled as a reboot file or not
                 string typeString = "am_";
                 if (id >= 100000)
@@ -6373,6 +6419,10 @@ namespace AquaModelLibrary.Extra
                     data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
                     data.partHash = GetFileHash(data.partName);
                     data.partExHash = GetFileHash(data.partExName);
+                    data.linkedInnerName = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    data.linkedInnerExName = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    data.linkedInnerHash = GetFileHash(data.linkedInnerName);
+                    data.linkedInnerExHash = GetFileHash(data.linkedInnerExName);
 
                     //Set icon string
                     data.iconName = icon + castPartIcon + castArmIcon + id + ".ice";
@@ -6467,6 +6517,13 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.clegIdLink[id].bcln.fileId;
                 }
+                int soundId = -1;
+                int linkedInnerId = -1;
+                if (aquaCMX.clegDict.ContainsKey(id))
+                {
+                    soundId = aquaCMX.clegDict[id].body2.costumeSoundId;
+                    linkedInnerId = aquaCMX.clegDict[id].body2.linkedInnerId;
+                }
                 //Decide if it needs to be handled as a reboot file or not
                 string typeString = "lg_";
                 if (id >= 100000)
@@ -6475,6 +6532,10 @@ namespace AquaModelLibrary.Extra
                     data.partExName = $"{rebootExStart}{typeString}{adjustedId}_ex.ice";
                     data.partHash = GetFileHash(data.partName);
                     data.partExHash = GetFileHash(data.partExName);
+                    data.linkedInnerName = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    data.linkedInnerExName = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    data.linkedInnerHash = GetFileHash(data.linkedInnerName);
+                    data.linkedInnerExHash = GetFileHash(data.linkedInnerExName);
 
                     //Set icon string
                     data.iconName = icon + castPartIcon + castLegIcon + id + ".ice";
@@ -6490,6 +6551,24 @@ namespace AquaModelLibrary.Extra
                     //Set icon string
                     data.iconName = icon + castPartIcon + castLegIcon + finalIdIcon + ".ice";
                     data.iconHash = GetFileHash(data.iconName);
+                }
+                if (soundId != -1)
+                {
+                    string soundFileUnhash = "";
+                    string castSoundFileUnhash = "";
+                    if (soundId >= 100000)
+                    {
+                        soundFileUnhash = $"{rebootStart}bs_{soundId}.ice";
+                    }
+                    else
+                    {
+                        soundFileUnhash = $"{classicStart}bs_{soundId:D5}.ice";
+                        castSoundFileUnhash = $"{classicStart}ls_{soundId:D5}.ice";
+                    }
+                    data.soundName = soundFileUnhash;
+                    data.soundHash = GetFileHash(soundFileUnhash);
+                    data.castSoundName = castSoundFileUnhash;
+                    data.castSoundHash = GetFileHash(castSoundFileUnhash);
                 }
 
                 //Decide which type this is
