@@ -201,13 +201,7 @@ namespace AquaModelLibrary.Extra
                 {
                     var vert = mesh.Vertices[v];
                     vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMat));
-                    if(flver is FLVER0)
-                    {
-                        vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
-                    } else
-                    {
-                        vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
-                    }
+                    vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
 
                     if (vert.UVs.Count > 0)
                     {
