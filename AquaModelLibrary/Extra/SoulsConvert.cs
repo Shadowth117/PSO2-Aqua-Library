@@ -27,6 +27,7 @@ namespace AquaModelLibrary.Extra
         {
             SoulsFormats.IFlver flver = null;
             var raw = File.ReadAllBytes(filePath);
+
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
@@ -205,7 +206,7 @@ namespace AquaModelLibrary.Extra
                         vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
                     } else
                     {
-                        vtxl.vertNormals.Add(vert.Normal);
+                        vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
                     }
 
                     if (vert.UVs.Count > 0)
