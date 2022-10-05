@@ -3583,6 +3583,34 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void parseMSOToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select MySpaceObject",
+                Filter = "MySpaceObject Files (*.mso)|*.mso|All Files (*.*)|*"
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var mso = AquaUtil.LoadMSO(openFileDialog.FileName);
+                List<string> msoInfo = new List<string>();
+                msoInfo.Add($"MSO Entries ({mso.entryCount}):");
+                msoInfo.Add($"");
+                int i = 0;
+                foreach(var entry in mso.msoEntries)
+                {
+                    msoInfo.Add($"({i}) Name: {entry.asciiName}");
+                    msoInfo.Add($"Descriptor: {entry.utf8Descriptor}");
+                    msoInfo.Add($"Group Name: {entry.groupName}");
+                    msoInfo.Add($"Traits: [{entry.asciiTrait1}], [{entry.asciiTrait2}], [{entry.asciiTrait3}], [{entry.asciiTrait4}], [{entry.asciiTrait5}]");
+                    msoInfo.Add($"");
+                    i++;
+                }
+
+                File.WriteAllLines(openFileDialog.FileName + "_msoInfo.txt", msoInfo);
+            }
+        }
     }
 }
 

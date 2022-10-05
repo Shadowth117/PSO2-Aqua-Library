@@ -173,6 +173,7 @@
     <Compile Include="AquaStructs\MusicFileReboot.cs" />
     <Compile Include="AquaStructs\MusicFileAlpha.cs" />
     <Compile Include="AquaStructs\MyRoomParameters.cs" />
+    <Compile Include="AquaStructs\MySpaceObjects.cs" />
     <Compile Include="AquaStructs\NGSAquaObject.cs" />
     <Compile Include="AquaStructs\NGSShaderPresets\NGSShaderDetailPresets.cs" />
     <Compile Include="AquaStructs\NGSShaderPresets\NGSShaderExtraPresets.cs" />

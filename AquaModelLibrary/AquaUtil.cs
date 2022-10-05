@@ -4112,5 +4112,105 @@ namespace AquaModelLibrary
             FLTDPhysicsMethods.LoadFLTD(inFilename);
         }
 
+        public void ReadMSO(string inFilename)
+        {
+            LoadMSO(inFilename);
+        }
+
+        public static MySpaceObjectsSettings LoadMSO(string inFilename)
+        {
+            string ext = Path.GetExtension(inFilename);
+            if (ext.Length > 5)
+            {
+                ext = ext.Substring(0, 5);
+            }
+            var file = File.ReadAllBytes(inFilename);
+            return LoadMSO(ext, file);
+        }
+
+        public static MySpaceObjectsSettings LoadMSO(string ext, byte[] file)
+        {
+            MySpaceObjectsSettings mso = null;
+            int offset;
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string variant = null;
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+
+                if (variant == "NIFL")
+                {
+                    mso = new MySpaceObjectsSettings();
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    mso.entryOffset = streamReader.Read<int>();
+                    mso.entryCount = streamReader.Read<int>();
+
+                    streamReader.Seek(offset + mso.entryOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < mso.entryCount; i++)
+                    {
+                        MySpaceObjectsSettings.MSOEntryObject msoEntry = new MySpaceObjectsSettings.MSOEntryObject();
+                        msoEntry.msoEntry = streamReader.Read<MySpaceObjectsSettings.MSOEntry>();
+
+                        var bookmark = streamReader.Position();
+                        if (msoEntry.msoEntry.asciiNameOffset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiNameOffset, SeekOrigin.Begin);
+                            msoEntry.asciiName = ReadCString(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.utf8DescriptorOffset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.utf8DescriptorOffset, SeekOrigin.Begin);
+                            msoEntry.utf8Descriptor = ReadUTF8String(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait1Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait1Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait1 = ReadCString(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait2Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait2Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait2 = ReadCString(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait3Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait3Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait3 = ReadCString(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait4Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait4Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait4 = ReadCString(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.groupNameOffset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.groupNameOffset, SeekOrigin.Begin);
+                            msoEntry.groupName = ReadCString(streamReader);
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait5Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait5Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait5 = ReadCString(streamReader);
+                        }
+
+                        mso.msoEntries.Add(msoEntry);
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+                    }
+
+                }
+            }
+
+            return mso;
+        }
+
     }
 }

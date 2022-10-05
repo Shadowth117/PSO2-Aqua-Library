@@ -13,6 +13,8 @@ namespace AquaExtras
         public static string defaultWeaponString = "it_wp_xxx_";
 
         //Indexing
+        public static string mySpaceObjectSettingsIce = "myspace/myspace_data_setting.ice";
+        public static string mySpaceObjectSettingsMso = "myspace_object_setting.mso";
         public static string myRoomParametersIce = "myroom/myroom_param.ice";
         public static string myRoomGoodsFilename = "myroom_roomgoods.mrp";
         public static string myRoomChipFilename = "myroom_chip.mrp";

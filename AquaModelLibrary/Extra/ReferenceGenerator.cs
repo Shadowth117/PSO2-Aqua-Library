@@ -1118,11 +1118,97 @@ namespace AquaModelLibrary.Extra
                     }
                 }
             }
+            files.Clear();
 
             string roomOutDir = Path.Combine(outputDirectory, "Objects");
             Directory.CreateDirectory(roomOutDir);
             File.WriteAllLines(Path.Combine(roomOutDir, "Rooms.csv"), roomsOut);
             File.WriteAllLines(Path.Combine(roomOutDir, "Room Goods.csv"), roomGoodsOut);
+
+            //MySpace 
+            var rebootfilename = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(mySpaceObjectSettingsIce)));
+
+            iceFile = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(rebootfilename)));
+            files.AddRange(iceFile.groupOneFiles);
+            files.AddRange(iceFile.groupTwoFiles);
+
+            roomGoodsOut.Add("Data is laid out as follows:\nObject Name (if known), Object Function, Animation type, category 1, category 2, object unhashed name, object hashed name, object _ex textures hashed name\n\n");
+            for (int i = 0; i < files.Count; i++)
+            {
+                var name = IceFile.getFileName(files[i]);
+                if (name == mySpaceObjectSettingsMso)
+                {
+                    var mso = AquaUtil.LoadMSO("mso\0", files[i]);
+                    List<string> msoInfo = new List<string>();
+                    msoInfo.Add("Name, Descriptor, Group Name, [Traits]");
+                    foreach (var entry in mso.msoEntries)
+                    {
+                        var objFile1 = $"object/map_object/{entry.asciiName}_l1.ice";
+                        var objFile2 = $"object/map_object/{entry.asciiName}_l2.ice";
+                        var objFile3 = $"object/map_object/{entry.asciiName}_l3.ice";
+                        var objFile4 = $"object/map_object/{entry.asciiName}_l4.ice";
+                        var objFileCol = $"object/map_object/{entry.asciiName}_col.ice";
+                        var objFileCom = $"object/map_object/{entry.asciiName}_com.ice";
+                        var objFileEff = $"object/map_object/{entry.asciiName}_eff.ice";
+
+                        var objFile1Hash = GetRebootHash(GetFileHash(objFile1));
+                        var objFile2Hash = GetRebootHash(GetFileHash(objFile2));
+                        var objFile3Hash = GetRebootHash(GetFileHash(objFile3));
+                        var objFile4Hash = GetRebootHash(GetFileHash(objFile4));
+                        var objFileColHash = GetRebootHash(GetFileHash(objFileCol));
+                        var objFileComHash = GetRebootHash(GetFileHash(objFileCom));
+                        var objFileEffHash = GetRebootHash(GetFileHash(objFileEff));
+
+                        string entryString = $"{entry.asciiName},{entry.utf8Descriptor.Replace(',', '_')},";
+                        bool found = false;
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
+                        {
+                            entryString += $"{objFile1Hash},";
+                            found = true;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile2Hash)))
+                        {
+                            entryString += $"{objFile2Hash},";
+                            found = true;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile3Hash)))
+                        {
+                            entryString += $"{objFile3Hash},";
+                            found = true;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile4Hash)))
+                        {
+                            entryString += $"{objFile4Hash},";
+                            found = true;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileColHash)))
+                        {
+                            entryString += $"{objFileColHash},";
+                            found = true;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileComHash)))
+                        {
+                            entryString += $"{objFileComHash},";
+                            found = true;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileEffHash)))
+                        {
+                            entryString += $"{objFileEffHash},";
+                            found = true;
+                        }
+                        entryString += $"{entry.groupName},[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]";
+                        if (found == false)
+                        {
+                            entryString += ",(Not Found)";
+                        }
+                        msoInfo.Add(entryString);
+                    }
+                    File.WriteAllLines(Path.Combine(roomOutDir, "MySpace Goods.csv"), msoInfo);
+                }
+            }
+
+
+
         }
 
         private static void GenerateAnimation_EffectLists(string pso2_binDir, string playerCAnimDirOut, string playerRAnimDirOut, out List<string> genAnimList, out List<string> genAnimListNGS)

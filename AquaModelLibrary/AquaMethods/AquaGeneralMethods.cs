@@ -320,6 +320,12 @@ namespace AquaModelLibrary.AquaMethods
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
+        public static string ReadUTF8String(BufferedStreamReader streamReader)
+        {
+            string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), 0x100)); //Shouldn't ever be more than 0x60... in theory
+            return str.Remove(str.IndexOf(char.MinValue));
+        }
+
         public static string ReadUTF16String(BufferedStreamReader streamReader, long end, bool quickMode = true)
         {
             string str;
