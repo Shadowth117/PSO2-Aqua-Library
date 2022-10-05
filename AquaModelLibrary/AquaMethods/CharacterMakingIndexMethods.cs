@@ -957,7 +957,7 @@ namespace AquaModelLibrary
             }
             if(mode >= 1)
             {
-                outBytes.AddRange(BitConverter.GetBytes(acce.flt_8C));
+                outBytes.AddRange(BitConverter.GetBytes(acce.flt_90));
             }
         }
 
@@ -2071,9 +2071,14 @@ namespace AquaModelLibrary
                     acce.acce12List.Add(ReadAcce12Object(streamReader, count));
                 }
 
-                if(cmxDateSize >= aug17_22TableAddressInt)
+                if(cmxDateSize >= oct4_22TableAddressInt)
                 {
-                    acce.flt_8C = streamReader.Read<float>();
+                    acce.effectNamePtr = streamReader.Read<int>();
+                }
+
+                if (cmxDateSize >= aug17_22TableAddressInt)
+                {
+                    acce.flt_90 = streamReader.Read<float>();
                 }
 
                 long temp = streamReader.Position();
@@ -2159,6 +2164,16 @@ namespace AquaModelLibrary
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString15Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach15 = AquaGeneralMethods.ReadCString(streamReader);
+                    }
+
+                    if (cmxDateSize >= oct4_22TableAddressInt)
+                    {
+                        if (acce.effectNamePtr + offset > 0)
+                        {
+                            streamReader.Seek(acce.effectNamePtr + offset, SeekOrigin.Begin);
+                            acce.effectName = AquaGeneralMethods.ReadCString(streamReader);
+                        }
+
                     }
                 }
 

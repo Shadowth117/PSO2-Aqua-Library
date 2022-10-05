@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
+﻿using System.Collections.Generic;
 
 namespace AquaModelLibrary
 {
@@ -15,6 +10,7 @@ namespace AquaModelLibrary
         public static int feb8_22TableAddressInt = 0x2DAFD0; //Lv 40 update cmx
         public static int jun7_22TableAddressInt = 0x2F6C44; //Kvaris update cmx
         public static int aug17_22TableAddressInt = 0x307D6C; //August 17th 2022 update cmx
+        public static int oct4_22TableAddressInt = 0x00320b1c; //October 5th 2022 update cmx
 
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -427,7 +423,8 @@ namespace AquaModelLibrary
             public float flt_54;
             public ACCE2B acce2b;
             public List<ACCE_12Object> acce12List = new List<ACCE_12Object>();
-            public float flt_8C;
+            public int effectNamePtr;
+            public float flt_90;
 
             public string dataString;
             public string nodeAttach1;
@@ -452,6 +449,8 @@ namespace AquaModelLibrary
 
             public string nodeAttach15;
             public string nodeAttach16;
+
+            public string effectName;
         }
 
         public struct ACCE
@@ -600,7 +599,7 @@ namespace AquaModelLibrary
 
         public struct NGS_Teeth
         {
-            public int id; 
+            public int id;
             public int dataStringPtr;
             public int texString1Ptr;
             public int texString2Ptr;
@@ -883,8 +882,8 @@ namespace AquaModelLibrary
             public int jun7_22Address; //Only in June 7, 2022 builds and forward
             public int feb8_22UnkAddress; //Only in feb 8, 2022 builds and forwared
 
-            public int bodyCount; 
-            public int carmCount; 
+            public int bodyCount;
+            public int carmCount;
             public int clegCount;
             public int bodyOuterCount;
 
