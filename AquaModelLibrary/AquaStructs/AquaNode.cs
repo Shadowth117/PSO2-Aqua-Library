@@ -29,7 +29,6 @@ namespace AquaModelLibrary
             node.firstChild = -1;
 
             aqn.nodeList.Add(node);
-            aqn.nodeList.Add(node);
 
             return aqn;
         }

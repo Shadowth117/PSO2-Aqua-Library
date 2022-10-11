@@ -182,7 +182,14 @@
     <Compile Include="AquaStructs\NGSShaderPresets\PSO2ShaderTexInfoPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
+    <Compile Include="BluePoint\CMSH\CMSH.cs" />
+    <Compile Include="BluePoint\CMSH\CMSHFaceData.cs" />
+    <Compile Include="BluePoint\CMSH\CMSHHeader.cs" />
+    <Compile Include="BluePoint\CMSH\CMSHMatReference.cs" />
+    <Compile Include="BluePoint\CMSH\CMSHVertexData.cs" />
+    <Compile Include="BluePoint\CMSH\CMSHVertexDataDefinition.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
+    <Compile Include="Extra\BluePointConvert.cs" />
     <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
     <Compile Include="Extra\DDS\DirectXUtil.cs" />
     <Compile Include="Extra\DirectX\D3DEnums.cs" />
@@ -201,6 +208,7 @@
     <Compile Include="Extra\PSO2MapHandler.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
+    <Compile Include="Extra\Vec3Int.cs" />
     <Compile Include="Zero\PSZTextBin.cs" />
     <Compile Include="Extra\ReferenceGenerator.cs" />
     <Compile Include="Extra\SoulsConvert.cs" />
