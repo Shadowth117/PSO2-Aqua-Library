@@ -35,6 +35,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 sr.Seek(0x18, System.IO.SeekOrigin.Current);
                 matRef.matNameLength = sr.Read<byte>();
                 matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), matRef.matNameLength));
+                if(variantFlag == 0x1 && (i + 1) != matCount)
+                {
+                    matRef.unkInt0 = sr.Read<int>();
+                    matRef.unkVertexAddress = sr.Read<int>();
+                }
                 sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
                 matList.Add(matRef);
             }

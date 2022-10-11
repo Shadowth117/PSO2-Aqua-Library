@@ -183,6 +183,7 @@
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
     <Compile Include="BluePoint\CMSH\CMSH.cs" />
+    <Compile Include="BluePoint\CMSH\CMSHBoneData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHFaceData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHHeader.cs" />
     <Compile Include="BluePoint\CMSH\CMSHMatReference.cs" />

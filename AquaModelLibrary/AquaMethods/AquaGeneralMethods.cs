@@ -320,6 +320,14 @@ namespace AquaModelLibrary.AquaMethods
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
+        public static string ReadCStringSeek(BufferedStreamReader streamReader)
+        {
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x100)); //Shouldn't ever be more than 0x60... in theory
+            var minVal = str.IndexOf(char.MinValue);
+            streamReader.Seek(minVal + 1, SeekOrigin.Current);
+            return str.Remove(minVal);
+        }
+
         public static string ReadUTF8String(BufferedStreamReader streamReader)
         {
             string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), 0x100)); //Shouldn't ever be more than 0x60... in theory

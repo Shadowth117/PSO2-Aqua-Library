@@ -37,10 +37,12 @@ namespace AquaModelLibrary.Extra
                 }
             }*/
             //aqn = new AquaNode();
-            var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
+            var mirrorMat = Matrix4x4.Identity;
+            /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
                                         0, 0, 1, 0,
                                         0, 0, 0, 1);
+            */
             /*
             for (int i = 0; i < flver.Bones.Count; i++)
             {
