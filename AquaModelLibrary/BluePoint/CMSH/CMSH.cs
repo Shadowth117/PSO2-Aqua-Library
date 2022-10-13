@@ -20,6 +20,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             header = new CMSHHeader(sr);
             vertData = new CMSHVertexData(sr);
             faceData = new CMSHFaceData(sr, vertData.positionList.Count);
+            var position = sr.Position();
             if(header.variantFlag == 0x1)
             {
                 boneData = new CMSHBoneData(sr);

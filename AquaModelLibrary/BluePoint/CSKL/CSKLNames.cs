@@ -58,8 +58,8 @@ namespace AquaModelLibrary.BluePoint.CSKL
         //Helper
         public int primaryNameOffsetListAbsoluteOffset;
 
-        public int secondaryNameOffsetListAbsoluteOffset;
-        public int secondaryParamOffsetListAbsoluteOffset;
+        public long secondaryNameOffsetListAbsoluteOffset;
+        public long secondaryParamOffsetListAbsoluteOffset;
 
 
         public CSKLNames()
@@ -73,9 +73,13 @@ namespace AquaModelLibrary.BluePoint.CSKL
             secondaryNameCount = sr.Read<int>();
             primaryNameOffsetListOffset = sr.Read<int>();
 
+            var secondaryNameOffsetListOffsetPosition = sr.Position();
+            var secondaryParamOffsetListOffsetPosition = secondaryNameOffsetListOffsetPosition + 4;
             secondaryNameOffsetListOffset = sr.Read<int>();
             secondaryParamOffsetListOffset = sr.Read<int>();
 
+            secondaryNameOffsetListAbsoluteOffset = secondaryNameOffsetListOffsetPosition + secondaryNameOffsetListOffset;
+            secondaryParamOffsetListAbsoluteOffset = secondaryParamOffsetListOffsetPosition + secondaryParamOffsetListOffset;
             //Primary Name List
             primaryNames = new CSKLNameList(sr);
             if(secondaryNameCount > 0 && secondaryNameOffsetListOffset > 0)

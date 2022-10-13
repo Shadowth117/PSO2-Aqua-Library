@@ -18,11 +18,20 @@ namespace AquaModelLibrary.Extra
         public static AquaObject ReadCMDL(string filePath, out AquaNode aqn)
         {
             string cmshPath = Path.ChangeExtension(filePath, ".cmsh");
-            string csklPath = Path.ChangeExtension(filePath, ".cskl");
-            string backupPath = Path.GetDirectoryName(filePath);
-            string cmtlPath = Path.Combine(Path.GetDirectoryName(backupPath), "materials", "_cmn");
+            string modelPath = Path.GetDirectoryName(filePath);
+            string cmtlPath = Path.Combine(Path.GetDirectoryName(modelPath), "materials", "_cmn");
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(cmshPath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return CMDLToAqua(new CMSH(streamReader), cmtlPath, modelPath, out aqn);
+            }
+        }
+
+        public static AquaObject CMDLToAqua(CMSH mdl, string cmtlPath, string modelPath, out AquaNode aqn)
+        {
+            var csklPath = Path.Combine(modelPath, Path.GetFileName(mdl.boneData.skeletonPath));
             CSKL cskl = null;
-            if(File.Exists(csklPath))
+            if (File.Exists(csklPath))
             {
                 using (Stream stream = new MemoryStream(File.ReadAllBytes(csklPath)))
                 using (var streamReader = new BufferedStreamReader(stream, 8192))
@@ -30,15 +39,6 @@ namespace AquaModelLibrary.Extra
                     cskl = new CSKL(streamReader);
                 }
             }
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(cmshPath)))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                return CMDLToAqua(new List<CMSH>() { new CMSH(streamReader) }, cskl, cmtlPath, backupPath, out aqn);
-            }
-        }
-
-        public static AquaObject CMDLToAqua(List<CMSH> mdl, CSKL cskl, string cmtlPath, string backupPath, out AquaNode aqn)
-        {
             var mirrorMat = Matrix4x4.Identity;
             /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
@@ -126,179 +126,176 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
-            for (int i = 0; i < mdl.Count; i++)
+            var mesh = mdl;
+
+            var nodeMatrix = Matrix4x4.Identity;
+
+            //Vert data
+            var vertCount = mesh.vertData.positionList.Count;
+            AquaObject.VTXL vtxl = new AquaObject.VTXL();
+
+            for (int v = 0; v < vertCount; v++)
             {
-                var mesh = mdl[i];
+                vtxl.vertPositions.Add(Vector3.Transform(mesh.vertData.positionList[v], mirrorMat));
+                //vtxl.vertNormals.Add(Vector3.Transform(mesh.vertData.normals[v], mirrorMat));
 
-                var nodeMatrix = Matrix4x4.Identity;
-
-                //Vert data
-                var vertCount = mesh.vertData.positionList.Count;
-                AquaObject.VTXL vtxl = new AquaObject.VTXL();
-
-                for (int v = 0; v < vertCount; v++)
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
                 {
-                    vtxl.vertPositions.Add(Vector3.Transform(mesh.vertData.positionList[v], mirrorMat));
-                    //vtxl.vertNormals.Add(Vector3.Transform(mesh.vertData.normals[v], mirrorMat));
-
-                    if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
-                    {
-                        var uv1 = mesh.vertData.uvDict[VertexMagic.TEX0][v];
-                        vtxl.uv1List.Add(new Vector2(uv1.X, uv1.Y));
-                    }
-                    if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX1))
-                    {
-                        var uv2 = mesh.vertData.uvDict[VertexMagic.TEX1][v];
-                        vtxl.uv2List.Add(new Vector2(uv2.X, uv2.Y));
-                    }
-                    if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX2))
-                    {
-                        var uv3 = mesh.vertData.uvDict[VertexMagic.TEX2][v];
-                        vtxl.uv3List.Add(new Vector2(uv3.X, uv3.Y));
-                    }
-                    if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX3))
-                    {
-                        var uv4 = mesh.vertData.uvDict[VertexMagic.TEX3][v];
-                        vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
-                    }
-
-                    /*
-                    if (vert.Colors.Count > 0)
-                    {
-                        var color = vert.Colors[0];
-                        vtxl.vertColors.Add(new byte[] { (byte)(color.B * 255), (byte)(color.G * 255), (byte)(color.R * 255), (byte)(color.A * 255) });
-                    }
-                    if (vert.Colors.Count > 1)
-                    {
-                        var color2 = vert.Colors[1];
-                        vtxl.vertColor2s.Add(new byte[] { (byte)(color2.B * 255), (byte)(color2.G * 255), (byte)(color2.R * 255), (byte)(color2.A * 255) });
-                    }
-                    */
-
-                    if (mesh.vertData.vertWeights.Count > 0)
-                    {
-                        vtxl.vertWeights.Add(mesh.vertData.vertWeights[v]);
-                        vtxl.vertWeightIndices.Add(mesh.vertData.vertWeightIndices[v]);
-                    }
-                    else if (mesh.vertData.vertWeightIndices.Count > 0)
-                    {
-                        vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
-                        vtxl.vertWeightIndices.Add(new int[] { mesh.vertData.vertWeightIndices[v][0], 0, 0, 0 });
-                    }
+                    var uv1 = mesh.vertData.uvDict[VertexMagic.TEX0][v];
+                    vtxl.uv1List.Add(new Vector2(uv1.X, uv1.Y));
+                }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX1))
+                {
+                    var uv2 = mesh.vertData.uvDict[VertexMagic.TEX1][v];
+                    vtxl.uv2List.Add(new Vector2(uv2.X, uv2.Y));
+                }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX2))
+                {
+                    var uv3 = mesh.vertData.uvDict[VertexMagic.TEX2][v];
+                    vtxl.uv3List.Add(new Vector2(uv3.X, uv3.Y));
+                }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX3))
+                {
+                    var uv4 = mesh.vertData.uvDict[VertexMagic.TEX3][v];
+                    vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
                 }
 
-                vtxl.convertToLegacyTypes();
-                aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(vtxl, out int vc));
-
-                //Face data
-                //Split CMSH by materials. Materials seem to contain a face count after which they split
-                int currentFace = 0;
-                for (int m = 0; m < mesh.header.matList.Count; m++)
+                /*
+                if (vert.Colors.Count > 0)
                 {
-                    var matFileName = mesh.header.matList[m].matName.Replace("_mat1", "");
-                    matFileName = matFileName.Replace("_mat", "");
-                    var matPath = Path.Combine(cmtlPath, matFileName + ".cmat");
-                    var backupMatPath = Path.Combine(backupPath, matFileName + ".cmat");
-                    string texName = "test_d.dds";
-                    if (File.Exists(matPath))
-                    {
-                        using (Stream stream = new MemoryStream(File.ReadAllBytes(matPath)))
-                        using (var streamReader = new BufferedStreamReader(stream, 8192))
-                        {
-                            var cmat = new CMAT(streamReader);
-                            if(cmat.texNames.Count > 0)
-                            {
-                                texName = cmat.texNames[0];
-                            }
-                        }
-                    } else if(File.Exists(backupMatPath))
-                    {
-                        using (Stream stream = new MemoryStream(File.ReadAllBytes(backupMatPath)))
-                        using (var streamReader = new BufferedStreamReader(stream, 8192))
-                        {
-                            var cmat = new CMAT(streamReader);
-                            if (cmat.texNames.Count > 0)
-                            {
-                                texName = cmat.texNames[0];
-                            }
-                        }
-
-                    }
-
-                    //Material
-                    var mat = new AquaObject.GenericMaterial();
-                    mat.matName = $"{mesh.header.matList[m].matName}";
-                    mat.texNames = new List<string>();
-                    mat.texNames.Add(texName);
-                    aqp.tempMats.Add(mat);
-
-                    var startFace = mesh.header.matList[m].startingFaceIndex / 6;
-                    var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
-                    if (mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0)
-                    {
-                        startFace = currentFace;
-                        faceCount = mesh.faceData.faceList.Count - currentFace;
-                    }
-                    currentFace = startFace + faceCount;
-
-                    Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
-                    AquaObject.VTXL matVtxl = new AquaObject.VTXL();
-                    AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
-                    List<Vector3> triList = new List<Vector3>();
-                    for (int f = startFace; f < (startFace + faceCount); f++)
-                    {
-                        var tri = mesh.faceData.faceList[f];
-
-                        int x;
-                        int y;
-                        int z;
-                        if(vertIdDict.TryGetValue(tri.X, out var value))
-                        {
-                            x = value;
-                        } else
-                        {
-                            vertIdDict.Add(tri.X, matVtxl.vertPositions.Count);
-                            x = matVtxl.vertPositions.Count;
-                            AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.X);
-                        }
-                        if (vertIdDict.TryGetValue(tri.Y, out var value2))
-                        {
-                            y = value2;
-                        }
-                        else
-                        {
-                            vertIdDict.Add(tri.Y, matVtxl.vertPositions.Count);
-                            y = matVtxl.vertPositions.Count;
-                            AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.Y);
-                        }
-                        if (vertIdDict.TryGetValue(tri.Z, out var value3))
-                        {
-                            z = value3;
-                        }
-                        else
-                        {
-                            vertIdDict.Add(tri.Z, matVtxl.vertPositions.Count);
-                            z = matVtxl.vertPositions.Count;
-                            AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.Z);
-                        }
-
-                        triList.Add(new Vector3(x, y, z));
-                    }
-                    genMesh.triList = triList;
-
-                    //Extra
-                    genMesh.vertCount = matVtxl.vertPositions.Count;
-                    genMesh.matIdList = new List<int>(new int[genMesh.triList.Count]);
-                    for (int j = 0; j < genMesh.matIdList.Count; j++)
-                    {
-                        genMesh.matIdList[j] = aqp.tempMats.Count - 1;
-                    }
-
-                    aqp.tempTris.Add(genMesh);
-                    aqp.vtxlList.Add(matVtxl);
+                    var color = vert.Colors[0];
+                    vtxl.vertColors.Add(new byte[] { (byte)(color.B * 255), (byte)(color.G * 255), (byte)(color.R * 255), (byte)(color.A * 255) });
                 }
+                if (vert.Colors.Count > 1)
+                {
+                    var color2 = vert.Colors[1];
+                    vtxl.vertColor2s.Add(new byte[] { (byte)(color2.B * 255), (byte)(color2.G * 255), (byte)(color2.R * 255), (byte)(color2.A * 255) });
+                }
+                */
 
+                if (mesh.vertData.vertWeights.Count > 0)
+                {
+                    vtxl.vertWeights.Add(mesh.vertData.vertWeights[v]);
+                    vtxl.vertWeightIndices.Add(mesh.vertData.vertWeightIndices[v]);
+                }
+                else if (mesh.vertData.vertWeightIndices.Count > 0)
+                {
+                    vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+                    vtxl.vertWeightIndices.Add(new int[] { mesh.vertData.vertWeightIndices[v][0], 0, 0, 0 });
+                }
             }
+
+            vtxl.convertToLegacyTypes();
+            aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(vtxl, out int vc));
+
+            //Face data
+            //Split CMSH by materials. Materials seem to contain a face count after which they split
+            int currentFace = 0;
+            for (int m = 0; m < mesh.header.matList.Count; m++)
+            {
+                var matFileName = mesh.header.matList[m].matName.Replace("_mat1", "");
+                matFileName = matFileName.Replace("_mat", "");
+                var matPath = Path.Combine(cmtlPath, matFileName + ".cmat");
+                var backupMatPath = Path.Combine(modelPath, matFileName + ".cmat");
+                string texName = "test_d.dds";
+                if (File.Exists(matPath))
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(matPath)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var cmat = new CMAT(streamReader);
+                        if(cmat.texNames.Count > 0)
+                        {
+                            texName = cmat.texNames[0];
+                        }
+                    }
+                } else if(File.Exists(backupMatPath))
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(backupMatPath)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var cmat = new CMAT(streamReader);
+                        if (cmat.texNames.Count > 0)
+                        {
+                            texName = cmat.texNames[0];
+                        }
+                    }
+
+                }
+
+                //Material
+                var mat = new AquaObject.GenericMaterial();
+                mat.matName = $"{mesh.header.matList[m].matName}";
+                mat.texNames = new List<string>();
+                mat.texNames.Add(texName);
+                aqp.tempMats.Add(mat);
+
+                var startFace = mesh.header.matList[m].startingFaceIndex / 6;
+                var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
+                if (mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0)
+                {
+                    startFace = currentFace;
+                    faceCount = mesh.faceData.faceList.Count - currentFace;
+                }
+                currentFace = startFace + faceCount;
+
+                Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
+                AquaObject.VTXL matVtxl = new AquaObject.VTXL();
+                AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                List<Vector3> triList = new List<Vector3>();
+                for (int f = startFace; f < (startFace + faceCount); f++)
+                {
+                    var tri = mesh.faceData.faceList[f];
+
+                    int x;
+                    int y;
+                    int z;
+                    if(vertIdDict.TryGetValue(tri.X, out var value))
+                    {
+                        x = value;
+                    } else
+                    {
+                        vertIdDict.Add(tri.X, matVtxl.vertPositions.Count);
+                        x = matVtxl.vertPositions.Count;
+                        AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.X);
+                    }
+                    if (vertIdDict.TryGetValue(tri.Y, out var value2))
+                    {
+                        y = value2;
+                    }
+                    else
+                    {
+                        vertIdDict.Add(tri.Y, matVtxl.vertPositions.Count);
+                        y = matVtxl.vertPositions.Count;
+                        AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.Y);
+                    }
+                    if (vertIdDict.TryGetValue(tri.Z, out var value3))
+                    {
+                        z = value3;
+                    }
+                    else
+                    {
+                        vertIdDict.Add(tri.Z, matVtxl.vertPositions.Count);
+                        z = matVtxl.vertPositions.Count;
+                        AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.Z);
+                    }
+
+                    triList.Add(new Vector3(x, y, z));
+                }
+                genMesh.triList = triList;
+
+                //Extra
+                genMesh.vertCount = matVtxl.vertPositions.Count;
+                genMesh.matIdList = new List<int>(new int[genMesh.triList.Count]);
+                for (int j = 0; j < genMesh.matIdList.Count; j++)
+                {
+                    genMesh.matIdList[j] = aqp.tempMats.Count - 1;
+                }
+
+                aqp.tempTris.Add(genMesh);
+                aqp.vtxlList.Add(matVtxl);
+            }
+
 
             return aqp;
         }
