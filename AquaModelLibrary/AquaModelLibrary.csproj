@@ -190,6 +190,7 @@
     <Compile Include="BluePoint\CMSH\CMSHMatReference.cs" />
     <Compile Include="BluePoint\CMSH\CMSHVertexData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHVertexDataDefinition.cs" />
+    <Compile Include="BluePoint\CMAT\CMAT.cs" />
     <Compile Include="BluePoint\CSKL\CSKL.cs" />
     <Compile Include="BluePoint\CSKL\CSKLFamilyIds.cs" />
     <Compile Include="BluePoint\CSKL\CSKLHeader.cs" />

@@ -38,8 +38,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
                 if (matCount > 1 && (i + 1 != matCount))
                 {
-                    matRef.unkInt0 = sr.Read<int>();
-                    matRef.unkVertexAddress = sr.Read<int>();
+                    matRef.startingFaceIndex = sr.Read<int>();
+                    matRef.endingFaceIndex = sr.Read<int>();
                 }
                 matList.Add(matRef);
             }
