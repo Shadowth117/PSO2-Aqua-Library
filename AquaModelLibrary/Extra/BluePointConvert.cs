@@ -192,6 +192,7 @@ namespace AquaModelLibrary.Extra
 
                 //Face data
                 //Split CMSH by materials. Materials seem to contain a face count after which they split
+                int currentFace = 0;
                 for (int m = 0; m < mesh.header.matList.Count; m++)
                 {
                     var matFileName = mesh.header.matList[m].matName.Replace("_mat1", "");
@@ -233,10 +234,13 @@ namespace AquaModelLibrary.Extra
 
                     var startFace = mesh.header.matList[m].startingFaceIndex / 6;
                     var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
-                    if(mesh.header.matList[m].endingFaceIndex == 0)
+                    if (mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0)
                     {
-                        faceCount = mesh.faceData.faceList.Count - startFace;
+                        startFace = currentFace;
+                        faceCount = mesh.faceData.faceList.Count - currentFace;
                     }
+                    currentFace = startFace + faceCount;
+
                     Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
                     AquaObject.VTXL matVtxl = new AquaObject.VTXL();
                     AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
