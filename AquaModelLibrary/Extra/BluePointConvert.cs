@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.BluePoint.CMSH;
+using AquaModelLibrary.BluePoint.CSKL;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using static AquaModelLibrary.AquaNode;
 
 namespace AquaModelLibrary.Extra
 {
@@ -14,46 +16,51 @@ namespace AquaModelLibrary.Extra
     {
         public static AquaObject ReadCMDL(string filePath, out AquaNode aqn)
         {
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            string cmshPath = Path.ChangeExtension(filePath, ".cmsh");
+            string csklPath = Path.ChangeExtension(filePath, ".cskl");
+            CSKL cskl = null;
+            if(File.Exists(csklPath))
+            {
+                using (Stream stream = new MemoryStream(File.ReadAllBytes(csklPath)))
+                using (var streamReader = new BufferedStreamReader(stream, 8192))
+                {
+                    cskl = new CSKL(streamReader);
+                }
+            }
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(cmshPath)))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                return CMDLToAqua(new List<CMSH>() { new CMSH(streamReader) },out aqn);
+                return CMDLToAqua(new List<CMSH>() { new CMSH(streamReader) }, cskl, out aqn);
             }
         }
 
-        public static AquaObject CMDLToAqua(List<CMSH> mdl, out AquaNode aqn)
+        public static AquaObject CMDLToAqua(List<CMSH> mdl, CSKL cskl, out AquaNode aqn)
         {
             aqn = AquaNode.GenerateBasicAQN();
             AquaObject aqp = new NGSAquaObject();
-            /*
-            if (flver is FLVER2 flver2)
+            for (int i = 0; i < cskl.header.boneCount; i++)
             {
-                if (flver2.Header.Version > 0x20010)
-                {
-                    for (int i = 0; i < flver2.Bones.Count; i++)
-                    {
-                        aqp.bonePalette.Add((uint)i);
-                    }
-                }
-            }*/
-            //aqn = new AquaNode();
+                aqp.bonePalette.Add((uint)i);
+            }
+            aqn = new AquaNode();
             var mirrorMat = Matrix4x4.Identity;
             /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
                                         0, 0, 1, 0,
                                         0, 0, 0, 1);
             */
-            /*
-            for (int i = 0; i < flver.Bones.Count; i++)
+            
+            for (int i = 0; i < cskl.header.boneCount; i++)
             {
-                var flverBone = flver.Bones[i];
-                var parentId = flverBone.ParentIndex;
+                var metadata = cskl.metadata.familyIds[i];
+                var parentId = metadata.parentId;
 
-                FLVER.Bone.RotationOrder order = FLVER.Bone.RotationOrder.XZY;
                 var tfmMat = Matrix4x4.Identity;
 
-                Matrix4x4 mat = flverBone.ComputeLocalTransform(order);
-
+                Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
+                Matrix4x4 invMatReal = cskl.invTransforms[i];
+                //invMatReal = Matrix4x4.Transpose(invMatReal);
+                Matrix4x4.Invert(invMatReal, out var invInvMat);
                 mat *= tfmMat;
 
                 Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
@@ -89,7 +96,7 @@ namespace AquaModelLibrary.Extra
                 aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
                 aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
                 aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
-                aqNode.boneName.SetString(flverBone.Name);
+                aqNode.boneName.SetString(cskl.names.primaryNames.names[i].Split('|').Last());
                 //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                 aqn.nodeList.Add(aqNode);
             }
@@ -108,7 +115,6 @@ namespace AquaModelLibrary.Extra
                 bone.SetInverseBindPoseMatrix(invMat);
                 aqn.nodeList[i] = bone;
             }
-            */
 
             for (int i = 0; i < mdl.Count; i++)
             {

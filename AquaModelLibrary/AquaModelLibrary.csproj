@@ -185,10 +185,17 @@
     <Compile Include="BluePoint\CMSH\CMSH.cs" />
     <Compile Include="BluePoint\CMSH\CMSHBoneData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHFaceData.cs" />
+    <Compile Include="BluePoint\CFooter.cs" />
     <Compile Include="BluePoint\CMSH\CMSHHeader.cs" />
     <Compile Include="BluePoint\CMSH\CMSHMatReference.cs" />
     <Compile Include="BluePoint\CMSH\CMSHVertexData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHVertexDataDefinition.cs" />
+    <Compile Include="BluePoint\CSKL\CSKL.cs" />
+    <Compile Include="BluePoint\CSKL\CSKLFamilyIds.cs" />
+    <Compile Include="BluePoint\CSKL\CSKLHeader.cs" />
+    <Compile Include="BluePoint\CSKL\CSKLNames.cs" />
+    <Compile Include="BluePoint\CSKL\CSKLTransform.cs" />
+    <Compile Include="BluePoint\CSKL\SKLMetaData.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\BluePointConvert.cs" />
     <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
@@ -288,6 +295,7 @@
       <Name>ZamboniLib</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

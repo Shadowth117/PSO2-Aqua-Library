@@ -13,6 +13,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public CMSHVertexData vertData;
         public CMSHFaceData faceData;
         public CMSHBoneData boneData;
+        public CFooter footerData;
 
         public CMSH(BufferedStreamReader sr)
         {
@@ -23,6 +24,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             {
                 boneData = new CMSHBoneData(sr);
             }
+            footerData = sr.Read<CFooter>();
         }
     }
 }

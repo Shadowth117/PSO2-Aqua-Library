@@ -1,6 +1,6 @@
-﻿namespace AquaModelLibrary.BluePoint.CMSH
+﻿namespace AquaModelLibrary.BluePoint
 {
-    public struct CMSHFooter
+    public struct CFooter
     {
         public int magic;
         public int flags;

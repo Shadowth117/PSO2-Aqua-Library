@@ -26,10 +26,18 @@ namespace AquaModelLibrary.BluePoint.CMSH
         {
             flags = sr.Read<int>();
             indexCount = sr.Read<int>();
-
+            bool useInts = vertCount > ushort.MaxValue;
             for(int i = 0; i < indexCount / 3; i++)
             {
-                faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>()));
+                switch(useInts)
+                {
+                    case true:
+                        faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<int>(), sr.Read<int>(), sr.Read<int>()));
+                        break;
+                    case false:
+                        faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>()));
+                        break;
+                }
             }
         }
     }

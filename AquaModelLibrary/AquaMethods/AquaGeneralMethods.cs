@@ -314,33 +314,33 @@ namespace AquaModelLibrary.AquaMethods
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
-        public static string ReadCString(BufferedStreamReader streamReader)
+        public static string ReadCString(BufferedStreamReader streamReader, int blockSize = 0x100)
         {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x100)); //Shouldn't ever be more than 0x60... in theory
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
-        public static string ReadCStringSeek(BufferedStreamReader streamReader)
+        public static string ReadCStringSeek(BufferedStreamReader streamReader, int blockSize = 0x100)
         {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), 0x100)); //Shouldn't ever be more than 0x60... in theory
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
             var minVal = str.IndexOf(char.MinValue);
             streamReader.Seek(minVal + 1, SeekOrigin.Current);
             return str.Remove(minVal);
         }
 
-        public static string ReadUTF8String(BufferedStreamReader streamReader)
+        public static string ReadUTF8String(BufferedStreamReader streamReader, int blockSize = 0x100)
         {
-            string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), 0x100)); //Shouldn't ever be more than 0x60... in theory
+            string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
             return str.Remove(str.IndexOf(char.MinValue));
         }
 
-        public static string ReadUTF16String(BufferedStreamReader streamReader, long end, bool quickMode = true)
+        public static string ReadUTF16String(BufferedStreamReader streamReader, long end, bool quickMode = true, int blockSize = 0x60)
         {
             string str;
             // There's really no string limit, but it takes a long time to read these accurately. To avoid this attempt reading a short amount first. Then, go to failsafe if needed.
             if (quickMode == true)
             {
-                str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), 0x60));
+                str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize));
                 int strEnd = str.IndexOf(char.MinValue);
 
                 //Return the string if the buffer is valid

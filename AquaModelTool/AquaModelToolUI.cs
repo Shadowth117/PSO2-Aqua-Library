@@ -3617,7 +3617,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select Demon's Souls PS5 cmdl file(s)",
-                Filter = "Demon's Souls PS5 cmsh Files (*.cmsh)|*.cmsh|All Files (*.*)|*",
+                Filter = "Demon's Souls PS5 cmsh Files (*.cmsh, *.cmdl)|*.cmsh;*.cmdl|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -3645,7 +3645,7 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select Demon's Souls PS5 cmdl file(s)",
-                Filter = "Demon's Souls PS5 cmsh Files (*.cmsh)|*.cmsh|All Files (*.*)|*",
+                Filter = "Demon's Souls PS5 cmsh Files (*.cmsh, *.cmdl)|*.cmsh;*.cmdl|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
