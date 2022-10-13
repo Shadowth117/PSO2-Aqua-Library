@@ -48,7 +48,6 @@ namespace AquaModelLibrary.Extra
             if(cskl == null || cskl.header.boneCount == 0)
             {
                 aqp.bonePalette.Add((uint)0);
-                aqn = AquaNode.GenerateBasicAQN();
             } else
             {
                 for (int i = 0; i < cskl.header.boneCount; i++)

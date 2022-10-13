@@ -75,20 +75,20 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 vertDef.int_14 = sr.Read<int>();
                 vertDefs.Add(vertDef);
             }
-
-            for(int i = 0; i < vertDefinitionsCount; i++)
+            var vertCount = vertDefs[0].dataSize / 0xC; //First should alwasy be position
+            for (int i = 0; i < vertDefinitionsCount; i++)
             {
                 sr.Seek(vertexDataStart + vertDefs[i].dataStart, System.IO.SeekOrigin.Begin);
                 switch(vertDefs[i].dataMagic)
                 {
                     case VertexMagic.POS0:
-                        for(int v = 0; v < vertDefs[i].dataSize / 0xC; v++)
+                        for(int v = 0; v < vertCount; v++)
                         {
                             positionList.Add(sr.Read<Vector3>());
                         }
                         break;
                     case VertexMagic.QUT0:
-                        for (int v = 0; v < vertDefs[i].dataSize / 0x4; v++)
+                        for (int v = 0; v < vertCount; v++)
                         {
                             normalsMaybe.Add(sr.ReadBytes(sr.Position(), 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
@@ -104,22 +104,32 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     case VertexMagic.TEX7:
                     case VertexMagic.TEX8:
                         var uvList = new List<Vector2>();
-                        for (int v = 0; v < vertDefs[i].dataSize / 0x4; v++)
+                        for (int v = 0; v < vertCount; v++)
                         {
                             uvList.Add(new Vector2(sr.Read<Half>(), sr.Read<Half>()));
                         }
                         uvDict.Add(vertDefs[i].dataMagic, uvList);
                         break;
                     case VertexMagic.BONI:
-                        for (int v = 0; v < vertDefs[i].dataSize / 0x4; v++)
+                        var smolCount = vertDefs[i].dataSize / 0x4;
+                        if (vertCount != smolCount)
                         {
-                            var indices = sr.ReadBytes(sr.Position(), 4);
-                            vertWeightIndices.Add(new int[] { indices[0], indices[1], indices[2], indices[3] });
-                            sr.Seek(4, System.IO.SeekOrigin.Current);
+                            for (int v = 0; v < vertCount; v++)
+                            {
+                                vertWeightIndices.Add(new int[] { sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>() });
+                            }
+                        } else
+                        {
+                            for (int v = 0; v < vertCount; v++)
+                            {
+                                var indices = sr.ReadBytes(sr.Position(), 4);
+                                vertWeightIndices.Add(new int[] { indices[0], indices[1], indices[2], indices[3] });
+                                sr.Seek(4, System.IO.SeekOrigin.Current);
+                            }
                         }
                         break;
                     case VertexMagic.BONW:
-                        for (int v = 0; v < vertDefs[i].dataSize / 0x4; v++)
+                        for (int v = 0; v < vertCount; v++)
                         {
                             var weights = sr.ReadBytes(sr.Position(), 4);
                             vertWeights.Add(new Vector4((float)((double)weights[0] / 0xFF), (float)((double)weights[1] / 0xFF), (float)((double)weights[2] / 0xFF), (float)((double)weights[3] / 0xFF)));
