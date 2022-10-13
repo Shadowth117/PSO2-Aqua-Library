@@ -36,85 +36,94 @@ namespace AquaModelLibrary.Extra
 
         public static AquaObject CMDLToAqua(List<CMSH> mdl, CSKL cskl, out AquaNode aqn)
         {
-            aqn = AquaNode.GenerateBasicAQN();
-            AquaObject aqp = new NGSAquaObject();
-            for (int i = 0; i < cskl.header.boneCount; i++)
-            {
-                aqp.bonePalette.Add((uint)i);
-            }
-            aqn = new AquaNode();
             var mirrorMat = Matrix4x4.Identity;
             /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
                                         0, 0, 1, 0,
                                         0, 0, 0, 1);
             */
+
+            aqn = AquaNode.GenerateBasicAQN();
+            AquaObject aqp = new NGSAquaObject();
+            if(cskl == null || cskl.header.boneCount == 0)
+            {
+                aqp.bonePalette.Add((uint)0);
+                aqn = AquaNode.GenerateBasicAQN();
+            } else
+            {
+                for (int i = 0; i < cskl.header.boneCount; i++)
+                {
+                    aqp.bonePalette.Add((uint)i);
+                }
+                aqn = new AquaNode();
+
+                for (int i = 0; i < cskl.header.boneCount; i++)
+                {
+                    var metadata = cskl.metadata.familyIds[i];
+                    var parentId = metadata.parentId;
+
+                    var tfmMat = Matrix4x4.Identity;
+
+                    Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
+                    Matrix4x4 invMatReal = cskl.invTransforms[i];
+                    //invMatReal = Matrix4x4.Transpose(invMatReal);
+                    Matrix4x4.Invert(invMatReal, out var invInvMat);
+                    mat *= tfmMat;
+
+                    Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
+
+                    //If there's a parent, multiply by it
+                    if (parentId != -1)
+                    {
+                        var pn = aqn.nodeList[parentId];
+                        var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
+                                                      pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
+                                                      pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
+                                                      pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
+
+                        Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
+                        mat = mat * invParentInvTfm;
+                    }
+                    if (parentId == -1 && i != 0)
+                    {
+                        parentId = 0;
+                    }
+
+                    //Create AQN node
+                    NODE aqNode = new NODE();
+                    aqNode.boneShort1 = 0x1C0;
+                    aqNode.animatedFlag = 1;
+                    aqNode.parentId = parentId;
+                    aqNode.unkNode = -1;
+
+                    aqNode.scale = new Vector3(1, 1, 1);
+
+                    Matrix4x4.Invert(mat, out var invMat);
+                    aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
+                    aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
+                    aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
+                    aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
+                    aqNode.boneName.SetString(cskl.names.primaryNames.names[i].Split('|').Last());
+                    //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
+                    aqn.nodeList.Add(aqNode);
+                }
+
+                //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
+                for (int i = 0; i < aqn.nodeList.Count; i++)
+                {
+                    var bone = aqn.nodeList[i];
+                    Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
+                    mat *= mirrorMat;
+                    Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
+                    bone.pos = translation;
+                    bone.eulRot = MathExtras.QuaternionToEuler(rot);
+
+                    Matrix4x4.Invert(mat, out var invMat);
+                    bone.SetInverseBindPoseMatrix(invMat);
+                    aqn.nodeList[i] = bone;
+                }
+            }
             
-            for (int i = 0; i < cskl.header.boneCount; i++)
-            {
-                var metadata = cskl.metadata.familyIds[i];
-                var parentId = metadata.parentId;
-
-                var tfmMat = Matrix4x4.Identity;
-
-                Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
-                Matrix4x4 invMatReal = cskl.invTransforms[i];
-                //invMatReal = Matrix4x4.Transpose(invMatReal);
-                Matrix4x4.Invert(invMatReal, out var invInvMat);
-                mat *= tfmMat;
-
-                Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
-
-                //If there's a parent, multiply by it
-                if (parentId != -1)
-                {
-                    var pn = aqn.nodeList[parentId];
-                    var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
-                                                  pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
-                                                  pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
-                                                  pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
-
-                    Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
-                    mat = mat * invParentInvTfm;
-                }
-                if (parentId == -1 && i != 0)
-                {
-                    parentId = 0;
-                }
-
-                //Create AQN node
-                NODE aqNode = new NODE();
-                aqNode.boneShort1 = 0x1C0;
-                aqNode.animatedFlag = 1;
-                aqNode.parentId = parentId;
-                aqNode.unkNode = -1;
-
-                aqNode.scale = new Vector3(1, 1, 1);
-
-                Matrix4x4.Invert(mat, out var invMat);
-                aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
-                aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
-                aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
-                aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
-                aqNode.boneName.SetString(cskl.names.primaryNames.names[i].Split('|').Last());
-                //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
-                aqn.nodeList.Add(aqNode);
-            }
-
-            //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
-            for (int i = 0; i < aqn.nodeList.Count; i++)
-            {
-                var bone = aqn.nodeList[i];
-                Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                mat *= mirrorMat;
-                Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
-                bone.pos = translation;
-                bone.eulRot = MathExtras.QuaternionToEuler(rot);
-
-                Matrix4x4.Invert(mat, out var invMat);
-                bone.SetInverseBindPoseMatrix(invMat);
-                aqn.nodeList[i] = bone;
-            }
 
             for (int i = 0; i < mdl.Count; i++)
             {
