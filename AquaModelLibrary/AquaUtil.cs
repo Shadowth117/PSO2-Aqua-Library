@@ -261,7 +261,14 @@ namespace AquaModelLibrary
                         }
                     }
 
-                    SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
+                    if(splitVerts == false)
+                    {
+                        matModelSplit.vtxlList = aquaModels[msI].models[aqI].vtxlList;
+                        matModelSplit.tempTris = aquaModels[msI].models[aqI].tempTris;
+                    } else
+                    {
+                        SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
+                    }
                     outModel = matModelSplit;
                     if (useRigid == false)
                     {
