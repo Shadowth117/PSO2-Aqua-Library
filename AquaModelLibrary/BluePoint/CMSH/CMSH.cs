@@ -9,23 +9,38 @@ namespace AquaModelLibrary.BluePoint.CMSH
 {
     public class CMSH
     {
-        public CMSHHeader header;
-        public CMSHVertexData vertData;
-        public CMSHFaceData faceData;
-        public CMSHBoneData boneData;
+        public CMSHHeader header = null;
+        public CMSHVertexData vertData = null;
+        public CMSHFaceData faceData = null;
+        public CMSHUnkData0 unkdata0 = null;
+        public CMSHUnkData1 unkdata1 = null;
+        public CMSHUnkData2 unkdata2 = null;
+        public CMSHBoneData boneData = null;
         public CFooter footerData;
 
         public CMSH(BufferedStreamReader sr)
         {
             header = new CMSHHeader(sr);
-            vertData = new CMSHVertexData(sr);
-            faceData = new CMSHFaceData(sr, vertData.positionList.Count);
-            var position = sr.Position();
-            if(header.variantFlag == 0x1)
+            if(header.variantFlag2 != 0x41)
             {
-                boneData = new CMSHBoneData(sr);
+                vertData = new CMSHVertexData(sr);
+                faceData = new CMSHFaceData(sr, vertData.positionList.Count);
+                if ((header.variantFlag2 & 0x20) > 0)
+                {
+                    unkdata0 = new CMSHUnkData0(sr);
+                    unkdata1 = new CMSHUnkData1(sr);
+                }
+                if ((header.variantFlag & 0x1) > 0)
+                {
+                    byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
+                    if (test[0] != '$')
+                    {
+                        unkdata2 = new CMSHUnkData2(sr);
+                    }
+                    boneData = new CMSHBoneData(sr);
+                }
+                footerData = sr.Read<CFooter>();
             }
-            footerData = sr.Read<CFooter>();
         }
     }
 }

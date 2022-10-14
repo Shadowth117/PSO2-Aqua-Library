@@ -29,6 +29,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         public CMSHBoneData(BufferedStreamReader sr)
         {
+            var pos = sr.Position();
             skelPathLength = sr.Read<byte>();
             skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), skelPathLength));
             sr.Seek(skelPathLength, System.IO.SeekOrigin.Current);

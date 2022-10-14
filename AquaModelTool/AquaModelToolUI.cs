@@ -3635,7 +3635,10 @@ namespace AquaModelTool
                         aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
                         aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
                     }
-                    AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                    if(aqn != null)
+                    {
+                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                    }
                 }
             }
         }

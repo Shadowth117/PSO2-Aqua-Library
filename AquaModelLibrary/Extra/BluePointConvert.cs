@@ -29,16 +29,50 @@ namespace AquaModelLibrary.Extra
 
         public static AquaObject CMDLToAqua(CMSH mdl, string cmtlPath, string modelPath, out AquaNode aqn)
         {
-            var csklPath = Path.Combine(modelPath, Path.GetFileName(mdl.boneData.skeletonPath));
-            CSKL cskl = null;
-            if (File.Exists(csklPath))
+            if(mdl.header.variantFlag2 == 0x41)
             {
-                using (Stream stream = new MemoryStream(File.ReadAllBytes(csklPath)))
-                using (var streamReader = new BufferedStreamReader(stream, 8192))
+                aqn = null;
+                return null;
+            }
+            var csklPath = "";
+            CSKL cskl = null;
+            if (mdl.boneData != null)
+            {
+                csklPath = Path.Combine(modelPath, Path.GetFileName(mdl.boneData.skeletonPath));
+                if (File.Exists(csklPath))
                 {
-                    cskl = new CSKL(streamReader);
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(csklPath)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        cskl = new CSKL(streamReader);
+                    }
+                } else
+                {
+                    if (modelPath.Contains("-app0"))
+                    {
+                        var currentPath = modelPath;
+                        int i = 0;
+                        while (Path.GetFileName(currentPath).IndexOf("-app0") == -1)
+                        {
+                            currentPath = Path.GetDirectoryName(currentPath);
+                            i++;
+                            //Should seriously never ever ever happen, but screw it
+                            if(i == 255)
+                            {
+                                break;
+                            }
+                        }
+                        csklPath = Path.Combine(currentPath, mdl.boneData.skeletonPath.Substring(2).Replace("****", "_cmn")).Replace("/", "\\");
+
+                        using (Stream stream = new MemoryStream(File.ReadAllBytes(csklPath)))
+                        using (var streamReader = new BufferedStreamReader(stream, 8192))
+                        {
+                            cskl = new CSKL(streamReader);
+                        }
+                    }
                 }
             }
+           
             var mirrorMat = Matrix4x4.Identity;
             /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
@@ -48,9 +82,15 @@ namespace AquaModelLibrary.Extra
 
             aqn = AquaNode.GenerateBasicAQN();
             AquaObject aqp = new NGSAquaObject();
-            if(cskl == null || cskl.header.boneCount == 0)
+            if (cskl == null && mdl.boneData == null)
             {
                 aqp.bonePalette.Add((uint)0);
+            } else if (cskl == null && mdl.boneData != null)
+            {
+                for (int i = 0; i < mdl.boneData.nameCount; i++)
+                {
+                    aqp.bonePalette.Add((uint)i);
+                }
             } else
             {
                 for (int i = 0; i < cskl.header.boneCount; i++)
@@ -139,6 +179,7 @@ namespace AquaModelLibrary.Extra
                 vtxl.vertPositions.Add(Vector3.Transform(mesh.vertData.positionList[v], mirrorMat));
                 //vtxl.vertNormals.Add(Vector3.Transform(mesh.vertData.normals[v], mirrorMat));
 
+                //UVs
                 if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
                 {
                     var uv1 = mesh.vertData.uvDict[VertexMagic.TEX0][v];
@@ -160,18 +201,15 @@ namespace AquaModelLibrary.Extra
                     vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
                 }
 
-                /*
-                if (vert.Colors.Count > 0)
+                //Vert Colors
+                if (mesh.vertData.colors.Count > 0)
                 {
-                    var color = vert.Colors[0];
-                    vtxl.vertColors.Add(new byte[] { (byte)(color.B * 255), (byte)(color.G * 255), (byte)(color.R * 255), (byte)(color.A * 255) });
+                    vtxl.vertColors.Add(mesh.vertData.colors[v]);
                 }
-                if (vert.Colors.Count > 1)
+                if (mesh.vertData.color2s.Count > 1)
                 {
-                    var color2 = vert.Colors[1];
-                    vtxl.vertColor2s.Add(new byte[] { (byte)(color2.B * 255), (byte)(color2.G * 255), (byte)(color2.R * 255), (byte)(color2.A * 255) });
+                    vtxl.vertColor2s.Add(mesh.vertData.color2s[v]);
                 }
-                */
 
                 if (mesh.vertData.vertWeights.Count > 0)
                 {
@@ -193,6 +231,15 @@ namespace AquaModelLibrary.Extra
             int currentFace = 0;
             for (int m = 0; m < mesh.header.matList.Count; m++)
             {
+                var startFace = mesh.header.matList[m].startingFaceIndex / 6;
+                var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
+                
+                //Sometimes BluePoint's optimization led to degenerate faces, so we skip
+                if(faceCount == 0 && mesh.header.matList[m].endingFaceIndex > 1)
+                {
+                    continue;
+                }
+
                 var matFileName = mesh.header.matList[m].matName.Replace("_mat1", "");
                 matFileName = matFileName.Replace("_mat", "");
                 var matPath = Path.Combine(cmtlPath, matFileName + ".cmat");
@@ -230,8 +277,6 @@ namespace AquaModelLibrary.Extra
                 mat.texNames.Add(texName);
                 aqp.tempMats.Add(mat);
 
-                var startFace = mesh.header.matList[m].startingFaceIndex / 6;
-                var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
                 if (mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0)
                 {
                     startFace = currentFace;

@@ -12,6 +12,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
     {
         POS0 = 0x504F5330,
         QUT0 = 0x51555430,
+        COL0 = 0x434F4C30,
+        COL1 = 0x434F4C31,
         TEX0 = 0x54455830,
         TEX1 = 0x54455831,
         TEX2 = 0x54455832,
@@ -42,6 +44,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public List<Vector3> positionList = new List<Vector3>();
         public List<byte[]> normalsMaybe = new List<byte[]>(); //If figured out, remove
         public List<Quaternion> normals = new List<Quaternion>();
+        public List<byte[]> colors = new List<byte[]>();
+        public List<byte[]> color2s = new List<byte[]>();
         public List<int[]> vertWeightIndices = new List<int[]>();
         public List<Vector4> vertWeights = new List<Vector4>();
         public Dictionary<VertexMagic, List<Vector2>> uvDict = new Dictionary<VertexMagic, List<Vector2>>(); //Access by magic, ex 0XET or 3XET (TEX0 and TEX3) as ints. UVs seem stored as half floats
@@ -94,6 +98,20 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
                         break;
+                    case VertexMagic.COL0:
+                        for (int v = 0; v < vertCount; v++)
+                        {
+                            colors.Add(sr.ReadBytes(sr.Position(), 4));
+                            sr.Seek(4, System.IO.SeekOrigin.Current);
+                        }
+                        break;
+                    case VertexMagic.COL1:
+                        for (int v = 0; v < vertCount; v++)
+                        {
+                            color2s.Add(sr.ReadBytes(sr.Position(), 4));
+                            sr.Seek(4, System.IO.SeekOrigin.Current);
+                        }
+                        break;
                     case VertexMagic.TEX0:
                     case VertexMagic.TEX1:
                     case VertexMagic.TEX2:
@@ -137,8 +155,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
                         }
                         break;
                     case VertexMagic.SAT_:
+                        unkDict.Add(vertDefs[i].dataMagic, sr.ReadBytes(sr.Position(), vertDefs[i].dataSize));
+                        sr.Seek(vertexDataStart + vertDefs[i].dataStart + vertDefs[i].dataSize, System.IO.SeekOrigin.Begin);
+                        break;
                     default:
-                        Debug.WriteLine($"Unknown data type {vertDefs[i].dataMagic.ToString("X")} {vertDefs[i].dataMagic}");
+                        Debug.WriteLine($"Unknown data type {vertDefs[i].dataMagic.ToString("X")} {vertDefs[i].dataMagic} {UTF8Encoding.UTF8.GetString(BitConverter.GetBytes((int)vertDefs[i].dataMagic))}");
                         unkDict.Add(vertDefs[i].dataMagic, sr.ReadBytes(sr.Position(), vertDefs[i].dataSize));
                         sr.Seek(vertexDataStart + vertDefs[i].dataStart + vertDefs[i].dataSize, System.IO.SeekOrigin.Begin);
                         break;
