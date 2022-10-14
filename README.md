@@ -26,6 +26,8 @@ Aqua Model Tool - A tool for editing PSO2 models, along with various other utili
   -Allows for converting most Phantasy Star Portable/2/2 Infinity models to pso2's format  
   -Allows for converting PSO1 PC n.rel stage models to pso2's format  
   -Allows for converting PSO1 .xvm texture archives and .xvr textures to .dds textures  
+  -Allows for converting From Software flvers to .fbx or pso2's format  
+  -Allows for converting BluePoint games .cmdl/.cmsh to .fbx or pso2's format  
   
   The library allows for many more PSO2 specific features, however.  
   
