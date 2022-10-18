@@ -122,6 +122,8 @@
             this.parseMSOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.readNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -785,7 +787,9 @@
             this.pSZEnemyDataToolStripMenuItem,
             this.dumpAllTextToolStripMenuItem,
             this.assimpExportToolStripMenuItem,
-            this.parseMSOToolStripMenuItem});
+            this.parseMSOToolStripMenuItem,
+            this.readNOMToolStripMenuItem,
+            this.convertNOMToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -793,63 +797,63 @@
             // boneFlagTestToolStripMenuItem
             // 
             this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
-            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
             this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
             // 
             // cMTTestToolStripMenuItem
             // 
             this.cMTTestToolStripMenuItem.Name = "cMTTestToolStripMenuItem";
-            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.cMTTestToolStripMenuItem.Text = "CMTTest";
             this.cMTTestToolStripMenuItem.Click += new System.EventHandler(this.cMTTestToolStripMenuItem_Click);
             // 
             // pSZTextToolStripMenuItem
             // 
             this.pSZTextToolStripMenuItem.Name = "pSZTextToolStripMenuItem";
-            this.pSZTextToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.pSZTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZTextToolStripMenuItem.Text = "PSZText";
             this.pSZTextToolStripMenuItem.Click += new System.EventHandler(this.pSZTextToolStripMenuItem_Click);
             // 
             // pSZEnemyZoneToolStripMenuItem
             // 
             this.pSZEnemyZoneToolStripMenuItem.Name = "pSZEnemyZoneToolStripMenuItem";
-            this.pSZEnemyZoneToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.pSZEnemyZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZEnemyZoneToolStripMenuItem.Text = "PSZEnemyZone";
             this.pSZEnemyZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyZoneToolStripMenuItem_Click);
             // 
             // pSZObjZoneToolStripMenuItem
             // 
             this.pSZObjZoneToolStripMenuItem.Name = "pSZObjZoneToolStripMenuItem";
-            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZObjZoneToolStripMenuItem.Text = "PSZObjZone";
             this.pSZObjZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZObjZoneToolStripMenuItem_Click);
             // 
             // pSZEnemyDataToolStripMenuItem
             // 
             this.pSZEnemyDataToolStripMenuItem.Name = "pSZEnemyDataToolStripMenuItem";
-            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZEnemyDataToolStripMenuItem.Text = "PSZEnemyData";
             this.pSZEnemyDataToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyDataToolStripMenuItem_Click);
             // 
             // dumpAllTextToolStripMenuItem
             // 
             this.dumpAllTextToolStripMenuItem.Name = "dumpAllTextToolStripMenuItem";
-            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.dumpAllTextToolStripMenuItem.Text = "DumpAllText";
             this.dumpAllTextToolStripMenuItem.Click += new System.EventHandler(this.dumpAllTextToolStripMenuItem_Click);
             // 
             // assimpExportToolStripMenuItem
             // 
             this.assimpExportToolStripMenuItem.Name = "assimpExportToolStripMenuItem";
-            this.assimpExportToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.assimpExportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.assimpExportToolStripMenuItem.Text = "AssimpExport";
             this.assimpExportToolStripMenuItem.Click += new System.EventHandler(this.assimpExportToolStripMenuItem_Click);
             // 
             // parseMSOToolStripMenuItem
             // 
             this.parseMSOToolStripMenuItem.Name = "parseMSOToolStripMenuItem";
-            this.parseMSOToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.parseMSOToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.parseMSOToolStripMenuItem.Text = "Parse MSO";
             this.parseMSOToolStripMenuItem.Click += new System.EventHandler(this.parseMSOToolStripMenuItem_Click);
             // 
@@ -870,6 +874,20 @@
             this.splitter1.Size = new System.Drawing.Size(3, 253);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
+            // 
+            // readNOMToolStripMenuItem
+            // 
+            this.readNOMToolStripMenuItem.Name = "readNOMToolStripMenuItem";
+            this.readNOMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.readNOMToolStripMenuItem.Text = "ReadNOM";
+            this.readNOMToolStripMenuItem.Click += new System.EventHandler(this.readNOMToolStripMenuItem_Click);
+            // 
+            // convertNOMToolStripMenuItem
+            // 
+            this.convertNOMToolStripMenuItem.Name = "convertNOMToolStripMenuItem";
+            this.convertNOMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.convertNOMToolStripMenuItem.Text = "ConvertNOM";
+            this.convertNOMToolStripMenuItem.Click += new System.EventHandler(this.convertNOMToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -986,6 +1004,8 @@
         private System.Windows.Forms.ToolStripMenuItem parseMSOToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertDemonsSoulsPS5CmdlToaqpaqnToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readNOMToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertNOMToolStripMenuItem;
     }
 }
 

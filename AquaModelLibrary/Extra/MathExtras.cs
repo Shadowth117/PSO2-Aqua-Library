@@ -5,6 +5,16 @@ namespace AquaModelLibrary.Extra
 {
     public static class MathExtras
     {
+        public static Quaternion ToQuat(this Vector4 vec4)
+        {
+            return new Quaternion(vec4.X, vec4.Y, vec4.Z, vec4.W);
+        }
+
+        public static Vector4 ToVec4(this Quaternion quat)
+        {
+            return new Vector4(quat.X, quat.Y, quat.Z, quat.W);
+        }
+
         public static Quaternion EulerToQuaternion(Vector3 angle)
         {
             return EulerToQuaternion(angle.X, angle.Y, angle.Z);
@@ -15,6 +25,12 @@ namespace AquaModelLibrary.Extra
             y *= (float)(Math.PI / 180);
             z *= (float)(Math.PI / 180);
 
+            var rotation = Matrix4x4.CreateRotationX((float)x) *
+                Matrix4x4.CreateRotationY((float)y) *
+                Matrix4x4.CreateRotationZ((float)z);
+
+            Quaternion q = Quaternion.CreateFromRotationMatrix(rotation);
+            /*
             // Abbreviations for the various angular functions
             double cy = Math.Cos(z * 0.5);
             double sy = Math.Sin(z * 0.5);
@@ -28,7 +44,7 @@ namespace AquaModelLibrary.Extra
             q.X = (float)(sr * cp * cy - cr * sp * sy);
             q.Y = (float)(cr * sp * cy + sr * cp * sy);
             q.Z = (float)(cr * cp * sy - sr * sp * cy);
-
+            */
             return q;
         }
 

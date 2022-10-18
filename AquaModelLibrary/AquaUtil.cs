@@ -2778,7 +2778,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static int PRMGenerateFacesFromVerts(PRMModel prmModel)
+        public static int PRMGenerateFacesFromVerts(PRMModel prmModel)
         {
             int faceCount = prmModel.header.entryCount;
             for (int i = 0; i < faceCount; i += 3)

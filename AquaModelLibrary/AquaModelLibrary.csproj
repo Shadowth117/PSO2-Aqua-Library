@@ -182,6 +182,8 @@
     <Compile Include="AquaStructs\NGSShaderPresets\PSO2ShaderTexInfoPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
+    <Compile Include="BluePoint\CANI\CANI.cs" />
+    <Compile Include="BluePoint\CANI\CANIHeader.cs" />
     <Compile Include="BluePoint\CMSH\CMSH.cs" />
     <Compile Include="BluePoint\CMSH\CMSHBoneData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHFaceData.cs" />
@@ -221,6 +223,7 @@
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="Extra\Vec3Int.cs" />
+    <Compile Include="PSU\NOM.cs" />
     <Compile Include="Zero\PSZTextBin.cs" />
     <Compile Include="Extra\ReferenceGenerator.cs" />
     <Compile Include="Extra\SoulsConvert.cs" />

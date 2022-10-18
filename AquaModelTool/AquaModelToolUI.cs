@@ -3672,6 +3672,55 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readNOMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSU NOM",
+                Filter = "PSU NOM Files (*.nom)|*.nom|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
+                }
+            }
+        }
+
+        private void convertNOMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSU NOM",
+                Filter = "PSU NOM Files (*.nom)|*.nom|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                OpenFileDialog openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select PSU .aqn",
+                    Filter = "PSU aqn Files (*.aqn)|*.aqn|All Files (*.*)|*",
+                    Multiselect = true
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    aquaUI.aqua.ReadBones(openFileDialog2.FileName);
+
+                    foreach (var file in openFileDialog.FileNames)
+                    {
+                        var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
+                        var bones = aquaUI.aqua.aquaBones[0];
+                        aquaUI.aqua.aquaMotions.Add(new AnimSet());
+                        aquaUI.aqua.aquaMotions[0].anims.Add(nom.GetPSO2MotionPSUBody(bones));
+                        aquaUI.aqua.WriteNIFLMotion(Path.ChangeExtension(file, ".aqm"));
+                    }
+                }
+            }
+        }
     }
 }
 
