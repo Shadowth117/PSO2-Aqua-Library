@@ -424,6 +424,7 @@ namespace AquaModelLibrary.PSU
                             break;
                         case 8: //Use and alter previous value
                             quat = lastQuat;
+                            /*
                             quat.Y = -quat.Y;
                             quat.Z = -quat.Z;
                             rotKeys.vector4Keys[f - 1] = quat;
@@ -434,10 +435,11 @@ namespace AquaModelLibrary.PSU
                             else
                             {
                                 skip = true;
-                            }
+                            }*/
                             break;
                         case 9:
                             quat = lastQuat;
+                            /*
                             quat.X = -quat.X;
                             quat.Y = -quat.Y;
                             rotKeys.vector4Keys[f - 1] = quat;
@@ -448,10 +450,11 @@ namespace AquaModelLibrary.PSU
                             else
                             {
                                 skip = true;
-                            }
+                            }*/
                             break;
                         case 10:
                             quat = lastQuat;
+                            /*
                             quat.X = -quat.X;
                             quat.Z = -quat.Z;
                             rotKeys.vector4Keys[f - 1] = quat;
@@ -462,14 +465,14 @@ namespace AquaModelLibrary.PSU
                             else
                             {
                                 skip = true;
-                            }
+                            }*/
                             break;
                         default:
                             Debug.WriteLine($"Unexpected type {rotFrame.type}");
                             throw new Exception();
                     }
                     lastQuat = quat;
-
+                   
                     //Assign to pso2 bone
                     int flag = 0;
                     if(f == 0)
@@ -497,7 +500,7 @@ namespace AquaModelLibrary.PSU
                     rotKeys.frameTimings.Add((uint)((rotFrame.frame * 0x10) + flag));
                 }
             }
-
+            /*
             for(int i = 0; i < rotationFrameList.Count; i++)
             {
                 var motionKey = aqm.motionKeys[i];
@@ -514,7 +517,7 @@ namespace AquaModelLibrary.PSU
                         Debug.WriteLine($"{k}: {rotKeys.vector4Keys[k]} Euler: {euler.X} {euler.Y} {euler.Z} Euler PI {euler.X * Math.PI / 180} {euler.Y * Math.PI / 180} {euler.Z * Math.PI / 180}");
                     }
                 }
-            }
+            }*/
 
             /*
             for (int i = rotationFrameList.Count - 1; i > 0; i--)
