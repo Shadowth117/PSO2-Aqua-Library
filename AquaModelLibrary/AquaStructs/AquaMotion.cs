@@ -192,10 +192,7 @@ namespace AquaModelLibrary
                 highTime /= 0x10;
                 lowTime /= 0x10;
                 double ratio = (time - lowTime) / (highTime - lowTime);
-                if(double.IsInfinity(ratio) || double.IsNaN(ratio) || ratio < 0 || ratio == 0)
-                {
-                    var a = 0;
-                }
+
                 return Vector4.Lerp(lowValue, highValue, (float)ratio);
             }
 

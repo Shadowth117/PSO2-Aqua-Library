@@ -1,13 +1,9 @@
-﻿using AquaModelLibrary.Extra;
-using Reloaded.Memory.Streams;
+﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.PSU
 {
@@ -294,7 +290,7 @@ namespace AquaModelLibrary.PSU
         //Basically, bone nodes have a matrix with world coordinates, but we need coords local to the parent. Therefore, we grab these here.
         public void GetDefaultTransformsFromBones(AquaNode bones, int? endRangeLocal = null)
         {
-            if(endRangeLocal == null)
+            if (endRangeLocal == null)
             {
                 endRangeLocal = endRange;
             }
@@ -334,10 +330,134 @@ namespace AquaModelLibrary.PSU
 
         }
 
+        public List<(Vector3 data, int frame)> GetPositionKeys(int boneNum)
+        {
+            List<(Vector3 data, int frame)> posFrames = new List<(Vector3 data, int frame)>();
+            List<int> times = new List<int>();
+            
+            //Get all frame times
+            for (int i = 0; i < xPositionFrameList.Count; i++)
+            {
+                GetTimes(xPositionFrameList[boneNum], times);
+                GetTimes(yPositionFrameList[boneNum], times);
+                GetTimes(zPositionFrameList[boneNum], times);
+            }
+
+            //Interpolate and combine frame data
+            for(int i = 0; i < times.Count; i++)
+            {
+                var xVal = defaultPos[boneNum].X;
+                var yVal = defaultPos[boneNum].Y;
+                var zVal = defaultPos[boneNum].Z;
+
+                if (xPositionFrameList[boneNum] != null)
+                {
+                    xVal = GetPosValueAtTime(xPositionFrameList[boneNum], times[i]);
+                }
+                if (yPositionFrameList[boneNum] != null)
+                {
+                    yVal = GetPosValueAtTime(yPositionFrameList[boneNum], times[i]);
+                }
+                if (zPositionFrameList[boneNum] != null)
+                {
+                    zVal = GetPosValueAtTime(zPositionFrameList[boneNum], times[i]);
+                }
+
+                posFrames.Add((new Vector3(xVal, yVal, zVal), times[i]));
+            }
+
+            return posFrames;
+        }
+
+        public static void GetTimes(List<NomFrame> bone, List<int> times)
+        {
+            if(bone == null)
+            {
+                return;
+            }
+            for (int f = 0; f < bone.Count; f++)
+            {
+                if (!times.Contains(bone[f].frame))
+                {
+                    times.Add(bone[f].frame);
+                }
+            }
+        }
+
+        public static float GetPosValue(List<NomFrame> bone, int index)
+        {
+            switch (bone[index].type)
+            {
+                case 8:
+                case 9:
+                case 10:
+                    return bone[index - 1].data[0];
+                default:
+                    return bone[index].data[0];
+            }
+
+        }
+
+        public static float GetPosValueAtTime(List<NomFrame> bone, double time)
+        {
+            if (bone.Count == 0 || time == bone[0].frame || bone.Count == 1)
+            {
+                return bone[0].data[0];
+            }
+            if (time > bone[bone.Count - 1].frame || time < 0)
+            {
+                throw new System.Exception("Time out of range");
+            }
+
+            //Get high and low times
+            float lowValue = GetPosValue(bone, 0);
+            uint lowTime = 1;
+            float highValue = GetPosValue(bone, bone.Count - 1);
+            uint highTime = bone[bone.Count - 1].frame;
+            for (int i = 0; i < bone.Count; i++)
+            {
+                uint frameTime = (uint)bone[i].frame;
+                if (frameTime <= time)
+                {
+                    lowTime = frameTime;
+                    lowValue = GetPosValue(bone, i);
+                }
+                if (frameTime >= time)
+                {
+                    highTime = frameTime;
+                    highValue = GetPosValue(bone, i);
+                }
+            }
+            if (lowTime == time)
+            {
+                return lowValue;
+            }
+            else if (highTime == time)
+            {
+                return highValue;
+            }
+
+            //Interpolate based on results
+            time /= 0x10;
+            highTime /= 0x10;
+            lowTime /= 0x10;
+            double ratio = (time - lowTime) / (highTime - lowTime);
+            var distance = (float)Math.Sqrt(Math.Pow(highValue - lowValue, 2));
+            var finalValue = (float)(lowValue + (distance * ratio));
+
+            if(finalValue > 48)
+            {
+                var a = 0;
+            }
+
+            return finalValue;
+        }
+
         public AquaMotion GetPSO2MotionPSUBody(AquaNode bones)
         {
             GetDefaultTransformsFromBones(bones, bones.nodeList.Count - 1);
             AquaMotion aqm = new AquaMotion();
+            var posData = new List<(Vector3 data, int frame)>[28];
 
             aqm.moHeader = new AquaMotion.MOHeader();
             aqm.moHeader.frameSpeed = 30;
@@ -377,23 +497,52 @@ namespace AquaModelLibrary.PSU
                 scale.keyType = 3;
                 scale.vector4Keys.Add(new Vector4(1.0f, 1.0f, 1.0f, 0));
 
-
                 keySet.keyData.Add(pos);
                 keySet.keyData.Add(rot);
                 keySet.keyData.Add(scale);
 
                 aqm.motionKeys.Add(keySet);
+
+                posData[i] = GetPositionKeys(i);
             }
 
-            for (int i = 0; i < rotationFrameList.Count; i++)
+            for (int i = 0; i < 28; i++)
             {
+                //Positions
+                var motionKey = aqm.motionKeys[i];
+                var posKeys = aqm.motionKeys[i].keyData[0];
+                var posBone = posData[i];
+
+                if (posBone != null && posBone.Count > 0)
+                {
+                    posKeys.keyCount = posBone.Count;
+                    posKeys.vector4Keys.Clear();
+                }
+
+                for (int f = 0; f < posBone.Count; f++)
+                {
+                    var posFrame = posBone[f];
+
+                    //Assign to pso2 bone
+                    int flag = 0;
+                    if (f == 0)
+                    {
+                        flag = 1;
+                    }
+                    else if (f == posBone.Count - 1)
+                    {
+                        flag = 2;
+                    }
+                    posKeys.vector4Keys.Add(new Vector4(posFrame.data, 0));
+                    posKeys.frameTimings.Add((uint)((posFrame.frame * 0x10) + flag));
+                }
+
+                //Rotations
                 if (rotationFrameList[i] == null)
                 {
                     continue;
                 }
-                var motionKey = aqm.motionKeys[i];
                 var rotKeys = aqm.motionKeys[i].keyData[1];
-
                 var rotBone = rotationFrameList[i];
                 Vector4 lastQuat = new Vector4();
 
@@ -472,25 +621,27 @@ namespace AquaModelLibrary.PSU
                             throw new Exception();
                     }
                     lastQuat = quat;
-                   
+
                     //Assign to pso2 bone
                     int flag = 0;
-                    if(f == 0)
+                    if (f == 0)
                     {
                         flag = 1;
-                    } else if(f == rotBone.Count - 1)
+                    }
+                    else if (f == rotBone.Count - 1)
                     {
                         flag = 2;
                     }
-                    
-                    if(skip == true) //Skip being true means this is the last frame for this bone and key type
+
+                    if (skip == true) //Skip being true means this is the last frame for this bone and key type
                     {
                         rotKeys.keyCount--;
                         //Add end flag to previous frame time
                         if (rotKeys.frameTimings != null && rotKeys.frameTimings.Count > 1)
                         {
                             rotKeys.frameTimings[f - 1] += 2;
-                        } else if(rotKeys.frameTimings.Count == 1)
+                        }
+                        else if (rotKeys.frameTimings.Count == 1)
                         {
                             rotKeys.frameTimings.Clear();
                         }
@@ -500,80 +651,6 @@ namespace AquaModelLibrary.PSU
                     rotKeys.frameTimings.Add((uint)((rotFrame.frame * 0x10) + flag));
                 }
             }
-            /*
-            for(int i = 0; i < rotationFrameList.Count; i++)
-            {
-                var motionKey = aqm.motionKeys[i];
-                var rotKeys = motionKey.keyData[1];
-                Debug.WriteLine($"{i} - {boneNames[i]}:");
-                for(int k = 0; k < rotKeys.vector4Keys.Count; k++)
-                {
-                    var euler = MathExtras.QuaternionToEuler(rotKeys.vector4Keys[k].ToQuat());
-                    if(rotKeys.frameTimings.Count > 0)
-                    {
-                        Debug.WriteLine($"{k} Time ({rotKeys.frameTimings[k] / 0x10}): {rotKeys.vector4Keys[k]} Euler: {euler.X} {euler.Y} {euler.Z} Euler PI {euler.X * Math.PI / 180} {euler.Y * Math.PI / 180} {euler.Z * Math.PI / 180}");
-                    } else
-                    {
-                        Debug.WriteLine($"{k}: {rotKeys.vector4Keys[k]} Euler: {euler.X} {euler.Y} {euler.Z} Euler PI {euler.X * Math.PI / 180} {euler.Y * Math.PI / 180} {euler.Z * Math.PI / 180}");
-                    }
-                }
-            }*/
-
-            /*
-            for (int i = rotationFrameList.Count - 1; i > 0; i--)
-            {
-                var motionKey = aqm.motionKeys[i];
-                var rotKeys = motionKey.keyData[1];
-                var parMotionKey = aqm.motionKeys[bones.nodeList[i].parentId];
-                var parRotKeys = parMotionKey.keyData[1];
-
-                for (int f = 0; f < rotKeys.vector4Keys.Count; f++)
-                {
-                    var quat = rotKeys.vector4Keys[f];
-                    var trueQuat = new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
-
-                    double time = 0;
-                    if (rotKeys.frameTimings.Count > 0)
-                    {
-                        time = rotKeys.frameTimings[f];
-                    }
-                    var parQuat = parRotKeys.GetLinearInterpolatedVec4Key(time);
-                    var parTrueQuat = new Quaternion(parQuat.X, parQuat.Y, parQuat.Z, parQuat.W);
-
-                    trueQuat = trueQuat * parTrueQuat; // Quaternion.Inverse(parTrueQuat);
-
-                    rotKeys.vector4Keys[f] = new Vector4(trueQuat.X, trueQuat.Y, trueQuat.Z, trueQuat.W);
-                }
-            }*/
-
-            //Remove parent influence
-            /*
-            for(int i = rotationFrameList.Count - 1; i > 0; i--)
-            {
-                var motionKey = aqm.motionKeys[i];
-                var rotKeys = motionKey.keyData[1];
-                var parMotionKey = aqm.motionKeys[bones.nodeList[i].parentId];
-                var parRotKeys = parMotionKey.keyData[1];
-
-                for (int f = 0; f < rotKeys.vector4Keys.Count; f++)
-                {
-                    var quat = rotKeys.vector4Keys[f];
-                    var trueQuat = new Quaternion(quat.X, quat.Y, quat.Z, quat.W);
-
-                    double time = 0;
-                    if(rotKeys.frameTimings.Count > 0)
-                    {
-                        time = rotKeys.frameTimings[f];
-                    }
-                    var parQuat = parRotKeys.GetLinearInterpolatedVec4Key(time);
-                    var parTrueQuat = new Quaternion(parQuat.X, parQuat.Y, parQuat.Z, parQuat.W);
-
-                    trueQuat = trueQuat * Quaternion.Inverse(parTrueQuat);
-
-                    rotKeys.vector4Keys[f] = new Vector4(trueQuat.X, trueQuat.Y, trueQuat.Z, trueQuat.W);
-                }
-            }
-            */
             aqm.moHeader.nodeCount = aqm.motionKeys.Count;
 
             return aqm;
@@ -621,7 +698,7 @@ namespace AquaModelLibrary.PSU
                 scale.keyCount = 1;
                 scale.keyType = 3;
                 scale.vector4Keys.Add(new Vector4(1.0f, 1.0f, 1.0f, 0));
-                
+
 
                 keySet.keyData.Add(pos);
                 keySet.keyData.Add(rot);
@@ -629,8 +706,8 @@ namespace AquaModelLibrary.PSU
 
                 aqm.motionKeys.Add(keySet);
             }
-            
-            for(int i = 0; i < rotationFrameList.Count; i++)
+
+            for (int i = 0; i < rotationFrameList.Count; i++)
             {
                 if (rotationFrameList[i] == null)
                 {
@@ -638,11 +715,11 @@ namespace AquaModelLibrary.PSU
                 }
                 var rotBone = rotationFrameList[i];
                 Vector4 lastQuat = new Vector4();
-                for(int f = 0; f < rotBone.Count; f++)
+                for (int f = 0; f < rotBone.Count; f++)
                 {
                     var rotFrame = rotBone[f];
                     Vector4 quat;
-                    switch(rotFrame.type)
+                    switch (rotFrame.type)
                     {
                         case 0: //4 values, full quaternion data
                             quat = new Vector4(rotFrame.data[0], rotFrame.data[1], rotFrame.data[2], rotFrame.data[3]);
@@ -652,7 +729,7 @@ namespace AquaModelLibrary.PSU
                             quat = new Vector4(rotFrame.data[0], rotFrame.data[1], 0, 0);
                             break;
                         case 8: //Use previous value
-                        case 9:  
+                        case 9:
                         case 10:
                             quat = lastQuat;
                             break;
