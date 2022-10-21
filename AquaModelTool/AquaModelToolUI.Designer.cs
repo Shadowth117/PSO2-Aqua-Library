@@ -124,6 +124,7 @@
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.readNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readXNJToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -789,7 +790,8 @@
             this.assimpExportToolStripMenuItem,
             this.parseMSOToolStripMenuItem,
             this.readNOMToolStripMenuItem,
-            this.convertNOMToolStripMenuItem});
+            this.convertNOMToolStripMenuItem,
+            this.readXNJToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -888,6 +890,13 @@
             this.convertNOMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.convertNOMToolStripMenuItem.Text = "ConvertNOM";
             this.convertNOMToolStripMenuItem.Click += new System.EventHandler(this.convertNOMToolStripMenuItem_Click);
+            // 
+            // readXNJToolStripMenuItem
+            // 
+            this.readXNJToolStripMenuItem.Name = "readXNJToolStripMenuItem";
+            this.readXNJToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.readXNJToolStripMenuItem.Text = "ReadXNJ";
+            this.readXNJToolStripMenuItem.Click += new System.EventHandler(this.readXNJToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1006,6 +1015,7 @@
         private System.Windows.Forms.ToolStripMenuItem convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readNOMToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertNOMToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readXNJToolStripMenuItem;
     }
 }
 

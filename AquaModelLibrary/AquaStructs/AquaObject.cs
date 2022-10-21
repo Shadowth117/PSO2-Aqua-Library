@@ -50,6 +50,9 @@ namespace AquaModelLibrary
         public List<GenericTriangles> tempTris = new List<GenericTriangles>();
         public List<GenericMaterial> tempMats = new List<GenericMaterial>();
 
+        //Extra
+        public List<string> meshNames = new List<string>();
+
         //Credit to MiscellaneousModder for this list:
         public enum baseWearIds : int
         {

@@ -38,7 +38,7 @@ namespace AquaModelLibrary
             int mainTagType = streamReader.Read<int>();
             tagString = Encoding.UTF8.GetString(BitConverter.GetBytes(mainTagType));
 #if DEBUG
-            Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
+            //Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
 #endif
             ptrCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
             entryCount = streamReader.Read<short>();

@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.AquaMethods;
+using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -56,8 +57,10 @@ namespace AquaModelLibrary.PSU
         public List<List<NomFrame>> xPositionFrameList = new List<List<NomFrame>>();
         public List<List<NomFrame>> yPositionFrameList = new List<List<NomFrame>>();
         public List<List<NomFrame>> zPositionFrameList = new List<List<NomFrame>>();
+        public List<short> extraData = new List<short>();
         public ushort frameCount;
         public float frameRate;
+        public int boneCount;
 
         public string[] boneNames = new string[]
         {
@@ -130,15 +133,16 @@ namespace AquaModelLibrary.PSU
                 streamReader.Seek(0x6, SeekOrigin.Begin);
                 frameCount = streamReader.Read<ushort>();
                 frameRate = streamReader.Read<float>();
+                boneCount = streamReader.Read<int>();
 
                 //Skip past initial pointer data since it's redundant for our purposes
                 streamReader.Seek(0x40, SeekOrigin.Begin);
 
                 //Populate offset lists. These should always have a set length and a set amount. All observed so far have anyways
-                for (int i = 0; i < 28; i++) { rotationOffsets.Add(streamReader.Read<int>()); }
-                for (int i = 0; i < 28; i++) { positionOffsets.Add(streamReader.Read<int>()); }
-                for (int i = 0; i < 28; i++) { list3Offsets.Add(streamReader.Read<int>()); }
-                for (int i = 0; i < 28; i++) { list4Offsets.Add(streamReader.Read<int>()); }
+                for (int i = 0; i < boneCount; i++) { rotationOffsets.Add(streamReader.Read<int>()); }
+                for (int i = 0; i < boneCount; i++) { positionOffsets.Add(streamReader.Read<int>()); }
+                for (int i = 0; i < boneCount; i++) { list3Offsets.Add(streamReader.Read<int>()); }
+                for (int i = 0; i < boneCount; i++) { list4Offsets.Add(streamReader.Read<int>()); }
 
                 //Populate the actual frame data lists
 
@@ -147,6 +151,15 @@ namespace AquaModelLibrary.PSU
                 ReadNomList(positionOffsets, xPositionFrameList, streamReader, false);
                 ReadNomList(list3Offsets, yPositionFrameList, streamReader, false);
                 ReadNomList(list4Offsets, zPositionFrameList, streamReader, false);
+
+                while(streamReader.Position() < rawData.Length)
+                {
+                    var pos = streamReader.Position();
+                    extraData.Add(streamReader.Read<short>());
+                    var dataPos = unpackValue(extraData[extraData.Count - 1], false);
+                    var dataRot = unpackValue(extraData[extraData.Count - 1], true);
+                    Debug.WriteLine($"Extra @ Address {pos:X} - pos {dataPos} - rot {dataRot}");
+                }
             }
         }
 
@@ -177,11 +190,7 @@ namespace AquaModelLibrary.PSU
                         {
                             if (isRotList && nomFrame.type2 != 0x8)
                             {
-                                Console.WriteLine("Unexpected rot frame set end...");
-                            }
-                            else if (!isRotList)
-                            {
-                                examinedType -= 0x2;
+                                Debug.WriteLine("Unexpected rot frame set end...");
                             }
                             continueLoop = false;
                         }
@@ -206,7 +215,7 @@ namespace AquaModelLibrary.PSU
                                 case 0xB: // reset Z
                                     break;
                                 default:
-                                    Console.WriteLine("Unknown type " + examinedType + " detected at " + streamReader.Position().ToString("X") + " in iteration " + i);
+                                    Debug.WriteLine("Unknown rotation type " + examinedType + " detected at " + streamReader.Position().ToString("X") + " in iteration " + i);
                                     break;
                             }
                         }
@@ -217,13 +226,21 @@ namespace AquaModelLibrary.PSU
                                 case 0x0: // value
                                     typeCount = 0x1;
                                     break;
+                                case 0x2:
+                                    typeCount = 0x4;
+                                    break;
                                 case 0x4: // interpolate
+                                    typeCount = 0x3;
+                                    break;
+                                case 0x6:
                                     typeCount = 0x3;
                                     break;
                                 case 0x8: // reset
                                     break;
+                                case 0xA:
+                                    break;
                                 default:
-                                    Console.WriteLine("Unknown type " + examinedType + " detected at " + streamReader.Position().ToString("X") + " in iteration " + i);
+                                    Debug.WriteLine("Unknown position type " + examinedType + " detected at " + streamReader.Position().ToString("X") + " in iteration " + i);
                                     break;
                             }
                         }
@@ -233,7 +250,7 @@ namespace AquaModelLibrary.PSU
                         {
                             short rawValue = streamReader.Read<short>();
                             nomFrame.rawData.Add(rawValue);
-                            nomFrame.data.Add(convertValue(rawValue, isRotList));
+                            nomFrame.data.Add(unpackValue(rawValue, isRotList));
                         }
                         frameValues.Add(nomFrame);
 
@@ -248,7 +265,7 @@ namespace AquaModelLibrary.PSU
                     }
                     else
                     {
-                        Console.WriteLine($"Bad frame count. Check node {i}, data address {frameOffsets[i].ToString("X")} in file for more info.");
+                        Debug.WriteLine($"Bad frame count. Check node {i}, data address {frameOffsets[i].ToString("X")} in file for more info.");
                         frameList.Add(null);
                     }
                 }
@@ -260,7 +277,7 @@ namespace AquaModelLibrary.PSU
         }
 
         //Deobfuscates animation frame data
-        private float convertValue(short initialValue, bool isRotValue = false)
+        private float unpackValue(short initialValue, bool isRotValue = false)
         {
             //This value is different for rotation frames
             int finalAddition = 0x37800000;
@@ -270,13 +287,16 @@ namespace AquaModelLibrary.PSU
             }
 
             int signum = Math.Sign(initialValue);
-            int shifted = (initialValue & 0xFFFF) << 13;
+            int initialValueAnd = (initialValue & 0xFFFF);
+            int shifted = initialValueAnd << 13;
             int initialValue1 = shifted & 0x0F800000;
 
             //Exit early if 0
             if (initialValue1 == 0)
             {
-                return 0.0f;
+                float zero = 0.0f;
+                zero *= signum;
+                return zero;
             }
 
             int value2 = shifted & 0x007FE000;
@@ -285,6 +305,169 @@ namespace AquaModelLibrary.PSU
             float result = signum * BitConverter.ToSingle(BitConverter.GetBytes(finalFloat), 0);
 
             return result;
+        }
+
+        //Obfuscates animation frame data
+        private short packValue(float initialValue, bool isRotValue = false)
+        {
+            int signum = Math.Sign(initialValue);
+            if (initialValue == 0)
+            {
+                var zeroBytes = BitConverter.GetBytes(initialValue);
+                if (zeroBytes[3] == 0x80)
+                {
+                    return -32768;
+                } else
+                {
+                    return 0;
+                }
+            }
+
+            //This value is different for rotation frames
+            int finalSubtraction = 0x37800000;
+            if (isRotValue)
+            {
+                finalSubtraction = 0x30000000;
+            }
+
+            initialValue /= signum;
+            int intFloat = BitConverter.ToInt32(BitConverter.GetBytes(initialValue), 0);
+
+            int subbedValue = intFloat - finalSubtraction;
+
+            int value1 = subbedValue & 0x0F800000;
+            int value2 = subbedValue & 0x007FE000;
+
+            int value3 = value1 | value2;
+            var val3Bytes = BitConverter.GetBytes(value3);
+            if(signum == -1)
+            {
+                val3Bytes[3] |= 0x10;
+            }
+            int shifted = BitConverter.ToInt32(val3Bytes, 0) >> 13;
+            int shiftedAnd = (shifted & 0xFFFF);
+
+            var bytes = BitConverter.GetBytes(shiftedAnd);
+            var sht = BitConverter.ToInt16(bytes, 0);
+
+            return sht;
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outbytes = new List<byte>();
+            List<int> pointerListOffsets = new List<int>();
+            outbytes.Add(0x1);
+            outbytes.Add(0x0);
+            outbytes.Add(0x2);
+            outbytes.Add(0x10);
+            outbytes.Add(0x0);
+            outbytes.Add(0x0);
+
+            ushort? endFrame = null;
+            for(int i = 0; i < rotationFrameList.Count; i++)
+            {
+                if (rotationFrameList[i] != null)
+                {
+                    endFrame = rotationFrameList[i][rotationFrameList[i].Count - 1].frame;
+                    break;
+                }
+                if (xPositionFrameList[i] != null)
+                {
+                    endFrame = xPositionFrameList[i][xPositionFrameList[i].Count - 1].frame;
+                    break;
+                }
+                if (yPositionFrameList[i] != null)
+                {
+                    endFrame = yPositionFrameList[i][yPositionFrameList[i].Count - 1].frame;
+                    break;
+                }
+                if (zPositionFrameList[i] != null)
+                {
+                    endFrame = zPositionFrameList[i][zPositionFrameList[i].Count - 1].frame;
+                    break;
+                }
+            }
+            if (endFrame == null)
+            {
+                Debug.WriteLine("Tried to get bytes from an empty anim...");
+                return null;
+            }
+            outbytes.AddRange(BitConverter.GetBytes((ushort)endFrame));
+            outbytes.AddRange(BitConverter.GetBytes(frameRate));
+            outbytes.AddRange(BitConverter.GetBytes(boneCount)); //Bone Count. Probably ALWAYS 0x1C
+
+            outbytes.AddRange(BitConverter.GetBytes(0x0)); //Pointer to rotation data start
+            outbytes.AddRange(BitConverter.GetBytes(0x0)); //Pointer to x position data start
+            outbytes.AddRange(BitConverter.GetBytes(0x0)); //Pointer to y position data start
+            outbytes.AddRange(BitConverter.GetBytes(0x0)); //Pointer to z position data start
+
+            outbytes.AddRange(BitConverter.GetBytes(0x40)); //Pointer to rotation data pointers
+            outbytes.AddRange(BitConverter.GetBytes(0xB0)); //Pointer to x position data pointers
+            outbytes.AddRange(BitConverter.GetBytes(0x120)); //Pointer to y position data pointers
+            outbytes.AddRange(BitConverter.GetBytes(0x190)); //Pointer to z position data pointers
+
+            outbytes.AddRange(BitConverter.GetBytes(0)); //File size
+            AquaGeneralMethods.AlignWriter(outbytes, 0x10);
+
+            for(int a = 0; a < 4; a++)
+            {
+                pointerListOffsets.Add(outbytes.Count);
+                for (int i = 0; i < boneCount; i++) //Pointers for all 
+                {
+                    outbytes.AddRange(BitConverter.GetBytes(0));
+                }
+                AquaGeneralMethods.AlignWriter(outbytes, 0x10);
+            }
+
+            //Write Rotation Data
+            AquaGeneralMethods.SetByteListInt(outbytes, 0x10, outbytes.Count);
+            WriteNOMList(outbytes, rotationFrameList, pointerListOffsets[0], true);
+
+            //Write X Position Data
+            AquaGeneralMethods.SetByteListInt(outbytes, 0x14, outbytes.Count);
+            WriteNOMList(outbytes, xPositionFrameList, pointerListOffsets[1], false);
+
+            //Write Y Position Data
+            AquaGeneralMethods.SetByteListInt(outbytes, 0x18, outbytes.Count);
+            WriteNOMList(outbytes, yPositionFrameList, pointerListOffsets[2], false);
+
+            //Write Z Position Data
+            AquaGeneralMethods.SetByteListInt(outbytes, 0x1C, outbytes.Count);
+            WriteNOMList(outbytes, zPositionFrameList, pointerListOffsets[3], false);
+            AquaGeneralMethods.AlignWriter(outbytes, 0x4);
+
+            foreach(var edata in extraData)
+            {
+                outbytes.AddRange(BitConverter.GetBytes(edata));
+            }
+            AquaGeneralMethods.SetByteListInt(outbytes, 0x30, outbytes.Count);
+
+            return outbytes.ToArray();
+        }
+
+        public void WriteNOMList(List<byte> outbytes, List<List<NomFrame>> nomList, int pointerListOffset, bool isRotValue = false)
+        {
+            for (int i = 0; i < nomList.Count; i++)
+            {
+                if (nomList[i] != null)
+                {
+                    AquaGeneralMethods.SetByteListInt(outbytes, pointerListOffset + 0x4 * i, outbytes.Count);
+                    var currentList = nomList[i];
+
+                    //Read frames for the node until there aren't any
+                    for(int f = 0; f < currentList.Count; f++)
+                    {
+                        NomFrame nomFrame = currentList[f];
+                        outbytes.Add(nomFrame.frame);
+                        outbytes.Add((byte)((nomFrame.type * 0x10) + (nomFrame.type2)));
+                        foreach(var value in nomFrame.data)
+                        {
+                            outbytes.AddRange(BitConverter.GetBytes(packValue(value, isRotValue)));
+                        }
+                    }
+                }
+            }
         }
 
         //Basically, bone nodes have a matrix with world coordinates, but we need coords local to the parent. Therefore, we grab these here.
@@ -445,11 +628,6 @@ namespace AquaModelLibrary.PSU
             var distance = (float)Math.Sqrt(Math.Pow(highValue - lowValue, 2));
             var finalValue = (float)(lowValue + (distance * ratio));
 
-            if(finalValue > 48)
-            {
-                var a = 0;
-            }
-
             return finalValue;
         }
 
@@ -457,7 +635,7 @@ namespace AquaModelLibrary.PSU
         {
             GetDefaultTransformsFromBones(bones, bones.nodeList.Count - 1);
             AquaMotion aqm = new AquaMotion();
-            var posData = new List<(Vector3 data, int frame)>[28];
+            var posData = new List<(Vector3 data, int frame)>[rotationFrameList.Count];
 
             aqm.moHeader = new AquaMotion.MOHeader();
             aqm.moHeader.frameSpeed = 30;
@@ -467,7 +645,7 @@ namespace AquaModelLibrary.PSU
             aqm.moHeader.testString.SetString("test");
 
             //Go through and add NGS nodes 
-            for (int i = 0; i < 28; i++)
+            for (int i = 0; i < rotationFrameList.Count; i++)
             {
                 var keySet = new AquaMotion.KeyData();
                 keySet.mseg.nodeDataCount = 3;
@@ -506,7 +684,7 @@ namespace AquaModelLibrary.PSU
                 posData[i] = GetPositionKeys(i);
             }
 
-            for (int i = 0; i < 28; i++)
+            for (int i = 0; i < rotationFrameList.Count; i++)
             {
                 //Positions
                 var motionKey = aqm.motionKeys[i];

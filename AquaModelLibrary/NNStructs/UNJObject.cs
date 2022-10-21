@@ -53,7 +53,11 @@ namespace AquaModelLibrary.NNStructs
             streamReader.Seek(offset + headerOffset, SeekOrigin.Begin);
             header = streamReader.Read<UNJHeader>();
 
-            texList = NNTextureList.ReadNNT(Path.ChangeExtension(filePath, ".unt"));
+            var texPath = Path.ChangeExtension(filePath, ".unt");
+            if (File.Exists(texPath))
+            {
+                texList = NNTextureList.ReadNNT(texPath);
+            }
             ReadBones(Path.ChangeExtension(filePath, ".una"));
             ReadVerts();
             ReadMaterials();
@@ -117,7 +121,12 @@ namespace AquaModelLibrary.NNStructs
                 genMat.texNames = new List<string>();
                 for(int t = 0; t < curMat.diffuseTexIds.Count; t++)
                 {
-                    genMat.texNames.Add(Path.ChangeExtension(texList[curMat.diffuseTexIds[t]], ".dds"));
+                    string name = $"tex_{t}";
+                    if(texList.Count - 1 > t)
+                    {
+                        name = texList[curMat.diffuseTexIds[t]];
+                    }
+                    genMat.texNames.Add(Path.ChangeExtension(name, ".dds"));
                 }
                 aqp.tempMats.Add(genMat);
             }
@@ -303,7 +312,7 @@ namespace AquaModelLibrary.NNStructs
                             props.offsetU = BitConverter.ToSingle(rawProp, 0);
                             break;
                         case 0x4B:
-                            props.offsetU = BitConverter.ToSingle(rawProp, 0);
+                            props.offsetV = BitConverter.ToSingle(rawProp, 0);
                             break;
                         case 0x5E:
                             props.diffuseEnabled = rawProp[0];

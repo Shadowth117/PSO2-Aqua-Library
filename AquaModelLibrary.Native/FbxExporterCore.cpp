@@ -42,7 +42,11 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         AquaObject::MESH msh = aqo->meshList[meshId];
         AquaObject::VTXL^ vtxl = aqo->vtxlList[msh.vsetIndex];
         String^ meshName;
-        if (includeMetadata)
+        
+        if (aqo->meshNames->Count - 1 >= meshId)
+        {
+            meshName = aqo->meshNames[meshId];
+        } else if (includeMetadata)
         {
             meshName = String::Format("mesh[{4}]_{0}_{1}_{2}_{3}#{5}#{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, meshId, msh.baseMeshNodeId, msh.baseMeshDummyId);
         }

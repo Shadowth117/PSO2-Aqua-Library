@@ -3685,7 +3685,14 @@ namespace AquaModelTool
             {
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
+                    var rawNom = File.ReadAllBytes(file);
+                    var nom = new AquaModelLibrary.PSU.NOM(rawNom);
+                    var artificialNom = nom.GetBytes();
+                    File.WriteAllBytes(file + ".out", artificialNom);
+                    if(rawNom.Length != artificialNom.Length)
+                    {
+                        Debug.WriteLine($"{Path.GetFileName(file)} was {rawNom.Length:X} while getBytes result was {artificialNom.Length:X}");
+                    }
                 }
             }
         }
@@ -3719,6 +3726,44 @@ namespace AquaModelTool
                         aquaUI.aqua.WriteNIFLMotion(Path.ChangeExtension(file, ".aqm"));
                     }
                 }
+            }
+        }
+
+        private void readXNJToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSU xnj/model xnr file(s)",
+                Filter = "PSU Model Files (*.xnj, *.xnr)|*.xnj;*.xnr|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.aquaModels.Clear();
+                    ModelSet set = new ModelSet();
+                    NNObject xnj = new NNObject();
+                    xnj.ReadPSUXNJ(file);
+                    
+                    set.models.Add(xnj.ConvertToBasicAquaobject(out var aqn));
+                    if (set.models[0] != null && set.models[0].tempTris.Count > 0)
+                    {
+                        aquaUI.aqua.aquaModels.Add(set);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+
+                        var outName = Path.ChangeExtension(file, ".aqp");
+                        aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
+                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
+                    }
+                }
+
+#if DEBUG
+                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
+#endif
+                System.Diagnostics.Debug.Unindent();
+                System.Diagnostics.Debug.Flush();
             }
         }
     }
