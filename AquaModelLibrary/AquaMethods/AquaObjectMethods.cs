@@ -1396,6 +1396,7 @@ namespace AquaModelLibrary
                             vtxl.bonePalette.AddRange(model.vtxlList[modelId].bonePalette);
                         }
                         boneIdList.Add(boneIds);
+                        outModel.meshNames.Add(model.meshNames[modelId]);
                         outModel.vtxlList.Add(vtxl);
                     }
                 }

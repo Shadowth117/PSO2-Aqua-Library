@@ -43,7 +43,7 @@ namespace AquaModelLibrary
             return str;
         }
 
-        public static void AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
+        public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
         {
             float baseScale = scaleFactor;
             Assimp.AssimpContext context = new Assimp.AssimpContext();
@@ -51,13 +51,13 @@ namespace AquaModelLibrary
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
             bool playerExport = aiScene.RootNode.Children[0].Name.Contains("pl_");
-            if(playerExport && forceNoPlayerExport)
+            if (playerExport && forceNoPlayerExport)
             {
                 playerExport = false;
             }
             string inputFilename = Path.GetFileNameWithoutExtension(initialFilePath);
             List<string> aqmNames = new List<string>(); //Leave off extensions in case we want this to be .trm later
-            List<AquaMotion> aqmList = new List<AquaMotion>();
+            List<(string fileName, AquaMotion aqm)> aqmList = new List<(string fileName, AquaMotion aqm)>();
             Dictionary<int, Assimp.Node> aiNodes = GetAnimatedNodes(aiScene);
             var nodeKeys = aiNodes.Keys.ToList();
             nodeKeys.Sort();
@@ -99,7 +99,7 @@ namespace AquaModelLibrary
                 {
                     nameCleaned = $"Anim_{i}_" + nameCleaned;
                 }
-                if ( ext != ".aqm" && ext != ".trm")
+                if (ext != ".aqm" && ext != ".trm")
                 {
                     nameCleaned += ".aqm";
                 }
@@ -142,7 +142,7 @@ namespace AquaModelLibrary
 
                     int id;
                     ParseNodeId(animNode.NodeName, out string finalName, out id);
-                    if(id < 0)
+                    if (id < 0)
                     {
                         continue;
                     }
@@ -158,7 +158,7 @@ namespace AquaModelLibrary
                         AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
                         posKeys.keyType = 1;
                         posKeys.dataType = 1;
-                        if(aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
+                        if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
                         {
                             posKeys.dataType += 0x80;
                         }
@@ -166,7 +166,7 @@ namespace AquaModelLibrary
                         foreach (var pos in animNode.PositionKeys)
                         {
                             posKeys.vector4Keys.Add(new Vector4(pos.Value.X * baseScale, pos.Value.Y * baseScale, pos.Value.Z * baseScale, 0));
-                            if(animNode.PositionKeys.Count > 1)
+                            if (animNode.PositionKeys.Count > 1)
                             {
                                 //Account for first frame difference
                                 if (first)
@@ -225,7 +225,7 @@ namespace AquaModelLibrary
                     {
                         AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
                         sclKeys.keyType = 3;
-                        sclKeys.dataType = 1; 
+                        sclKeys.dataType = 1;
                         if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
                         {
                             sclKeys.dataType += 0x80;
@@ -285,7 +285,7 @@ namespace AquaModelLibrary
                     //Position
                     AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
                     posKeys.keyType = 0x10;
-                    posKeys.dataType = 5; 
+                    posKeys.dataType = 5;
                     if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
                     {
                         posKeys.dataType += 0x80;
@@ -417,22 +417,22 @@ namespace AquaModelLibrary
                         }
                     }
                 }
-                
-                if(useScaleFrames)
+
+                if (useScaleFrames)
                 {
                     for (int k = 0; k < aqm.motionKeys.Count; k++)
                     {
-                        if(ids.ContainsKey(k) && ids[k] >= 0)
+                        if (ids.ContainsKey(k) && ids[k] >= 0)
                         {
                             var scaleKeys = aqm.motionKeys[k].GetMKEYofType(3);
                             var parScaleKeys = aqm.motionKeys[ids[k]].GetMKEYofType(3);
 
-                            if(scaleKeys == null || parScaleKeys == null)
+                            if (scaleKeys == null || parScaleKeys == null)
                             {
                                 continue;
                             }
 
-                            for(int t = 0; t < scaleKeys.vector4Keys.Count; t++)
+                            for (int t = 0; t < scaleKeys.vector4Keys.Count; t++)
                             {
                                 var time = scaleKeys.frameTimings.Count > 0 ? scaleKeys.frameTimings[t] : 1;
                                 scaleKeys.vector4Keys[t] = scaleKeys.vector4Keys[t] * parScaleKeys.GetLinearInterpolatedVec4Key(time);
@@ -441,19 +441,30 @@ namespace AquaModelLibrary
                     }
                 }
 
-                aqmList.Add(aqm);
+                aqmList.Add((aqmNames[i], aqm));
             }
 
-            for (int i = 0; i < aqmList.Count; i++)
+            return aqmList;
+        }
+
+        public static void WriteMotions(string initialFilePath, List<(string fileName, AquaMotion aqm)> motionList)
+        {
+            AquaUtil aqua = new AquaUtil();
+            for (int i = 0; i < motionList.Count; i++)
             {
-                var aqm = aqmList[i];
+                var aqm = motionList[i].aqm;
                 AquaUtilData.AnimSet set = new AquaUtilData.AnimSet();
                 set.anims.Add(aqm);
                 aqua.aquaMotions.Add(set);
-                aqua.WriteNIFLMotion(initialFilePath + "_" + aqmNames[i]);
+                aqua.WriteNIFLMotion(initialFilePath + "_" + motionList[i].fileName);
 
                 aqua.aquaMotions.Clear();
             }
+        }
+
+        public static void AssimpAQMConvertAndWrite(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
+        {
+            WriteMotions(initialFilePath, AssimpAQMConvert(initialFilePath, forceNoPlayerExport, useScaleFrames, scaleFactor));
         }
 
         private static void AddOneScaleFrame(bool useScaleFrames, AquaMotion.KeyData node, bool add0x80 = false, Assimp.Node aiNode = null)

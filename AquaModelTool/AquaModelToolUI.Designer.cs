@@ -120,11 +120,15 @@
             this.dumpAllTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.assimpExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.parseMSOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertNOMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.readXNJToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSUxnjOrModelxnrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertPSUnomTofbxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+            this.convertAnimsTonomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -330,10 +334,16 @@
             // 
             this.otherGamesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.convertPSNovaaxsaifToolStripMenuItem1,
+            this.toolStripSeparator9,
             this.convertPSPortableunjToolStripMenuItem1,
+            this.convertPSUxnjOrModelxnrToolStripMenuItem,
+            this.convertPSUnomTofbxToolStripMenuItem,
+            this.convertAnimsTonomToolStripMenuItem,
+            this.toolStripSeparator8,
             this.convertPSOnrelTotrpToolStripMenuItem,
             this.convertPSOxvrToolStripMenuItem,
             this.dumpPSOxvmToolStripMenuItem,
+            this.toolStripSeparator7,
             this.convertSoulsflverToolStripMenuItem,
             this.convertSoulsflverTofbxToolStripMenuItem,
             this.convertModelToDemonsSoulsflverToolStripMenuItem,
@@ -394,6 +404,7 @@
             // 
             // convertModelToDemonsSoulsflverToolStripMenuItem
             // 
+            this.convertModelToDemonsSoulsflverToolStripMenuItem.Enabled = false;
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Name = "convertModelToDemonsSoulsflverToolStripMenuItem";
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(319, 22);
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Text = "Convert model to Demon\'s Souls .flver";
@@ -789,9 +800,7 @@
             this.dumpAllTextToolStripMenuItem,
             this.assimpExportToolStripMenuItem,
             this.parseMSOToolStripMenuItem,
-            this.readNOMToolStripMenuItem,
-            this.convertNOMToolStripMenuItem,
-            this.readXNJToolStripMenuItem});
+            this.convertNOMToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -859,6 +868,13 @@
             this.parseMSOToolStripMenuItem.Text = "Parse MSO";
             this.parseMSOToolStripMenuItem.Click += new System.EventHandler(this.parseMSOToolStripMenuItem_Click);
             // 
+            // convertNOMToolStripMenuItem
+            // 
+            this.convertNOMToolStripMenuItem.Name = "convertNOMToolStripMenuItem";
+            this.convertNOMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.convertNOMToolStripMenuItem.Text = "ConvertNOM";
+            this.convertNOMToolStripMenuItem.Click += new System.EventHandler(this.convertNOMToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -877,26 +893,41 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readNOMToolStripMenuItem
+            // convertPSUxnjOrModelxnrToolStripMenuItem
             // 
-            this.readNOMToolStripMenuItem.Name = "readNOMToolStripMenuItem";
-            this.readNOMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.readNOMToolStripMenuItem.Text = "ReadNOM";
-            this.readNOMToolStripMenuItem.Click += new System.EventHandler(this.readNOMToolStripMenuItem_Click);
+            this.convertPSUxnjOrModelxnrToolStripMenuItem.Name = "convertPSUxnjOrModelxnrToolStripMenuItem";
+            this.convertPSUxnjOrModelxnrToolStripMenuItem.Size = new System.Drawing.Size(319, 22);
+            this.convertPSUxnjOrModelxnrToolStripMenuItem.Text = "Convert PSU .xnj or model .xnr";
+            this.convertPSUxnjOrModelxnrToolStripMenuItem.Click += new System.EventHandler(this.convertPSUxnjOrModelxnrToolStripMenuItem_Click);
             // 
-            // convertNOMToolStripMenuItem
+            // convertPSUnomTofbxToolStripMenuItem
             // 
-            this.convertNOMToolStripMenuItem.Name = "convertNOMToolStripMenuItem";
-            this.convertNOMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.convertNOMToolStripMenuItem.Text = "ConvertNOM";
-            this.convertNOMToolStripMenuItem.Click += new System.EventHandler(this.convertNOMToolStripMenuItem_Click);
+            this.convertPSUnomTofbxToolStripMenuItem.Name = "convertPSUnomTofbxToolStripMenuItem";
+            this.convertPSUnomTofbxToolStripMenuItem.Size = new System.Drawing.Size(319, 22);
+            this.convertPSUnomTofbxToolStripMenuItem.Text = "Convert PSU .nom to .fbx";
+            this.convertPSUnomTofbxToolStripMenuItem.Click += new System.EventHandler(this.convertPSUnomTofbxToolStripMenuItem_Click);
             // 
-            // readXNJToolStripMenuItem
+            // toolStripSeparator7
             // 
-            this.readXNJToolStripMenuItem.Name = "readXNJToolStripMenuItem";
-            this.readXNJToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.readXNJToolStripMenuItem.Text = "ReadXNJ";
-            this.readXNJToolStripMenuItem.Click += new System.EventHandler(this.readXNJToolStripMenuItem_Click);
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(316, 6);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(316, 6);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(316, 6);
+            // 
+            // convertAnimsTonomToolStripMenuItem
+            // 
+            this.convertAnimsTonomToolStripMenuItem.Name = "convertAnimsTonomToolStripMenuItem";
+            this.convertAnimsTonomToolStripMenuItem.Size = new System.Drawing.Size(319, 22);
+            this.convertAnimsTonomToolStripMenuItem.Text = "Convert anim(s) to .nom";
+            this.convertAnimsTonomToolStripMenuItem.Click += new System.EventHandler(this.convertAnimsTonomToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1013,9 +1044,13 @@
         private System.Windows.Forms.ToolStripMenuItem parseMSOToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertDemonsSoulsPS5CmdlToaqpaqnToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem readNOMToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertNOMToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem readXNJToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertPSUxnjOrModelxnrToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertPSUnomTofbxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+        private System.Windows.Forms.ToolStripMenuItem convertAnimsTonomToolStripMenuItem;
     }
 }
 

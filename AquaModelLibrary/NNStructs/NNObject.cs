@@ -572,7 +572,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    node.boneName.SetString($"({i}) Node_{i}");
+                    node.boneName.SetString($"Node_{i}");
                 }
 
                 node.boneShort1 = BitConverter.ToUInt16(BitConverter.GetBytes(nnNode.type), 2);

@@ -3008,7 +3008,7 @@ namespace AquaModelTool
 
                     foreach (var file in openFileDialog.FileNames)
                     {
-                        ModelImporter.AssimpAQMConvert(file, forceNoCharacterMetadataCheckBox.Checked, true, scaleFactor);
+                        ModelImporter.AssimpAQMConvertAndWrite(file, forceNoCharacterMetadataCheckBox.Checked, true, scaleFactor);
                     }
                 }
             }
@@ -3673,30 +3673,6 @@ namespace AquaModelTool
             }
         }
 
-        private void readNOMToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PSU NOM",
-                Filter = "PSU NOM Files (*.nom)|*.nom|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    var rawNom = File.ReadAllBytes(file);
-                    var nom = new AquaModelLibrary.PSU.NOM(rawNom);
-                    var artificialNom = nom.GetBytes();
-                    File.WriteAllBytes(file + ".out", artificialNom);
-                    if(rawNom.Length != artificialNom.Length)
-                    {
-                        Debug.WriteLine($"{Path.GetFileName(file)} was {rawNom.Length:X} while getBytes result was {artificialNom.Length:X}");
-                    }
-                }
-            }
-        }
-
         private void convertNOMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -3721,6 +3697,7 @@ namespace AquaModelTool
                     {
                         var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
                         var bones = aquaUI.aqua.aquaBones[0];
+                        aquaUI.aqua.aquaMotions.Clear();
                         aquaUI.aqua.aquaMotions.Add(new AnimSet());
                         aquaUI.aqua.aquaMotions[0].anims.Add(nom.GetPSO2MotionPSUBody(bones));
                         aquaUI.aqua.WriteNIFLMotion(Path.ChangeExtension(file, ".aqm"));
@@ -3729,7 +3706,7 @@ namespace AquaModelTool
             }
         }
 
-        private void readXNJToolStripMenuItem_Click(object sender, EventArgs e)
+        private void convertPSUxnjOrModelxnrToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
@@ -3739,31 +3716,106 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
                     aquaUI.aqua.aquaModels.Clear();
                     ModelSet set = new ModelSet();
                     NNObject xnj = new NNObject();
                     xnj.ReadPSUXNJ(file);
-                    
+
                     set.models.Add(xnj.ConvertToBasicAquaobject(out var aqn));
                     if (set.models[0] != null && set.models[0].tempTris.Count > 0)
                     {
                         aquaUI.aqua.aquaModels.Add(set);
                         aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+                        set.models[0].ConvertToLegacyTypes();
+                        set.models[0].CreateTrueVertWeights();
 
                         var outName = Path.ChangeExtension(file, ".aqp");
                         aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
                         AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
                     }
                 }
+            }
+        }
 
-#if DEBUG
-                File.WriteAllLines("C:\\failedFiiles.txt", failedFiles);
-#endif
-                System.Diagnostics.Debug.Unindent();
-                System.Diagnostics.Debug.Flush();
+        private void convertPSUnomTofbxToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSU NOM(s)",
+                Filter = "PSU NOM Files (*.nom)|*.nom|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                OpenFileDialog openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select PSU .xnj or model .xnr",
+                    Filter = "PSU model Files (*.xnj, *.xnr)|*.xnj;*.xnr|All Files (*.*)|*"
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    ModelSet set = new ModelSet();
+                    NNObject xnj = new NNObject();
+                    xnj.ReadPSUXNJ(openFileDialog2.FileName);
+
+                    if (xnj != null && xnj.vtxlList.Count > 0)
+                    {
+                        set.models.Add(xnj.ConvertToBasicAquaobject(out var bones));
+                        aquaUI.aqua.aquaModels.Clear();
+                        aquaUI.aqua.aquaModels.Add(set);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false);
+                        aquaUI.aqua.aquaModels[0].models[0].ConvertToLegacyTypes();
+                        aquaUI.aqua.aquaModels[0].models[0].CreateTrueVertWeights();
+
+                        foreach (var file in openFileDialog.FileNames)
+                        {
+                            var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
+                            List<AquaMotion> aqms = new List<AquaMotion>();
+                            aqms.Add(nom.GetPSO2MotionPSUBody(bones));
+                            FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], bones, aqms, file.Replace(".nom", ".fbx"), new List<string>() { Path.GetFileName(file) }, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void convertAnimsTonomToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var ctx = new Assimp.AssimpContext())
+            {
+                var formats = ctx.GetSupportedImportFormats().ToList();
+                formats.Sort();
+
+                OpenFileDialog openFileDialog;
+                openFileDialog = new OpenFileDialog()
+                {
+                    Title = "Convert animation model file(s), fbx recommended (output .aqm(s) will be written to same directory)",
+                    Filter = ""
+                };
+                string tempFilter = "(*.fbx,*.dae,*.glb,*.gltf,*.pmx,*.smd)|*.fbx;*.dae;*.glb;*.gltf;*.pmx;*.smd";
+                string tempFilter2 = "";
+
+                openFileDialog.Filter = tempFilter + tempFilter2;
+
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    float scaleFactor = 1;
+
+                    foreach (var file in openFileDialog.FileNames)
+                    {
+                        var animData = ModelImporter.AssimpAQMConvert(file, forceNoCharacterMetadataCheckBox.Checked, true, scaleFactor);
+                        foreach(var anim in animData)
+                        {
+                            var nom = new AquaModelLibrary.PSU.NOM();
+                            nom.CreateFromPSO2Motion(anim.aqm);
+                            
+                            File.WriteAllBytes(Path.ChangeExtension(Path.Combine(file + "_" + anim.fileName), ".nom"), nom.GetBytes());
+                        }
+                    }
+                }
             }
         }
     }

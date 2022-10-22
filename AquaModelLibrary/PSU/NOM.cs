@@ -116,6 +116,11 @@ namespace AquaModelLibrary.PSU
         public Dictionary<int, Vector4> defaultPos = new Dictionary<int, Vector4>(); //Bind pose translations for animations
         public int endRange = 171; //camera_target
 
+        public NOM()
+        {
+
+        }
+
         //Takes the file, splits it based upon which pointer accesses it.
         //Also modifies all pointers to be 0-based!
         public NOM(byte[] rawData)
@@ -307,50 +312,29 @@ namespace AquaModelLibrary.PSU
             return result;
         }
 
-        //Obfuscates animation frame data
-        private short packValue(float initialValue, bool isRotValue = false)
+        //Agra the GOAT. Praise this man.
+        private short packValueAgra(float initialValue, bool isRotValue = false)
         {
+            int topBits = isRotValue ? 0x30000000 : 0x37800000;
             int signum = Math.Sign(initialValue);
-            if (initialValue == 0)
+            byte[] bytes = BitConverter.GetBytes(Math.Abs(initialValue));
+            int intRepresentation = BitConverter.ToInt32(bytes, 0);
+            if (intRepresentation <= topBits)
             {
-                var zeroBytes = BitConverter.GetBytes(initialValue);
-                if (zeroBytes[3] == 0x80)
-                {
-                    return -32768;
-                } else
-                {
-                    return 0;
-                }
+                return 0;
             }
-
-            //This value is different for rotation frames
-            int finalSubtraction = 0x37800000;
-            if (isRotValue)
+            int extractedBits = intRepresentation - topBits;
+            if ((extractedBits & 0xF800000) == 0)
             {
-                finalSubtraction = 0x30000000;
+                return 0;
             }
-
-            initialValue /= signum;
-            int intFloat = BitConverter.ToInt32(BitConverter.GetBytes(initialValue), 0);
-
-            int subbedValue = intFloat - finalSubtraction;
-
-            int value1 = subbedValue & 0x0F800000;
-            int value2 = subbedValue & 0x007FE000;
-
-            int value3 = value1 | value2;
-            var val3Bytes = BitConverter.GetBytes(value3);
-            if(signum == -1)
+            int isolatedBits = extractedBits & 0x0FFFE000;
+            int resultValue = isolatedBits >> 13;
+            if (signum != 1)
             {
-                val3Bytes[3] |= 0x10;
+                resultValue |= 0x8000;
             }
-            int shifted = BitConverter.ToInt32(val3Bytes, 0) >> 13;
-            int shiftedAnd = (shifted & 0xFFFF);
-
-            var bytes = BitConverter.GetBytes(shiftedAnd);
-            var sht = BitConverter.ToInt16(bytes, 0);
-
-            return sht;
+            return (short)(resultValue);
         }
 
         public byte[] GetBytes()
@@ -463,7 +447,7 @@ namespace AquaModelLibrary.PSU
                         outbytes.Add((byte)((nomFrame.type * 0x10) + (nomFrame.type2)));
                         foreach(var value in nomFrame.data)
                         {
-                            outbytes.AddRange(BitConverter.GetBytes(packValue(value, isRotValue)));
+                            outbytes.AddRange(BitConverter.GetBytes(packValueAgra(value, isRotValue)));
                         }
                     }
                 }
@@ -629,6 +613,136 @@ namespace AquaModelLibrary.PSU
             var finalValue = (float)(lowValue + (distance * ratio));
 
             return finalValue;
+        }
+
+        public void CreateFromPSO2Motion(AquaMotion aqm)
+        {
+            frameRate = aqm.moHeader.frameSpeed;
+            boneCount = aqm.motionKeys.Count;
+
+            if (aqm.motionKeys[aqm.motionKeys.Count - 1].mseg.nodeName.GetString().ToLower().Contains("nodetreeflag"))
+            {
+                boneCount -= 1;
+            }
+
+            rotationFrameList = new List<List<NomFrame>>();
+            xPositionFrameList = new List<List<NomFrame>>();
+            yPositionFrameList = new List<List<NomFrame>>();
+            zPositionFrameList = new List<List<NomFrame>>();
+
+            for(int i = 0; i < boneCount; i++)
+            {
+                var rotKeys = new List<NomFrame>();
+                var xPosKeys = new List<NomFrame>();
+                var yPosKeys = new List<NomFrame>();
+                var zPosKeys = new List<NomFrame>();
+                var posFrames = aqm.motionKeys[i].keyData[0];
+                var rotFrames = aqm.motionKeys[i].keyData[1];
+
+                //Position
+                for (int f = 0; f < posFrames.vector4Keys.Count; f++)
+                {
+                    var pos = posFrames.vector4Keys[f];
+                    var xPosNomFrom = new NomFrame();
+                    xPosNomFrom.data = new List<float>() { pos.X };
+                    var yPosNomFrom = new NomFrame();
+                    yPosNomFrom.data = new List<float>() { pos.Y };
+                    var zPosNomFrom = new NomFrame();
+                    zPosNomFrom.data = new List<float>() { pos.Z };
+
+                    //Handle lack of frameTimings
+                    if (posFrames.frameTimings == null || posFrames.frameTimings.Count < 2)
+                    {
+                        xPosNomFrom.frame = 0;
+
+                        var xPosNomEndFrame = new NomFrame();
+                        xPosNomEndFrame.data = xPosNomFrom.data;
+                        xPosNomEndFrame.frame = (byte)aqm.moHeader.endFrame;
+                        xPosNomEndFrame.type2 = 8;
+                        var yPosNomEndFrame = new NomFrame();
+                        yPosNomEndFrame.data = yPosNomFrom.data;
+                        yPosNomEndFrame.frame = (byte)aqm.moHeader.endFrame;
+                        yPosNomEndFrame.type2 = 8;
+                        var zPosNomEndFrame = new NomFrame();
+                        zPosNomEndFrame.data = zPosNomFrom.data;
+                        zPosNomEndFrame.frame = (byte)aqm.moHeader.endFrame;
+                        zPosNomEndFrame.type2 = 8;
+
+                        xPosKeys.Add(xPosNomFrom);
+                        xPosKeys.Add(xPosNomEndFrame);
+                        yPosKeys.Add(yPosNomFrom);
+                        yPosKeys.Add(yPosNomEndFrame);
+                        zPosKeys.Add(zPosNomFrom);
+                        zPosKeys.Add(zPosNomEndFrame);
+                        break;
+                    }
+                    else
+                    {
+                        xPosNomFrom.frame = (byte)(posFrames.frameTimings[f] / 0x10);
+                        yPosNomFrom.frame = (byte)(posFrames.frameTimings[f] / 0x10);
+                        zPosNomFrom.frame = (byte)(posFrames.frameTimings[f] / 0x10);
+                    }
+                    if(f == posFrames.vector4Keys.Count - 1)
+                    {
+                        xPosNomFrom.type2 = 8;
+                        yPosNomFrom.type2 = 8;
+                        zPosNomFrom.type2 = 8;
+                    }
+
+                    xPosKeys.Add(xPosNomFrom);
+                    yPosKeys.Add(yPosNomFrom);
+                    zPosKeys.Add(zPosNomFrom);
+                }
+
+                //Rotation
+                for (int f = 0; f < rotFrames.vector4Keys.Count; f++)
+                {
+                    var rot = rotFrames.vector4Keys[f];
+                    var rotNomFrame = new NomFrame();
+                    rotNomFrame.data = new List<float>() { rot.X, rot.Y, rot.Z, rot.W };
+
+                    //Handle lack of frameTimings
+                    if(rotFrames.frameTimings == null || rotFrames.frameTimings.Count < 2)
+                    {
+                        rotNomFrame.frame = 0;
+
+                        var rotEndFrame = new NomFrame();
+                        rotEndFrame.data = rotNomFrame.data;
+                        rotEndFrame.frame = (byte)aqm.moHeader.endFrame;
+                        rotEndFrame.type2 = 8;
+
+                        rotKeys.Add(rotNomFrame);
+                        rotKeys.Add(rotEndFrame);
+                        break;
+                    } else
+                    {
+                        rotNomFrame.frame = (byte)(rotFrames.frameTimings[f] / 0x10);
+                    }
+                    if (f == rotFrames.vector4Keys.Count - 1)
+                    {
+                        rotNomFrame.type2 = 8;
+                    }
+
+                    rotKeys.Add(rotNomFrame);
+                }
+
+                if(rotKeys.Count > 0)
+                {
+                    rotationFrameList.Add(rotKeys);
+                }
+                if (xPosKeys.Count > 0)
+                {
+                    xPositionFrameList.Add(xPosKeys);
+                }
+                if (yPosKeys.Count > 0)
+                {
+                    yPositionFrameList.Add(yPosKeys);
+                }
+                if (zPosKeys.Count > 0)
+                {
+                    zPositionFrameList.Add(zPosKeys);
+                }
+            }
         }
 
         public AquaMotion GetPSO2MotionPSUBody(AquaNode bones)
