@@ -3818,6 +3818,29 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void convertPSO2PlayeraqmToPSUnomToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select PSO2 Player Animation",
+                Filter = "PSO2 Player Animation (*.aqm)|*.aqm",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var aq = new AquaUtil();
+                foreach(var file in openFileDialog.FileNames)
+                {
+                    aq.aquaMotions.Clear();
+                    aq.ReadMotion(openFileDialog.FileName);
+                    var nom = new AquaModelLibrary.PSU.NOM();
+                    nom.CreateFromPSO2BodyMotion(aq.aquaMotions[0].anims[0]);
+                    File.WriteAllBytes( Path.ChangeExtension(file, ".nom"), nom.GetBytes());
+                }
+            }
+        }
     }
 }
 

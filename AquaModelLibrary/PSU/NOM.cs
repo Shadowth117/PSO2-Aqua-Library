@@ -96,18 +96,64 @@ namespace AquaModelLibrary.PSU
 
         public Dictionary<int, int> toPSO2BoneDict = new Dictionary<int, int>()
         {
-            { 0, 0 }, //Root
-            { 1, 2 }, //Navel->hip
-            { 2, 3 }, //Pelvis->pelvis
-            { 3, 4 }, //L_thigh->l_thigh
-            { 4, 6 }, //L_calf->l_calf
-            { 5, 7 }, //L_foot->l_foot_effl
-            { 6, 11 }, //R_thigh->r_thigh
-            { 7, 13 }, //R_calf->r_calf
-            { 8, 14 }, //R_foot->r_foot
-            { 9, 19 }, //Spine->navel_4aiming
+            { 0,  0 }, //Root
+            { 1,  2 }, //Navel->hip
+            { 2,  3 }, //Pelvis->pelvis
+            { 3,  4 }, //L_thigh->l_thigh
+            { 4,  6 }, //L_calf->l_calf
+            { 5,  7 }, //L_foot->l_foot_effl
+            { 6,  11 }, //R_thigh->r_thigh
+            { 7,  13 }, //R_calf->r_calf
+            { 8,  14 }, //R_foot->r_foot
+            { 9,  19 }, //Spine->navel_4aiming
             { 10, 21 }, //Spine1->spine2
-            { 11, 45 }, //NeckRoot->neck0
+            //{11, ? }, //No direct compare?
+            { 12, 45 }, //NeckRoot->neck0
+            { 13, 47 }, //Head->head
+            { 14, 22 }, //L_clavicle->l_clavicle
+            { 15, 23 }, //L_upperarm->l_upperarm
+            { 16, 25 }, //L_forearm->l_forearm
+            { 17, 27 }, //L_hand->l_hand
+            { 18, 28 }, //L_weapon->l_weapon_efhl
+            { 19, 30 }, //R_clavicle->r_clavicle
+            { 20, 31 }, //R_upperarm->r_upperarm
+            { 21, 33 }, //R_forearm->r_forearm
+            { 22, 35 }, //R_hand->r_hand
+            { 23, 36 }, //R_weapon->r_weapon_efhl
+            { 24, 41 }, //L_breast->l_breast
+            { 25, 43 }, //R_breast->r_breast
+            { 26, 18 }, //Belly->crotch
+            //{ 27, ? }, //Body->?
+        };
+
+        public Dictionary<int, int> fromPSO2BoneDict = new Dictionary<int, int>()
+        {
+            { 0, 0 }, //Root
+            { 2, 1 }, //Navel<-hip
+            { 3, 2 }, //Pelvis<-pelvis
+            { 4, 3 }, //L_thigh<-l_thigh
+            { 6, 4 }, //L_calf<-l_calf
+            { 7, 5 }, //L_foot<-l_foot_effl
+            { 11, 6 }, //R_thigh<-r_thigh
+            { 13, 7 }, //R_calf<-r_calf
+            { 14, 8 }, //R_foot<-r_foot
+            { 19, 9 }, //Spine<-navel_4aiming
+            { 21,10 }, //Spine1<-spine2
+            { 45,12 }, //NeckRoot<-neck0
+            { 47,13 }, //Head<-head
+            { 22,14 }, //L_clavicle<-l_clavicle
+            { 23,15 }, //L_upperarm<-l_upperarm
+            { 25,16 }, //L_forearm<-l_forearm
+            { 27,17 }, //L_hand<-l_hand
+            { 28,18 }, //L_weapon<-l_weapon_efhl
+            { 30,19 }, //R_clavicle<-r_clavicle
+            { 31,20 }, //R_upperarm<-r_upperarm
+            { 33,21 }, //R_forearm<-r_forearm
+            { 35,22 }, //R_hand<-r_hand
+            { 36,23 }, //R_weapon<-r_weapon_efhl
+            { 41,24 }, //L_breast<-l_breast
+            { 43,25 }, //R_breast<-r_breast
+            { 18,26 }, //Belly<-crotch
         };
 
         //Conversion
@@ -615,12 +661,34 @@ namespace AquaModelLibrary.PSU
             return finalValue;
         }
 
+        public void CreateFromPSO2BodyMotion(AquaMotion aqm)
+        {
+            //Create a stripped down aqm with only the bones we need
+            AquaMotion psuAqm = new AquaMotion();
+            psuAqm.moHeader = new AquaMotion.MOHeader();
+            psuAqm.moHeader.frameSpeed = aqm.moHeader.frameSpeed;
+            psuAqm.moHeader.endFrame = aqm.moHeader.endFrame;
+
+            for (int i = 0; i < 28; i++)
+            {
+                if(toPSO2BoneDict.TryGetValue(i, out int key))
+                {
+                    psuAqm.motionKeys.Add(aqm.motionKeys[key]);
+                } else
+                {
+                    psuAqm.motionKeys.Add(null);
+                }
+            }
+
+            CreateFromPSO2Motion(psuAqm);
+        }
+
         public void CreateFromPSO2Motion(AquaMotion aqm)
         {
             frameRate = aqm.moHeader.frameSpeed;
             boneCount = aqm.motionKeys.Count;
 
-            if (aqm.motionKeys[aqm.motionKeys.Count - 1].mseg.nodeName.GetString().ToLower().Contains("nodetreeflag"))
+            if (aqm.motionKeys[aqm.motionKeys.Count - 1] != null && aqm.motionKeys[aqm.motionKeys.Count - 1].mseg.nodeName.GetString().ToLower().Contains("nodetreeflag"))
             {
                 boneCount -= 1;
             }
@@ -636,10 +704,42 @@ namespace AquaModelLibrary.PSU
                 var xPosKeys = new List<NomFrame>();
                 var yPosKeys = new List<NomFrame>();
                 var zPosKeys = new List<NomFrame>();
+
+                if (aqm.motionKeys[i] == null)
+                {
+                    rotationFrameList.Add(null);
+                    xPositionFrameList.Add(null);
+                    yPositionFrameList.Add(null);
+                    zPositionFrameList.Add(null);
+                    continue;
+                }
+
                 var posFrames = aqm.motionKeys[i].keyData[0];
                 var rotFrames = aqm.motionKeys[i].keyData[1];
 
                 //Position
+                //Precheck
+                bool skipPosX = true;
+                bool skipPosY = true;
+                bool skipPosZ = true;
+                var pos0 = posFrames.vector4Keys[0];
+                for (int f = 0; f < posFrames.vector4Keys.Count; f++)
+                {
+                    var pos = posFrames.vector4Keys[f];
+                    if(pos0.X != pos.X)
+                    {
+                        skipPosX = false;
+                    }
+                    if (pos0.Y != pos.Y)
+                    {
+                        skipPosY = false;
+                    }
+                    if (pos0.Z != pos.Z)
+                    {
+                        skipPosZ = false;
+                    }
+                }
+
                 for (int f = 0; f < posFrames.vector4Keys.Count; f++)
                 {
                     var pos = posFrames.vector4Keys[f];
@@ -695,6 +795,18 @@ namespace AquaModelLibrary.PSU
                 }
 
                 //Rotation
+                //Precheck
+                bool skipRot = true;
+                var rot0 = rotFrames.vector4Keys[0];
+                for (int f = 0; f < rotFrames.vector4Keys.Count; f++)
+                {
+                    var rot = rotFrames.vector4Keys[f];
+                    if (rot0.Equals(rot))
+                    {
+                        skipRot = false;
+                    }
+                }
+
                 for (int f = 0; f < rotFrames.vector4Keys.Count; f++)
                 {
                     var rot = rotFrames.vector4Keys[f];
@@ -726,21 +838,36 @@ namespace AquaModelLibrary.PSU
                     rotKeys.Add(rotNomFrame);
                 }
 
-                if(rotKeys.Count > 0)
+                if(rotKeys.Count > 0 && skipRot == false)
                 {
                     rotationFrameList.Add(rotKeys);
+                } else
+                {
+                    rotationFrameList.Add(null);
                 }
-                if (xPosKeys.Count > 0)
+                if (xPosKeys.Count > 0 && skipPosX == false)
                 {
                     xPositionFrameList.Add(xPosKeys);
                 }
-                if (yPosKeys.Count > 0)
+                else
+                {
+                    xPositionFrameList.Add(null);
+                }
+                if (yPosKeys.Count > 0 && skipPosY == false)
                 {
                     yPositionFrameList.Add(yPosKeys);
                 }
-                if (zPosKeys.Count > 0)
+                else
+                {
+                    yPositionFrameList.Add(null);
+                }
+                if (zPosKeys.Count > 0 && skipPosZ == false)
                 {
                     zPositionFrameList.Add(zPosKeys);
+                }
+                else
+                {
+                    zPositionFrameList.Add(null);
                 }
             }
         }
