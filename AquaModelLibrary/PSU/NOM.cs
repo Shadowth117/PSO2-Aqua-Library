@@ -856,6 +856,7 @@ namespace AquaModelLibrary.PSU
                     {
                         //Strip original bone transform
                         var frameData = value.keyData[0].vector4Keys[k] - defaultPosPSO2[key];
+                        frameData *= 10; //position values in pso2 are 1/10th of psu's
 
                         //Apply to PSU bone transform
                         value.keyData[0].vector4Keys[k] = frameData + defaultPos[i];

@@ -383,13 +383,16 @@ namespace AquaModelLibrary
                         mode = 1;
                     }
 
-                    //Get rid of parental influence
-                    for (int t = 0; t < nodeScale.frameTimings.Count; t++)
+                    if(nodeScale != null)
                     {
-                        var currentTime = nodeScale.frameTimings[t];
-                        var value = parentNodeScale.GetLinearInterpolatedVec4Key(currentTime);
+                        //Get rid of parental influence
+                        for (int t = 0; t < nodeScale.frameTimings.Count; t++)
+                        {
+                            var currentTime = nodeScale.frameTimings[t];
+                            var value = parentNodeScale.GetLinearInterpolatedVec4Key(currentTime);
 
-                        nodeScale.RemoveParentScaleInfluenceAtTime(nodeScale.frameTimings[t], mode, value);
+                            nodeScale.RemoveParentScaleInfluenceAtTime(nodeScale.frameTimings[t], mode, value);
+                        }
                     }
                 }
             }
