@@ -30,8 +30,9 @@ namespace AquaModelLibrary.Extra
                 Matrix4x4.CreateRotationZ((float)z);
 
             Quaternion q = Quaternion.CreateFromRotationMatrix(rotation);
-            /*
+            
             // Abbreviations for the various angular functions
+            /*
             double cy = Math.Cos(z * 0.5);
             double sy = Math.Sin(z * 0.5);
             double cp = Math.Cos(y * 0.5);

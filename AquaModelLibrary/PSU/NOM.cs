@@ -1,10 +1,13 @@
 ﻿using AquaModelLibrary.AquaMethods;
+using AquaModelLibrary.Extra;
+using Marathon.Formats.Mesh.Ninja;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
+using static Marathon.Formats.Mesh.Ninja.NinjaKeyframe;
 
 namespace AquaModelLibrary.PSU
 {
@@ -160,6 +163,8 @@ namespace AquaModelLibrary.PSU
         public List<string> nodeNames = new List<string>(); //Default node names for NGS player models
         public Dictionary<int, Quaternion> defaultRots = new Dictionary<int, Quaternion>(); //Bind pose rotations for animations
         public Dictionary<int, Vector4> defaultPos = new Dictionary<int, Vector4>(); //Bind pose translations for animations
+        public Dictionary<int, Quaternion> defaultRotsPSO2 = new Dictionary<int, Quaternion>(); //Bind pose rotations for animations
+        public Dictionary<int, Vector4> defaultPosPSO2 = new Dictionary<int, Vector4>(); //Bind pose translations for animations
         public int endRange = 171; //camera_target
 
         public NOM()
@@ -509,6 +514,8 @@ namespace AquaModelLibrary.PSU
             }
             nodeNames.Clear();
             defaultRots.Clear();
+            defaultPos.Clear();
+
             for (int i = 0; i <= endRangeLocal; i++) //<= since we do want to hit that last one
             {
                 var bone = bones.nodeList[i];
@@ -539,6 +546,51 @@ namespace AquaModelLibrary.PSU
                 nodeNames.Add(bone.boneName.GetString());
                 defaultRots.Add(i, localRot);
                 defaultPos.Add(i, localPos);
+            }
+
+        }
+
+        //Basically, bone nodes have a matrix with world coordinates, but we need coords local to the parent. Therefore, we grab these here.
+        public void GetDefaultTransformsFromPSO2Bones(AquaNode bones, int? endRangeLocal = null)
+        {
+            if (endRangeLocal == null)
+            {
+                endRangeLocal = endRange;
+            }
+            nodeNames.Clear();
+            defaultRotsPSO2.Clear();
+            defaultPosPSO2.Clear();
+
+            for (int i = 0; i <= endRangeLocal; i++) //<= since we do want to hit that last one
+            {
+                var bone = bones.nodeList[i];
+                Matrix4x4 inverseWorldMatrix = new Matrix4x4(bone.m1.X, bone.m1.Y, bone.m1.Z, bone.m1.W, bone.m2.X, bone.m2.Y, bone.m2.Z, bone.m2.W,
+                    bone.m3.X, bone.m3.Y, bone.m3.Z, bone.m3.W, bone.m4.X, bone.m4.Y, bone.m4.Z, bone.m4.W);
+                Matrix4x4.Invert(inverseWorldMatrix, out Matrix4x4 worldMatrix);
+
+                Quaternion localRot;
+                Vector4 localPos;
+                if (bone.parentId == -1)
+                {
+                    localRot = Quaternion.Inverse(Quaternion.CreateFromRotationMatrix(inverseWorldMatrix));
+                    localPos = new Vector4(inverseWorldMatrix.M41, inverseWorldMatrix.M42, inverseWorldMatrix.M43, inverseWorldMatrix.M44);
+                }
+                else
+                {
+                    var boneParent = bones.nodeList[bone.parentId];
+                    Matrix4x4 parentInverseWorldMatrix = new Matrix4x4(boneParent.m1.X, boneParent.m1.Y, boneParent.m1.Z, boneParent.m1.W, boneParent.m2.X,
+                        boneParent.m2.Y, boneParent.m2.Z, boneParent.m2.W, boneParent.m3.X, boneParent.m3.Y, boneParent.m3.Z, boneParent.m3.W, boneParent.m4.X,
+                        boneParent.m4.Y, boneParent.m4.Z, boneParent.m4.W);
+
+                    var localMatrix = Matrix4x4.Multiply(worldMatrix, parentInverseWorldMatrix);
+
+                    localRot = Quaternion.CreateFromRotationMatrix(localMatrix);
+                    localPos = new Vector4(localMatrix.M41, localMatrix.M42, localMatrix.M43, localMatrix.M44);
+                }
+
+                nodeNames.Add(bone.boneName.GetString());
+                defaultRotsPSO2.Add(i, localRot);
+                defaultPosPSO2.Add(i, localPos);
             }
 
         }
@@ -661,8 +713,132 @@ namespace AquaModelLibrary.PSU
             return finalValue;
         }
 
-        public void CreateFromPSO2BodyMotion(AquaMotion aqm)
+        public void CreateFromNNMotion(NinjaMotion nm)
         {
+            frameRate = nm.Framerate;
+            boneCount = 28; //We're just gonna assume this is meant for player anims right now
+            frameCount = (ushort)nm.EndFrame;
+
+            rotationFrameList = new List<List<NomFrame>>();
+            xPositionFrameList = new List<List<NomFrame>>();
+            yPositionFrameList = new List<List<NomFrame>>();
+            zPositionFrameList = new List<List<NomFrame>>();
+
+            for(int i = 0; i < 28; i++)
+            {
+                rotationFrameList.Add(null);
+                xPositionFrameList.Add(null);
+                yPositionFrameList.Add(null);
+                zPositionFrameList.Add(null);
+            }
+
+            foreach(var sub in nm.SubMotions)
+            {
+                if(sub.Type.HasFlag(SubMotionType.NND_SMOTTYPE_TRANSLATION_MASK))
+                {
+                    var posFramesX = new List<NomFrame>();
+                    var posFramesY = new List<NomFrame>();
+                    var posFramesZ = new List<NomFrame>();
+                    for (int i = 0; i < sub.Keyframes.Count; i++)
+                    {
+                        var posFrameX = new NomFrame();
+                        var posFrameY = new NomFrame();
+                        var posFrameZ = new NomFrame();
+
+                        var kf = (NNS_MOTION_KEY_VECTOR)sub.Keyframes[i];
+                        posFrameX.frame = (byte)kf.Frame;
+                        posFrameY.frame = (byte)kf.Frame;
+                        posFrameZ.frame = (byte)kf.Frame;
+                        posFrameX.data.Add(kf.Value.X);
+                        posFrameY.data.Add(kf.Value.Y);
+                        posFrameZ.data.Add(kf.Value.Z);
+
+                        if(i == sub.Keyframes.Count - 1)
+                        {
+                            posFrameX.type2 = 8;
+                        }
+
+                        posFramesX.Add(posFrameX);
+                        posFramesY.Add(posFrameY);
+                        posFramesZ.Add(posFrameZ);
+                    }
+                    
+                    //Sanity check. If we have a frame, it needs to have at least one more to cap it off
+                    if(posFramesX.Count == 1)
+                    {
+                        var posFrameXEnd = new NomFrame();
+                        posFrameXEnd.type2 = 8;
+                        posFrameXEnd.frame = (byte)nm.EndFrame;
+                        posFrameXEnd.data = posFramesX[0].data;
+                        posFramesX.Add(posFrameXEnd);
+                    }
+                    if (posFramesY.Count == 1)
+                    {
+                        var posFrameYEnd = new NomFrame();
+                        posFrameYEnd.type2 = 8;
+                        posFrameYEnd.frame = (byte)nm.EndFrame;
+                        posFrameYEnd.data = posFramesY[0].data;
+                        posFramesY.Add(posFrameYEnd);
+                    }
+                    if (posFramesZ.Count == 1)
+                    {
+                        var posFrameZEnd = new NomFrame();
+                        posFrameZEnd.type2 = 8;
+                        posFrameZEnd.frame = (byte)nm.EndFrame;
+                        posFrameZEnd.data = posFramesZ[0].data;
+                        posFramesZ.Add(posFrameZEnd);
+                    }
+
+                    xPositionFrameList[sub.NodeIndex] = posFramesX;
+                    yPositionFrameList[sub.NodeIndex] = posFramesY;
+                    zPositionFrameList[sub.NodeIndex] = posFramesZ;
+                } else if(sub.Type.HasFlag(SubMotionType.NND_SMOTTYPE_ROTATION_XYZ))
+                {
+                    var rotFrames = new List<NomFrame>();
+                    for (int i = 0; i < sub.Keyframes.Count; i++)
+                    {
+                        var rotFrame = new NomFrame();
+
+                        var kf = (NNS_MOTION_KEY_ROTATE_A16)sub.Keyframes[i];
+                        rotFrame.frame = (byte)kf.Frame;
+                        var vec3 = kf.GetVec3();
+                        var quat = MathExtras.EulerToQuaternion(vec3);
+
+                        rotFrame.data.Add(quat.X);
+                        rotFrame.data.Add(quat.Y);
+                        rotFrame.data.Add(quat.Z);
+                        rotFrame.data.Add(quat.W);
+
+                        if (i == sub.Keyframes.Count - 1)
+                        {
+                            rotFrame.type2 = 8;
+                        }
+
+                        rotFrames.Add(rotFrame);
+                    }
+
+                    //Sanity check. If we have a frame, it needs to have at least one more to cap it off
+                    if (rotFrames.Count == 1)
+                    {
+                        var rotFrameEnd = new NomFrame();
+                        rotFrameEnd.type2 = 8;
+                        rotFrameEnd.frame = (byte)nm.EndFrame;
+                        rotFrameEnd.data = rotFrames[0].data;
+                        rotFrames.Add(rotFrameEnd);
+                    }
+                    rotationFrameList[sub.NodeIndex] = rotFrames;
+                } else
+                {
+                    throw new Exception("Unexpected frame type!");
+                }
+            }
+        }
+
+        public void CreateFromPSO2BodyMotion(AquaMotion aqm, AquaNode psuAqn, AquaNode pso2Aqn)
+        {
+            GetDefaultTransformsFromBones(psuAqn, 27);
+            GetDefaultTransformsFromPSO2Bones(pso2Aqn);
+
             //Create a stripped down aqm with only the bones we need
             AquaMotion psuAqm = new AquaMotion();
             psuAqm.moHeader = new AquaMotion.MOHeader();
@@ -673,7 +849,32 @@ namespace AquaModelLibrary.PSU
             {
                 if(toPSO2BoneDict.TryGetValue(i, out int key))
                 {
-                    psuAqm.motionKeys.Add(aqm.motionKeys[key]);
+                    var value = aqm.motionKeys[key];
+
+                    //Position keys
+                    for(int k = 0; k < value.keyData[0].vector4Keys.Count; k++)
+                    {
+                        //Strip original bone transform
+                        var frameData = value.keyData[0].vector4Keys[k] - defaultPosPSO2[key];
+
+                        //Apply to PSU bone transform
+                        value.keyData[0].vector4Keys[k] = frameData + defaultPos[i];
+                    }
+
+                    //Rotation Keys
+                    for (int k = 0; k < value.keyData[1].vector4Keys.Count; k++)
+                    {
+                        //Strip original bone transform
+                        var frameData = value.keyData[1].vector4Keys[k].ToQuat() * Quaternion.Inverse(defaultRotsPSO2[key]);
+                        if(i == 9)
+                        {
+                            frameData = Quaternion.Inverse(frameData);
+                        }
+                        //Apply to PSU bone transform
+                        value.keyData[1].vector4Keys[k] = (frameData * defaultRots[i]).ToVec4();
+                    }
+
+                    psuAqm.motionKeys.Add(value);
                 } else
                 {
                     psuAqm.motionKeys.Add(null);
@@ -838,7 +1039,7 @@ namespace AquaModelLibrary.PSU
                     rotKeys.Add(rotNomFrame);
                 }
 
-                if(rotKeys.Count > 0 && skipRot == false)
+                if(rotKeys.Count > 0 /*&& skipRot == false*/)
                 {
                     rotationFrameList.Add(rotKeys);
                 } else
@@ -927,6 +1128,7 @@ namespace AquaModelLibrary.PSU
 
             for (int i = 0; i < rotationFrameList.Count; i++)
             {
+                //Debug.WriteLine($"Bone {i}");
                 //Positions
                 var motionKey = aqm.motionKeys[i];
                 var posKeys = aqm.motionKeys[i].keyData[0];
@@ -975,7 +1177,6 @@ namespace AquaModelLibrary.PSU
                 {
                     var rotFrame = rotBone[f];
                     Vector4 quat;
-                    bool skip = false;
                     switch (rotFrame.type)
                     {
                         case 0: //4 values, full quaternion data
@@ -1052,20 +1253,8 @@ namespace AquaModelLibrary.PSU
                         flag = 2;
                     }
 
-                    if (skip == true) //Skip being true means this is the last frame for this bone and key type
-                    {
-                        rotKeys.keyCount--;
-                        //Add end flag to previous frame time
-                        if (rotKeys.frameTimings != null && rotKeys.frameTimings.Count > 1)
-                        {
-                            rotKeys.frameTimings[f - 1] += 2;
-                        }
-                        else if (rotKeys.frameTimings.Count == 1)
-                        {
-                            rotKeys.frameTimings.Clear();
-                        }
-                        continue;
-                    }
+                    var euler = MathExtras.QuaternionToEuler(quat.ToQuat());
+                    //Debug.WriteLine($"Frame ({rotFrame.frame}) Euler X {euler.X} Y {euler.Y} Z {euler.Z}  Quat {quat.X} {quat.Y} {quat.Z} {quat.W}");
                     rotKeys.vector4Keys.Add(quat);
                     rotKeys.frameTimings.Add((uint)((rotFrame.frame * 0x10) + flag));
                 }

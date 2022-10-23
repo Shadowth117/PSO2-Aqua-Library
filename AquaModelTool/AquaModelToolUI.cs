@@ -3673,39 +3673,6 @@ namespace AquaModelTool
             }
         }
 
-        private void convertNOMToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select PSU NOM",
-                Filter = "PSU NOM Files (*.nom)|*.nom|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                OpenFileDialog openFileDialog2 = new OpenFileDialog()
-                {
-                    Title = "Select PSU .aqn",
-                    Filter = "PSU aqn Files (*.aqn)|*.aqn|All Files (*.*)|*",
-                    Multiselect = true
-                };
-                if (openFileDialog2.ShowDialog() == DialogResult.OK)
-                {
-                    aquaUI.aqua.ReadBones(openFileDialog2.FileName);
-
-                    foreach (var file in openFileDialog.FileNames)
-                    {
-                        var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
-                        var bones = aquaUI.aqua.aquaBones[0];
-                        aquaUI.aqua.aquaMotions.Clear();
-                        aquaUI.aqua.aquaMotions.Add(new AnimSet());
-                        aquaUI.aqua.aquaMotions[0].anims.Add(nom.GetPSO2MotionPSUBody(bones));
-                        aquaUI.aqua.WriteNIFLMotion(Path.ChangeExtension(file, ".aqm"));
-                    }
-                }
-            }
-        }
-
         private void convertPSUxnjOrModelxnrToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -3823,21 +3790,70 @@ namespace AquaModelTool
         {
             var openFileDialog = new OpenFileDialog()
             {
-                Title = "Select PSO2 Player Animation",
+                Title = "Select PSO2 Player Animation(s)",
                 Filter = "PSO2 Player Animation (*.aqm)|*.aqm",
                 FileName = "",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                OpenFileDialog openFileDialog2 = new OpenFileDialog()
+                {
+                    Title = "Select PSU .xnj or model .xnr",
+                    Filter = "PSU model Files (*.xnj, *.xnr)|*.xnj;*.xnr|All Files (*.*)|*"
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+                    OpenFileDialog openFileDialog3 = new OpenFileDialog()
+                    {
+                        Title = "Select PSO2 .aqn",
+                        Filter = "PSO2 aqn Files (*.aqn)|*.aqn|All Files (*.*)|*",
+                        Multiselect = true
+                    };
+                    if (openFileDialog3.ShowDialog() == DialogResult.OK)
+                    {
+                        NNObject xnj = new NNObject();
+                        xnj.ReadPSUXNJ(openFileDialog2.FileName);
+                        if (xnj != null && xnj.vtxlList.Count > 0)
+                        {
+                            xnj.ConvertToBasicAquaobject(out var bones);
+                            var aq = new AquaUtil();
+                            aq.ReadBones(openFileDialog3.FileName);
+                            foreach (var file in openFileDialog.FileNames)
+                            {
+                                aq.aquaMotions.Clear();
+                                aq.ReadMotion(file);
+                                var nom = new AquaModelLibrary.PSU.NOM();
+                                nom.CreateFromPSO2BodyMotion(aq.aquaMotions[0].anims[0], bones, aq.aquaBones[0]);
+                                File.WriteAllBytes(Path.ChangeExtension(file, ".nom"), nom.GetBytes());
+                            }
+                        }
+                    }   
+                }
+                        
+            }
+        }
+
+        private void readNNMotionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select NN Animation",
+                Filter = "NN Animation (*.xnm;*.ynm)|*.xnm;*.ynm",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
                 var aq = new AquaUtil();
-                foreach(var file in openFileDialog.FileNames)
+                foreach (var file in openFileDialog.FileNames)
                 {
                     aq.aquaMotions.Clear();
-                    aq.ReadMotion(openFileDialog.FileName);
+                    var nm = new Marathon.Formats.Mesh.Ninja.NinjaMotion();
+                    nm.Read(file);
                     var nom = new AquaModelLibrary.PSU.NOM();
-                    nom.CreateFromPSO2BodyMotion(aq.aquaMotions[0].anims[0]);
-                    File.WriteAllBytes( Path.ChangeExtension(file, ".nom"), nom.GetBytes());
+                    nom.CreateFromNNMotion(nm);
+                    File.WriteAllBytes(Path.ChangeExtension(file, ".nom"), nom.GetBytes());
                 }
             }
         }
