@@ -3823,6 +3823,10 @@ namespace AquaModelTool
                             {
                                 aq.aquaMotions.Clear();
                                 aq.ReadMotion(file);
+                                if(aq.aquaMotions[0].anims[0].motionKeys.Count < 50)
+                                {
+                                    continue;
+                                }
                                 var nom = new AquaModelLibrary.PSU.NOM();
                                 nom.CreateFromPSO2BodyMotion(aq.aquaMotions[0].anims[0], bones, aq.aquaBones[0]);
                                 File.WriteAllBytes(Path.ChangeExtension(file, ".nom"), nom.GetBytes());
