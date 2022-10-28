@@ -951,7 +951,6 @@ namespace AquaModelLibrary
                     case "DOC ":
                         break;
                     case "MAGR":
-                        Debug.WriteLine((int)data[0][0xFF]);
                         mgxIds.Add((int)data[0][0xFF]);
                         break;
                     default:
