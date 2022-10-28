@@ -43,11 +43,15 @@ namespace AquaModelLibrary
                         int vertIndex = model.tempTris[mesh].faceVerts[face].rawVertId[faceVert];
 
                         //Handle if for whatever reason we have more vertices than expected
-                        if(vertIndex > vtxlCheck.Count - 1)
+                        if(vertIndex > (vtxlCheck.Count - 1))
                         {
                             vtxlCheck.AddRange(new bool[vertIndex - (vtxlCheck.Count - 1)]);
-                            vtxl.AddRange(vertIndex - (vtxlCheck.Count - 1), vtxl);
                         } 
+
+                        if (vertIndex > (vtxl.vertPositions.Count - 1))
+                        {
+                            vtxl.AddRange(vertIndex - (vtxl.vertPositions.Count - 1), vtxl);
+                        }
 
                         if (vtxlCheck[vertIndex] == true && !IsSameVertex(vtxl, vertIndex, model.tempTris[mesh].faceVerts[face], faceVert))
                         {
@@ -1396,7 +1400,10 @@ namespace AquaModelLibrary
                             vtxl.bonePalette.AddRange(model.vtxlList[modelId].bonePalette);
                         }
                         boneIdList.Add(boneIds);
-                        outModel.meshNames.Add(model.meshNames[modelId]);
+                        if(outModel.meshNames.Count > modelId)
+                        {
+                            outModel.meshNames.Add(model.meshNames[modelId]);
+                        }
                         outModel.vtxlList.Add(vtxl);
                     }
                 }
