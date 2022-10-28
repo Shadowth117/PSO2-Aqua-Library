@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using static Vector3Integer.Vector3Int;
 
 namespace AquaModelLibrary
 {
@@ -76,48 +77,12 @@ namespace AquaModelLibrary
         //Returns an aqp ready for the ConvertToNGSPSO2Mesh method
         public AquaObject ConvertToBasicAquaobject(out AquaNode aqn)
         {
-            List<AquaObject.VTXL> newVtxlList = new List<AquaObject.VTXL>();
             aqn = nodes;
             AquaObject aqp = new NGSAquaObject();
             aqp.bonePalette = new List<uint>();
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 aqp.bonePalette.Add((uint)i);
-            }
-
-            //Optimize vert data
-            //Loop through vertices and check if their data matches. If it does, set map to the existing dat in the new vertex list. If not, append and set new mapping accordingly
-            //This is done due to massive redundancy from UNJ vertices being listed in tristrip draw order already. 
-            for (int i = 0; i < vtxlList.Count; i++)
-            {
-                var curVtxl = vtxlList[i];
-                AquaObject.VTXL newVtxl = new AquaObject.VTXL();
-
-                for (int v = 0; v < curVtxl.vertPositions.Count; v++)
-                {
-                    bool found = false;
-                    for (int j = 0; j < newVtxl.vertPositions.Count; j++)
-                    {
-                        if (AquaObjectMethods.IsSameVertex(curVtxl, v, newVtxl, j))
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (found == false)
-                    {
-                        AquaObjectMethods.appendVertex(curVtxl, newVtxl, v);
-                        if (animNodeMap != null && newVtxl.vertWeightIndices.Count > 0)
-                        {
-                            var id = newVtxl.vertWeightIndices.Count - 1;
-                            var indices = newVtxl.vertWeightIndices[newVtxl.vertWeightIndices.Count - 1];
-                            newVtxl.vertWeightIndices[newVtxl.vertWeightIndices.Count - 1] = new int[] { animNodeMap[indices[0]], animNodeMap[indices[1]], animNodeMap[indices[2]], animNodeMap[indices[3]] };
-                        }
-                    }
-                }
-
-                newVtxlList.Add(newVtxl);
             }
 
             //Convert material data
@@ -149,7 +114,7 @@ namespace AquaModelLibrary
                     var group = meshListList[i][j].vtxlId;
                     var matId = meshListList[i][j].materialId;
                     AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
-                    genMesh.vertCount = newVtxlList[group].vertPositions.Count;
+                    genMesh.vertCount = vtxlList[group].vertPositions.Count;
 
                     //Generate strips
                     var mesh = meshListList[i][j];
@@ -186,9 +151,14 @@ namespace AquaModelLibrary
                                 }
 
                                 AquaObject.VTXL vtxl = new AquaObject.VTXL();
-                                AquaObjectMethods.appendVertex(newVtxlList[group], vtxl, (int)face.X);
-                                AquaObjectMethods.appendVertex(newVtxlList[group], vtxl, (int)face.Y);
-                                AquaObjectMethods.appendVertex(newVtxlList[group], vtxl, (int)face.Z);
+                                var prevListCount = vtxlList[group].vertPositions.Count;
+                                if(prevListCount < face.X || prevListCount < face.Y || prevListCount < face.Z)
+                                {
+                                    throw new Exception();
+                                }
+                                AquaObjectMethods.appendVertex(vtxlList[group], vtxl, (int)face.X);
+                                AquaObjectMethods.appendVertex(vtxlList[group], vtxl, (int)face.Y);
+                                AquaObjectMethods.appendVertex(vtxlList[group], vtxl, (int)face.Z);
                                 vtxl.rawVertId.Add((int)face.X);
                                 vtxl.rawVertId.Add((int)face.Y);
                                 vtxl.rawVertId.Add((int)face.Z);
@@ -249,31 +219,23 @@ namespace AquaModelLibrary
 
                 var stripLenList = new List<ushort>();
                 streamReader.Seek(offset + indexList.lengthOffset, SeekOrigin.Begin);
-                long bookmarkOuter = -1;
-                long bookmarkInner = -1;
-                for (int s = 0; s < indexList.stripCount; s++)
+                for(int lenEntry = 0; lenEntry < indexList.stripCount; lenEntry++)
                 {
-                    var currentIndLen = streamReader.Read<ushort>();
-                    stripLenList.Add(currentIndLen);
-                    var strip = new List<ushort>();
-                    bookmarkOuter = streamReader.Position();
+                    stripLenList.Add(streamReader.Read<ushort>());
+                }
 
-                    for (int ind = 0; ind < currentIndLen; ind++)
+                streamReader.Seek(offset + indexList.indexOffset, SeekOrigin.Begin);
+                for (int lenEntry = 0; lenEntry < indexList.stripCount; lenEntry++)
+                {
+                    var currentLen = stripLenList[lenEntry];
+                    var strip = new List<ushort>();
+                    for (int ind = 0; ind < currentLen; ind++)
                     {
-                        if (bookmarkInner != -1)
-                        {
-                            streamReader.Seek(bookmarkInner, SeekOrigin.Begin);
-                        }
-                        else
-                        {
-                            streamReader.Seek(indexList.indexOffset, SeekOrigin.Begin);
-                        }
                         strip.Add(streamReader.Read<ushort>());
-                        bookmarkInner = streamReader.Position();
                     }
                     stripList.Add(strip);
-                    streamReader.Seek(bookmarkOuter, SeekOrigin.Begin);
                 }
+
                 stripListList.Add(stripList);
             }
         }
@@ -483,7 +445,7 @@ namespace AquaModelLibrary
             //Read the actual vertices
             streamReader.Seek(offset + vset.vtxlOffset, SeekOrigin.Begin);
 
-            for (int v = 0; v < vset.vtxlCount; v++)
+            for (int v = 0; v < vset.vtxlCount; v++) //I think we want to overread?? Maybe?
             {
                 var calcedSize = 0;
                 if ((vset.vertFormat & (int)XNJVertexFlags.HasXyz) > 0)
@@ -587,7 +549,7 @@ namespace AquaModelLibrary
                 node.firstChild = nnNode.NODE_CHILD;
                 node.nextSibling = nnNode.NODE_SIBLING;
                 node.pos = nnNode.NODE_TRN;
-                node.eulRot = nnNode.NODE_ROT * 180f / (float)Math.PI;
+                node.eulRot = new Vector3(nnNode.NODE_ROT.X * 360.0f / 65536.0f, nnNode.NODE_ROT.Y * 360.0f / 65536.0f, nnNode.NODE_ROT.Z * 360.0f / 65536.0f);
                 node.scale = nnNode.NODE_SCL;
                 node.m1 = nnNode.m1;
                 node.m2 = nnNode.m2;
@@ -627,7 +589,7 @@ namespace AquaModelLibrary
             public short NODE_SIBLING;
 
             public Vector3 NODE_TRN;
-            public Vector3 NODE_ROT;
+            public Vec3Int NODE_ROT;
             public Vector3 NODE_SCL;
             // 4x4 Matrix NODE_INVINIT_MTX     
             public Vector4 m1;
