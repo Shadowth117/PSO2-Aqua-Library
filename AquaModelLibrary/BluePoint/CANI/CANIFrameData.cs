@@ -23,6 +23,8 @@ namespace AquaModelLibrary.BluePoint.CANI
         x41E = 0x41E,
         x40F = 0x40F,
         x410 = 0x410,
+        x60C = 0x610,
+        x411 = 0x411, //Comparable to 0x41B for 0x60C instead. Camera only?
     }
 
     public class CANIFrameData
