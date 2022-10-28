@@ -3838,7 +3838,7 @@ namespace AquaModelTool
             }
         }
 
-        private void readNNMotionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void readNNMotionToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             var openFileDialog = new OpenFileDialog()
             {
@@ -3858,6 +3858,28 @@ namespace AquaModelTool
                     var nom = new AquaModelLibrary.PSU.NOM();
                     nom.CreateFromNNMotion(nm);
                     File.WriteAllBytes(Path.ChangeExtension(file, ".nom"), nom.GetBytes());
+                }
+            }
+        }
+
+        private void parseCAWSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select CAWS Animation WorkSpace",
+                Filter = "CAWS Animation WorkSpace (*.caws)|*.caws",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(file)))
+                    using (Reloaded.Memory.Streams.BufferedStreamReader sr = new Reloaded.Memory.Streams.BufferedStreamReader(ms, 8192))
+                    {
+                        var caws = new AquaModelLibrary.BluePoint.CAWS.CAWS(sr);
+                    }
                 }
             }
         }

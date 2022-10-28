@@ -31,6 +31,11 @@ namespace SoulsFormats
 
             public int LayoutIndex { get; set; }
 
+            public Mesh()
+            {
+
+            }
+
             internal Mesh(BinaryReaderEx br, FLVER0 flv, int dataOffset)
             {
                 Dynamic = br.ReadByte();

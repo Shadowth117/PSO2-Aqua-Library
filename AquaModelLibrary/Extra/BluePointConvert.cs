@@ -179,8 +179,8 @@ namespace AquaModelLibrary.Extra
             {
                 vtxl.vertPositions.Add(Vector3.Transform(mesh.vertData.positionList[v], mirrorMat));
                 //vtxl.vertNormals.Add(Vector3.Transform(mesh.vertData.normals[v], mirrorMat));
-                var quat = new Vector4(((float)mesh.vertData.normalsMaybe[v][0]) / 255f, ((float)mesh.vertData.normalsMaybe[v][1]) / 255f, ((float)mesh.vertData.normalsMaybe[v][2]) / 255f, ((float)mesh.vertData.normalsMaybe[v][3]) / 255f);
-                //Debug.WriteLine($"{quat.X} {quat.Y} {quat.Z} {quat.W}");
+                //var quat = mesh.vertData.normals[v];
+
                 //UVs
                 if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
                 {

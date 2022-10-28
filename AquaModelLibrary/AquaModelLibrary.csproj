@@ -183,7 +183,13 @@
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
     <Compile Include="BluePoint\CANI\CANI.cs" />
+    <Compile Include="BluePoint\CANI\CANIFrameData.cs" />
     <Compile Include="BluePoint\CANI\CANIHeader.cs" />
+    <Compile Include="BluePoint\CANI\CANIPositionData.cs" />
+    <Compile Include="BluePoint\CANI\CANIRotationData.cs" />
+    <Compile Include="BluePoint\CANI\CANIUnkV3Half.cs" />
+    <Compile Include="BluePoint\CAWS\CAWS.cs" />
+    <Compile Include="BluePoint\CAWS\CAWSObject.cs" />
     <Compile Include="BluePoint\CMSH\CMSH.cs" />
     <Compile Include="BluePoint\CMSH\CMSHBoneData.cs" />
     <Compile Include="BluePoint\CMSH\CMSHFaceData.cs" />

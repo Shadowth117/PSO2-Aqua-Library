@@ -42,8 +42,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         //Data
         public List<Vector3> positionList = new List<Vector3>();
-        public List<byte[]> normalsMaybe = new List<byte[]>(); //If figured out, remove
         public List<Quaternion> normals = new List<Quaternion>();
+        public List<byte[]> normalTemp = new List<byte[]>();
         public List<byte[]> colors = new List<byte[]>();
         public List<byte[]> color2s = new List<byte[]>();
         public List<int[]> vertWeightIndices = new List<int[]>();
@@ -94,8 +94,13 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     case VertexMagic.QUT0:
                         for (int v = 0; v < vertCount; v++)
                         {
-                            normalsMaybe.Add(sr.ReadBytes(sr.Position(), 4));
+                            var byteArr = sr.ReadBytes(sr.Position(), 4);
                             sr.Seek(4, System.IO.SeekOrigin.Current);
+                            Quaternion quat = new Quaternion(ConvertBPSbyte(byteArr[0]), ConvertBPSbyte(byteArr[1]), ConvertBPSbyte(byteArr[2]), ConvertBPSbyte(byteArr[3]));
+                            normalTemp.Add(byteArr);
+                            //Debug.WriteLine($"Byte represntation {byteArr[0]:X2} {byteArr[1]:X2} {byteArr[2]:X2} {byteArr[3]:X2} - {((float)byteArr[0]) / 255} {((float)byteArr[1]) / 255} {((float)byteArr[2]) / 255} {((float)byteArr[3]) / 255} \nSByte representation {sbyteArr[0]:X2} {sbyteArr[1]:X2} {sbyteArr[2]:X2} {sbyteArr[3]:X2} - {((float)sbyteArr[0]) / 127} {((float)sbyteArr[1]) / 127} {((float)sbyteArr[2]) / 127} {((float)sbyteArr[3]) / 127} ");
+                            //Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
+                            normals.Add(quat);
                         }
                         break;
                     case VertexMagic.COL0:
@@ -164,6 +169,18 @@ namespace AquaModelLibrary.BluePoint.CMSH
                         sr.Seek(vertexDataStart + vertDefs[i].dataStart + vertDefs[i].dataSize, System.IO.SeekOrigin.Begin);
                         break;
                 }
+            }
+        }
+
+        public float ConvertBPSbyte(byte b)
+        {
+            if(b < 128)
+            {
+                return (float)((double)b / 127.0);
+            } else
+            {
+                b -= 127;
+                return (float)((double)b / 127.0);
             }
         }
     }

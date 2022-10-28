@@ -130,6 +130,7 @@
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.convertPSO2PlayeraqmToPSUnomToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readNNMotionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parseCAWSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -838,7 +839,8 @@
             this.dumpAllTextToolStripMenuItem,
             this.assimpExportToolStripMenuItem,
             this.parseMSOToolStripMenuItem,
-            this.readNNMotionToolStripMenuItem});
+            this.readNNMotionToolStripMenuItem,
+            this.parseCAWSToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -936,7 +938,14 @@
             this.readNNMotionToolStripMenuItem.Name = "readNNMotionToolStripMenuItem";
             this.readNNMotionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.readNNMotionToolStripMenuItem.Text = "Read NN Motion";
-            this.readNNMotionToolStripMenuItem.Click += new System.EventHandler(this.readNNMotionToolStripMenuItem_Click);
+            this.readNNMotionToolStripMenuItem.Click += new System.EventHandler(this.readNNMotionToolStripMenuItem_Click_1);
+            // 
+            // parseCAWSToolStripMenuItem
+            // 
+            this.parseCAWSToolStripMenuItem.Name = "parseCAWSToolStripMenuItem";
+            this.parseCAWSToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.parseCAWSToolStripMenuItem.Text = "Parse CAWS";
+            this.parseCAWSToolStripMenuItem.Click += new System.EventHandler(this.parseCAWSToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1061,6 +1070,7 @@
         private System.Windows.Forms.ToolStripMenuItem convertAnimsTonomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem convertPSO2PlayeraqmToPSUnomToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readNNMotionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parseCAWSToolStripMenuItem;
     }
 }
 

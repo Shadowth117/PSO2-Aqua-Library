@@ -352,6 +352,18 @@ namespace AquaModelLibrary.Extra
                         }
                     }
                 }
+                for (int i = 0; i < aqp.meshList.Count; i++)
+                {
+                    var mesh = aqp.meshList[i];
+                    var vtxl = aqp.vtxlList[mesh.vsetIndex];
+                    var faces = aqp.strips[mesh.psetIndex];
+                    var shader = aqp.shadList[mesh.shadIndex];
+                    var render = aqp.rendList[mesh.rendIndex];
+                    FLVER0.Mesh flvMesh = new FLVER0.Mesh();
+                    flvMesh.Dynamic = 0;
+                    flvMesh.MaterialIndex = (byte)mesh.mateIndex;
+                    flvMesh.BackfaceCulling = render.twosided > 0;
+                }
             }
 
             return flver;
