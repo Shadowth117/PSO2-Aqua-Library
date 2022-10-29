@@ -67,12 +67,12 @@ namespace AquaModelLibrary
                 {
                     //Seek through potential padding
                     int magic = 0;
-                    while (magic != MAGIC_XVRT && offset < xvm.Length)
+                    while (magic != MAGIC_XVRT && offset < xvm.Length - 3)
                     {
                         magic = BitConverter.ToInt32(xvm, offset);
                         offset += 4;
                     }
-                    if (offset > xvm.Length)
+                    if (offset > xvm.Length - 3)
                     {
                         break;
                     }
@@ -101,7 +101,7 @@ namespace AquaModelLibrary
                         if (texNames != null && i < texNames.Count)
                         {
                             Debug.WriteLine(texNames[i] + ".dds" + " " + flags.ToString("X") + " " + type.ToString("X"));
-                            File.WriteAllBytes(outFolder + texNames[i] + ".xvr", rawXvr);
+                            File.WriteAllBytes(outFolder + ModelImporter.NixIllegalCharacters(texNames[i]) + ".xvr", rawXvr);
                         }
                         else
                         {
@@ -119,8 +119,8 @@ namespace AquaModelLibrary
                         }
                         if (texNames != null && i < texNames.Count)
                         {
-                            Debug.WriteLine(texNames[i] + ".dds" + " " + flags.ToString("X") + " " + type.ToString("X"));
-                            File.WriteAllBytes(outFolder + texNames[i] + ".dds", xvr.ToArray());
+                            //Debug.WriteLine(texNames[i] + ".dds" + " " + flags.ToString("X") + " " + type.ToString("X"));
+                            File.WriteAllBytes(outFolder + ModelImporter.NixIllegalCharacters(texNames[i]) + ".dds", xvr.ToArray());
                         }
                         else
                         {

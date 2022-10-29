@@ -2884,31 +2884,35 @@ namespace AquaModelTool
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
                 Title = "Select PSO1 PC n.rel map file",
-                Filter = "PSO1 PC Map|*n.rel"
+                Filter = "PSO1 PC Map|*n.rel",
+                Multiselect = true,
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                bool useSubPath = true;
-                string subPath = "";
-                string fname = openFileDialog.FileName;
-                string outFolder = null;
-                if (useSubPath == true)
+                foreach(var path in openFileDialog.FileNames)
                 {
-                    subPath = Path.GetFileNameWithoutExtension(openFileDialog.FileName) + "\\";
-                    var info = Directory.CreateDirectory(Path.GetDirectoryName(openFileDialog.FileName) + "\\" + subPath);
-                    fname = info.FullName + Path.GetFileName(openFileDialog.FileName);
-                    outFolder = info.FullName;
+                    bool useSubPath = true;
+                    string subPath = "";
+                    string fname = path;
+                    string outFolder = null;
+                    if (useSubPath == true)
+                    {
+                        subPath = Path.GetFileNameWithoutExtension(path) + "\\";
+                        var info = Directory.CreateDirectory(Path.GetDirectoryName(path) + "\\" + subPath);
+                        fname = info.FullName + Path.GetFileName(path);
+                        outFolder = info.FullName;
+                    }
+
+                    var rel = new PSONRelConvert(File.ReadAllBytes(path), path, 0.1f, outFolder);
+                    var aqua = new AquaUtil();
+                    var set = new ModelSet();
+                    set.models.Add(rel.aqObj);
+                    aqua.aquaModels.Add(set);
+                    aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false, false);
+
+                    fname = fname.Replace(".rel", ".trp");
+                    aqua.WriteClassicNIFLModel(fname, fname);
                 }
-
-                var rel = new PSONRelConvert(File.ReadAllBytes(openFileDialog.FileName), openFileDialog.FileName, 0.1f, outFolder);
-                var aqua = new AquaUtil();
-                var set = new ModelSet();
-                set.models.Add(rel.aqObj);
-                aqua.aquaModels.Add(set);
-                aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false, false);
-
-                fname = fname.Replace(".rel", ".trp");
-                aqua.WriteClassicNIFLModel(fname, fname);
             }
         }
 

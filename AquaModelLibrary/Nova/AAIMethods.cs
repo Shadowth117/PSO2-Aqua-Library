@@ -2,6 +2,7 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -112,19 +113,21 @@ namespace AquaModelLibrary.Nova
 
                 //return null;
 
-                var offsetTimes = streamReader.ReadOffsetTimeSets(streamReader.Position(), timeCount);
-                List<List<OffsetTimeSet>> setsList = new List<List<OffsetTimeSet>>();
+                var offsetTimesStart = streamReader.Position();
+                var offsetTimes = streamReader.ReadOffsetTimeSets(timeCount);
+                List<List<NodeOffsetSet>> setsList = new List<List<NodeOffsetSet>>();
 
                 for (int i = 0; i < offsetTimes.Count; i++)
                 {
-                    streamReader.Seek(offsetTimes[i].offset, SeekOrigin.Begin);
+                    streamReader.Seek(offsetTimes[i].offset + offsetTimesStart, SeekOrigin.Begin);
                     var position = streamReader.Position();
+                    Debug.WriteLine($"OffsetTime {i} start: {position:X}");
                     int keyNodeCount = streamReader.Read<int>();
 
-                    List<OffsetTimeSet> sets = new List<OffsetTimeSet>();
-                    for(int j = 0; j < keyNodeCount; j++)
+                    List<NodeOffsetSet> sets = new List<NodeOffsetSet>();
+                    for (int j = 0; j < keyNodeCount; j++)
                     {
-                        OffsetTimeSet set = streamReader.Read<OffsetTimeSet>();
+                        NodeOffsetSet set = streamReader.Read<NodeOffsetSet>();
                         sets.Add(set);
                     }
                     setsList.Add(sets);
@@ -133,15 +136,21 @@ namespace AquaModelLibrary.Nova
             return null;
         }
 
-        public static List<OffsetTimeSet> ReadOffsetTimeSets(this BufferedStreamReader streamReader, long position, int timeCount)
+        public static List<OffsetTimeSet> ReadOffsetTimeSets(this BufferedStreamReader streamReader, int timeCount)
         {
             List<OffsetTimeSet> sets = new List<OffsetTimeSet>();
             OffsetTimeSet set0 = new OffsetTimeSet() { offset = streamReader.Read<int>(), time = streamReader.Read<float>() };
-            
-            for(int i = 0; i < timeCount; i++)
+
+            //Note a potentially unintended read
+            if(timeCount == 0)
             {
-                //Add i * 8 to the offset for the true offset since the offsets here are relatigve to the position of their defining int
-                OffsetTimeSet set = new OffsetTimeSet() { offset = (int)position + streamReader.Read<int>() + i * 8, time = streamReader.Read<float>() };
+                Debug.WriteLine($"Warning, timeCount is {timeCount}, set0 values are offset:{set0.offset:X} time:{set0.time}");
+            }
+            sets.Add(set0);
+
+            for (int i = 0; i < timeCount - 1; i++) //Already Reading one in before this
+            {
+                OffsetTimeSet set = new OffsetTimeSet() { offset = streamReader.Read<int>(), time = streamReader.Read<float>() };
                 sets.Add(set);
             }
 
