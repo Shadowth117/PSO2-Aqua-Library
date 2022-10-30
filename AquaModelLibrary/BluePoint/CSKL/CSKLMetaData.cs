@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
-    public class SKLMetaData
+    public class CSKLMetaData
     {
         public ushort usht_00;
         public ushort usht_02;
@@ -21,12 +21,12 @@ namespace AquaModelLibrary.BluePoint.CSKL
 
         public List<CSKLFamilyIds> familyIds = new List<CSKLFamilyIds>();
 
-        public SKLMetaData()
+        public CSKLMetaData()
         {
 
         }
 
-        public SKLMetaData(BufferedStreamReader sr)
+        public CSKLMetaData(BufferedStreamReader sr)
         {
             var start = sr.Position();
 

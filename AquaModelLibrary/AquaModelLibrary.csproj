@@ -204,7 +204,7 @@
     <Compile Include="BluePoint\CSKL\CSKLHeader.cs" />
     <Compile Include="BluePoint\CSKL\CSKLNames.cs" />
     <Compile Include="BluePoint\CSKL\CSKLTransform.cs" />
-    <Compile Include="BluePoint\CSKL\SKLMetaData.cs" />
+    <Compile Include="BluePoint\CSKL\CSKLMetaData.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\BluePointConvert.cs" />
     <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
@@ -237,6 +237,7 @@
     <Compile Include="NNStructs\Structures\XNJHeader.cs" />
     <Compile Include="NNStructs\Structures\XNJVertexFlags.cs" />
     <Compile Include="NNStructs\Structures\XNJMaterial.cs" />
+    <Compile Include="Nova\Structures\KeyFrameData.cs" />
     <Compile Include="PSU\NOM.cs" />
     <Compile Include="Zero\PSZTextBin.cs" />
     <Compile Include="Extra\ReferenceGenerator.cs" />

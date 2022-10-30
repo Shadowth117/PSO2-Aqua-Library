@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Nova
                 ushort sht_0C = streamReader.Read<ushort>();
                 int timeCount = streamReader.Read<int>();
 
-                int finalFrame = streamReader.Read<int>();
+                float finalFrame = streamReader.Read<float>();
                 int unkAddress0 = streamReader.Read<int>();
                 int unkAddress1 = streamReader.Read<int>();
                 int unkAddress2 = streamReader.Read<int>();
@@ -116,13 +116,20 @@ namespace AquaModelLibrary.Nova
                 var offsetTimesStart = streamReader.Position();
                 var offsetTimes = streamReader.ReadOffsetTimeSets(timeCount);
                 List<List<NodeOffsetSet>> setsList = new List<List<NodeOffsetSet>>();
-
+                List<Dictionary<int, KeyFrameData>> framesDictList = new List<Dictionary<int, KeyFrameData>>();
+                
                 for (int i = 0; i < offsetTimes.Count; i++)
                 {
-                    streamReader.Seek(offsetTimes[i].offset + offsetTimesStart, SeekOrigin.Begin);
+                    streamReader.Seek(offsetTimes[i].offset + offsetTimesStart + i * 8, SeekOrigin.Begin);
                     var position = streamReader.Position();
                     Debug.WriteLine($"OffsetTime {i} start: {position:X}");
                     int keyNodeCount = streamReader.Read<int>();
+                    
+                    //Sometimes, they just put the keydata right here? Read the keydata when this is figured out
+                    if(keyNodeCount > 0xFF)
+                    {
+                        throw new Exception();
+                    }
 
                     List<NodeOffsetSet> sets = new List<NodeOffsetSet>();
                     for (int j = 0; j < keyNodeCount; j++)
@@ -131,6 +138,11 @@ namespace AquaModelLibrary.Nova
                         sets.Add(set);
                     }
                     setsList.Add(sets);
+
+                    for(int j = 0; j < sets.Count; j++)
+                    {
+
+                    }
                 }
             }
             return null;

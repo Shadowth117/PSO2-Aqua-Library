@@ -1411,8 +1411,8 @@ namespace AquaModelLibrary
                         vec4.Z += value;
                         break;
                     case 3:
-                        vec4.W += value;
                         break;
+                        vec4.W += value;
                 }
 
                 return vec4;
