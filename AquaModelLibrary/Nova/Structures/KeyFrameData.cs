@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Nova.Structures
 {
-    public struct KeyFrameData
+    public struct RotationKey
     {
         public ushort usht_0;
         public ushort usht_1;

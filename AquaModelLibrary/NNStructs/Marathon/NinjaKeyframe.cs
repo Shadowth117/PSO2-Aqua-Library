@@ -65,18 +65,18 @@ namespace Marathon.Formats.Mesh.Ninja
         {
             public short Frame { get; set; }
 
-            public short Value1 { get; set; }
+            public ushort Value1 { get; set; }
 
-            public short Value2 { get; set; }
+            public ushort Value2 { get; set; }
 
-            public short Value3 { get; set; }
+            public ushort Value3 { get; set; }
 
             public void Read(BufferedStreamReader reader, bool be)
             {
                 Frame = reader.ReadBE<short>(be);
-                Value1 = reader.ReadBE<short>(be);
-                Value2 = reader.ReadBE<short>(be);
-                Value3 = reader.ReadBE<short>(be);
+                Value1 = reader.ReadBE<ushort>(be);
+                Value2 = reader.ReadBE<ushort>(be);
+                Value3 = reader.ReadBE<ushort>(be);
             }
 
             public Vector3 GetVec3()

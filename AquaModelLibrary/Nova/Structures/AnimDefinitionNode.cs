@@ -21,11 +21,13 @@ namespace AquaModelLibrary.Nova.Structures
     {
         public string dcString = null;
         public DataClumpStart dcStart;
+        public object dc;
+        /*
         public DataClump14 d14;
         public DataClump24 d24;
         public DataClump30 d30;
         public DataClump34 d34;
-        public DataClump44 d44;
+        public DataClump44 d44;*/
     }
 
     public struct DataClumpStart

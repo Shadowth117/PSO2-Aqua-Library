@@ -82,25 +82,25 @@ namespace AquaModelLibrary.Nova
                         {
                             case 0x14:
                                 ct14++;
-                                dc.d14 = streamReader.Read<DataClump14>();
+                                dc.dc = streamReader.Read<DataClump14>();
                                 break;
-                            case 0x24:
+                            case 0x24: //Should be for typical keyframe types
                                 ct24++;
-                                dc.d24 = streamReader.Read<DataClump24>();
+                                dc.dc = streamReader.Read<DataClump24>();
                                 break;
                             case 0x30:
                                 ct30++;
-                                dc.d30 = streamReader.Read<DataClump30>();
+                                dc.dc = streamReader.Read<DataClump30>();
                                 break;
                             case 0x34:
                                 ct34++;
-                                dc.d34 = streamReader.Read<DataClump34>();
-                                dc.dcString = dc.d34.clumpName.GetString();
+                                dc.dc = streamReader.Read<DataClump34>();
+                                dc.dcString = ((DataClump34)dc.dc).clumpName.GetString();
                                 break;
                             case 0x44:
                                 ct44++;
-                                dc.d44 = streamReader.Read<DataClump44>();
-                                dc.dcString = dc.d44.clumpName.GetString();
+                                dc.dc = streamReader.Read<DataClump44>();
+                                dc.dcString = ((DataClump44)dc.dc).clumpName.GetString();
                                 break;
                             default:
                                 MessageBox.Show($"clumpSize {dc.dcStart.dcType.ToString("X")} at {streamReader.Position().ToString("X")} is unexpected!");
@@ -116,7 +116,7 @@ namespace AquaModelLibrary.Nova
                 var offsetTimesStart = streamReader.Position();
                 var offsetTimes = streamReader.ReadOffsetTimeSets(timeCount);
                 List<List<NodeOffsetSet>> setsList = new List<List<NodeOffsetSet>>();
-                List<Dictionary<int, KeyFrameData>> framesDictList = new List<Dictionary<int, KeyFrameData>>();
+                List<Dictionary<int, RotationKey>> framesDictList = new List<Dictionary<int, RotationKey>>();
                 
                 for (int i = 0; i < offsetTimes.Count; i++)
                 {
@@ -141,7 +141,7 @@ namespace AquaModelLibrary.Nova
 
                     for(int j = 0; j < sets.Count; j++)
                     {
-
+                        
                     }
                 }
             }
