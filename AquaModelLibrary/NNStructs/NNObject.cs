@@ -21,6 +21,7 @@ namespace AquaModelLibrary
         public bool usesMysterObject = false;
         public List<string> texList = new List<string>();
         public AquaNode nodes = null; //Technically not the same, but it's close enough we can store everything PSU really has here
+        public List<NN_NODE> NNNodes = new List<NN_NODE>(); 
         public List<AquaObject.VTXL> vtxlList = new List<AquaObject.VTXL>();
         public List<NNS_MeshSetInfo> meshInfoList = new List<NNS_MeshSetInfo>();
         public List<List<NNS_MeshSet>> meshListList = new List<List<NNS_MeshSet>>();
@@ -43,6 +44,7 @@ namespace AquaModelLibrary
         public void ReadPSUXNJ(string filePath)
         {
             var fileData = File.ReadAllBytes(filePath);
+            fileData = GetNXOB(fileData);
             streamReader = new BufferedStreamReader(new MemoryStream(fileData), 8192);
 
             var magic = Encoding.ASCII.GetString(streamReader.ReadBytes(0, 4));
@@ -72,6 +74,37 @@ namespace AquaModelLibrary
             ReadMaterials();
             ReadFaceData();
             ReadMeshData();
+        }
+
+        public static byte[] GetNXOB(byte[] bytes)
+        {
+            var magic = Encoding.UTF8.GetString(bytes, 0, 4);
+            int headerOff = 0;
+            if (magic == "NXOB" && magic == "NYOB" && magic == "NXR\0" && magic == "NYR\0")
+            {
+                return bytes;
+            }
+            while(magic != "NXOB" && magic != "NYOB" && magic != "NXR\0" && magic != "NYR\0")
+            {
+                switch (magic)
+                {
+                    case "YNJ\0":
+                    case "XNJ\0":
+                        headerOff += BitConverter.ToInt32(bytes, headerOff + 4);
+                        break;
+                    case "NYR\0":
+                    case "NXR\0":
+                    default:
+                        headerOff += BitConverter.ToInt32(bytes, headerOff + 4) + 8;
+                        break;
+                }
+
+                magic = Encoding.UTF8.GetString(bytes, headerOff, 4);
+            }
+
+            byte[] newArray = new byte[bytes.Length - headerOff];
+            Array.Copy(bytes, headerOff, newArray, 0, newArray.Length);
+            return newArray;
         }
 
         //Returns an aqp ready for the ConvertToNGSPSO2Mesh method
@@ -433,7 +466,7 @@ namespace AquaModelLibrary
             int[] vertIndices = new int[4];
             for (int j = 0; j < vset.bonePaletteCount; j++)
             {
-                ushort index = (ushort)streamReader.Read<uint>();
+                ushort index = (ushort)animNodeMap[(ushort)streamReader.Read<uint>()];
                 vertIndices[j] = index;
                 bonePalette.Add(index);
             }
@@ -522,6 +555,7 @@ namespace AquaModelLibrary
             nodes = new AquaNode();
             Dictionary<int, AquaNode.NODE> nodeDict = new Dictionary<int, AquaNode.NODE>();
             Dictionary<int, int> nodeIntDict = new Dictionary<int, int>();
+            NNNodes = new List<NN_NODE>();
 
             streamReader.Seek(offset + header.boneOffset, SeekOrigin.Begin);
             for (int i = 0; i < header.boneCount; i++)
@@ -564,6 +598,7 @@ namespace AquaModelLibrary
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_BBZSIZE));
 
                 nodes.nodeList.Add(node);
+                NNNodes.Add(nnNode);
             }
             animNodeMap = nodeIntDict;
         }
