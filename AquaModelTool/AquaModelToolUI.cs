@@ -250,7 +250,7 @@ namespace AquaModelTool
             }
         }
 
-        public void AquaUIOpenFile(string str = null)
+        public bool AquaUIOpenFile(string str = null)
         {
             string file = aquaUI.confirmFile(str);
             if (file != null)
@@ -334,12 +334,14 @@ namespace AquaModelTool
                         break;
                     default:
                         MessageBox.Show("Invalid File");
-                        return;
+                        return false;
                 }
                 filePanel.Controls.Add(control);
                 control.Dock = DockStyle.Fill;
                 control.BringToFront();
             }
+
+            return true;
         }
 
         private void ClearData()

@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary;
 using System;
 using System.Windows.Forms;
+using static AquaModelLibrary.Utility.ColorUtility;
 
 namespace AquaModelTool
 {
@@ -10,6 +11,8 @@ namespace AquaModelTool
         private int currentShaderId = 0;
         private int currentExtraId = 0;
         private NGSAquaObject.NGSSHAD ngsShad = null;
+        bool canUpdate = false;
+        private ColorDialog colorDialog = new ColorDialog();
         public ShaderEditor(AquaObject aquaModel)
         {
             model = aquaModel;
@@ -42,6 +45,7 @@ namespace AquaModelTool
             valueYUD.Enabled = state;
             valueZUD.Enabled = state;
             valueWUD.Enabled = state;
+            diffuseRGBButton.Enabled = state;
         }
 
         public void ResetExtras()
@@ -54,6 +58,7 @@ namespace AquaModelTool
             valueYUD.Value = 0;
             valueZUD.Value = 0;
             valueWUD.Value = 0;
+            diffuseRGBButton.BackColor = System.Drawing.Color.White;
         }
 
         public void UpdateShaderDisplay()
@@ -97,6 +102,10 @@ namespace AquaModelTool
                 valueYUD.Value = (decimal)ngsShad.shadExtra[currentExtraId].entryFloats.Y;
                 valueZUD.Value = (decimal)ngsShad.shadExtra[currentExtraId].entryFloats.Z;
                 valueWUD.Value = (decimal)ngsShad.shadExtra[currentExtraId].entryFloats.W;
+
+                var color = ARGBFromRGBAVector3(ngsShad.shadExtra[currentExtraId].entryFloats.X, ngsShad.shadExtra[currentExtraId].entryFloats.Y, ngsShad.shadExtra[currentExtraId].entryFloats.Z);
+                diffuseRGBButton.BackColor = color;
+                canUpdate = true;
             }
         }
 
@@ -156,7 +165,7 @@ namespace AquaModelTool
 
         private void flags2UD_ValueChanged(object sender, EventArgs e)
         {
-            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1)
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1 && canUpdate)
             {
                 var extra = ngsShad.shadExtra[currentExtraId];
                 extra.entryFlag2 = (short)flags2UD.Value;
@@ -166,49 +175,95 @@ namespace AquaModelTool
 
         private void valueXUD_ValueChanged(object sender, EventArgs e)
         {
-            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1)
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1 && canUpdate)
             {
+                canUpdate = false;
                 var extra = ngsShad.shadExtra[currentExtraId];
                 var vec4 = extra.entryFloats;
                 vec4.X = (float)valueXUD.Value;
+                var color = System.Drawing.Color.FromArgb(1, (byte)(vec4.X * 255f), diffuseRGBButton.BackColor.G, diffuseRGBButton.BackColor.B);
+                diffuseRGBButton.BackColor = color;
                 extra.entryFloats = vec4;
                 ngsShad.shadExtra[currentExtraId] = extra;
+                diffuseRGBButton.Update();
+
+                canUpdate = true;
             }
         }
 
         private void valueYUD_ValueChanged(object sender, EventArgs e)
         {
-            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1)
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1 && canUpdate)
             {
+                canUpdate = false;
                 var extra = ngsShad.shadExtra[currentExtraId];
                 var vec4 = extra.entryFloats;
                 vec4.Y = (float)valueYUD.Value;
+                var color = System.Drawing.Color.FromArgb(1, diffuseRGBButton.BackColor.R, (byte)(vec4.Y * 255f), diffuseRGBButton.BackColor.B );
+                diffuseRGBButton.BackColor = color;
                 extra.entryFloats = vec4;
                 ngsShad.shadExtra[currentExtraId] = extra;
+                diffuseRGBButton.Update();
+
+                canUpdate = true;
             }
         }
 
         private void valueZUD_ValueChanged(object sender, EventArgs e)
         {
-            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1)
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1 && canUpdate)
             {
+                canUpdate = false;
                 var extra = ngsShad.shadExtra[currentExtraId];
                 var vec4 = extra.entryFloats;
                 vec4.Z = (float)valueZUD.Value;
+                var color = System.Drawing.Color.FromArgb(1, diffuseRGBButton.BackColor.R, diffuseRGBButton.BackColor.G, (byte)(vec4.Z * 255f));
+                diffuseRGBButton.BackColor = color;
                 extra.entryFloats = vec4;
                 ngsShad.shadExtra[currentExtraId] = extra;
+                diffuseRGBButton.Update();
+
+                canUpdate = true;
             }
         }
 
         private void valueWUD_ValueChanged(object sender, EventArgs e)
         {
-            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1)
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1 && canUpdate)
             {
+                canUpdate = false;
                 var extra = ngsShad.shadExtra[currentExtraId];
                 var vec4 = extra.entryFloats;
                 vec4.W = (float)valueWUD.Value;
                 extra.entryFloats = vec4;
                 ngsShad.shadExtra[currentExtraId] = extra;
+
+                canUpdate = true;
+            }
+        }
+
+        private void diffuseRGBButton_Click(object sender, EventArgs e)
+        {
+            if (ngsShad != null && shaderExtraLB.SelectedIndex != -1 && canUpdate)
+            {
+                canUpdate = false;
+                var extra = ngsShad.shadExtra[currentExtraId];
+                var vec4 = extra.entryFloats;
+
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    vec4.X = (float)colorDialog.Color.R / 255;
+                    vec4.Y = (float)colorDialog.Color.G / 255;
+                    vec4.Z = (float)colorDialog.Color.B / 255;
+                    diffuseRGBButton.BackColor = colorDialog.Color;
+                }
+                valueXUD.Value = (decimal)vec4.X;
+                valueYUD.Value = (decimal)vec4.Y;
+                valueZUD.Value = (decimal)vec4.Z;
+                extra.entryFloats = vec4;
+                ngsShad.shadExtra[currentExtraId] = extra;
+
+                canUpdate = true;
             }
         }
     }

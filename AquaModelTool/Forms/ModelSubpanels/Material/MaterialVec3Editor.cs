@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AquaModelLibrary.Utility;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Windows.Forms;
@@ -94,6 +95,8 @@ namespace AquaModelTool.Forms.ModelSubpanels.Material
                     mate.unkRGBA1 = vec4;
                     break;
             }
+            var color = ColorUtility.ARGBFromRGBAVector3((float)matXUD.Value, (float)matYUD.Value, (float)matZUD.Value);
+            _matButton.BackColor = color;
             _matList[_matIndex] = mate;
         }
 
@@ -107,23 +110,26 @@ namespace AquaModelTool.Forms.ModelSubpanels.Material
                 {
                     case 0:
                         rGBButton.BackColor = colorDialog.Color;
-                        mate.diffuseRGBA = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.diffuseRGBA.W);
+                        mate.diffuseRGBA = new Vector4((float)colorDialog.Color.R / 255, (float)colorDialog.Color.G / 255, (float)colorDialog.Color.B / 255, mate.diffuseRGBA.W);
                         break;
                     case 1:
                         rGBButton.BackColor = colorDialog.Color;
-                        mate.unkRGBA0 = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.unkRGBA0.W);
+                        mate.unkRGBA0 = new Vector4((float)colorDialog.Color.R / 255, (float)colorDialog.Color.G / 255, (float)colorDialog.Color.B / 255, mate.unkRGBA0.W);
                         break;
                     case 2:
                         rGBButton.BackColor = colorDialog.Color;
-                        mate._sRGBA = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate._sRGBA.W);
+                        mate._sRGBA = new Vector4((float)colorDialog.Color.R / 255, (float)colorDialog.Color.G / 255, (float)colorDialog.Color.B / 255, mate._sRGBA.W);
                         break;
                     case 3:
                         rGBButton.BackColor = colorDialog.Color;
-                        mate.unkRGBA1 = new Vector4(colorDialog.Color.R / 255, colorDialog.Color.G / 255, colorDialog.Color.B / 255, mate.unkRGBA1.W);
+                        mate.unkRGBA1 = new Vector4((float)colorDialog.Color.R / 255, (float)colorDialog.Color.G / 255, (float)colorDialog.Color.B / 255, mate.unkRGBA1.W);
                         break;
                 }
                 _matButton.BackColor = colorDialog.Color;
             }
+            matXUD.Value = (decimal)((float)colorDialog.Color.R / 255);
+            matYUD.Value = (decimal)((float)colorDialog.Color.G / 255);
+            matZUD.Value = (decimal)((float)colorDialog.Color.B / 255);
             _matList[_matIndex] = mate;
         }
     }

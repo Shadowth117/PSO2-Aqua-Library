@@ -54,6 +54,7 @@ namespace AquaModelTool
             this.flags2Label = new System.Windows.Forms.Label();
             this.flags1UD = new System.Windows.Forms.NumericUpDown();
             this.flags2UD = new System.Windows.Forms.NumericUpDown();
+            this.diffuseRGBButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.unk0UD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.valueZUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.valueXUD)).BeginInit();
@@ -172,6 +173,11 @@ namespace AquaModelTool
             // valueZUD
             // 
             this.valueZUD.DecimalPlaces = 6;
+            this.valueZUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            458752});
             this.valueZUD.Location = new System.Drawing.Point(291, 132);
             this.valueZUD.Maximum = new decimal(new int[] {
             10000000,
@@ -200,6 +206,11 @@ namespace AquaModelTool
             // valueXUD
             // 
             this.valueXUD.DecimalPlaces = 6;
+            this.valueXUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            458752});
             this.valueXUD.Location = new System.Drawing.Point(135, 132);
             this.valueXUD.Maximum = new decimal(new int[] {
             10000000,
@@ -228,6 +239,11 @@ namespace AquaModelTool
             // valueYUD
             // 
             this.valueYUD.DecimalPlaces = 6;
+            this.valueYUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            458752});
             this.valueYUD.Location = new System.Drawing.Point(213, 132);
             this.valueYUD.Maximum = new decimal(new int[] {
             10000000,
@@ -265,6 +281,11 @@ namespace AquaModelTool
             // valueWUD
             // 
             this.valueWUD.DecimalPlaces = 6;
+            this.valueWUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            458752});
             this.valueWUD.Location = new System.Drawing.Point(135, 171);
             this.valueWUD.Maximum = new decimal(new int[] {
             10000000,
@@ -362,10 +383,22 @@ namespace AquaModelTool
             this.flags2UD.TabIndex = 7;
             this.flags2UD.ValueChanged += new System.EventHandler(this.flags2UD_ValueChanged);
             // 
+            // diffuseRGBButton
+            // 
+            this.diffuseRGBButton.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.diffuseRGBButton.Location = new System.Drawing.Point(219, 168);
+            this.diffuseRGBButton.Name = "diffuseRGBButton";
+            this.diffuseRGBButton.Size = new System.Drawing.Size(144, 23);
+            this.diffuseRGBButton.TabIndex = 39;
+            this.diffuseRGBButton.Text = "Edit XYZ as Color";
+            this.diffuseRGBButton.UseVisualStyleBackColor = false;
+            this.diffuseRGBButton.Click += new System.EventHandler(this.diffuseRGBButton_Click);
+            // 
             // ShaderEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.diffuseRGBButton);
             this.Controls.Add(this.valueZUD);
             this.Controls.Add(this.valueZLabel);
             this.Controls.Add(this.valueWUD);
@@ -433,5 +466,6 @@ namespace AquaModelTool
         private System.Windows.Forms.Label flags2Label;
         private System.Windows.Forms.NumericUpDown flags1UD;
         private System.Windows.Forms.NumericUpDown flags2UD;
+        private System.Windows.Forms.Button diffuseRGBButton;
     }
 }
