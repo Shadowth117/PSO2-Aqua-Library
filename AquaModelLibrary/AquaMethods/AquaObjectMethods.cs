@@ -2754,6 +2754,10 @@ namespace AquaModelLibrary
 
         public static string RemoveBlendersShitDuplicateDenoterAndAssimpDuplicate(string name)
         {
+            if(name.Length < 5)
+            {
+                return name;
+            }
             if(name[name.Length - 4] == '.')
             {
                 return name.Substring(0, name.Length - 4);

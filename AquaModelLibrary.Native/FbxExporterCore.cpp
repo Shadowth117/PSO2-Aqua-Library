@@ -458,7 +458,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
         lNode->LclTranslation.Set(FbxVector4(translation.X, translation.Y, translation.Z));
         lNode->LclRotation.Set(eulerAngles);
-        lNode->LclScaling.Set(FbxVector4(scale.X, scale.Y, scale.Z));
+        lNode->LclScaling.Set(FbxVector4(1, 1, 1));
 
         FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
         lSkeleton->Color.Set(FbxDouble3(0, 0.769, 0));

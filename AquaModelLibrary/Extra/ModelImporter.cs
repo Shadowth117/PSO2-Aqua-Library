@@ -1115,6 +1115,10 @@ namespace AquaModelLibrary
 
         public static List<int> GetMeshIds(string name)
         {
+            if(name.Length < 6)
+            {
+                return new List<int>();
+            }
             if (name.Substring(name.Length - 5, 5) == "_mesh")
             {
                 name = name.Substring(0, name.Length - 5);
