@@ -199,7 +199,15 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             for ( int j = 0; j < bonePalette->Count; j++ )
             {
                 ushort boneIndex = bonePalette[ j ];
-                AquaNode::NODE node = aqn->nodeList[ boneIndex ];
+                AquaNode::NODE node;
+                if (aqn->nodeList->Count > boneIndex)
+                {
+                    node = aqn->nodeList[boneIndex];
+                }
+                else {
+                    node = aqn->nodeList[0];
+                    boneIndex = 0;
+                }
                 FbxNode* lBoneNode = ( FbxNode* ) convertedBones[ boneIndex ].ToPointer();
 
                 IntPtr clusterPtr;
