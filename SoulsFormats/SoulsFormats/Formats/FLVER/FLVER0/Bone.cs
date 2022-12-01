@@ -27,6 +27,10 @@ namespace SoulsFormats
 
             public short PreviousSiblingIndex;
 
+            public Bone()
+            {
+            }
+
             internal Bone(BinaryReaderEx br, bool useUnicode)
             {
                 Position = br.ReadVector3();
