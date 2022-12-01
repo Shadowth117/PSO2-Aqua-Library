@@ -164,6 +164,13 @@ namespace AquaModelLibrary
                 {
                     var categoryIndexOffset = streamReader.Read<int>();
                     var subCategoryId = streamReader.Read<int>();
+
+                    //Thanks, SEA servers...
+                    while (subCategoryId >= txt.text[i].Count)
+                    {
+                        txt.text[i].Add(new List<PSO2Text.textPair>());
+                    }
+
                     var categoryIndexCount = streamReader.Read<int>();
                     var bookMarkSub = streamReader.Position();
 
