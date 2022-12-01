@@ -2525,7 +2525,7 @@ namespace AquaModelTool
                     sb.AppendLine($"=== ({i}) {node.boneName.curString}:");
                     sb.AppendLine($"Bone Short 1 {node.boneShort1.ToString("X")} | Bone Short 2 {node.boneShort2.ToString("X")}");
                     sb.AppendLine($"Animated Flag {node.animatedFlag}");
-                    sb.AppendLine($"First Child {node.firstChild} | Next Sibling {node.nextSibling} | NGS Sibling {node.ngsSibling} | Unk Node {node.unkNode}");
+                    sb.AppendLine($"First Child {node.firstChild} | Next Sibling {node.nextSibling} | NGS Sibling {node.ngsRotationOrderChangeCounter} | Unk Node {node.unkNode}");
                     if (i != 0)
                     {
                         sb.AppendLine($"Parent info - ({node.parentId}) {bn.nodeList[node.parentId].boneName.curString}");
@@ -3577,6 +3577,25 @@ namespace AquaModelTool
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
+                    if(!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "DeSMtdLayoutData.bin")))
+                    {
+                        MessageBox.Show("No DeSMtdLayoutData.bin detected! Please select a PS3 Demon's Souls game folder!");
+                        var browseDialog = new CommonOpenFileDialog()
+                        {
+                            Title = "Open PS3 Demon's Souls root folder",
+                            IsFolderPicker = true,
+                        };
+
+                        if (browseDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                        {
+                            SoulsConvert.GetDeSLayoutMTDInfo(browseDialog.FileName);
+                        } else
+                        {
+                            MessageBox.Show("You MUST have an DeSMtdLayoutData.bin file to proceed!");
+                            return;
+                        }
+                    }
+
                     AquaUtil aqua = new AquaUtil();
                     ModelSet modelSet = new ModelSet();
                     modelSet.models.Add(ModelImporter.AssimpAquaConvertFull(openFileDialog.FileName, 1, false, true, out AquaNode aqn));
@@ -3584,8 +3603,7 @@ namespace AquaModelTool
                     var ext = Path.GetExtension(openFileDialog.FileName);
                     var outStr = openFileDialog.FileName.Replace(ext, "_out.flver");
 
-                    aqua.aquaModels.Clear();
-                    AquaUIOpenFile(outStr);
+                    //TODO
                 }
             }
         }
