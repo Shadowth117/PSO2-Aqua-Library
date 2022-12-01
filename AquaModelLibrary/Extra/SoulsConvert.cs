@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using SoulsFormats;
@@ -22,6 +23,11 @@ namespace AquaModelLibrary.Extra
             DarkSouls3,
             Sekiro
         }
+
+        public static Matrix4x4 mirrorMat = new Matrix4x4(-1, 0, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 1, 0,
+                                    0, 0, 0, 1);
 
         public static AquaObject ReadFlver(string filePath, out AquaNode aqn)
         {
@@ -55,10 +61,6 @@ namespace AquaModelLibrary.Extra
                 }
             }
             aqn = new AquaNode();
-            var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
-                                        0, 1, 0, 0,
-                                        0, 0, 1, 0,
-                                        0, 0, 0, 1);
             for (int i = 0; i < flver.Bones.Count; i++)
             {
                 var flverBone = flver.Bones[i];
@@ -302,11 +304,22 @@ namespace AquaModelLibrary.Extra
 
         public static IFlver ConvertModelToFlver(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, SoulsGame game, IFlver matReferenceFlver = null)
         {
-            return AquaToFlver(initialFilePath, ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn), aqn, game, matReferenceFlver);
+            return null;
+            //return AquaToFlver(initialFilePath, ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn), aqn, game, matReferenceFlver);
         }
-
+        
         public static IFlver AquaToFlver(string initialFilePath, AquaObject aqp, AquaNode aqn, SoulsGame game, IFlver matReferenceFlver)
         {
+            switch(game)
+            {
+                case SoulsGame.DemonsSouls:
+                    break;
+                default:
+                    return null;
+            }
+
+            var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var mtdDict = ReadMTDLayoutData(Path.Combine(exePath, "DeSMtdLayoutData.bin"));
             FLVER0 flver = new FLVER0();
             flver.Header = new FLVER0Header();
             flver.Header.BigEndian = true;
@@ -318,55 +331,383 @@ namespace AquaModelLibrary.Extra
             flver.Header.Unk5C = 0;
 
             List<string> usedMaterials = new List<string>();
-            if (matReferenceFlver == null)
+            Dictionary<string, FLVER0.Material> matDict = new Dictionary<string, FLVER0.Material>();
+            if (matReferenceFlver != null)
             {
-            } else
-            {
-                Dictionary<string, FLVER0.Material> matDict = new Dictionary<string, FLVER0.Material>();
-                for(int i = 0; i < matReferenceFlver.Materials.Count; i++)
+                for (int i = 0; i < matReferenceFlver.Materials.Count; i++)
                 {
                     matDict.Add(matReferenceFlver.Materials[i].Name, (FLVER0.Material)matReferenceFlver.Materials[i]);
                 }
-                
-                for (int i = 0; i < aqp.mateList.Count; i++)
+            }
+
+            for (int i = 0; i < aqp.mateList.Count; i++)
+            {
+                var matIndex = usedMaterials.IndexOf(aqp.mateList[i].matName.GetString());
+                if (matIndex != -1)
                 {
-                    var matIndex = usedMaterials.IndexOf(aqp.mateList[i].matName.GetString());
-                    if (matIndex != -1)
+                    var name = aqp.mateList[i].matName.GetString();
+                    var nameSplit = name.Split('|');
+                    string mtd = null;
+                    if(nameSplit.Length > 1)
                     {
-                        continue;
+                        mtd = nameSplit[1];
                     } else
                     {
-                        var name = aqp.mateList[i].matName.GetString();
-                        usedMaterials.Add(name);
-                        if(matDict.TryGetValue(name, out var mat))
-                        {
-                            flver.Materials.Add(mat);
-                        } else
-                        {
-                            var flvMat = new FLVER0.Material(true);
-                            flvMat.Name = name;
-                            flvMat.MTD = "u:\\nlimited\\based\\works\\p_metal[dsb].mtd";
-                            flvMat.Layouts = new List<FLVER0.BufferLayout>();
-                            //flvMat.Layouts.Add(new FLVER0.BufferLayout());
-                            //flvMat.Textures
-                        }
+                        mtd = "u:\\nlimited\\based\\works\\p_metal[dsb]_skin.mtd";
                     }
-                }
-                for (int i = 0; i < aqp.meshList.Count; i++)
+
+                    var flvMat = new FLVER0.Material(true);
+                    flvMat.Name = nameSplit[0];
+                    if (mtdDict.ContainsKey(Path.GetFileName(mtd).ToLower()))
+                    {
+                        flvMat.Layouts.Add(mtdDict[mtd]);
+                        flvMat.MTD = mtd;
+                    }
+                } else
                 {
-                    var mesh = aqp.meshList[i];
-                    var vtxl = aqp.vtxlList[mesh.vsetIndex];
-                    var faces = aqp.strips[mesh.psetIndex];
-                    var shader = aqp.shadList[mesh.shadIndex];
-                    var render = aqp.rendList[mesh.rendIndex];
-                    FLVER0.Mesh flvMesh = new FLVER0.Mesh();
-                    flvMesh.Dynamic = 0;
-                    flvMesh.MaterialIndex = (byte)mesh.mateIndex;
-                    flvMesh.BackfaceCulling = render.twosided > 0;
+                    //var name = ;
+                    usedMaterials.Add(name);
+                    if(matDict.TryGetValue(name, out var mat))
+                    {
+                        flver.Materials.Add(mat);
+                    } else
+                    {
+                        var flvMat = new FLVER0.Material(true);
+                        flvMat.Name = name;
+                        flvMat.MTD = "u:\\nlimited\\based\\works\\p_metal[dsb]_skin.mtd";
+                        flvMat.Layouts = new List<FLVER0.BufferLayout>();
+
+                        //Create Vertex layouts
+                        //TODO create them based on MTD if needed? Unsure how much variation is required here
+                        //flvMat.Layouts.Add(new FLVER0.BufferLayout());
+                        //flvMat.Textures
+                    }
                 }
             }
 
+            //Bones store bounding which encompass the extents of all vertices onto which they are weighted.
+            //When no vertices are weighted to them, this bounding is -3.402823e+38 for all min bound values and 3.402823e+38 for all max bound values
+            Dictionary<int, Vector3> MaxBoundingBoxByBone = new Dictionary<int, Vector3>();
+            Dictionary<int, Vector3> MinBoundingBoxByBone = new Dictionary<int, Vector3>();
+
+            for (int i = 0; i < aqp.meshList.Count; i++)
+            {
+                var mesh = aqp.meshList[i];
+                var vtxl = aqp.vtxlList[mesh.vsetIndex];
+                var faces = aqp.strips[mesh.psetIndex];
+                var shader = aqp.shadList[mesh.shadIndex];
+                var render = aqp.rendList[mesh.rendIndex];
+                var flvMat = flver.Materials[mesh.mateIndex];
+
+                FLVER0.Mesh flvMesh = new FLVER0.Mesh();
+                flvMesh.MaterialIndex = (byte)mesh.mateIndex;
+                flvMesh.BackfaceCulling = render.twosided > 0;
+                flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
+
+                for (int v = 0; v < vtxl.vertPositions.Count; v++)
+                {
+                    var vert = new FLVER.Vertex();
+
+                    for(int l = 0; l < flvMat.Layouts[0].Count; l++)
+                    {
+                        switch (flvMat.Layouts[0][l].Semantic)
+                        {
+                            case FLVER.LayoutSemantic.Position:
+                                var pos = Vector3.Transform(vtxl.vertPositions[v], mirrorMat);
+                                vert.Position = pos;
+                                break;
+                            case FLVER.LayoutSemantic.UV:
+                                if(flvMat.Layouts[0][l].Type == FLVER.LayoutType.UVPair)
+                                {
+
+                                } else
+                                {
+
+                                }
+                                break;
+                            case FLVER.LayoutSemantic.Normal:
+                                if (vtxl.vertNormals.Count > 0)
+                                {
+                                    vert.Normal = Vector3.TransformNormal(vtxl.vertNormals[v], mirrorMat);
+                                } else
+                                {
+                                    vert.Normal = Vector3.One;
+                                }
+                                break;
+                            case FLVER.LayoutSemantic.Tangent:
+                                break;
+                            case FLVER.LayoutSemantic.Bitangent:
+                                break;
+                            case FLVER.LayoutSemantic.VertexColor:
+                                break;
+                            case FLVER.LayoutSemantic.BoneIndices:
+                                break;
+                            case FLVER.LayoutSemantic.BoneWeights:
+                                break;
+                        }
+                    }
+
+                    if (vtxl.vertTangentList.Count > 0)
+                    {
+                        vert.Tangents.Add(new Vector4(Vector3.TransformNormal(vtxl.vertTangentList[v], mirrorMat), 0));
+                    }
+
+                    if (vtxl.vertBinormalList.Count > 0)
+                    {
+                        vert.Bitangent = new Vector4(Vector3.TransformNormal(vtxl.vertBinormalList[v], mirrorMat), 0);
+                    }
+
+                    if (vtxl.vertColors.Count > 0)
+                    {
+                        vert.Colors.Add(new FLVER.VertexColor(vtxl.vertColors[v][3], vtxl.vertColors[v][2], vtxl.vertColors[v][1], vtxl.vertColors[v][0]));
+                    }
+
+                    if (vtxl.vertColor2s.Count > 0)
+                    {
+                        vert.Colors.Add(new FLVER.VertexColor(vtxl.vertColor2s[v][3], vtxl.vertColor2s[v][2], vtxl.vertColor2s[v][1], vtxl.vertColor2s[v][0]));
+                    }
+
+                    if (vtxl.uv1List.Count > 0)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv1List[v], 0));
+                    }
+
+                    if (vtxl.uv2List.Count > 0)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv2List[v], 0));
+                    }
+
+                    if (vtxl.uv3List.Count > 0)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv3List[v], 0));
+                    }
+
+                    if (vtxl.uv4List.Count > 0)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv4List[v], 0));
+                    }
+
+                    if(vtxl.vertWeightIndices.Count > 0)
+                    {
+                        var indices = vtxl.vertWeightIndices[v];
+                        vert.BoneIndices = new FLVER.VertexBoneIndices() { };
+                        vert.BoneIndices[0] = indices[0];
+                        vert.BoneIndices[1] = indices[1];
+                        vert.BoneIndices[2] = indices[2];
+                        vert.BoneIndices[3] = indices[3];
+
+                        int bone0 = indices[0];
+                        int bone1 = indices[1];
+                        int bone2 = indices[2];
+                        int bone3 = indices[3];
+                        if (aqp is ClassicAquaObject)
+                        {
+                            bone0 = vtxl.bonePalette[bone0];
+                            bone1 = vtxl.bonePalette[bone1];
+                            bone2 = vtxl.bonePalette[bone2];
+                            bone3 = vtxl.bonePalette[bone3];
+                        }
+
+                        List<int> boneCheckList = new List<int>();
+                        boneCheckList.Add(bone0);
+                        if (boneCheckList.Contains(bone1))
+                        {
+                            bone1 = -1;
+                        }
+                        if (boneCheckList.Contains(bone2))
+                        {
+                            bone2 = -1;
+                        }
+                        if (boneCheckList.Contains(bone3))
+                        {
+                            bone3 = -1;
+                        }
+
+                        CheckBounds(MaxBoundingBoxByBone, MinBoundingBoxByBone, vert.Position, bone0);
+                        CheckBounds(MaxBoundingBoxByBone, MinBoundingBoxByBone, vert.Position, bone1);
+                        CheckBounds(MaxBoundingBoxByBone, MinBoundingBoxByBone, vert.Position, bone2);
+                        CheckBounds(MaxBoundingBoxByBone, MinBoundingBoxByBone, vert.Position, bone3);
+                    }
+
+                    if (vtxl.vertWeights.Count > 0)
+                    {
+                        var weights = vtxl.vertWeightIndices[v];
+                        vert.BoneWeights = new FLVER.VertexBoneWeights() { };
+                        vert.BoneWeights[0] = weights[0];
+                        vert.BoneWeights[1] = weights[1];
+                        vert.BoneWeights[2] = weights[2];
+                        vert.BoneWeights[3] = weights[3];
+                    }
+
+                    flvMesh.Vertices.Add(vert);
+                }
+
+            }
+
+            foreach (var aqBone in aqn.nodeList)
+            {
+                FLVER.Bone bone = new FLVER.Bone();
+                bone.Name = aqBone.boneName.GetString();
+                //bone.
+                flver.Bones.Add(bone);
+            }
+
             return flver;
+        }
+
+        private static void CheckBounds(Dictionary<int, Vector3> MaxBoundingBoxByBone, Dictionary<int, Vector3> MinBoundingBoxByBone, Vector3 vec3, int boneId)
+        {
+            if (boneId != -1 && !MaxBoundingBoxByBone.ContainsKey(boneId))
+            {
+                MaxBoundingBoxByBone[boneId] = vec3;
+                MinBoundingBoxByBone[boneId] = vec3;
+            }
+            else if(boneId != -1)
+            {
+                MaxBoundingBoxByBone[boneId] = AquaObjectMethods.GetMaximumBounding(MaxBoundingBoxByBone[boneId], vec3);
+                MinBoundingBoxByBone[boneId] = AquaObjectMethods.GetMinimumBounding(MinBoundingBoxByBone[boneId], vec3);
+            }
+        }
+
+        public static void GetDeSLayoutMTDInfo(string desPath)
+        {
+            Dictionary<string, FLVER0.BufferLayout> mtdLayoutsRawDict = new Dictionary<string, FLVER0.BufferLayout>();
+            var files = Directory.EnumerateFiles(desPath, "*.*", SearchOption.AllDirectories);
+            foreach (var file in files)
+            {
+                var loadedFiles = ReadFilesNullable<FLVER0>(file);
+                if (loadedFiles != null && loadedFiles.Count > 0)
+                {
+                    foreach (var fileSet in loadedFiles)
+                    {
+                        var flver = fileSet.File;
+
+                        foreach (var mat in flver.Materials)
+                        {
+                            var layout = mat.Layouts[0];
+                            if (!mtdLayoutsRawDict.ContainsKey(mat.MTD))
+                            {
+                                mtdLayoutsRawDict.Add(mat.MTD, layout);
+                            }
+                        }
+                    }
+                }
+
+                List<byte> mtdLayoutBytes = new List<byte>();
+                mtdLayoutBytes.AddRange(BitConverter.GetBytes(mtdLayoutsRawDict.Count));
+                foreach (var entry in mtdLayoutsRawDict)
+                {
+                    mtdLayoutBytes.AddRange(BitConverter.GetBytes(entry.Key.Length * 2));
+                    mtdLayoutBytes.AddRange(UnicodeEncoding.Unicode.GetBytes(entry.Key));
+                    mtdLayoutBytes.AddRange(BitConverter.GetBytes(entry.Value.Count));
+                    foreach (var layoutEntry in entry.Value)
+                    {
+                        mtdLayoutBytes.Add((byte)layoutEntry.Type);
+                        mtdLayoutBytes.Add((byte)layoutEntry.Semantic);
+                    }
+                }
+
+                var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                File.WriteAllBytes(Path.Combine(exePath, "DeSMtdLayoutData.bin"), mtdLayoutBytes.ToArray());
+            }
+        }
+
+        public static Dictionary<string, FLVER0.BufferLayout> ReadMTDLayoutData(string dataPath)
+        {
+            var layoutsRaw = File.ReadAllBytes(dataPath);
+            int offset = 0;
+            int entryCount = BitConverter.ToInt32(layoutsRaw, 0);
+            offset += 4;
+            Dictionary<string, FLVER0.BufferLayout> layouts = new Dictionary<string, FLVER0.BufferLayout>();
+            for (int i = 0; i < entryCount; i++)
+            {
+                int strByteLen = BitConverter.ToInt32(layoutsRaw, offset);
+                offset += 4;
+                string mtd = Encoding.Unicode.GetString(layoutsRaw, offset, strByteLen).ToLower();
+                offset += strByteLen;
+
+                int layoutLen = BitConverter.ToInt32(layoutsRaw, offset);
+                offset += 4;
+                FLVER0.BufferLayout layout = new FLVER0.BufferLayout();
+                for (int j = 0; j < layoutLen; j++)
+                {
+                    byte type = layoutsRaw[offset];
+                    offset += 1;
+                    byte semantic = layoutsRaw[offset];
+                    offset += 1;
+
+                    layout.Add(new FLVER.LayoutMember((FLVER.LayoutType)type, (FLVER.LayoutSemantic)semantic, j, 0));
+                }
+                if (!layouts.ContainsKey(Path.GetFileName(mtd)))
+                {
+                    layouts.Add(Path.GetFileName(mtd), layout);
+                }
+            }
+
+            return layouts;
+        }
+
+        public class URIFlver0Pair
+        {
+            public string Uri { get; set; }
+            public FLVER0 File { get; set; }
+        }
+
+        public static List<URIFlver0Pair> ReadFilesNullable<TFormat>(string path)
+    where TFormat : SoulsFile<TFormat>, new()
+        {
+            if (BND3.Is(path))
+            {
+                var bnd3 = BND3.Read(path);
+                var selected = bnd3.Files.Where(f => Path.GetExtension(f.Name) == ".flver");
+                List<URIFlver0Pair> Files = new List<URIFlver0Pair>();
+                foreach (var file in bnd3.Files)
+                {
+                    if (Path.GetExtension(file.Name) == ".flver")
+                    {
+                        Files.Add(new URIFlver0Pair() { Uri = file.Name, File = SoulsFile<FLVER0>.Read(file.Bytes) });
+                    }
+                }
+                return Files;
+            }
+            else if (BND4.Is(path))
+            {
+                var bnd4 = BND4.Read(path);
+                var selected = bnd4.Files.Where(f => Path.GetExtension(f.Name) == ".flver");
+                List<URIFlver0Pair> Files = new List<URIFlver0Pair>();
+                foreach (var file in bnd4.Files)
+                {
+                    if (Path.GetExtension(file.Name) == ".flver")
+                    {
+                        Files.Add(new URIFlver0Pair() { Uri = file.Name, File = SoulsFile<FLVER0>.Read(file.Bytes) });
+                    }
+                }
+                return Files;
+            }
+            else
+            {
+                var file = File.ReadAllBytes(path);
+                if (FLVER0.Is(file))
+                {
+                    return new List<URIFlver0Pair>() { new URIFlver0Pair() { Uri = path, File = SoulsFile<FLVER0>.Read(file) } };
+                }
+                return null;
+            }
+
+        }
+
+        public static bool IsMaterialUsingSkinning(FLVER0.Material mat)
+        {
+            for (int i = 0; i < mat.Layouts.Count; i++)
+            {
+                //HOPEFULLY this should always be 0. If not, pain
+                if(mat.Layouts[0][i].Semantic == FLVER.LayoutSemantic.BoneWeights)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
