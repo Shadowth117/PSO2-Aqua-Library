@@ -102,7 +102,7 @@ namespace AquaModelLibrary
             public int firstChild;    //0x5, type 0x8
             public int nextSibling;   //0x6, type 0x8
             public int const0_2;      //0xC, type 0x9? Ordering and nebulous usage makes this unclear. Observed only 0.
-            public int ngsSibling;    //Counts up in the case of an NGS bone sibling for player models.
+            public int ngsRotationOrderChangeCounter;    //Counts up in the case of an NGS bone with a non default rotation order.
 
             public Vector3 pos;       //0x7, type 0x4A, 0x1
             public int const0_4;
