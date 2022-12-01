@@ -820,6 +820,42 @@ namespace AquaModelLibrary
             vtxl.createTrueVertWeights();
         }
 
+        public static Vector3 GetMaximumBounding(Vector3 maxPoint, Vector3 newPoint)
+        {
+            if (maxPoint.X < newPoint.X)
+            {
+                maxPoint.X = newPoint.X;
+            }
+            if (maxPoint.Y < newPoint.Y)
+            {
+                maxPoint.Y = newPoint.Y;
+            }
+            if (maxPoint.Z < newPoint.Z)
+            {
+                maxPoint.Z = newPoint.Z;
+            }
+
+            return maxPoint;
+        }
+
+        public static Vector3 GetMinimumBounding(Vector3 minPoint, Vector3 newPoint)
+        {
+            if (minPoint.X > newPoint.X)
+            {
+                minPoint.X = newPoint.X;
+            }
+            if (minPoint.Y > newPoint.Y)
+            {
+                minPoint.Y = newPoint.Y;
+            }
+            if (minPoint.Z > newPoint.Z)
+            {
+                minPoint.Z = newPoint.Z;
+            }
+
+            return minPoint;
+        }
+
         public static BoundingVolume GenerateBounding(List<VTXL> vertData)
         {
             BoundingVolume bounds = new BoundingVolume();
@@ -834,32 +870,10 @@ namespace AquaModelLibrary
                 for (int vert = 0; vert < vertData[vset].vertPositions.Count; vert++)
                 {
                     //Compare to max
-                    if (maxPoint.X < vertData[vset].vertPositions[vert].X)
-                    {
-                        maxPoint.X = vertData[vset].vertPositions[vert].X;
-                    }
-                    if (maxPoint.Y < vertData[vset].vertPositions[vert].Y)
-                    {
-                        maxPoint.Y = vertData[vset].vertPositions[vert].Y;
-                    }
-                    if (maxPoint.Z < vertData[vset].vertPositions[vert].Z)
-                    {
-                        maxPoint.Z = vertData[vset].vertPositions[vert].Z;
-                    }
+                    maxPoint = GetMaximumBounding(maxPoint, vertData[vset].vertPositions[vert]);
 
                     //Compare to min
-                    if (minPoint.X > vertData[vset].vertPositions[vert].X)
-                    {
-                        minPoint.X = vertData[vset].vertPositions[vert].X;
-                    }
-                    if (minPoint.Y > vertData[vset].vertPositions[vert].Y)
-                    {
-                        minPoint.Y = vertData[vset].vertPositions[vert].Y;
-                    }
-                    if (minPoint.Z > vertData[vset].vertPositions[vert].Z)
-                    {
-                        minPoint.Z = vertData[vset].vertPositions[vert].Z;
-                    }
+                    minPoint = GetMinimumBounding(minPoint, vertData[vset].vertPositions[vert]);
                 }
             }
 
@@ -2274,6 +2288,24 @@ namespace AquaModelLibrary
                     texNames.Add("pl_body_base_subnormal_02.dds");
                     texNames.Add("pl_body_base_subnormal_03.dds");
                     break;
+                case "rbd_d":
+                case "reboot_bd_d":
+                case "reboot_pl_d":
+                case "reboot_player_d":
+                case "reboot_ba_decal":
+                    if (mat.shaderNames == null)
+                    {
+                        mat.shaderNames = new List<string>() { "1102p", "1102" };
+                    }
+                    texNames.Add("pl_body_base_diffuse.dds");
+                    texNames.Add("pl_body_base_multi.dds");
+                    texNames.Add("pl_body_base_normal.dds");
+                    texNames.Add("pl_body_base_mask.dds");
+                    texNames.Add("pl_body_base_subnormal_01.dds");
+                    texNames.Add("pl_body_base_subnormal_02.dds");
+                    texNames.Add("pl_body_base_subnormal_03.dds");
+                    texNames.Add("pl_body_decal.dds");
+                    break;
                 case "rhr":
                 case "reboot_hair":
                     if (mat.shaderNames == null)
@@ -2356,7 +2388,13 @@ namespace AquaModelLibrary
                     case "pl_body_diffuse.dds":
                         return "pl";
                     case "pl_body_base_diffuse.dds":
-                        return "rbd";
+                        switch (names[names.Count - 1])
+                        {
+                            case "pl_body_decal.dds":
+                                return "rbd_d";
+                            default:
+                                return "rbd";
+                        }
                     case "pl_body_skin_diffuse.dds":
                         return "rbd_sk";
                     case "pl_body_outer_diffuse.dds":
