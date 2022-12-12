@@ -353,7 +353,7 @@ namespace AquaModelLibrary.Extra
 
         private unsafe static Bitmap GetDDSBitMap(byte[] trueFile)
         {
-            using (var image = Pfim.Pfim.FromStream(new MemoryStream(trueFile)))
+            using (var image = Pfim.Pfimage.FromStream(new MemoryStream(trueFile)))
             {
                 PixelFormat format;
 
@@ -1196,6 +1196,9 @@ namespace AquaModelLibrary.Extra
                             entryString += $"{objFileEffHash},";
                             found = true;
                         }
+
+
+
                         entryString += $"{entry.groupName},[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]";
                         if (found == false)
                         {

@@ -19,6 +19,7 @@ using static AquaModelLibrary.VTBFMethods;
 using AquaModelLibrary.Extra;
 using AquaModelLibrary.OtherStructs;
 using AquaModelLibrary.AquaMethods;
+using Newtonsoft.Json;
 
 namespace AquaModelLibrary
 {
@@ -1089,7 +1090,7 @@ namespace AquaModelLibrary
                 //Write SHAD sub structs
                 for (int shadId = 0; shadId < model.shadList.Count; shadId++)
                 {
-                    var shad = (NGSAquaObject.NGSSHAD)model.shadList[shadId];
+                    var shad = model.shadList[shadId];
 
                     if (shad.shadDetailOffset != 0)
                     {
@@ -3498,7 +3499,7 @@ namespace AquaModelLibrary
             File.WriteAllBytes(outFileName, finalOutBytes.ToArray());
         }
 
-        public void WriteAQEAnim(List<byte> outBytes, AquaEffect.AnimObject anim, List<int> nof0PointerLocations)
+        private void WriteAQEAnim(List<byte> outBytes, AquaEffect.AnimObject anim, List<int> nof0PointerLocations)
         {
             List<int> keysOffsets = new List<int>();
             List<int> timeOffsets = new List<int>();
@@ -4166,11 +4167,19 @@ namespace AquaModelLibrary
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiNameOffset, SeekOrigin.Begin);
                             msoEntry.asciiName = ReadCString(streamReader);
                         }
+                        else
+                        {
+                            msoEntry.asciiName = "";
+                        }
 
                         if (msoEntry.msoEntry.utf8DescriptorOffset > 0x10)
                         {
                             streamReader.Seek(offset + msoEntry.msoEntry.utf8DescriptorOffset, SeekOrigin.Begin);
                             msoEntry.utf8Descriptor = ReadUTF8String(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.utf8Descriptor = "";
                         }
 
                         if (msoEntry.msoEntry.asciiTrait1Offset > 0x10)
@@ -4178,11 +4187,19 @@ namespace AquaModelLibrary
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait1Offset, SeekOrigin.Begin);
                             msoEntry.asciiTrait1 = ReadCString(streamReader);
                         }
+                        else
+                        {
+                            msoEntry.asciiTrait1 = "";
+                        }
 
                         if (msoEntry.msoEntry.asciiTrait2Offset > 0x10)
                         {
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait2Offset, SeekOrigin.Begin);
                             msoEntry.asciiTrait2 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait2 = "";
                         }
 
                         if (msoEntry.msoEntry.asciiTrait3Offset > 0x10)
@@ -4190,11 +4207,19 @@ namespace AquaModelLibrary
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait3Offset, SeekOrigin.Begin);
                             msoEntry.asciiTrait3 = ReadCString(streamReader);
                         }
+                        else
+                        {
+                            msoEntry.asciiTrait3 = "";
+                        }
 
                         if (msoEntry.msoEntry.asciiTrait4Offset > 0x10)
                         {
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait4Offset, SeekOrigin.Begin);
                             msoEntry.asciiTrait4 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait4 = "";
                         }
 
                         if (msoEntry.msoEntry.groupNameOffset > 0x10)
@@ -4202,11 +4227,18 @@ namespace AquaModelLibrary
                             streamReader.Seek(offset + msoEntry.msoEntry.groupNameOffset, SeekOrigin.Begin);
                             msoEntry.groupName = ReadCString(streamReader);
                         }
+                        else
+                        {
+                            msoEntry.groupName = "";
+                        }
 
                         if (msoEntry.msoEntry.asciiTrait5Offset > 0x10)
                         {
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait5Offset, SeekOrigin.Begin);
                             msoEntry.asciiTrait5 = ReadCString(streamReader);
+                        } else
+                        {
+                            msoEntry.asciiTrait5 = "";
                         }
 
                         mso.msoEntries.Add(msoEntry);
@@ -4219,5 +4251,120 @@ namespace AquaModelLibrary
             return mso;
         }
 
+        public void ConvertToJson(string filePath)
+        {
+            var ext = Path.GetExtension(filePath);
+            JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
+            string jsonData = "";
+            switch (ext)
+            {
+                case ".aqo":
+                case ".tro":
+                case ".aqp":
+                case ".trp":
+                    ReadModel(filePath);
+                    jsonData = JsonConvert.SerializeObject(aquaModels[0], jss);
+                    if (aquaModels[0].models[0].objc.type > 0xC32)
+                    {
+                        filePath = filePath.Replace(ext, $".ngs{ext}");
+                    }
+                    else
+                    {
+                        filePath = filePath.Replace(ext, $".classic{ext}");
+                    }
+                    aquaModels.Clear();
+                    break;
+                case ".aqn":
+                case ".trn":
+                    ReadBones(filePath);
+                    jsonData = JsonConvert.SerializeObject(aquaBones[0], jss);
+                    aquaBones.Clear();
+                    break;
+                case ".aqm":
+                case ".trm":
+                    ReadMotion(filePath);
+                    jsonData = JsonConvert.SerializeObject(aquaMotions[0], jss);
+                    aquaMotions.Clear();
+                    break;
+                case ".bti":
+                    ReadBTI(filePath);
+                    jsonData = JsonConvert.SerializeObject(aquaMotionConfigs[0], jss);
+                    aquaMotionConfigs.Clear();
+                    break;
+                case ".cmx":
+                    var cmx = ReadCMX(filePath);
+                    jsonData = JsonConvert.SerializeObject(cmx, jss);
+                    cmx = null;
+                    break;
+                case ".text":
+                    var text = ReadPSO2Text(filePath);
+                    jsonData = JsonConvert.SerializeObject(text, jss);
+                    text = null;
+                    break;
+                case ".aqe": //(Classic for now)
+                    ReadEffect(filePath);
+                    jsonData = JsonConvert.SerializeObject(aquaEffect[0], jss);
+                    aquaEffect.Clear();
+                    break;
+            }
+            File.WriteAllText(filePath + ".json", jsonData);
+        }
+
+        public void ConvertFromJson(string filePath)
+        {
+            var ogName = filePath.Substring(0, filePath.Length - 5);
+            var ext = Path.GetExtension(ogName); //GetFileNameWithoutExtension nixes the .json text
+            var jsonData = File.ReadAllText(filePath);
+
+            switch (ext)
+            {
+                case ".aqo":
+                case ".tro":
+                case ".aqp":
+                case ".trp":
+                    ModelSet aqp;
+                    if(filePath.Contains(".ngs."))
+                    {
+                        aqp = JsonConvert.DeserializeObject<NGSModelSet>(jsonData).GetModelSet();
+                        aquaModels.Add(aqp);
+                        WriteNGSNIFLModel(ogName, ogName);
+                    } else if(filePath.Contains(".classic."))
+                    {
+                        aqp = JsonConvert.DeserializeObject<ClassicModelSet>(jsonData).GetModelSet();
+                        aquaModels.Add(aqp);
+                        WriteClassicNIFLModel(ogName, ogName);
+                    }
+                    break;
+                case ".aqn":
+                case ".trn":
+                    var aqn = JsonConvert.DeserializeObject<AquaNode>(jsonData);
+                    WriteBones(ogName, aqn);
+                    break;
+                case ".aqm":
+                case ".trm":
+                    var aqm = JsonConvert.DeserializeObject<AnimSet>(jsonData);
+                    aquaMotions.Add(aqm);
+                    WriteNIFLMotion(ogName);
+                    break;
+                case ".bti":
+                    var bti = JsonConvert.DeserializeObject<AquaBTI_MotionConfig>(jsonData);
+                    WriteBTI(bti, ogName);
+                    break;
+                case ".cmx":
+                    var cmx = JsonConvert.DeserializeObject<CharacterMakingIndex>(jsonData);
+                    WriteCMX(ogName, cmx, 1);
+                    break;
+                case ".text":
+                    var text = JsonConvert.DeserializeObject<PSO2Text>(jsonData);
+                    WritePSO2TextNIFL(ogName, text);
+                    break;
+                case ".aqe": //(Classic for now)
+                    var aqe = JsonConvert.DeserializeObject<AquaEffect>(jsonData);
+                    aquaEffect.Add(aqe);
+                    WriteClassicNIFLEffect(ogName);
+                    aquaEffect.Clear();
+                    break;
+            }
+        }
     }
 }

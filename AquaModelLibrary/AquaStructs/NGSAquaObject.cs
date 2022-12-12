@@ -59,30 +59,9 @@ namespace AquaModelLibrary
             public int int_0C;
         }
 
-        //Same as pso2 equivalent, but the 2 parts at the end are actually used for offsets to 2 new structs
-        public class NGSSHAD : SHAD
+        public static SHAD ReadNGSSHAD(BufferedStreamReader streamReader, int offset)
         {
-            public SHADDetail shadDetail;
-            public List<SHADExtraEntry> shadExtra = new List<SHADExtraEntry>();
-
-            public override SHAD Clone()
-            {
-                NGSSHAD newShad = new NGSSHAD();
-                newShad.unk0 = unk0;
-                newShad.pixelShader = PSO2String.GeneratePSO2String(pixelShader.GetBytes());
-                newShad.vertexShader = PSO2String.GeneratePSO2String(vertexShader.GetBytes());
-                newShad.shadDetailOffset = shadDetailOffset;
-                newShad.shadExtraOffset = shadExtraOffset;
-                newShad.shadDetail = shadDetail;
-                newShad.shadExtra = new List<SHADExtraEntry>(shadExtra);
-
-                return newShad;
-            }
-        }
-
-        public static NGSSHAD ReadNGSSHAD(BufferedStreamReader streamReader, int offset)
-        {
-            NGSSHAD shad = new NGSSHAD();
+            SHAD shad = new SHAD();
             shad.unk0 = streamReader.Read<int>();
             shad.pixelShader = streamReader.Read<PSO2String>();
             shad.vertexShader = streamReader.Read<PSO2String>();

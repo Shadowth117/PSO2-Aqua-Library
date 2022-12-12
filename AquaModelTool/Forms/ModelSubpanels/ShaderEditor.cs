@@ -10,7 +10,7 @@ namespace AquaModelTool
         private AquaObject model;
         private int currentShaderId = 0;
         private int currentExtraId = 0;
-        private NGSAquaObject.NGSSHAD ngsShad = null;
+        private AquaObject.SHAD ngsShad = null;
         bool canUpdate = false;
         private ColorDialog colorDialog = new ColorDialog();
         public ShaderEditor(AquaObject aquaModel)
@@ -70,9 +70,9 @@ namespace AquaModelTool
             vShaderTB.Text = model.shadList[currentShaderId].vertexShader.GetString();
             unk0UD.Value = model.shadList[currentShaderId].unk0;
 
-            if (model.shadList[currentShaderId].GetType().Equals(typeof(NGSAquaObject.NGSSHAD)))
+            if (model.shadList[currentShaderId].isNGS)
             {
-                ngsShad = (NGSAquaObject.NGSSHAD)model.shadList[currentShaderId];
+                ngsShad = model.shadList[currentShaderId];
 
                 //Populate listbox
                 for (int i = 0; i < ngsShad.shadExtra.Count; i++)

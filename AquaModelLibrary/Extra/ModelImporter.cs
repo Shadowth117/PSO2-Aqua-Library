@@ -785,7 +785,7 @@ namespace AquaModelLibrary
                 int nodeCounter = 0;
                 BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
             }
-            IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale);
+            IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale, boneDict);
 
             //Generate bonepalette. No real reason not to just put in every bone at the moment.
             aqp.bonePalette = new List<uint>();
@@ -808,12 +808,9 @@ namespace AquaModelLibrary
         private static Assimp.Node GetRootNode(Assimp.Node aiNode)
         {
             var nodeCountName = GetNodeNumber(aiNode.Name);
-            if (nodeCountName != -1)
+            if (nodeCountName == 0)
             {
-                if (nodeCountName == 0)
-                {
-                    return aiNode;
-                }
+                return aiNode;
             }
             foreach (var childNode in aiNode.Children)
             {
@@ -836,11 +833,16 @@ namespace AquaModelLibrary
             }
             else if (useNameNodeNum == false)
             {
-                boneDict.Add(aiNode.Name, nodeCounter);
+                if(aiNode.Name != "RootNode")
+                {
+                    var originalName = aiNode.Name;
+                    aiNode.Name = $"({nodeCounter}){aiNode.Name}";
+                    boneDict.Add(originalName, nodeCounter);
+                    //We can in theory ignore bones that don't meet either condition since they'll be effect nodes and listed outside the normal count
+                    nodeCounter++;
+                }
             }
 
-            //We can in theory ignore bones that don't meet either condition since they'll be effect nodes and listed outside the normal count
-            nodeCounter++;
 
             foreach (var childNode in aiNode.Children)
             {
@@ -848,7 +850,7 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, Assimp.Scene aiScene, Assimp.Node aiNode, Matrix4x4 parentTfm, float baseScale)
+        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, Assimp.Scene aiScene, Assimp.Node aiNode, Matrix4x4 parentTfm, float baseScale, Dictionary<string, int> boneDict)
         {
             //Decide if this is an effect node or not
             string nodeName = aiNode.Name;
@@ -895,7 +897,11 @@ namespace AquaModelLibrary
                     }
                     else
                     {
-                        throw new Exception("Error: Parent node not processed before its child");
+                        if(aiNode.Parent == aiScene.RootNode)
+                        {
+                            node.parentId = -1;
+                        }
+                        Debug.WriteLine("Warning: Parent node not processed before its child");
                     }
                 }
                 else
@@ -971,12 +977,12 @@ namespace AquaModelLibrary
             foreach (int meshId in aiNode.MeshIndices)
             {
                 var mesh = aiScene.Meshes[meshId];
-                AddAiMeshToAQP(aqp, mesh, nodeMat, baseScale);
+                AddAiMeshToAQP(aqp, mesh, nodeMat, baseScale, boneDict);
             }
 
             foreach (var childNode in aiNode.Children)
             {
-                IterateAiNodesAQP(aqp, aqn, aiScene, childNode, nodeMat, baseScale);
+                IterateAiNodesAQP(aqp, aqn, aiScene, childNode, nodeMat, baseScale, boneDict);
             }
         }
 
@@ -992,7 +998,7 @@ namespace AquaModelLibrary
             return mat;
         }
 
-        public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale)
+        public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale, Dictionary<string, int> boneDict)
         {
             AquaObject.GenericTriangles genTris = new AquaObject.GenericTriangles();
             genTris.name = mesh.Name;
@@ -1092,7 +1098,7 @@ namespace AquaModelLibrary
                         List<float> vertWeights = new List<float>();
                         foreach (var bone in mesh.Bones)
                         {
-                            var boneId = GetNodeNumber(bone.Name);
+                            var boneId = boneDict[bone.Name];
                             foreach (var weight in bone.VertexWeights)
                             {
                                 if (weight.VertexID == v)

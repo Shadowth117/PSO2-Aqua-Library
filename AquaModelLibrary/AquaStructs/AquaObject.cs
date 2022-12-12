@@ -52,6 +52,7 @@ namespace AquaModelLibrary
 
         //Extra
         public List<string> meshNames = new List<string>();
+        public List<string> matUnicodeNames = new List<string>();
 
         //Credit to MiscellaneousModder for this list:
         public enum baseWearIds : int
@@ -275,7 +276,7 @@ namespace AquaModelLibrary
                 return base.GetHashCode();
             }
 
-            public override bool Equals(Object obj)
+            public bool Equiv(Object obj)
             {
                 MATE c = (MATE)obj;
                 // Optimization for a common success case.
@@ -297,7 +298,7 @@ namespace AquaModelLibrary
 
             public static bool operator ==(MATE lhs, MATE rhs)
             {
-                return lhs.Equals(rhs);
+                return lhs.Equiv(rhs);
             }
 
             public static bool operator !=(MATE lhs, MATE rhs) => !(lhs == rhs);
@@ -386,8 +387,10 @@ namespace AquaModelLibrary
         {
         }
 
+        //NGS SHADs are the same as the pso2 equivalent, but the 2 parts at the end are actually used for offsets to 2 new structs
         public class SHAD
         {
+            public bool isNGS = false;
             public int unk0; //0x90, type 0x9 //Always 0?
             public PSO2String pixelShader; //0x91, type 0x2 //Pixel Shader string
             public PSO2String vertexShader; //0x92, type 0x2 //Vertex Shader string
@@ -395,14 +398,20 @@ namespace AquaModelLibrary
             public int shadExtraOffset; //Unused in classic. Not read in some versions of NIFL Tool, causing misalignments. Doesn't exist in VTBF, so perhaps added later on.
                                         //Offset to struct containing extra shader info with areas for some int16s and floats.
 
-            public virtual SHAD Clone()
+            public SHADDetail shadDetail;
+            public List<SHADExtraEntry> shadExtra = new List<SHADExtraEntry>();
+
+            public SHAD Clone()
             {
                 SHAD newShad = new SHAD();
+                newShad.isNGS = isNGS;
                 newShad.unk0 = unk0;
                 newShad.pixelShader = PSO2String.GeneratePSO2String(pixelShader.GetBytes());
                 newShad.vertexShader = PSO2String.GeneratePSO2String(vertexShader.GetBytes());
                 newShad.shadDetailOffset = shadDetailOffset;
                 newShad.shadExtraOffset = shadExtraOffset;
+                newShad.shadDetail = shadDetail;
+                newShad.shadExtra = new List<SHADExtraEntry>(shadExtra);
 
                 return newShad;
             }
@@ -509,10 +518,11 @@ namespace AquaModelLibrary
             public float unkFloat0; //0x6A, type 0xA //0
             public float unkFloat1; //0x6B, type 0xA //0
             public PSO2String texName; //0x6C, type 0x2 //Texture filename (includes extension)
-            public override bool Equals(object obj)
+            
+            /*public override bool Equals(object obj)
             {
                 return Equals((TSTA)obj);
-            }
+            }*/
 
             public bool Equals(TSTA c)
             {
@@ -1609,7 +1619,7 @@ namespace AquaModelLibrary
 
             public void toStrips(ushort[] indices)
             {
-                List<ushort> stripList = new List<ushort>();
+                triStrips.Clear();
                 NvStripifier stripifier = new NvStripifier();
 
                 var nvStrips = stripifier.GenerateStripsReturner(indices, true);
