@@ -2089,7 +2089,13 @@ namespace AquaModelLibrary
                     mat.shaderNames = shadNames;
                     mat.blendType = curMate.alphaType.GetString();
                     mat.specialType = AquaObjectMethods.GetSpecialMatType(texNames);
-                    mat.matName = curMate.matName.GetString();
+                    if (matUnicodeNames.Count > curMesh.mateIndex)
+                    {
+                        mat.matName = matUnicodeNames[curMesh.mateIndex];
+                    } else
+                    {
+                        mat.matName = curMate.matName.GetString();
+                    }
                     mat.twoSided = curRend.twosided;
                     mat.alphaCutoff = curRend.alphaCutoff;
 

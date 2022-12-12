@@ -289,7 +289,7 @@ namespace AquaModelLibrary.Extra
                 //Material
                 var mat = new AquaObject.GenericMaterial();
                 var flverMat = flver.Materials[mesh.MaterialIndex];
-                mat.matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}";
+                mat.matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";
                 mat.texNames = new List<string>();
                 foreach (var tex in flverMat.Textures)
                 {
@@ -395,7 +395,22 @@ namespace AquaModelLibrary.Extra
                 string name = nameSplit[0];
                 var matIndex = usedMaterials.IndexOf(name);
                 string mtd = null;
+                int ogMatIndex = -1;
+                if(nameSplit.Length > 1)
+                {
+                    mtd = nameSplit[1];
+                    if(nameSplit.Length > 2)
+                    {
+                        ogMatIndex = Int32.Parse(nameSplit[2]);
+                    }
+                }
                 FLVER0.Material flvMat;
+                if (metaMats != null && ogMatIndex < metaMats.Count)
+                {
+                    flvMat = metaMats[ogMatIndex];
+                    flver.Materials.Add(flvMat);
+                    continue;
+                }
                 if (matIndex != -1)
                 {
                     continue;
@@ -412,7 +427,7 @@ namespace AquaModelLibrary.Extra
                     {
                         flvMat = new FLVER0.Material(true); 
                         flvMat.Name = name;
-                        mtd = "n:\\orthern\\limit\\p_metal[dsb]_skin.mtd";
+                        mtd = mtd ?? "n:\\orthern\\limit\\p_metal[dsb]_skin.mtd";
                         flvMat.MTD = mtd;
                         if(texList.Count > 0)
                         {
@@ -522,17 +537,18 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Normal:
                                 if (vtxl.vertNormals.Count > 0)
                                 {
-                                    vert.Normal = Vector3.TransformNormal(vtxl.vertNormals[v], mirrorMat);
+                                    vert.Normal = Vector3.Transform(vtxl.vertNormals[v], mirrorMat);
                                 }
                                 else
                                 {
                                     vert.Normal = Vector3.One;
                                 }
+                                vert.NormalW = 127;
                                 break;
                             case FLVER.LayoutSemantic.Tangent:
                                 if (vtxl.vertTangentList.Count > 0)
                                 {
-                                    vert.Tangents.Add(new Vector4(Vector3.TransformNormal(vtxl.vertTangentList[v], mirrorMat), 0));
+                                    vert.Tangents.Add(new Vector4(Vector3.Transform(vtxl.vertTangentList[v], mirrorMat), 0));
                                 }
                                 else
                                 {
@@ -542,7 +558,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Bitangent:
                                 if (vtxl.vertBinormalList.Count > 0)
                                 {
-                                    vert.Bitangent = new Vector4(Vector3.TransformNormal(vtxl.vertBinormalList[v], mirrorMat), 0);
+                                    vert.Bitangent = new Vector4(Vector3.Transform(vtxl.vertBinormalList[v], mirrorMat), 0);
                                 }
                                 else
                                 {
@@ -569,7 +585,7 @@ namespace AquaModelLibrary.Extra
                                     }
                                     else
                                     {
-                                        vert.Colors.Add(new FLVER.VertexColor(1, 1, 1, 1));
+                                        vert.Colors.Add(new FLVER.VertexColor(1.0f, 1.0f, 1.0f, 1.0f));
                                     }
                                 }
                                 break;

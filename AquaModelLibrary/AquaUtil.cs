@@ -4254,7 +4254,7 @@ namespace AquaModelLibrary
         public void ConvertToJson(string filePath)
         {
             var ext = Path.GetExtension(filePath);
-            JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
+            JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented,  };
             string jsonData = "";
             switch (ext)
             {

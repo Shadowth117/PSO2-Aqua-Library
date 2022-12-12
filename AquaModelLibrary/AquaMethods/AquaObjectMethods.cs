@@ -2841,6 +2841,7 @@ namespace AquaModelLibrary
             model.mateList.Add(mate);
             model.shadList.Add(shad);
             model.rendList.Add(rend);
+            model.matUnicodeNames.Add(mat.matName);
         }
 
         public static List<TSTA> GetTexListTSTAs(AquaObject model, int tsetIndex)
