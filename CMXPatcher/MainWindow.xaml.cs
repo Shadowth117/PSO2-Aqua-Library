@@ -70,6 +70,34 @@ namespace CMXPatcher
             this.Close();
         }
 
+        private void ExtractEditableEntries(object sender, RoutedEventArgs e)
+        {
+            foreach(var id in patcher.cmx.costumeDict.Keys)
+            {
+                ExtractBodyEntryNoPrompt("costume", patcher.cmx.costumeDict, id, true);
+            }
+            foreach (var id in patcher.cmx.baseWearDict.Keys)
+            {
+                ExtractBodyEntryNoPrompt("basewear", patcher.cmx.baseWearDict, id, true);
+            }
+            foreach (var id in patcher.cmx.outerDict.Keys)
+            {
+                ExtractBodyEntryNoPrompt("outerwear", patcher.cmx.outerDict, id, true);
+            }
+            foreach (var id in patcher.cmx.carmDict.Keys)
+            {
+                ExtractBodyEntryNoPrompt("castarm", patcher.cmx.carmDict, id, true);
+            }
+            foreach (var id in patcher.cmx.clegDict.Keys)
+            {
+                ExtractBodyEntryNoPrompt("castleg", patcher.cmx.clegDict, id, true);
+            }
+            foreach (var id in patcher.cmx.hairDict.Keys)
+            {
+                ExtractHairEntryNoPrompt("hair", patcher.cmx.hairDict, id, true);
+            }
+        }
+
         private void ExtractCostumeEntry(object sender, RoutedEventArgs e)
         {
             ExtractBodyEntry("costume", patcher.cmx.costumeDict);
@@ -105,8 +133,9 @@ namespace CMXPatcher
             var id = NumberPrompt.ShowDialog(type);
             ExtractBodyEntryNoPrompt(type, dict, id);
         }
-        private void ExtractHairEntryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.HAIRObject> dict, int id)
+        private bool ExtractHairEntryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.HAIRObject> dict, int id, bool silent = false)
         {
+            bool success = false;
             if (id != -1)
             {
                 if (dict.ContainsKey(id))
@@ -116,26 +145,42 @@ namespace CMXPatcher
                     try
                     {
                         File.WriteAllText(path, HAIRStructHandler.ConvertToString(dict[id], type).ToString());
-                        MessageBox.Show($"Wrote successfully to {path}.");
+                        success = true;
+                        if(!silent)
+                        {
+                            MessageBox.Show($"Wrote successfully to {path}.");
+                        }
                     }
                     catch
                     {
-                        MessageBox.Show($"Unable to write {path}. Ensure you have all permissions to said directory.");
+                        if(!silent)
+                        {
+                            MessageBox.Show($"Unable to write {path}. Ensure you have all permissions to said directory.");
+                        }
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Please Input a valid id to extract.");
+                    if(!silent)
+                    {
+                        MessageBox.Show("Please Input a valid id to extract.");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please Input a valid id to extract.");
+                if(!silent)
+                {
+                    MessageBox.Show("Please Input a valid id to extract.");
+                }
             }
+
+            return success;
         }
 
-        private void ExtractBodyEntryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict, int id)
+        private bool ExtractBodyEntryNoPrompt(string type, Dictionary<int, AquaModelLibrary.CharacterMakingIndex.BODYObject> dict, int id, bool silent = false)
         {
+            bool success = false;
             if (id != -1)
             {
                 if (dict.ContainsKey(id))
@@ -145,22 +190,37 @@ namespace CMXPatcher
                     try
                     {
                         File.WriteAllText(path, BODYStructHandler.ConvertToString(dict[id], type).ToString());
-                        MessageBox.Show($"Wrote successfully to {path}.");
+                        success = true;
+                        if (!silent)
+                        {
+                            MessageBox.Show($"Wrote successfully to {path}.");
+                        }
                     }
                     catch
                     {
-                        MessageBox.Show($"Unable to write {path}. Ensure you have all permissions to said directory.");
+                        if (!silent)
+                        {
+                            MessageBox.Show($"Unable to write {path}. Ensure you have all permissions to said directory.");
+                        }
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Please Input a valid id to extract.");
+                    if (!silent)
+                    {
+                        MessageBox.Show("Please Input a valid id to extract.");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please Input a valid id to extract.");
+                if (!silent)
+                {
+                    MessageBox.Show("Please Input a valid id to extract.");
+                }
             }
+
+            return success;
         }
 
         private void cmxPatchClick(object sender, RoutedEventArgs e)
