@@ -78,32 +78,15 @@ namespace AquaModelLibrary
         {
             [JsonIgnore]
             public fixed byte stringArray[0xA];
-            public byte[] _stringArray
-            {
-                set
-                {
-                    for (int i = 0; i < 0xA; i++)
-                    {
-                        if (value.Length > i)
-                        {
-                            stringArray[i] = value[i];
-                        }
-                    }
-                }
-                get
-                {
-                    byte[] byteArr = new byte[0xA];
-                    for (int i = 0; i < 0xA; i++)
-                    {
-                        byteArr[i] = stringArray[i];
-                    }
-                    return byteArr;
-                }
-            }
             public string curString
             {
-                get {
+                get
+                {
                     return GetString();
+                }
+                set
+                {
+                    SetString(value);
                 }
             }
 
@@ -184,33 +167,15 @@ namespace AquaModelLibrary
         {
             [JsonIgnore]
             public fixed byte stringArray[0x20];
-            public byte[] _stringArray
-            {
-                set
-                {
-                    for(int i = 0; i < 0x20; i++)
-                    {
-                        if(value.Length > i)
-                        {
-                            stringArray[i] = value[i];
-                        }
-                    }
-                }
-                get
-                {
-                    byte[] byteArr = new byte[0x20];
-                    for(int i = 0; i < 0x20; i++)
-                    {
-                        byteArr[i] = stringArray[i];
-                    }
-                    return byteArr;
-                }
-            }
             public string curString
             {
                 get
                 {
                     return GetString();
+                }
+                set
+                {
+                    SetString(value);
                 }
             }
 
@@ -357,33 +322,15 @@ namespace AquaModelLibrary
         {
             [JsonIgnore]
             public fixed byte stringArray[0x30];
-            public byte[] _stringArray
-            {
-                set
-                {
-                    for (int i = 0; i < 0x30; i++)
-                    {
-                        if (value.Length > i)
-                        {
-                            stringArray[i] = value[i];
-                        }
-                    }
-                }
-                get
-                {
-                    byte[] byteArr = new byte[0x30];
-                    for (int i = 0; i < 0x30; i++)
-                    {
-                        byteArr[i] = stringArray[i];
-                    }
-                    return byteArr;
-                }
-            }
             public string curString
             {
                 get
                 {
                     return GetString();
+                }
+                set
+                {
+                    SetString(value);
                 }
             }
             
