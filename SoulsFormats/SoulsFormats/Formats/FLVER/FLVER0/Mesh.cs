@@ -20,7 +20,7 @@ namespace SoulsFormats
 
             public short DefaultBoneIndex { get; set; }
 
-            public short[] BoneIndices { get; private set; }
+            public short[] BoneIndices { get; set; }
 
             public short Unk46 { get; set; }
 
