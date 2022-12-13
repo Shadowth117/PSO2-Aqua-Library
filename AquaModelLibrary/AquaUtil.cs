@@ -534,7 +534,7 @@ namespace AquaModelLibrary
                     SplitMeshByMaterial(aquaModels[msI].models[aqI], matModelSplit);
                     if (useRigid == false)
                     {
-                        BatchSplitByBoneCount(matModelSplit, outModel, 16);
+                        BatchSplitByBoneCountTempData(matModelSplit, outModel, 16);
                         RemoveAllUnusedBones(outModel);
                     }
                     else

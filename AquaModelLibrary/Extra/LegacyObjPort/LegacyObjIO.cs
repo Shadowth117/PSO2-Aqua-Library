@@ -234,7 +234,7 @@ namespace LegacyObj
             AquaObjectMethods.VTXLFromFaceVerts(aqo);
             if (aqo.objc.type < 0xC32)
             {
-                AquaObjectMethods.BatchSplitByBoneCount(aqo, tempModel, boneLimit);
+                AquaObjectMethods.BatchSplitByBoneCountTempData(aqo, tempModel, boneLimit);
                 aqo.tempTris = tempModel.tempTris;
                 aqo.vtxlList = tempModel.vtxlList;
                 tempModel = null;

@@ -308,7 +308,11 @@ namespace AquaModelLibrary.Extra
 
         public static IFlver ConvertModelToFlver(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, SoulsGame game, IFlver referenceFlver = null)
         {
-            return AquaToFlver(initialFilePath, ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn), aqn, game, referenceFlver);
+            var aqp = ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn);
+
+            //Demon's Souls and Dark Souls models have a limit of 28 bones.
+            AquaObjectMethods.BatchSplitByBoneCount(aqp, 28);
+            return AquaToFlver(initialFilePath, aqp, aqn, game, referenceFlver);
         }
 
         public static IFlver AquaToFlver(string initialFilePath, AquaObject aqp, AquaNode aqn, SoulsGame game, IFlver referenceFlver = null)

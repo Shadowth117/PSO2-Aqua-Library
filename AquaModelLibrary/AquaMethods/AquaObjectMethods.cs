@@ -1333,7 +1333,6 @@ namespace AquaModelLibrary
                 {
                     Dictionary<float, int> faceVertDict = new Dictionary<float, int>();
                     List<int> faceVertIds = new List<int>();
-                    List<int> tempFaceMatIds = new List<int>();
                     List<int> boneIds = new List<int>();
                     List<ushort> tempFaces = new List<ushort>();
 
@@ -1438,7 +1437,21 @@ namespace AquaModelLibrary
                 }
 
                 //Assign first split back to original slot, assign subsequent splits to end of the list
-                
+                for(int i = 0; i < faceList.Count; i++)
+                {
+                    if(i == 0)
+                    {
+                        model.strips[mesh.psetIndex] = faceList[i];
+                        continue;
+                    }
+                    var newMesh = mesh;
+                    mesh.psetIndex = model.strips.Count;
+                    mesh.vsetIndex = model.vsetList.Count + i - 1;
+                    model.strips.Add(faceList[i]);
+                    model.psetList.Add(psetList[i]);
+                    model.meshList.Add(newMesh);
+                }
+
                 //If we're doing an NGS model, we can leave the vertices alone since we can recycle vertices for strips
                 if (model.objc.type <= 0xC32)
                 {
@@ -1455,13 +1468,19 @@ namespace AquaModelLibrary
                         }
                         model.vtxlList.Add(vtxlList[i]);
                         model.vtxeList.Add(model.vtxeList[mesh.vsetIndex]);
+                        model.vsetList.Add(vset0);
                     }
                 }
 
                 //Update stripStartCounts for psets
-
-                //Update OBJC
-
+                var totalStripsShorts = 0;
+                for(int i = 0; i < model.psetList.Count; i++)
+                {
+                    var pset = model.psetList[i];
+                    pset.stripStartCount = totalStripsShorts;
+                    model.psetList[i] = pset;
+                    totalStripsShorts += model.psetList[i].psetFaceCount;
+                }
             }
 
 
@@ -1574,11 +1593,135 @@ namespace AquaModelLibrary
                 }
 
             }
-
-
         }
 
-        public static void SplitByBoneCount(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
+        public static void SplitByBoneCount(AquaObject model, int meshId, int boneLimit)
+        {
+            List<List<int>> faceLists = new List<List<int>>();
+
+            var mesh = model.meshList[meshId];
+            var tris = model.strips[mesh.psetIndex].GetTriangles();
+            bool[] usedFaceIds = new bool[tris.Count];
+            int startFace = 0;
+
+            while (true)
+            {
+                List<int> objBones = new List<int>();
+                List<int> faceArray = new List<int>();
+
+                //Find start point for this iteration
+                for (int i = 0; i < usedFaceIds.Length; i++)
+                {
+                    if (!usedFaceIds[i])
+                    {
+                        startFace = i;
+                        break;
+                    }
+                }
+
+                List<int> edgeVertCandidates = new List<int>();
+                List<int> usedVerts = new List<int>();
+                for (int f = startFace; f < usedFaceIds.Length; f++)
+                {
+                    if (usedFaceIds[f] != true)
+                    {
+                        //Used to watch how many bones are being used so it can be understood where to split the meshes.
+                        //These also help to track the bones being used so the edge verts list can be generated. Not sure how important that is, but the game stores it.
+                        List<int> faceBones = new List<int>();
+                        int newBones = 0;
+
+                        //Get vert ids of the face
+                        float[] faceIds = VectorAsArray(tris[f]);
+
+                        //Get bones in the face
+                        foreach (float v in faceIds)
+                        {
+                            bool vertCheck = false;
+                            for (int b = 0; b < model.vtxlList[mesh.vsetIndex].vertWeightIndices[(int)v].Length; b++)
+                            {
+                                int id = model.vtxlList[mesh.vsetIndex].vertWeightIndices[(int)v][b];
+                                if (!faceBones.Contains(id))
+                                {
+                                    faceBones.Add(id);
+                                }
+
+                                //If it's not in here, it's a candidate to be an edgeVert
+                                if (!objBones.Contains(id))
+                                {
+                                    vertCheck = true;
+                                }
+                            }
+
+                            //Add edge vert candidates 
+                            if (vertCheck && !edgeVertCandidates.Contains((int)v))
+                            {
+                                edgeVertCandidates.Add((int)v);
+                            }
+                        }
+
+                        //Check for bones in the face that weren't in the obj bone set yet
+                        foreach (int fb in faceBones)
+                        {
+                            if (!objBones.Contains(fb))
+                            {
+                                newBones++;
+                            }
+                        }
+
+                        //If enough space or no new, add to the object amount as well
+                        if (newBones + objBones.Count <= boneLimit)
+                        {
+                            //Add new bones if there's room
+                            foreach (int fb in faceBones)
+                            {
+                                if (!objBones.Contains(fb))
+                                {
+                                    objBones.Add(fb);
+                                }
+                            }
+                            //Track used verts so we can figure out edge verts later
+                            foreach (float id in faceIds)
+                            {
+                                if (!usedVerts.Contains((int)id))
+                                {
+                                    usedVerts.Add((int)id);
+                                }
+                            }
+                            usedFaceIds[f] = true;
+                            faceArray.Add(f);
+                        }
+                    }
+                }
+                //Determine what should be added to the final edge vert list
+                foreach (int vert in edgeVertCandidates)
+                {
+                    if (!model.vtxlList[mesh.vsetIndex].edgeVerts.Contains((ushort)vert) && usedVerts.Contains(vert))
+                    {
+                        model.vtxlList[mesh.vsetIndex].edgeVerts.Add((ushort)vert);
+                    }
+                }
+                faceLists.Add(faceArray);
+
+
+                bool breakFromLoop = true;
+                for (int i = 0; i < usedFaceIds.Length; i++)
+                {
+                    if (usedFaceIds[i] == false)
+                    {
+                        breakFromLoop = false;
+                    }
+                }
+                if (breakFromLoop)
+                {
+                    break;
+                }
+            }
+
+            //Split the meshes
+            SplitMesh(model, meshId, faceLists);
+        }
+
+        public static void SplitByBoneCountTempData(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
         {
             List<List<int>> faceLists = new List<List<int>>();
 
@@ -1710,7 +1853,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void BatchSplitByBoneCount(AquaObject model, AquaObject outModel, int boneLimit)
+        public static void BatchSplitByBoneCount(AquaObject model, int boneLimit)
         {
             for (int i = 0; i < model.vtxlList.Count; i++)
             {
@@ -1718,7 +1861,27 @@ namespace AquaModelLibrary
                 //Pass to splitting function if beyond the limit, otherwise pass untouched
                 if (model.vtxlList[i].bonePalette.Count > boneLimit)
                 {
-                    SplitByBoneCount(model, outModel, i, boneLimit);
+                    SplitByBoneCount(model, i, boneLimit);
+                }
+            }
+
+            //Get rid of this since we don't understand it and it's probably going to confuse the game if it's not processed along with these.
+            model.strips2.Clear();
+            model.strips3.Clear();
+            model.pset2List.Clear();
+            model.mesh2List.Clear();
+            model.strips3Lengths.Clear();
+        }
+
+        public static void BatchSplitByBoneCountTempData(AquaObject model, AquaObject outModel, int boneLimit)
+        {
+            for (int i = 0; i < model.vtxlList.Count; i++)
+            {
+                RemoveUnusedBones(model.vtxlList[i]);
+                //Pass to splitting function if beyond the limit, otherwise pass untouched
+                if (model.vtxlList[i].bonePalette.Count > boneLimit)
+                {
+                    SplitByBoneCountTempData(model, outModel, i, boneLimit);
                 } else
                 {
                     CloneUnprocessedMesh(model, outModel, i);
