@@ -3568,7 +3568,6 @@ namespace AquaModelTool
                     }
 
                     AquaUtil aqua = new AquaUtil();
-                    //AquaObjectMethods.SplitByBoneCount
                     var ext = Path.GetExtension(openFileDialog.FileName);
                     var outStr = openFileDialog.FileName.Replace(ext, "_out.flver");
                     SoulsConvert.ConvertModelToFlverAndWrite(openFileDialog.FileName, outStr, 1, true, true, SoulsConvert.SoulsGame.DemonsSouls);

@@ -397,6 +397,14 @@ namespace AquaModelLibrary
             {
                 destinationVTXL.vert0x23.Add((short[])sourceVTXL.vert0x23[sourceIndex].Clone());
             }
+            if (sourceVTXL.vert0x24.Count > sourceIndex)
+            {
+                destinationVTXL.vert0x24.Add((short[])sourceVTXL.vert0x24[sourceIndex].Clone());
+            }
+            if (sourceVTXL.vert0x25.Count > sourceIndex)
+            {
+                destinationVTXL.vert0x25.Add((short[])sourceVTXL.vert0x25[sourceIndex].Clone());
+            }
             if (sourceVTXL.vertTangentListNGS.Count > sourceIndex)
             {
                 destinationVTXL.vertTangentListNGS.Add((short[])sourceVTXL.vertTangentListNGS[sourceIndex].Clone());
@@ -1318,7 +1326,7 @@ namespace AquaModelLibrary
         }
 
         //Uses mesh id unlike the temp data variation so that it can work with retail models
-        public static void SplitMesh(AquaObject model, int meshId, List<List<int>> facesToClone)
+        public static void SplitMesh(AquaObject model, int meshId, List<List<int>> facesToClone, bool forceVtxlSplit = false)
         {
             if (facesToClone.Count > 0)
             {
@@ -1401,17 +1409,32 @@ namespace AquaModelLibrary
                             tempFaces[i] = (ushort)faceVertDict[tempFaces[i]];
                         }
 
-                        //Assign new tempTris
-                        var newTris = new stripData();
-                        newTris.triStrips = tempFaces;
-                        newTris.format0xC33 = true;
-                        newTris.triIdCount = tempFaces.Count;
-                        newTris.faceGroups.Add(tempFaces.Count);
+                        //Assign new stripdata
+                        stripData newTris;
+                        if(model.objc.type >= 0xC31)
+                        {
+                            newTris = new stripData();
+                            newTris.triStrips = tempFaces;
+                            newTris.format0xC33 = true;
+                            newTris.triIdCount = tempFaces.Count;
+                            newTris.faceGroups.Add(tempFaces.Count);
+                        } else
+                        {
+                            newTris = new stripData(tempFaces.ToArray());
+                            newTris.format0xC33 = false;
+                        }
                         faceList.Add(newTris);
 
                         //PSET
                         var pset = new PSET();
-                        pset.tag = 0x1000;
+                        if (model.objc.type >= 0xC31)
+                        {
+                            pset.tag = 0x1000;
+                        }
+                        else
+                        {
+                            pset.tag = 0x2100;
+                        }
                         pset.faceGroupCount = 0x1;
                         pset.psetFaceCount = tempFaces.Count;
                         psetList.Add(pset);
@@ -1432,6 +1455,7 @@ namespace AquaModelLibrary
                         {
                             meshNames.Add(model.meshNames[meshId] + $"_{f}");
                         }
+                        RemoveUnusedBones(vtxl);
                         vtxlList.Add(vtxl);
                     }
                 }
@@ -1445,15 +1469,18 @@ namespace AquaModelLibrary
                         continue;
                     }
                     var newMesh = mesh;
-                    mesh.psetIndex = model.strips.Count;
-                    mesh.vsetIndex = model.vsetList.Count + i - 1;
+                    newMesh.psetIndex = model.strips.Count;
+                    if (model.objc.type < 0xC32 || forceVtxlSplit)
+                    {
+                        newMesh.vsetIndex = model.vsetList.Count + i - 1;
+                    }
                     model.strips.Add(faceList[i]);
                     model.psetList.Add(psetList[i]);
                     model.meshList.Add(newMesh);
                 }
 
                 //If we're doing an NGS model, we can leave the vertices alone since we can recycle vertices for strips
-                if (model.objc.type <= 0xC32)
+                if (model.objc.type < 0xC32 || forceVtxlSplit)
                 {
                     var vset0 = model.vsetList[mesh.vsetIndex];
                     vset0.vtxlCount = vtxlList[0].vertPositions.Count;
@@ -1595,7 +1622,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void SplitByBoneCount(AquaObject model, int meshId, int boneLimit)
+        public static void SplitByBoneCount(AquaObject model, int meshId, int boneLimit, bool forceVtxlSplit = false)
         {
             List<List<int>> faceLists = new List<List<int>>();
 
@@ -1718,7 +1745,7 @@ namespace AquaModelLibrary
             }
 
             //Split the meshes
-            SplitMesh(model, meshId, faceLists);
+            SplitMesh(model, meshId, faceLists, forceVtxlSplit);
         }
 
         public static void SplitByBoneCountTempData(AquaObject model, AquaObject outModel, int modelId, int boneLimit)
@@ -1853,15 +1880,29 @@ namespace AquaModelLibrary
             }
         }
 
-        public static void BatchSplitByBoneCount(AquaObject model, int boneLimit)
+        public static void BatchSplitByBoneCount(AquaObject model, int boneLimit, bool forceVtxlSplit = false)
         {
-            for (int i = 0; i < model.vtxlList.Count; i++)
+            //Set up a temporary bone palette to be used in case a mesh needs it, such as for NGS meshes
+            List<ushort> bonePalette = new List<ushort>();
+            for (int b = 0; b < model.bonePalette.Count; b++)
             {
-                RemoveUnusedBones(model.vtxlList[i]);
-                //Pass to splitting function if beyond the limit, otherwise pass untouched
-                if (model.vtxlList[i].bonePalette.Count > boneLimit)
+                bonePalette.Add((ushort)model.bonePalette[b]);
+            }
+
+            int startingMeshCount = model.meshList.Count;
+            for (int i = 0; i < startingMeshCount; i++)
+            {
+                var mesh = model.meshList[i];
+                //Make sure there's a bonepalette to pull from
+                if (model.vtxlList[mesh.vsetIndex].bonePalette?.Count == 0)
                 {
-                    SplitByBoneCount(model, i, boneLimit);
+                    model.vtxlList[mesh.vsetIndex].bonePalette = bonePalette;
+                }
+                RemoveUnusedBones(model.vtxlList[mesh.vsetIndex]);
+                //Pass to splitting function if beyond the limit, otherwise pass untouched
+                if (model.vtxlList[mesh.vsetIndex].bonePalette.Count > boneLimit)
+                {
+                    SplitByBoneCount(model, i, boneLimit, forceVtxlSplit);
                 }
             }
 
@@ -2756,7 +2797,7 @@ namespace AquaModelLibrary
                         if(_index == 0)
                         {
                             firstTexName = "";
-                        } else
+                        } else if(_index != -1)
                         {
                             firstTexName = firstTexName.Substring(0, _index);
                         }

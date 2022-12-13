@@ -311,7 +311,7 @@ namespace AquaModelLibrary.Extra
             var aqp = ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn);
 
             //Demon's Souls and Dark Souls models have a limit of 28 bones.
-            AquaObjectMethods.BatchSplitByBoneCount(aqp, 28);
+            AquaObjectMethods.BatchSplitByBoneCount(aqp, 28, true);
             return AquaToFlver(initialFilePath, aqp, aqn, game, referenceFlver);
         }
 
