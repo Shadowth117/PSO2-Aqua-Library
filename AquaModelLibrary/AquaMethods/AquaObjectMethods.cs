@@ -2968,7 +2968,6 @@ namespace AquaModelLibrary
             }
             mate.alphaType.SetString(mat.blendType);
             mate.matName.SetString(mat.matName);
-            model.matUnicodeNames.Add(mat.matName);
 
             //Set up SHAD
             string key = mat.shaderNames[0] + " " + mat.shaderNames[1];

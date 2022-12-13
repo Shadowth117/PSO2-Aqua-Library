@@ -445,15 +445,15 @@
             // convertSoulsflverToolStripMenuItem
             // 
             this.convertSoulsflverToolStripMenuItem.Name = "convertSoulsflverToolStripMenuItem";
-            this.convertSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(319, 22);
-            this.convertSoulsflverToolStripMenuItem.Text = "Convert Souls .flver to .aqp/.aqn";
+            this.convertSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
+            this.convertSoulsflverToolStripMenuItem.Text = "Convert From Software .flver/.flv, .mdl to .aqp/.aqn";
             this.convertSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverToolStripMenuItem_Click);
             // 
             // convertSoulsflverTofbxToolStripMenuItem
             // 
             this.convertSoulsflverTofbxToolStripMenuItem.Name = "convertSoulsflverTofbxToolStripMenuItem";
-            this.convertSoulsflverTofbxToolStripMenuItem.Size = new System.Drawing.Size(319, 22);
-            this.convertSoulsflverTofbxToolStripMenuItem.Text = "Convert Souls .flver to .fbx";
+            this.convertSoulsflverTofbxToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
+            this.convertSoulsflverTofbxToolStripMenuItem.Text = "Convert From Software .flver/.flv, .mdl to .fbx";
             this.convertSoulsflverTofbxToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverTofbxToolStripMenuItem_Click);
             // 
             // exportWithMetadataToolStripMenuItem

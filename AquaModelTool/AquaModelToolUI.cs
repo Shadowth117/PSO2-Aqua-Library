@@ -3330,8 +3330,8 @@ namespace AquaModelTool
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
-                Title = "Select Souls flver file(s)",
-                Filter = "Souls flver Files (*.flver, *.flv)|*.flver;*.flv|All Files (*.*)|*",
+                Title = "Select From Software flver, MDL4 file(s)",
+                Filter = "From Software flver, MDL4 Files (*.flver, *.flv, *.mdl)|*.flver;*.flv;*.mdl|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -3358,8 +3358,8 @@ namespace AquaModelTool
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
-                Title = "Select Souls flver file(s)",
-                Filter = "Souls flver Files (*.flver, *.flv)|*.flver;*.flv|All Files (*.*)|*",
+                Title = "Select From Software flver, MDL4 file(s)",
+                Filter = "From Software flver, MDL4 Files (*.flver, *.flv, *.mdl)|*.flver;*.flv;*.mdl|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
