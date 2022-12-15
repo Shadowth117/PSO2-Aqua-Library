@@ -303,7 +303,7 @@ namespace AquaModelLibrary
                 streamReader.Seek(model.objc.shadOffset + offset, SeekOrigin.Begin);
                 for (int shadIndex = 0; shadIndex < model.objc.shadCount; shadIndex++)
                 {
-                    model.shadList.Add(NGSAquaObject.ReadNGSSHAD(streamReader, offset));
+                    model.shadList.Add(NGSAquaObject.ReadNGSSHAD(streamReader, offset, true));
                 }
             }
 

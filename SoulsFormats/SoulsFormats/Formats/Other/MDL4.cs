@@ -117,6 +117,34 @@ namespace SoulsFormats.Other
                 br.Position = paramsStart + 0x800;
             }
 
+            public Dictionary<string, string> GetTexDict()
+            {
+                Dictionary<string, string> parameters = new Dictionary<string, string>();
+                for(int i = 0; i < Params.Count; i++)
+                {
+                    if (Params[i].Name.ToLower().Contains("texture"))
+                    {
+                        parameters.Add(Params[i].Name.ToLower(), (string)Params[i].Value + ".dds");
+                    }
+                }
+
+                return parameters;
+            }
+
+            public List<string> GetTexList()
+            {
+                List<string> parameters = new List<string>();
+                for (int i = 0; i < Params.Count; i++)
+                {
+                    if (Params[i].Name.ToLower().Contains("texture"))
+                    {
+                        parameters.Add((string)Params[i].Value + ".dds");
+                    }
+                }
+
+                return parameters;
+            }
+
             public class Param
             {
                 public ParamType Type;

@@ -59,9 +59,10 @@ namespace AquaModelLibrary
             public int int_0C;
         }
 
-        public static SHAD ReadNGSSHAD(BufferedStreamReader streamReader, int offset)
+        public static SHAD ReadNGSSHAD(BufferedStreamReader streamReader, int offset, bool isNGSShader)
         {
             SHAD shad = new SHAD();
+            shad.isNGS = true;
             shad.unk0 = streamReader.Read<int>();
             shad.pixelShader = streamReader.Read<PSO2String>();
             shad.vertexShader = streamReader.Read<PSO2String>();

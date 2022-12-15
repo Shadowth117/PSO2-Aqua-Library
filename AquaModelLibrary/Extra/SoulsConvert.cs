@@ -242,11 +242,7 @@ namespace AquaModelLibrary.Extra
                 var mat = new AquaObject.GenericMaterial();
                 var flverMat = mdl4.Materials[mesh.MaterialIndex];
                 mat.matName = $"{flverMat.Name}|{mesh.MaterialIndex}";
-                mat.texNames = new List<string>();
-                foreach (var tex in flverMat.Params)
-                {
-                //    mat.texNames.Add(Path.GetFileName(tex.));
-                }
+                mat.texNames = flverMat.GetTexList();
                 aqp.tempMats.Add(mat);
             }
 
@@ -489,7 +485,13 @@ namespace AquaModelLibrary.Extra
                 //Material
                 var mat = new AquaObject.GenericMaterial();
                 var flverMat = flver.Materials[mesh.MaterialIndex];
-                mat.matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";
+                if(useMetaData)
+                {
+                    mat.matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";
+                } else
+                {
+                    mat.matName = $"{flverMat.Name}";
+                }
                 mat.texNames = new List<string>();
                 foreach (var tex in flverMat.Textures)
                 {
@@ -609,7 +611,7 @@ namespace AquaModelLibrary.Extra
                     }
                 }
                 FLVER0.Material flvMat;
-                if (metaMats != null && ogMatIndex < metaMats.Count)
+                if (metaMats != null && ogMatIndex < metaMats.Count && ogMatIndex != -1)
                 {
                     flvMat = metaMats[ogMatIndex];
                     flver.Materials.Add(flvMat);

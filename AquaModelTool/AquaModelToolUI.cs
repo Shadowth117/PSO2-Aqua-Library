@@ -2701,26 +2701,26 @@ namespace AquaModelTool
                         ngsShaders.Add($"{shad.pixelShader.GetString()} {shad.vertexShader.GetString()}", shad);
                     }
 
-                    foreach(var model in aquaUI.aqua.aquaModels[0].models)
+                }
+                foreach (var model in aquaUI.aqua.aquaModels[0].models)
+                {
+                    for (int s = 0; s < model.shadList.Count; s++)
                     {
-                        for(int s = 0; s < model.shadList.Count; s++)
+                        var curShader = model.shadList[s];
+                        string shadKey = $"{curShader.pixelShader.GetString()} {curShader.vertexShader.GetString()}";
+                        if (ngsShaders.TryGetValue(shadKey, out var value))
                         {
-                            var curShader = model.shadList[s];
-                            string shadKey = $"{curShader.pixelShader} {curShader.vertexShader}";
-                            if(ngsShaders.TryGetValue(shadKey, out var value))
-                            {
-                                AquaObject.SHAD ngsCurShad = curShader;
-                                ngsCurShad.shadDetail = value.shadDetail;
-                                ngsCurShad.shadDetailOffset = value.shadDetailOffset;
-                                ngsCurShad.shadExtra = value.shadExtra;
-                                ngsCurShad.shadExtraOffset = value.shadExtraOffset;
-                                model.shadList[s] = ngsCurShad;
-                                break;
-                            }
+                            AquaObject.SHAD ngsCurShad = curShader;
+                            ngsCurShad.isNGS = true;
+                            ngsCurShad.shadDetail = value.shadDetail;
+                            ngsCurShad.shadDetailOffset = value.shadDetailOffset;
+                            ngsCurShad.shadExtra = value.shadExtra;
+                            ngsCurShad.shadExtraOffset = value.shadExtraOffset;
+                            model.shadList[s] = ngsCurShad;
                         }
                     }
                 }
-                
+
             }
         }
 
@@ -3369,7 +3369,7 @@ namespace AquaModelTool
                 {
                     aquaUI.aqua.aquaModels.Clear();
                     ModelSet set = new ModelSet();
-                    set.models.Add(SoulsConvert.ReadFlver(file, out AquaNode aqn));
+                    set.models.Add(SoulsConvert.ReadFlver(file, out AquaNode aqn, exportWithMetadataToolStripMenuItem.Checked));
                     var outName = Path.ChangeExtension(file, ".aqp");
                     if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
                     {
