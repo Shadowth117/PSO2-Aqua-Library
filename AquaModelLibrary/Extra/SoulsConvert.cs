@@ -9,6 +9,7 @@ using System.Text;
 using Newtonsoft.Json;
 using static AquaModelLibrary.AquaNode;
 using NvTriStripDotNet;
+using AquaModelLibrary.Extra.FromSoft;
 
 namespace AquaModelLibrary.Extra
 {
@@ -38,9 +39,10 @@ namespace AquaModelLibrary.Extra
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
-
+                TangentSolver.SolveTangentsDemonsSouls((FLVER0.Mesh)flver.Meshes[0], ((FLVER0)flver).Header.Version);
+                DebugDumpToFile((FLVER0)flver, 0);
                 //Dump metadata
-                if(useMetaData)
+                if (useMetaData)
                 {
                     string materialData = JsonConvert.SerializeObject(flver.Materials, jss);
                     string dummyData = JsonConvert.SerializeObject(flver.Dummies, jss);
@@ -68,6 +70,33 @@ namespace AquaModelLibrary.Extra
             }
             aqn = null;
             return FlverToAqua(flver, out aqn, useMetaData);
+        }
+
+        public static void DebugDumpToFile(FLVER0 flver, int id)
+        {
+#if DEBUG
+            StringBuilder sb = new StringBuilder();
+            for(int m = 0; m < flver.Meshes.Count; m++)
+            {
+                var faces = flver.Meshes[m].Triangulate(flver.Header.Version);
+                for (int f = 0; f < faces.Count; f++)
+                {
+                    sb.AppendLine(flver.Meshes[m].Vertices[faces[f]].Normal.ToString());
+                }
+            }
+            StringBuilder sb2 = new StringBuilder();
+            for (int m = 0; m < flver.Meshes.Count; m++)
+            {
+                var faces = flver.Meshes[m].Triangulate(flver.Header.Version);
+                for (int f = 0; f < faces.Count; f++)
+                {
+                    sb2.AppendLine(flver.Meshes[m].Vertices[faces[f]].Tangents[0].ToString());
+                }
+            }
+
+            File.WriteAllText($"C:\\Normals_{id}", sb.ToString());
+            File.WriteAllText($"C:\\NormalsTan_{id}", sb2.ToString());
+#endif
         }
 
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
@@ -369,6 +398,7 @@ namespace AquaModelLibrary.Extra
                 if (flver is FLVER0)
                 {
                     FLVER0.Mesh mesh0 = (FLVER0.Mesh)mesh;
+
                     vtxl.bonePalette = new List<ushort>();
                     for (int b = 0; b < mesh0.BoneIndices.Length; b++)
                     {
@@ -403,6 +433,7 @@ namespace AquaModelLibrary.Extra
                     throw new Exception("Unexpected flver variant");
                 }
 
+                List<Vector3> normals = new List<Vector3>();
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
@@ -865,6 +896,7 @@ namespace AquaModelLibrary.Extra
                     flvMesh.Vertices.Add(vert);
                 }
 
+                TangentSolver.SolveTangentsDemonsSouls(flvMesh, flver.Header.Version);
                 flver.Meshes.Add(flvMesh);
             }
 
@@ -914,6 +946,7 @@ namespace AquaModelLibrary.Extra
                 flver.Bones.Add(bone);
             }
 
+            DebugDumpToFile((FLVER0)flver, 1);
             return flver;
         }
 
