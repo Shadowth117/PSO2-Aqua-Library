@@ -39,6 +39,7 @@ namespace AquaModelLibrary.Extra
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
+                //DebugDumpToFile((FLVER0)flver, 0);
                 //Dump metadata
                 if (useMetaData)
                 {
@@ -68,6 +69,33 @@ namespace AquaModelLibrary.Extra
             }
             aqn = null;
             return FlverToAqua(flver, out aqn, useMetaData);
+        }
+
+        public static void DebugDumpToFile(FLVER0 flver, int id)
+        {
+#if DEBUG
+            StringBuilder sb = new StringBuilder();
+            for (int m = 0; m < flver.Meshes.Count; m++)
+            {
+                var faces = flver.Meshes[m].Triangulate(flver.Header.Version);
+                for (int f = 0; f < faces.Count; f++)
+                {
+                    sb.AppendLine(flver.Meshes[m].Vertices[faces[f]].Normal.ToString() + " "  + flver.Meshes[m].Vertices[faces[f]].Position.ToString());
+                }
+            }
+            StringBuilder sb2 = new StringBuilder();
+            for (int m = 0; m < flver.Meshes.Count; m++)
+            {
+                var faces = flver.Meshes[m].Triangulate(flver.Header.Version);
+                for (int f = 0; f < faces.Count; f++)
+                {
+                    sb2.AppendLine(flver.Meshes[m].Vertices[faces[f]].Tangents[0].ToString());
+                }
+            }
+
+            File.WriteAllText($"C:\\Normals_{id}", sb.ToString());
+            File.WriteAllText($"C:\\NormalsTan_{id}", sb2.ToString());
+#endif
         }
 
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
@@ -685,7 +713,8 @@ namespace AquaModelLibrary.Extra
                 FLVER0.Mesh flvMesh = new FLVER0.Mesh();
                 flvMesh.MaterialIndex = (byte)mesh.mateIndex;
                 flvMesh.BackfaceCulling = render.twosided > 0;
-                flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
+                //flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
+                flvMesh.Dynamic = 1;
                 flvMesh.Vertices = new List<FLVER.Vertex>();
                 flvMesh.VertexIndices = new List<int>();
                 flvMesh.DefaultBoneIndex = 0; //Maybe set properly later from the aqp version if important
@@ -885,7 +914,6 @@ namespace AquaModelLibrary.Extra
 
                 FLVER.Bone bone = new FLVER.Bone();
                 bone.Name = aqBone.boneName.GetString();
-                bone.Scale = new Vector3(1, 1, 1);
                 bone.BoundingBoxMax = MaxBoundingBoxByBone.ContainsKey(i) ? MaxBoundingBoxByBone[i] : defaultMaxBound;
                 bone.BoundingBoxMin = MinBoundingBoxByBone.ContainsKey(i) ? MinBoundingBoxByBone[i] : defaultMinBound;
                 bone.Unk3C = bone.Name.ToUpper().EndsWith("NUB") ? 1 : 0;
@@ -912,11 +940,15 @@ namespace AquaModelLibrary.Extra
 
                 bone.Translation = translation;
                 bone.Rotation = MathExtras.QuaternionToEuler(rotation);
-                bone.Scale = scale;
+                bone.Scale = new Vector3(1, 1, 1);
 
                 flver.Bones.Add(bone);
             }
 
+            flver.Header.BoundingBoxMax = (Vector3)maxBounding;
+            flver.Header.BoundingBoxMin = (Vector3)minBounding;
+
+            //DebugDumpToFile((FLVER0)flver, 1);
             return flver;
         }
 
