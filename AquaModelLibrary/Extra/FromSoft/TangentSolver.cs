@@ -139,27 +139,23 @@ namespace AquaModelLibrary.Extra.FromSoft
                     Vector3 t2n = Vector3.Normalize(tan2[i]);
 
                     float w = ((!(Vector3.Dot(Vector3.Cross(n, t), tan2[i]) < 0f)) ? 1 : (-1));
-                    var retailBitangent = mesh.Vertices[i].Bitangent;
                     var tangent0 = (Vector3.Normalize(t - n * Vector3.Dot(n, t)));
-                    var bitangent0 = (Vector3.Normalize(t2 - n * Vector3.Dot(n, t2)));
                     Vector3 finalTangent0 = Vector3.Normalize(Vector3.Cross(mesh.Vertices[i].Normal,
                                new Vector3(tangent0.X,
                                tangent0.Y,
                                tangent0.Z) * w));
-                    Vector3 bitTest = Vector3.Normalize(Vector3.Cross(mesh.Vertices[i].Normal, finalTangent0));
 
                     mesh.Vertices[i].Tangents[0] = new System.Numerics.Vector4(finalTangent0.X, finalTangent0.Y, finalTangent0.Z, -w);
 
-                    var ghettoTan = RotatePoint(new Vector3(mesh.Vertices[i].Normal.X, mesh.Vertices[i].Normal.Y, mesh.Vertices[i].Normal.Z), 0, (float)Math.PI / 2f, 0);
                     var ghettoBit = Vector3.Normalize(Vector3.Lerp(tangent0, finalTangent0, 0.46f)); //This is between these two and for w/e reason, .46 or so seems the closest approximation
                     if (mesh.Vertices[i].Tangents.Count >= 2)
                     {
-                        ghettoTan = RotatePoint(new Vector3(mesh.Vertices[i].Normal.X, mesh.Vertices[i].Normal.Y, mesh.Vertices[i].Normal.Z), 0, (float)Math.PI / 2f, 0);
+                        var ghettoTan = RotatePoint(new Vector3(mesh.Vertices[i].Normal.X, mesh.Vertices[i].Normal.Y, mesh.Vertices[i].Normal.Z), 0, (float)Math.PI / 2f, 0);
                         mesh.Vertices[i].Tangents[1] = new System.Numerics.Vector4(ghettoTan.X, ghettoTan.Y, ghettoTan.Z, 0);
                     }
                     if (mesh.Vertices[i].Bitangent != Vector4.Zero)
                     {
-                        mesh.Vertices[i].Bitangent = ghettoBit;
+                        mesh.Vertices[i].Bitangent = new Vector4(ghettoBit, -w);
                     }
 
                 }
