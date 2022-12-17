@@ -1034,7 +1034,7 @@ namespace AquaModelLibrary
                     faceVtxl.vertPositions.Add(vertPos);
                     if (mesh.HasNormals)
                     {
-                        faceVtxl.vertNormals.Add(new Vector3(mesh.Normals[v].X * baseScale, mesh.Normals[v].Y * baseScale, mesh.Normals[v].Z * baseScale));
+                        faceVtxl.vertNormals.Add(Vector3.Normalize(new Vector3(mesh.Normals[v].X, mesh.Normals[v].Y, mesh.Normals[v].Z)));
                     }
                     if (mesh.HasVertexColors(0))
                     {

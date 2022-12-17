@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Extra
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
-                //DebugDumpToFile((FLVER0)flver, 0);
+                DebugDumpToFile((FLVER0)flver, 0);
                 //Dump metadata
                 if (useMetaData)
                 {
@@ -948,7 +948,7 @@ namespace AquaModelLibrary.Extra
             flver.Header.BoundingBoxMax = (Vector3)maxBounding;
             flver.Header.BoundingBoxMin = (Vector3)minBounding;
 
-            //DebugDumpToFile((FLVER0)flver, 1);
+            DebugDumpToFile((FLVER0)flver, 1);
             return flver;
         }
 
