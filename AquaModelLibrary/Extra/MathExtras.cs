@@ -5,6 +5,24 @@ namespace AquaModelLibrary.Extra
 {
     public static class MathExtras
     {
+        public static void MirrorX(this Quaternion quat)
+        {
+            quat.Y = -quat.Y;
+            quat.Z = -quat.Z;
+        }
+
+        public static void MirrorY(this Quaternion quat)
+        {
+            quat.X = -quat.X;
+            quat.Z = -quat.Z;
+        }
+        public static void MirrorZ(this Quaternion quat)
+        {
+            quat.X = -quat.X;
+            quat.Y = -quat.Y;
+        }
+
+
         public static Quaternion ToQuat(this Vector4 vec4)
         {
             return new Quaternion(vec4.X, vec4.Y, vec4.Z, vec4.W);

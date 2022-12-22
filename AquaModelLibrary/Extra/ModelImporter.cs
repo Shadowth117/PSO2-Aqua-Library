@@ -780,11 +780,8 @@ namespace AquaModelLibrary
             //Default to this so ids can be assigned by order if needed
             Dictionary<string, int> boneDict = new Dictionary<string, int>();
             var aqnRoot = GetRootNode(aiScene.RootNode);
-            if (aqnRoot == null || preAssignNodeIds == true)
-            {
-                int nodeCounter = 0;
-                BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
-            }
+            int nodeCounter = 0;
+            BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
             IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale, boneDict);
 
             //Generate bonepalette. No real reason not to just put in every bone at the moment.
@@ -855,6 +852,11 @@ namespace AquaModelLibrary
             //Decide if this is an effect node or not
             string nodeName = aiNode.Name;
             var nodeParent = aiNode.Parent;
+            if(nodeName.EndsWith("_end"))
+            {
+                //Blender, please
+                return;
+            }
             if (ParseNodeId(nodeName, out string finalName, out int nodeId))
             {
                 AquaNode.NODE node = new AquaNode.NODE();
@@ -1098,6 +1100,10 @@ namespace AquaModelLibrary
                         List<float> vertWeights = new List<float>();
                         foreach (var bone in mesh.Bones)
                         {
+                            if(!boneDict.ContainsKey(bone.Name))
+                            {
+                                continue;
+                            }
                             var boneId = boneDict[bone.Name];
                             foreach (var weight in bone.VertexWeights)
                             {

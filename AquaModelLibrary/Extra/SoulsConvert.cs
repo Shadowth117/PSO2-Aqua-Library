@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using static AquaModelLibrary.AquaNode;
 using NvTriStripDotNet;
 using AquaModelLibrary.Extra.FromSoft;
+using AquaModelLibrary.Native.Fbx;
 
 namespace AquaModelLibrary.Extra
 {
@@ -92,9 +93,20 @@ namespace AquaModelLibrary.Extra
                     sb2.AppendLine(flver.Meshes[m].Vertices[faces[f]].Tangents[0].ToString());
                 }
             }
+            StringBuilder sb3 = new StringBuilder();
+            for (int m = 0; m < flver.Meshes.Count; m++)
+            {
+                var faces = flver.Meshes[m].Triangulate(flver.Header.Version);
+                for (int f = 0; f < faces.Count; f++)
+                {
+                    var indices = flver.Meshes[m].Vertices[faces[f]].BoneIndices;
+                    sb3.AppendLine($"{indices[0]} {indices[1]} {indices[2]} {indices[3]}");
+                }
+            }
 
             File.WriteAllText($"C:\\Normals_{id}", sb.ToString());
             File.WriteAllText($"C:\\NormalsTan_{id}", sb2.ToString());
+            File.WriteAllText($"C:\\NormalsWeight_{id}", sb3.ToString());
 #endif
         }
 
@@ -112,7 +124,6 @@ namespace AquaModelLibrary.Extra
                 var tfmMat = Matrix4x4.Identity;
 
                 Matrix4x4 mat = flverBone.ComputeLocalTransform();
-
                 mat *= tfmMat;
 
                 Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
@@ -301,10 +312,7 @@ namespace AquaModelLibrary.Extra
                 var tfmMat = Matrix4x4.Identity;
 
                 Matrix4x4 mat = flverBone.ComputeLocalTransform(order);
-
                 mat *= tfmMat;
-
-                Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
 
                 //If there's a parent, multiply by it
                 if (parentId != -1)
@@ -542,7 +550,7 @@ namespace AquaModelLibrary.Extra
         {
             var aqp = ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn);
 
-            //Demon's Souls and Dark Souls models have a limit of 28 bones.
+            //Demon's Souls has a limit of 28 bones per mesh.
             AquaObjectMethods.BatchSplitByBoneCount(aqp, 28, true);
             return AquaToFlver(initialFilePath, aqp, aqn, game, referenceFlver);
         }
@@ -721,13 +729,27 @@ namespace AquaModelLibrary.Extra
                 flvMesh.BoneIndices = new short[28];
                 for(int b = 0; b < 28; b++)
                 {
-                    //Correct this for bone split meshes later
-                    if (aqp.bonePalette.Count > b)
+                    if(vtxl.bonePalette.Count > 0)
                     {
-                        flvMesh.BoneIndices[b] = (short)aqp.bonePalette[b];
+
+                        if (vtxl.bonePalette.Count > b)
+                        {
+                            flvMesh.BoneIndices[b] = (short)vtxl.bonePalette[b];
+                        }
+                        else
+                        {
+                            flvMesh.BoneIndices[b] = -1;
+                        }
                     } else
                     {
-                        flvMesh.BoneIndices[b] = -1;
+                        if (aqp.bonePalette.Count > b)
+                        {
+                            flvMesh.BoneIndices[b] = (short)aqp.bonePalette[b];
+                        }
+                        else
+                        {
+                            flvMesh.BoneIndices[b] = -1;
+                        }
                     }
                 }
 
@@ -906,11 +928,10 @@ namespace AquaModelLibrary.Extra
             {
                 var aqBone = aqn.nodeList[i];
                 Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
-                aqBoneWorldTfm *= mirrorMat;
 
                 //Set the inverted transform so when we read it back we can use it for parent calls
-                Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
-                aqn.nodeList[i].SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
+                //Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
+                //aqn.nodeList[i].SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
 
                 FLVER.Bone bone = new FLVER.Bone();
                 bone.Name = aqBone.boneName.GetString();
@@ -927,7 +948,7 @@ namespace AquaModelLibrary.Extra
                 if (aqBone.parentId == -1)
                 {
                     rootSiblings.Add(i);
-                    localTfm = aqBoneInvWorldTfm;
+                    localTfm = aqBoneWorldTfm;
                 } else
                 {
                     //Calc local transforms
@@ -939,7 +960,14 @@ namespace AquaModelLibrary.Extra
                 Matrix4x4.Decompose(localTfm, out var scale, out var rotation, out var translation);
 
                 bone.Translation = translation;
-                bone.Rotation = MathExtras.QuaternionToEuler(rotation);
+
+                //Swap to XZY
+                var eulerAngles = MathExtras.QuaternionToEuler(rotation);
+                var temp = eulerAngles.Y;
+                eulerAngles.Y = eulerAngles.Z;
+                eulerAngles.Z = temp;
+
+                bone.Rotation = eulerAngles;
                 bone.Scale = new Vector3(1, 1, 1);
 
                 flver.Bones.Add(bone);

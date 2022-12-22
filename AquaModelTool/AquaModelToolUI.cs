@@ -2488,6 +2488,8 @@ namespace AquaModelTool
                 AquaUtil aqua = new AquaUtil();
                 aqua.ReadBones(openFileDialog.FileName);
 
+                StringBuilder sb3 = new StringBuilder();
+                StringBuilder sb2 = new StringBuilder();
                 StringBuilder sb = new StringBuilder();
                 var bn = aqua.aquaBones[0];
                 for (int i = 0; i < bn.nodeList.Count; i++)
@@ -2513,6 +2515,7 @@ namespace AquaModelTool
                     Vector3 localEulRot;
                     Vector3 worldEulRot = MathExtras.QuaternionToEuler(rotation);
                     Quaternion localQuat;
+                    Quaternion invParentRot = new Quaternion(-1, -1, -1, -1);
                     if (i != 0)
                     {
                         Matrix4x4.Invert(bn.nodeList[node.parentId].GetInverseBindPoseMatrix(), out var parMat);
@@ -2520,6 +2523,7 @@ namespace AquaModelTool
                         var invParRot = Quaternion.Inverse(parRot);
                         localQuat = rotation * invParRot;
                         localEulRot = MathExtras.QuaternionToEuler(rotation * invParRot);
+                        invParentRot = invParRot;
                     } else
                     {
                         localEulRot = worldEulRot;
@@ -2533,8 +2537,13 @@ namespace AquaModelTool
                     sb.AppendLine($"Inv Bind World Scale {scale.X} {scale.Y} {scale.Z}");
                     sb.AppendLine($"===");
                     sb.AppendLine($"");
+
+                    sb3.AppendLine($"{{ {{Bone {i}}}  {{NGS Sibling {node.ngsRotationOrderChangeCounter}}} {{Inverse Parent World Quaternion Rotation {invParentRot.X} {invParentRot.Y} {invParentRot.Z} {invParentRot.W}}} {{World Quaternion Rotation {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}}} {{Local Euler Rotation {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}}} {{Generated Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}}} }}");
+                    sb2.AppendLine($"{{ {{Bone {i}}} {{Inverse Parent World Quaternion Rotation {invParentRot.X} {invParentRot.Y} {invParentRot.Z} {invParentRot.W}}} {{World Quaternion Rotation {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}}} {{Local Euler Rotation {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}}} {{Generated Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}}} }}");
                 }
                 File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}.txt", sb.ToString());
+                File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}_GPT.txt", sb2.ToString());
+                File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}_GPT2.txt", sb3.ToString());
             }
         }
 
@@ -3944,6 +3953,11 @@ namespace AquaModelTool
                     aqu.ConvertFromJson(file);
                 }
             }
+        }
+
+        private void exportWithMetadataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            exportWithMetadataToolStripMenuItem.Checked = !exportWithMetadataToolStripMenuItem.Checked;
         }
     }
 }
