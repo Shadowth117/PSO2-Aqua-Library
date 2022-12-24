@@ -1990,27 +1990,30 @@ namespace AquaModelLibrary
                     {
                         foreach (int meshId in vsetTracker[key])
                         {
-                            Dictionary<int, int> usedVerts = new Dictionary<int, int>();
-                            VSET newVset = new VSET();
-                            VTXL newVtxl = new VTXL();
-
-                            int counter = 0;
-                            for (int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
+                            if(meshList[meshId].vsetIndex >= 0 && meshList[meshId].psetIndex >= 0)
                             {
-                                ushort id = strips[meshId].triStrips[stripIndex];
-                                if (!usedVerts.ContainsKey(id))
+                                Dictionary<int, int> usedVerts = new Dictionary<int, int>();
+                                VSET newVset = new VSET();
+                                VTXL newVtxl = new VTXL();
+
+                                int counter = 0;
+                                for (int stripIndex = 0; stripIndex < strips[meshId].triStrips.Count; stripIndex++)
                                 {
-                                    AquaObjectMethods.appendVertex(vtxlList[meshList[meshId].vsetIndex], newVtxl, id);
-                                    usedVerts.Add(id, counter);
-                                    counter++;
+                                    ushort id = strips[meshId].triStrips[stripIndex];
+                                    if (!usedVerts.ContainsKey(id))
+                                    {
+                                        AquaObjectMethods.appendVertex(vtxlList[meshList[meshId].vsetIndex], newVtxl, id);
+                                        usedVerts.Add(id, counter);
+                                        counter++;
+                                    }
+                                    strips[meshId].triStrips[stripIndex] = (ushort)usedVerts[id];
                                 }
-                                strips[meshId].triStrips[stripIndex] = (ushort)usedVerts[id];
-                            }
-                            var tempMesh = meshList[meshId];
-                            tempMesh.vsetIndex = meshId;
-                            meshList[meshId] = tempMesh;
-                            newVsetArray[meshId] = newVset;
-                            newVtxlArray[meshId] = newVtxl;
+                                var tempMesh = meshList[meshId];
+                                tempMesh.vsetIndex = meshId;
+                                meshList[meshId] = tempMesh;
+                                newVsetArray[meshId] = newVset;
+                                newVtxlArray[meshId] = newVtxl;
+                            } 
                         }
                     }
                     else
@@ -2026,6 +2029,23 @@ namespace AquaModelLibrary
                 vsetList = newVsetArray.ToList();
                 vtxlList = newVtxlArray.ToList();
             }
+
+            List<int> badIds = new List<int>();
+            for(int i = 0; i < meshList.Count; i++)
+            {
+                if (meshList[i].vsetIndex < 0 || meshList[i].psetIndex < 0)
+                {
+                    badIds.Add(i);
+                }
+            }
+
+            int badCounter = 0;
+            foreach(var id in badIds)
+            {
+                meshList.RemoveAt(id - badCounter);
+                badCounter++;
+            }
+            objc.meshCount = meshList.Count;
             objc.vsetCount = vsetList.Count;
 
             return vsetList.Count;

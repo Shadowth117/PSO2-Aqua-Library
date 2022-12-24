@@ -104,9 +104,22 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
+            StringBuilder sb4 = new StringBuilder();
+            for (int b = 0; b < flver.Bones.Count; b++)
+            {
+                var bn = flver.Bones[b];
+                var m = bn.ComputeLocalTransform();
+                sb4.AppendLine($"{b} {bn.Name}");
+                sb4.AppendLine($"{m.M11} {m.M12} {m.M13} {m.M14}");
+                sb4.AppendLine($"{m.M21} {m.M22} {m.M23} {m.M24}");
+                sb4.AppendLine($"{m.M31} {m.M32} {m.M33} {m.M34}");
+                sb4.AppendLine($"{m.M41} {m.M42} {m.M43} {m.M44}");
+            }
+
             File.WriteAllText($"C:\\Normals_{id}", sb.ToString());
             File.WriteAllText($"C:\\NormalsTan_{id}", sb2.ToString());
             File.WriteAllText($"C:\\NormalsWeight_{id}", sb3.ToString());
+            File.WriteAllText($"C:\\NormalsBones_{id}", sb4.ToString());
 #endif
         }
 
@@ -924,14 +937,16 @@ namespace AquaModelLibrary.Extra
 
             List<int> rootSiblings = new List<int>();
             flver.Bones = new List<FLVER.Bone>();
+
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 var aqBone = aqn.nodeList[i];
                 Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
+                aqBoneWorldTfm *= mirrorMat;
 
                 //Set the inverted transform so when we read it back we can use it for parent calls
-                //Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
-                //aqn.nodeList[i].SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
+                Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
+                aqn.nodeList[i].SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
 
                 FLVER.Bone bone = new FLVER.Bone();
                 bone.Name = aqBone.boneName.GetString();
@@ -962,13 +977,14 @@ namespace AquaModelLibrary.Extra
                 bone.Translation = translation;
 
                 //Swap to XZY
-                var eulerAngles = MathExtras.QuaternionToEuler(rotation);
-                var temp = eulerAngles.Y;
+                var eulerAngles = MathExtras.QuaternionToEulerRadians(rotation);
+                /*var temp = eulerAngles.Y;
                 eulerAngles.Y = eulerAngles.Z;
-                eulerAngles.Z = temp;
+                eulerAngles.Z = temp;*/
 
                 bone.Rotation = eulerAngles;
                 bone.Scale = new Vector3(1, 1, 1);
+                var mat = bone.ComputeLocalTransform();
 
                 flver.Bones.Add(bone);
             }

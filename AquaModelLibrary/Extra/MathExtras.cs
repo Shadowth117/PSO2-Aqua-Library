@@ -70,6 +70,11 @@ namespace AquaModelLibrary.Extra
         //Based on C++ code at https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
         public static Vector3 QuaternionToEuler(Quaternion quat)
         {
+            return QuaternionToEulerRadians(quat) * (float)(180 / Math.PI);
+        }
+
+        public static Vector3 QuaternionToEulerRadians(Quaternion quat)
+        {
             Vector3 angles;
 
             // roll (x-axis rotation)
@@ -88,8 +93,6 @@ namespace AquaModelLibrary.Extra
             double siny_cosp = 2 * (quat.W * quat.Z + quat.X * quat.Y);
             double cosy_cosp = 1 - 2 * (quat.Y * quat.Y + quat.Z * quat.Z);
             angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
-
-            angles *= (float)(180 / Math.PI);
 
             return angles;
         }
