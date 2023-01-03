@@ -3,6 +3,16 @@ using System.Numerics;
 
 namespace AquaModelLibrary.Extra
 {
+    public enum RotationOrder
+    {
+        XYZ,
+        XZY,
+        YXZ,
+        YZX,
+        ZXY,
+        ZYX
+    }
+
     public static class MathExtras
     {
         public static void MirrorX(this Quaternion quat)
@@ -33,37 +43,54 @@ namespace AquaModelLibrary.Extra
             return new Vector4(quat.X, quat.Y, quat.Z, quat.W);
         }
 
-        public static Quaternion EulerToQuaternion(Vector3 angle)
+        public static Quaternion EulerToQuaternion(Vector3 angle, RotationOrder order = RotationOrder.XYZ)
         {
-            return EulerToQuaternion(angle.X, angle.Y, angle.Z);
+            return EulerToQuaternionRadian(angle * (float)(Math.PI / 180), order);
         }
-        public static Quaternion EulerToQuaternion(double x, double y, double z) // roll (X), pitch (Y),  yaw (Z)
-        {
-            x *= (float)(Math.PI / 180);
-            y *= (float)(Math.PI / 180);
-            z *= (float)(Math.PI / 180);
 
-            var rotation = Matrix4x4.CreateRotationX((float)x) *
-                Matrix4x4.CreateRotationY((float)y) *
-                Matrix4x4.CreateRotationZ((float)z);
+        private static Quaternion EulerToQuaternionRadian(Vector3 angle, RotationOrder order = RotationOrder.XYZ)
+        {
+            float x = angle.X;
+            float y = angle.Y;
+            float z = angle.Z;
+            Matrix4x4 rotation = Matrix4x4.Identity;
+
+            switch (order)
+            {
+                case RotationOrder.XYZ:
+                    rotation = Matrix4x4.CreateRotationX((float)x) *
+                        Matrix4x4.CreateRotationY((float)y) *
+                        Matrix4x4.CreateRotationZ((float)z);
+                    break;
+                case RotationOrder.XZY:
+                    rotation = Matrix4x4.CreateRotationX((float)x) *
+                        Matrix4x4.CreateRotationZ((float)z) *
+                        Matrix4x4.CreateRotationY((float)y);
+                    break;
+                case RotationOrder.YXZ:
+                    rotation = Matrix4x4.CreateRotationY((float)y) *
+                        Matrix4x4.CreateRotationX((float)x) *
+                        Matrix4x4.CreateRotationZ((float)z);
+                    break;
+                case RotationOrder.YZX:
+                    rotation = Matrix4x4.CreateRotationY((float)y) *
+                        Matrix4x4.CreateRotationZ((float)z) *
+                        Matrix4x4.CreateRotationX((float)x);
+                    break;
+                case RotationOrder.ZXY:
+                    rotation = Matrix4x4.CreateRotationZ((float)z) *
+                        Matrix4x4.CreateRotationX((float)x) *
+                        Matrix4x4.CreateRotationY((float)y);
+                    break;
+                case RotationOrder.ZYX:
+                    rotation = Matrix4x4.CreateRotationZ((float)z) *
+                        Matrix4x4.CreateRotationY((float)y) *
+                        Matrix4x4.CreateRotationX((float)x);
+                    break;
+            }
 
             Quaternion q = Quaternion.CreateFromRotationMatrix(rotation);
-            
-            // Abbreviations for the various angular functions
-            /*
-            double cy = Math.Cos(z * 0.5);
-            double sy = Math.Sin(z * 0.5);
-            double cp = Math.Cos(y * 0.5);
-            double sp = Math.Sin(y * 0.5);
-            double cr = Math.Cos(x * 0.5);
-            double sr = Math.Sin(x * 0.5);
 
-            Quaternion q = new Quaternion();
-            q.W = (float)(cr * cp * cy + sr * sp * sy);
-            q.X = (float)(sr * cp * cy - cr * sp * sy);
-            q.Y = (float)(cr * sp * cy + sr * cp * sy);
-            q.Z = (float)(cr * cp * sy - sr * sp * cy);
-            */
             return q;
         }
 
@@ -72,6 +99,43 @@ namespace AquaModelLibrary.Extra
         {
             return QuaternionToEulerRadians(quat) * (float)(180 / Math.PI);
         }
+
+        public static Vector3 QuaternionToEulerRadiansTest(Quaternion quat)
+        {
+            Vector3 vec3 = new Vector3();
+
+            float sqw = quat.W * quat.W;
+            float sqx = quat.X * quat.X;
+            float sqy = quat.Y * quat.Y;
+            float sqz = quat.Z * quat.Z;
+            float unit = sqx + sqy + sqz + sqw; // if normalized is one, otherwise
+                                                // is correction factor
+            float test = quat.X * quat.Y + quat.Z * quat.W;
+            if (test > 0.499 * unit)
+            { // singularity at north pole
+                vec3.Y = (float)(2 * Math.Atan2(quat.X, quat.W));
+                vec3.Z = (float)(Math.PI / 2);
+                vec3.X = 0;
+            }
+            else if (test < -0.499 * unit)
+            { // singularity at south pole
+                vec3.Y = (float)(-2 * Math.Atan2(quat.X, quat.W));
+                vec3.Z = -(float)(Math.PI / 2);
+                vec3.X = 0;
+            }
+            else
+            {
+                vec3.Y = (float)Math.Atan2(2 * quat.Y * quat.W - 2 * quat.X * quat.Z, sqx - sqy - sqz + sqw); // roll
+                                                                                                              // or
+                                                                                                              // heading
+                vec3.Z = (float)Math.Asin(2 * test / unit); // pitch or attitude
+                vec3.X = (float)Math.Atan2(2 * quat.X * quat.W - 2 * quat.Y * quat.Z, -sqx + sqy - sqz + sqw); // yaw
+                                                                                                               // or
+                                                                                                               // bank
+            }
+            return vec3;
+        }
+
 
         public static Vector3 QuaternionToEulerRadians(Quaternion quat)
         {
@@ -95,6 +159,69 @@ namespace AquaModelLibrary.Extra
             angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
 
             return angles;
+        }
+
+        public static Vector3 QuaternionToEulerRadiansZLimited(Quaternion quat)
+        {
+            Vector3 angles;
+
+            // roll (x-axis rotation)
+            double sinr_cosp = 2 * (quat.W * quat.X + quat.Y * quat.Z);
+            double cosr_cosp = 1 - 2 * (quat.X * quat.X + quat.Y * quat.Y);
+            angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch (y-axis rotation)
+            double sinp = Math.Sqrt(1 + 2 * (quat.W * quat.X - quat.Y * quat.Z));
+            double cosp = Math.Sqrt(1 - 2 * (quat.W * quat.X - quat.Y * quat.Z));
+            angles.Y = (float)(2 * Math.Atan2(sinp, cosp) - Math.PI / 2);
+
+            // yaw (z-axis rotation)
+            double siny_cosp = 2 * (quat.W * quat.Z + quat.X * quat.Y);
+            if (Math.Abs(siny_cosp) >= 1)
+                angles.Z = (float)CopySign(Math.PI / 2, siny_cosp); // use 90 degrees if out of range
+            else
+                angles.Z = (float)Math.Asin(siny_cosp);
+
+            return angles;
+        }
+
+        public static Vector3 QuaternionToEulerRadiansNoHandle(Quaternion quat)
+        {
+            Vector3 angles;
+
+            // roll (x-axis rotation)
+            double sinr_cosp = 2 * (quat.W * quat.X + quat.Y * quat.Z);
+            double cosr_cosp = 1 - 2 * (quat.X * quat.X + quat.Y * quat.Y);
+            angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch (y-axis rotation)
+            double sinp = Math.Sqrt(1 + 2 * (quat.W * quat.X - quat.Y * quat.Z));
+            double cosp = Math.Sqrt(1 - 2 * (quat.W * quat.X - quat.Y * quat.Z));
+            angles.Y = (float)(2 * Math.Atan2(sinp, cosp) - Math.PI / 2);
+
+            // yaw (z-axis rotation)
+            double siny_cosp = 2 * (quat.W * quat.Z + quat.X * quat.Y);
+            double cosy_cosp = 1 - 2 * (quat.Y * quat.Y + quat.Z * quat.Z);
+            angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+            return angles;
+        }
+
+        //There's probably a better way to do this, but I am no math king
+        public static Matrix4x4 SetMatrixScale(Matrix4x4 mat)
+        {
+            return SetMatrixScale(mat, new Vector3(1, 1, 1));
+        }
+
+        public static Matrix4x4 SetMatrixScale(Matrix4x4 originalMat, Vector3 scaleVec3)
+        {
+            Matrix4x4 mat;
+            Matrix4x4.Decompose(originalMat, out var scaleMat, out var rotMat, out var posMat);
+            mat = Matrix4x4.Identity;
+            mat *= Matrix4x4.CreateScale(scaleVec3);
+            mat *= Matrix4x4.CreateFromQuaternion(rotMat);
+            mat *= Matrix4x4.CreateTranslation(posMat);
+            return mat;
         }
 
         public static double CopySign(double x, double y)

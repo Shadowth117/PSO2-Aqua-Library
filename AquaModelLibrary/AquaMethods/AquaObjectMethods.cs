@@ -3196,6 +3196,7 @@ namespace AquaModelLibrary
 
             //Get two-sided and alphaCutoff
             nameArr = name.Split('@');
+            name = nameArr[0];
             if(nameArr.Length > 1)
             {
                 for(int i = 1; i < nameArr.Length; i++)

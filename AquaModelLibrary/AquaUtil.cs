@@ -3782,7 +3782,7 @@ namespace AquaModelLibrary
                 streamReader.Seek(strCount, SeekOrigin.Current);
 
                 entity.subObjectCount = streamReader.Read<int>();
-                Console.WriteLine($"Position {(streamReader.Position() - offset).ToString("X")}");
+                //Debug.WriteLine($"Position {(streamReader.Position() - offset).ToString("X")}");
                 int trueCount = entity.subObjectCount;
                 //Gather variables
                 for (int obj = 0; obj < trueCount; obj++)

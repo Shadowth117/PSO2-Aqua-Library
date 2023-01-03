@@ -11,6 +11,7 @@ using static AquaModelLibrary.AquaNode;
 using NvTriStripDotNet;
 using AquaModelLibrary.Extra.FromSoft;
 using AquaModelLibrary.Native.Fbx;
+using System.Diagnostics;
 
 namespace AquaModelLibrary.Extra
 {
@@ -26,10 +27,20 @@ namespace AquaModelLibrary.Extra
             Sekiro
         }
 
-        public static Matrix4x4 mirrorMat = new Matrix4x4(-1, 0, 0, 0,
-                                    0, 1, 0, 0,
-                                    0, 0, 1, 0,
-                                    0, 0, 0, 1);
+        public static Matrix4x4 mirrorMatX = new Matrix4x4(-1, 0, 0, 0,
+                                                            0, 1, 0, 0,
+                                                            0, 0, 1, 0,
+                                                            0, 0, 0, 1);
+
+        public static Matrix4x4 mirrorMatY = new Matrix4x4(1, 0, 0, 0,
+                                                            0, -1, 0, 0,
+                                                            0, 0, 1, 0,
+                                                            0, 0, 0, 1);
+
+        public static Matrix4x4 mirrorMatZ = new Matrix4x4(1, 0, 0, 0,
+                                                            0, 1, 0, 0,
+                                                            0, 0, -1, 0,
+                                                            0, 0, 0, 1);
 
         public static AquaObject ReadFlver(string filePath, out AquaNode aqn, bool useMetaData = false)
         {
@@ -40,7 +51,6 @@ namespace AquaModelLibrary.Extra
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
-                DebugDumpToFile((FLVER0)flver, 0);
                 //Dump metadata
                 if (useMetaData)
                 {
@@ -90,7 +100,7 @@ namespace AquaModelLibrary.Extra
                 var faces = flver.Meshes[m].Triangulate(flver.Header.Version);
                 for (int f = 0; f < faces.Count; f++)
                 {
-                    sb2.AppendLine(flver.Meshes[m].Vertices[faces[f]].Tangents[0].ToString());
+                    //sb2.AppendLine(flver.Meshes[m].Vertices[faces[f]].Tangents[0].ToString());
                 }
             }
             StringBuilder sb3 = new StringBuilder();
@@ -110,16 +120,95 @@ namespace AquaModelLibrary.Extra
                 var bn = flver.Bones[b];
                 var m = bn.ComputeLocalTransform();
                 sb4.AppendLine($"{b} {bn.Name}");
-                sb4.AppendLine($"{m.M11} {m.M12} {m.M13} {m.M14}");
-                sb4.AppendLine($"{m.M21} {m.M22} {m.M23} {m.M24}");
-                sb4.AppendLine($"{m.M31} {m.M32} {m.M33} {m.M34}");
-                sb4.AppendLine($"{m.M41} {m.M42} {m.M43} {m.M44}");
+                sb4.AppendLine($"{m.M11:F6} {m.M12:F6} {m.M13:F6} {m.M14:F6}");
+                sb4.AppendLine($"{m.M21:F6} {m.M22:F6} {m.M23:F6} {m.M24:F6}");
+                sb4.AppendLine($"{m.M31:F6} {m.M32:F6} {m.M33:F6} {m.M34:F6}");
+                sb4.AppendLine($"{m.M41:F6} {m.M42:F6} {m.M43:F6} {m.M44:F6}");
+                Matrix4x4.Decompose(m, out var scale, out var rot, out var pos);
+                sb4.AppendLine($"Scale: {scale.X:F6} {scale.Y:F6} {scale.Z:F6}");
+                sb4.AppendLine($"Rotation: {rot.X:F6} {rot.Y:F6} {rot.Z:F6} {rot.W:F6}");
+                var euler = MathExtras.QuaternionToEuler(rot);
+                sb4.AppendLine($"Rotation (Euler): {euler.X:F6} {euler.Y:F6} {euler.Z:F6}");
+                sb4.AppendLine($"Rotation (Original Euler): {(bn.Rotation.X * 180 / Math.PI):F6} {(bn.Rotation.Y * 180 / Math.PI):F6} {(bn.Rotation.Z * 180 / Math.PI):F6}");
+                sb4.AppendLine($"Position: {pos.X:F6} {pos.Y:F6} {pos.Z:F6}");
             }
 
             File.WriteAllText($"C:\\Normals_{id}", sb.ToString());
             File.WriteAllText($"C:\\NormalsTan_{id}", sb2.ToString());
             File.WriteAllText($"C:\\NormalsWeight_{id}", sb3.ToString());
             File.WriteAllText($"C:\\NormalsBones_{id}", sb4.ToString());
+#endif
+        }
+        public static void DebugDumpLocalBonesToFile(FLVER0 flver, int id)
+        {
+#if DEBUG
+            StringBuilder sb4 = new StringBuilder();
+            for (int b = 0; b < flver.Bones.Count; b++)
+            {
+                var bn = flver.Bones[b];
+                var m = bn.ComputeLocalTransform();
+                sb4.AppendLine($"{b} {bn.Name}");
+                sb4.AppendLine($"{m.M11:F6} {m.M12:F6} {m.M13:F6} {m.M14:F6}");
+                sb4.AppendLine($"{m.M21:F6} {m.M22:F6} {m.M23:F6} {m.M24:F6}");
+                sb4.AppendLine($"{m.M31:F6} {m.M32:F6} {m.M33:F6} {m.M34:F6}");
+                sb4.AppendLine($"{m.M41:F6} {m.M42:F6} {m.M43:F6} {m.M44:F6}");
+                Matrix4x4.Decompose(m, out var scale, out var rot, out var pos);
+                sb4.AppendLine($"Scale: {bn.Scale.X:F6} {bn.Scale.Y:F6} {bn.Scale.Z:F6}");
+                sb4.AppendLine($"Rotation: {rot.X:F6} {rot.Y:F6} {rot.Z:F6} {rot.W:F6}");
+                var euler = MathExtras.QuaternionToEuler(rot);
+                var eulRot = bn.Rotation * (float)(180 / Math.PI);
+                sb4.AppendLine($"Rotation (Euler): {eulRot.X :F6} {eulRot.Y:F6} {eulRot.Z:F6}");
+                sb4.AppendLine($"Position: {bn.Translation.X:F6} {bn.Translation.Y:F6} {bn.Translation.Z:F6}");
+            }
+
+            File.WriteAllText($"C:\\NormalsBonesLocal_{id}", sb4.ToString());
+#endif
+        }
+        public static void DebugDumpWorldBonesToFile(AquaNode aqn, int id)
+        {
+#if DEBUG
+            StringBuilder sb4 = new StringBuilder();
+            for (int b = 0; b < aqn.nodeList.Count; b++)
+            {
+                var bn = aqn.nodeList[b];
+                Matrix4x4.Invert(bn.GetInverseBindPoseMatrix(), out var m);
+                sb4.AppendLine($"{b} {bn.boneName.GetString()}");
+                sb4.AppendLine($"{m.M11:F6} {m.M12:F6} {m.M13:F6} {m.M14:F6}");
+                sb4.AppendLine($"{m.M21:F6} {m.M22:F6} {m.M23:F6} {m.M24:F6}");
+                sb4.AppendLine($"{m.M31:F6} {m.M32:F6} {m.M33:F6} {m.M34:F6}");
+                sb4.AppendLine($"{m.M41:F6} {m.M42:F6} {m.M43:F6} {m.M44:F6}");
+                Matrix4x4.Decompose(m, out var scale, out var rot, out var pos);
+                sb4.AppendLine($"Scale: {scale.X:F6} {scale.Y:F6} {scale.Z:F6}");
+                sb4.AppendLine($"Rotation: {rot.X:F6} {rot.Y:F6} {rot.Z:F6} {rot.W:F6}");
+                var euler = MathExtras.QuaternionToEuler(rot);
+                sb4.AppendLine($"Rotation (Euler): {euler.X:F6} {euler.Y:F6} {euler.Z:F6}");
+                sb4.AppendLine($"Position: {pos.X:F6} {pos.Y:F6} {pos.Z:F6}");
+            }
+
+            File.WriteAllText($"C:\\NormalsBonesWorld_{id}", sb4.ToString());
+#endif
+        }
+        public static void DebugDumpLocalM4BonesToFile(List<Matrix4x4> matList, int id)
+        {
+#if DEBUG
+            StringBuilder sb4 = new StringBuilder();
+            for (int b = 0; b < matList.Count; b++)
+            {
+                var m = matList[b];
+                sb4.AppendLine($"{b}");
+                sb4.AppendLine($"{m.M11:F6} {m.M12:F6} {m.M13:F6} {m.M14:F6}");
+                sb4.AppendLine($"{m.M21:F6} {m.M22:F6} {m.M23:F6} {m.M24:F6}");
+                sb4.AppendLine($"{m.M31:F6} {m.M32:F6} {m.M33:F6} {m.M34:F6}");
+                sb4.AppendLine($"{m.M41:F6} {m.M42:F6} {m.M43:F6} {m.M44:F6}");
+                Matrix4x4.Decompose(m, out var scale, out var rot, out var pos);
+                sb4.AppendLine($"Scale: {scale.X:F6} {scale.Y:F6} {scale.Z:F6}");
+                sb4.AppendLine($"Rotation: {rot.X:F6} {rot.Y:F6} {rot.Z:F6} {rot.W:F6}");
+                var euler = MathExtras.QuaternionToEuler(rot);
+                sb4.AppendLine($"Rotation (Euler): {euler.X:F6} {euler.Y:F6} {euler.Z:F6}");
+                sb4.AppendLine($"Position: {pos.X:F6} {pos.Y:F6} {pos.Z:F6}");
+            }
+
+            File.WriteAllText($"C:\\NormalsBonesM4Local_{id}", sb4.ToString());
 #endif
         }
 
@@ -138,8 +227,6 @@ namespace AquaModelLibrary.Extra
 
                 Matrix4x4 mat = flverBone.ComputeLocalTransform();
                 mat *= tfmMat;
-
-                Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
 
                 //If there's a parent, multiply by it
                 if (parentId != -1)
@@ -173,16 +260,14 @@ namespace AquaModelLibrary.Extra
                 aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
                 aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
                 aqNode.boneName.SetString(flverBone.Name);
-                //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                 aqn.nodeList.Add(aqNode);
             }
-
             //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 var bone = aqn.nodeList[i];
                 Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                mat *= mirrorMat;
+                mat *= mirrorMatX;
                 Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
                 bone.pos = translation;
                 bone.eulRot = MathExtras.QuaternionToEuler(rot);
@@ -228,8 +313,8 @@ namespace AquaModelLibrary.Extra
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
-                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMat));
-                    vtxl.vertNormals.Add(Vector3.Transform(new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z), mirrorMat));
+                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
+                    vtxl.vertNormals.Add(Vector3.Transform(new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z), mirrorMatX));
 
                     if (vert.UVs.Count > 0)
                     {
@@ -316,6 +401,8 @@ namespace AquaModelLibrary.Extra
                 }
             }
             aqn = new AquaNode();
+            Vector3 maxTest = new Vector3();
+            Vector3 minTest = new Vector3();
             for (int i = 0; i < flver.Bones.Count; i++)
             {
                 var flverBone = flver.Bones[i];
@@ -324,6 +411,29 @@ namespace AquaModelLibrary.Extra
                 FLVER.Bone.RotationOrder order = FLVER.Bone.RotationOrder.XZY;
                 var tfmMat = Matrix4x4.Identity;
 
+                if(flverBone.Rotation.X > maxTest.X)
+                {
+                    maxTest.X = flverBone.Rotation.X;
+                } else if(flverBone.Rotation.X < minTest.X)
+                {
+                    minTest.X = flverBone.Rotation.X;
+                }
+                if (flverBone.Rotation.Y > maxTest.Y)
+                {
+                    maxTest.Y = flverBone.Rotation.Y;
+                }
+                else if (flverBone.Rotation.Y < minTest.Y)
+                {
+                    minTest.Y = flverBone.Rotation.Y;
+                }
+                if (flverBone.Rotation.Z > maxTest.Z)
+                {
+                    maxTest.Z = flverBone.Rotation.Z;
+                }
+                else if (flverBone.Rotation.Z < minTest.Z)
+                {
+                    minTest.Z = flverBone.Rotation.Z;
+                }
                 Matrix4x4 mat = flverBone.ComputeLocalTransform(order);
                 mat *= tfmMat;
 
@@ -362,13 +472,18 @@ namespace AquaModelLibrary.Extra
                 //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                 aqn.nodeList.Add(aqNode);
             }
-
+            Debug.WriteLine(maxTest);
+            Debug.WriteLine(minTest);
+            DebugDumpToFile((FLVER0)flver, 0);
+            DebugDumpWorldBonesToFile(aqn, 0);
+            DebugDumpLocalBonesToFile((FLVER0)flver, 0);
+            List<Matrix4x4> testRecompile = new List<Matrix4x4>();
             //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 var bone = aqn.nodeList[i];
                 Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                mat *= mirrorMat;
+                mat *= mirrorMatX;
                 Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
                 bone.pos = translation;
                 bone.eulRot = MathExtras.QuaternionToEuler(rot);
@@ -376,7 +491,13 @@ namespace AquaModelLibrary.Extra
                 Matrix4x4.Invert(mat, out var invMat);
                 bone.SetInverseBindPoseMatrix(invMat);
                 aqn.nodeList[i] = bone;
+                testRecompile.Add(MathExtras.SetMatrixScale(mat));
             }
+            DebugDumpLocalM4BonesToFile(testRecompile, 0);
+            DebugDumpWorldBonesToFile(aqn, -1);
+#if DEBUG
+            AquaUtil.WriteBones(@"A:\Games\Demon's Souls (USA)\PS3_GAME\USRDIR\chr\c2000\" + "c2000 - Copy.fbx_initialMirror.aqn", aqn);
+#endif
 
             for (int i = 0; i < flver.Meshes.Count; i++)
             {
@@ -457,8 +578,8 @@ namespace AquaModelLibrary.Extra
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
-                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMat));
-                    vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMat));
+                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
+                    vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMatX));
 
                     if (vert.UVs.Count > 0)
                     {
@@ -784,7 +905,7 @@ namespace AquaModelLibrary.Extra
                         switch (flvMat.Layouts[0][l].Semantic)
                         {
                             case FLVER.LayoutSemantic.Position:
-                                var pos = Vector3.Transform(vtxl.vertPositions[v], mirrorMat);
+                                var pos = Vector3.Transform(vtxl.vertPositions[v], mirrorMatX);
                                 vert.Position = pos;
 
                                 //Calc model bounding
@@ -809,7 +930,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Normal:
                                 if (vtxl.vertNormals.Count > 0)
                                 {
-                                    vert.Normal = Vector3.Transform(vtxl.vertNormals[v], mirrorMat);
+                                    vert.Normal = Vector3.Transform(vtxl.vertNormals[v], mirrorMatX);
                                 }
                                 else
                                 {
@@ -820,7 +941,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Tangent:
                                 if (vtxl.vertTangentList.Count > 0)
                                 {
-                                    vert.Tangents.Add(new Vector4(Vector3.Transform(vtxl.vertTangentList[v], mirrorMat), 0));
+                                    vert.Tangents.Add(new Vector4(Vector3.Transform(vtxl.vertTangentList[v], mirrorMatX), 0));
                                 }
                                 else
                                 {
@@ -830,7 +951,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Bitangent:
                                 if (vtxl.vertBinormalList.Count > 0)
                                 {
-                                    vert.Bitangent = new Vector4(Vector3.Transform(vtxl.vertBinormalList[v], mirrorMat), 0);
+                                    vert.Bitangent = new Vector4(Vector3.Transform(vtxl.vertBinormalList[v], mirrorMatX), 0);
                                 }
                                 else
                                 {
@@ -938,18 +1059,26 @@ namespace AquaModelLibrary.Extra
             List<int> rootSiblings = new List<int>();
             flver.Bones = new List<FLVER.Bone>();
 
+            AquaUtil.WriteBones(initialFilePath + "_pre.aqn", aqn);
+            DebugDumpWorldBonesToFile(aqn, 1);
+            List<Matrix4x4> matList = new List<Matrix4x4>();
+            AquaNode aqn2 = new AquaNode();
+            aqn2.nodeList = new List<NODE>();
+
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 var aqBone = aqn.nodeList[i];
                 Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
-                aqBoneWorldTfm *= mirrorMat;
+                aqBoneWorldTfm *= mirrorMatX;
+                aqBoneWorldTfm = MathExtras.SetMatrixScale(aqBoneWorldTfm, new Vector3(1, 1, 1));
 
                 //Set the inverted transform so when we read it back we can use it for parent calls
                 Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
-                aqn.nodeList[i].SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
+                aqBone.SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
+                aqn.nodeList[i] = aqBone;
 
                 FLVER.Bone bone = new FLVER.Bone();
-                bone.Name = aqBone.boneName.GetString();
+                var name = bone.Name = aqBone.boneName.GetString();
                 bone.BoundingBoxMax = MaxBoundingBoxByBone.ContainsKey(i) ? MaxBoundingBoxByBone[i] : defaultMaxBound;
                 bone.BoundingBoxMin = MinBoundingBoxByBone.ContainsKey(i) ? MinBoundingBoxByBone[i] : defaultMinBound;
                 bone.Unk3C = bone.Name.ToUpper().EndsWith("NUB") ? 1 : 0;
@@ -970,24 +1099,82 @@ namespace AquaModelLibrary.Extra
                     //Parent is already mirrored from earlier processing
                     var parBoneInvTfm = aqn.nodeList[aqBone.parentId].GetInverseBindPoseMatrix();
                     localTfm = Matrix4x4.Multiply(aqBoneWorldTfm, parBoneInvTfm);
-                }
 
+                    Matrix4x4.Invert(aqn.nodeList[aqBone.parentId].GetInverseBindPoseMatrix(), out var parBoneTfm);
+                    Matrix4x4.Invert(localTfm * parBoneTfm, out var newInvTfm);
+                    AquaNode.NODE node = aqBone;
+                    node.SetInverseBindPoseMatrix(newInvTfm);
+                    aqn2.nodeList.Add(node);
+                    
+                    Matrix4x4.Decompose(localTfm, out var tempScale, out var tempRotation, out var tempTranslation);
+                    var eulerAngles2 = MathExtras.QuaternionToEulerRadiansNoHandle(tempRotation);
+
+                    var matrix = Matrix4x4.Identity;
+                    matrix *= Matrix4x4.CreateScale(tempScale);
+                    var tempRotationMtx = Matrix4x4.CreateFromQuaternion(tempRotation);
+                    matrix *= tempRotationMtx;
+                    matrix *= Matrix4x4.CreateTranslation(tempTranslation);
+
+
+
+                    var matrix2 = Matrix4x4.Identity;
+                    matrix2 *= Matrix4x4.CreateScale(tempScale);
+                    var tempRotationMtx2 = Matrix4x4.CreateRotationX(eulerAngles2.X) *
+                        Matrix4x4.CreateRotationY(eulerAngles2.Y) *
+                        Matrix4x4.CreateRotationZ(eulerAngles2.Z);
+
+                    matrix2 *= tempRotationMtx2;
+                    matrix2 *= Matrix4x4.CreateTranslation(tempTranslation);
+
+                    var matrix3 = Matrix4x4.Identity;
+                    matrix3 *= Matrix4x4.CreateScale(tempScale);
+                    var tempQuat = MathExtras.EulerToQuaternion(eulerAngles2 * (float)(180 / Math.PI));
+                    matrix *= Matrix4x4.CreateFromQuaternion(tempQuat);
+                    matrix3 *= tempRotationMtx2;
+                    matrix3 *= Matrix4x4.CreateTranslation(tempTranslation);
+
+
+
+                    var matrix4 = Matrix4x4.Identity;
+                    matrix4 *= Matrix4x4.CreateScale(tempScale);
+                    var tempRotationMtx3 = Matrix4x4.CreateRotationX(eulerAngles2.X) *
+                        Matrix4x4.CreateRotationZ(eulerAngles2.Z) *
+                        Matrix4x4.CreateRotationY(eulerAngles2.Y);
+
+                    matrix4 *= tempRotationMtx3;
+                    matrix4 *= Matrix4x4.CreateTranslation(tempTranslation);
+
+
+                    var eulerAngles3 = MathExtras.QuaternionToEulerRadiansNoHandle(tempRotation);
+                    var afafQuat = tempRotation;
+                    var tempQuat2 = MathExtras.EulerToQuaternion(eulerAngles3 * (float)(180 / Math.PI));
+
+                    var world = aqBoneWorldTfm;
+                    var recalcedWorld = localTfm * parBoneTfm;
+                    var recalcedWorld2 = matrix * parBoneTfm;
+                    var recalcedWorld3 = matrix2 * parBoneTfm;
+                    var recalcedWorld4 = matrix3 * parBoneTfm;
+                    var recalcedWorld5 = matrix4 * parBoneTfm;
+                }
                 Matrix4x4.Decompose(localTfm, out var scale, out var rotation, out var translation);
+                matList.Add(localTfm);
 
                 bone.Translation = translation;
 
-                //Swap to XZY
-                var eulerAngles = MathExtras.QuaternionToEulerRadians(rotation);
-                /*var temp = eulerAngles.Y;
-                eulerAngles.Y = eulerAngles.Z;
-                eulerAngles.Z = temp;*/
-
+                //Rotate order based on scale x y z values as a hack? (ex. if direction for y is -1 instead of x, do different order 
+                var eulerAngles = MathExtras.QuaternionToEulerRadiansNoHandle(rotation);
                 bone.Rotation = eulerAngles;
                 bone.Scale = new Vector3(1, 1, 1);
-                var mat = bone.ComputeLocalTransform();
 
+                var mat = bone.ComputeLocalTransform();
+                matList.Add(mat);
                 flver.Bones.Add(bone);
             }
+            DebugDumpLocalBonesToFile((FLVER0)flver, 1);
+            DebugDumpWorldBonesToFile(aqn, 2);
+            DebugDumpWorldBonesToFile(aqn2, 3);
+            DebugDumpLocalM4BonesToFile(matList, 1);
+            AquaUtil.WriteBones(initialFilePath + "_post.aqn", aqn);
 
             flver.Header.BoundingBoxMax = (Vector3)maxBounding;
             flver.Header.BoundingBoxMin = (Vector3)minBounding;

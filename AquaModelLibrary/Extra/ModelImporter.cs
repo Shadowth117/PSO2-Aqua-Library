@@ -922,7 +922,7 @@ namespace AquaModelLibrary
                     //worldMat *= parMatrix;
                     worldMat = GetWorldTransform(aiNode);
                 }
-                worldMat = SetMatrixScale1(worldMat);
+                worldMat = SetMatrixScale(worldMat);
                 Matrix4x4.Invert(worldMat, out var worldMatInv);
                 node.m1 = new Vector4(worldMatInv.M11, worldMatInv.M12, worldMatInv.M13, worldMatInv.M14);
                 node.m2 = new Vector4(worldMatInv.M21, worldMatInv.M22, worldMatInv.M23, worldMatInv.M24);
@@ -986,18 +986,6 @@ namespace AquaModelLibrary
             {
                 IterateAiNodesAQP(aqp, aqn, aiScene, childNode, nodeMat, baseScale, boneDict);
             }
-        }
-
-        //There's probably a better way to do this, but I am no math king
-        private static Matrix4x4 SetMatrixScale1(Matrix4x4 worldMat)
-        {
-            Matrix4x4 mat;
-            Matrix4x4.Decompose(worldMat, out var scaleMat, out var rotMat, out var posMat);
-            mat = Matrix4x4.Identity;
-            mat *= Matrix4x4.CreateScale(new Vector3(1, 1, 1));
-            mat *= Matrix4x4.CreateFromQuaternion(rotMat);
-            mat *= Matrix4x4.CreateTranslation(posMat);
-            return mat;
         }
 
         public static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale, Dictionary<string, int> boneDict)

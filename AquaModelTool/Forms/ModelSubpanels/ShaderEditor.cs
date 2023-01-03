@@ -250,6 +250,7 @@ namespace AquaModelTool
                 var extra = ngsShad.shadExtra[currentExtraId];
                 var vec4 = extra.entryFloats;
 
+                colorDialog.Color = ARGBFromRGBAVector3((float)valueXUD.Value, (float)valueYUD.Value, (float)valueZUD.Value);
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {
                     vec4.X = (float)colorDialog.Color.R / 255;

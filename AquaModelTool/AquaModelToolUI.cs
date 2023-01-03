@@ -2403,7 +2403,7 @@ namespace AquaModelTool
                         boneLocalInvInvRots.Add(invInvRot);
                     }
                     boneLocalRots.Add(rot);
-                    boneLocalQuats.Add(AquaModelLibrary.Extra.MathExtras.EulerToQuaternion(node.eulRot.X, node.eulRot.Y, node.eulRot.Z));
+                    boneLocalQuats.Add(AquaModelLibrary.Extra.MathExtras.EulerToQuaternion(node.eulRot));
                     Matrix4x4 mat = Matrix4x4.Identity;
 
                     mat *= Matrix4x4.CreateScale(scale);
@@ -2505,7 +2505,7 @@ namespace AquaModelTool
                     }
                     sb.AppendLine($"Pos {node.pos.X} {node.pos.Y} {node.pos.Z}");
                     sb.AppendLine($"Euler Rot {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}");
-                    var quat = MathExtras.EulerToQuaternion(node.eulRot.X, node.eulRot.Y, node.eulRot.Z);
+                    var quat = MathExtras.EulerToQuaternion(node.eulRot);
                     sb.AppendLine($"Euler Rot to Quat {quat.X} {quat.Y} {quat.Z} {quat.W}");
                     sb.AppendLine($"Scale {node.scale.X} {node.scale.Y} {node.scale.Z}");
                     sb.AppendLine($"");
