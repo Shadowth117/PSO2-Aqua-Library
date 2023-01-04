@@ -2488,8 +2488,6 @@ namespace AquaModelTool
                 AquaUtil aqua = new AquaUtil();
                 aqua.ReadBones(openFileDialog.FileName);
 
-                StringBuilder sb3 = new StringBuilder();
-                StringBuilder sb2 = new StringBuilder();
                 StringBuilder sb = new StringBuilder();
                 var bn = aqua.aquaBones[0];
                 for (int i = 0; i < bn.nodeList.Count; i++)
@@ -2505,14 +2503,29 @@ namespace AquaModelTool
                     }
                     sb.AppendLine($"Pos {node.pos.X} {node.pos.Y} {node.pos.Z}");
                     sb.AppendLine($"Euler Rot {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}");
-                    var quat = MathExtras.EulerToQuaternion(node.eulRot);
-                    sb.AppendLine($"Euler Rot to Quat {quat.X} {quat.Y} {quat.Z} {quat.W}");
+                    var quatXyz = MathExtras.EulerToQuaternionByOrder(node.eulRot, RotationOrder.XYZ);
+                    var quatXzy = MathExtras.EulerToQuaternionByOrder(node.eulRot, RotationOrder.XZY);
+                    var quatYzx = MathExtras.EulerToQuaternionByOrder(node.eulRot, RotationOrder.YZX);
+                    var quatYxz = MathExtras.EulerToQuaternionByOrder(node.eulRot, RotationOrder.YXZ);
+                    var quatZxy = MathExtras.EulerToQuaternionByOrder(node.eulRot, RotationOrder.ZXY);
+                    var quatZyx = MathExtras.EulerToQuaternionByOrder(node.eulRot, RotationOrder.ZYX);
+                    sb.AppendLine($"XYZ Euler Rot to Quat {quatXyz.X} {quatXyz.Y} {quatXyz.Z} {quatXyz.W}");
+                    sb.AppendLine($"XZY Euler Rot to Quat {quatXzy.X} {quatXzy.Y} {quatXzy.Z} {quatXzy.W}");
+                    sb.AppendLine($"YZX Euler Rot to Quat {quatYzx.X} {quatYzx.Y} {quatYzx.Z} {quatYzx.W}");
+                    sb.AppendLine($"YXZ Euler Rot to Quat {quatYxz.X} {quatYxz.Y} {quatYxz.Z} {quatYxz.W}");
+                    sb.AppendLine($"ZXY Euler Rot to Quat {quatZxy.X} {quatZxy.Y} {quatZxy.Z} {quatZxy.W}");
+                    sb.AppendLine($"ZYX Euler Rot to Quat {quatZyx.X} {quatZyx.Y} {quatZyx.Z} {quatZyx.W}");
                     sb.AppendLine($"Scale {node.scale.X} {node.scale.Y} {node.scale.Z}");
                     sb.AppendLine($"");
 
                     Matrix4x4.Invert(node.GetInverseBindPoseMatrix(), out var mat);
                     Matrix4x4.Decompose(mat, out var scale, out var rotation, out var pos);
-                    Vector3 localEulRot;
+                    Vector3 localEulRotXyz;
+                    Vector3 localEulRotXzy;
+                    Vector3 localEulRotYzx;
+                    Vector3 localEulRotYxz;
+                    Vector3 localEulRotZxy;
+                    Vector3 localEulRotZyx;
                     Vector3 worldEulRot = MathExtras.QuaternionToEuler(rotation);
                     Quaternion localQuat;
                     Quaternion invParentRot = new Quaternion(-1, -1, -1, -1);
@@ -2522,28 +2535,38 @@ namespace AquaModelTool
                         Matrix4x4.Decompose(parMat, out var parScale, out var parRot, out var parPos);
                         var invParRot = Quaternion.Inverse(parRot);
                         localQuat = rotation * invParRot;
-                        localEulRot = MathExtras.QuaternionToEuler(rotation * invParRot);
+                        localEulRotXyz = MathExtras.QuaternionToEulerByOrder(rotation * invParRot, RotationOrder.XYZ);
+                        localEulRotXzy = MathExtras.QuaternionToEulerByOrder(rotation * invParRot, RotationOrder.XZY);
+                        localEulRotYzx = MathExtras.QuaternionToEulerByOrder(rotation * invParRot, RotationOrder.YZX);
+                        localEulRotYxz = MathExtras.QuaternionToEulerByOrder(rotation * invParRot, RotationOrder.YXZ);
+                        localEulRotZxy = MathExtras.QuaternionToEulerByOrder(rotation * invParRot, RotationOrder.ZXY);
+                        localEulRotZyx = MathExtras.QuaternionToEulerByOrder(rotation * invParRot, RotationOrder.ZYX);
                         invParentRot = invParRot;
                     } else
                     {
-                        localEulRot = worldEulRot;
+                        localEulRotXyz = worldEulRot;
+                        localEulRotXzy = MathExtras.QuaternionToEulerByOrder(rotation, RotationOrder.XZY);
+                        localEulRotYzx = MathExtras.QuaternionToEulerByOrder(rotation, RotationOrder.YZX);
+                        localEulRotYxz = MathExtras.QuaternionToEulerByOrder(rotation, RotationOrder.YXZ);
+                        localEulRotZxy = MathExtras.QuaternionToEulerByOrder(rotation, RotationOrder.ZXY);
+                        localEulRotZyx = MathExtras.QuaternionToEulerByOrder(rotation, RotationOrder.ZYX);
                         localQuat = rotation;
                     }
                     sb.AppendLine($"Inv Bind World Pos {pos.X} {pos.Y} {pos.Z}");
-                    sb.AppendLine($"Inv Bind Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}");
+                    sb.AppendLine($"XYZ Inv Bind Local Euler Rot {localEulRotXyz.X} {localEulRotXyz.Y} {localEulRotXyz.Z}");
+                    sb.AppendLine($"XZY Inv Bind Local Euler Rot {localEulRotXzy.X} {localEulRotXzy.Y} {localEulRotXzy.Z}");
+                    sb.AppendLine($"YZX Inv Bind Local Euler Rot {localEulRotYzx.X} {localEulRotYzx.Y} {localEulRotYzx.Z}");
+                    sb.AppendLine($"YXZ Inv Bind Local Euler Rot {localEulRotYxz.X} {localEulRotYxz.Y} {localEulRotYxz.Z}");
+                    sb.AppendLine($"ZXY Inv Bind Local Euler Rot {localEulRotZxy.X} {localEulRotZxy.Y} {localEulRotZxy.Z}");
+                    sb.AppendLine($"ZYX Inv Bind Local Euler Rot {localEulRotZyx.X} {localEulRotZyx.Y} {localEulRotZyx.Z}");
                     sb.AppendLine($"Inv Bind World Euler Rot {worldEulRot.X} {worldEulRot.Y} {worldEulRot.Z}");
                     sb.AppendLine($"Inv Bind Local Quat Rot {localQuat.X} {localQuat.Y} {localQuat.Z} {localQuat.W}");
                     sb.AppendLine($"Inv Bind World Quat Rot {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
                     sb.AppendLine($"Inv Bind World Scale {scale.X} {scale.Y} {scale.Z}");
                     sb.AppendLine($"===");
                     sb.AppendLine($"");
-
-                    sb3.AppendLine($"{{ {{Bone {i}}}  {{NGS Sibling {node.ngsRotationOrderChangeCounter}}} {{Inverse Parent World Quaternion Rotation {invParentRot.X} {invParentRot.Y} {invParentRot.Z} {invParentRot.W}}} {{World Quaternion Rotation {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}}} {{Local Euler Rotation {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}}} {{Generated Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}}} }}");
-                    sb2.AppendLine($"{{ {{Bone {i}}} {{Inverse Parent World Quaternion Rotation {invParentRot.X} {invParentRot.Y} {invParentRot.Z} {invParentRot.W}}} {{World Quaternion Rotation {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}}} {{Local Euler Rotation {node.eulRot.X} {node.eulRot.Y} {node.eulRot.Z}}} {{Generated Local Euler Rot {localEulRot.X} {localEulRot.Y} {localEulRot.Z}}} }}");
                 }
                 File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}.txt", sb.ToString());
-                File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}_GPT.txt", sb2.ToString());
-                File.WriteAllText($"C:\\{Path.GetFileName(openFileDialog.FileName)}_GPT2.txt", sb3.ToString());
             }
         }
 

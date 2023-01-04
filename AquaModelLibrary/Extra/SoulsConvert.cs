@@ -434,7 +434,7 @@ namespace AquaModelLibrary.Extra
                 {
                     minTest.Z = flverBone.Rotation.Z;
                 }
-                Matrix4x4 mat = flverBone.ComputeLocalTransform(order);
+                Matrix4x4 mat = flverBone.ComputeLocalTransform();
                 mat *= tfmMat;
 
                 //If there's a parent, multiply by it

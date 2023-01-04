@@ -19,4 +19,8 @@
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).dll&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(ProjectName).exe&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).exe&quot;" />
+  </Target>
+
 </Project>

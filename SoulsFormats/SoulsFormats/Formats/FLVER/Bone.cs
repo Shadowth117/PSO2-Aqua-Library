@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace SoulsFormats
 {
@@ -9,14 +10,20 @@ namespace SoulsFormats
         /// </summary>
         public class Bone
         {
+
+            /// <summary>
+            /// Flags to help handle rotation ordering
+            /// </summary>
             public enum RotationOrder
             {
-                XYZ,
-                XZY,
-                YXZ,
-                YZX,
-                ZXY,
-                ZYX
+                XYZ = 0b_0000_0101,
+                XZY = 0b_0000_0011,
+                YXZ = 0b_0000_0110,
+                YZX = 0b_0000_1011,
+                ZXY = 0b_0000_1101,
+                ZYX = 0b_0000_1110,
+                undefined = 0b_0000_0111,
+                undefined2 = 0b_0000_1111,
             }
             /// <summary>
             /// Corresponds to the name of a bone in the parent skeleton, if present.
@@ -89,11 +96,13 @@ namespace SoulsFormats
             /// <summary>
             /// Creates a transformation matrix from the scale, rotation, and translation of the bone.
             /// </summary>
-            public Matrix4x4 ComputeLocalTransform(RotationOrder order = RotationOrder.XZY)
+            public Matrix4x4 ComputeLocalTransform()
             {
                 var mat = Matrix4x4.CreateScale(Scale);
 
-                switch(order)
+                RotationOrder order = GetRotationOrder();
+
+                switch (order)
                 {
                     case RotationOrder.XYZ:
                         mat *= Matrix4x4.CreateRotationX(Rotation.X);
@@ -125,11 +134,25 @@ namespace SoulsFormats
                         mat *= Matrix4x4.CreateRotationY(Rotation.Y);
                         mat *= Matrix4x4.CreateRotationX(Rotation.X);
                         break;
+                    default: //XZY as default
+                        mat *= Matrix4x4.CreateRotationX(Rotation.X);
+                        mat *= Matrix4x4.CreateRotationZ(Rotation.Z);
+                        mat *= Matrix4x4.CreateRotationY(Rotation.Y);
+                        break;
                 }
 
                 mat *= Matrix4x4.CreateTranslation(Translation);
 
                 return mat;
+            }
+
+            private RotationOrder GetRotationOrder()
+            {
+                int xHigh = Math.Abs(Rotation.X) > 90 ? 1 : 0;
+                int yHigh = Math.Abs(Rotation.Y) > 90 ? 1 : 0;
+                int zHigh = Math.Abs(Rotation.Z) > 90 ? 1 : 0;
+                int order = xHigh + yHigh + zHigh;
+                return (RotationOrder)order;
             }
 
             /// <summary>
