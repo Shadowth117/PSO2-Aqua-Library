@@ -314,6 +314,25 @@ namespace AquaModelLibrary.Extra
                 return RotationOrder.XYZ;
         }
 
+        public static RotationOrder DetermineRotationOrderCombinationSouls(Quaternion quat)
+        {
+            var rotMat = Matrix4x4.CreateFromQuaternion(quat);
+            if ((Math.Abs(rotMat.M12) >= 0.9999999) || (Math.Abs(rotMat.M21) >= 0.9999999))
+            {
+                return RotationOrder.XZY;
+            }
+            else if ((Math.Abs(rotMat.M13) >= 0.9999999) || (Math.Abs(rotMat.M31) >= 0.9999999))
+            {
+                return RotationOrder.XYZ;
+            }
+            else if ((Math.Abs(rotMat.M23) >= 0.9999999) || (Math.Abs(rotMat.M32) < 0.9999999))
+            {
+                return RotationOrder.YXZ;
+            }
+
+            return RotationOrder.XZY;
+        }
+
         //Adapted from https://github.com/mrdoob/three.js/blob/4d6d52aca6fd714fbf0aedb16ce0b8da5701e681/src/math/Euler.js#L105
         public static Vector3 QuaternionToEulerRadians(Quaternion quat, RotationOrder order = RotationOrder.XYZ)
         {
