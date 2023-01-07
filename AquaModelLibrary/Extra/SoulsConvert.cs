@@ -920,11 +920,7 @@ namespace AquaModelLibrary.Extra
             List<int> rootSiblings = new List<int>();
             flver.Bones = new List<FLVER.Bone>();
 
-            AquaUtil.WriteBones(initialFilePath + "_pre.aqn", aqn);
-            List<Matrix4x4> matList = new List<Matrix4x4>();
-            AquaNode aqn2 = new AquaNode();
-            aqn2.nodeList = new List<NODE>();
-
+            //Set up bones
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 var aqBone = aqn.nodeList[i];
@@ -961,20 +957,16 @@ namespace AquaModelLibrary.Extra
                     localTfm = Matrix4x4.Multiply(aqBoneWorldTfm, parBoneInvTfm);
                 }
                 Matrix4x4.Decompose(localTfm, out var scale, out var rotation, out var translation);
-                matList.Add(localTfm);
 
                 bone.Translation = translation;
-                Debug.WriteLine($"{i} {name} {rotation.X:F6} {rotation.Y:F6} {rotation.Z:F6} {rotation.W:F6} - {scale.X} {scale.Y} {scale.Z}");
-                //Rotate order based on scale x y z values as a hack? (ex. if direction for y is -1 instead of x, do different order)
+
                 var eulerAngles = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
                 bone.Rotation = eulerAngles;
                 bone.Scale = new Vector3(1, 1, 1);
 
                 var mat = bone.ComputeLocalTransform();
-                matList.Add(mat);
                 flver.Bones.Add(bone);
             }
-            AquaUtil.WriteBones(initialFilePath + "_post.aqn", aqn);
 
             flver.Header.BoundingBoxMax = (Vector3)maxBounding;
             flver.Header.BoundingBoxMin = (Vector3)minBounding;
