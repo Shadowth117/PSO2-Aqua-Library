@@ -916,10 +916,9 @@ namespace AquaModelLibrary
                 Matrix4x4 worldMat;
                 var localMat = SwapRow4Column4Mat4(GetMat4FromAssimpMat4(aiNode.Transform));
                 worldMat = localMat;
+
                 if (node.parentId != -1)
                 {
-                    //Matrix4x4.Invert(aqn.nodeList[node.parentId].GetInverseBindPoseMatrix(), out var parMatrix);
-                    //worldMat *= parMatrix;
                     worldMat = GetWorldTransform(aiNode);
                 }
                 worldMat = SetMatrixScale(worldMat);

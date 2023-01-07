@@ -316,7 +316,18 @@ namespace AquaModelLibrary.AquaMethods
 
         public static string ReadCString(BufferedStreamReader streamReader, int blockSize = 0x100)
         {
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
+            var pos = streamReader.Position();
+            var strLen = streamReader.BaseStream().Length;
+            if (strLen <= pos + blockSize)
+            {
+                blockSize = (int)(strLen - pos);
+            }
+            //Past end of file
+            if(blockSize <= 0)
+            {
+                return null;
+            }
+            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(pos, blockSize)); //Shouldn't ever be more than 0x60... in theory
             return str.Remove(str.IndexOf(char.MinValue));
         }
 

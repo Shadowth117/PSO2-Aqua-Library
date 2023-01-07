@@ -242,6 +242,7 @@ namespace AquaModelLibrary.Extra
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
+            GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateUILists(pso2_binDir, outputDirectory);
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateMusicData(pso2_binDir, musicDirOut);
@@ -249,7 +250,6 @@ namespace AquaModelLibrary.Extra
             GenerateAreaData(pso2_binDir, stageDirOut);
             GenerateRoomLists(pso2_binDir, outputDirectory);
             GenerateUnitLists(pso2_binDir, outputDirectory);
-            GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);

@@ -418,7 +418,6 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         Quaternion rotation;
 
         Matrix4x4::Decompose(localTransformation, scale, rotation, translation);
-
         FbxVector4 eulerAngles;
         eulerAngles.SetXYZ(FbxQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
 

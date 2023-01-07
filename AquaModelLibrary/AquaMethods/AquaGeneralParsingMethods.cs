@@ -1249,7 +1249,10 @@ namespace AquaModelLibrary
                 var bookmark = streamReader.Position();
                 streamReader.Seek(strPtr + offset, SeekOrigin.Begin);
                 var str = ReadCString(streamReader);
-                
+                if(str == null)
+                {
+                    str = $"value_{i}";
+                }
                 lps.fVarDict.Add(str, flt);
 
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
@@ -1264,7 +1267,10 @@ namespace AquaModelLibrary
                 var str = ReadCString(streamReader);
                 streamReader.Seek(strPtr2 + offset, SeekOrigin.Begin);
                 var str2 = ReadCString(streamReader);
-
+                if (str == null)
+                {
+                    str = $"value_{i}";
+                }
                 lps.stringVarDict.Add(str, str2);
 
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
@@ -1279,7 +1285,10 @@ namespace AquaModelLibrary
                 var str = ReadCString(streamReader);
                 streamReader.Seek(strPtr2 + offset, SeekOrigin.Begin);
                 var str2 = ReadCString(streamReader);
-
+                if (str == null)
+                {
+                    str = $"value_{i}";
+                }
                 lps.areaEntryExitDefaults.Add(str, str2);
 
                 streamReader.Seek(bookmark, SeekOrigin.Begin);
@@ -1294,7 +1303,10 @@ namespace AquaModelLibrary
                 var str = ReadCString(streamReader);
                 streamReader.Seek(strPtr2 + offset, SeekOrigin.Begin);
                 var str2 = ReadCString(streamReader);
-
+                if (str == null)
+                {
+                    str = $"value_{i}";
+                }
                 lps.areaEntryExitDefaults2.Add(str, str2);
 
                 streamReader.Seek(bookmark, SeekOrigin.Begin);

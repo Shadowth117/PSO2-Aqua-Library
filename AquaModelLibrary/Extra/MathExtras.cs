@@ -10,7 +10,7 @@ namespace AquaModelLibrary.Extra
         YXZ,
         YZX,
         ZXY,
-        ZYX
+        ZYX,
     }
 
     public static class MathExtras
@@ -266,13 +266,14 @@ namespace AquaModelLibrary.Extra
             return angles;
         }
 
-        public static Vector3 QuaternionToEulerOld(Quaternion quat, RotationOrder order = RotationOrder.XYZ)
+        public static Vector3 QuaternionToEulerOld(Quaternion quat)
         {
-            return QuaternionToEulerRadiansOld(quat, order) * (float)(180 / Math.PI);
+            return QuaternionToEulerRadiansOld(quat) * (float)(180 / Math.PI);
         }
 
         //Based on C++ code at https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-        public static Vector3 QuaternionToEulerRadiansOld(Quaternion quat, RotationOrder order = RotationOrder.XYZ)
+        //Handles Gimbal Lock on Y axis
+        public static Vector3 QuaternionToEulerRadiansOld(Quaternion quat)
         {
             Vector3 angles;
 
@@ -296,41 +297,30 @@ namespace AquaModelLibrary.Extra
             return angles;
         }
 
-        public static RotationOrder DetermineRotationOrder(Quaternion quat)
+        public static RotationOrder GetRotationOrder(Quaternion quat)
         {
-            var rotMat = Matrix4x4.CreateFromQuaternion(quat);
-            if (Math.Abs(rotMat.M13) >= 0.9999999)
+            double sinr_cosp = 2 * (quat.W * quat.X + quat.Y * quat.Z);
+            double sinp = 2 * (quat.W * quat.Y - quat.Z * quat.X);
+            double siny_cosp = 2 * (quat.W * quat.Z + quat.X * quat.Y);
+
+            bool xHigh = Math.Abs(sinr_cosp) >= 1;
+            bool yHigh = Math.Abs(sinp) >= 1;
+            bool zHigh = Math.Abs(siny_cosp) >= 1;
+
+            if (!yHigh)
             {
                 return RotationOrder.XYZ;
             }
-            else if (Math.Abs(rotMat.M23) >= 0.9999999)
-            {
-                return RotationOrder.YXZ;
-            } else 
-            {
-                //
-            }
-
-                return RotationOrder.XYZ;
-        }
-
-        public static RotationOrder DetermineRotationOrderCombinationSouls(Quaternion quat)
-        {
-            var rotMat = Matrix4x4.CreateFromQuaternion(quat);
-            if ((Math.Abs(rotMat.M12) >= 0.9999999) || (Math.Abs(rotMat.M21) >= 0.9999999))
+            else if (!zHigh)
             {
                 return RotationOrder.XZY;
             }
-            else if ((Math.Abs(rotMat.M13) >= 0.9999999) || (Math.Abs(rotMat.M31) >= 0.9999999))
-            {
-                return RotationOrder.XYZ;
-            }
-            else if ((Math.Abs(rotMat.M23) >= 0.9999999) || (Math.Abs(rotMat.M32) < 0.9999999))
+            else if (!xHigh)
             {
                 return RotationOrder.YXZ;
             }
 
-            return RotationOrder.XZY;
+            return RotationOrder.XYZ;
         }
 
         //Adapted from https://github.com/mrdoob/three.js/blob/4d6d52aca6fd714fbf0aedb16ce0b8da5701e681/src/math/Euler.js#L105
@@ -425,19 +415,6 @@ namespace AquaModelLibrary.Extra
                         angles.Y = 0;
                     }
                     break;
-            }
-            
-            if(float.IsNaN(angles.X))
-            {
-                var a = 0;
-            }
-            if (float.IsNaN(angles.Y))
-            {
-                var b = 0;
-            }
-            if (float.IsNaN(angles.Z))
-            {
-                var c = 0;
             }
 
             return angles;
