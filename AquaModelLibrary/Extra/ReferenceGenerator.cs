@@ -2055,13 +2055,13 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
                     output = AddHQBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash},";
                     }
                     output += AddOutfitSound(pso2_binDir, soundId);
+                    output += "\n";
                 }
                 else
                 {
@@ -2079,9 +2079,9 @@ namespace AquaModelLibrary.Extra
                     //Set icon string
                     output += "," + GetCostumeOuterIconString(pso2_binDir, finalIdIcon);
 
-                    output += "\n";
                     output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
                     output += AddOutfitSound(pso2_binDir, soundId);
+                    output += "\n";
                 }
 
                 //Decide which type this is
@@ -2230,7 +2230,6 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
                     output = AddBasewearExtraFiles(output, reb, pso2_binDir, false);
 
                     output += ",[HQ Ice]," + rebExHash;
@@ -2239,13 +2238,13 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
                     output = AddHQBasewearExtraFiles(output, rebEx, pso2_binDir, false);
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash},";
                     }
                     output += AddOutfitSound(pso2_binDir, soundId);
+                    output += "\n";
                 }
                 else
                 {
@@ -2268,9 +2267,9 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
                     output = AddBasewearExtraFiles(output, classic, pso2_binDir, true);
                     output += AddOutfitSound(pso2_binDir, soundId);
+                    output += "\n";
                 }
 
                 //Decide which type this is
@@ -2370,8 +2369,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
@@ -2509,20 +2506,17 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
-
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
-
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash},";
                     }
+                    output += "\n";
                 }
                 else
                 {
@@ -2653,21 +2647,19 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
-
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
-
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}\n";
+                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}";
                     }
                     output += AddOutfitSound(pso2_binDir, soundId);
+
+                    output += "\n";
                 }
                 else
                 {
@@ -2689,9 +2681,9 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
+                    output += AddOutfitSound(pso2_binDir, soundId);
 
                     output += "\n";
-                    output += AddOutfitSound(pso2_binDir, soundId);
 
                 }
 
@@ -2787,8 +2779,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
@@ -2925,8 +2915,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
@@ -3578,8 +3566,6 @@ namespace AquaModelLibrary.Extra
                         output += ", (Not found)";
                     }
 
-                    output += "\n";
-
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
@@ -3684,8 +3670,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
@@ -3794,8 +3778,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
@@ -3915,8 +3897,6 @@ namespace AquaModelLibrary.Extra
                     {
                         output += ", (Not found)";
                     }
-
-                    output += "\n";
 
                     output += ",[HQ Ice]," + rebExHash;
                     if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
@@ -5197,12 +5177,23 @@ namespace AquaModelLibrary.Extra
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
-                output += $",[Alt Model],{rpCheck}\n";
+                output += $",[Alt Model],{rpCheck},";
             }
             //Aqv archive
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
             {
-                output += $",[Aqv],{bmCheck}\n";
+                output += $",[Aqv],{bmCheck},";
+            }
+            var rebootBm = GetRebootHash(bmCheck);
+            //NGS Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
+            {
+                output += $",[HQ NGS Aqv],{rebootBm},";
+            }
+            //NGS NA Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
+            {
+                output += $",[HQ NGS NA Aqv],{rebootBm},";
             }
 
             //NGS doesn't have these sorts of files
@@ -5211,7 +5202,7 @@ namespace AquaModelLibrary.Extra
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
-                    output += $",[Hand Textures],{hnCheck}\n";
+                    output += $",[Hand Textures],{hnCheck},";
                 }
             }
 
@@ -5226,12 +5217,23 @@ namespace AquaModelLibrary.Extra
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
-                output += $",[HQ Alt Model],{rpCheck}\n";
+                output += $",[HQ Alt Model],{rpCheck},";
             }
             //Aqv archive
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
             {
-                output += $",[HQ Aqv],{bmCheck}\n";
+                output += $",[HQ Aqv],{bmCheck},";
+            }
+            var rebootBm = GetRebootHash(bmCheck);
+            //NGS Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
+            {
+                output += $",[HQ NGS Aqv],{rebootBm},";
+            }
+            //NGS NA Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
+            {
+                output += $",[HQ NGS NA Aqv],{rebootBm},";
             }
 
             //NGS doesn't have these sorts of files
@@ -5240,7 +5242,7 @@ namespace AquaModelLibrary.Extra
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
-                    output += $",[HQ Hand Textures],{hnCheck}\n";
+                    output += $",[HQ Hand Textures],{hnCheck},";
                 }
             }
 
@@ -5264,13 +5266,24 @@ namespace AquaModelLibrary.Extra
 
         public static string AddBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
         {
-            string rpCheck, hnCheck;
-            GetBasewearExtraFileStrings(fname, out rpCheck, out hnCheck);
+            string rpCheck, hnCheck, bmCheck;
+            GetBasewearExtraFileStrings(fname, out rpCheck, out hnCheck, out bmCheck);
 
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
-                output += $",[Alt Model],{rpCheck}\n";
+                output += $",[Alt Model],{rpCheck},";
+            }
+            var rebootBm = GetRebootHash(bmCheck);
+            //NGS Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
+            {
+                output += $",[HQ NGS Aqv],{rebootBm},";
+            }
+            //NGS NA Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
+            {
+                output += $",[HQ NGS NA Aqv],{rebootBm},";
             }
 
             //NGS doesn't have these sorts of files
@@ -5279,7 +5292,7 @@ namespace AquaModelLibrary.Extra
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
-                    output += $",[Hand Textures],{hnCheck}\n";
+                    output += $",[Hand Textures],{hnCheck},";
                 }
             }
 
@@ -5287,13 +5300,24 @@ namespace AquaModelLibrary.Extra
         }
         public static string AddHQBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
         {
-            string rpCheck, hnCheck;
-            GetHQBasewearExtraFileStrings(fname, out rpCheck, out hnCheck);
+            string rpCheck, hnCheck, bmCheck;
+            GetHQBasewearExtraFileStrings(fname, out rpCheck, out hnCheck, out bmCheck);
 
             //_rp alt model
             if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
             {
-                output += $",[HQ Alt Model],{rpCheck}\n";
+                output += $",[HQ Alt Model],{rpCheck},";
+            }
+            var rebootBm = GetRebootHash(bmCheck);
+            //NGS Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
+            {
+                output += $",[HQ NGS Aqv],{rebootBm},";
+            }
+            //NGS NA Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
+            {
+                output += $",[HQ NGS NA Aqv],{rebootBm},";
             }
 
             //NGS doesn't have these sorts of files
@@ -5302,25 +5326,27 @@ namespace AquaModelLibrary.Extra
                 //Hand textures
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
                 {
-                    output += $",[HQ Hand Textures],{hnCheck}\n";
+                    output += $",[HQ Hand Textures],{hnCheck},";
                 }
             }
 
             return output;
         }
 
-        public static void GetBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck)
+        public static void GetBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck, out string bmCheck)
         {
             rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
             hnCheck = GetFileHash(fname.Replace("bw", "ho"));
             //If not basewear, hn. If basewear, ho
+            bmCheck = GetFileHash(fname.Replace("bw", "bm"));
         }
 
-        public static void GetHQBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck)
+        public static void GetHQBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck, out string bmCheck)
         {
             rpCheck = GetFileHash(fname.Replace("_ex.ice", "_rp_ex.ice"));
             hnCheck = GetFileHash(fname.Replace("bw", "ho"));
             //If not basewear, hn. If basewear, ho
+            bmCheck = GetFileHash(fname.Replace("bw", "bm"));
         }
 
         public static string AddOutfitSound(string pso2_binDir, int soundId)
@@ -5341,10 +5367,10 @@ namespace AquaModelLibrary.Extra
                 string castSoundFile = GetFileHash(soundFileLegUnhash);
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, castSoundFile)))
                 {
-                    return $",[Footstep sounds],{castSoundFile}\n";
+                    return $",[Footstep sounds],{castSoundFile},";
                 } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
                 {
-                    return $",[Footstep sounds],{soundFile}\n";
+                    return $",[Footstep sounds],{soundFile},";
                 }
             }
 
