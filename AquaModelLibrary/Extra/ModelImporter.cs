@@ -701,7 +701,7 @@ namespace AquaModelLibrary
         }
 
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
-        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn)
+        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true)
         {
             AquaUtil aquaUtil = new AquaUtil();
             Assimp.AssimpContext context = new Assimp.AssimpContext();
@@ -795,7 +795,7 @@ namespace AquaModelLibrary
             AquaUtilData.ModelSet set = new AquaUtilData.ModelSet();
             set.models.Add(aqp);
             aquaUtil.aquaModels.Add(set);
-            aquaUtil.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, true);
+            aquaUtil.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, true, false, condenseMaterials);
 
             //AQPs created this way will require more processing to finish.
             //-Texture lists in particular, MUST be generated as what exists is not valid without serious errors
@@ -915,6 +915,8 @@ namespace AquaModelLibrary
                 //Assign transform data
                 Matrix4x4 worldMat;
                 var localMat = SwapRow4Column4Mat4(GetMat4FromAssimpMat4(aiNode.Transform));
+                Matrix4x4.Decompose(localMat, out var scale, out var rot, out var pos);
+                
                 worldMat = localMat;
 
                 if (node.parentId != -1)

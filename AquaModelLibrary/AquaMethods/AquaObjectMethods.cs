@@ -1932,7 +1932,9 @@ namespace AquaModelLibrary
             outModel.tempMats = model.tempMats;
         }
 
-        public static void SplitMeshByMaterial(AquaObject model, AquaObject outModel)
+        //Seemingly not necessary on pso2 data since this split is already a requirement
+        //Therefore, we only operate on temp data
+        public static void SplitMeshByMaterialTempData(AquaObject model, AquaObject outModel)
         {
             for (int i = 0; i < model.tempTris.Count; i++)
             {

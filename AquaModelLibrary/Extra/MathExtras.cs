@@ -109,7 +109,7 @@ namespace AquaModelLibrary.Extra
         /// <param name="angle"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        private static Quaternion EulerToQuaternionRadian(Vector3 angle, RotationOrder order = RotationOrder.XYZ)
+        public static Quaternion EulerToQuaternionRadian(Vector3 angle, RotationOrder order = RotationOrder.XYZ)
         {
             float x = angle.X;
             float y = angle.Y;

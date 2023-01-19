@@ -3406,7 +3406,7 @@ namespace AquaModelTool
                     if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
                     {
                         aquaUI.aqua.aquaModels.Add(set);
-                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true, false);
                         set.models[0].ConvertToLegacyTypes();
                         set.models[0].CreateTrueVertWeights();
 
@@ -3981,6 +3981,24 @@ namespace AquaModelTool
         private void exportWithMetadataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             exportWithMetadataToolStripMenuItem.Checked = !exportWithMetadataToolStripMenuItem.Checked;
+        }
+
+        private void readMCGMCPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select MCP/MCG File",
+                Filter = "MCP/MCG files|*.mcg;*.mcp",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ReadSoulsFile(file);
+                }
+            }
         }
     }
 }

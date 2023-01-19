@@ -41,6 +41,44 @@ namespace AquaModelLibrary.Extra
                                                             0, 1, 0, 0,
                                                             0, 0, -1, 0,
                                                             0, 0, 0, 1);
+
+        public static void ReadSoulsFile(string filePath)
+        {
+            var raw = File.ReadAllBytes(filePath);
+            if(filePath.EndsWith(".mcg"))
+            {
+                var mcg = SoulsFormats.SoulsFile<SoulsFormats.MCG>.Read(raw);
+                int maxA = 0;
+                int maxB = 0;
+                Debug.WriteLine($"mcg edge count == {mcg.Edges.Count}");
+                Debug.WriteLine($"mcg node count == {mcg.Nodes.Count}");
+                string edgesText = "";
+                for(int i = 0; i < mcg.Edges.Count; i++)
+                {
+                    edgesText += $"Edge {i}\n";
+                    edgesText += $"  Unk Indices A:\n    ";
+                    for(int j = 0; j < mcg.Edges[i].UnkIndicesA.Count; j++)
+                    {
+                        edgesText += $"{mcg.Edges[i].UnkIndicesA[j]}, ";
+                        maxA = Math.Max(maxA, mcg.Edges[i].UnkIndicesA[j]);
+                    }
+                    edgesText += "\n";
+                    edgesText += $"  Unk Indices B:\n    ";
+                    for (int j = 0; j < mcg.Edges[i].UnkIndicesB.Count; j++)
+                    {
+                        edgesText += $"{mcg.Edges[i].UnkIndicesB[j]}, ";
+                        maxB = Math.Max(maxB, mcg.Edges[i].UnkIndicesB[j]);
+                    }
+                    edgesText += "\n";
+                }
+                Debug.Write(edgesText);
+                Debug.WriteLine($"Max A: {maxA}\nMax B: {maxB}");
+            } else if(filePath.EndsWith(".mcp"))
+            {
+                var mcp = SoulsFormats.SoulsFile<SoulsFormats.MCP>.Read(raw);
+            }
+        }
+
         public static AquaObject ReadFlver(string filePath, out AquaNode aqn, bool useMetaData = false)
         {
             SoulsFormats.IFlver flver = null;
@@ -50,14 +88,6 @@ namespace AquaModelLibrary.Extra
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
-                //Dump metadata
-                if (useMetaData)
-                {
-                    string materialData = JsonConvert.SerializeObject(flver.Materials, jss);
-                    string dummyData = JsonConvert.SerializeObject(flver.Dummies, jss);
-                    File.WriteAllText(filePath + ".matData.json", materialData);
-                    File.WriteAllText(filePath + ".dummyData.json", dummyData);
-                }
             }
             else if (SoulsFormats.SoulsFile<SoulsFormats.FLVER2>.Is(raw))
             {
@@ -70,14 +100,27 @@ namespace AquaModelLibrary.Extra
                 {
                     string materialData = JsonConvert.SerializeObject(mdl4.Materials, jss);
                     string dummyData = JsonConvert.SerializeObject(mdl4.Dummies, jss);
+                    string boneData = JsonConvert.SerializeObject(mdl4.Bones, jss);
                     File.WriteAllText(filePath + ".matData.json", materialData);
                     File.WriteAllText(filePath + ".dummyData.json", dummyData);
+                    File.WriteAllText(filePath + ".boneData.json", boneData);
                 }
 
                 aqn = null;
                 return MDL4ToAqua(mdl4, out aqn, useMetaData);
             }
-            aqn = null;
+            aqn = null;  
+            
+            //Dump metadata
+            if (useMetaData)
+            {
+                string materialData = JsonConvert.SerializeObject(flver.Materials, jss);
+                string dummyData = JsonConvert.SerializeObject(flver.Dummies, jss);
+                string boneData = JsonConvert.SerializeObject(flver.Bones, jss);
+                File.WriteAllText(filePath + ".matData.json", materialData);
+                File.WriteAllText(filePath + ".dummyData.json", dummyData);
+                File.WriteAllText(filePath + ".boneData.json", boneData);
+            }
             return FlverToAqua(flver, out aqn, useMetaData);
         }
 
@@ -330,6 +373,14 @@ namespace AquaModelLibrary.Extra
 
                 aqNode.scale = new Vector3(1, 1, 1);
 
+#if DEBUG
+                var xyz = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.XYZ);
+                var xzy = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.XZY);
+                var yxz = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.YXZ);
+                var yzx = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.YZX);
+                var zxy = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.ZXY);
+                var zyx = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.ZYX);
+#endif
                 Matrix4x4.Invert(mat, out var invMat);
                 aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                 aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
@@ -356,9 +407,6 @@ namespace AquaModelLibrary.Extra
                 aqn.nodeList[i] = bone;
                 testRecompile.Add(MathExtras.SetMatrixScale(mat));
             }
-#if DEBUG
-            AquaUtil.WriteBones(@"A:\Games\Demon's Souls (USA)\PS3_GAME\USRDIR\chr\c2000\" + "c2000 - Copy.fbx_initialMirror.aqn", aqn);
-#endif
 
             for (int i = 0; i < flver.Meshes.Count; i++)
             {
@@ -517,13 +565,17 @@ namespace AquaModelLibrary.Extra
 
                 //Material
                 var mat = new AquaObject.GenericMaterial();
+                string matName; 
                 var flverMat = flver.Materials[mesh.MaterialIndex];
                 if(useMetaData)
                 {
-                    mat.matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";
+                    matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";
+                    mat.matName = matName;
+
                 } else
                 {
-                    mat.matName = $"{flverMat.Name}";
+                    matName = $"{flverMat.Name}";
+                    mat.matName = matName;
                 }
                 mat.texNames = new List<string>();
                 foreach (var tex in flverMat.Textures)
@@ -531,6 +583,7 @@ namespace AquaModelLibrary.Extra
                     mat.texNames.Add(Path.GetFileName(tex.Path));
                 }
                 aqp.tempMats.Add(mat);
+                aqp.matUnicodeNames.Add(matName);
             }
 
             return aqp;
@@ -543,7 +596,7 @@ namespace AquaModelLibrary.Extra
 
         public static IFlver ConvertModelToFlver(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, SoulsGame game, IFlver referenceFlver = null)
         {
-            var aqp = ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn);
+            var aqp = ModelImporter.AssimpAquaConvertFull(initialFilePath, scaleFactor, preAssignNodeIds, isNGS, out AquaNode aqn, false);
 
             //Demon's Souls has a limit of 28 bones per mesh.
             AquaObjectMethods.BatchSplitByBoneCount(aqp, 28, true);
@@ -585,8 +638,10 @@ namespace AquaModelLibrary.Extra
 
             var dummyPath = Path.ChangeExtension(initialFilePath, "flver.dummyData.json");
             var matPath = Path.ChangeExtension(initialFilePath, "flver.matData.json");
+            var bonePath = Path.ChangeExtension(initialFilePath, "flver.boneData.json");
             var dummyDataText = File.Exists(dummyPath) ? File.ReadAllText(dummyPath) : null;
             var materialDataText = File.Exists(matPath) ? File.ReadAllText(matPath) : null;
+            var boneDataText = File.Exists(bonePath) ? File.ReadAllText(bonePath) : null;
             //Dummies - Deserialize from JSON and apply if there's not a reference flver selected. Use reference flver if available
             if (referenceFlver != null)
             {
@@ -617,15 +672,16 @@ namespace AquaModelLibrary.Extra
             }
 
             flver.Materials = new List<FLVER0.Material>();
+            List<int> matIds = new List<int>();
             for (int i = 0; i < aqp.meshList.Count; i++)
             {
                 int pso2MatId = aqp.meshList[i].mateIndex;
                 var texList = AquaObjectMethods.GetTexListNames(aqp, aqp.meshList[i].tsetIndex);
                 var pso2Mat = aqp.mateList[pso2MatId];
                 string rawName;
-                if(aqp.matUnicodeNames.Count > i)
+                if(aqp.matUnicodeNames.Count > pso2MatId)
                 {
-                    rawName = aqp.matUnicodeNames[i];
+                    rawName = aqp.matUnicodeNames[pso2MatId];
                 } else
                 {
                     rawName = pso2Mat.matName.GetString();
@@ -635,23 +691,34 @@ namespace AquaModelLibrary.Extra
                 var matIndex = usedMaterials.IndexOf(name);
                 string mtd = null;
                 int ogMatIndex = -1;
+
+                //Use stored mtd name if possible 
                 if(nameSplit.Length > 1)
                 {
                     mtd = nameSplit[1];
+                    
+                    //Grab original material index if possible
                     if(nameSplit.Length > 2)
                     {
                         ogMatIndex = Int32.Parse(nameSplit[2]);
                     }
                 }
+
                 FLVER0.Material flvMat;
+                
+                //If we loaded maps externally and it's in range of that list, use it
                 if (metaMats != null && ogMatIndex < metaMats.Count && ogMatIndex != -1)
                 {
                     flvMat = metaMats[ogMatIndex];
+                    matIds.Add(flver.Materials.Count);
                     flver.Materials.Add(flvMat);
                     continue;
                 }
+
+                //If matIndex isn't -1, we're good and can leave. Otherwise, on with the defaults
                 if (matIndex != -1)
                 {
+                    matIds.Add(matIndex);
                     continue;
                 }
                 else
@@ -659,6 +726,7 @@ namespace AquaModelLibrary.Extra
                     usedMaterials.Add(name);
                     if (matDict.TryGetValue(name, out flvMat))
                     {
+                        matIds.Add(flver.Materials.Count);
                         flver.Materials.Add(flvMat);
                         continue;
                     }
@@ -690,8 +758,9 @@ namespace AquaModelLibrary.Extra
                     flvMat.Layouts.Add(mtdDict["p_metal[dsb]_skin.mtd"]);
                     flvMat.MTD = "p_metal[dsb]_skin.mtd";
                 }
-                flver.Materials.Add(flvMat);
 
+                matIds.Add(flver.Materials.Count);
+                flver.Materials.Add(flvMat);
             }
 
             //Bones store bounding which encompass the extents of all vertices onto which they are weighted.
@@ -711,11 +780,11 @@ namespace AquaModelLibrary.Extra
                 var faces = aqp.strips[mesh.psetIndex];
                 var shader = aqp.shadList[mesh.shadIndex];
                 var render = aqp.rendList[mesh.rendIndex];
-                var flvMat = flver.Materials[mesh.mateIndex];
+                var flvMat = flver.Materials[matIds[i]];
 
                 FLVER0.Mesh flvMesh = new FLVER0.Mesh();
-                flvMesh.MaterialIndex = (byte)mesh.mateIndex;
-                flvMesh.BackfaceCulling = render.twosided > 0;
+                flvMesh.MaterialIndex = (byte)matIds[i];
+                flvMesh.BackfaceCulling = false;
                 //flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
                 flvMesh.Dynamic = 1;
                 flvMesh.Vertices = new List<FLVER.Vertex>();
@@ -920,52 +989,66 @@ namespace AquaModelLibrary.Extra
             List<int> rootSiblings = new List<int>();
             flver.Bones = new List<FLVER.Bone>();
 
-            //Set up bones
-            for (int i = 0; i < aqn.nodeList.Count; i++)
+            if(boneDataText == null)
             {
-                var aqBone = aqn.nodeList[i];
-                Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
-                aqBoneWorldTfm *= mirrorMatX;
-                aqBoneWorldTfm = MathExtras.SetMatrixScale(aqBoneWorldTfm);
-
-                //Set the inverted transform so when we read it back we can use it for parent calls
-                Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
-                aqBone.SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
-                aqn.nodeList[i] = aqBone;
-
-                FLVER.Bone bone = new FLVER.Bone();
-                var name = bone.Name = aqBone.boneName.GetString();
-                bone.BoundingBoxMax = MaxBoundingBoxByBone.ContainsKey(i) ? MaxBoundingBoxByBone[i] : defaultMaxBound;
-                bone.BoundingBoxMin = MinBoundingBoxByBone.ContainsKey(i) ? MinBoundingBoxByBone[i] : defaultMinBound;
-                bone.Unk3C = bone.Name.ToUpper().EndsWith("NUB") ? 1 : 0;
-                bone.ParentIndex = (short)aqBone.parentId;
-                bone.ChildIndex = (short)aqBone.firstChild;
-                bone.PreviousSiblingIndex = (short)GetPreviousSibling(aqn.nodeList, i, rootSiblings);
-                bone.NextSiblingIndex = (short)aqn.nodeList[i].nextSibling;
-                bone.ChildIndex = (short)aqn.nodeList[i].firstChild;
-
-                Matrix4x4 localTfm;
-                if (aqBone.parentId == -1)
+                //Set up bones
+                for (int i = 0; i < aqn.nodeList.Count; i++)
                 {
-                    rootSiblings.Add(i);
-                    localTfm = aqBoneWorldTfm;
-                } else
-                {
-                    //Calc local transforms
-                    //Parent is already mirrored from earlier processing
-                    var parBoneInvTfm = aqn.nodeList[aqBone.parentId].GetInverseBindPoseMatrix();
-                    localTfm = Matrix4x4.Multiply(aqBoneWorldTfm, parBoneInvTfm);
+                    var aqBone = aqn.nodeList[i];
+                    Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
+                    aqBoneWorldTfm *= mirrorMatX;
+                    aqBoneWorldTfm = MathExtras.SetMatrixScale(aqBoneWorldTfm, new Vector3(1, 1, 1));
+
+                    //Set the inverted transform so when we read it back we can use it for parent calls
+                    Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
+                    aqBone.SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
+                    aqn.nodeList[i] = aqBone;
+
+                    FLVER.Bone bone = new FLVER.Bone();
+                    var name = bone.Name = aqBone.boneName.GetString();
+                    bone.BoundingBoxMax = MaxBoundingBoxByBone.ContainsKey(i) ? MaxBoundingBoxByBone[i] : defaultMaxBound;
+                    bone.BoundingBoxMin = MinBoundingBoxByBone.ContainsKey(i) ? MinBoundingBoxByBone[i] : defaultMinBound;
+                    bone.Unk3C = bone.Name.ToUpper().EndsWith("NUB") ? 1 : 0;
+                    bone.ParentIndex = (short)aqBone.parentId;
+                    bone.ChildIndex = (short)aqBone.firstChild;
+                    bone.PreviousSiblingIndex = (short)GetPreviousSibling(aqn.nodeList, i, rootSiblings);
+                    bone.NextSiblingIndex = (short)aqn.nodeList[i].nextSibling;
+                    bone.ChildIndex = (short)aqn.nodeList[i].firstChild;
+
+                    Matrix4x4 localTfm;
+                    if (aqBone.parentId == -1)
+                    {
+                        rootSiblings.Add(i);
+                        localTfm = aqBoneWorldTfm;
+                    }
+                    else
+                    {
+                        //Calc local transforms
+                        //Parent is already mirrored from earlier processing
+                        var parBoneInvTfm = aqn.nodeList[aqBone.parentId].GetInverseBindPoseMatrix();
+                        localTfm = Matrix4x4.Multiply(aqBoneWorldTfm, parBoneInvTfm);
+                    }
+                    Matrix4x4.Decompose(localTfm, out var scale, out var rotation, out var translation);
+
+                    bone.Translation = translation;
+
+                    var eulerAngles = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
+#if DEBUG
+                    var eulerAngles2 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XYZ);
+                    var eulerAngles3 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.YXZ);
+                    var eulerAngles4 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.YZX);
+                    var eulerAngles5 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.ZXY);
+                    var eulerAngles6 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.ZYX);
+#endif
+                    bone.Rotation = eulerAngles;
+                    bone.Scale = new Vector3(1, 1, 1);
+
+                    var mat = bone.ComputeLocalTransform();
+                    flver.Bones.Add(bone);
                 }
-                Matrix4x4.Decompose(localTfm, out var scale, out var rotation, out var translation);
-
-                bone.Translation = translation;
-
-                var eulerAngles = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
-                bone.Rotation = eulerAngles;
-                bone.Scale = new Vector3(1, 1, 1);
-
-                var mat = bone.ComputeLocalTransform();
-                flver.Bones.Add(bone);
+            } else
+            {
+                flver.Bones = JsonConvert.DeserializeObject<List<FLVER.Bone>>(boneDataText);
             }
 
             flver.Header.BoundingBoxMax = (Vector3)maxBounding;
@@ -976,46 +1059,51 @@ namespace AquaModelLibrary.Extra
 
         private static int GetPreviousSibling(List<NODE> nodeList, int boneIndex, List<int> rootSiblings)
         {
+            //Nothing CAN be before this
             if(boneIndex == 0)
             {
                 return -1;
             }
 
+            //Handle root specially; loop through the root siblings
             var curBone = nodeList[boneIndex];
-            if(curBone.parentId == -1)
+            int currentPreviousSibling = -1;
+            if (curBone.parentId == -1)
             {
-                int currentPreviousRootSibling = -1;
                 for(int i = 0; i < rootSiblings.Count; i++)
                 {
-                    if (rootSiblings[i] < boneIndex && rootSiblings[i] > currentPreviousRootSibling)
+                    if (rootSiblings[i] < boneIndex && rootSiblings[i] > currentPreviousSibling)
                     {
-                        currentPreviousRootSibling = rootSiblings[i];
+                        currentPreviousSibling = rootSiblings[i];
                     }
                 }
 
-                return currentPreviousRootSibling;
+                return currentPreviousSibling;
             }
 
             var parBone = nodeList[curBone.parentId];
 
+            //Return early if this is the first child
             if (parBone.firstChild == boneIndex)
             {
                 return -1;
             }
 
             var curSiblingBone = nodeList[parBone.firstChild];
-
+            currentPreviousSibling = parBone.firstChild;
+            
+            //Loop through each next sibling since we've set these already
             while (curSiblingBone.nextSibling != -1)
             {
-                if (curSiblingBone.nextSibling == boneIndex)
+                if (curSiblingBone.nextSibling >= boneIndex)
                 {
-                    return curSiblingBone.nextSibling;
+                    return currentPreviousSibling;
                 }
-
+                currentPreviousSibling = curSiblingBone.nextSibling;
                 curSiblingBone = nodeList[curSiblingBone.nextSibling];
             }
 
-            throw new Exception("Misconfigured ");
+            return currentPreviousSibling;
         }
 
         private static void AddUV(FLVER.Vertex vert, AquaObject.VTXL vtxl, int vertId)
