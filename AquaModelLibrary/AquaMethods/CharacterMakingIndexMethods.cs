@@ -1751,6 +1751,11 @@ namespace AquaModelLibrary
                     body.body40cap = streamReader.Read<BODY40Cap>();
                 }
 
+                if(rel0DataStart >= jan25_23TableAddressInt)
+                {
+                    body.body2023_1 = streamReader.Read<BODY2023_1>();
+                }
+
                 long temp = streamReader.Position();
 
                 if (IsValidOffset(body.body.dataStringPtr))
@@ -1787,6 +1792,16 @@ namespace AquaModelLibrary
                 {
                     streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
                     body.texString6 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body2023_1.nodeStrPtr_0))
+                {
+                    streamReader.Seek(body.body2023_1.nodeStrPtr_0 + offset, SeekOrigin.Begin);
+                    body.nodeString0 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.body2023_1.nodeStrPtr_1))
+                {
+                    streamReader.Seek(body.body2023_1.nodeStrPtr_1 + offset, SeekOrigin.Begin);
+                    body.nodeString1 = AquaGeneralMethods.ReadCString(streamReader);
                 }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);

@@ -22,6 +22,10 @@ namespace AquaModelLibrary.Extra
 {
     public unsafe class ReferenceGenerator
     {
+        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures";
+        public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures";
+        public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
+
         //Takes in pso2_bin directory and outputDirectory. From there, it will read to memory various files in order to determine namings. 
         //As win32_na is a patching folder, if it exists in the pso2_bin it will be prioritized for text related items.
         public unsafe static void OutputFileLists(string pso2_binDir, string outputDirectory)
@@ -273,7 +277,7 @@ namespace AquaModelLibrary.Extra
             loadTunnelsOut.Add($"PSO2 Classic Load Tunnel,{loadTunnelClassic},{GetFileHash(loadTunnelClassic)}");
             loadTunnelsOut.Add($"NGS Load Tunnel,{loadTunnelReboot},{GetRebootHash(GetFileHash(loadTunnelReboot))}");
 
-            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "LoadTunnels.csv"), loadTunnelsOut);
+            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "LoadTunnels.csv"), loadTunnelsOut, Encoding.UTF8);
 
             //---------------------------Stamps
             List<string> stampsOut = new List<string>();
@@ -306,11 +310,11 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
-            File.WriteAllLines(Path.Combine(outputStampDirectory, "stamps.csv"), stampsOut);
+            File.WriteAllLines(Path.Combine(outputStampDirectory, "stamps.csv"), stampsOut, Encoding.UTF8);
             if(stampsNAOut.Count > 0)
             {
                 stampsNAOut.Insert(0, "These stamp files are used specifically for the Global version when English language options are selected.");
-                File.WriteAllLines(Path.Combine(outputStampDirectory, "stampsNA.csv"), stampsNAOut);
+                File.WriteAllLines(Path.Combine(outputStampDirectory, "stampsNA.csv"), stampsNAOut, Encoding.UTF8);
             }
 
         }
@@ -1128,89 +1132,90 @@ namespace AquaModelLibrary.Extra
             //MySpace 
             var rebootfilename = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(mySpaceObjectSettingsIce)));
 
-            iceFile = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(rebootfilename)));
-            files.AddRange(iceFile.groupOneFiles);
-            files.AddRange(iceFile.groupTwoFiles);
-
-            roomGoodsOut.Add("Data is laid out as follows:\nObject Name (if known), Object Function, Animation type, category 1, category 2, object unhashed name, object hashed name, object _ex textures hashed name\n\n");
-            for (int i = 0; i < files.Count; i++)
+            if(File.Exists(rebootfilename))
             {
-                var name = IceFile.getFileName(files[i]);
-                if (name == mySpaceObjectSettingsMso)
+                iceFile = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(rebootfilename)));
+                files.AddRange(iceFile.groupOneFiles);
+                files.AddRange(iceFile.groupTwoFiles);
+
+                roomGoodsOut.Add("Data is laid out as follows:\nObject Name (if known), Object Function, Animation type, category 1, category 2, object unhashed name, object hashed name, object _ex textures hashed name\n\n");
+                for (int i = 0; i < files.Count; i++)
                 {
-                    var mso = AquaUtil.LoadMSO("mso\0", files[i]);
-                    List<string> msoInfo = new List<string>();
-                    msoInfo.Add("Name, Descriptor, Group Name, [Traits]");
-                    foreach (var entry in mso.msoEntries)
+                    var name = IceFile.getFileName(files[i]);
+                    if (name == mySpaceObjectSettingsMso)
                     {
-                        var objFile1 = $"object/map_object/{entry.asciiName}_l1.ice";
-                        var objFile2 = $"object/map_object/{entry.asciiName}_l2.ice";
-                        var objFile3 = $"object/map_object/{entry.asciiName}_l3.ice";
-                        var objFile4 = $"object/map_object/{entry.asciiName}_l4.ice";
-                        var objFileCol = $"object/map_object/{entry.asciiName}_col.ice";
-                        var objFileCom = $"object/map_object/{entry.asciiName}_com.ice";
-                        var objFileEff = $"object/map_object/{entry.asciiName}_eff.ice";
+                        var mso = AquaUtil.LoadMSO("mso\0", files[i]);
+                        List<string> msoInfo = new List<string>();
+                        msoInfo.Add("Name, Descriptor, Group Name, [Traits]");
+                        foreach (var entry in mso.msoEntries)
+                        {
+                            var objFile1 = $"object/map_object/{entry.asciiName}_l1.ice";
+                            var objFile2 = $"object/map_object/{entry.asciiName}_l2.ice";
+                            var objFile3 = $"object/map_object/{entry.asciiName}_l3.ice";
+                            var objFile4 = $"object/map_object/{entry.asciiName}_l4.ice";
+                            var objFileCol = $"object/map_object/{entry.asciiName}_col.ice";
+                            var objFileCom = $"object/map_object/{entry.asciiName}_com.ice";
+                            var objFileEff = $"object/map_object/{entry.asciiName}_eff.ice";
 
-                        var objFile1Hash = GetRebootHash(GetFileHash(objFile1));
-                        var objFile2Hash = GetRebootHash(GetFileHash(objFile2));
-                        var objFile3Hash = GetRebootHash(GetFileHash(objFile3));
-                        var objFile4Hash = GetRebootHash(GetFileHash(objFile4));
-                        var objFileColHash = GetRebootHash(GetFileHash(objFileCol));
-                        var objFileComHash = GetRebootHash(GetFileHash(objFileCom));
-                        var objFileEffHash = GetRebootHash(GetFileHash(objFileEff));
+                            var objFile1Hash = GetRebootHash(GetFileHash(objFile1));
+                            var objFile2Hash = GetRebootHash(GetFileHash(objFile2));
+                            var objFile3Hash = GetRebootHash(GetFileHash(objFile3));
+                            var objFile4Hash = GetRebootHash(GetFileHash(objFile4));
+                            var objFileColHash = GetRebootHash(GetFileHash(objFileCol));
+                            var objFileComHash = GetRebootHash(GetFileHash(objFileCom));
+                            var objFileEffHash = GetRebootHash(GetFileHash(objFileEff));
 
-                        string entryString = $"{entry.asciiName},{entry.utf8Descriptor.Replace(',', '_')},";
-                        bool found = false;
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
-                        {
-                            entryString += $"{objFile1Hash},";
-                            found = true;
-                        }
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile2Hash)))
-                        {
-                            entryString += $"{objFile2Hash},";
-                            found = true;
-                        }
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile3Hash)))
-                        {
-                            entryString += $"{objFile3Hash},";
-                            found = true;
-                        }
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile4Hash)))
-                        {
-                            entryString += $"{objFile4Hash},";
-                            found = true;
-                        }
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileColHash)))
-                        {
-                            entryString += $"{objFileColHash},";
-                            found = true;
-                        }
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileComHash)))
-                        {
-                            entryString += $"{objFileComHash},";
-                            found = true;
-                        }
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileEffHash)))
-                        {
-                            entryString += $"{objFileEffHash},";
-                            found = true;
-                        }
+                            string entryString = $"{entry.asciiName},{entry.utf8Descriptor.Replace(',', '_')},";
+                            bool found = false;
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
+                            {
+                                entryString += $"{objFile1Hash},";
+                                found = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile2Hash)))
+                            {
+                                entryString += $"{objFile2Hash},";
+                                found = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile3Hash)))
+                            {
+                                entryString += $"{objFile3Hash},";
+                                found = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile4Hash)))
+                            {
+                                entryString += $"{objFile4Hash},";
+                                found = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileColHash)))
+                            {
+                                entryString += $"{objFileColHash},";
+                                found = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileComHash)))
+                            {
+                                entryString += $"{objFileComHash},";
+                                found = true;
+                            }
+                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileEffHash)))
+                            {
+                                entryString += $"{objFileEffHash},";
+                                found = true;
+                            }
 
 
 
-                        entryString += $"{entry.groupName},[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]";
-                        if (found == false)
-                        {
-                            entryString += ",(Not Found)";
+                            entryString += $"{entry.groupName},[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]";
+                            if (found == false)
+                            {
+                                entryString += ",(Not Found)";
+                            }
+                            msoInfo.Add(entryString);
                         }
-                        msoInfo.Add(entryString);
+                        File.WriteAllLines(Path.Combine(roomOutDir, "MySpace Goods.csv"), msoInfo);
                     }
-                    File.WriteAllLines(Path.Combine(roomOutDir, "MySpace Goods.csv"), msoInfo);
                 }
             }
-
-
 
         }
 
@@ -1951,6 +1956,19 @@ namespace AquaModelLibrary.Extra
             //StringBuilder outputNGSCostumeFemale = new StringBuilder();
             StringBuilder outputUnknownWearables = new StringBuilder();
 
+            outputCostumeMale.AppendLine(partColumns);
+            outputCostumeFemale.AppendLine(partColumns);
+            outputCastBody.AppendLine(partColumns);
+            outputCasealBody.AppendLine(partColumns);
+            outputOuterMale.AppendLine(partColumns);
+            outputOuterFemale.AppendLine(partColumns);
+            outputCostumeMale.AppendLine(partColumns);
+            outputNGSOuterMale.AppendLine(partColumns);
+            outputNGSOuterFemale.AppendLine(partColumns);
+            outputNGSCastBody.AppendLine(partColumns);
+            outputNGSCasealBody.AppendLine(partColumns);
+            outputUnknownWearables.AppendLine(partColumns);
+
             //Build text Dict
             masterIdList = new List<int>();
             nameDicts = new List<Dictionary<int, string>>();
@@ -1968,26 +1986,29 @@ namespace AquaModelLibrary.Extra
             //There may also be hn files for these while basewear would have ho files for hand textures
             foreach (int id in masterIdList)
             {
-                string output = "";
+                PartData partData = new PartData();
                 bool named = false;
-                foreach (var dict in nameDicts)
+                for (int i = 0; i < nameDicts.Count; i++)
                 {
+                    var dict = nameDicts[i];
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
                         named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
+                partData.id = id;
 
                 //Account for lack of a name on an outfit
                 if (named == false)
                 {
-                    output = $"[Unnamed {id}]" + output;
+                    if(partData.namesByLanguage.Count > 0)
+                    {
+                        partData.namesByLanguage[0] = $"[Unnamed {id}]";
+                    } else
+                    {
+                        partData.namesByLanguage.Add($"[Unnamed {id}]");
+                    }
                 }
 
                 //Double check these ids and use an adjustedId if needed
@@ -2000,6 +2021,7 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.outerWearIdLink[id].bcln.fileId;
                 }
+                partData.adjustedId = adjustedId;
 
                 //Decide if bd or ow
                 int soundId = -1;
@@ -2037,31 +2059,32 @@ namespace AquaModelLibrary.Extra
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        output += ", (Not found)";
-                    }
                     //Set icon string
-                    output += "," + GetCostumeOuterIconString(pso2_binDir, id.ToString());
-
-                    output += "\n";
-                    output = AddBodyExtraFiles(output, reb, pso2_binDir, "_" + typeString, false);
-
-
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    GetCostumeOuterIconString(partData, pso2_binDir, id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
 
-                    output = AddHQBodyExtraFiles(output, rebEx, pso2_binDir, "_" + typeString, false);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+                    AddBodyExtraFiles(partData, reb, pso2_binDir, "_" + typeString, false);
+                    AddHQBodyExtraFiles(partData, rebEx, pso2_binDir, "_" + typeString, false);
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash},";
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
                     }
-                    output += AddOutfitSound(pso2_binDir, soundId);
-                    output += "\n";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
+                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2071,18 +2094,21 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
-                    //Set icon string
-                    output += "," + GetCostumeOuterIconString(pso2_binDir, finalIdIcon);
 
-                    output = AddBodyExtraFiles(output, classic, pso2_binDir, "_" + typeString, true);
-                    output += AddOutfitSound(pso2_binDir, soundId);
-                    output += "\n";
+                    //Set icon string
+                    GetCostumeOuterIconString(partData, pso2_binDir, finalIdIcon);
+
+                    AddBodyExtraFiles(partData, classic, pso2_binDir, "_" + typeString, true);
+                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
+
+                string output = partData.GetLine();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 10000)
@@ -2142,10 +2168,7 @@ namespace AquaModelLibrary.Extra
             WriteCSV(playerRebootDirOut, "CasealNGSBodies.csv", outputNGSCasealBody);
             //WriteCSV(playerRebootDirOut, "MaleNGSCostumes.csv", outputNGSCostumeMale);
             //WriteCSV(playerRebootDirOut, "FemaleNGSCostumes.csv", outputNGSCostumeFemale);
-            if (outputUnknownWearables.Length > 0)
-            {
-                WriteCSV(playerDirOut, "UnknownOutfits.csv", outputUnknownWearables);
-            }
+            WriteCSV(playerDirOut, "UnknownOutfits.csv", outputUnknownWearables);
 
             //---------------------------Parse out basewear
             StringBuilder outputBasewearMale = new StringBuilder();
@@ -2153,6 +2176,12 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputNGSBasewearMale = new StringBuilder();
             StringBuilder outputNGSBasewearFemale = new StringBuilder();
             StringBuilder outputNGSGenderlessBasewear = new StringBuilder();
+
+            outputBasewearMale.AppendLine(partColumns);
+            outputBasewearFemale.AppendLine(partColumns);
+            outputNGSBasewearMale.AppendLine(partColumns);
+            outputNGSBasewearFemale.AppendLine(partColumns);
+            outputNGSGenderlessBasewear.AppendLine(partColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -2168,27 +2197,15 @@ namespace AquaModelLibrary.Extra
             //There may also be hn files for these while basewear would have ho files for hand textures
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Get SoundID
                 int soundId = -1;
@@ -2205,6 +2222,8 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.baseWearIdLink[id].bcln.fileId;
                 }
+                partData.adjustedId = adjustedId;
+
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
@@ -2217,34 +2236,40 @@ namespace AquaModelLibrary.Extra
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
+
                     //Set icon string
                     var iconStr = GetBasewearIconString(id.ToString());
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBasewearIconStringUnhashed(id.ToString());
                     }
 
-                    output = AddBasewearExtraFiles(output, reb, pso2_binDir, false);
+                    AddBasewearExtraFiles(partData, reb, pso2_binDir, false);
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
 
-                    output = AddHQBasewearExtraFiles(output, rebEx, pso2_binDir, false);
+                    AddHQBasewearExtraFiles(partData, rebEx, pso2_binDir, false);
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash},";
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
                     }
-                    output += AddOutfitSound(pso2_binDir, soundId);
-                    output += "\n";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
+                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2254,23 +2279,26 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
-                    }
-                    //Set icon string
-                    var iconStr = GetBasewearIconString(finalIdIcon);
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
 
-                    output = AddBasewearExtraFiles(output, classic, pso2_binDir, true);
-                    output += AddOutfitSound(pso2_binDir, soundId);
-                    output += "\n";
+                    //Set icon string
+                    var iconStr = GetBasewearIconString(finalIdIcon);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBasewearIconStringUnhashed(id.ToString());
+                    }
+
+                    AddBasewearExtraFiles(partData, classic, pso2_binDir, true);
+                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
+
+                string output = partData.GetLine();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 30000)
@@ -2310,6 +2338,11 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputNGSInnerwearMale = new StringBuilder();
             StringBuilder outputNGSInnerwearFemale = new StringBuilder();
 
+            outputInnerwearMale.AppendLine(partColumns);
+            outputInnerwearFemale.AppendLine(partColumns);
+            outputNGSInnerwearMale.AppendLine(partColumns);
+            outputNGSInnerwearFemale.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "innerwear", true);
@@ -2322,27 +2355,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
@@ -2350,6 +2371,8 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.innerWearIdLink[id].bcln.fileId;
                 }
+                partData.adjustedId = adjustedId;
+
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
@@ -2358,25 +2381,24 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
+
                     string iconStr = GetInnerwearIconString(id.ToString());
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetInnerwearIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -2387,22 +2409,23 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
+
                     //Set icon string
                     var iconStr = GetInnerwearIconString(finalIdIcon);
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetInnerwearIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 30000)
@@ -2437,6 +2460,11 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputNGSCastArmMale = new StringBuilder();
             StringBuilder outputNGSCastArmFemale = new StringBuilder();
 
+            outputCastArmMale.AppendLine(partColumns);
+            outputCastArmFemale.AppendLine(partColumns);
+            outputNGSCastArmMale.AppendLine(partColumns);
+            outputNGSCastArmFemale.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "arm", true);
@@ -2449,27 +2477,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
@@ -2482,6 +2498,8 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.castArmIdLink[id].bcln.fileId;
                 }
+                partData.adjustedId = adjustedId;
+
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
@@ -2494,29 +2512,34 @@ namespace AquaModelLibrary.Extra
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     string iconStr = GetCastArmIconString(id.ToString());
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastArmIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
 
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash},";
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
                     }
-                    output += "\n";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
                 }
                 else
                 {
@@ -2526,22 +2549,22 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetCastArmIconString(finalIdIcon);
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastArmIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 50000)
@@ -2576,6 +2599,11 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputNGSCastLegMale = new StringBuilder();
             StringBuilder outputNGSCastLegFemale = new StringBuilder();
 
+            outputCastLegMale.AppendLine(partColumns);
+            outputCastLegFemale.AppendLine(partColumns);
+            outputNGSCastLegMale.AppendLine(partColumns);
+            outputNGSCastLegFemale.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "Leg", true); //Yeah for some reason this string starts capitalized while none of the others do... don't ask me.
@@ -2588,27 +2616,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id; 
@@ -2623,6 +2639,8 @@ namespace AquaModelLibrary.Extra
                 {
                     adjustedId = aquaCMX.clegIdLink[id].bcln.fileId;
                 }
+                partData.adjustedId = adjustedId;
+
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
                 {
@@ -2635,31 +2653,35 @@ namespace AquaModelLibrary.Extra
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     string iconStr = GetCastLegIconString(id.ToString());
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
 
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
                     {
-                        output += $",[Linked Inners (SQ, HQ)],{rebLinkedInnerHash},{rebLinkedInnerExHash}";
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
                     }
-                    output += AddOutfitSound(pso2_binDir, soundId);
-
-                    output += "\n";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
+                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2669,23 +2691,23 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetCastLegIconString(finalIdIcon);
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
                     }
-                    output += AddOutfitSound(pso2_binDir, soundId);
-
-                    output += "\n";
+                    AddOutfitSound(partData, pso2_binDir, soundId);
 
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 50000)
@@ -2725,6 +2747,16 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputNGSCastFemaleBodyPaint = new StringBuilder();
             StringBuilder outputNGSGenderlessBodyPaint = new StringBuilder();
 
+            outputMaleBodyPaint.AppendLine(partColumns);
+            outputFemaleBodyPaint.AppendLine(partColumns);
+            outputMaleLayeredBodyPaint.AppendLine(partColumns);
+            outputFemaleLayeredBodyPaint.AppendLine(partColumns);
+            outputNGSMaleBodyPaint.AppendLine(partColumns);
+            outputNGSFemaleBodyPaint.AppendLine(partColumns);
+            outputNGSCastMaleBodyPaint.AppendLine(partColumns);
+            outputNGSCastFemaleBodyPaint.AppendLine(partColumns);
+            outputNGSGenderlessBodyPaint.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint1", true);
@@ -2737,27 +2769,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -2767,26 +2787,24 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + bodyPaintIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    var iconStr = GetBodyPaintIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBodyPaintIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -2796,22 +2814,22 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
-                    var iconStr = GetFileHash(icon + bodyPaintIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    var iconStr = GetBodyPaintIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBodyPaintIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 10000)
@@ -2868,6 +2886,8 @@ namespace AquaModelLibrary.Extra
             //---------------------------Parse out stickers
             StringBuilder outputStickers = new StringBuilder();
 
+            outputStickers.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint2", true);
@@ -2880,27 +2900,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -2910,26 +2918,25 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
+
                     //Set icon string
                     var iconStr = GetFileHash(icon + stickerIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetStickerIconStringUnhashed(id.ToString());
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -2939,23 +2946,23 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + stickerIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetStickerIconStringUnhashed(id.ToString());
                     }
-
-                    output += "\n";
 
                 }
 
+                string output = partData.GetLine();
+                partData = null;
                 outputStickers.Append(output);
             }
             WriteCSV(playerDirOut, "Stickers.csv", outputStickers);
@@ -2965,6 +2972,11 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputFemaleHair = new StringBuilder();
             StringBuilder outputCasealHair = new StringBuilder();
             StringBuilder outputNGSHair = new StringBuilder();
+
+            outputMaleHair.AppendLine(hairColumns);
+            outputFemaleHair.AppendLine(hairColumns);
+            outputCasealHair.AppendLine(hairColumns);
+            outputNGSHair.AppendLine(hairColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -2978,27 +2990,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3015,11 +3015,18 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
                     //Set icon string
                     string maleIconStr;
                     string femaleIconStr;
@@ -3038,24 +3045,25 @@ namespace AquaModelLibrary.Extra
                         femaleIconStr = icon + hairIcon + iconFemale + id + ".ice";
                         castIconStr = icon + hairIcon + iconCast + id + ".ice";
                     }
-                    maleIconStr = GetFileHash(maleIconStr);
-                    femaleIconStr = GetFileHash(femaleIconStr);
-                    castIconStr = GetFileHash(castIconStr);
+                    var maleIconStrHash = GetFileHash(maleIconStr);
+                    var femaleIconStrHash = GetFileHash(femaleIconStr);
+                    var castIconStrHash = GetFileHash(castIconStr);
 
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStrHash)))
                     {
-                        output += "," + maleIconStr;
+                        partData.iconHash = maleIconStrHash;
+                        partData.iconName = maleIconStr;
                     }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStrHash)))
                     {
-                        output += "," + femaleIconStr;
+                        partData.iconOuterHash = femaleIconStrHash;
+                        partData.iconOuterName = femaleIconStr;
                     }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStrHash)))
                     {
-                        output += "," + castIconStr;
+                        partData.iconCastHash = castIconStrHash;
+                        partData.iconCastName = castIconStr;
                     }
-
-                    output += "\n";
                 }
                 else
                 {
@@ -3064,31 +3072,38 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
-                    var maleIconStr = GetFileHash(icon + hairIcon + iconMale + finalId + ".ice");
-                    var femaleIconStr = GetFileHash(icon + hairIcon + iconFemale + finalId + ".ice");
-                    var castIconStr = GetFileHash(icon + hairIcon + iconCast + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStr)))
-                    {
-                        output += "," + maleIconStr;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStr)))
-                    {
-                        output += "," + femaleIconStr;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStr)))
-                    {
-                        output += "," + castIconStr;
-                    }
+                    var maleIconStr = icon + hairIcon + iconMale + id + ".ice";
+                    var femaleIconStr = icon + hairIcon + iconFemale + id + ".ice";
+                    var castIconStr = icon + hairIcon + iconCast + id + ".ice";
+                    var maleIconStrHash = GetFileHash(maleIconStr);
+                    var femaleIconStrHash = GetFileHash(femaleIconStr);
+                    var castIconStrHash = GetFileHash(castIconStr);
 
-                    output += "\n";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStrHash)))
+                    {
+                        partData.iconHash = maleIconStrHash;
+                        partData.iconName = maleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStrHash)))
+                    {
+                        partData.iconOuterHash = femaleIconStrHash;
+                        partData.iconOuterName = femaleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStrHash)))
+                    {
+                        partData.iconCastHash = castIconStrHash;
+                        partData.iconCastName = castIconStr;
 
+                    }
                 }
+                string output = partData.GetLineAllIcons();
+                partData = null;
 
                 //Decide which type this is
                 if (id < 10000)
@@ -3117,39 +3132,30 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputEyes = new StringBuilder();
             StringBuilder outputNGSEyes = new StringBuilder();
 
+            outputEyes.AppendLine(partColumns);
+            outputNGSEyes.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "eye", true);
 
             //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
+            GatherDictKeys(masterIdList, aquaCMX.eyeDict.Keys);
 
             masterIdList.Sort();
 
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3159,20 +3165,18 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + eyeIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyeIconStringUnhashed(id.ToString());
                     }
-
-                    output += "\n";
                 }
                 else
                 {
@@ -3181,22 +3185,22 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + eyeIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyeIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id < 100000)
                 {
@@ -3214,6 +3218,9 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputEyebrows = new StringBuilder();
             StringBuilder outputNGSEyebrows = new StringBuilder();
 
+            outputEyebrows.AppendLine(partColumns);
+            outputNGSEyebrows.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "eyebrows", true);
@@ -3226,27 +3233,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3255,20 +3250,18 @@ namespace AquaModelLibrary.Extra
                     string rebEx = $"{rebootExStart}eb_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + eyeBrowsIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyebrowsIconStringUnhashed(id.ToString());
                     }
-
-                    output += "\n";
                 }
                 else
                 {
@@ -3277,22 +3270,22 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + eyeBrowsIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyebrowsIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id <= 100000)
                 {
@@ -3310,6 +3303,9 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputEyelashes = new StringBuilder();
             StringBuilder outputNGSEyelashes = new StringBuilder();
 
+            outputEyelashes.AppendLine(partColumns);
+            outputNGSEyelashes.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "eyelashes", true);
@@ -3322,27 +3318,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3351,20 +3335,18 @@ namespace AquaModelLibrary.Extra
                     string rebEx = $"{rebootExStart}el_{id}_ex.ice";
                     string rebHash = GetFileHash(reb);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + eyelashesIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyelashesIconStringUnhashed(id.ToString());
                     }
-
-                    output += "\n";
                 }
                 else
                 {
@@ -3373,22 +3355,22 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + eyelashesIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyelashesIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id <= 100000)
                 {
@@ -3404,6 +3386,7 @@ namespace AquaModelLibrary.Extra
 
             //---------------------------Parse out ACCE //Stored under decoy in a99be286e3a7e1b45d88a3ea4d6c18c4
             StringBuilder outputAccessories = new StringBuilder();
+            outputAccessories.AppendLine(acceColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -3419,8 +3402,9 @@ namespace AquaModelLibrary.Extra
             {
                 string output = "";
                 bool named = false;
-                foreach (var dict in nameDicts)
+                for (int i = 0; i < nameDicts.Count && i < 2; i++)
                 {
+                    var dict = nameDicts[i];
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
                         named = true;
@@ -3454,18 +3438,15 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        output += ", (Not found)";
-                    }
                     //Set icon string
                     var iconStr = GetFileHash(icon + accessoryIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    output += iconStr + ",";
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        output += rebHash;
                     }
+                    output += ",";
                 }
                 else
                 {
@@ -3474,21 +3455,15 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        output += ", (Not found)";
-                    }
                     //Set icon string
                     var iconStr = GetFileHash(icon + accessoryIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    output += iconStr + ",";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        output += $"{classicHash}";
                     }
+                    output += ",";
                 }
-
-                output += "\n";
 
                 //Add linked character nodes
                 if (aquaCMX.accessoryDict.ContainsKey(id))
@@ -3496,7 +3471,9 @@ namespace AquaModelLibrary.Extra
                     var acce = aquaCMX.accessoryDict[id];
 
                     output += $",{acce.nodeAttach1},{acce.nodeAttach2},{acce.nodeAttach3},{acce.nodeAttach4},{acce.nodeAttach5}," +
-                        $"{acce.nodeAttach6},{acce.nodeAttach7},{acce.nodeAttach8}";
+                        $"{acce.nodeAttach6},{acce.nodeAttach7},{acce.nodeAttach8},{acce.nodeAttach9},{acce.nodeAttach10}," +
+                        $"{acce.nodeAttach11},{acce.nodeAttach12},{acce.nodeAttach13},{acce.nodeAttach14},{acce.nodeAttach15},{acce.nodeAttach16}" +
+                        $",{acce.effectName}";
                 }
 
                 output += "\n";
@@ -3508,6 +3485,8 @@ namespace AquaModelLibrary.Extra
             //---------------------------Parse out skin
             StringBuilder outputSkin = new StringBuilder();
             StringBuilder outputNGSSkin = new StringBuilder();
+            outputSkin.AppendLine(partColumns);
+            outputNGSSkin.AppendLine(partColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -3521,27 +3500,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3551,28 +3518,26 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
 
                     //Set icon string
                     string iconStrTest = icon + skinIcon + GetIconGender(id) + id + ".ice";
                     var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetSkinIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebHash;
+                        partData.partExName = reb;
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -3582,23 +3547,23 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
 
                     //Set icon string
                     var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetSkinIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id < 100000)
                 {
@@ -3615,6 +3580,8 @@ namespace AquaModelLibrary.Extra
             //---------------------------Parse out FCP1, Face Textures
             StringBuilder outputFCP1 = new StringBuilder();
             StringBuilder outputNGSFCP1 = new StringBuilder();
+            outputFCP1.AppendLine(partColumns);
+            outputNGSFCP1.AppendLine(partColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -3628,27 +3595,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3658,26 +3613,24 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + faceIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -3687,22 +3640,23 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + faceIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
+
                 if (id <= 100000)
                 {
                     outputFCP1.Append(output);
@@ -3723,6 +3677,8 @@ namespace AquaModelLibrary.Extra
             //---------------------------Parse out FCP2
             StringBuilder outputFCP2 = new StringBuilder();
             StringBuilder outputNGSFCP2 = new StringBuilder();
+            outputFCP2.AppendLine(partColumns);
+            outputNGSFCP2.AppendLine(partColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -3736,27 +3692,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3766,26 +3710,24 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + facePaintIcon + id + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -3795,22 +3737,22 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
                     //Set icon string
                     var iconStr = GetFileHash(icon + facePaintIcon + finalId + ".ice");
-                    output += "," + iconStr;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                     {
-                        output += ", (Not found)";
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id <= 100000)
                 {
@@ -3839,6 +3781,16 @@ namespace AquaModelLibrary.Extra
             StringBuilder outputDewmanFemaleFace = new StringBuilder();
             StringBuilder outputNGSFace = new StringBuilder();
 
+            outputHumanMaleFace.AppendLine(partColumns);
+            outputHumanFemaleFace.AppendLine(partColumns);
+            outputNewmanMaleFace.AppendLine(partColumns);
+            outputNewmanFemaleFace.AppendLine(partColumns);
+            outputCastMaleFace.AppendLine(partColumns);
+            outputCastFemaleFace.AppendLine(partColumns);
+            outputDewmanMaleFace.AppendLine(partColumns);
+            outputDewmanFemaleFace.AppendLine(partColumns);
+            outputNGSFace.AppendLine(partColumns);
+
             masterIdList.Clear();
             nameDicts.Clear();
 
@@ -3854,8 +3806,7 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
 
                 string realId = "";
                 if (!faceIds.TryGetValue(id, out realId))
@@ -3868,21 +3819,10 @@ namespace AquaModelLibrary.Extra
                 {
                     if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name for a face
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 if (id >= 100000)
@@ -3892,19 +3832,17 @@ namespace AquaModelLibrary.Extra
                     string rebHash = GetFileHash(reb);
                     string rebExHash = GetFileHash(rebEx);
 
-                    output += rebHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
                     }
 
-                    output += ",[HQ Ice]," + rebExHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
-
-                    output += "\n";
 
                 }
                 else
@@ -3914,15 +3852,15 @@ namespace AquaModelLibrary.Extra
 
                     var classicHash = GetFileHash(classic);
 
-                    output += classicHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
                     }
 
-                    output += "\n";
-
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id < 10000)
                 {
@@ -3974,6 +3912,8 @@ namespace AquaModelLibrary.Extra
             //---------------------------Parse out Face motions
             StringBuilder outputFcmn = new StringBuilder();
             StringBuilder outputFcmnNGS = new StringBuilder();
+            outputFcmn.AppendLine(partColumns);
+            outputFcmnNGS.AppendLine(partColumns);
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -3986,27 +3926,15 @@ namespace AquaModelLibrary.Extra
             //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
             foreach (int id in masterIdList)
             {
-                string output = "";
-                bool named = false;
+                PartData partData = new PartData();
                 foreach (var dict in nameDicts)
                 {
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
-                        named = true;
-                        output += str + ",";
-                    }
-                    else
-                    {
-                        output += ",";
+                        partData.namesByLanguage.Add(str);
                     }
                 }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
+                partData.id = id;
 
                 //Decide if it needs to be handled as a reboot file or not
                 string typeString = "fm_";
@@ -4016,10 +3944,10 @@ namespace AquaModelLibrary.Extra
                     var partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
                     var partHash = GetFileHash(partName);
                     var partExHash = GetFileHash(partExName);
-                    output += partHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = partHash;
+                        partData.partName = partName;
                     }
                 }
                 else
@@ -4027,12 +3955,14 @@ namespace AquaModelLibrary.Extra
                     string finalId = $"{id:D5}";
                     var partName = $"{classicStart}{typeString}{finalId}.ice";
                     var partHash = GetFileHash(partName);
-                    output += partHash;
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
                     {
-                        output += ", (Not found)";
+                        partData.partHash = partHash;
+                        partData.partName = partName;
                     }
                 }
+                string output = partData.GetLine();
+                partData = null;
 
                 if (id < 100000)
                 {
@@ -4054,6 +3984,7 @@ namespace AquaModelLibrary.Extra
             if (aquaCMX.ngsEarDict.Count > 0 || masterIdList.Count > 0)
             {
                 StringBuilder outputNGSEars = new StringBuilder();
+                outputNGSEars.AppendLine(partColumns);
 
                 //Add potential cmx ids that wouldn't be stored in
                 GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
@@ -4063,27 +3994,15 @@ namespace AquaModelLibrary.Extra
                 //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
                 foreach (int id in masterIdList)
                 {
-                    string output = "";
-                    bool named = false;
+                    PartData partData = new PartData();
                     foreach (var dict in nameDicts)
                     {
                         if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                         {
-                            named = true;
-                            output += str + ",";
-                        }
-                        else
-                        {
-                            output += ",";
+                            partData.namesByLanguage.Add(str);
                         }
                     }
-                    output += $"{id},";
-
-                    //Account for lack of a name on an outfit
-                    if (named == false)
-                    {
-                        output = $"[Unnamed {id}]" + output;
-                    }
+                    partData.id = id;
 
                     //Decide if it needs to be handled as a reboot file or not
                     if (id >= 100000)
@@ -4092,20 +4011,18 @@ namespace AquaModelLibrary.Extra
                         string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
                         string rebHash = GetFileHash(reb);
 
-                        output += rebHash;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                         {
-                            output += ", (Not found)";
+                            partData.partHash = rebHash;
+                            partData.partName = reb;
                         }
                         //Set icon string
                         var iconStr = GetFileHash(icon + earIcon + id + ".ice");
-                        output += "," + iconStr;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                         {
-                            output += ", (Not found)";
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetEarIconStringUnhashed(id.ToString());
                         }
-
-                        output += "\n";
 
                     }
                     else
@@ -4115,22 +4032,22 @@ namespace AquaModelLibrary.Extra
 
                         var classicHash = GetFileHash(classic);
 
-                        output += classicHash;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                         {
-                            output += ", (Not found)";
+                            partData.partHash = classicHash;
+                            partData.partName = classic;
                         }
                         //Set icon string
                         var iconStr = GetFileHash(icon + earIcon + finalId + ".ice");
-                        output += "," + iconStr;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                         {
-                            output += ", (Not found)";
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetEarIconStringUnhashed(id.ToString());
                         }
 
-                        output += "\n";
-
                     }
+                    string output = partData.GetLine();
+                    partData = null;
 
                     outputNGSEars.Append(output);
 
@@ -4146,6 +4063,7 @@ namespace AquaModelLibrary.Extra
             if (aquaCMX.ngsTeethDict.Count > 0 || masterIdList.Count > 0)
             {
                 StringBuilder outputNGSTeeth = new StringBuilder();
+                outputNGSTeeth.AppendLine(partColumns);
 
                 //Add potential cmx ids that wouldn't be stored in
                 GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
@@ -4155,27 +4073,15 @@ namespace AquaModelLibrary.Extra
                 //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
                 foreach (int id in masterIdList)
                 {
-                    string output = "";
-                    bool named = false;
+                    PartData partData = new PartData();
                     foreach (var dict in nameDicts)
                     {
                         if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                         {
-                            named = true;
-                            output += str + ",";
-                        }
-                        else
-                        {
-                            output += ",";
+                            partData.namesByLanguage.Add(str);
                         }
                     }
-                    output += $"{id},";
-
-                    //Account for lack of a name on an outfit
-                    if (named == false)
-                    {
-                        output = $"[Unnamed {id}]" + output;
-                    }
+                    partData.id = id;
 
                     //Decide if it needs to be handled as a reboot file or not
                     if (id >= 100000)
@@ -4185,20 +4091,18 @@ namespace AquaModelLibrary.Extra
                         string rebHash = GetFileHash(reb);
                         string rebExHash = GetFileHash(rebEx);
 
-                        output += rebHash;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                         {
-                            output += ", (Not found)";
+                            partData.partHash = rebHash;
+                            partData.partName = reb;
                         }
                         //Set icon string
                         var iconStr = GetFileHash(icon + teethIcon + id + ".ice");
-                        output += "," + iconStr;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                         {
-                            output += ", (Not found)";
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetTeethIconStringUnhashed(id.ToString());
                         }
-
-                        output += "\n";
                     }
                     else
                     {
@@ -4207,22 +4111,22 @@ namespace AquaModelLibrary.Extra
 
                         var classicHash = GetFileHash(classic);
 
-                        output += classicHash;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                         {
-                            output += ", (Not found)";
+                            partData.partHash = classicHash;
+                            partData.partName = classic;
                         }
                         //Set icon string
                         var iconStr = GetFileHash(icon + teethIcon + finalId + ".ice");
-                        output += "," + iconStr;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                         {
-                            output += ", (Not found)";
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetTeethIconStringUnhashed(id.ToString());
                         }
 
-                        output += "\n";
-
                     }
+                    string output = partData.GetLine();
+                    partData = null;
 
                     outputNGSTeeth.Append(output);
 
@@ -4238,6 +4142,7 @@ namespace AquaModelLibrary.Extra
             if (aquaCMX.ngsHornDict.Count > 0 || masterIdList.Count > 0)
             {
                 StringBuilder outputNGSHorns = new StringBuilder();
+                outputNGSHorns.AppendLine(partColumns);
 
                 //Add potential cmx ids that wouldn't be stored in
                 GatherDictKeys(masterIdList, aquaCMX.ngsHornDict.Keys);
@@ -4252,27 +4157,15 @@ namespace AquaModelLibrary.Extra
                     {
                         continue;
                     }
-                    string output = "";
-                    bool named = false;
+                    PartData partData = new PartData();
                     foreach (var dict in nameDicts)
                     {
                         if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                         {
-                            named = true;
-                            output += str + ",";
-                        }
-                        else
-                        {
-                            output += ",";
+                            partData.namesByLanguage.Add(str);
                         }
                     }
-                    output += $"{id},";
-
-                    //Account for lack of a name on an outfit
-                    if (named == false)
-                    {
-                        output = $"[Unnamed {id}]" + output;
-                    }
+                    partData.id = id;
 
                     //Decide if it needs to be handled as a reboot file or not
                     if (id >= 100000)
@@ -4282,44 +4175,41 @@ namespace AquaModelLibrary.Extra
                         string rebHash = GetFileHash(reb);
                         string rebExHash = GetFileHash(rebEx);
 
-                        output += rebHash;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                         {
-                            output += ", (Not found)";
+                            partData.partHash = rebHash;
+                            partData.partName = reb;
                         }
                         //Set icon string
                         var iconStr = GetFileHash(icon + hornIcon + id + ".ice");
-                        output += "," + iconStr;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                         {
-                            output += ", (Not found)";
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetHornIconStringUnhashed(id.ToString());
                         }
-
-                        output += "\n";
                     }
                     else
                     {
                         string finalId = $"{id:D5}";
                         string classic = $"{classicStart}hn_{finalId}.ice";
-
                         var classicHash = GetFileHash(classic);
 
-                        output += classicHash;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
                         {
-                            output += ", (Not found)";
+                            partData.partHash = classicHash;
+                            partData.partName = classic;
                         }
                         //Set icon string
                         var iconStr = GetFileHash(icon + hornIcon + finalId + ".ice");
-                        output += "," + iconStr;
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
                         {
-                            output += ", (Not found)";
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetHornIconStringUnhashed(id.ToString());
                         }
 
-                        output += "\n";
-
                     }
+                    string output = partData.GetLine();
+                    partData = null;
 
                     outputNGSHorns.Append(output);
 
@@ -4360,7 +4250,7 @@ namespace AquaModelLibrary.Extra
 
                     magOut.Add(names + mgFileName + "," + GetFileHash(mgFileName) + exists);
                 }
-                File.WriteAllLines(Path.Combine(playerDirOut, $"Mags.csv"), magOut);
+                File.WriteAllLines(Path.Combine(playerDirOut, $"Mags.csv"), magOut, Encoding.UTF8);
             }
 
             //---------------------------Generate NGS Mag List
@@ -4391,7 +4281,7 @@ namespace AquaModelLibrary.Extra
 
                     magOut.Add(names + mgFileName + "," + GetRebootHash(GetFileHash(mgFileName)) + exists);
                 }
-                File.WriteAllLines(Path.Combine(playerDirOut, $"MagsNGS.csv"), magOut);
+                File.WriteAllLines(Path.Combine(playerDirOut, $"MagsNGS.csv"), magOut, Encoding.UTF8);
             }
         }
 
@@ -4425,7 +4315,7 @@ namespace AquaModelLibrary.Extra
                 }
                 pbList.Add(pbName + GetFileHash(pbCreatures + letter++ + ".ice"));
             }
-            File.WriteAllLines(Path.Combine(playerClassicDirOut, "PhotonBlastCreatures.csv"), pbList);
+            File.WriteAllLines(Path.Combine(playerClassicDirOut, "PhotonBlastCreatures.csv"), pbList, Encoding.UTF8);
         }
 
         public static void GenerateVehicle_SpecialWeaponList(string playerDirOut, string playerCAnimDirOut, string playerRAnimDirOut, List<string> genAnimList, List<string> genAnimListNGS)
@@ -4478,15 +4368,15 @@ namespace AquaModelLibrary.Extra
                 dbList.Add($"{dbJP} レベル,{dbNA} Levels," + GetFileHash(db_vehicle + $"vc_dh{i}{dbInternal}_level.ice"));
             }
 
-            File.WriteAllLines(Path.Combine(playerRAnimDirOut, $"General Character Animations NGS.csv"), genAnimListNGS);
-            File.WriteAllLines(Path.Combine(playerCAnimDirOut, $"General Character Animations.csv"), genAnimList);
-            File.WriteAllLines(Path.Combine(playerDirOut, "DarkBlasts_DrivableVehicles.csv"), dbList);
+            File.WriteAllLines(Path.Combine(playerRAnimDirOut, $"General Character Animations NGS.csv"), genAnimListNGS, Encoding.UTF8);
+            File.WriteAllLines(Path.Combine(playerCAnimDirOut, $"General Character Animations.csv"), genAnimList, Encoding.UTF8);
+            File.WriteAllLines(Path.Combine(playerDirOut, "DarkBlasts_DrivableVehicles.csv"), dbList, Encoding.UTF8);
 
             //---------------------------NGS Special Weapon/Vehicle List
             List<string> ngsVehicleOutput = new List<string>();
             ngsVehicleOutput.Add("Mobile Cannon,モバイルキャノン,f2/150838707a2fda44d80b91220a3b39");
             ngsVehicleOutput.Add("Snowboard,スノーボード,53/36651397f0cd04340eacf32a116e5b");
-            File.WriteAllLines(Path.Combine(playerDirOut, "DarkBlasts_DrivableVehiclesNGS.csv"), ngsVehicleOutput);
+            File.WriteAllLines(Path.Combine(playerDirOut, "DarkBlasts_DrivableVehiclesNGS.csv"), ngsVehicleOutput, Encoding.UTF8);
         }
 
         public static void GeneratePetList(string petsDirOut)
@@ -4497,7 +4387,7 @@ namespace AquaModelLibrary.Extra
             {
                 classicPetOutput.Add(str + $",{ GetFileHash("enemy/" + str.Split(',')[2]) }");
             }
-            File.WriteAllLines(Path.Combine(petsDirOut, "PetsClassic.csv"), classicPetOutput);
+            File.WriteAllLines(Path.Combine(petsDirOut, "PetsClassic.csv"), classicPetOutput, Encoding.UTF8);
 
             //---------------------------Generate NGS Pet List
 
@@ -4512,7 +4402,7 @@ namespace AquaModelLibrary.Extra
             {
                 classicEnemyStatOutput.Add(str + $",{ GetFileHash("enemy/" + str.Split(',')[2]) }");
             }
-            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemyBaseStats.csv"), classicEnemyStatOutput);
+            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemyBaseStats.csv"), classicEnemyStatOutput, Encoding.UTF8);
 
             //---------------------------Generate Enemy List
             List<string> classicEnemyOutput = new List<string>();
@@ -4520,7 +4410,7 @@ namespace AquaModelLibrary.Extra
             {
                 classicEnemyOutput.Add(str + $",{ GetFileHash("enemy/" + str.Split(',')[2]) }");
             }
-            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemiesClassic.csv"), classicEnemyOutput);
+            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemiesClassic.csv"), classicEnemyOutput, Encoding.UTF8);
 
             //---------------------------Generate NGS Enemy List
             List<string> ngsEnemyOutput = new List<string>();
@@ -4735,7 +4625,7 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
-            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemiesNGS.csv"), ngsEnemyOutput);
+            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemiesNGS.csv"), ngsEnemyOutput, Encoding.UTF8);
 
             //---------------------------Generate Miscellaneous NGS Enemy List
             List<string> ngsMiscOutput = new List<string>();
@@ -4749,7 +4639,7 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
-            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemiesNGS Miscellaneous.csv"), ngsMiscOutput);
+            File.WriteAllLines(Path.Combine(enemyDirOut, "EnemiesNGS Miscellaneous.csv"), ngsMiscOutput, Encoding.UTF8);
         }
 
         public static void GenerateWeaponLists(string pso2_binDir, string outputDirectory)
@@ -4786,11 +4676,11 @@ namespace AquaModelLibrary.Extra
             Directory.CreateDirectory(outputDirectory + "\\Weapons\\NGS\\");
             if (wepDefOutput.Count > 0)
             {
-                File.WriteAllLines(outputDirectory + "\\Weapons\\PSO2\\" + "WeaponDefaults.csv", wepDefOutput);
+                File.WriteAllLines(outputDirectory + "\\Weapons\\PSO2\\" + "WeaponDefaults.csv", wepDefOutput, Encoding.UTF8);
             }
             if (wepDefNGSOutput.Count > 0)
             {
-                File.WriteAllLines(outputDirectory + "\\Weapons\\NGS\\" + "WeaponDefaultsNGS.csv", wepDefNGSOutput);
+                File.WriteAllLines(outputDirectory + "\\Weapons\\NGS\\" + "WeaponDefaultsNGS.csv", wepDefNGSOutput, Encoding.UTF8);
             }
 
             //---------------------------Generate Weapon list 
@@ -5161,195 +5051,192 @@ namespace AquaModelLibrary.Extra
         {
             if (output.Length != 0)
             {
-                File.WriteAllText(Path.Combine(outputDirectory, fileName), output.ToString());
+                File.WriteAllText(Path.Combine(outputDirectory, fileName), output.ToString(), Encoding.UTF8);
             }
+
+            //If true, clear out the stringbuilder object
             if (nullSB == true)
             {
                 output = null;
             }
         }
 
-        public static string AddBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
+        public static void AddBodyExtraFiles(PartData partData, string fname, string pso2_binDir, string typeString, bool isClassic)
         {
-            string rpCheck, bmCheck, hnCheck;
-            GetBodyExtraFileStrings(fname, typeString, out rpCheck, out bmCheck, out hnCheck);
+            string rpName, bmName, hnName;
+            GetBodyExtraFileStrings(fname, typeString, out rpName, out bmName, out hnName);
+            string rpHash = GetFileHash(rpName);
+            string bmHash = GetFileHash(bmName);
+            string hnHash = GetFileHash(hnName);
 
             //_rp alt model
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpHash)))
             {
-                output += $",[Alt Model],{rpCheck},";
+                partData.partRpHash = rpHash;
+                partData.partRpName = rpName;
             }
             //Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmHash)))
             {
-                output += $",[Aqv],{bmCheck},";
-            }
-            var rebootBm = GetRebootHash(bmCheck);
-            //NGS Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
-            {
-                output += $",[HQ NGS Aqv],{rebootBm},";
-            }
-            //NGS NA Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
-            {
-                output += $",[HQ NGS NA Aqv],{rebootBm},";
+                partData.matAnimHash = bmHash;
+                partData.matAnimName = bmName;
             }
 
             //NGS doesn't have these sorts of files
             if (isClassic)
             {
                 //Hand textures
-                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnHash)))
                 {
-                    output += $",[Hand Textures],{hnCheck},";
+                    partData.handsHash = hnHash;
+                    partData.handsName = hnName;
                 }
             }
 
-            return output;
+            return;
         }
 
-        public static string AddHQBodyExtraFiles(string output, string fname, string pso2_binDir, string typeString, bool isClassic)
+        public static void AddHQBodyExtraFiles(PartData partData, string fname, string pso2_binDir, string typeString, bool isClassic)
         {
-            string rpCheck, bmCheck, hnCheck;
-            GetHQBodyExtraFileStrings(fname, typeString, out rpCheck, out bmCheck, out hnCheck);
+            string rpName, bmName, hnName;
+            GetHQBodyExtraFileStrings(fname, typeString, out rpName, out bmName, out hnName);
+            string rpHash = GetFileHash(rpName);
+            string bmHash = GetFileHash(bmName);
+            string hnHash = GetFileHash(hnName);
 
             //_rp alt model
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpHash)))
             {
-                output += $",[HQ Alt Model],{rpCheck},";
+                partData.partRpHash = rpHash;
+                partData.partRpName = rpName;
             }
             //Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmHash)))
             {
-                output += $",[HQ Aqv],{bmCheck},";
-            }
-            var rebootBm = GetRebootHash(bmCheck);
-            //NGS Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
-            {
-                output += $",[HQ NGS Aqv],{rebootBm},";
-            }
-            //NGS NA Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
-            {
-                output += $",[HQ NGS NA Aqv],{rebootBm},";
+                partData.matAnimHash = bmHash;
+                partData.matAnimName = bmName;
             }
 
             //NGS doesn't have these sorts of files
             if (isClassic)
             {
                 //Hand textures
-                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnHash)))
                 {
-                    output += $",[HQ Hand Textures],{hnCheck},";
+                    partData.handsHash = hnHash;
+                    partData.handsName = hnName;
                 }
             }
 
-            return output;
+            return;
         }
+
         public static void GetHQBodyExtraFileStrings(string fname, string typeString, out string rpCheck, out string bmCheck, out string hnCheck)
         {
-            rpCheck = GetFileHash(fname.Replace("_ex.ice", "_rp_ex.ice"));
-            bmCheck = GetFileHash(fname.Replace(typeString, "_bm_"));
-            hnCheck = GetFileHash(fname.Replace(typeString, "_hn_"));
+            rpCheck = fname.Replace("_ex.ice", "_rp_ex.ice");
+            bmCheck = fname.Replace(typeString, "_bm_");
+            hnCheck = fname.Replace(typeString, "_hn_");
             //If not basewear, hn. If basewear, ho
         }
 
         public static void GetBodyExtraFileStrings(string fname, string typeString, out string rpCheck, out string bmCheck, out string hnCheck)
         {
-            rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
-            bmCheck = GetFileHash(fname.Replace(typeString, "_bm_"));
-            hnCheck = GetFileHash(fname.Replace(typeString, "_hn_"));
+            rpCheck = fname.Replace(".ice", "_rp.ice");
+            bmCheck = fname.Replace(typeString, "_bm_");
+            hnCheck = fname.Replace(typeString, "_hn_");
             //If not basewear, hn. If basewear, ho
         }
 
-        public static string AddBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
+        public static void AddBasewearExtraFiles(PartData partData, string fname, string pso2_binDir, bool isClassic)
         {
-            string rpCheck, hnCheck, bmCheck;
-            GetBasewearExtraFileStrings(fname, out rpCheck, out hnCheck, out bmCheck);
+            string rpName, hnName, bmName;
+            GetBasewearExtraFileStrings(fname, out rpName, out hnName, out bmName);
+            string rpHash = GetFileHash(rpName);
+            string bmHash = GetFileHash(bmName);
+            string hnHash = GetFileHash(hnName);
 
             //_rp alt model
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpHash)))
             {
-                output += $",[Alt Model],{rpCheck},";
+                partData.partRpHash = rpHash;
+                partData.partRpName = rpName;
             }
-            var rebootBm = GetRebootHash(bmCheck);
-            //NGS Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
+            var rebootBm = GetRebootHash(bmName);
+            //Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmHash)))
             {
-                output += $",[HQ NGS Aqv],{rebootBm},";
-            }
-            //NGS NA Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
-            {
-                output += $",[HQ NGS NA Aqv],{rebootBm},";
+                partData.matAnimHash = bmHash;
+                partData.matAnimName = bmName;
             }
 
             //NGS doesn't have these sorts of files
             if (isClassic)
             {
                 //Hand textures
-                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnHash)))
                 {
-                    output += $",[Hand Textures],{hnCheck},";
+                    partData.handsHash = hnHash;
+                    partData.handsName = hnName;
                 }
             }
 
-            return output;
+            return;
         }
-        public static string AddHQBasewearExtraFiles(string output, string fname, string pso2_binDir, bool isClassic)
+
+        public static void AddHQBasewearExtraFiles(PartData partData, string fname, string pso2_binDir, bool isClassic)
         {
-            string rpCheck, hnCheck, bmCheck;
-            GetHQBasewearExtraFileStrings(fname, out rpCheck, out hnCheck, out bmCheck);
+            string rpName, hnName, bmName;
+            GetHQBasewearExtraFileStrings(fname, out rpName, out hnName, out bmName);
+            string rpHash = GetFileHash(rpName);
+            string bmHash = GetFileHash(bmName);
+            string hnHash = GetFileHash(hnName);
 
             //_rp alt model
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpCheck)))
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, rpHash)))
             {
-                output += $",[HQ Alt Model],{rpCheck},";
+                partData.partRpHash = rpHash;
+                partData.partRpName = rpName;
             }
-            var rebootBm = GetRebootHash(bmCheck);
-            //NGS Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootBm)))
+            var rebootBm = GetRebootHash(bmName);
+
+            //Aqv archive
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, bmHash)))
             {
-                output += $",[HQ NGS Aqv],{rebootBm},";
-            }
-            //NGS NA Aqv archive
-            if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, rebootBm)))
-            {
-                output += $",[HQ NGS NA Aqv],{rebootBm},";
+                partData.matAnimHash = bmHash;
+                partData.matAnimName = bmName;
             }
 
             //NGS doesn't have these sorts of files
             if (isClassic)
             {
                 //Hand textures
-                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnCheck)))
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, hnHash)))
                 {
-                    output += $",[HQ Hand Textures],{hnCheck},";
+                    partData.handsHash = hnHash;
+                    partData.handsName = hnName;
                 }
             }
 
-            return output;
+            return;
         }
 
         public static void GetBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck, out string bmCheck)
         {
-            rpCheck = GetFileHash(fname.Replace(".ice", "_rp.ice"));
-            hnCheck = GetFileHash(fname.Replace("bw", "ho"));
+            rpCheck = fname.Replace(".ice", "_rp.ice");
+            hnCheck = fname.Replace("bw", "ho");
             //If not basewear, hn. If basewear, ho
-            bmCheck = GetFileHash(fname.Replace("bw", "bm"));
+            bmCheck = fname.Replace("bw", "bm");
         }
 
         public static void GetHQBasewearExtraFileStrings(string fname, out string rpCheck, out string hnCheck, out string bmCheck)
         {
-            rpCheck = GetFileHash(fname.Replace("_ex.ice", "_rp_ex.ice"));
-            hnCheck = GetFileHash(fname.Replace("bw", "ho"));
+            rpCheck = fname.Replace("_ex.ice", "_rp_ex.ice");
+            hnCheck = fname.Replace("bw", "ho");
             //If not basewear, hn. If basewear, ho
-            bmCheck = GetFileHash(fname.Replace("bw", "bm"));
+            bmCheck = fname.Replace("bw", "bm");
         }
 
-        public static string AddOutfitSound(string pso2_binDir, int soundId)
+        public static void AddOutfitSound(PartData partData, string pso2_binDir, int soundId)
         {
             if (soundId != -1)
             {
@@ -5367,14 +5254,17 @@ namespace AquaModelLibrary.Extra
                 string castSoundFile = GetFileHash(soundFileLegUnhash);
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, castSoundFile)))
                 {
-                    return $",[Footstep sounds],{castSoundFile},";
-                } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
+                    partData.castSoundHash = castSoundFile;
+                    partData.castSoundName = soundFileLegUnhash;
+                }
+                if (File.Exists(Path.Combine(pso2_binDir, dataDir, soundFile)))
                 {
-                    return $",[Footstep sounds],{soundFile},";
+                    partData.soundHash = soundFile;
+                    partData.soundName = soundFileUnhash;
                 }
             }
 
-            return "";
+            return;
         }
 
         public static void GatherDictKeys<T>(List<int> masterIdList, Dictionary<int, T>.KeyCollection keys)
@@ -5619,7 +5509,7 @@ namespace AquaModelLibrary.Extra
         {
             if (output.Count > 0)
             {
-                File.WriteAllLines(filepath, output);
+                File.WriteAllLines(filepath, output, Encoding.UTF8);
             }
         }
 
@@ -5728,21 +5618,146 @@ namespace AquaModelLibrary.Extra
             return GetFileHash(icon + earIcon + id + ".ice");
         }
 
+        public static string GetCastLegIconStringUnhashed(string id)
+        {
+            return icon + castPartIcon + castLegIcon + id + ".ice";
+        }
+
+        public static string GetCastArmIconStringUnhashed(string id)
+        {
+            return icon + castPartIcon + castArmIcon + id + ".ice";
+        }
+
+        public static string GetInnerwearIconStringUnhashed(string id)
+        {
+            return icon + innerwearIcon + GetIconGender(Int32.Parse(id)) + id + ".ice";
+        }
+
+        public static string GetBasewearIconStringUnhashed(string id)
+        {
+            return icon + basewearIcon + GetIconGender(Int32.Parse(id)) + id + ".ice";
+        }
+
+        public static string GetSkinIconStringUnhashed(string id)
+        {
+            return icon + skinIcon + GetIconGender(Int32.Parse(id)) + id + ".ice";
+        }
+
+        public static string GetBodyPaintIconStringUnhashed(string id)
+        {
+            return icon + bodyPaintIcon + id + ".ice";
+        }
+
+        public static string GetStickerIconStringUnhashed(string id)
+        {
+            return icon + stickerIcon + id + ".ice";
+        }
+
+        public static string GetAccessoryIconStringUnhashed(string id)
+        {
+            return icon + accessoryIcon + id + ".ice";
+        }
+
+        public static string GetEyeIconStringUnhashed(string id)
+        {
+            return icon + eyeIcon + id + ".ice";
+        }
+
+        public static string GetEyebrowsIconStringUnhashed(string id)
+        {
+            return icon + eyeBrowsIcon + id + ".ice";
+        }
+
+        public static string GetEyelashesIconStringUnhashed(string id)
+        {
+            return icon + eyelashesIcon + id + ".ice";
+        }
+
+        public static string GetFaceIconStringUnhashed(string id)
+        {
+            return icon + faceIcon + id + ".ice";
+        }
+
+        public static string GetFacePaintIconStringUnhashed(string id)
+        {
+            return icon + facePaintIcon + id + ".ice";
+        }
+
+        public static string GetHairCastIconStringUnhashed(string id)
+        {
+            return icon + hairIcon + "cast_" + id + ".ice";
+        }
+
+        public static string GetHairManIconStringUnhashed(string id)
+        {
+            return icon + hairIcon + "man_" + id + ".ice";
+        }
+
+        public static string GetHairWomanIconStringUnhashed(string id)
+        {
+            return icon + hairIcon + "woman_" + id + ".ice";
+        }
+
+        public static string GetHornIconStringUnhashed(string id)
+        {
+            return icon + hornIcon + id + ".ice";
+        }
+
+        public static string GetTeethIconStringUnhashed(string id)
+        {
+            return icon + teethIcon + id + ".ice";
+        }
+
+        public static string GetEarIconStringUnhashed(string id)
+        {
+            return icon + earIcon + id + ".ice";
+        }
+
+        public static void GetCostumeOuterIconString(PartData part, string pso2_binDir, string finalId)
+        {
+            var iconName = icon + costumeIcon + finalId + ".ice";
+            var iconHash = GetFileHash(iconName);
+            var iconCastName = icon + castPartIcon + finalId + ".ice";
+            var iconCastHash = GetFileHash(iconCastName);
+            var iconOuterName = icon + outerwearIcon + GetIconGender(Int32.Parse(finalId)) + finalId + ".ice";
+            var iconOuterHash = GetFileHash(iconOuterName);
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconHash)))
+            {
+                part.iconHash = iconHash;
+                part.iconName = iconName;
+            }
+            else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconCastHash)))
+            {
+                part.iconCastHash = iconCastHash;
+                part.iconCastName = iconCastName;
+            } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconOuterHash)))
+            {
+                part.iconOuterHash = iconOuterHash;
+                part.iconOuterName = iconOuterName;
+            }
+
+            return;
+        }
+
         public static string GetCostumeOuterIconString(string pso2_binDir, string finalId)
         {
-            var iconStr = GetFileHash(icon + costumeIcon + finalId + ".ice");
-            var iconStr2 = GetFileHash(icon + castPartIcon + finalId + ".ice");
-            var iconStr3 = GetFileHash(icon + outerwearIcon + GetIconGender(Int32.Parse(finalId)) + finalId + ".ice");
-            if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+            var iconName = icon + costumeIcon + finalId + ".ice";
+            var iconHash = GetFileHash(iconName);
+            var iconCastName = icon + castPartIcon + finalId + ".ice";
+            var iconCastHash = GetFileHash(iconCastName);
+            var iconOuterName = icon + outerwearIcon + GetIconGender(Int32.Parse(finalId)) + finalId + ".ice";
+            var iconOuterHash = GetFileHash(iconOuterName);
+            if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconHash)))
             {
-                return iconStr;
+                return iconHash;
             }
-            else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr2)))
+            else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconCastHash)))
             {
-                return iconStr2;
-            } else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr3)))
+                return iconCastHash;
+            }
+            else if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconOuterHash)))
             {
-                return iconStr3;
+                return iconOuterHash;
             }
 
             return "";
@@ -5842,6 +5857,7 @@ namespace AquaModelLibrary.Extra
         public class PartData
         {
             public int id;
+            public int adjustedId;
             public List<string> namesByLanguage = new List<string>();
             public string iconName = "";
             public string iconHash = "";
@@ -5886,6 +5902,7 @@ namespace AquaModelLibrary.Extra
                 CopyFile(pso2BinDir, destinationPso2BinDir, handsHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, handsExHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, soundHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, castSoundHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, matAnimHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, matAnimExHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, linkedInnerHash);
@@ -5903,6 +5920,90 @@ namespace AquaModelLibrary.Extra
                         File.Copy(filePath, destPath);
                     }
                 }
+            }
+
+            public string GetLine(bool hash = true)
+            {
+                if(hash)
+                {
+                    return GetLineHash();
+                }
+                
+                return GetLineUnhashed();
+
+            }
+            public string GetLineAllIcons(bool hash = true)
+            {
+                if (hash)
+                {
+                    return GetLineHashAllIcons();
+                }
+
+                return GetLineUnhashedAllIcons();
+
+            }
+
+            private string GetLineHash()
+            {
+                string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
+                string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
+                return $"{jpName},{enName},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
+            }
+
+            private string GetLineUnhashed()
+            {
+                string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
+                string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
+                return $"{jpName},{enName},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
+            }
+            private string GetLineHashAllIcons()
+            {
+                string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
+                string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
+                return $"{jpName},{enName},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
+            }
+
+            private string GetLineUnhashedAllIcons()
+            {
+                string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
+                string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
+                return $"{jpName},{enName},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
+            }
+
+            private string GetIconStringHashed()
+            {
+                if(iconHash != "" && iconHash != null)
+                {
+                    return iconHash;
+                }
+                else if (iconOuterHash != "" && iconOuterHash != null)
+                {
+                    return iconOuterHash;
+                }
+                else if (iconCastHash != "" && iconCastHash != null)
+                {
+                    return iconCastHash;
+                }
+
+                return "";
+            }
+
+            private string GetIconStringUnhashed()
+            {
+                if (iconName != "" && iconName != null)
+                {
+                    return iconName;
+                }
+                else if (iconOuterName != "" && iconOuterName != null)
+                {
+                    return iconOuterName;
+                }
+                else if (iconCastName != "" && iconCastName != null)
+                {
+                    return iconCastName;
+                }
+
+                return "";
             }
         }
 

@@ -10,7 +10,8 @@ namespace AquaModelLibrary
         public static int feb8_22TableAddressInt = 0x2DAFD0; //Lv 40 update cmx
         public static int jun7_22TableAddressInt = 0x2F6C44; //Kvaris update cmx
         public static int aug17_22TableAddressInt = 0x307D6C; //August 17th 2022 update cmx
-        public static int oct4_22TableAddressInt = 0x00320b1c; //October 5th 2022 update cmx
+        public static int oct4_22TableAddressInt = 0x00320b1C; //October 5th 2022 update cmx
+        public static int jan25_23TableAddressInt = 0x0034689C; //October 5th 2022 update cmx
 
         public static string dataDir = $"data\\win32\\";
         public static string dataNADir = $"data\\win32_na\\";
@@ -157,6 +158,7 @@ namespace AquaModelLibrary
             public BODYRitem bodyRitem;
             public BODY2 body2;
             public BODY40Cap body40cap;
+            public BODY2023_1 body2023_1;
             public string dataString;
             public string texString1;
             public string texString2;
@@ -164,6 +166,8 @@ namespace AquaModelLibrary
             public string texString4;
             public string texString5;
             public string texString6;
+            public string nodeString0;
+            public string nodeString1;
         }
 
         public struct BODY
@@ -218,6 +222,12 @@ namespace AquaModelLibrary
         {
             public float float_78;
             public float float_7C;
+        }
+
+        public struct BODY2023_1
+        {
+            public int nodeStrPtr_0;
+            public int nodeStrPtr_1;
         }
 
         public class BBLYObject : BaseCMXObject

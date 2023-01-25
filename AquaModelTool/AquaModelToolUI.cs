@@ -858,17 +858,17 @@ namespace AquaModelTool
                 }
                 presetTexList.Append("        };\n\n    }\n}");
                 tstaDict.Append("        };\n\n    }\n}");
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleNGSOutput.csv", simpleOutput.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedNGSOutput.csv", advancedOutput.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleOutputTexSheets.csv", simpleOutputTexSheet.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutputTexSheets.csv", advancedOutputTexSheet.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleNGSOutput.csv", simpleOutput.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedNGSOutput.csv", advancedOutput.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "simpleOutputTexSheets.csv", simpleOutputTexSheet.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "detailedOutputTexSheets.csv", advancedOutputTexSheet.ToString(), Encoding.UTF8);
 
                 //Terrible chonks of code for the greater good
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderDetailPresets.cs", detailDictOutput.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderExtraPresets.cs", extraDictOutput.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderUnk0ValuesPresets.cs", unk0DictOutput.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderTexInfoPresets.cs", presetTexList.ToString());
-                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderTexSetPresets.cs", tstaDict.ToString());
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderDetailPresets.cs", detailDictOutput.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderExtraPresets.cs", extraDictOutput.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderUnk0ValuesPresets.cs", unk0DictOutput.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderTexInfoPresets.cs", presetTexList.ToString(), Encoding.UTF8);
+                File.WriteAllText(goodFolderDialog.FileName + "\\" + "NGSShaderTexSetPresets.cs", tstaDict.ToString(), Encoding.UTF8);
             }
 
             aquaUI.aqua.aquaModels.Clear();
@@ -3081,7 +3081,7 @@ namespace AquaModelTool
                         dropData.Add($"{itemName},{drops.itemIds[i]:X8},1/{drops.rates[i]}");
                     }
 
-                    File.WriteAllLines(fname + ".csv", dropData);
+                    File.WriteAllLines(fname + ".csv", dropData, Encoding.UTF8);
                 }
             }
         }
@@ -3144,7 +3144,7 @@ namespace AquaModelTool
                         dropData.Add($"{itemName},{drops.itemIds[i]:X8},1/{drops.rates[i]}");
                     }
 
-                    File.WriteAllLines(fname + ".csv", dropData);
+                    File.WriteAllLines(fname + ".csv", dropData, Encoding.UTF8);
                 }
             }
         }
@@ -3229,7 +3229,7 @@ namespace AquaModelTool
                             $"{drops.enemyData[i].u16_14},{drops.enemyData[i].u16_16},{drops.enemyData[i].u16_18},{drops.enemyData[i].u16_1A},{drops.enemyData[i].u16_1C},{drops.enemyData[i].u16_1E},{drops.enemyData[i].u16_20},{drops.enemyData[i].u16_22}");
                     }
 
-                    File.WriteAllLines(fname + ".csv", dropData);
+                    File.WriteAllLines(fname + ".csv", dropData, Encoding.UTF8);
                 }
             }
         }
