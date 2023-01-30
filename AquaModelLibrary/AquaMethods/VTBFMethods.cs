@@ -391,9 +391,19 @@ namespace AquaModelLibrary
 
             BoundingVolume bounding = new BoundingVolume();
             bounding.modelCenter = ((Vector3)(objcRaw[0][0x1E]));
-            bounding.boundingRadius = (float)(objcRaw[0][0x1F]);
-            bounding.modelCenter2 = ((Vector3)(objcRaw[0][0x20]));
-            bounding.halfExtents = ((Vector3)(objcRaw[0][0x21]));
+
+            if (objcRaw[0].ContainsKey(0x1F))
+            {
+                bounding.boundingRadius = (float)(objcRaw[0][0x1F]);
+            }
+            if (objcRaw[0].ContainsKey(0x20))
+            {
+                bounding.modelCenter2 = ((Vector3)(objcRaw[0][0x20]));
+            }
+            if (objcRaw[0].ContainsKey(0x21))
+            {
+                bounding.halfExtents = ((Vector3)(objcRaw[0][0x21]));
+            }
 
             objc.bounds = bounding;
 

@@ -73,9 +73,36 @@ namespace AquaModelLibrary.Extra
                 }
                 Debug.Write(edgesText);
                 Debug.WriteLine($"Max A: {maxA}\nMax B: {maxB}");
+                Debug.WriteLine($"Unk04 {mcg.Unk04} {mcg.Unk04:X}");
+                Debug.WriteLine($"Unk18 {mcg.Unk18} {mcg.Unk18:X}");
+                Debug.WriteLine($"Unk1C {mcg.Unk1C} {mcg.Unk1C:X}");
             } else if(filePath.EndsWith(".mcp"))
             {
                 var mcp = SoulsFormats.SoulsFile<SoulsFormats.MCP>.Read(raw);
+                Dictionary<uint, List<MCP.Room>> rooms = new Dictionary<uint, List<MCP.Room>>();
+                foreach(var room in mcp.Rooms)
+                {
+                    if(!rooms.ContainsKey(room.MapID))
+                    {
+                        rooms[room.MapID] = new List<MCP.Room>();
+                    } else
+                    {
+                        rooms[room.MapID].Add(room);
+                    }
+                }
+                StringBuilder sb = new StringBuilder();
+                var keys = rooms.Keys.ToList();
+                keys.Sort();
+                foreach(var key in keys)
+                {
+                    sb.AppendLine(key.ToString("X"));
+                    var roomList = rooms[key];
+                    for(int i = 0; i < roomList.Count; i++)
+                    {
+                        sb.AppendLine(roomList[i].LocalIndex.ToString());
+                    }
+                }
+                Debug.Write(sb.ToString());
             }
         }
 
@@ -476,7 +503,17 @@ namespace AquaModelLibrary.Extra
                     }
 
                     FLVER2.FaceSet faceSet = mesh2.FaceSets[0];
-                    indices = faceSet.Triangulate(mesh2.Vertices.Count < ushort.MaxValue);
+                    //By order?
+                    if(faceSet.Indices.Count == 0)
+                    {
+                        for(int f = 0; f < mesh2.Vertices.Count; f += 1)
+                        {
+                            indices.Add(f);
+                        }
+                    } else
+                    {
+                        indices = faceSet.Triangulate(mesh2.Vertices.Count < ushort.MaxValue);
+                    }
                 }
                 else
                 {
