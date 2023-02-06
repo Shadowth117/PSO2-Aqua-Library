@@ -262,6 +262,7 @@
     <Compile Include="Extra\DirectX\D3DEnums.cs" />
     <Compile Include="Extra\EnemyData.cs" />
     <Compile Include="Extra\FilenameConstants.cs" />
+    <Compile Include="Extra\FromSoft\SoulsMapMetadataGenerator.cs" />
     <Compile Include="Extra\FromSoft\TangentSolver.cs" />
     <Compile Include="Extra\Half.cs" />
     <Compile Include="Extra\IceArchiveSelector.cs" />

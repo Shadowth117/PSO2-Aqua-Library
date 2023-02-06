@@ -103,6 +103,9 @@ namespace AquaModelLibrary.Extra
                     }
                 }
                 Debug.Write(sb.ToString());
+            } else if(filePath.EndsWith(".msb"))
+            {
+                var msb = SoulsFormats.SoulsFile<MSBD>.Read(raw);
             }
         }
 

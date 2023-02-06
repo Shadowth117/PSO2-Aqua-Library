@@ -4000,6 +4000,38 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readMSBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select MSB File",
+                Filter = "MSB files|*.msb",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ReadSoulsFile(file);
+                }
+            }
+        }
+
+        private void generateMCGMCPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Multiselect = true,
+                Title = "Select Demon's Souls m**_**_**_** folders for connected areas",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                AquaModelLibrary.Extra.FromSoft.SoulsMapMetadataGenerator.Generate(goodFolderDialog.FileNames.ToList(), out var mcCombo);
+            }
+        }
     }
 }
 
