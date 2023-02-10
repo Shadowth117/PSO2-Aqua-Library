@@ -12,12 +12,14 @@ namespace AquaModelLibrary.Extra.FromSoft
 {
     public static class SoulsMapMetadataGenerator
     {
+        public static float MCEpsilon = 0.001f;
         private class RoomInfo
         {
             public int roomId = -1; //Id of the NVM itself
             public string areaId = "";
             public Vector3 BoundingBoxMax;
             public Vector3 BoundingBoxMin;
+            public NVM nvm;
             public List<Gate> gates = new List<Gate>();
         }
 
@@ -25,6 +27,8 @@ namespace AquaModelLibrary.Extra.FromSoft
         {
             public List<NVM.Triangle> tris = new List<NVM.Triangle>();
             public List<int> uniqueVertIds = new List<int>();
+            public List<MCG.Node> nodes = new List<MCG.Node>(); //Really should only ever be one, but w/e
+            
         }
 
         public class MCCombo
@@ -38,7 +42,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             mcCombo = new MCCombo();
             mcCombo.mcp = new MCP();
             mcCombo.mcg = new MCG();
-
+            
             //Gather NVM files and filter by MSB 
             Dictionary<string, List<NVM>> nvmDict = new Dictionary<string, List<NVM>>(); 
             foreach(var dir in directories)
@@ -100,7 +104,8 @@ namespace AquaModelLibrary.Extra.FromSoft
                 foreach (var nvm in nvmList)
                 {
                     RoomInfo roomInfo = new RoomInfo();
-                    
+                    roomInfo.nvm = nvm;
+
                     //Set bounding from nvm
                     roomInfo.BoundingBoxMax = nvm.RootBox.MaxValueCorner;
                     roomInfo.BoundingBoxMin = nvm.RootBox.MinValueCorner;
@@ -133,7 +138,15 @@ namespace AquaModelLibrary.Extra.FromSoft
 
             //Create MCP and MCG, presumably Map Container Portals and Map Container Gates, or something along those lines
             //Bounds in MCP should be the same as the bounds in each individual .nvm
+            //Bounds should be used to narrow down NVM comparisons
+            foreach(var dir in directories)
+            {
+                var nvmTriList = triDicts[dir];
+                foreach (var roomInfo in nvmTriList)
+                {
 
+                }
+            }
         }
 
         private static List<int> GetUniqueVertIds(List<NVM.Triangle> triSet)
