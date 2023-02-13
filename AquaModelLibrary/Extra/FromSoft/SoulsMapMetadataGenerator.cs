@@ -228,7 +228,7 @@ namespace AquaModelLibrary.Extra.FromSoft
 
                                             var node = new MCG.Node();
                                             node.Position = avg;
-                                            node.Unk18 = -1;
+                                            node.Unk18 = 0;
                                             node.Unk1C = 0;
 
                                             //Fill in nodes and 'edge' indices later in process
@@ -310,14 +310,16 @@ namespace AquaModelLibrary.Extra.FromSoft
             {
                 List<int> usedNodeList = new List<int>();
                 var name = Path.GetFileName(dir);
-                ApplyEdgeSet(mcCombos[name].mcg, tempEdgeDict[dir], usedNodeList);
+                ApplyEdgeSet(mcCombos[name].mcg, tempEdgeDict[dir], usedNodeList, 0);
+                int roomCount = triDicts[dir].Count;
                 foreach (var pair in tempEdgeDict)
                 {
                     if(pair.Key == dir)
                     {
                         continue;
                     }
-                    ApplyEdgeSet(mcCombos[name].mcg, pair.Value, usedNodeList);
+                    ApplyEdgeSet(mcCombos[name].mcg, pair.Value, usedNodeList, roomCount);
+                    roomCount += triDicts[pair.Key].Count;
                 }
                 usedNodeList.Sort();
                 mcCombos[name].mcg.Write(dir + $"\\{Path.GetFileName(dir)}.mcg");
@@ -367,14 +369,13 @@ namespace AquaModelLibrary.Extra.FromSoft
                     mcpRoom.ConnectedRoomIndices.Sort();
                     mcCombos[name].mcp.Rooms.Add(mcpRoom);
                 }
-                //mcCombos[name].mcp.Unk04 = 5193296;
                 mcCombos[name].mcp.Write(dir + $"\\{Path.GetFileName(dir)}.mcp");
             }
 
 
         }
 
-        private static void ApplyEdgeSet(MCG mcg, List<MCG.Edge> edgeList, List<int> usedIndexList)
+        private static void ApplyEdgeSet(MCG mcg, List<MCG.Edge> edgeList, List<int> usedIndexList, int roomCounter)
         {
             foreach(var edge in edgeList)
             {
@@ -395,7 +396,20 @@ namespace AquaModelLibrary.Extra.FromSoft
 
                 mcg.Nodes[edge.NodeIndexA].ConnectedNodeIndices.Sort();
                 mcg.Nodes[edge.NodeIndexB].ConnectedNodeIndices.Sort();
-                mcg.Edges.Add(edge);
+
+                //Clone and alter edges
+                MCG.Edge newEdge = new MCG.Edge();
+                newEdge.MapID = edge.MapID;
+                newEdge.MCPRoomIndex = edge.MCPRoomIndex + roomCounter; //Since rooms are ordered differently per mcg, we need to ensure they match those new ids.
+                newEdge.NodeIndexA = edge.NodeIndexA;
+                newEdge.NodeIndexB = edge.NodeIndexB;
+                newEdge.Unk20 = edge.Unk20;
+
+                //May need editing later if these are implemented, depending on how they work
+                newEdge.UnkIndicesA = edge.UnkIndicesA; 
+                newEdge.UnkIndicesB = edge.UnkIndicesB;
+
+                mcg.Edges.Add(newEdge);
             }
         }
 

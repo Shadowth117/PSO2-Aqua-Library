@@ -129,6 +129,11 @@ namespace AquaModelLibrary.Extra
                     edge.UnkIndicesA.Clear();
                     edge.UnkIndicesB.Clear();
                 }
+                foreach(var node in mcg.Nodes)
+                {
+                    node.Unk18 = 0;
+                    node.Unk1C = 0;
+                }
                 mcg.Write(filePath);
             }
         }
