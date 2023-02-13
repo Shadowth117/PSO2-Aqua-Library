@@ -16,10 +16,11 @@ namespace AquaModelLibrary.Extra.FromSoft
         private class RoomInfo
         {
             public int roomId = -1; //Id of the NVM itself
-            public string areaId = "";
+            public uint mapId = 0;
             public Vector3 BoundingBoxMax;
             public Vector3 BoundingBoxMin;
             public NVM nvm;
+            public List<RoomInfo> adjacentRooms = new List<RoomInfo>();
             public List<Gate> gates = new List<Gate>();
         }
 
@@ -27,21 +28,28 @@ namespace AquaModelLibrary.Extra.FromSoft
         {
             public List<NVM.Triangle> tris = new List<NVM.Triangle>();
             public List<int> uniqueVertIds = new List<int>();
+            public Vector3 BoundingBoxMax;
+            public Vector3 BoundingBoxMin;
             public List<MCG.Node> nodes = new List<MCG.Node>(); //Really should only ever be one, but w/e
+            public List<Gate> touchedGates = new List<Gate>();
             
         }
 
         public class MCCombo
         {
-            public MCP mcp;
-            public MCG mcg;
+            public MCP mcp = new MCP();
+            public MCG mcg = new MCG();
+
+            public MCCombo(bool bigEndian = true)
+            {
+                mcp.BigEndian = bigEndian;
+                mcg.BigEndian = bigEndian;
+            }
         }
 
-        public static void Generate(List<string> directories, out MCCombo mcCombo)
+        public static void Generate(List<string> directories, out Dictionary<string, MCCombo> mcCombos)
         {
-            mcCombo = new MCCombo();
-            mcCombo.mcp = new MCP();
-            mcCombo.mcg = new MCG();
+            mcCombos = new Dictionary<string, MCCombo>();
             
             //Gather NVM files and filter by MSB 
             Dictionary<string, List<NVM>> nvmDict = new Dictionary<string, List<NVM>>(); 
@@ -49,6 +57,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             {
                 //Get the MSB to see what navmeshes are being used
                 var name = Path.GetFileName(dir);
+                mcCombos.Add(name, new MCCombo());
                 var msbPath = Path.GetDirectoryName(dir) + $"\\mapstudio\\{name}.msb";
                 MSBD msb = null;
                 List<string> msbNavmeshNames = new List<string>();
@@ -101,6 +110,9 @@ namespace AquaModelLibrary.Extra.FromSoft
             {
                 var nvmList = nvmDict[dir];
                 List<RoomInfo> nvmTriList = new List<RoomInfo>();
+
+                var roomNums = Path.GetFileName(dir).Substring(1).Split('_');
+                uint mapId = BitConverter.ToUInt32(new byte[] { Byte.Parse(roomNums[3]), Byte.Parse(roomNums[2]), Byte.Parse(roomNums[1]), Byte.Parse(roomNums[0]) }, 0);
                 foreach (var nvm in nvmList)
                 {
                     RoomInfo roomInfo = new RoomInfo();
@@ -115,8 +127,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                     roomInfo.BoundingBoxMin.Y -= 1;
 
                     roomInfo.roomId = nvmTriList.Count;
-                    roomInfo.areaId = Path.GetFileName(dir);
-
+                    roomInfo.mapId = mapId;
                     List<int> usedIndices = new List<int>();
                     //Gather Gate triangles
                     for(int i = 0; i < nvm.Triangles.Count; i++)
@@ -128,6 +139,41 @@ namespace AquaModelLibrary.Extra.FromSoft
                             Gate gate = new Gate();
                             gate.tris = triSet;
                             gate.uniqueVertIds = GetUniqueVertIds(triSet);
+                            Vector3 BoundingBoxMax = nvm.Vertices[gate.uniqueVertIds[0]];
+                            Vector3 BoundingBoxMin = nvm.Vertices[gate.uniqueVertIds[0]];
+                            foreach(var id in gate.uniqueVertIds)
+                            {
+                                var vert = nvm.Vertices[id];
+                                //Min extents
+                                if (BoundingBoxMin.X > vert.X)
+                                {
+                                    BoundingBoxMin.X = vert.X;
+                                }
+                                if (BoundingBoxMin.Y > vert.Y)
+                                {
+                                    BoundingBoxMin.Y = vert.Y;
+                                }
+                                if (BoundingBoxMin.Z > vert.Z)
+                                {
+                                    BoundingBoxMin.Z = vert.Z;
+                                }
+
+                                //Max extents
+                                if (BoundingBoxMax.X < vert.X)
+                                {
+                                    BoundingBoxMax.X = vert.X;
+                                }
+                                if (BoundingBoxMax.Y < vert.Y)
+                                {
+                                    BoundingBoxMax.Y = vert.Y;
+                                }
+                                if (BoundingBoxMax.Z < vert.Z)
+                                {
+                                    BoundingBoxMax.Z = vert.Z;
+                                }
+                            }
+                            gate.BoundingBoxMax = BoundingBoxMax;
+                            gate.BoundingBoxMin = BoundingBoxMin;
                             roomInfo.gates.Add(gate);
                         }
                     }
@@ -139,14 +185,236 @@ namespace AquaModelLibrary.Extra.FromSoft
             //Create MCP and MCG, presumably Map Container Portals and Map Container Gates, or something along those lines
             //Bounds in MCP should be the same as the bounds in each individual .nvm
             //Bounds should be used to narrow down NVM comparisons
+
+            //Create nodes
+            List<MCG.Node> nodes = new List<MCG.Node>();
             foreach(var dir in directories)
             {
                 var nvmTriList = triDicts[dir];
-                foreach (var roomInfo in nvmTriList)
+                for (int roomInfoId = 0; roomInfoId < nvmTriList.Count; roomInfoId++)
                 {
+                    var roomInfo = nvmTriList[roomInfoId];
+                    foreach (var gate in roomInfo.gates)
+                    {
+                        //Loop through all other gathered nvms and create nodes as appropriate
+                        foreach (var dir2 in directories)
+                        {
+                            var nvmTriList2 = triDicts[dir2];
+                            for (int roomInfo2Id = 0; roomInfo2Id < nvmTriList2.Count; roomInfo2Id++)
+                            {
+                                var roomInfo2 = nvmTriList2[roomInfo2Id];
+                                //Proceed if the nvms overlap or touch and this isn't the current nvm
+                                if (roomInfo != roomInfo2 && MathExtras.BoundsIntersect(gate.BoundingBoxMax, gate.BoundingBoxMin, roomInfo2.BoundingBoxMax, roomInfo2.BoundingBoxMin, MCEpsilon))
+                                {
+                                    foreach(var gate2 in roomInfo2.gates)
+                                    {
+                                        //Proceed if a gate in the nvm overlaps or touches the original gate
+                                        if (!gate.touchedGates.Contains(gate2) && MathExtras.BoundsIntersect(gate.BoundingBoxMax, gate.BoundingBoxMin, gate2.BoundingBoxMax, gate2.BoundingBoxMin, MCEpsilon))
+                                        {
+                                            gate.touchedGates.Add(gate2);
+                                            gate2.touchedGates.Add(gate);
 
+                                            Vector3 avg = new Vector3();
+                                            foreach(var id in gate.uniqueVertIds)
+                                            {
+                                                avg += roomInfo.nvm.Vertices[id];
+                                            }
+                                            foreach(var id in gate2.uniqueVertIds)
+                                            {
+                                                avg += roomInfo2.nvm.Vertices[id];
+                                            }
+
+                                            avg /= (gate.uniqueVertIds.Count + gate2.uniqueVertIds.Count);
+
+                                            var node = new MCG.Node();
+                                            node.Position = avg;
+                                            node.Unk18 = -1;
+                                            node.Unk1C = 0;
+
+                                            //Fill in nodes and 'edge' indices later in process
+                                            gate.nodes.Add(node);
+                                            gate2.nodes.Add(node);
+                                            if(!roomInfo.adjacentRooms.Contains(roomInfo2))
+                                            {
+                                                roomInfo.adjacentRooms.Add(roomInfo2);
+                                                roomInfo2.adjacentRooms.Add(roomInfo);
+                                            }
+                                            nodes.Add(node);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
+            //Add the node sets to the files
+            foreach(var dir in directories)
+            {
+                var name = Path.GetFileName(dir);
+                mcCombos[name].mcg.Nodes = GetClonedNodeList(nodes);
+            }
+
+            //Set up edges
+            Dictionary<string, List<MCG.Edge>> tempEdgeDict = new Dictionary<string, List<MCG.Edge>>();
+            foreach (var dir in directories)
+            {
+                List<MCG.Edge> edgeList = new List<MCG.Edge>();
+                var nvmTriList = triDicts[dir];
+                foreach (var roomInfo in nvmTriList)
+                {
+                    List<string> gatePairs = new List<string>();
+                    foreach (var gate in roomInfo.gates)
+                    {
+                        //Iterate through gates of the same room to link paths
+                        foreach (var gate2 in roomInfo.gates)
+                        {
+                            var id0 = roomInfo.gates.IndexOf(gate);
+                            var id1 = roomInfo.gates.IndexOf(gate2);
+                            if (gate2 != gate && gate.nodes.Count > 0 && gate2.nodes.Count > 0 && gate.nodes?[0] != gate2.nodes?[0] && !gatePairs.Contains($"{id0}_{id1}"))
+                            {
+                                gatePairs.Add($"{id0}_{id1}");
+                                gatePairs.Add($"{id1}_{id0}");
+                                MCG.Edge edge = new MCG.Edge();
+                                edge.MapID = roomInfo.mapId;
+                                edge.MCPRoomIndex = roomInfo.roomId;
+                                var node0Id = nodes.IndexOf(gate.nodes[0]);
+                                var node1Id = nodes.IndexOf(gate2.nodes[0]);
+                                if (node0Id > node1Id)
+                                {
+                                    edge.NodeIndexA = node1Id;
+                                    edge.NodeIndexB = node0Id;
+                                } else
+                                {
+                                    edge.NodeIndexA = node0Id;
+                                    edge.NodeIndexB = node1Id;
+                                }
+                                edge.Unk20 = MathExtras.Distance(gate.nodes[0].Position, gate2.nodes[0].Position);
+
+                                //Node connection data will be added later per mcg
+
+                                //Apparently these can just be empty and the game is chill with it. Adding bad values here is a crash so best left alone for now.
+                                edge.UnkIndicesA = new List<int>();
+                                edge.UnkIndicesB = new List<int>();
+                                edgeList.Add(edge);
+                            }
+                        }
+                    }
+                }
+                tempEdgeDict.Add(dir, edgeList);
+            }
+
+            //Set edges to mcg files (alter per order per file)
+            foreach(var dir in directories)
+            {
+                List<int> usedNodeList = new List<int>();
+                var name = Path.GetFileName(dir);
+                ApplyEdgeSet(mcCombos[name].mcg, tempEdgeDict[dir], usedNodeList);
+                foreach (var pair in tempEdgeDict)
+                {
+                    if(pair.Key == dir)
+                    {
+                        continue;
+                    }
+                    ApplyEdgeSet(mcCombos[name].mcg, pair.Value, usedNodeList);
+                }
+                usedNodeList.Sort();
+                mcCombos[name].mcg.Write(dir + $"\\{Path.GetFileName(dir)}.mcg");
+            }
+
+            //Set up mcp files
+            for (int i = 0; i < directories.Count; i++)
+            {
+                var dir = directories[i];
+                var name = Path.GetFileName(dir);
+
+                //We want one set of these per directory and each of those should start with only rooms in that directory
+                List<RoomInfo> tempRooms = new List<RoomInfo>();
+                var nvmTriList = triDicts[dir];
+                foreach (var room in nvmTriList)
+                {
+                    tempRooms.Add(room);
+                }
+
+                //Go through the other rooms
+                for(int j = 0; j < directories.Count; j++)
+                {
+                    if(j == i)
+                    {
+                        continue;
+                    }
+                    nvmTriList = triDicts[directories[j]];
+                    foreach (var room in nvmTriList)
+                    {
+                        tempRooms.Add(room);
+                    }
+                }
+
+                //Process into MCP Rooms
+                foreach(var room in tempRooms)
+                {
+                    var mcpRoom = new MCP.Room();
+                    mcpRoom.LocalIndex = room.roomId;
+                    mcpRoom.BoundingBoxMax = room.BoundingBoxMax;
+                    mcpRoom.BoundingBoxMin = room.BoundingBoxMin;
+                    mcpRoom.MapID = room.mapId;
+
+                    foreach(var adjRoom in room.adjacentRooms)
+                    {
+                        mcpRoom.ConnectedRoomIndices.Add(tempRooms.IndexOf(adjRoom));
+                    }
+                    mcpRoom.ConnectedRoomIndices.Sort();
+                    mcCombos[name].mcp.Rooms.Add(mcpRoom);
+                }
+                //mcCombos[name].mcp.Unk04 = 5193296;
+                mcCombos[name].mcp.Write(dir + $"\\{Path.GetFileName(dir)}.mcp");
+            }
+
+
+        }
+
+        private static void ApplyEdgeSet(MCG mcg, List<MCG.Edge> edgeList, List<int> usedIndexList)
+        {
+            foreach(var edge in edgeList)
+            {
+                if(!usedIndexList.Contains(edge.NodeIndexA))
+                {
+                    usedIndexList.Add(edge.NodeIndexA);
+                }
+                if (!usedIndexList.Contains(edge.NodeIndexB))
+                {
+                    usedIndexList.Add(edge.NodeIndexB);
+                }
+                //Addend node data based on current edge
+                mcg.Nodes[edge.NodeIndexA].ConnectedNodeIndices.Add(edge.NodeIndexB);
+                mcg.Nodes[edge.NodeIndexB].ConnectedNodeIndices.Add(edge.NodeIndexA);
+
+                mcg.Nodes[edge.NodeIndexA].ConnectedEdgeIndices.Add(mcg.Edges.Count);
+                mcg.Nodes[edge.NodeIndexB].ConnectedEdgeIndices.Add(mcg.Edges.Count);
+
+                mcg.Nodes[edge.NodeIndexA].ConnectedNodeIndices.Sort();
+                mcg.Nodes[edge.NodeIndexB].ConnectedNodeIndices.Sort();
+                mcg.Edges.Add(edge);
+            }
+        }
+
+        private static List<MCG.Node> GetClonedNodeList(List<MCG.Node> nodes)
+        {
+            List<MCG.Node> clonedNodes = new List<MCG.Node>();
+            foreach(var node in nodes)
+            {
+                MCG.Node clonedNode = new MCG.Node();
+                clonedNode.Position = node.Position;
+                clonedNode.Unk18 = node.Unk18;
+                clonedNode.Unk1C = node.Unk1C;
+                clonedNode.ConnectedEdgeIndices = new List<int>();
+                clonedNode.ConnectedNodeIndices = new List<int>();
+
+                clonedNodes.Add(clonedNode);
+            }
+
+            return clonedNodes;
         }
 
         private static List<int> GetUniqueVertIds(List<NVM.Triangle> triSet)
@@ -174,7 +442,6 @@ namespace AquaModelLibrary.Extra.FromSoft
 
         private static void CompileGateTriSet(List<NVM.Triangle> triSet, List<int> usedIndices, NVM nvm, int id)
         {
-            List<NVM.Triangle> tris = new List<NVM.Triangle>();
             var tri = nvm.Triangles[id];
             if (!usedIndices.Contains(id) && (tri.Flags & NVM.TriangleFlags.GATE) > 0)
             {

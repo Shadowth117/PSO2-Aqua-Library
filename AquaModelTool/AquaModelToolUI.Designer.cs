@@ -69,7 +69,9 @@
             this.convertSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertSoulsflverTofbxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportWithMetadataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateMCGMCPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertModelToDemonsSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.convertDemonsSoulsPS5CmdlToaqpaqnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
@@ -137,8 +139,7 @@
             this.readMSBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
-            this.generateMCGMCPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nullMCGUnksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -490,6 +491,13 @@
             this.exportWithMetadataToolStripMenuItem.Text = "Convert flver with Metadata";
             this.exportWithMetadataToolStripMenuItem.Click += new System.EventHandler(this.exportWithMetadataToolStripMenuItem_Click);
             // 
+            // generateMCGMCPToolStripMenuItem
+            // 
+            this.generateMCGMCPToolStripMenuItem.Name = "generateMCGMCPToolStripMenuItem";
+            this.generateMCGMCPToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
+            this.generateMCGMCPToolStripMenuItem.Text = "Generate Demon\'s Souls MCG/MCP";
+            this.generateMCGMCPToolStripMenuItem.Click += new System.EventHandler(this.generateMCGMCPToolStripMenuItem_Click);
+            // 
             // convertModelToDemonsSoulsflverToolStripMenuItem
             // 
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Name = "convertModelToDemonsSoulsflverToolStripMenuItem";
@@ -497,6 +505,11 @@
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Text = "Convert model to Demon\'s Souls .flver";
             this.convertModelToDemonsSoulsflverToolStripMenuItem.Click += new System.EventHandler(this.convertModelToDemonsSoulsflverToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator11
+            // 
+            this.toolStripSeparator11.Name = "toolStripSeparator11";
+            this.toolStripSeparator11.Size = new System.Drawing.Size(341, 6);
             // 
             // convertDemonsSoulsPS5CmdlToaqpaqnToolStripMenuItem
             // 
@@ -891,7 +904,8 @@
             this.readNNMotionToolStripMenuItem,
             this.parseCAWSToolStripMenuItem,
             this.readMCGMCPToolStripMenuItem,
-            this.readMSBToolStripMenuItem});
+            this.readMSBToolStripMenuItem,
+            this.nullMCGUnksToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -899,91 +913,91 @@
             // boneFlagTestToolStripMenuItem
             // 
             this.boneFlagTestToolStripMenuItem.Name = "boneFlagTestToolStripMenuItem";
-            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.boneFlagTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.boneFlagTestToolStripMenuItem.Text = "BoneFlagTest";
             this.boneFlagTestToolStripMenuItem.Click += new System.EventHandler(this.boneFlagTestToolStripMenuItem_Click);
             // 
             // cMTTestToolStripMenuItem
             // 
             this.cMTTestToolStripMenuItem.Name = "cMTTestToolStripMenuItem";
-            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.cMTTestToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.cMTTestToolStripMenuItem.Text = "CMTTest";
             this.cMTTestToolStripMenuItem.Click += new System.EventHandler(this.cMTTestToolStripMenuItem_Click);
             // 
             // pSZTextToolStripMenuItem
             // 
             this.pSZTextToolStripMenuItem.Name = "pSZTextToolStripMenuItem";
-            this.pSZTextToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.pSZTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZTextToolStripMenuItem.Text = "PSZText";
             this.pSZTextToolStripMenuItem.Click += new System.EventHandler(this.pSZTextToolStripMenuItem_Click);
             // 
             // pSZEnemyZoneToolStripMenuItem
             // 
             this.pSZEnemyZoneToolStripMenuItem.Name = "pSZEnemyZoneToolStripMenuItem";
-            this.pSZEnemyZoneToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.pSZEnemyZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZEnemyZoneToolStripMenuItem.Text = "PSZEnemyZone";
             this.pSZEnemyZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyZoneToolStripMenuItem_Click);
             // 
             // pSZObjZoneToolStripMenuItem
             // 
             this.pSZObjZoneToolStripMenuItem.Name = "pSZObjZoneToolStripMenuItem";
-            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.pSZObjZoneToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZObjZoneToolStripMenuItem.Text = "PSZObjZone";
             this.pSZObjZoneToolStripMenuItem.Click += new System.EventHandler(this.pSZObjZoneToolStripMenuItem_Click);
             // 
             // pSZEnemyDataToolStripMenuItem
             // 
             this.pSZEnemyDataToolStripMenuItem.Name = "pSZEnemyDataToolStripMenuItem";
-            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.pSZEnemyDataToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pSZEnemyDataToolStripMenuItem.Text = "PSZEnemyData";
             this.pSZEnemyDataToolStripMenuItem.Click += new System.EventHandler(this.pSZEnemyDataToolStripMenuItem_Click);
             // 
             // dumpAllTextToolStripMenuItem
             // 
             this.dumpAllTextToolStripMenuItem.Name = "dumpAllTextToolStripMenuItem";
-            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.dumpAllTextToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.dumpAllTextToolStripMenuItem.Text = "DumpAllText";
             this.dumpAllTextToolStripMenuItem.Click += new System.EventHandler(this.dumpAllTextToolStripMenuItem_Click);
             // 
             // assimpExportToolStripMenuItem
             // 
             this.assimpExportToolStripMenuItem.Name = "assimpExportToolStripMenuItem";
-            this.assimpExportToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.assimpExportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.assimpExportToolStripMenuItem.Text = "AssimpExport";
             this.assimpExportToolStripMenuItem.Click += new System.EventHandler(this.assimpExportToolStripMenuItem_Click);
             // 
             // parseMSOToolStripMenuItem
             // 
             this.parseMSOToolStripMenuItem.Name = "parseMSOToolStripMenuItem";
-            this.parseMSOToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.parseMSOToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.parseMSOToolStripMenuItem.Text = "Parse MSO";
             this.parseMSOToolStripMenuItem.Click += new System.EventHandler(this.parseMSOToolStripMenuItem_Click);
             // 
             // readNNMotionToolStripMenuItem
             // 
             this.readNNMotionToolStripMenuItem.Name = "readNNMotionToolStripMenuItem";
-            this.readNNMotionToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.readNNMotionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.readNNMotionToolStripMenuItem.Text = "Read NN Motion";
             this.readNNMotionToolStripMenuItem.Click += new System.EventHandler(this.readNNMotionToolStripMenuItem_Click_1);
             // 
             // parseCAWSToolStripMenuItem
             // 
             this.parseCAWSToolStripMenuItem.Name = "parseCAWSToolStripMenuItem";
-            this.parseCAWSToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.parseCAWSToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.parseCAWSToolStripMenuItem.Text = "Parse CAWS";
             this.parseCAWSToolStripMenuItem.Click += new System.EventHandler(this.parseCAWSToolStripMenuItem_Click);
             // 
             // readMCGMCPToolStripMenuItem
             // 
             this.readMCGMCPToolStripMenuItem.Name = "readMCGMCPToolStripMenuItem";
-            this.readMCGMCPToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.readMCGMCPToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.readMCGMCPToolStripMenuItem.Text = "Read MCG, MCP";
             this.readMCGMCPToolStripMenuItem.Click += new System.EventHandler(this.readMCGMCPToolStripMenuItem_Click);
             // 
             // readMSBToolStripMenuItem
             // 
             this.readMSBToolStripMenuItem.Name = "readMSBToolStripMenuItem";
-            this.readMSBToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.readMSBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.readMSBToolStripMenuItem.Text = "Read MSB";
             this.readMSBToolStripMenuItem.Click += new System.EventHandler(this.readMSBToolStripMenuItem_Click);
             // 
@@ -1005,17 +1019,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // toolStripSeparator11
+            // nullMCGUnksToolStripMenuItem
             // 
-            this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(341, 6);
-            // 
-            // generateMCGMCPToolStripMenuItem
-            // 
-            this.generateMCGMCPToolStripMenuItem.Name = "generateMCGMCPToolStripMenuItem";
-            this.generateMCGMCPToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
-            this.generateMCGMCPToolStripMenuItem.Text = "Generate Demon\'s Souls MCG/MCP";
-            this.generateMCGMCPToolStripMenuItem.Click += new System.EventHandler(this.generateMCGMCPToolStripMenuItem_Click);
+            this.nullMCGUnksToolStripMenuItem.Name = "nullMCGUnksToolStripMenuItem";
+            this.nullMCGUnksToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.nullMCGUnksToolStripMenuItem.Text = "Null MCG Unks";
+            this.nullMCGUnksToolStripMenuItem.Click += new System.EventHandler(this.nullMCGUnksToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1149,6 +1158,7 @@
         private System.Windows.Forms.ToolStripMenuItem readMSBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem generateMCGMCPToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.ToolStripMenuItem nullMCGUnksToolStripMenuItem;
     }
 }
 

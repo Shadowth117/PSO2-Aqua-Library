@@ -897,7 +897,7 @@ namespace AquaModelLibrary
             {
                 for (int vert = 0; vert < vertData[vset].vertPositions.Count; vert++)
                 {
-                    float distance = Distance(center, vertData[vset].vertPositions[vert]);
+                    float distance = Extra.MathExtras.Distance(center, vertData[vset].vertPositions[vert]);
                     if (distance > radius)
                     {
                         radius = distance;
@@ -911,11 +911,6 @@ namespace AquaModelLibrary
             bounds.boundingRadius = radius;
 
             return bounds;
-        }
-
-        public static float Distance(Vector3 point1, Vector3 point2)
-        {
-            return (float)Math.Sqrt(Math.Pow(point2.X - point1.X, 2) + Math.Pow(point2.Y - point1.Y, 2) + Math.Pow(point2.Z - point1.Z, 2));
         }
         
         //Adapted from this: https://forums.cgsociety.org/t/finding-bi-normals-tangents/975005/8 

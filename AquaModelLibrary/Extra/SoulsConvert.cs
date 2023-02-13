@@ -44,10 +44,13 @@ namespace AquaModelLibrary.Extra
 
         public static void ReadSoulsFile(string filePath)
         {
+            JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
             var raw = File.ReadAllBytes(filePath);
             if(filePath.EndsWith(".mcg"))
             {
                 var mcg = SoulsFormats.SoulsFile<SoulsFormats.MCG>.Read(raw);
+                string mcgData = JsonConvert.SerializeObject(mcg, jss);
+                File.WriteAllText(filePath + ".json", mcgData);
                 int maxA = 0;
                 int maxB = 0;
                 Debug.WriteLine($"mcg edge count == {mcg.Edges.Count}");
@@ -70,6 +73,10 @@ namespace AquaModelLibrary.Extra
                         maxB = Math.Max(maxB, mcg.Edges[i].UnkIndicesB[j]);
                     }
                     edgesText += "\n";
+                    if(mcg.Edges[i].NodeIndexA > mcg.Edges[i].NodeIndexB)
+                    {
+                        var a = 0;
+                    }
                 }
                 Debug.Write(edgesText);
                 Debug.WriteLine($"Max A: {maxA}\nMax B: {maxB}");
@@ -79,6 +86,8 @@ namespace AquaModelLibrary.Extra
             } else if(filePath.EndsWith(".mcp"))
             {
                 var mcp = SoulsFormats.SoulsFile<SoulsFormats.MCP>.Read(raw);
+                string mcpData = JsonConvert.SerializeObject(mcp, jss);
+                File.WriteAllText(filePath + ".json", mcpData);
                 Dictionary<uint, List<MCP.Room>> rooms = new Dictionary<uint, List<MCP.Room>>();
                 foreach(var room in mcp.Rooms)
                 {
@@ -106,6 +115,21 @@ namespace AquaModelLibrary.Extra
             } else if(filePath.EndsWith(".msb"))
             {
                 var msb = SoulsFormats.SoulsFile<MSBD>.Read(raw);
+            }
+        }
+
+        public static void NullUnkIndices(string filePath)
+        {
+            var raw = File.ReadAllBytes(filePath);
+            if (filePath.EndsWith(".mcg"))
+            {
+                var mcg = SoulsFormats.SoulsFile<SoulsFormats.MCG>.Read(raw);
+                foreach(var edge in mcg.Edges)
+                {
+                    edge.UnkIndicesA.Clear();
+                    edge.UnkIndicesB.Clear();
+                }
+                mcg.Write(filePath);
             }
         }
 
