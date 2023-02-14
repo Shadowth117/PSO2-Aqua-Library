@@ -114,7 +114,13 @@ namespace AquaModelLibrary.Extra
                 Debug.Write(sb.ToString());
             } else if(filePath.EndsWith(".msb"))
             {
-                var msb = SoulsFormats.SoulsFile<MSBD>.Read(raw);
+                if(BitConverter.ToUInt32(raw, 4) == 0xFFFFFFFF)
+                {
+                    var msb = SoulsFormats.SoulsFile<MSBDR>.Read(raw);
+                } else
+                {
+                    var msb = SoulsFormats.SoulsFile<MSBD>.Read(raw);
+                }
             }
         }
 

@@ -59,7 +59,7 @@ namespace SoulsFormats
             public class Point : Shape
             {
                 internal override ShapeType Type => ShapeType.Point;
-                internal override bool HasShapeData => false;
+                internal override bool HasShapeData => true;
 
                 /// <summary>
                 /// Creates a deep copy of the Point.
@@ -67,6 +67,15 @@ namespace SoulsFormats
                 public override Shape DeepCopy()
                 {
                     return new Point();
+                }
+                internal override void ReadShapeData(BinaryReaderEx br)
+                {
+                    br.AssertInt64(-1);
+                }
+
+                internal override void WriteShapeData(BinaryWriterEx bw)
+                {
+                    bw.WriteInt64(-1);
                 }
             }
 
