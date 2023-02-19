@@ -184,7 +184,7 @@ namespace AquaModelLibrary.Extra
                 string boneData = JsonConvert.SerializeObject(flver.Bones, jss);
                 File.WriteAllText(filePath + ".matData.json", materialData);
                 File.WriteAllText(filePath + ".dummyData.json", dummyData);
-                //File.WriteAllText(filePath + ".boneData.json", boneData);
+                File.WriteAllText(filePath + ".boneData.json", boneData);
             }
             return FlverToAqua(flver, out aqn, useMetaData);
         }
