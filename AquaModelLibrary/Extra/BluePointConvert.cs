@@ -1,16 +1,13 @@
-﻿using AquaModelLibrary.BluePoint.CMSH;
+﻿using AquaModelLibrary.BluePoint.CANI;
 using AquaModelLibrary.BluePoint.CMAT;
+using AquaModelLibrary.BluePoint.CMSH;
 using AquaModelLibrary.BluePoint.CSKL;
 using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using static AquaModelLibrary.AquaNode;
-using System.Diagnostics;
 
 namespace AquaModelLibrary.Extra
 {
@@ -28,9 +25,18 @@ namespace AquaModelLibrary.Extra
             }
         }
 
+        public static CANI ReadCANI(string filePath)
+        {
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return new CANI(streamReader);
+            }
+        }
+
         public static AquaObject CMDLToAqua(CMSH mdl, string cmtlPath, string modelPath, out AquaNode aqn)
         {
-            if(mdl.header.variantFlag2 == 0x41)
+            if (mdl.header.variantFlag2 == 0x41)
             {
                 aqn = null;
                 return null;
@@ -47,7 +53,8 @@ namespace AquaModelLibrary.Extra
                     {
                         cskl = new CSKL(streamReader);
                     }
-                } else
+                }
+                else
                 {
                     if (modelPath.Contains("-app0"))
                     {
@@ -58,7 +65,7 @@ namespace AquaModelLibrary.Extra
                             currentPath = Path.GetDirectoryName(currentPath);
                             i++;
                             //Should seriously never ever ever happen, but screw it
-                            if(i == 255)
+                            if (i == 255)
                             {
                                 break;
                             }
@@ -73,7 +80,7 @@ namespace AquaModelLibrary.Extra
                     }
                 }
             }
-           
+
             var mirrorMat = Matrix4x4.Identity;
             /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
                                         0, 1, 0, 0,
@@ -86,13 +93,15 @@ namespace AquaModelLibrary.Extra
             if (cskl == null && mdl.boneData == null)
             {
                 aqp.bonePalette.Add((uint)0);
-            } else if (cskl == null && mdl.boneData != null)
+            }
+            else if (cskl == null && mdl.boneData != null)
             {
                 for (int i = 0; i < mdl.boneData.nameCount; i++)
                 {
                     aqp.bonePalette.Add((uint)i);
                 }
-            } else
+            }
+            else
             {
                 for (int i = 0; i < cskl.header.boneCount; i++)
                 {
@@ -235,9 +244,9 @@ namespace AquaModelLibrary.Extra
             {
                 var startFace = mesh.header.matList[m].startingFaceIndex / 6;
                 var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
-                
+
                 //Sometimes BluePoint's optimization led to degenerate faces, so we skip
-                if(faceCount == 0 && mesh.header.matList[m].endingFaceIndex > 1)
+                if (faceCount == 0 && mesh.header.matList[m].endingFaceIndex > 1)
                 {
                     continue;
                 }
@@ -253,12 +262,13 @@ namespace AquaModelLibrary.Extra
                     using (var streamReader = new BufferedStreamReader(stream, 8192))
                     {
                         var cmat = new CMAT(streamReader);
-                        if(cmat.texNames.Count > 0)
+                        if (cmat.texNames.Count > 0)
                         {
                             texName = cmat.texNames[0];
                         }
                     }
-                } else if(File.Exists(backupMatPath))
+                }
+                else if (File.Exists(backupMatPath))
                 {
                     using (Stream stream = new MemoryStream(File.ReadAllBytes(backupMatPath)))
                     using (var streamReader = new BufferedStreamReader(stream, 8192))
@@ -297,10 +307,11 @@ namespace AquaModelLibrary.Extra
                     int x;
                     int y;
                     int z;
-                    if(vertIdDict.TryGetValue(tri.X, out var value))
+                    if (vertIdDict.TryGetValue(tri.X, out var value))
                     {
                         x = value;
-                    } else
+                    }
+                    else
                     {
                         vertIdDict.Add(tri.X, matVtxl.vertPositions.Count);
                         x = matVtxl.vertPositions.Count;

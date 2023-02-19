@@ -184,7 +184,7 @@ namespace AquaModelLibrary.Extra
                 string boneData = JsonConvert.SerializeObject(flver.Bones, jss);
                 File.WriteAllText(filePath + ".matData.json", materialData);
                 File.WriteAllText(filePath + ".dummyData.json", dummyData);
-                File.WriteAllText(filePath + ".boneData.json", boneData);
+                //File.WriteAllText(filePath + ".boneData.json", boneData);
             }
             return FlverToAqua(flver, out aqn, useMetaData);
         }
@@ -455,8 +455,11 @@ namespace AquaModelLibrary.Extra
                 //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                 aqn.nodeList.Add(aqNode);
             }
+            Vector3? maxBounding = null;
+            Vector3? minBounding = null;
+            Vector3? maxBounding2 = null;
+            Vector3? minBounding2 = null;
 
-            List<Matrix4x4> testRecompile = new List<Matrix4x4>();
             //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
@@ -470,7 +473,6 @@ namespace AquaModelLibrary.Extra
                 Matrix4x4.Invert(mat, out var invMat);
                 bone.SetInverseBindPoseMatrix(invMat);
                 aqn.nodeList[i] = bone;
-                testRecompile.Add(MathExtras.SetMatrixScale(mat));
             }
 
             for (int i = 0; i < flver.Meshes.Count; i++)
@@ -562,6 +564,22 @@ namespace AquaModelLibrary.Extra
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
+                    var alter = Vector3.Transform(vert.Position, flver.Bones[0].ComputeLocalTransform());
+                    //Recalc model bounding
+                    if (maxBounding == null)
+                    {
+                        maxBounding = vert.Position;
+                        minBounding = vert.Position;
+                        maxBounding2 = alter;
+                        minBounding2 = alter;
+                    }
+                    else
+                    {
+                        maxBounding = AquaObjectMethods.GetMaximumBounding(vert.Position, (Vector3)maxBounding);
+                        minBounding = AquaObjectMethods.GetMinimumBounding(vert.Position, (Vector3)minBounding);
+                        maxBounding2 = AquaObjectMethods.GetMaximumBounding(alter, (Vector3)maxBounding);
+                        minBounding2 = AquaObjectMethods.GetMinimumBounding(alter, (Vector3)minBounding);
+                    }
                     vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
                     vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMatX));
 
@@ -702,14 +720,7 @@ namespace AquaModelLibrary.Extra
             flver.Header.VertexIndexSize = 16; //Probably needs to be 32 if we go over 65535 faces in a mesh, but DeS PS3 probably never does that.
 
             List<string> usedMaterials = new List<string>();
-            Dictionary<string, FLVER0.Material> matDict = new Dictionary<string, FLVER0.Material>();
-            if (referenceFlver != null)
-            {
-                for (int i = 0; i < referenceFlver.Materials.Count; i++)
-                {
-                    matDict.Add(referenceFlver.Materials[i].Name, (FLVER0.Material)referenceFlver.Materials[i]);
-                }
-            }
+            flver.Materials = new List<FLVER0.Material>();
 
             var dummyPath = Path.ChangeExtension(initialFilePath, "flver.dummyData.json");
             var matPath = Path.ChangeExtension(initialFilePath, "flver.matData.json");
@@ -733,20 +744,16 @@ namespace AquaModelLibrary.Extra
 
             //Materials - Deserialize tex lists from JSON and apply. Use reference flver for tex names if available
             List<FLVER0.Material> metaMats = null;
-            if(materialDataText != null)
+            if (referenceFlver != null)
+            {
+                metaMats = (List<FLVER0.Material>)referenceFlver.Materials;
+                flver.Materials.AddRange(metaMats);
+            } else if (materialDataText != null)
             {
                 metaMats = JsonConvert.DeserializeObject<List<FLVER0.Material>>(materialDataText);
-                for(int i = 0; i < metaMats.Count; i++)
-                {
-                    if (!matDict.ContainsKey(metaMats[i].Name))
-                    {
-                        matDict.Add(metaMats[i].Name, metaMats[i]);
-                    }
-                }
-
+                flver.Materials.AddRange(metaMats);
             }
 
-            flver.Materials = new List<FLVER0.Material>();
             List<int> matIds = new List<int>();
             for (int i = 0; i < aqp.meshList.Count; i++)
             {
@@ -784,9 +791,12 @@ namespace AquaModelLibrary.Extra
                 //If we loaded maps externally and it's in range of that list, use it
                 if (metaMats != null && ogMatIndex < metaMats.Count && ogMatIndex != -1)
                 {
+                    matIds.Add(ogMatIndex);
+                    /*
                     flvMat = metaMats[ogMatIndex];
                     matIds.Add(flver.Materials.Count);
                     flver.Materials.Add(flvMat);
+                    */
                     continue;
                 }
 
@@ -799,26 +809,17 @@ namespace AquaModelLibrary.Extra
                 else
                 {
                     usedMaterials.Add(name);
-                    if (matDict.TryGetValue(name, out flvMat))
+                    flvMat = new FLVER0.Material(true); 
+                    flvMat.Name = name;
+                    mtd = mtd ?? "n:\\orthern\\limit\\p_metal[dsb]_skin.mtd";
+                    flvMat.MTD = mtd;
+                    if(texList.Count > 0)
                     {
-                        matIds.Add(flver.Materials.Count);
-                        flver.Materials.Add(flvMat);
-                        continue;
-                    }
-                    else
-                    {
-                        flvMat = new FLVER0.Material(true); 
-                        flvMat.Name = name;
-                        mtd = mtd ?? "n:\\orthern\\limit\\p_metal[dsb]_skin.mtd";
-                        flvMat.MTD = mtd;
-                        if(texList.Count > 0)
-                        {
-                            FLVER0.Texture tex = new FLVER0.Texture();
-                            flvMat.Textures = new List<FLVER0.Texture>();
-                            tex.Path = texList[0];
-                            tex.Type = "g_Diffuse";
-                            flvMat.Textures.Add(tex);
-                        }
+                        FLVER0.Texture tex = new FLVER0.Texture();
+                        flvMat.Textures = new List<FLVER0.Texture>();
+                        tex.Path = texList[0];
+                        tex.Type = "g_Diffuse";
+                        flvMat.Textures.Add(tex);
                     }
                 }
                 flvMat.Layouts = new List<FLVER0.BufferLayout>();
@@ -846,7 +847,6 @@ namespace AquaModelLibrary.Extra
             var defaultMinBound = new Vector3(-3.402823e+38f, -3.402823e+38f, -3.402823e+38f);
             Vector3? maxBounding = null;
             Vector3? minBounding = null;
-
             flver.Meshes = new List<FLVER0.Mesh>();
             for (int i = 0; i < aqp.meshList.Count; i++)
             {
@@ -860,8 +860,9 @@ namespace AquaModelLibrary.Extra
                 FLVER0.Mesh flvMesh = new FLVER0.Mesh();
                 flvMesh.MaterialIndex = (byte)matIds[i];
                 flvMesh.BackfaceCulling = false;
+                byte isDynamic = 0;
                 //flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
-                flvMesh.Dynamic = 1;
+                flvMesh.Dynamic = 0;
                 flvMesh.Vertices = new List<FLVER.Vertex>();
                 flvMesh.VertexIndices = new List<int>();
                 flvMesh.DefaultBoneIndex = 0; //Maybe set properly later from the aqp version if important
@@ -1045,17 +1046,24 @@ namespace AquaModelLibrary.Extra
                                 {
                                     weights = vtxl.vertWeights[v];
                                 }
-                                    vert.BoneWeights = new FLVER.VertexBoneWeights() { };
+
+                                vert.BoneWeights = new FLVER.VertexBoneWeights() { };
                                 vert.BoneWeights[0] = weights.X;
                                 vert.BoneWeights[1] = weights.Y;
                                 vert.BoneWeights[2] = weights.Z;
                                 vert.BoneWeights[3] = weights.W;
+
+                                if((weights.X < 0.999f && weights.X > 0) || (weights.Y < 0.999f && weights.Y > 0) || (weights.Z < 0.999f && weights.Z > 0) || (weights.W < 0.999f && weights.W > 0))
+                                {
+                                    isDynamic = 1;
+                                }
                                 break;
                         }
                     }
 
                     flvMesh.Vertices.Add(vert);
                 }
+                flvMesh.Dynamic = isDynamic;
 
                 TangentSolver.SolveTangentsDemonsSouls(flvMesh, flver.Header.Version);
                 flver.Meshes.Add(flvMesh);

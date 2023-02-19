@@ -237,6 +237,8 @@
     <Compile Include="BluePoint\CANI\CANIHeader.cs" />
     <Compile Include="BluePoint\CAWS\CAWS.cs" />
     <Compile Include="BluePoint\CAWS\CAWSObject.cs" />
+    <Compile Include="BluePoint\CGPR\CGPR.cs" />
+    <Compile Include="BluePoint\CGPR\CAWSObject.cs" />
     <Compile Include="BluePoint\CMDL\CMDL.cs" />
     <Compile Include="BluePoint\CMSH\CMSH.cs" />
     <Compile Include="BluePoint\CMSH\CMSHBoneData.cs" />

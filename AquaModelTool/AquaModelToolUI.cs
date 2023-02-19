@@ -4050,6 +4050,38 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void parseCANIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select Demon's Souls PS5 cani file(s)",
+                Filter = "Demon's Souls PS5 cani Files (*.cani)|*.cani|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<string> failedFiles = new List<string>();
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    var cani = BluePointConvert.ReadCANI(file);
+                    /*
+                    aquaUI.aqua.aquaModels.Clear();
+                    ModelSet set = new ModelSet();
+                    set.models.Add(BluePointConvert.ReadCMDL(file, out AquaNode aqn));
+                    var outName = Path.ChangeExtension(file, ".aqp");*/
+                    /*if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                    {
+                        aquaUI.aqua.aquaModels.Add(set);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                        set.models[0].ConvertToLegacyTypes();
+                        set.models[0].CreateTrueVertWeights();
+
+                        FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), false);
+                    }*/
+                }
+            }
+        }
     }
 }
 
