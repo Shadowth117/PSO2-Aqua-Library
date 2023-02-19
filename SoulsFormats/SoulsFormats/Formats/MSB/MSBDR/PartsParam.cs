@@ -531,28 +531,32 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    br.AssertInt32(0);
-                    BreakTerm = br.ReadSByte();
-                    NetSyncType = br.ReadSByte();
-                    br.AssertInt16(0);
-                    InitAnimID = br.ReadInt16();
-                    UnkT0E = br.ReadInt16();
-                    UnkT10 = br.ReadInt32();
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
+                    if(!(this is DummyObject))
+                    {
+                        br.AssertInt32(0);
+                        BreakTerm = br.ReadSByte();
+                        NetSyncType = br.ReadSByte();
+                        br.AssertInt16(0);
+                        InitAnimID = br.ReadInt16();
+                        UnkT0E = br.ReadInt16();
+                        UnkT10 = br.ReadInt32();
+                        br.Pad(0x8);
+                    }
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(0);
-                    bw.WriteSByte(BreakTerm);
-                    bw.WriteSByte(NetSyncType);
-                    bw.WriteInt16(0);
-                    bw.WriteInt16(InitAnimID);
-                    bw.WriteInt16(UnkT0E);
-                    bw.WriteInt32(UnkT10);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
+                    if (!(this is DummyObject))
+                    {
+                        bw.WriteInt32(0);
+                        bw.WriteSByte(BreakTerm);
+                        bw.WriteSByte(NetSyncType);
+                        bw.WriteInt16(0);
+                        bw.WriteInt16(InitAnimID);
+                        bw.WriteInt16(UnkT0E);
+                        bw.WriteInt32(UnkT10);
+                        bw.PadFF(0x8);
+                    }
                 }
             }
 
@@ -656,60 +660,71 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadInt32();
-                    UnkT04 = br.ReadInt32();
-                    UnkT08 = br.ReadSingle();
-                    NPCParamID = br.ReadInt32();
-                    TalkID = br.ReadInt32();
-                    PointMoveType = br.ReadByte();
-                    br.AssertByte(0);
-                    PlatoonID = br.ReadUInt16();
-                    CharaInitID = br.ReadInt32();
-                    CollisionIndex = br.ReadInt32();
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    MovePointIndices = br.ReadInt16s(8);
-                    InitAnimID = br.ReadInt32();
-                    DamageAnimID = br.ReadInt32();
+                    if(!(this is DummyEnemy))
+                    {
+                        UnkT00 = br.ReadInt32();
+                        UnkT04 = br.ReadInt32();
+                        UnkT08 = br.ReadSingle();
+                        NPCParamID = br.ReadInt32();
+                        TalkID = br.ReadInt32();
+                        PointMoveType = br.ReadByte();
+                        br.AssertByte(0xFF);
+                        PlatoonID = br.ReadUInt16();
+                        CharaInitID = br.ReadInt32();
+                        CollisionIndex = br.ReadInt32();
+                        br.Pad(0x8);
+                        MovePointIndices = br.ReadInt16s(8);
+                        InitAnimID = br.ReadInt32();
+                        DamageAnimID = br.ReadInt32();
+                    }
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(UnkT00);
-                    bw.WriteInt32(UnkT04);
-                    bw.WriteSingle(UnkT08);
-                    bw.WriteInt32(NPCParamID);
-                    bw.WriteInt32(TalkID);
-                    bw.WriteByte(PointMoveType);
-                    bw.WriteByte(0);
-                    bw.WriteUInt16(PlatoonID);
-                    bw.WriteInt32(CharaInitID);
-                    bw.WriteInt32(CollisionIndex);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt16s(MovePointIndices);
-                    bw.WriteInt32(InitAnimID);
-                    bw.WriteInt32(DamageAnimID);
+                    if (!(this is DummyEnemy))
+                    {
+                        bw.WriteInt32(UnkT00);
+                        bw.WriteInt32(UnkT04);
+                        bw.WriteSingle(UnkT08);
+                        bw.WriteInt32(NPCParamID);
+                        bw.WriteInt32(TalkID);
+                        bw.WriteByte(PointMoveType);
+                        bw.WriteByte(0xFF);
+                        bw.WriteUInt16(PlatoonID);
+                        bw.WriteInt32(CharaInitID);
+                        bw.WriteInt32(CollisionIndex);
+                        bw.PadFF(0x8);
+                        bw.WriteInt16s(MovePointIndices);
+                        bw.WriteInt32(InitAnimID);
+                        bw.WriteInt32(DamageAnimID);
+                    }
                 }
 
                 internal override void GetNames(MSBDR msb, Entries entries)
                 {
-                    base.GetNames(msb, entries);
-                    CollisionName = MSB.FindName(entries.Parts, CollisionIndex);
+                    if (!(this is DummyEnemy))
+                    {
+                        base.GetNames(msb, entries);
+                        CollisionName = MSB.FindName(entries.Parts, CollisionIndex);
 
-                    MovePointNames = new string[MovePointIndices.Length];
-                    for (int i = 0; i < MovePointIndices.Length; i++)
-                        MovePointNames[i] = MSB.FindName(entries.Regions, MovePointIndices[i]);
+                        MovePointNames = new string[MovePointIndices.Length];
+                        for (int i = 0; i < MovePointIndices.Length; i++)
+                            MovePointNames[i] = MSB.FindName(entries.Regions, MovePointIndices[i]);
+                    }
                 }
 
                 internal override void GetIndices(MSBDR msb, Entries entries)
                 {
-                    base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(entries.Parts, CollisionName);
 
-                    MovePointIndices = new short[MovePointNames.Length];
-                    for (int i = 0; i < MovePointNames.Length; i++)
-                        MovePointIndices[i] = (short)MSB.FindIndex(entries.Regions, MovePointNames[i]);
+                    if (!(this is DummyEnemy))
+                    {
+                        base.GetIndices(msb, entries);
+                        CollisionIndex = MSB.FindIndex(entries.Parts, CollisionName);
+
+                        MovePointIndices = new short[MovePointNames.Length];
+                        for (int i = 0; i < MovePointNames.Length; i++)
+                            MovePointIndices[i] = (short)MSB.FindIndex(entries.Regions, MovePointNames[i]);
+                    }
                 }
             }
 
@@ -750,21 +765,19 @@ namespace SoulsFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     UnkT00 = br.ReadByte();
-                    br.AssertByte(0);
-                    br.AssertInt16(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
+                    br.AssertByte(0xFF);
+                    br.AssertInt16(-1);
+                    br.AssertInt32(-1);
+                    br.Pad(0x8);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteByte(UnkT00);
-                    bw.WriteByte(0);
-                    bw.WriteInt16(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
+                    bw.WriteByte(0xFF);
+                    bw.WriteInt16(-1);
+                    bw.WriteInt32(-1);
+                    bw.PadFF(0x8);
                 }
             }
 
@@ -847,10 +860,7 @@ namespace SoulsFormats
                     RefTexIDs = br.ReadInt16s(16);
                     UnkT38 = br.ReadInt16();
                     MapNameID = br.ReadInt16();
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
+                    br.Pad(0x8);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -863,10 +873,7 @@ namespace SoulsFormats
                     bw.WriteInt16s(RefTexIDs);
                     bw.WriteInt16(UnkT38);
                     bw.WriteInt16(MapNameID);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
+                    bw.Pad(0x8);
                 }
             }
 
@@ -964,9 +971,7 @@ namespace SoulsFormats
                     UnkT28 = br.ReadSingle();
                     UnkT2C = br.ReadInt32();
                     UnkT30 = br.ReadInt32();
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
+                    br.Pad(8);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -984,9 +989,7 @@ namespace SoulsFormats
                     bw.WriteSingle(UnkT28);
                     bw.WriteInt32(UnkT2C);
                     bw.WriteInt32(UnkT30);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
+                    bw.PadFF(8);
                 }
             }
 
@@ -1022,19 +1025,13 @@ namespace SoulsFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     NvmGroups = br.ReadUInt32s(4);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
+                    br.Pad(8);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteUInt32s(NvmGroups);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
+                    bw.PadFF(8);
                 }
             }
 
@@ -1106,16 +1103,14 @@ namespace SoulsFormats
                 {
                     CollisionIndex = br.ReadInt32();
                     MapID = br.ReadBytes(4);
-                    br.AssertInt32(0);
-                    br.AssertInt32(0);
+                    br.Pad(0x8);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteInt32(CollisionIndex);
                     bw.WriteBytes(MapID);
-                    bw.WriteInt32(0);
-                    bw.WriteInt32(0);
+                    bw.PadFF(0x8);
                 }
 
                 internal override void GetNames(MSBDR msb, Entries entries)

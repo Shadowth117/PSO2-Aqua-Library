@@ -660,10 +660,10 @@ namespace SoulsFormats
                     MinInterval = br.ReadSingle();
                     MaxInterval = br.ReadSingle();
                     InitialSpawnCount = br.ReadByte();
-                    br.AssertPattern(0x1F, 0x00);
+                    br.AssertPattern(0x3, 0xFF);
                     SpawnPointIndices = br.ReadInt32s(4);
                     SpawnPartIndices = br.ReadInt32s(32);
-                    br.AssertPattern(0x40, 0x00);
+                    br.Pad(0x8);
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -676,10 +676,9 @@ namespace SoulsFormats
                     bw.WriteSingle(MinInterval);
                     bw.WriteSingle(MaxInterval);
                     bw.WriteByte(InitialSpawnCount);
-                    bw.WritePattern(0x1F, 0x00);
+                    bw.WritePattern(0x3, 0xFF);
                     bw.WriteInt32s(SpawnPointIndices);
                     bw.WriteInt32s(SpawnPartIndices);
-                    bw.WritePattern(0x40, 0x00);
                     bw.PadFF(0x8);
                 }
 

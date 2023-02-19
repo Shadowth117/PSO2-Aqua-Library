@@ -141,7 +141,7 @@ namespace SoulsFormats
                     throw new InvalidDataException($"{nameof(unkOffsetA)} must not be 0 in type {GetType()}.");
                 if (unkOffsetB == 0)
                     throw new InvalidDataException($"{nameof(unkOffsetB)} must not be 0 in type {GetType()}.");
-                if (Shape.HasShapeData ^ shapeDataOffset != 0)
+                if (Shape.HasShapeData ^ shapeDataOffset != 0 && shapeType != MSB.ShapeType.Point)
                     throw new InvalidDataException($"Unexpected {nameof(shapeDataOffset)} 0x{shapeDataOffset:X} in type {GetType()}.");
 
                 br.Position = start + nameOffset;

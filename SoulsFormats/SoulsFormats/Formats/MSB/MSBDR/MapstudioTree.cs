@@ -134,6 +134,7 @@ namespace SoulsFormats
                 Unk20 = br.ReadSingle();
                 Unk24 = br.ReadSingle();
                 Unk28 = br.ReadSingle();
+                br.Pad(0x8);
                 Unk0C = br.ReadInt64();
                 Unk1C = br.ReadInt64();
                 Unk2C = br.ReadInt64();
@@ -153,6 +154,7 @@ namespace SoulsFormats
                 bw.WriteSingle(Unk20);
                 bw.WriteSingle(Unk24);
                 bw.WriteSingle(Unk28);
+                bw.PadFF(0x8);
                 bw.WriteInt64(Unk0C);
                 bw.WriteInt64(Unk1C);
                 bw.WriteInt64(Unk2C);
