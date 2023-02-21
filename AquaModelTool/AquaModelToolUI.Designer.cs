@@ -138,9 +138,10 @@
             this.readMCGMCPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMSBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nullMCGUnksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parseCANIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.parseCANIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.parseDRBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -907,7 +908,8 @@
             this.readMCGMCPToolStripMenuItem,
             this.readMSBToolStripMenuItem,
             this.nullMCGUnksToolStripMenuItem,
-            this.parseCANIToolStripMenuItem});
+            this.parseCANIToolStripMenuItem,
+            this.parseDRBToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -1010,6 +1012,13 @@
             this.nullMCGUnksToolStripMenuItem.Text = "Null MCG Unks";
             this.nullMCGUnksToolStripMenuItem.Click += new System.EventHandler(this.nullMCGUnksToolStripMenuItem_Click);
             // 
+            // parseCANIToolStripMenuItem
+            // 
+            this.parseCANIToolStripMenuItem.Name = "parseCANIToolStripMenuItem";
+            this.parseCANIToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.parseCANIToolStripMenuItem.Text = "Parse CANI";
+            this.parseCANIToolStripMenuItem.Click += new System.EventHandler(this.parseCANIToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -1028,12 +1037,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // parseCANIToolStripMenuItem
+            // parseDRBToolStripMenuItem
             // 
-            this.parseCANIToolStripMenuItem.Name = "parseCANIToolStripMenuItem";
-            this.parseCANIToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.parseCANIToolStripMenuItem.Text = "Parse CANI";
-            this.parseCANIToolStripMenuItem.Click += new System.EventHandler(this.parseCANIToolStripMenuItem_Click);
+            this.parseDRBToolStripMenuItem.Name = "parseDRBToolStripMenuItem";
+            this.parseDRBToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.parseDRBToolStripMenuItem.Text = "Parse DRB";
+            this.parseDRBToolStripMenuItem.Click += new System.EventHandler(this.parseDRBToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1169,6 +1178,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripMenuItem nullMCGUnksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parseCANIToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem parseDRBToolStripMenuItem;
     }
 }
 

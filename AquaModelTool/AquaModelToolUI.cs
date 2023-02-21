@@ -4082,6 +4082,24 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void parseDRBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select DRB File",
+                Filter = "DRB files|*.drb",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ReadSoulsFile(file);
+                }
+            }
+        }
     }
 }
 
