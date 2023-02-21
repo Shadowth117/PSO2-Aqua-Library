@@ -64,7 +64,7 @@ namespace SoulsFormats
             /// </summary>
             public short ScalingMode { get; set; }
 
-            internal Shape()
+            public Shape()
             {
                 ScalingOriginX = -1;
                 ScalingOriginY = -1;

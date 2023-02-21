@@ -121,6 +121,70 @@ namespace AquaModelLibrary.Extra
                 {
                     var msb = SoulsFormats.SoulsFile<MSBD>.Read(raw);
                 }
+            } else if(filePath.EndsWith(".drb"))
+            {
+                var drb = DRB.Read(raw, DRB.DRBVersion.DarkSouls);
+
+                DRB.Control.Static control = new DRB.Control.Static();
+                control.Unk00 = 0;
+                drb.Textures.Add(new DRB.Texture() {Name = "MapShot_03", Path = "N:\\DemonsSoul\\data\\Menu\\Texture\\MapShot\\MapShot_03.tga" });
+
+                short TexBottomEdge = 512;
+                short TexRightEdge = 1024;
+                short TexTopEdge = 256;
+                short TexLeftEdge = 512;
+                short textureId = 2;
+                for (int i = 0; i < 8; i++)
+                {
+                    //Check if we need to go to the next column
+                    if(TexBottomEdge > 1024)
+                    {
+                        TexBottomEdge = 256;
+                        TexTopEdge = 0;
+                        //Check if we need to go to a new texture sheet
+                        if (TexRightEdge == 1024)
+                        {
+                            TexRightEdge = 512;
+                            TexLeftEdge = 0;
+                            textureId += 1;
+                        } else //If not, go to the next column
+                        {
+                            TexRightEdge += 512;
+                            TexLeftEdge += 512;
+                        }
+                    }
+                    var dlgo70 = new DRB.Dlgo();
+                    dlgo70.Control = control;
+                    dlgo70.Name = $"mapshot_7_{i}";
+                    DRB.Shape.Sprite dlgo70Shape = new DRB.Shape.Sprite();
+                    dlgo70Shape.BlendMode = DRB.Shape.BlendingMode.Alpha;
+                    dlgo70Shape.CustomColor = System.Drawing.Color.White;
+                    dlgo70Shape.Orientation = DRB.Shape.SpriteOrientation.None;
+                    dlgo70Shape.PaletteColor = 0;
+                    dlgo70Shape.ScalingOriginX = -1;
+                    dlgo70Shape.ScalingOriginY = -1;
+                    dlgo70Shape.ScalingMode = 0;
+                    dlgo70Shape.TextureIndex = textureId;
+
+                    dlgo70Shape.BottomEdge = 256;
+                    dlgo70Shape.RightEdge = 512;
+                    dlgo70Shape.TopEdge = 0;
+                    dlgo70Shape.LeftEdge = 0;
+
+                    dlgo70Shape.TexBottomEdge = TexBottomEdge;
+                    dlgo70Shape.TexRightEdge = TexRightEdge;
+                    dlgo70Shape.TexTopEdge = TexTopEdge;
+                    dlgo70Shape.TexLeftEdge = TexLeftEdge;
+                    dlgo70.Shape = dlgo70Shape;
+
+                    drb.Dlgs[0].Dlgos.Add(dlgo70);
+
+                    //Advance the row
+                    TexBottomEdge += 256;
+                    TexTopEdge += 256;
+                }
+
+                //drb.Write(filePath);
             }
         }
 
@@ -184,7 +248,7 @@ namespace AquaModelLibrary.Extra
                 string boneData = JsonConvert.SerializeObject(flver.Bones, jss);
                 File.WriteAllText(filePath + ".matData.json", materialData);
                 File.WriteAllText(filePath + ".dummyData.json", dummyData);
-                File.WriteAllText(filePath + ".boneData.json", boneData);
+                //File.WriteAllText(filePath + ".boneData.json", boneData);
             }
             return FlverToAqua(flver, out aqn, useMetaData);
         }
