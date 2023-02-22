@@ -124,7 +124,8 @@ namespace AquaModelLibrary.Extra
             } else if(filePath.EndsWith(".drb"))
             {
                 var drb = DRB.Read(raw, DRB.DRBVersion.DarkSouls);
-
+                
+                /*
                 DRB.Control.Static control = new DRB.Control.Static();
                 control.Unk00 = 0;
                 drb.Textures.Add(new DRB.Texture() {Name = "MapShot_03", Path = "N:\\DemonsSoul\\data\\Menu\\Texture\\MapShot\\MapShot_03.tga" });
@@ -183,7 +184,7 @@ namespace AquaModelLibrary.Extra
                     TexBottomEdge += 256;
                     TexTopEdge += 256;
                 }
-
+                */
                 //drb.Write(filePath);
             }
         }
