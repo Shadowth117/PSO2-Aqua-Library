@@ -81,13 +81,6 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
-            var mirrorMat = Matrix4x4.Identity;
-            /*var mirrorMat = new Matrix4x4(-1, 0, 0, 0,
-                                        0, 1, 0, 0,
-                                        0, 0, 1, 0,
-                                        0, 0, 0, 1);
-            */
-
             aqn = AquaNode.GenerateBasicAQN();
             AquaObject aqp = new NGSAquaObject();
             if (cskl == null && mdl.boneData == null)
@@ -148,6 +141,8 @@ namespace AquaModelLibrary.Extra
                     aqNode.parentId = parentId;
                     aqNode.unkNode = -1;
 
+                    aqNode.pos = translation;
+                    aqNode.eulRot = MathExtras.QuaternionToEuler(quatRot);
                     aqNode.scale = new Vector3(1, 1, 1);
 
                     Matrix4x4.Invert(mat, out var invMat);
@@ -158,21 +153,6 @@ namespace AquaModelLibrary.Extra
                     aqNode.boneName.SetString(cskl.names.primaryNames.names[i].Split('|').Last());
                     //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                     aqn.nodeList.Add(aqNode);
-                }
-
-                //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
-                for (int i = 0; i < aqn.nodeList.Count; i++)
-                {
-                    var bone = aqn.nodeList[i];
-                    Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                    mat *= mirrorMat;
-                    Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
-                    bone.pos = translation;
-                    bone.eulRot = MathExtras.QuaternionToEuler(rot);
-
-                    Matrix4x4.Invert(mat, out var invMat);
-                    bone.SetInverseBindPoseMatrix(invMat);
-                    aqn.nodeList[i] = bone;
                 }
             }
 
@@ -186,7 +166,7 @@ namespace AquaModelLibrary.Extra
 
             for (int v = 0; v < vertCount; v++)
             {
-                vtxl.vertPositions.Add(Vector3.Transform(mesh.vertData.positionList[v], mirrorMat));
+                vtxl.vertPositions.Add(mesh.vertData.positionList[v]);
                 //vtxl.vertNormals.Add(Vector3.Transform(mesh.vertData.normals[v], mirrorMat));
                 //var quat = mesh.vertData.normals[v];
 

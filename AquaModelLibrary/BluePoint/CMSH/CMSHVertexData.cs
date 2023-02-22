@@ -11,9 +11,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
     public enum VertexMagic : int
     {
         POS0 = 0x504F5330,
+        NRM0 = 0x4E524D30,
         QUT0 = 0x51555430,
         COL0 = 0x434F4C30,
         COL1 = 0x434F4C31,
+        TAN0 = 0x54414E30,
         TEX0 = 0x54455830,
         TEX1 = 0x54455831,
         TEX2 = 0x54455832,
@@ -91,6 +93,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             positionList.Add(sr.Read<Vector3>());
                         }
                         break;
+                    case VertexMagic.NRM0:
+                    case VertexMagic.TAN0:
                     case VertexMagic.QUT0:
                         for (int v = 0; v < vertCount; v++)
                         {
@@ -100,7 +104,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             normalTemp.Add(byteArr);
                             //Debug.WriteLine($"Byte represntation {byteArr[0]:X2} {byteArr[1]:X2} {byteArr[2]:X2} {byteArr[3]:X2} - {((float)byteArr[0]) / 255} {((float)byteArr[1]) / 255} {((float)byteArr[2]) / 255} {((float)byteArr[3]) / 255} \nSByte representation {sbyteArr[0]:X2} {sbyteArr[1]:X2} {sbyteArr[2]:X2} {sbyteArr[3]:X2} - {((float)sbyteArr[0]) / 127} {((float)sbyteArr[1]) / 127} {((float)sbyteArr[2]) / 127} {((float)sbyteArr[3]) / 127} ");
                             //Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
-                            normals.Add(quat);
+                            //normals.Add(quat);
                         }
                         break;
                     case VertexMagic.COL0:

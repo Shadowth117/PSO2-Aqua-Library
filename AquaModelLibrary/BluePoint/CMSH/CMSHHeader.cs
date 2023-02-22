@@ -18,6 +18,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public List<CMSHMatReference> matList = new List<CMSHMatReference>();
         public int endInt;
 
+        //0x0, 0x2 data
+        public byte unk0002Byte;
+        public int unk0002Int0;
+        public int unk0002Int1;
+
         public string OtherModelName = null; //For variantFlag2 being 0x41
 
         public CMSHHeader()
@@ -34,7 +39,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
             if(variantFlag2 != 0x41)
             {
-                crc = sr.Read<int>();
+                //For certain SOTC models
+                if(variantFlag != 0 && variantFlag2 != 2)
+                {
+                    crc = sr.Read<int>();
+                }
                 matCount = sr.Read<int>();
             
                 for(int i = 0; i < matCount; i++)
@@ -54,6 +63,13 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 }
 
                 endInt = sr.Read<int>();
+
+                if (variantFlag == 0 && variantFlag2 == 2)
+                {
+                    unk0002Byte = sr.Read<byte>();
+                    unk0002Int0 = sr.Read<int>();
+                    unk0002Int1 = sr.Read<int>();
+                }
             } else
             {
                 var mdlLen = sr.Read<byte>();
