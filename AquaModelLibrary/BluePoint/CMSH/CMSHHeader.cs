@@ -18,10 +18,16 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public List<CMSHMatReference> matList = new List<CMSHMatReference>();
         public int endInt;
 
+        //Demon's Souls check
+        public bool hasCrc; //Used if a crc is detected.
+
         //0x0, 0x2 data
         public byte unk0002Byte;
         public int unk0002Int0;
         public int unk0002Int1;
+
+        //0x8C, 0xA data
+        public int unk8C0AInt0;
 
         public string OtherModelName = null; //For variantFlag2 being 0x41
 
@@ -40,9 +46,17 @@ namespace AquaModelLibrary.BluePoint.CMSH
             if(variantFlag2 != 0x41)
             {
                 //For certain SOTC models
-                if(variantFlag != 0 && variantFlag2 != 2)
+                var crcCheck = sr.ReadBytes(sr.Position(), 4);
+                hasCrc = crcCheck[1] > 0 || crcCheck[2] > 0 || crcCheck[3] > 0;
+                if(variantFlag != 0 && variantFlag2 != 2 || hasCrc)
                 {
                     crc = sr.Read<int>();
+                }
+
+                //Read 8C and 0A specific value
+                if(variantFlag == 0x8C && variantFlag2 == 0xA)
+                {
+                    unk8C0AInt0 = sr.Read<int>();
                 }
                 matCount = sr.Read<int>();
             
@@ -64,7 +78,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
                 endInt = sr.Read<int>();
 
-                if (variantFlag == 0 && variantFlag2 == 2)
+                if (variantFlag == 0 && variantFlag2 == 2 && hasCrc == false)
                 {
                     unk0002Byte = sr.Read<byte>();
                     unk0002Int0 = sr.Read<int>();
