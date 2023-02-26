@@ -13,13 +13,13 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public byte variantFlag2; //Sections being things such as vertexData, FaceData, etc.
         public byte unk0;
         public ushort unk1;
-        public int crc;          //Hash for file?
+        public byte[] extraFlags;          //Hash for file?
         public int matCount;     //Material reference count
         public List<CMSHMatReference> matList = new List<CMSHMatReference>();
         public int endInt;
 
         //Demon's Souls check
-        public bool hasCrc; //Used if a crc is detected.
+        public bool hasExtraFlags; //Used if extra flags are detected.
 
         //0x0, 0x2 data
         public byte unk0002Byte;
@@ -47,10 +47,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
             {
                 //For certain SOTC models
                 var crcCheck = sr.ReadBytes(sr.Position(), 4);
-                hasCrc = crcCheck[1] > 0 || crcCheck[2] > 0 || crcCheck[3] > 0;
-                if(variantFlag != 0 && variantFlag2 != 2 || hasCrc)
+                hasExtraFlags = crcCheck[1] > 0 || crcCheck[2] > 0 || crcCheck[3] > 0;
+                if(variantFlag != 0 && variantFlag2 != 2 || hasExtraFlags)
                 {
-                    crc = sr.Read<int>();
+                    extraFlags = sr.ReadBytes(sr.Position(), 4);
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
                 }
 
                 //Read 8C and 0A specific value
@@ -59,26 +60,30 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     unk8C0AInt0 = sr.Read<int>();
                 }
                 matCount = sr.Read<int>();
-            
-                for(int i = 0; i < matCount; i++)
+                
+                //For 0x8C types, extraFlag 0
+                if(variantFlag != 0x8C || (extraFlags[0] & 8) > 0)
                 {
-                    CMSHMatReference matRef = new CMSHMatReference();
-                    matRef.texNameHash = sr.ReadBytes(sr.Position(), 0x18);
-                    sr.Seek(0x18, System.IO.SeekOrigin.Current);
-                    matRef.matNameLength = sr.Read<byte>();
-                    matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), matRef.matNameLength));
-                    sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
-                    if (matCount > 1 && (i + 1 != matCount))
+                    for (int i = 0; i < matCount; i++)
                     {
-                        matRef.startingFaceIndex = sr.Read<int>();
-                        matRef.endingFaceIndex = sr.Read<int>();
+                        CMSHMatReference matRef = new CMSHMatReference();
+                        matRef.texNameHash = sr.ReadBytes(sr.Position(), 0x18);
+                        sr.Seek(0x18, System.IO.SeekOrigin.Current);
+                        matRef.matNameLength = sr.Read<byte>();
+                        matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), matRef.matNameLength));
+                        sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
+                        if (matCount > 1 && (i + 1 != matCount))
+                        {
+                            matRef.startingFaceIndex = sr.Read<int>();
+                            matRef.endingFaceIndex = sr.Read<int>();
+                        }
+                        matList.Add(matRef);
                     }
-                    matList.Add(matRef);
                 }
 
                 endInt = sr.Read<int>();
 
-                if (variantFlag == 0 && variantFlag2 == 2 && hasCrc == false)
+                if (variantFlag == 0 && variantFlag2 == 2 && hasExtraFlags == false)
                 {
                     unk0002Byte = sr.Read<byte>();
                     unk0002Int0 = sr.Read<int>();
