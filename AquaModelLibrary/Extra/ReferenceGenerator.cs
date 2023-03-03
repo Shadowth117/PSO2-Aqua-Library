@@ -61,6 +61,8 @@ namespace AquaModelLibrary.Extra
             PSO2Text actorNameText = null;
             PSO2Text actorNameTextReboot_NPC = null;
             PSO2Text actorNameTextReboot = null;
+            PSO2Text objectCommonText = null;
+            PSO2Text uiMyRoomText = null;
             LobbyActionCommon lac = null;
             List<LobbyActionCommon> rebootLac = new List<LobbyActionCommon>();
             List<int> magIds = null;
@@ -68,9 +70,8 @@ namespace AquaModelLibrary.Extra
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
 
             aquaCMX = ExtractCMX(pso2_binDir, aquaCMX);
-
             ReadCMXText(pso2_binDir, out partsText, out acceText, out commonText, out commonTextReboot);
-            ReadExtraText(pso2_binDir, out actorNameText, out actorNameTextReboot, out actorNameTextReboot_NPC);
+            ReadExtraText(pso2_binDir, out actorNameText, out actorNameTextReboot, out actorNameTextReboot_NPC, out uiMyRoomText, out objectCommonText);
 
             faceIds = GetFaceVariationLuaNameDict(pso2_binDir, faceIds);
 
@@ -181,6 +182,8 @@ namespace AquaModelLibrary.Extra
             Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
             Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootNPCByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> objectCommonByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.textPair>>> uiMyRoomByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
 
             if (partsText != null)
             {
@@ -239,6 +242,20 @@ namespace AquaModelLibrary.Extra
                     actorNameRebootNPCByCat.Add(actorNameTextReboot_NPC.categoryNames[i], actorNameTextReboot_NPC.text[i]);
                 }
             }
+            if (objectCommonText != null)
+            {
+                for (int i = 0; i < objectCommonText.text.Count; i++)
+                {
+                    objectCommonByCat.Add(objectCommonText.categoryNames[i], objectCommonText.text[i]);
+                }
+            }
+            if (uiMyRoomText != null)
+            {
+                for (int i = 0; i < uiMyRoomText.text.Count; i++)
+                {
+                    uiMyRoomByCat.Add(uiMyRoomText.categoryNames[i], uiMyRoomText.text[i]);
+                }
+            }
 
             List<int> masterIdList;
             List<Dictionary<int, string>> nameDicts;
@@ -246,14 +263,15 @@ namespace AquaModelLibrary.Extra
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
-            GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
+            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
+            GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat);
+            GenerateAreaData(pso2_binDir, stageDirOut);
             GenerateUILists(pso2_binDir, outputDirectory);
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateMusicData(pso2_binDir, musicDirOut);
             GenerateCasinoData(pso2_binDir, outputDirectory);
-            GenerateAreaData(pso2_binDir, stageDirOut);
-            GenerateRoomLists(pso2_binDir, outputDirectory);
             GenerateUnitLists(pso2_binDir, outputDirectory);
+            GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
@@ -264,7 +282,379 @@ namespace AquaModelLibrary.Extra
             GenerateVehicle_SpecialWeaponList(playerDirOut, playerCAnimDirOut, playerRAnimDirOut, genAnimList, genAnimListNGS);
             GeneratePetList(petsDirOut);
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
-            //---------------------------Generate 
+        }
+
+        private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.textPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.textPair>>> uiRoomByCat)
+        {
+            string objectOutDir = Path.Combine(outputDirectory, "Objects");
+
+            //Dictionaries
+            List<string> masterNameList = new List<string>();
+            List<Dictionary<string, string>> roomDict = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(uiRoomByCat, masterNameList, roomDict, "Room", true);
+
+            masterNameList.Clear();
+            List<Dictionary<string, string>> actorDict = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(actorNameByCat, masterNameList, actorDict, "Object", true);
+
+            masterNameList.Clear();
+            List<Dictionary<string, string>> commonDict = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(objectCommonByCat, masterNameList, commonDict, "ObjectName", true);
+
+            //Classic objects
+            string scriptsPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicScripts));
+            var scripts = new PSO2CompressedScripts(scriptsPath);
+            var classicObjectsScript = scripts.knownLua["object_behavior_pack.obj.lua"];
+            var classicObjectsScript2 = scripts.knownLua["object_dofile_list_server.lua"];
+            classicObjectsScript.Decompile();
+
+            List<string> classicObjectsList = new List<string>();
+            string obj = "";
+
+
+            List<string> classicObjectsScriptList = new List<string>();
+            foreach (var constant in classicObjectsScript.Function.Constants)
+            {
+                classicObjectsScriptList.Add(constant.ToString());
+            }
+            classicObjectsScriptList.Sort();
+
+            foreach (var constant in classicObjectsScriptList)
+            {
+                var str = constant;
+                if (str.Length > 3)
+                {
+                    str = str.Substring(1, str.Length - 2);
+                }
+
+                //Order should be object name then object ice
+                if (str.StartsWith("ob_"))
+                {
+                    if(obj != "")
+                    {
+                        classicObjectsList.Add(obj + ",,\n");
+                        obj = "";
+                    }
+                    if (PSO2ObjectNames.classicObjectNames.ContainsKey(str))
+                    {
+                        obj += PSO2ObjectNames.classicObjectNames[str] + ",";
+                    } else
+                    {
+                        string jpName = "";
+                        string enName = "";
+
+                        //Check room dictionary
+                        if (roomDict?.Count > 0)
+                        {
+                            if (roomDict?[0].ContainsKey(str) == true)
+                            {
+                                jpName = roomDict[0][str];
+                            }
+                            if (roomDict?.Count > 1)
+                            {
+                                if (roomDict?[1].ContainsKey(str) == true)
+                                {
+                                    enName = roomDict[1][str];
+                                }
+                            }
+                        }
+
+                        //Check actor dictionary
+                        if (actorDict?.Count > 0)
+                        {
+                            if (actorDict?[0].ContainsKey(str) == true)
+                            {
+                                jpName = actorDict[0][str];
+                            }
+                            if (actorDict?.Count > 1)
+                            {
+                                if (actorDict?[1].ContainsKey(str) == true)
+                                {
+                                    enName = actorDict[1][str];
+                                }
+                            }
+                        }
+                        obj += $"{jpName},{enName},";
+                    }
+                    obj += $"{str},";
+
+                    var modelFile = $"object/map_object/{str}.ice";
+                    var modelExFile = $"object/map_object/{str}_ex.ice";
+                    obj += $"{modelFile},{modelExFile},";
+
+                    var hash = GetFileHash(modelFile);
+                    var hashEx = GetFileHash(modelExFile);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, hash)))
+                    {
+                        obj += hash;
+                    }
+                    obj += ",";
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, hashEx)))
+                    {
+                        obj += hashEx;
+                    }
+                    classicObjectsList.Add(obj);
+
+                    obj = "";
+                }
+            }
+
+            List<string> classicObjectsScript2List = new List<string>();
+            foreach (var constant in classicObjectsScript2.Function.Constants)
+            {
+                classicObjectsScript2List.Add(constant.ToString());
+            }
+            classicObjectsScript2List.Sort();
+
+            foreach (var constant in classicObjectsScript2List)
+            {
+                var str = constant;
+                if (str.Length > 3)
+                {
+                    str = str.Substring(1, str.Length - 2);
+                }
+
+                //Order should be object name then object ice
+                if (str.StartsWith("map_"))
+                {
+                    str = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(str));
+                    if (obj != "")
+                    {
+                        classicObjectsList.Add(obj + ",,\n");
+                        obj = "";
+                    }
+                    if (PSO2ObjectNames.classicObjectNames.ContainsKey(str))
+                    {
+                        obj += PSO2ObjectNames.classicObjectNames[str] + ",";
+                    }
+                    else
+                    {
+                        string jpName = "";
+                        string enName = "";
+
+                        //Check actor dictionary
+                        if (actorDict?.Count > 0)
+                        {
+                            if (actorDict?[0].ContainsKey(str) == true)
+                            {
+                                jpName = actorDict[0][str];
+                            }
+                            if (actorDict?.Count > 1)
+                            {
+                                if (actorDict?[1].ContainsKey(str) == true)
+                                {
+                                    enName = actorDict[1][str];
+                                }
+                            }
+                        }
+                        obj += $"{jpName},{enName},";
+                    }
+                    obj += $"{str},";
+
+                    var modelFile = $"object/map_object/{str}.ice";
+
+                    var hash = GetFileHash(modelFile);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, hash)))
+                    {
+                        modelFile = "";
+                        hash = "";
+                    }
+                    obj += $"{modelFile},,{hash},";
+                    classicObjectsList.Add(obj);
+
+                    obj = "";
+                }
+            }
+            classicObjectsList.Insert(0, "Object Name JP,Object Name EN,Object ID,Object Path,Object Path Tier 6 Textures,Object Hash,Object Hash Tier 6 Textures");
+
+
+            WriteCSV(objectOutDir, $"ClassicObjects.csv", classicObjectsList);
+            
+            //Reboot Objects
+            string rbScriptsPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootScripts)));
+            var rbScripts = new PSO2CompressedScripts(rbScriptsPath);
+            var rbObjectsScript = rbScripts.knownLua["object_preset_list.lua"];
+            var rbSeasonObjectsScript = rbScripts.knownLua["object_season.lua"];
+            List<string> rbObjectsList = new List<string>();
+            rbObjectsScript.Decompile();
+            rbSeasonObjectsScript.Decompile();
+
+            //Get seasonal data
+            Dictionary<string, string> seasonalListing = new Dictionary<string, string>();
+            byte[] bytes = null; 
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
+                {
+                    rbSeasonObjectsScript.Print(new UnluacNET.Output(writer));
+                    writer.Flush();
+                    bytes = memStream.ToArray();
+                }
+            }
+            using (MemoryStream memStream = new MemoryStream(bytes))
+            {
+                using (var reader = new StreamReader(memStream))
+                {
+                    string currentObj = null;
+                    string seasonStrings = "";
+                    bool inSeasonTable = false;
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine();
+                        if(line.Contains("Object.ObjectSeasonTable"))
+                        {
+                            inSeasonTable = true;
+                        } else if(inSeasonTable)
+                        {
+                            if (line.Contains("{"))
+                            {
+                                currentObj = line.Replace(" ", "").Replace("-", "").Replace("{", "").Replace("=","");
+                                continue;
+                            }
+                            if (currentObj == null)
+                            {
+                                if(line.Contains("}"))
+                                {
+                                    break;
+                                }
+                            }
+                            if (line.Contains("}"))
+                            {
+                                seasonalListing.Add(currentObj, seasonStrings.Substring(0, seasonStrings.Length - 1));
+                                currentObj = null;
+                                seasonStrings = "";
+                                continue;
+                            }
+                            seasonStrings += line.Replace(" ", "").Replace(",", "").Replace("\"", "").Replace("=", " ") + "|";
+                        }
+                    }
+                }
+            }
+
+            List<string> rbObjectList = new List<string>();
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
+                {
+                    rbObjectsScript.Print(new UnluacNET.Output(writer));
+                    writer.Flush();
+                    bytes = memStream.ToArray();
+                }
+            }
+            using (MemoryStream memStream = new MemoryStream(bytes))
+            {
+                using (var reader = new StreamReader(memStream))
+                {
+                    bool inPresetTable = false;
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine();
+                        if (line.Contains("Object.ObjectPresetList"))
+                        {
+                            inPresetTable = true;
+                        } else if (inPresetTable)
+                        {
+                            if (line.Contains("}"))
+                            {
+                                break;
+                            }
+                            rbObjectList.Add(line.Replace(" ", "").Replace(",", "").Replace("\"", "").Replace("=", "|"));
+                        }
+                    }
+                }
+            }
+
+            string objStart = "object/map_object/";
+            rbObjectList.Sort();
+            foreach (var rbObj in rbObjectList)
+            {
+                var split = rbObj.Split('|');
+                var objName = split[0];
+                var detail = split[1];
+
+                var objLOD1 = objStart + objName + "_l1.ice";
+                var objLOD2 = objStart + objName + "_l2.ice";
+                var objLOD3 = objStart + objName + "_l3.ice";
+                var objLOD4 = objStart + objName + "_l4.ice";
+                var coll = objStart + objName + "_col.ice";
+                var common = objStart + objName + "_com.ice";
+                var effect = objStart + objName + "_eff.ice";
+
+                var objLOD1Hash = GetRebootHash(GetFileHash(objLOD1));
+                var objLOD2Hash = GetRebootHash(GetFileHash(objLOD2));
+                var objLOD3Hash = GetRebootHash(GetFileHash(objLOD3));
+                var objLOD4Hash = GetRebootHash(GetFileHash(objLOD4));
+                var collHash = GetRebootHash(GetFileHash(coll));
+                var commonHash = GetRebootHash(GetFileHash(common));
+                var effHash = GetRebootHash(GetFileHash(effect));
+
+                if(!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD1Hash)))
+                {
+                    objLOD1 = "";
+                    objLOD1Hash = "";
+                }
+                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD2Hash)))
+                {
+                    objLOD2 = "";
+                    objLOD2Hash = "";
+                }
+                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD3Hash)))
+                {
+                    objLOD3 = "";
+                    objLOD3Hash = "";
+                }
+                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD4Hash)))
+                {
+                    objLOD4 = "";
+                    objLOD4Hash = "";
+                }
+                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, collHash)))
+                {
+                    coll = "";
+                    collHash = "";
+                }
+                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, commonHash)))
+                {
+                    common = "";
+                    commonHash = "";
+                }
+                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, effHash)))
+                {
+                    effect = "";
+                    effHash = "";
+                }
+
+                string seasonListing = "";
+                if (seasonalListing.ContainsKey(objName))
+                {
+                    seasonListing = seasonalListing[objName];
+                }
+
+                string jpName = "";
+                string enName = "";
+
+                //Check object_common dictionary
+                if (commonDict?.Count > 0)
+                {
+                    if (commonDict?[0].ContainsKey(objName) == true)
+                    {
+                        jpName = commonDict[0][objName];
+                    }
+                    if (commonDict?.Count > 1)
+                    {
+                        if (commonDict?[1].ContainsKey(objName) == true)
+                        {
+                            enName = commonDict[1][objName];
+                        }
+                    }
+                }
+
+                rbObjectsList.Add($"{jpName},{enName},{objName},{detail},{objLOD1},{objLOD1Hash},{objLOD2},{objLOD2Hash},{objLOD3},{objLOD3Hash},{objLOD4},{objLOD4Hash},{coll},{collHash},{common},{commonHash},{effect},{effHash},{seasonListing}");
+            }
+
+            rbObjectsList.Insert(0, "Object Name JP,Object Name EN,Object ID,Object Detail,Object LOD1,Object LOD1 Hash,Object LOD2,Object LOD2 Hash,Object LOD3,Object LOD3 Hash,Object LOD4,Object LOD4 Hash,Object Collision,Object Collision Hash,Object Common,Object Common Hash,Object Effect,Object Effect Hash,Seasonal Object Swaps");
+            WriteCSV(objectOutDir, $"NGSObjects.csv", rbObjectsList);
         }
 
         private static void GenerateUILists(string pso2_binDir, string outputDirectory)
@@ -1055,8 +1445,12 @@ namespace AquaModelLibrary.Extra
             File.WriteAllLines(Path.Combine(unitOutDir, "Units.csv"), aoxOut);
         }
 
-        private static void GenerateRoomLists(string pso2_binDir, string outputDirectory)
+        private static void GenerateRoomLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.textPair>>> uiRoomByCat)
         {
+            List<string> masterNameList = new List<string>();
+            List<Dictionary<string, string>> textDict = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(uiRoomByCat, masterNameList, textDict, "Room", true);
+
             List<string> roomsOut = new List<string>();
             List<string> roomGoodsOut = new List<string>();
             var filename = Path.Combine(pso2_binDir, dataDir, GetFileHash(myRoomParametersIce));
@@ -1101,6 +1495,23 @@ namespace AquaModelLibrary.Extra
                         for(int id = 0; id < 105; id++)
                         {
                             string chipFinalString = chip.objectString.Substring(0, 8) + $"{id:D4}";
+                            string jpName = "";
+                            string enName = "";
+
+                            if(textDict?.Count > 0)
+                            {
+                                if (textDict?[0].ContainsKey(chipFinalString) == true)
+                                {
+                                    jpName = textDict[0][chipFinalString];
+                                }
+                                if (textDict?.Count > 1)
+                                {
+                                    if (textDict?[1].ContainsKey(chipFinalString) == true)
+                                    {
+                                        enName = textDict[1][chipFinalString];
+                                    }
+                                }
+                            }
                             string chipBase = "object/map_object/" + chipFinalString + ".ice";
                             string chipBaseEx = "object/map_object/" + chipFinalString + "_ex.ice";
                             string chipObj = GetFileHash(chipBase);
@@ -1110,11 +1521,14 @@ namespace AquaModelLibrary.Extra
 
                             if (File.Exists(objFile))
                             {
-                                string roomName = roomNames.ContainsKey(chipFinalString) ? roomNames[chipFinalString] : "";
+                                string roomName = $"{jpName},{enName}";
                                 string output = roomName + "," + chipBase + "," + chipObj;
                                 if (File.Exists(objFileEx))
                                 {
-                                    output += "," + chipObjEx;
+                                    output += "," + chipBaseEx + "," + chipObjEx;
+                                } else
+                                {
+                                    output += ",,";
                                 }
                                 roomsOut.Add(output);
                             }
@@ -1123,11 +1537,12 @@ namespace AquaModelLibrary.Extra
                 }
             }
             files.Clear();
+            roomsOut.Insert(0, "Japanese Name,English Name,Unhashed Filename,Hashed Filename,Unhashed Filename Tier 6,Hashed Filename Tier 6");
 
             string roomOutDir = Path.Combine(outputDirectory, "Objects");
             Directory.CreateDirectory(roomOutDir);
-            File.WriteAllLines(Path.Combine(roomOutDir, "Rooms.csv"), roomsOut);
-            File.WriteAllLines(Path.Combine(roomOutDir, "Room Goods.csv"), roomGoodsOut);
+            WriteCSV(roomOutDir, "Rooms.csv", roomsOut);
+            WriteCSV(roomOutDir, "Room Goods.csv", roomGoodsOut);
 
             //MySpace 
             var rebootfilename = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(mySpaceObjectSettingsIce)));
@@ -1212,7 +1627,7 @@ namespace AquaModelLibrary.Extra
                             }
                             msoInfo.Add(entryString);
                         }
-                        File.WriteAllLines(Path.Combine(roomOutDir, "MySpace Goods.csv"), msoInfo);
+                        WriteCSV(roomOutDir, "MySpace Goods.csv", msoInfo);
                     }
                 }
             }
@@ -5061,6 +5476,14 @@ namespace AquaModelLibrary.Extra
             }
         }
 
+        private static void WriteCSV(string outputDirectory, string fileName, List<string> output)
+        {
+            if (output.Count != 0)
+            {
+                File.WriteAllLines(Path.Combine(outputDirectory, fileName), output, Encoding.UTF8);
+            }
+        }
+
         public static void AddBodyExtraFiles(PartData partData, string fname, string pso2_binDir, string typeString, bool isClassic)
         {
             string rpName, bmName, hnName;
@@ -5826,7 +6249,7 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        public static void ReadExtraText(string pso2_binDir, out PSO2Text actorNameText, out PSO2Text actorNameTextReboot, out PSO2Text actorNameTextReboot_NPC)
+        public static void ReadExtraText(string pso2_binDir, out PSO2Text actorNameText, out PSO2Text actorNameTextReboot, out PSO2Text actorNameTextReboot_NPC, out PSO2Text uiMyRoomText, out PSO2Text objectCommonText)
         {            
             //Load actor name text
             string actorNameTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicActorName));
@@ -5834,23 +6257,33 @@ namespace AquaModelLibrary.Extra
 
             actorNameText = GetTextConditional(actorNameTextPath, actorNameTextPathhNA, actorNameName);
 
-            //Load reboot actor name text
+            //Load ui my room text
+            string uiRoomTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(uiRoomIce));
+            string uiRoomTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(uiRoomIce));
+            uiMyRoomText = GetTextConditional(uiRoomTextPath, uiRoomTextPathhNA, uiRoomFilename);
+
+            //Load reboot text
             if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
             {
+                //Load reboot actor name text
                 string actorNameTextRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootActorName)));
                 string actorNameTextRebootPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(rebootActorName)));
-
                 actorNameTextReboot = GetTextConditional(actorNameTextRebootPath, actorNameTextRebootPathhNA, actorNameName);
 
                 string actorNameTextRebootNPCPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootActorNameNPC)));
                 string actorNameTextRebootNPCPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(rebootActorNameNPC)));
-
                 actorNameTextReboot_NPC = GetTextConditional(actorNameTextRebootNPCPath, actorNameTextRebootNPCPathhNA, actorNameNPCName);
+
+                //Load object common text
+                string objCommonTextPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(objCommonIce)));
+                string objCommonTextPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(objCommonIce)));
+                objectCommonText = GetTextConditional(objCommonTextPath, objCommonTextPathhNA, objCommonText);
             }
             else
             {
                 actorNameTextReboot = null;
                 actorNameTextReboot_NPC = null;
+                objectCommonText = null;
             }
         }
 

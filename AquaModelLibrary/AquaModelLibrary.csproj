@@ -195,6 +195,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="ZstdNet, Version=1.4.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZstdNet.1.4.5\lib\net45\ZstdNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AquaMethods\AquaFigMethods.cs" />
@@ -280,7 +283,9 @@
     <Compile Include="Extra\ModelImporter.cs" />
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
+    <Compile Include="Extra\PSO2CompressedScripts.cs" />
     <Compile Include="Extra\PSO2MapHandler.cs" />
+    <Compile Include="Extra\PSO2ObjectNames.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
     <Compile Include="Extra\Vec3Int.cs" />
@@ -359,6 +364,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Extra\PSO2Scripts\ScriptReference.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Libraries\NvTriStripDotNet.dll" />
     <Content Include="Libraries\ooz.x64.dll" />
   </ItemGroup>
@@ -369,6 +377,10 @@
     <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj">
       <Project>{7abbe830-6de3-4ade-915c-2feeb20a45d4}</Project>
       <Name>SoulsFormats</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnluacNET\UnluacNET.csproj">
+      <Project>{ed5d3e22-804b-4baa-bd7f-f47f19804cf8}</Project>
+      <Name>UnluacNET</Name>
     </ProjectReference>
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj">
       <Project>{f0c5b71b-5956-42fe-8dac-10759cf6bee0}</Project>
@@ -383,5 +395,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets'))" />
+    <Error Condition="!Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ZstdNet.1.4.5\build\ZstdNet.targets'))" />
   </Target>
+  <Import Project="..\packages\ZstdNet.1.4.5\build\ZstdNet.targets" Condition="Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" />
 </Project>

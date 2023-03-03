@@ -26,9 +26,9 @@ namespace AquaExtras
         //NPC
         public static string npcBtVoiceStart = "npc_bt_voice/11_sound_voice_bt_";
 
-        //UI
-        public static string loadTunnelClassic = "ui_playable_load.ice";
-        public static string loadTunnelReboot = "interface/ui_playable_load.ice";
+        //Object
+        public static string objCommonIce = "object/language/object_common.ice";
+        public static string objCommonText = "object_common.text";
 
         //Shaders
         public static string syShader = "sy_shader.ice";
@@ -36,6 +36,10 @@ namespace AquaExtras
         public static string syShaderModelOld = "sy_shader_model_old.ice";
         public static string syShaderModelOldItem = "sy_shader_model_old_item.ice";
         public static string syShaderPrimitive = "sy_shader_primitive.ice";
+
+        //Scripting
+        public static string classicScripts = "sy_script.ice";
+        public static string rebootScripts = "sy_scriptreboot.ice";
 
         //Special
         public static string dashPanelIce = "character/pl_reboot_object_dashpanel.ice";
@@ -53,7 +57,11 @@ namespace AquaExtras
         public static string lnAreaTemplateCommonReboot = "stage/ln_area_template_common_reboot.ice"; //LPS files inside tell the game what layout models exist etc. for NGS. Only applicable for areas like Trainia, open worlds use a different system
 
         //UI
+        public static string loadTunnelClassic = "ui_playable_load.ice";
+        public static string loadTunnelReboot = "interface/ui_playable_load.ice";
         public static string stampPath = "ui_stamp/ui_stamp_";
+        public static string uiRoomIce = "ui_myroom.ice";
+        public static string uiRoomFilename = "ui_myroom.text";
 
         //Out
         public static string animsEffectsOut = @"Animations and Effects\";
@@ -6234,10 +6242,6 @@ namespace AquaExtras
             {5,"アーム／ヘラスラスト,Arms / Hera Thrust"},
             {6,"レッグ／ヘラグラインド,Legs / Hera Grind"},
             {7,"リア／ブルームフェザー,Back / Bloom Feather"},
-        };
-
-        public static Dictionary<string, string> roomNames = new Dictionary<string, string>()
-        { 
         };
 
         public static Dictionary<string, string> roomGoodsNames = new Dictionary<string, string>()

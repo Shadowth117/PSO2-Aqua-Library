@@ -28,6 +28,9 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         //0x8C, 0xA data
         public int unk8C0AInt0;
+        public byte unk8C0AByte0;
+        public byte unk8C0AInnerBigPtrByte; //Seems to be 0x1 for large pointers and 0x2 for larger ones
+        public int unk8C0AModelDataSize; //\Distance from directly after the short value to the end of the face indices
 
         public string OtherModelName = null; //For variantFlag2 being 0x41
 
@@ -58,11 +61,38 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 if(variantFlag == 0x8C && variantFlag2 == 0xA)
                 {
                     unk8C0AInt0 = sr.Read<int>();
+                    matCount = sr.ReadBigEndianPrimitive<ushort>();
+                    unk8C0AByte0 = sr.Read<byte>();
+
+                    unk8C0AInnerBigPtrByte = sr.Read<byte>();
+                    unk8C0AModelDataSize = sr.ReadBigEndianPrimitive<ushort>();
+
+                    //We need to transform unk8C0AModelDataSize based on unk8C0AInnerBigPtrByte's value. If 0, we can ignore this
+                    switch (unk8C0AInnerBigPtrByte)
+                    {
+                        case 1:
+                            throw new NotImplementedException();
+                            break;
+                        case 2:
+                            throw new NotImplementedException();
+                            break;
+                        case 0:
+                        default:
+                            break;
+                    }
+                } else
+                {
+                    matCount = sr.Read<int>();
                 }
-                matCount = sr.Read<int>();
-                
-                //For 0x8C types, extraFlag 0
-                if(variantFlag != 0x8C || (extraFlags[0] & 8) > 0)
+
+                //Read 8C and 0A specific value
+                if (variantFlag == 0x8C && variantFlag2 == 0xA)
+                {
+                    unk8C0AInt0 = sr.Read<int>();
+                }
+
+                //For 0x8C types, check the bit which says if there should be material
+                if (variantFlag != 0x8C || (extraFlags[0] & 8) > 0)
                 {
                     for (int i = 0; i < matCount; i++)
                     {
@@ -83,6 +113,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
                 endInt = sr.Read<int>();
 
+                //SOTC 0x0, 0x2 files have these
                 if (variantFlag == 0 && variantFlag2 == 2 && hasExtraFlags == false)
                 {
                     unk0002Byte = sr.Read<byte>();
