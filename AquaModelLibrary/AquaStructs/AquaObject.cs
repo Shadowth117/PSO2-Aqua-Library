@@ -1542,6 +1542,26 @@ namespace AquaModelLibrary
 
             }
 
+            //Obviously in a lot of cases the bonepalettes should cover this, but can be helpful for NGS models
+            public List<uint> GetUsedBonesTrueWeightIndices()
+            {
+                List<uint> weightIndices = new List<uint>();
+                for(int i = 0; i < this.trueVertWeightIndices.Count; i++)
+                {
+                    foreach(uint id in trueVertWeightIndices[i])
+                    {
+                        if(!weightIndices.Contains(id))
+                        {
+                            weightIndices.Add(id);
+                        }
+                    }
+                }
+
+                weightIndices.Sort();
+
+                return weightIndices;
+            }
+
             public VTXL Clone()
             {
                 VTXL newVTXL = new VTXL();
