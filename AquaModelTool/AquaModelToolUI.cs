@@ -3358,40 +3358,12 @@ namespace AquaModelTool
             }
         }
 
-        private void convertSoulsflverToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select From Software flver, MDL4 file(s)",
-                Filter = "From Software flver, MDL4 Files (*.flver, *.flv, *.mdl)|*.flver;*.flv;*.mdl|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                List<string> failedFiles = new List<string>();
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    aquaUI.aqua.aquaModels.Clear();
-                    ModelSet set = new ModelSet();
-                    set.models.Add(SoulsConvert.ReadFlver(file, out AquaNode aqn));
-                    var outName = Path.ChangeExtension(file, ".aqp");
-                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
-                    {
-                        aquaUI.aqua.aquaModels.Add(set);
-                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
-                        aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
-                    }
-                    AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
-                }
-            }
-        }
-
         private void convertSoulsflverTofbxToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
-                Title = "Select From Software flver, MDL4 file(s)",
-                Filter = "From Software flver, MDL4 Files (*.flver, *.flv, *.mdl)|*.flver;*.flv;*.mdl|All Files (*.*)|*",
+                Title = "Select From Software flver, MDL4, TPF, or BND file(s)",
+                Filter = "From Software flver, MDL4, or BND Files (*.flver, *.flv, *.mdl, *.*bnd, *.dcx, *.tpf)|*.flver;*.flv;*.mdl;*.*bnd;*.dcx;*.tpf|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -3399,19 +3371,7 @@ namespace AquaModelTool
                 List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    aquaUI.aqua.aquaModels.Clear();
-                    ModelSet set = new ModelSet();
-                    set.models.Add(SoulsConvert.ReadFlver(file, out AquaNode aqn, exportWithMetadataToolStripMenuItem.Checked));
-                    var outName = Path.ChangeExtension(file, ".aqp");
-                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
-                    {
-                        aquaUI.aqua.aquaModels.Add(set);
-                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true, false);
-                        set.models[0].ConvertToLegacyTypes();
-                        set.models[0].CreateTrueVertWeights();
-
-                        FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), false);
-                    }
+                    SoulsConvert.ConvertFile(file, exportWithMetadataToolStripMenuItem.Checked);
                 }
             }
         }
@@ -3632,37 +3592,6 @@ namespace AquaModelTool
                 }
 
                 File.WriteAllLines(openFileDialog.FileName + "_msoInfo.txt", msoInfo);
-            }
-        }
-
-        private void convertDemonsSoulsPS5CmdlToaqpaqnToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog()
-            {
-                Title = "Select Demon's Souls PS5 cmdl file(s)",
-                Filter = "Demon's Souls PS5 cmsh Files (*.cmsh, *.cmdl)|*.cmsh;*.cmdl|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                List<string> failedFiles = new List<string>();
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    aquaUI.aqua.aquaModels.Clear();
-                    ModelSet set = new ModelSet();
-                    set.models.Add(BluePointConvert.ReadCMDL(file, out AquaNode aqn));
-                    var outName = Path.ChangeExtension(file, ".aqp");
-                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
-                    {
-                        aquaUI.aqua.aquaModels.Add(set);
-                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
-                        aquaUI.aqua.WriteNGSNIFLModel(outName, outName);
-                    }
-                    if(aqn != null)
-                    {
-                        AquaUtil.WriteBones(Path.ChangeExtension(outName, ".aqn"), aqn);
-                    }
-                }
             }
         }
 

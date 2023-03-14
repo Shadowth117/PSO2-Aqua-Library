@@ -12,11 +12,19 @@ using NvTriStripDotNet;
 using AquaModelLibrary.Extra.FromSoft;
 using AquaModelLibrary.Native.Fbx;
 using System.Diagnostics;
+using AquaExtras;
+using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelLibrary.Extra
 {
     public static class SoulsConvert
     {
+        public class GameFile
+        {
+            public byte[] data = null;
+            public string fileName = "";
+        }
+
         public enum SoulsGame
         {
             DemonsSouls,
@@ -209,10 +217,103 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        public static AquaObject ReadFlver(string filePath, out AquaNode aqn, bool useMetaData = false)
+        public static void ConvertFile(string filePath, bool useMetaData = false)
+        {
+            ConvertFile(Path.GetDirectoryName(filePath), filePath, useMetaData);
+        }
+
+        public static void ConvertFile(string outDir, string filePath, bool useMetaData = false)
+        {
+            ConvertFile(outDir, filePath, File.ReadAllBytes(filePath), useMetaData);
+        }
+
+        public static void ConvertFile(string outDir, string filePath, byte[] file, bool useMetaData = false)
+        {
+            byte[] newFile = file;
+
+            if (SoulsFormats.DCX.Is(file))
+            {
+                newFile = DCX.Decompress(file);
+            }
+
+            IBinder files = null;
+            if(SoulsFile<SoulsFormats.BND3>.Is(newFile))
+            {
+                files = SoulsFile<SoulsFormats.BND3>.Read(newFile);
+            } else if(SoulsFile<SoulsFormats.BND4>.Is(newFile))
+            {
+                files = SoulsFile<SoulsFormats.BND4>.Read(newFile);
+            }
+
+            if(files == null)
+            {
+                files = new BND3();
+                files.Files.Add(new BinderFile() { Bytes = newFile, Name = null });
+            } else
+            {
+                outDir = Path.Combine(outDir, Path.GetFileName(filePath) + "_");
+            }
+
+            AquaUtil aqu = new AquaUtil();
+            foreach(var bndFile in files.Files)
+            {
+                var name = bndFile.Name ?? filePath;
+                var fileName = Path.GetFileNameWithoutExtension(name);
+                string outPath = outDir;
+                string extension; 
+                if (bndFile.Name != null)
+                {
+                    extension = Path.GetExtension(bndFile.Name);
+                    outPath = Path.Combine(outDir, fileName);
+                } else
+                {
+                    extension = Path.GetExtension(filePath);
+                }
+
+                try
+                {
+                    if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(bndFile.Bytes) || SoulsFormats.SoulsFile<SoulsFormats.FLVER2>.Is(bndFile.Bytes) || SoulsFormats.SoulsFile<SoulsFormats.Other.MDL4>.Is(bndFile.Bytes))
+                    {
+                        Directory.CreateDirectory(outPath);
+                        aqu.aquaModels.Clear();
+                        ModelSet set = new ModelSet();
+                        string modelPath = Path.Combine(outPath, Path.ChangeExtension(fileName, extension));
+
+                        set.models.Add(ReadFlver(modelPath, bndFile.Bytes, out AquaNode aqn, useMetaData));
+
+                        string finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
+                        var outName = Path.ChangeExtension(fileName, ".aqp");
+                        if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                        {
+                            aqu.aquaModels.Add(set);
+                            aqu.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true, false);
+                            set.models[0].ConvertToLegacyTypes();
+                            set.models[0].CreateTrueVertWeights();
+
+                            FbxExporter.ExportToFile(aqu.aquaModels[0].models[0], aqn, new List<AquaMotion>(), finalPath, new List<string>(), false);
+                        }
+                    }
+                    else if (TPF.Is(bndFile.Bytes))
+                    {
+                        Directory.CreateDirectory(outPath);
+                        var tpf = TPF.Read(bndFile.Bytes);
+                        foreach (var tex in tpf.Textures)
+                        {
+                            File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
+                        }
+                    }
+                }
+                catch(Exception ex) 
+                {
+                    Debug.WriteLine(Path.Combine(outPath, fileName));
+                }
+            }
+
+        }
+
+        public static AquaObject ReadFlver(string filePath, byte[] raw, out AquaNode aqn, bool useMetaData = false)
         {
             SoulsFormats.IFlver flver = null;
-            var raw = File.ReadAllBytes(filePath);
 
             JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
