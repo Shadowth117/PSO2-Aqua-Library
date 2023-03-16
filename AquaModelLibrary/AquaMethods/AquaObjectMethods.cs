@@ -1606,7 +1606,7 @@ namespace AquaModelLibrary
                             vtxl.bonePalette.AddRange(referenceVTXL.bonePalette);
                         }
                         boneIdList.Add(boneIds);
-                        if(outModel.meshNames.Count > modelId)
+                        if(model.meshNames.Count > modelId)
                         {
                             outModel.meshNames.Add(model.meshNames[modelId]);
                         }
@@ -2111,6 +2111,7 @@ namespace AquaModelLibrary
 
         public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
+            outModel.meshNames.Add(model.meshNames[meshId]);
             outModel.vtxlList.Add(model.vtxlList[meshId]);
             outModel.tempTris.Add(model.tempTris[meshId]);
         }

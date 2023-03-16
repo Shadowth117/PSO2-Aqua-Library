@@ -3371,7 +3371,10 @@ namespace AquaModelTool
                 List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    SoulsConvert.ConvertFile(file, exportWithMetadataToolStripMenuItem.Checked);
+                    SoulsConvert.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
+                    SoulsConvert.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
+                    SoulsConvert.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
+                    SoulsConvert.ConvertFile(file);
                 }
             }
         }
@@ -3905,11 +3908,6 @@ namespace AquaModelTool
                     aqu.ConvertFromJson(file);
                 }
             }
-        }
-
-        private void exportWithMetadataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            exportWithMetadataToolStripMenuItem.Checked = !exportWithMetadataToolStripMenuItem.Checked;
         }
 
         private void readMCGMCPToolStripMenuItem_Click(object sender, EventArgs e)

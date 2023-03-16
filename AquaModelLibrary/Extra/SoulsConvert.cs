@@ -19,6 +19,10 @@ namespace AquaModelLibrary.Extra
 {
     public static class SoulsConvert
     {
+        public static bool useMetaData = false;
+        public static bool applyMaterialNamesToMesh = false;
+        public static bool mirrorMesh = false;
+
         public class GameFile
         {
             public byte[] data = null;
@@ -217,17 +221,17 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        public static void ConvertFile(string filePath, bool useMetaData = false)
+        public static void ConvertFile(string filePath)
         {
-            ConvertFile(Path.GetDirectoryName(filePath), filePath, useMetaData);
+            ConvertFile(Path.GetDirectoryName(filePath), filePath);
         }
 
-        public static void ConvertFile(string outDir, string filePath, bool useMetaData = false)
+        public static void ConvertFile(string outDir, string filePath)
         {
-            ConvertFile(outDir, filePath, File.ReadAllBytes(filePath), useMetaData);
+            ConvertFile(outDir, filePath, File.ReadAllBytes(filePath));
         }
 
-        public static void ConvertFile(string outDir, string filePath, byte[] file, bool useMetaData = false)
+        public static void ConvertFile(string outDir, string filePath, byte[] file)
         {
             byte[] newFile = file;
 
@@ -279,7 +283,7 @@ namespace AquaModelLibrary.Extra
                         ModelSet set = new ModelSet();
                         string modelPath = Path.Combine(outPath, Path.ChangeExtension(fileName, extension));
 
-                        set.models.Add(ReadFlver(modelPath, bndFile.Bytes, out AquaNode aqn, useMetaData));
+                        set.models.Add(ReadFlver(modelPath, bndFile.Bytes, out AquaNode aqn));
 
                         string finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
                         var outName = Path.ChangeExtension(fileName, ".aqp");
@@ -311,7 +315,7 @@ namespace AquaModelLibrary.Extra
 
         }
 
-        public static AquaObject ReadFlver(string filePath, byte[] raw, out AquaNode aqn, bool useMetaData = false)
+        public static AquaObject ReadFlver(string filePath, byte[] raw, out AquaNode aqn)
         {
             SoulsFormats.IFlver flver = null;
 
@@ -627,18 +631,21 @@ namespace AquaModelLibrary.Extra
             Vector3? minBounding2 = null;
 
             //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
-            for (int i = 0; i < aqn.nodeList.Count; i++)
+            if(mirrorMesh)
             {
-                var bone = aqn.nodeList[i];
-                Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                mat *= mirrorMatX;
-                Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
-                bone.pos = translation;
-                bone.eulRot = MathExtras.QuaternionToEuler(rot);
+                for (int i = 0; i < aqn.nodeList.Count; i++)
+                {
+                    var bone = aqn.nodeList[i];
+                    Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
+                    mat *= mirrorMatX;
+                    Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
+                    bone.pos = translation;
+                    bone.eulRot = MathExtras.QuaternionToEuler(rot);
 
-                Matrix4x4.Invert(mat, out var invMat);
-                bone.SetInverseBindPoseMatrix(invMat);
-                aqn.nodeList[i] = bone;
+                    Matrix4x4.Invert(mat, out var invMat);
+                    bone.SetInverseBindPoseMatrix(invMat);
+                    aqn.nodeList[i] = bone;
+                }
             }
 
             for (int i = 0; i < flver.Meshes.Count; i++)
@@ -746,8 +753,17 @@ namespace AquaModelLibrary.Extra
                         maxBounding2 = AquaObjectMethods.GetMaximumBounding(alter, (Vector3)maxBounding);
                         minBounding2 = AquaObjectMethods.GetMinimumBounding(alter, (Vector3)minBounding);
                     }
-                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
-                    vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMatX));
+
+                    if (mirrorMesh)
+                    {
+                        vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
+                        vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMatX));
+                    }
+                    else
+                    {
+                        vtxl.vertPositions.Add(vert.Position);
+                        vtxl.vertNormals.Add(vert.Normal);
+                    }
 
                     if (vert.UVs.Count > 0)
                     {
@@ -808,7 +824,13 @@ namespace AquaModelLibrary.Extra
                 List<Vector3> triList = new List<Vector3>();
                 for (int id = 0; id < indices.Count - 2; id += 3)
                 {
-                    triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
+                    if(mirrorMesh)
+                    {
+                        triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
+                    } else
+                    {
+                        triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
+                    }
                 }
 
                 genMesh.triList = triList;
@@ -826,6 +848,10 @@ namespace AquaModelLibrary.Extra
                 var mat = new AquaObject.GenericMaterial();
                 string matName; 
                 var flverMat = flver.Materials[mesh.MaterialIndex];
+                if(applyMaterialNamesToMesh)
+                {
+                    aqp.meshNames.Add($"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}_mesh{i}");
+                }
                 if(useMetaData)
                 {
                     matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";

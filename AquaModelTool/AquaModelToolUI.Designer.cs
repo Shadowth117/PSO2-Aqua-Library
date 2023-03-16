@@ -68,6 +68,9 @@
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.convertSoulsflverTofbxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportWithMetadataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fixFromSoftMeshMirroringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.applyMaterialNamesToMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
             this.generateMCGMCPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertModelToDemonsSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
@@ -380,6 +383,9 @@
             this.toolStripSeparator7,
             this.convertSoulsflverTofbxToolStripMenuItem,
             this.exportWithMetadataToolStripMenuItem,
+            this.fixFromSoftMeshMirroringToolStripMenuItem,
+            this.applyMaterialNamesToMeshToolStripMenuItem,
+            this.toolStripSeparator12,
             this.generateMCGMCPToolStripMenuItem,
             this.convertModelToDemonsSoulsflverToolStripMenuItem,
             this.toolStripSeparator11,
@@ -476,11 +482,32 @@
             // exportWithMetadataToolStripMenuItem
             // 
             this.exportWithMetadataToolStripMenuItem.Checked = true;
+            this.exportWithMetadataToolStripMenuItem.CheckOnClick = true;
             this.exportWithMetadataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.exportWithMetadataToolStripMenuItem.Name = "exportWithMetadataToolStripMenuItem";
             this.exportWithMetadataToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
             this.exportWithMetadataToolStripMenuItem.Text = "Convert flver with Metadata";
-            this.exportWithMetadataToolStripMenuItem.Click += new System.EventHandler(this.exportWithMetadataToolStripMenuItem_Click);
+            // 
+            // fixFromSoftMeshMirroringToolStripMenuItem
+            // 
+            this.fixFromSoftMeshMirroringToolStripMenuItem.Checked = true;
+            this.fixFromSoftMeshMirroringToolStripMenuItem.CheckOnClick = true;
+            this.fixFromSoftMeshMirroringToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.fixFromSoftMeshMirroringToolStripMenuItem.Name = "fixFromSoftMeshMirroringToolStripMenuItem";
+            this.fixFromSoftMeshMirroringToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
+            this.fixFromSoftMeshMirroringToolStripMenuItem.Text = "Fix FromSoft mesh mirroring";
+            // 
+            // applyMaterialNamesToMeshToolStripMenuItem
+            // 
+            this.applyMaterialNamesToMeshToolStripMenuItem.CheckOnClick = true;
+            this.applyMaterialNamesToMeshToolStripMenuItem.Name = "applyMaterialNamesToMeshToolStripMenuItem";
+            this.applyMaterialNamesToMeshToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
+            this.applyMaterialNamesToMeshToolStripMenuItem.Text = "Apply material names to mesh";
+            // 
+            // toolStripSeparator12
+            // 
+            this.toolStripSeparator12.Name = "toolStripSeparator12";
+            this.toolStripSeparator12.Size = new System.Drawing.Size(310, 6);
             // 
             // generateMCGMCPToolStripMenuItem
             // 
@@ -1159,6 +1186,9 @@
         private System.Windows.Forms.ToolStripMenuItem nullMCGUnksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parseCANIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem parseDRBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem applyMaterialNamesToMeshToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
+        private System.Windows.Forms.ToolStripMenuItem fixFromSoftMeshMirroringToolStripMenuItem;
     }
 }
 

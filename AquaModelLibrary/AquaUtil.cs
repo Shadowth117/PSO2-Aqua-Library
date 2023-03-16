@@ -266,6 +266,7 @@ namespace AquaModelLibrary
                     {
                         matModelSplit.vtxlList = aquaModels[msI].models[aqI].vtxlList;
                         matModelSplit.tempTris = aquaModels[msI].models[aqI].tempTris;
+                        matModelSplit.meshNames = aquaModels[msI].models[aqI].meshNames;
                     } else
                     {
                         SplitMeshByMaterialTempData(aquaModels[msI].models[aqI], matModelSplit);
@@ -387,6 +388,7 @@ namespace AquaModelLibrary
                         }
                         mesh.unkInt0 = 0;
                         mesh.reserve0 = 0;
+
                         outModel.meshList.Add(mesh);
                     }
 
