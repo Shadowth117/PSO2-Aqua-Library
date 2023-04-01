@@ -3950,8 +3950,8 @@ namespace AquaModelLibrary.Extra
 
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
                     {
-                        partData.partExHash = rebHash;
-                        partData.partExName = reb;
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
                     }
 
                 }

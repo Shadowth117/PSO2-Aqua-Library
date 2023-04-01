@@ -3368,12 +3368,11 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                List<string> failedFiles = new List<string>();
+                SoulsConvert.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
+                SoulsConvert.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
+                SoulsConvert.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    SoulsConvert.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
-                    SoulsConvert.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
-                    SoulsConvert.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
                     SoulsConvert.ConvertFile(file);
                 }
             }
@@ -3608,13 +3607,11 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                List<string> failedFiles = new List<string>();
                 foreach (var file in openFileDialog.FileNames)
                 {
                     aquaUI.aqua.aquaModels.Clear();
                     ModelSet set = new ModelSet();
                     set.models.Add(BluePointConvert.ReadCMDL(file, out AquaNode aqn));
-                    var outName = Path.ChangeExtension(file, ".aqp");
                     if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
                     {
                         aquaUI.aqua.aquaModels.Add(set);

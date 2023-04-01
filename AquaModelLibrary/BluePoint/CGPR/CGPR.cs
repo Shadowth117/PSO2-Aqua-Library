@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,50 +10,43 @@ namespace AquaModelLibrary.BluePoint.CAWS
 {
     public class CGPR
     {
-        public string name = null;
-        public int cawsObjectCount;
-        
-        /*
-        public ulong hashThing;
-        public int const27B; //Always 0x27B???
+        public CFooter cfooter;
+        public int cgprObjCount;
+        public int int_04; //For 0 count cgpr
 
-        public int flags;
-        public int unkCount1;
-        public byte unkByte;
+        public CGPR()
+        {
 
-        public uint cawsConst;     //Always 0x394B87F0
-        public ulong hashThing1;
-        public ulong hashThing2;
-        public ulong unkLong;      //Always 0?
-
-        public ulong cawsConst2;
-        public ushort cawsConst3;
-        */
+        }
 
         public CGPR(BufferedStreamReader sr)
         {
-            var len = sr.Read<byte>();
-            name = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), len));
-            sr.Seek(len, System.IO.SeekOrigin.Current);
+            var cgprObjCount = sr.Read<int>(); //Doesn't always line up right. Correlates, but needs more research
 
-            cawsObjectCount = sr.Read<int>();
+            //Should just be an empty cgpr
+            if(cgprObjCount == 0)
+            {
+                int_04 = sr.Read<int>();
+                cfooter = sr.Read<CFooter>();
+            }
 
-            /*
-            hashThing = sr.Read<ulong>();
-            const27B = sr.Read<int>();
-            flags = sr.Read<int>();
-            unkCount1 = sr.Read<int>();
-            unkByte = sr.Read<byte>();
+            int type0 = sr.Peek<int>();
+            while(!(type0 == 0 || type0 == 0x47505250))
+            {
+                switch(type0)
+                {
+                    default:
+                        throw new Exception($"Unexpected object {type0.ToString("X")} discovered");
+                }
+                type0 = sr.Peek<int>();
 
-            cawsConst = sr.Read<uint>();
-            hashThing1 = sr.Read<ulong>();
-            hashThing2 = sr.Read<ulong>();
-            unkLong = sr.Read<ulong>();
-
-            cawsConst2 = sr.Read<ulong>();
-            cawsConst3 = sr.Read<ushort>();
-            */
-
+                //Try to account for weird scenarios where sizes don't align? Idk wtf the game is doing
+                if(sr.Peek<byte>() == 0)
+                {
+                    sr.Seek(1, System.IO.SeekOrigin.Current);
+                    type0 = sr.Peek<int>();
+                }
+            }
         }
     }
 }

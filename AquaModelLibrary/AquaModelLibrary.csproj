@@ -241,7 +241,7 @@
     <Compile Include="BluePoint\CAWS\CAWS.cs" />
     <Compile Include="BluePoint\CAWS\CAWSObject.cs" />
     <Compile Include="BluePoint\CFooter.cs" />
-    <Compile Include="BluePoint\CGPR\CAWSObject.cs" />
+    <Compile Include="BluePoint\CGPR\CGPRObject.cs" />
     <Compile Include="BluePoint\CGPR\CGPR.cs" />
     <Compile Include="BluePoint\CMAT\CMAT.cs" />
     <Compile Include="BluePoint\CMDL\CMDL.cs" />

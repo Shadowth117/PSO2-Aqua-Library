@@ -421,3 +421,7 @@ WeaponInstaller/bin/
 obj/Release/net46/
 
 obj/Release/netstandard2.1/
+
+SoulsModelTool/obj/
+
+SoulsModelTool/bin/
