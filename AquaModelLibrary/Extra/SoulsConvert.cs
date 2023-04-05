@@ -14,6 +14,10 @@ using AquaModelLibrary.Native.Fbx;
 using System.Diagnostics;
 using AquaExtras;
 using static AquaModelLibrary.Utility.AquaUtilData;
+using System.Security.Cryptography;
+using static SoulsFormats.FLVER;
+using Assimp;
+using Matrix4x4 = System.Numerics.Matrix4x4;
 
 namespace AquaModelLibrary.Extra
 {
@@ -22,6 +26,7 @@ namespace AquaModelLibrary.Extra
         public static bool useMetaData = false;
         public static bool applyMaterialNamesToMesh = false;
         public static bool mirrorMesh = false;
+        public static bool transformMesh = false;
 
         public class GameFile
         {
@@ -354,7 +359,7 @@ namespace AquaModelLibrary.Extra
                 string boneData = JsonConvert.SerializeObject(flver.Bones, jss);
                 File.WriteAllText(filePath + ".matData.json", materialData);
                 File.WriteAllText(filePath + ".dummyData.json", dummyData);
-                //File.WriteAllText(filePath + ".boneData.json", boneData);
+                File.WriteAllText(filePath + ".boneData.json", boneData);
             }
             return FlverToAqua(flver, out aqn, useMetaData);
         }
@@ -362,7 +367,7 @@ namespace AquaModelLibrary.Extra
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
         {
             AquaObject aqp = new NGSAquaObject();
-
+            List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
             aqn = new AquaNode();
             for (int i = 0; i < mdl4.Bones.Count; i++)
             {
@@ -400,6 +405,7 @@ namespace AquaModelLibrary.Extra
 
                 aqNode.scale = new Vector3(1, 1, 1);
 
+                BoneTransforms.Add(mat);
                 Matrix4x4.Invert(mat, out var invMat);
                 aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                 aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
@@ -409,18 +415,23 @@ namespace AquaModelLibrary.Extra
                 aqn.nodeList.Add(aqNode);
             }
             //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
-            for (int i = 0; i < aqn.nodeList.Count; i++)
+            if (mirrorMesh)
             {
-                var bone = aqn.nodeList[i];
-                Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                mat *= mirrorMatX;
-                Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
-                bone.pos = translation;
-                bone.eulRot = MathExtras.QuaternionToEuler(rot);
+                for (int i = 0; i < aqn.nodeList.Count; i++)
+                {
+                    var bone = aqn.nodeList[i];
+                    Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
+                    mat *= mirrorMatX;
+                    BoneTransforms[i] = mat;
 
-                Matrix4x4.Invert(mat, out var invMat);
-                bone.SetInverseBindPoseMatrix(invMat);
-                aqn.nodeList[i] = bone;
+                    Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
+                    bone.pos = translation;
+                    bone.eulRot = MathExtras.QuaternionToEuler(rot);
+
+                    Matrix4x4.Invert(mat, out var invMat);
+                    bone.SetInverseBindPoseMatrix(invMat);
+                    aqn.nodeList[i] = bone;
+                }
             }
 
             for (int i = 0; i < mdl4.Meshes.Count; i++)
@@ -432,18 +443,6 @@ namespace AquaModelLibrary.Extra
                 //Vert data
                 var vertCount = mesh.Vertices.Count;
                 AquaObject.VTXL vtxl = new AquaObject.VTXL();
-                /*
-                if (mesh.Dynamic > 0)
-                {
-                    for (int b = 0; b < flv.BoneIndices.Length; b++)
-                    {
-                        if (flv.BoneIndices[b] == -1)
-                        {
-                            break;
-                        }
-                        vtxl.bonePalette.Add((ushort)flv.BoneIndices[b]);
-                    }
-                }*/
                 SoulsFormats.Other.MDL4.Mesh mesh0 = mesh;
                 vtxl.bonePalette = new List<ushort>();
                 for (int b = 0; b < mesh0.BoneIndices.Length; b++)
@@ -459,8 +458,39 @@ namespace AquaModelLibrary.Extra
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
-                    vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
-                    vtxl.vertNormals.Add(Vector3.Transform(new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z), mirrorMatX));
+                    Vector3 vertPos = vert.Position;
+                    Vector3 vertNorm = new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z);
+
+                    if (mirrorMesh && !transformMesh)
+                    {
+                        vertPos = Vector3.Transform(vertPos, mirrorMatX);
+                        vertNorm = Vector3.TransformNormal(vertNorm, mirrorMatX);
+                        vertNorm *= -1;
+                    }
+
+                    if (transformMesh && mesh.BoneIndices?[0] != -1)
+                    {
+                        int boneTransformationIndex = -1;
+                        if(vert.BoneIndices != null && vert.BoneIndices[0] == vert.BoneIndices[1] && vert.BoneIndices[0] == vert.BoneIndices[2] && vert.BoneIndices[0] == vert.BoneIndices[3])
+                        {
+                            boneTransformationIndex = mesh.BoneIndices[vert.BoneIndices[0]];
+                        } else if(vert.Normal.Length() > 0) //Check that there IS a normal to read
+                        {
+                            boneTransformationIndex = mesh.BoneIndices[(int)vert.Normal.W];
+                        }
+
+                        if (boneTransformationIndex > -1 && BoneTransforms.Count > boneTransformationIndex)
+                        {
+                            var boneTfm = BoneTransforms[boneTransformationIndex];
+
+                            vertPos = Vector3.Transform(vertPos, boneTfm);
+                            vertNorm = Vector3.TransformNormal(vertNorm, boneTfm);
+                            vertNorm *= -1;
+                        }
+                    }
+
+                    vtxl.vertPositions.Add(vertPos);
+                    vtxl.vertNormals.Add(vertNorm);
 
                     if (vert.UVs.Count > 0)
                     {
@@ -535,6 +565,7 @@ namespace AquaModelLibrary.Extra
         public static AquaObject FlverToAqua(IFlver flver, out AquaNode aqn, bool useMetaData = false)
         {
             AquaObject aqp = new NGSAquaObject();
+            List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
 
             if (flver is FLVER2 flver2)
             {
@@ -616,6 +647,7 @@ namespace AquaModelLibrary.Extra
                 var zxy = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.ZXY);
                 var zyx = MathExtras.EulerToQuaternionRadian(flverBone.Rotation, RotationOrder.ZYX);
 #endif
+                BoneTransforms.Add(mat);
                 Matrix4x4.Invert(mat, out var invMat);
                 aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                 aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
@@ -638,6 +670,8 @@ namespace AquaModelLibrary.Extra
                     var bone = aqn.nodeList[i];
                     Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
                     mat *= mirrorMatX;
+                    BoneTransforms[i] = mat;
+
                     Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
                     bone.pos = translation;
                     bone.eulRot = MathExtras.QuaternionToEuler(rot);
@@ -684,6 +718,12 @@ namespace AquaModelLibrary.Extra
                         }
                     }
                 }
+
+                bool useNormalWTransform = false;
+                bool useIndexNoWeightTransform = false;
+                bool useDefaultBoneTransform = false;
+                bool foundBoneIndices = false;
+                bool foundBoneWeights = false;
                 List<int> indices = new List<int>();
                 if (flver is FLVER0)
                 {
@@ -699,10 +739,50 @@ namespace AquaModelLibrary.Extra
                         vtxl.bonePalette.Add((ushort)mesh0.BoneIndices[b]);
                     }
                     indices = mesh0.Triangulate(((FLVER0)flver).Header.Version);
+
+                    var material = (FLVER0.Material)flver.Materials[mesh0.MaterialIndex];
+                    foreach (var layoutType in material.Layouts[0])
+                    {
+                        switch (layoutType.Semantic)
+                        {
+                            case FLVER.LayoutSemantic.Normal:
+                                if (layoutType.Type == FLVER.LayoutType.Byte4B || layoutType.Type == FLVER.LayoutType.Byte4E)
+                                {
+                                    useNormalWTransform = true;
+                                }
+                                break;
+                            case FLVER.LayoutSemantic.BoneIndices:
+                                foundBoneIndices = true;
+                                break;
+                            case FLVER.LayoutSemantic.BoneWeights:
+                                foundBoneWeights = true;
+                                break;
+                        }
+                    }
                 }
                 else if (flver is FLVER2)
                 {
                     FLVER2.Mesh mesh2 = (FLVER2.Mesh)mesh;
+                    if (mesh2.VertexBuffers?.Count > 0)
+                    {
+                        var layouts = ((FLVER2)flver).BufferLayouts[mesh2.VertexBuffers[0].LayoutIndex];
+                        foreach(var layoutType in layouts)
+                        {
+                            switch (layoutType.Semantic)
+                            {
+                                case FLVER.LayoutSemantic.Normal:
+                                    if (layoutType.Type == FLVER.LayoutType.Byte4B || layoutType.Type == FLVER.LayoutType.Byte4E)
+                                    {
+                                        useNormalWTransform = true;
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    if(useNormalWTransform == false)
+                    {
+                        useDefaultBoneTransform = mesh2.DefaultBoneIndex != -1 && mesh2.DefaultBoneIndex < flver.Bones.Count;
+                    }
 
                     //Dark souls 3+ (Maybe bloodborne too) use direct bone id references instead of a bone palette
                     vtxl.bonePalette = new List<ushort>();
@@ -733,37 +813,87 @@ namespace AquaModelLibrary.Extra
                     throw new Exception("Unexpected flver variant");
                 }
 
+                //Transformation condition for DeS models
+                if (foundBoneIndices && !foundBoneWeights)
+                {
+                    useIndexNoWeightTransform = true;
+                }
+
                 List<Vector3> normals = new List<Vector3>();
+                bool wasTransformed = false;
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
-                    var alter = Vector3.Transform(vert.Position, flver.Bones[0].ComputeLocalTransform());
+                    Vector3 vertPos = vert.Position;
+                    Vector3 vertNorm = new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z);
+
+                    if (mirrorMesh && !transformMesh)
+                    {
+                        vertPos = Vector3.Transform(vertPos, mirrorMatX);
+                        vertNorm = Vector3.TransformNormal(vertNorm, mirrorMatX);
+                        vertNorm *= -1;
+                    }
+
+                    int boneTransformationIndex = -1;
+                    if (transformMesh)
+                    {
+                        if (mesh is FLVER0.Mesh)
+                        {
+                            var f0Mesh = (FLVER0.Mesh)mesh;
+                            if(useNormalWTransform && f0Mesh.Dynamic == 0)
+                            {
+                                boneTransformationIndex = vert.NormalW;
+                            } else if(useIndexNoWeightTransform && f0Mesh.BoneIndices?[0] != -1)
+                            {
+                                boneTransformationIndex = f0Mesh.BoneIndices[vert.BoneIndices[0]];
+                            }
+                        } else
+                        {
+                            var f2Mesh = (FLVER2.Mesh)mesh;
+                            if (useNormalWTransform && f2Mesh.Dynamic == 0)
+                            {
+                                boneTransformationIndex = vert.NormalW;
+                            } else if(useDefaultBoneTransform && flver.Bones.Count > f2Mesh.DefaultBoneIndex)
+                            {
+                                boneTransformationIndex = f2Mesh.DefaultBoneIndex;
+                            }
+
+                            if(f2Mesh.BoneIndices.Count > 0)
+                            {
+                                boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
+                            }
+                        }
+
+                        if (boneTransformationIndex > -1 && BoneTransforms.Count > boneTransformationIndex)
+                        {
+                            var boneTfm = BoneTransforms[boneTransformationIndex];
+
+                            vertPos = Vector3.Transform(vertPos, boneTfm);
+                            vertNorm = Vector3.TransformNormal(vertNorm, boneTfm);
+                            vertNorm *= -1;
+                        }
+                        wasTransformed = true;
+                    }
+
+                    var alter = Vector3.Transform(vertPos, flver.Bones[0].ComputeLocalTransform());
                     //Recalc model bounding
                     if (maxBounding == null)
                     {
-                        maxBounding = vert.Position;
-                        minBounding = vert.Position;
+                        maxBounding = vertPos;
+                        minBounding = vertPos;
                         maxBounding2 = alter;
                         minBounding2 = alter;
                     }
                     else
                     {
-                        maxBounding = AquaObjectMethods.GetMaximumBounding(vert.Position, (Vector3)maxBounding);
-                        minBounding = AquaObjectMethods.GetMinimumBounding(vert.Position, (Vector3)minBounding);
+                        maxBounding = AquaObjectMethods.GetMaximumBounding(vertPos, (Vector3)maxBounding);
+                        minBounding = AquaObjectMethods.GetMinimumBounding(vertPos, (Vector3)minBounding);
                         maxBounding2 = AquaObjectMethods.GetMaximumBounding(alter, (Vector3)maxBounding);
                         minBounding2 = AquaObjectMethods.GetMinimumBounding(alter, (Vector3)minBounding);
                     }
 
-                    if (mirrorMesh)
-                    {
-                        vtxl.vertPositions.Add(Vector3.Transform(vert.Position, mirrorMatX));
-                        vtxl.vertNormals.Add(Vector3.Transform(vert.Normal, mirrorMatX));
-                    }
-                    else
-                    {
-                        vtxl.vertPositions.Add(vert.Position);
-                        vtxl.vertNormals.Add(vert.Normal);
-                    }
+                    vtxl.vertPositions.Add(vertPos);
+                    vtxl.vertNormals.Add(vertNorm);
 
                     if (vert.UVs.Count > 0)
                     {
@@ -797,7 +927,7 @@ namespace AquaModelLibrary.Extra
                         vtxl.vertColor2s.Add(new byte[] { (byte)(color2.B * 255), (byte)(color2.G * 255), (byte)(color2.R * 255), (byte)(color2.A * 255) });
                     }
 
-                    if (vert.BoneWeights.Length > 0)
+                    if ((vert.BoneWeights[0] + vert.BoneWeights[1] + vert.BoneWeights[2] + vert.BoneWeights[3]) > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
                         vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], vert.BoneIndices[1], vert.BoneIndices[2], vert.BoneIndices[3] });
@@ -824,13 +954,15 @@ namespace AquaModelLibrary.Extra
                 List<Vector3> triList = new List<Vector3>();
                 for (int id = 0; id < indices.Count - 2; id += 3)
                 {
-                    if(mirrorMesh)
+                    triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
+                    /*
+                    if (mirrorMesh)
                     {
                         triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
                     } else
                     {
                         triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
-                    }
+                    }*/
                 }
 
                 genMesh.triList = triList;
@@ -1054,7 +1186,9 @@ namespace AquaModelLibrary.Extra
                 flvMesh.BackfaceCulling = false;
                 byte isDynamic = 0;
                 //flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
-                flvMesh.Dynamic = 0;
+
+                //= //TODO DECIDE IF DYNAMIC BASED ON LAYOUT AND ALTER VERTEX WEIGHTS, NORMAL W, BONE INDICES APPROPRIATELY
+                flvMesh.Dynamic = 1;
                 flvMesh.Vertices = new List<FLVER.Vertex>();
                 flvMesh.VertexIndices = new List<int>();
                 flvMesh.DefaultBoneIndex = 0; //Maybe set properly later from the aqp version if important

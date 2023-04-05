@@ -287,6 +287,7 @@ namespace AquaModelLibrary.Extra
         private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.textPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.textPair>>> uiRoomByCat)
         {
             string objectOutDir = Path.Combine(outputDirectory, "Objects");
+            Directory.CreateDirectory(objectOutDir);
 
             //Dictionaries
             List<string> masterNameList = new List<string>();

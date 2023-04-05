@@ -16,7 +16,7 @@ namespace SoulsFormats
             public int LayoutIndex { get; set; }
 
             internal int VertexSize;
-            internal int BufferIndex;
+            public int BufferIndex;
             internal int VertexCount;
             internal int BufferOffset;
 

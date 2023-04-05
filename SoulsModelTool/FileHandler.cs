@@ -54,7 +54,7 @@ namespace SoulsModelTool
                         SoulsConvert.applyMaterialNamesToMesh = true;
                         break;
                     case SoulsActionModifiers.transformMesh:
-                        //SoulsConvert.transformMesh = true;
+                        SoulsConvert.transformMesh = true;
                         break;
                     default:
                         break;

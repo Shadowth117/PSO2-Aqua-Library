@@ -3371,6 +3371,7 @@ namespace AquaModelTool
                 SoulsConvert.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
                 SoulsConvert.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
                 SoulsConvert.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
+                SoulsConvert.transformMesh = transformMeshToolStripMenuItem.Checked;
                 foreach (var file in openFileDialog.FileNames)
                 {
                     SoulsConvert.ConvertFile(file);

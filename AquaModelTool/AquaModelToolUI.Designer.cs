@@ -143,6 +143,7 @@
             this.parseDRBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.transformMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -385,6 +386,7 @@
             this.exportWithMetadataToolStripMenuItem,
             this.fixFromSoftMeshMirroringToolStripMenuItem,
             this.applyMaterialNamesToMeshToolStripMenuItem,
+            this.transformMeshToolStripMenuItem,
             this.toolStripSeparator12,
             this.generateMCGMCPToolStripMenuItem,
             this.convertModelToDemonsSoulsflverToolStripMenuItem,
@@ -1053,6 +1055,15 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // transformMeshToolStripMenuItem
+            // 
+            this.transformMeshToolStripMenuItem.Checked = true;
+            this.transformMeshToolStripMenuItem.CheckOnClick = true;
+            this.transformMeshToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.transformMeshToolStripMenuItem.Name = "transformMeshToolStripMenuItem";
+            this.transformMeshToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
+            this.transformMeshToolStripMenuItem.Text = "Transform Mesh";
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -1189,6 +1200,7 @@
         private System.Windows.Forms.ToolStripMenuItem applyMaterialNamesToMeshToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
         private System.Windows.Forms.ToolStripMenuItem fixFromSoftMeshMirroringToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem transformMeshToolStripMenuItem;
     }
 }
 
