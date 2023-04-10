@@ -85,7 +85,7 @@ namespace SoulsModelTool
                 set.models[0].ConvertToLegacyTypes();
                 set.models[0].CreateTrueVertWeights();
 
-                FbxExporter.ExportToFile(aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), false);
+                FbxExporter.ExportToFile(aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), new List<System.Numerics.Matrix4x4>(), false);
             }
         }
     }

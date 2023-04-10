@@ -70,6 +70,7 @@
             this.exportWithMetadataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fixFromSoftMeshMirroringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.applyMaterialNamesToMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.transformMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
             this.generateMCGMCPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertModelToDemonsSoulsflverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -143,7 +144,7 @@
             this.parseDRBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.transformMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportLODModelsIfInSameaqpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -221,7 +222,8 @@
             // 
             this.exportModelToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exportFBXToolStripMenuItem,
-            this.includeMetadataToolStripMenuItem});
+            this.includeMetadataToolStripMenuItem,
+            this.exportLODModelsIfInSameaqpToolStripMenuItem});
             this.exportModelToolStripMenuItem.Name = "exportModelToolStripMenuItem";
             this.exportModelToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
             this.exportModelToolStripMenuItem.Text = "Export Model";
@@ -229,7 +231,7 @@
             // exportFBXToolStripMenuItem
             // 
             this.exportFBXToolStripMenuItem.Name = "exportFBXToolStripMenuItem";
-            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.exportFBXToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
             this.exportFBXToolStripMenuItem.Text = "Export FBX";
             this.exportFBXToolStripMenuItem.Click += new System.EventHandler(this.exportModelToolStripMenuItem_Click);
             // 
@@ -239,7 +241,7 @@
             this.includeMetadataToolStripMenuItem.CheckOnClick = true;
             this.includeMetadataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.includeMetadataToolStripMenuItem.Name = "includeMetadataToolStripMenuItem";
-            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.includeMetadataToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
             this.includeMetadataToolStripMenuItem.Text = "Include Metadata";
             this.includeMetadataToolStripMenuItem.ToolTipText = "Leave this on for modding PSO2/NGS. Determines if the data appended in #s and sim" +
     "ilar elements should be added to the final bone, mesh, and material names.";
@@ -505,6 +507,15 @@
             this.applyMaterialNamesToMeshToolStripMenuItem.Name = "applyMaterialNamesToMeshToolStripMenuItem";
             this.applyMaterialNamesToMeshToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
             this.applyMaterialNamesToMeshToolStripMenuItem.Text = "Apply material names to mesh";
+            // 
+            // transformMeshToolStripMenuItem
+            // 
+            this.transformMeshToolStripMenuItem.Checked = true;
+            this.transformMeshToolStripMenuItem.CheckOnClick = true;
+            this.transformMeshToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.transformMeshToolStripMenuItem.Name = "transformMeshToolStripMenuItem";
+            this.transformMeshToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
+            this.transformMeshToolStripMenuItem.Text = "Transform Mesh";
             // 
             // toolStripSeparator12
             // 
@@ -1055,14 +1066,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // transformMeshToolStripMenuItem
+            // exportLODModelsIfInSameaqpToolStripMenuItem
             // 
-            this.transformMeshToolStripMenuItem.Checked = true;
-            this.transformMeshToolStripMenuItem.CheckOnClick = true;
-            this.transformMeshToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.transformMeshToolStripMenuItem.Name = "transformMeshToolStripMenuItem";
-            this.transformMeshToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
-            this.transformMeshToolStripMenuItem.Text = "Transform Mesh";
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.CheckOnClick = true;
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.Name = "exportLODModelsIfInSameaqpToolStripMenuItem";
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.Text = "Export LOD Models (If in same .aqp)";
             // 
             // AquaModelTool
             // 
@@ -1201,6 +1210,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
         private System.Windows.Forms.ToolStripMenuItem fixFromSoftMeshMirroringToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transformMeshToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportLODModelsIfInSameaqpToolStripMenuItem;
     }
 }
 

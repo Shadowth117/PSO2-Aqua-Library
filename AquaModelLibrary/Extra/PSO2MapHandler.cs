@@ -13,6 +13,7 @@ using Zamboni;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMethods.AquaNodeParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
+using static AquaModelLibrary.Extra.PSO2MapHandler;
 using static AquaModelLibrary.LHIObjectDetailLayout;
 
 namespace AquaModelLibrary.Extra
@@ -33,6 +34,7 @@ namespace AquaModelLibrary.Extra
             public Dictionary<string, AquaNode> aqns = new Dictionary<string, AquaNode>();
             public Dictionary<string, byte[]> ddsFiles = new Dictionary<string, byte[]>();
             public Dictionary<string, byte[]> lhiArrays = new Dictionary<string, byte[]>();
+            public Dictionary<string, List<Matrix4x4>> lhiMatrices = new Dictionary<string, List<Matrix4x4>>();
         }
 
         public static void DumpNGSMapData(string binPath, string outFolder, int id)
@@ -59,7 +61,11 @@ namespace AquaModelLibrary.Extra
                 //Models
                 foreach(var mdlName in lhiPair.Value.aqos.Keys)
                 {
-                    FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + ".fbx"), new List<string>(), false);
+                    FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $".fbx"), new List<string>(), new List<Matrix4x4>(), false);
+                    foreach (var lhiMat in lhiPair.Value.lhiMatrices)
+                    {
+                        FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $"_{lhiMat.Key}.fbx"), new List<string>(), lhiMat.Value, false);
+                    }
                 }
 
                 //Textures
@@ -84,6 +90,7 @@ namespace AquaModelLibrary.Extra
                 lhiPair.Value.aqns = null;
                 lhiPair.Value.ddsFiles = null;
                 lhiPair.Value.lhiArrays = null;
+                lhiPair.Value.lhiMatrices = null;
             }
             var keys = lhiData.Keys.ToArray();
             foreach(var key in keys)
@@ -201,7 +208,8 @@ namespace AquaModelLibrary.Extra
                                 DumpFromIce(binPath, info.objName, GetIcePath(lhColFilename, binPath), null, lhiData);
                                 if (!lhiData[info.objName].lhiArrays.ContainsKey(num))
                                 {
-                                    lhiData[info.objName].lhiArrays.Add(num, WriteMatrixData(lhi.detailInfoList[i]));
+                                    lhiData[info.objName].lhiArrays.Add(num, WriteMatrixData(info));
+                                    lhiData[info.objName].lhiMatrices.Add(num, info.matrices);
                                 }
                             }
                             break;
@@ -346,7 +354,7 @@ namespace AquaModelLibrary.Extra
 
                     if(lhiData == null)
                     {
-                        FbxExporter.ExportToFile(models[model], bones[model], new List<AquaMotion>(), Path.Combine(outFolder, model + ".fbx"), new List<string>(), false);
+                        FbxExporter.ExportToFile(models[model], bones[model], new List<AquaMotion>(), Path.Combine(outFolder, model + ".fbx"), new List<string>(), new List<Matrix4x4>(), false);
                     } else
                     {
                         if(!lhiData[outFolder].aqos.ContainsKey(model))

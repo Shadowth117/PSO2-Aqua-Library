@@ -25,6 +25,9 @@ using AquaModelLibrary.AquaMethods;
 using AquaModelLibrary.Zero;
 using Zamboni.IceFileFormats;
 using System.Reflection;
+using Microsoft.Win32;
+using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
+using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
 namespace AquaModelTool
 {
@@ -1262,14 +1265,24 @@ namespace AquaModelTool
                         }
                     }
 
-                    var model = aquaUI.aqua.aquaModels[0].models[0];
-                    if (model.objc.type > 0xC32)
-                    {
-                        model.splitVSETPerMesh();
-                    }
+                    var modelCount = exportLODModelsIfInSameaqpToolStripMenuItem.Checked ? aquaUI.aqua.aquaModels[0].models.Count : 1;
 
-                    model.FixHollowMatNaming();
-                    FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], aqms, saveFileDialog.FileName, aqmFileNames, includeMetadata);
+                    for(int i = 0; i < aquaUI.aqua.aquaModels[0].models.Count && i < modelCount; i++)
+                    {
+                        var model = aquaUI.aqua.aquaModels[0].models[i];
+                        if (model.objc.type > 0xC32)
+                        {
+                            model.splitVSETPerMesh();
+                        }
+                        model.FixHollowMatNaming();
+
+                        var name = saveFileDialog.FileName;
+                        if (modelCount > 1)
+                        {
+                            name = Path.Combine(Path.GetDirectoryName(name), Path.GetFileNameWithoutExtension(name) + $"_{i}.fbx");
+                        }
+                        FbxExporter.ExportToFile(model, aquaUI.aqua.aquaBones[0], aqms, name, aqmFileNames, new List<Matrix4x4>(), includeMetadata);
+                    }
                 }
             }
         }
@@ -1987,12 +2000,13 @@ namespace AquaModelTool
                 foreach (var filename in openFileDialog.FileNames)
                 {
                     AquaObject model;
+                    bool isPrm = false;
                     var ext = Path.GetExtension(filename);
                     if (simpleModelExtensions.Contains(ext))
                     {
                         aqua.LoadPRM(filename);
                         aqua.ConvertPRMToAquaObject();
-                        model = aqua.aquaModels[0].models[0];
+                        isPrm = true;
                     }
                     else
                     {
@@ -2022,14 +2036,27 @@ namespace AquaModelTool
                             aqua.ReadBones(bonePath);
                         }
                         aqua.ReadModel(filename);
-                        model = aqua.aquaModels[0].models[0];
-                        if (model.objc.type > 0xC32)
+                    }
+
+
+                    var modelCount = !isPrm && exportLODModelsIfInSameaqpToolStripMenuItem.Checked ? aquaUI.aqua.aquaModels[0].models.Count : 1;
+
+                    for (int i = 0; i < aqua.aquaModels[0].models.Count && i < modelCount; i++)
+                    {
+                        model = aqua.aquaModels[0].models[i];
+                        if (!isPrm && model.objc.type > 0xC32)
                         {
                             model.splitVSETPerMesh();
                         }
+                        model.FixHollowMatNaming();
+
+                        var name = Path.ChangeExtension(filename, ".fbx");
+                        if (modelCount > 1)
+                        {
+                            name = Path.Combine(Path.GetDirectoryName(name), Path.GetFileNameWithoutExtension(name) + $"_{i}.fbx");
+                        }
+                        FbxExporter.ExportToFile(model, aqua.aquaBones[0], new List<AquaMotion>(), name, new List<string>(), new List<Matrix4x4>(), includeMetadataToolStripMenuItem.Checked);
                     }
-                    model.FixHollowMatNaming();
-                    FbxExporter.ExportToFile(model, aqua.aquaBones[0], new List<AquaMotion>(), Path.ChangeExtension(filename, ".fbx"), new List<string>(), includeMetadataToolStripMenuItem.Checked);
                     aqua.aquaBones.Clear();
                     aqua.aquaModels.Clear();
                 }
@@ -3620,7 +3647,7 @@ namespace AquaModelTool
                         set.models[0].ConvertToLegacyTypes();
                         set.models[0].CreateTrueVertWeights();
 
-                        FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), false);
+                        FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), new List<Matrix4x4>(), false);
                     }
                 }
             }
@@ -3694,7 +3721,7 @@ namespace AquaModelTool
                             var nom = new AquaModelLibrary.PSU.NOM(File.ReadAllBytes(file));
                             List<AquaMotion> aqms = new List<AquaMotion>();
                             aqms.Add(nom.GetPSO2MotionPSUBody(bones));
-                            FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], bones, aqms, file.Replace(".nom", ".fbx"), new List<string>() { Path.GetFileName(file) }, true);
+                            FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], bones, aqms, file.Replace(".nom", ".fbx"), new List<string>() { Path.GetFileName(file) }, new List<Matrix4x4>(), true);
                         }
                     }
                 }

@@ -373,12 +373,16 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lSurfacePhong;
     }
 
-    FbxNode* CreateFbxNodeFromAquaObject( AquaObject^ aqo, String^ aqoName, String^ texturesDirectoryPath, FbxScene* lScene, FbxPose* lBindPose, List<IntPtr>^ convertedBones, AquaNode^ aqn, bool includeMetadata)
+    void CreateFbxNodeFromAquaObject( AquaObject^ aqo, String^ aqoName, String^ texturesDirectoryPath, FbxScene* lScene, FbxPose* lBindPose, List<IntPtr>^ convertedBones, AquaNode^ aqn, List<Matrix4x4>^ instanceTransforms, bool includeMetadata)
     {
         FbxNode* lNode = FbxNode::Create( lScene, Utf8String(aqoName + "_model").ToCStr() );
+        FbxNode* lNodeInstances = instanceTransforms->Count > 0 ? FbxNode::Create(lScene, Utf8String(aqoName + "_instances").ToCStr()) : NULL;
         List<int>^ meshMatMappings;
+        List<int>^ nodesToRemove = gcnew List<int>();
         List<AquaObject::GenericMaterial^>^ aqMats = aqo->GetUniqueMaterials(meshMatMappings);
         List<IntPtr>^ materials = gcnew List<IntPtr>( aqMats->Count );
+
+        FbxNode* lRootNode = lScene->GetRootNode();
 
         for each (AquaObject::GenericMaterial^ aqMat in aqMats)
         {
@@ -392,9 +396,52 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             lBindPose->Add( lMeshNode, FbxAMatrix() );
         }
 
-        lBindPose->Add( lNode, FbxAMatrix() );
+        //If we have instance transforms, we want to acutalize those
+        for (int i = 0; i < instanceTransforms->Count; i++)
+        {
+            FbxNode* instanceNode = FbxNode::Create(lScene, Utf8String(aqoName + "_instance_" + i).ToCStr());
+            Matrix4x4 tfm = instanceTransforms[i];        
+            Vector3 scale, translation;
+            Quaternion rotation;
 
-        return lNode;
+            Matrix4x4::Decompose(tfm, scale, rotation, translation);
+            FbxVector4 eulerAngles;
+            eulerAngles.SetXYZ(FbxQuaternion(rotation.X, rotation.Y, rotation.Z, rotation.W));
+
+            instanceNode->LclTranslation.Set(FbxVector4(translation.X, translation.Y, translation.Z));
+            instanceNode->LclRotation.Set(eulerAngles);
+            instanceNode->LclScaling.Set(FbxVector4(scale.X, scale.Y, scale.Z));
+
+            for (int j = 0; j < lNode->GetChildCount(); j++)
+            {
+                FbxNode* instanceNodeMesh = FbxNode::Create(lScene, Utf8String(aqoName + "_i_" + i + "_mesh_" + j).ToCStr());
+                instanceNodeMesh->SetNodeAttribute(lNode->GetChild(j)->GetMesh());
+                instanceNode->AddChild(instanceNodeMesh);
+                lBindPose->Add(instanceNodeMesh, FbxAMatrix());
+            }
+            lNodeInstances->AddChild(instanceNode);
+            lBindPose->Add(instanceNode, FbxAMatrix());
+        }
+
+        if (instanceTransforms->Count > 0)
+        {
+            //Remove from the main node if we're using instances
+            for (int i = 0; i < lNode->GetChildCount(); i++)
+            {
+                FbxNode* meshNode = lNode->GetChild(i);
+                lNode->RemoveChild(meshNode);
+            }
+            lNode->Destroy(true);
+            lRootNode->AddChild(lNodeInstances);
+            lBindPose->Add(lNodeInstances, FbxAMatrix());
+        }
+        else {
+            lRootNode->AddChild(lNode);
+            lBindPose->Add(lNode, FbxAMatrix());
+        }
+        aqMats->Clear();
+
+        return;
     }
     
     FbxNode* CreateFbxNodeFromAqnNode(AquaNode::NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex, bool includeMetadata)
@@ -655,7 +702,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     }
     
     //Expects pre VSET split model
-    void FbxExporterCore::ExportToFile( AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, bool includeMetadata)
+    void FbxExporterCore::ExportToFile( AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, List<Matrix4x4>^ instanceTransforms, bool includeMetadata)
     {
         String^ texturesDirectoryPath = Path::GetDirectoryName( destinationFilePath );
         String^ aqoName = Path::GetFileNameWithoutExtension ( destinationFilePath );
@@ -751,8 +798,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         lBindPose->Add(lSkeletonNode, FbxMatrix());
         lRootNode->AddChild(lSkeletonNode);
         
-        FbxNode* lObjectNode = CreateFbxNodeFromAquaObject( aqo, aqoName, texturesDirectoryPath, lScene, lBindPose, convertedBones, aqn, includeMetadata);
-        lRootNode->AddChild( lObjectNode );
+        CreateFbxNodeFromAquaObject( aqo, aqoName, texturesDirectoryPath, lScene, lBindPose, convertedBones, aqn, instanceTransforms, includeMetadata);
         
 
         lScene->AddPose( lBindPose );
