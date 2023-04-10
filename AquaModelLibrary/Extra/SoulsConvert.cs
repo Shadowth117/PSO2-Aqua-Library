@@ -299,7 +299,7 @@ namespace AquaModelLibrary.Extra
                             set.models[0].ConvertToLegacyTypes();
                             set.models[0].CreateTrueVertWeights();
 
-                            FbxExporter.ExportToFile(aqu.aquaModels[0].models[0], aqn, new List<AquaMotion>(), finalPath, new List<string>(), false);
+                            FbxExporter.ExportToFile(aqu.aquaModels[0].models[0], aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false);
                         }
                     }
                     else if (TPF.Is(bndFile.Bytes))
@@ -1180,15 +1180,41 @@ namespace AquaModelLibrary.Extra
                 var shader = aqp.shadList[mesh.shadIndex];
                 var render = aqp.rendList[mesh.rendIndex];
                 var flvMat = flver.Materials[matIds[i]];
-
+                
                 FLVER0.Mesh flvMesh = new FLVER0.Mesh();
                 flvMesh.MaterialIndex = (byte)matIds[i];
                 flvMesh.BackfaceCulling = false;
                 byte isDynamic = 0;
-                //flvMesh.Dynamic = vtxl.vertWeights.Count > 0 ? (byte)1 : (byte)0;
 
-                //= //TODO DECIDE IF DYNAMIC BASED ON LAYOUT AND ALTER VERTEX WEIGHTS, NORMAL W, BONE INDICES APPROPRIATELY
-                flvMesh.Dynamic = 1;
+                bool normalWBoneTransform = false;
+                bool foundBoneIndices = false;
+                bool foundBoneWeights = false;
+                if (flvMat.Layouts?.Count > 0)
+                {
+                    foreach (var layoutType in flvMat.Layouts[0])
+                    {
+                        switch (layoutType.Semantic)
+                        {
+                            case FLVER.LayoutSemantic.Normal:
+                                if (layoutType.Type == FLVER.LayoutType.Byte4B || layoutType.Type == FLVER.LayoutType.Byte4E)
+                                {
+                                    normalWBoneTransform = true;
+                                }
+                                break;
+                            case FLVER.LayoutSemantic.BoneIndices:
+                                foundBoneIndices = true;
+                                break;
+                            case FLVER.LayoutSemantic.BoneWeights:
+                                foundBoneWeights = true;
+                                break;
+                        }
+                    }
+                }
+                bool hasIndexNoWeightTransform = foundBoneIndices && !foundBoneWeights;
+
+                flvMesh.Dynamic = (byte)((hasIndexNoWeightTransform || normalWBoneTransform) ? 0 : 1);
+
+                //TODO DECIDE IF DYNAMIC BASED ON LAYOUT AND ALTER VERTEX WEIGHTS, NORMAL W, BONE INDICES APPROPRIATELY
                 flvMesh.Vertices = new List<FLVER.Vertex>();
                 flvMesh.VertexIndices = new List<int>();
                 flvMesh.DefaultBoneIndex = 0; //Maybe set properly later from the aqp version if important
@@ -1237,7 +1263,16 @@ namespace AquaModelLibrary.Extra
                         switch (flvMat.Layouts[0][l].Semantic)
                         {
                             case FLVER.LayoutSemantic.Position:
-                                var pos = Vector3.Transform(vtxl.vertPositions[v], mirrorMatX);
+                                var pos = vtxl.vertPositions[v];
+                                /*if (normalWBoneTransform)
+                                {
+                                    pos = Vector3.Transform(pos,);
+                                } else if (hasIndexNoWeightTransform)
+                                {
+                                    pos = Vector3.Transform(pos,);
+                                }
+                                */
+                                pos = Vector3.Transform(pos, mirrorMatX);
                                 vert.Position = pos;
 
                                 //Calc model bounding
