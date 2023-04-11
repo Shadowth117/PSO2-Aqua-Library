@@ -419,8 +419,16 @@ namespace AquaModelLibrary.AquaMethods
             return outData;
         }
 
+        //Toggle to hopefully enable console version support?
+        public static bool useFileNameHash = true;
+
         public static string GetFileHash(string str)
         {
+            if(!useFileNameHash)
+            {
+                return str;
+            }
+
             if (str == null)
             {
                 return "";
@@ -441,6 +449,11 @@ namespace AquaModelLibrary.AquaMethods
 
         public static string GetRebootHash(string fileName)
         {
+            if (!useFileNameHash)
+            {
+                return fileName;
+            }
+
             return fileName.Substring(0, 2) + "\\" + fileName.Substring(2, fileName.Length - 2);
         }
 

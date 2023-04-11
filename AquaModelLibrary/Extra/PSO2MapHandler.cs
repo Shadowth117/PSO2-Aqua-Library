@@ -33,14 +33,13 @@ namespace AquaModelLibrary.Extra
             public Dictionary<string, AquaObject> aqos = new Dictionary<string, AquaObject>();
             public Dictionary<string, AquaNode> aqns = new Dictionary<string, AquaNode>();
             public Dictionary<string, byte[]> ddsFiles = new Dictionary<string, byte[]>();
-            public Dictionary<string, byte[]> lhiArrays = new Dictionary<string, byte[]>();
             public Dictionary<string, List<Matrix4x4>> lhiMatrices = new Dictionary<string, List<Matrix4x4>>();
         }
 
-        public static void DumpNGSMapData(string binPath, string outFolder, int id)
+        public static void DumpMapData(string binPath, string outFolder, int id)
         {
             Dictionary<string, LHIData> lhiData = new Dictionary<string, LHIData>();
-            binPath = Path.Combine(binPath, "data\\win32reboot\\");
+            binPath = Path.Combine(binPath, CharacterMakingIndex.dataReboot);
 
             //Set
             string setIce = $"set/ls_{id:D4}_set.ice";
@@ -80,16 +79,9 @@ namespace AquaModelLibrary.Extra
                     }
                 }
 
-                //LHI data
-                foreach(var lhi in lhiPair.Value.lhiArrays)
-                {
-                    File.WriteAllBytes(Path.Combine(lhiPath, lhi.Key + "_lhi.bin"), lhi.Value);
-                }
-
                 lhiPair.Value.aqos = null;
                 lhiPair.Value.aqns = null;
                 lhiPair.Value.ddsFiles = null;
-                lhiPair.Value.lhiArrays = null;
                 lhiPair.Value.lhiMatrices = null;
             }
             var keys = lhiData.Keys.ToArray();
@@ -206,9 +198,8 @@ namespace AquaModelLibrary.Extra
                                 }
                                 DumpFromIce(binPath, info.objName, GetIcePath(lhFilename, binPath), null, lhiData);
                                 DumpFromIce(binPath, info.objName, GetIcePath(lhColFilename, binPath), null, lhiData);
-                                if (!lhiData[info.objName].lhiArrays.ContainsKey(num))
+                                if (!lhiData[info.objName].lhiMatrices.ContainsKey(num))
                                 {
-                                    lhiData[info.objName].lhiArrays.Add(num, WriteMatrixData(info));
                                     lhiData[info.objName].lhiMatrices.Add(num, info.matrices);
                                 }
                             }

@@ -13,10 +13,32 @@ namespace AquaModelLibrary
         public static int oct4_22TableAddressInt = 0x00320b1C; //October 5th 2022 update cmx
         public static int jan25_23TableAddressInt = 0x0034689C; //October 5th 2022 update cmx
 
-        public static string dataDir = $"data\\win32\\";
-        public static string dataNADir = $"data\\win32_na\\";
-        public static string dataReboot = $"data\\win32reboot\\";
-        public static string dataRebootNA = $"data\\win32reboot_na\\";
+        public static bool pcDirectory = true;
+        public static string dataDir 
+        {
+            get { return pcDirectory ? dataDirPC : dataDirConsole; }
+        }
+        public static string dataNADir
+        {
+            get { return pcDirectory ? dataNADirPC : dataNADirConsole; }
+        }
+        public static string dataReboot
+        {
+            get { return pcDirectory ? dataRebootPC : dataRebootConsole; }
+        }
+        public static string dataRebootNA
+        {
+            get { return pcDirectory ? dataRebootNAPC : dataRebootNAConsole; }
+        }
+
+        public static string dataDirPC = $"data\\win32\\";
+        public static string dataDirConsole = $"data\\";
+        public static string dataNADirPC = $"data\\win32_na\\";
+        public static string dataNADirConsole = $"data_na\\";
+        public static string dataRebootPC = $"data\\win32reboot\\";
+        public static string dataRebootConsole = $"datareboot\\";
+        public static string dataRebootNAPC = $"data\\win32reboot_na\\";
+        public static string dataRebootNAConsole = $"datareboot_na\\";
         public static string classicStart = $"character/making/pl_";
         public static string rebootStart = $"character/making_reboot/pl_";
         public static string rebootExStart = $"character/making_reboot_ex/pl_";
@@ -88,7 +110,7 @@ namespace AquaModelLibrary
         public static string classicActorName = $"actor/ac_name_text.ice";
         public static string rebootActorName = $"actor/ac_name_text.ice";
         public static string rebootActorNameNPC = $"npc/np_npc_actor_name.ice"; //Use this for actual cml names. Other one
-        public static string rebootLobbyAction = $"f94e8bfb6ee674e39fa6bc1aa697bf82";
+        public static string rebootLobbyAction = $"lobby_action/pl_lobby_action_setting.ice";
 
         public static string partsTextName = "ui_charamake_parts.text";
         public static string acceTextName = "ui_accessories_text.text";

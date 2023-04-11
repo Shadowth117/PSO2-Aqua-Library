@@ -77,7 +77,7 @@ namespace AquaModelLibrary.Extra
 
             //Load lac
             string lacPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicLobbyAction));
-            string lacPathRe = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootLobbyAction));
+            string lacPathRe = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootLobbyAction)));
             string lacTruePath = null;
             string lacTruePathReboot = null;
             if (File.Exists(lacPath))

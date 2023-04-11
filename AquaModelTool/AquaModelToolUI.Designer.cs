@@ -38,6 +38,7 @@
             this.exportModelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportFBXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.includeMetadataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportLODModelsIfInSameaqpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -144,7 +145,7 @@
             this.parseDRBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.exportLODModelsIfInSameaqpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.usePCDirectoriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -245,6 +246,13 @@
             this.includeMetadataToolStripMenuItem.Text = "Include Metadata";
             this.includeMetadataToolStripMenuItem.ToolTipText = "Leave this on for modding PSO2/NGS. Determines if the data appended in #s and sim" +
     "ilar elements should be added to the final bone, mesh, and material names.";
+            // 
+            // exportLODModelsIfInSameaqpToolStripMenuItem
+            // 
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.CheckOnClick = true;
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.Name = "exportLODModelsIfInSameaqpToolStripMenuItem";
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
+            this.exportLODModelsIfInSameaqpToolStripMenuItem.Text = "Export LOD Models (If in same .aqp)";
             // 
             // saveToolStripMenuItem
             // 
@@ -352,7 +360,8 @@
             this.convertNATextToEnPatchToolStripMenuItem,
             this.generateCharacterFileSheetToolStripMenuItem,
             this.parseVTBFToTextToolStripMenuItem,
-            this.assembleNGSMapToolStripMenuItem});
+            this.assembleNGSMapToolStripMenuItem,
+            this.usePCDirectoriesToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 23);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -1066,12 +1075,15 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // exportLODModelsIfInSameaqpToolStripMenuItem
+            // usePCDirectoriesToolStripMenuItem
             // 
-            this.exportLODModelsIfInSameaqpToolStripMenuItem.CheckOnClick = true;
-            this.exportLODModelsIfInSameaqpToolStripMenuItem.Name = "exportLODModelsIfInSameaqpToolStripMenuItem";
-            this.exportLODModelsIfInSameaqpToolStripMenuItem.Size = new System.Drawing.Size(264, 22);
-            this.exportLODModelsIfInSameaqpToolStripMenuItem.Text = "Export LOD Models (If in same .aqp)";
+            this.usePCDirectoriesToolStripMenuItem.Checked = true;
+            this.usePCDirectoriesToolStripMenuItem.CheckOnClick = true;
+            this.usePCDirectoriesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.usePCDirectoriesToolStripMenuItem.Name = "usePCDirectoriesToolStripMenuItem";
+            this.usePCDirectoriesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.usePCDirectoriesToolStripMenuItem.Text = "Use PC Directories";
+            this.usePCDirectoriesToolStripMenuItem.Click += new System.EventHandler(this.usePCDirectoriesToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1211,6 +1223,7 @@
         private System.Windows.Forms.ToolStripMenuItem fixFromSoftMeshMirroringToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transformMeshToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportLODModelsIfInSameaqpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem usePCDirectoriesToolStripMenuItem;
     }
 }
 

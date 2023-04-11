@@ -2031,9 +2031,21 @@ namespace AquaModelTool
                             aqua.aquaBones.Clear();
                             if (!File.Exists(bonePath)) //We need bones for this
                             {
-                                continue;
+                                //Check group 1 if group 2 doesn't have them
+                                bonePath = bonePath.Replace("group2", "group1");
+                                if (!File.Exists(bonePath))
+                                {
+                                    bonePath = null;
+                                }
                             }
-                            aqua.ReadBones(bonePath);
+                            if(bonePath != null)
+                            {
+                                aqua.ReadBones(bonePath);
+                            } else
+                            {
+                                //If we really can't find anything, make a placeholder
+                                aqua.aquaBones.Add(AquaNode.GenerateBasicAQN());
+                            }
                         }
                         aqua.ReadModel(filename);
                     }
@@ -2665,7 +2677,7 @@ namespace AquaModelTool
                     if (id >= 0)
                     {
                         PSO2MapHandler.pngMode = true;
-                        PSO2MapHandler.DumpNGSMapData(goodFolderDialog.FileName, goodFolderDialog2.FileName, id);
+                        PSO2MapHandler.DumpMapData(goodFolderDialog.FileName, goodFolderDialog2.FileName, id);
                     }
                 }
             }
@@ -4051,6 +4063,12 @@ namespace AquaModelTool
                     SoulsConvert.ReadSoulsFile(file);
                 }
             }
+        }
+
+        private void usePCDirectoriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CharacterMakingIndex.pcDirectory = usePCDirectoriesToolStripMenuItem.Checked;
+            AquaGeneralMethods.useFileNameHash = usePCDirectoriesToolStripMenuItem.Checked;
         }
     }
 }
