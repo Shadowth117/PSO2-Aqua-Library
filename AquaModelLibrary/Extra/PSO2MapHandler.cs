@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.AquaMethods;
+using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary.Native.Fbx;
 using Reloaded.Memory.Streams;
 using System;
@@ -9,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Web;
 using Zamboni;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMethods.AquaNodeParsingMethods;
@@ -36,20 +39,65 @@ namespace AquaModelLibrary.Extra
             public Dictionary<string, List<Matrix4x4>> lhiMatrices = new Dictionary<string, List<Matrix4x4>>();
         }
 
-        public static void DumpMapData(string binPath, string outFolder, int id)
+        public static void DumpMapData(string pso2BinPath, string outFolder, int id, bool? overrideToReboot = null)
         {
             Dictionary<string, LHIData> lhiData = new Dictionary<string, LHIData>();
-            binPath = Path.Combine(binPath, CharacterMakingIndex.dataReboot);
+            string dataPath = null;
+
+            string templateName = $"stage/ln_area_template_{id:D4}.ice";
+            string templateHash = GetRebootHash(GetFileHash(templateName));
+            string lpsPath = null;
+            bool isReboot = false;
+            LandPieceSettings lps = null;
+            if (overrideToReboot == false || File.Exists(Path.Combine(pso2BinPath, CharacterMakingIndex.dataDir, templateHash)))
+            {
+                dataPath = Path.Combine(pso2BinPath, CharacterMakingIndex.dataDir);
+                lpsPath = Path.Combine(dataPath, GetFileHash(AquaExtras.FilenameConstants.lnAreaTemplateCommon));
+                isReboot = false;
+            }
+            else if (overrideToReboot == true || File.Exists(Path.Combine(pso2BinPath, CharacterMakingIndex.dataReboot, templateHash)))
+            {
+                dataPath = Path.Combine(pso2BinPath, CharacterMakingIndex.dataReboot);
+                lpsPath = Path.Combine(dataPath, GetRebootHash(GetFileHash(AquaExtras.FilenameConstants.lnAreaTemplateCommonReboot)));
+                isReboot = true;
+            }
+
+            if (dataPath == null)
+            {
+                return;
+            }
+
+            if (File.Exists(lpsPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(lpsPath));
+                var lpsIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = new List<byte[]>(lpsIce.groupOneFiles);
+                files.AddRange(lpsIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    var fname = IceFile.getFileName(file).ToLower();
+                    if (fname == $"sn{id:D4}.lps")
+                    {
+                        lps = AquaMiscMethods.ReadLPS(file);
+                    }
+                }
+
+                lpsIce = null;
+            }
 
             //Set
             string setIce = $"set/ls_{id:D4}_set.ice";
-            DumpFromIce(binPath, Path.Combine(outFolder, "SetObjects"), GetIcePath(setIce, binPath));
+            DumpFromIce(dataPath, Path.Combine(outFolder, "SetObjects"), GetIcePath(setIce, dataPath, isReboot), isReboot);
 
             //Detail Objects and Layouts - might be the same number as above, but has way more slots
             for (int i = 0; i < 10000; i++)
             {
                 string detModelIce = $"stage/sn_{id:D4}/instancing/ln_{id:D4}_instancing_{i:D4}.ice";
-                DumpFromIce(binPath, Path.Combine(outFolder, i.ToString("D2") + "_lhi"), GetIcePath(detModelIce, binPath), null, lhiData);
+                DumpFromIce(dataPath, Path.Combine(outFolder, i.ToString("D2") + "_lhi"), GetIcePath(detModelIce, dataPath, isReboot), isReboot, null, lhiData);
             }
 
             foreach(var lhiPair in lhiData)
@@ -91,48 +139,99 @@ namespace AquaModelLibrary.Extra
             }
             
             //Terrain
-            for (int i = 0; i < 100; i++)
+            if(lps.pieceSets.Count > 1)
             {
-                //High detail model
-                string hdModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_f0_{i:D2}.ice";
-                DumpFromIce(binPath, Path.Combine(outFolder, i.ToString("D2")), GetIcePath(hdModelIce, binPath));
+                var pieceKeys = lps.pieceSets.Keys.ToList();
+                pieceKeys.Sort();
+                foreach (var key in pieceKeys)
+                {
+                    var piece = lps.pieceSets[key];
+                    var varCount = piece.pieceSet.variantCount;
+                    var var80Count = piece.pieceSet.variant80Count;
+                    for (int i = 0; i < varCount; i++)
+                    {
+                        var trIceName = $"stage/sn_{id:D4}/ln_{id:D4}_{key}_{i:D2}.ice";
+                        var trIceHash = GetFileHash(trIceName);
+                        if(isReboot)
+                        {
+                            trIceHash = GetRebootHash(trIceHash);
+                        }
+                        var filePath = Path.Combine(dataPath, trIceHash);
+                        DumpFromIce(dataPath, Path.Combine(outFolder, $"{key}_{i:D2}"), filePath, isReboot);
+                    }
+                    for (int i = 0; i < var80Count; i++)
+                    {
+                        var trIceName = $"stage/sn_{id:D4}/ln_{id:D4}_{key}_{i + 80:D2}.ice";
+                        var trIceHash = GetRebootHash(GetFileHash(trIceName));
+                        if (isReboot)
+                        {
+                            trIceHash = GetRebootHash(trIceHash);
+                        }
+                        var filePath = Path.Combine(dataPath, trIceHash);
+                        DumpFromIce(dataPath, Path.Combine(outFolder, $"{key}_{i + 80:D2}"), filePath, isReboot);
+                    }
+                }
+            } else
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    //High detail model
+                    string hdModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_f0_{i:D2}.ice";
+                    DumpFromIce(dataPath, Path.Combine(outFolder, i.ToString("D2")), GetIcePath(hdModelIce, dataPath, isReboot), isReboot);
 
-                //Collision
-                string colModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_f0_{i:D2}_col.ice";
-                DumpFromIce(binPath, Path.Combine(outFolder, i.ToString("D2")), GetIcePath(colModelIce, binPath));
+                    //Collision
+                    string colModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_f0_{i:D2}_col.ice";
+                    DumpFromIce(dataPath, Path.Combine(outFolder, i.ToString("D2")), GetIcePath(colModelIce, dataPath, isReboot), isReboot);
 
-                //TXL - Not sure why this is here when there's one usually IN the model files already, but whatever sega
-                string txlModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_f0_{i:D2}_txl.ice";
-                DumpFromIce(binPath, Path.Combine(outFolder, i.ToString("D2")), GetIcePath(txlModelIce, binPath));
+                    //TXL - Not sure why this is here when there's one usually IN the model files already, but whatever sega
+                    string txlModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_f0_{i:D2}_txl.ice";
+                    DumpFromIce(dataPath, Path.Combine(outFolder, i.ToString("D2")), GetIcePath(txlModelIce, dataPath, isReboot), isReboot);
+                }
             }
 
             //Common: Ususally for out of bounds stuff
             string commonModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_common.ice";
-            DumpFromIce(binPath, Path.Combine(outFolder, "common"), GetIcePath(commonModelIce, binPath));
+            DumpFromIce(dataPath, Path.Combine(outFolder, "common"), GetIcePath(commonModelIce, dataPath, isReboot), isReboot);
+            string commonEXModelIce = $"stage/sn_{id:D4}/ln_{id:D4}_common_ex.ice";
+            DumpFromIce(dataPath, Path.Combine(outFolder, "common_ex"), GetIcePath(commonEXModelIce, dataPath, isReboot), isReboot);
 
             //Skybox
             string weatherIce = $"stage/weather/ln_{id:4}_wtr.ice";
-            DumpFromIce(binPath, Path.Combine(outFolder, "skybox"), GetIcePath(weatherIce, binPath));
+            DumpFromIce(dataPath, Path.Combine(outFolder, "skybox"), GetIcePath(weatherIce, dataPath, isReboot), isReboot);
+            string weatherExIce = $"stage/weather/ln_{id:4}_wtr_ex.ice";
+            DumpFromIce(dataPath, Path.Combine(outFolder, "skybox"), GetIcePath(weatherExIce, dataPath, isReboot), isReboot);
+
+            //Radar
+            string radarIce = $"stage/radar/ln_{id:4}_rad.ice";
+            DumpFromIce(dataPath, Path.Combine(outFolder, "radar"), GetIcePath(radarIce, dataPath, isReboot), isReboot);
+
+            //Effect
+            string effectIce = $"stage/effect/ef_sn_{id:4}.ice";
+            DumpFromIce(dataPath, Path.Combine(outFolder, "effect"), GetIcePath(effectIce, dataPath, isReboot), isReboot);
 
             //Moons
             if (id == 5000 || id == 5001)
             {
                 string moonIce = $"object/map_object/ob_5000_0642.ice";
-                DumpFromIce(binPath, Path.Combine(outFolder, "skybox"), GetIcePath(moonIce, binPath));
+                DumpFromIce(dataPath, Path.Combine(outFolder, "skybox"), GetIcePath(moonIce, dataPath, isReboot), isReboot);
             }
             
         }
 
-        public static string GetIcePath(string unhashedIce, string binPath)
+        public static string GetIcePath(string unhashedIce, string binPath, bool isReboot)
         {
-            string iceHash = GetRebootHash(GetFileHash(unhashedIce));
+            string iceHash = GetFileHash(unhashedIce);
+            if(isReboot)
+            {
+                iceHash = GetRebootHash(iceHash);
+            }
             string icePath = Path.Combine(binPath, iceHash);
 
             return icePath;
         }
 
 
-        public static void DumpFromIce(string binPath, string outFolder, string hdModelPath, List<string> ddsList = null, Dictionary<string, LHIData> lhiData = null)
+        public static void DumpFromIce(string binPath, string outFolder, string hdModelPath, bool isReboot, List<string> ddsList = null, Dictionary<string, LHIData> lhiData = null)
         {
             if (File.Exists(hdModelPath))
             {
@@ -196,8 +295,8 @@ namespace AquaModelLibrary.Extra
                                 {
                                     lhiData.Add(info.objName, new LHIData());
                                 }
-                                DumpFromIce(binPath, info.objName, GetIcePath(lhFilename, binPath), null, lhiData);
-                                DumpFromIce(binPath, info.objName, GetIcePath(lhColFilename, binPath), null, lhiData);
+                                DumpFromIce(binPath, info.objName, GetIcePath(lhFilename, binPath, isReboot), isReboot, null, lhiData);
+                                DumpFromIce(binPath, info.objName, GetIcePath(lhColFilename, binPath, isReboot), isReboot, null, lhiData);
                                 if (!lhiData[info.objName].lhiMatrices.ContainsKey(num))
                                 {
                                     lhiData[info.objName].lhiMatrices.Add(num, info.matrices);
@@ -291,7 +390,7 @@ namespace AquaModelLibrary.Extra
                             var txl = AquaUtil.LoadTXL(".txl", data);
                             for (int ic = 0; ic < txl.iceList.Count; ic++)
                             {
-                                DumpFromIce(binPath, outFolder, GetIcePath(txl.iceList[ic], binPath), txl.texList, lhiData);
+                                DumpFromIce(binPath, outFolder, GetIcePath(txl.iceList[ic], binPath, isReboot), isReboot, txl.texList, lhiData);
                             }
                             break;
                         case ".aqp":
@@ -359,8 +458,8 @@ namespace AquaModelLibrary.Extra
                 {
                     var objFilename = Path.Combine(binPath, "object/map_object", obj.Key + "_l1.ice");
                     var objColFilename = Path.Combine(binPath, "object/map_object", obj.Key + "_col.ice");
-                    DumpFromIce(binPath, outFolder, GetIcePath(objFilename, binPath));
-                    DumpFromIce(binPath, outFolder, GetIcePath(objColFilename, binPath));
+                    DumpFromIce(binPath, outFolder, GetIcePath(objFilename, binPath, isReboot), isReboot);
+                    DumpFromIce(binPath, outFolder, GetIcePath(objColFilename, binPath, isReboot), isReboot);
 
                     List<byte> setData = new List<byte>();
                     setData.AddRange(BitConverter.GetBytes(obj.Value.Count));
