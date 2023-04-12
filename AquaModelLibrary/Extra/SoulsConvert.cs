@@ -1116,11 +1116,6 @@ namespace AquaModelLibrary.Extra
                 if (metaMats != null && ogMatIndex < metaMats.Count && ogMatIndex != -1)
                 {
                     matIds.Add(ogMatIndex);
-                    /*
-                    flvMat = metaMats[ogMatIndex];
-                    matIds.Add(flver.Materials.Count);
-                    flver.Materials.Add(flvMat);
-                    */
                     continue;
                 }
 
@@ -1253,10 +1248,33 @@ namespace AquaModelLibrary.Extra
                     flvMesh.VertexIndices.Add(ind);
                 }
 
+                //Saves time so we don't have to dynamically find the greatest weight for each set, but only if the mesh needs it
+                if(normalWBoneTransform || hasIndexNoWeightTransform)
+                {
+                   vtxl.SortBoneIndexWeightOrderByWeight();
+                }
+
                 //Handle vertices
+                int tfmBone = -1;
                 for (int v = 0; v < vtxl.vertPositions.Count; v++)
                 {
                     var vert = new FLVER.Vertex();
+
+                    //Get the bone for transforms if needed
+                    if (normalWBoneTransform || hasIndexNoWeightTransform)
+                    {
+                        if (vtxl.vertWeightIndices?.Count > 0 && vtxl.vertWeightIndices[v]?.Length > 0)
+                        {
+                            tfmBone = vtxl.vertWeightIndices[v][0];
+                            if (aqp is ClassicAquaObject)
+                            {
+                                tfmBone = vtxl.bonePalette[tfmBone];
+                            }
+                        } else
+                        {
+                            tfmBone = 0;
+                        }
+                    }
 
                     for (int l = 0; l < flvMat.Layouts[0].Count; l++)
                     {
@@ -1264,14 +1282,14 @@ namespace AquaModelLibrary.Extra
                         {
                             case FLVER.LayoutSemantic.Position:
                                 var pos = vtxl.vertPositions[v];
-                                /*if (normalWBoneTransform)
+
+                                //transform to inverse position if transforming
+                                if (normalWBoneTransform || hasIndexNoWeightTransform)
                                 {
-                                    pos = Vector3.Transform(pos,);
-                                } else if (hasIndexNoWeightTransform)
-                                {
-                                    pos = Vector3.Transform(pos,);
+                                    var tfm = aqn.nodeList[tfmBone].GetInverseBindPoseMatrix();
+                                    pos = Vector3.Transform(pos, tfm);
                                 }
-                                */
+                                
                                 pos = Vector3.Transform(pos, mirrorMatX);
                                 vert.Position = pos;
 
@@ -1303,7 +1321,7 @@ namespace AquaModelLibrary.Extra
                                 {
                                     vert.Normal = Vector3.One;
                                 }
-                                vert.NormalW = 127;
+                                vert.NormalW = normalWBoneTransform ? tfmBone : 127;
                                 break;
                             case FLVER.LayoutSemantic.Tangent:
                                 if (vtxl.vertTangentList.Count > 0)
@@ -1351,7 +1369,10 @@ namespace AquaModelLibrary.Extra
                                 break;
                             case FLVER.LayoutSemantic.BoneIndices:
                                 int[] indices;
-                                if(vtxl.vertWeightIndices.Count == 0)
+                                if(hasIndexNoWeightTransform)
+                                {
+                                    indices = new int[] { tfmBone, tfmBone, tfmBone, tfmBone };
+                                } else if(vtxl.vertWeightIndices.Count == 0)
                                 {
                                     indices = new int[4];
                                 } else
@@ -1376,8 +1397,10 @@ namespace AquaModelLibrary.Extra
                                     bone3 = vtxl.bonePalette[bone3];
                                 }
 
-                                List<int> boneCheckList = new List<int>();
-                                boneCheckList.Add(bone0);
+                                List<int> boneCheckList = new List<int>
+                                {
+                                    bone0
+                                };
                                 if (boneCheckList.Contains(bone1))
                                 {
                                     bone1 = -1;
