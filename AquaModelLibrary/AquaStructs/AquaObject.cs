@@ -1562,6 +1562,84 @@ namespace AquaModelLibrary
                 return weightIndices;
             }
 
+            public void SortBoneIndexWeightOrderByWeight()
+            {
+                if(vertWeights.Count > 0)
+                {
+                    for (int i = 0; i < vertWeightIndices.Count; i++)
+                    {
+                        var indices = vertWeightIndices[i].ToArray();
+                        var weights = vertWeights[i];
+                        var weightsArr = new float[4];
+                        for(int j = 0; j < indices.Length; j++)
+                        {
+                            switch(j)
+                            {
+                                case 0:
+                                    weightsArr[0] = weights.X;
+                                    break;
+                                case 1:
+                                    weightsArr[1] = weights.Y;
+                                    break;
+                                case 2:
+                                    weightsArr[2] = weights.Z;
+                                    break;
+                                case 3:
+                                    weightsArr[3] = weights.W;
+                                    break;
+                            }
+                        }
+                        Array.Sort(weightsArr, indices);
+                        vertWeightIndices[i] = indices;
+                        var newWeightVec4 = new Vector4(weightsArr[0], weightsArr[1], weightsArr[2], weightsArr[3]);
+                        vertWeights[i] = newWeightVec4;
+                    }
+                }
+                if (trueVertWeights.Count > 0)
+                {
+                    for (int i = 0; i < trueVertWeightIndices.Count; i++)
+                    {
+                        var indices = trueVertWeightIndices[i].ToArray();
+                        var weights = trueVertWeights[i];
+                        var weightsArr = new float[4];
+                        for (int j = 0; j < indices.Length; j++)
+                        {
+                            switch (j)
+                            {
+                                case 0:
+                                    weightsArr[0] = weights.X;
+                                    break;
+                                case 1:
+                                    weightsArr[1] = weights.Y;
+                                    break;
+                                case 2:
+                                    weightsArr[2] = weights.Z;
+                                    break;
+                                case 3:
+                                    weightsArr[3] = weights.W;
+                                    break;
+                            }
+                        }
+                        Array.Sort(weightsArr, indices);
+                        trueVertWeightIndices[i] = indices;
+                        var newWeightVec4 = new Vector4(weightsArr[0], weightsArr[1], weightsArr[2], weightsArr[3]);
+                        trueVertWeights[i] = newWeightVec4;
+                    }
+                }
+                if (rawVertWeights.Count > 0)
+                {
+                    for (int i = 0; i < rawVertWeightIds.Count; i++)
+                    {
+                        var indices = rawVertWeightIds[i].ToArray();
+                        var weights = rawVertWeights[i].ToArray();
+
+                        Array.Sort(weights, indices);
+                        rawVertWeightIds[i] = indices.ToList();
+                        rawVertWeights[i] = weights.ToList();
+                    }
+                }
+            }
+
             public VTXL Clone()
             {
                 VTXL newVTXL = new VTXL();
