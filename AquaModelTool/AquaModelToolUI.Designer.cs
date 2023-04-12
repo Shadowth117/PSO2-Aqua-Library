@@ -1094,7 +1094,7 @@
             this.convertMapTexturesTopngToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.convertMapTexturesTopngToolStripMenuItem.Name = "convertMapTexturesTopngToolStripMenuItem";
             this.convertMapTexturesTopngToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.convertMapTexturesTopngToolStripMenuItem.Text = "Convert Map Textures to .png";
+            this.convertMapTexturesTopngToolStripMenuItem.Text = "Convert Map .dds to .png";
             // 
             // AquaModelTool
             // 
