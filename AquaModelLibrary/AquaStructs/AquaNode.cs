@@ -126,6 +126,16 @@ namespace AquaModelLibrary
                 return bnMat;
             }
 
+            public Matrix4x4 GetInverseBindPoseMatrixInverted()
+            {
+                var bnMat = new Matrix4x4(m1.X, m1.Y, m1.Z, m1.W,
+                                            m2.X, m2.Y, m2.Z, m2.W,
+                                            m3.X, m3.Y, m3.Z, m3.W,
+                                            m4.X, m4.Y, m4.Z, m4.W);
+                Matrix4x4.Invert(bnMat, out Matrix4x4 result);
+                return result;
+            }
+
             public void SetInverseBindPoseMatrix(Matrix4x4 bnMat)
             {
                 m1 = new Vector4(bnMat.M11, bnMat.M12, bnMat.M13, bnMat.M14);
