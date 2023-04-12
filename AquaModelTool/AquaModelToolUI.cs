@@ -2676,7 +2676,7 @@ namespace AquaModelTool
                     int id = NumberPrompt.ShowDialog("map");
                     if (id >= 0)
                     {
-                        PSO2MapHandler.pngMode = true;
+                        PSO2MapHandler.pngMode = convertMapTexturesTopngToolStripMenuItem.Checked;
                         PSO2MapHandler.DumpMapData(goodFolderDialog.FileName, goodFolderDialog2.FileName, id);
                     }
                 }

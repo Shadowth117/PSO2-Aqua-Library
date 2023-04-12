@@ -45,7 +45,7 @@ namespace AquaModelLibrary.Extra
             string dataPath = null;
 
             string templateName = $"stage/ln_area_template_{id:D4}.ice";
-            string templateHash = GetRebootHash(GetFileHash(templateName));
+            string templateHash = GetFileHash(templateName);
             string lpsPath = null;
             bool isReboot = false;
             LandPieceSettings lps = null;
@@ -55,7 +55,7 @@ namespace AquaModelLibrary.Extra
                 lpsPath = Path.Combine(dataPath, GetFileHash(AquaExtras.FilenameConstants.lnAreaTemplateCommon));
                 isReboot = false;
             }
-            else if (overrideToReboot == true || File.Exists(Path.Combine(pso2BinPath, CharacterMakingIndex.dataReboot, templateHash)))
+            else if (overrideToReboot == true || File.Exists(Path.Combine(pso2BinPath, CharacterMakingIndex.dataReboot, GetRebootHash(templateHash))))
             {
                 dataPath = Path.Combine(pso2BinPath, CharacterMakingIndex.dataReboot);
                 lpsPath = Path.Combine(dataPath, GetRebootHash(GetFileHash(AquaExtras.FilenameConstants.lnAreaTemplateCommonReboot)));
@@ -80,7 +80,7 @@ namespace AquaModelLibrary.Extra
                 foreach (byte[] file in files)
                 {
                     var fname = IceFile.getFileName(file).ToLower();
-                    if (fname == $"sn{id:D4}.lps")
+                    if (fname == $"sn_{id:D4}.lps")
                     {
                         lps = AquaMiscMethods.ReadLPS(file);
                     }

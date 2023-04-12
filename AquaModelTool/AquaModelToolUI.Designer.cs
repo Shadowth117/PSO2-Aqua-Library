@@ -96,6 +96,7 @@
             this.generateCharacterFileSheetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.parseVTBFToTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.assembleNGSMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.usePCDirectoriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filenameButton = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readBonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -145,7 +146,7 @@
             this.parseDRBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.usePCDirectoriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertMapTexturesTopngToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -361,6 +362,7 @@
             this.generateCharacterFileSheetToolStripMenuItem,
             this.parseVTBFToTextToolStripMenuItem,
             this.assembleNGSMapToolStripMenuItem,
+            this.convertMapTexturesTopngToolStripMenuItem,
             this.usePCDirectoriesToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 23);
@@ -684,6 +686,16 @@
             this.assembleNGSMapToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
             this.assembleNGSMapToolStripMenuItem.Text = "NGS Map Dump (LONG process, MANY files)";
             this.assembleNGSMapToolStripMenuItem.Click += new System.EventHandler(this.assembleNGSMapToolStripMenuItem_Click_1);
+            // 
+            // usePCDirectoriesToolStripMenuItem
+            // 
+            this.usePCDirectoriesToolStripMenuItem.Checked = true;
+            this.usePCDirectoriesToolStripMenuItem.CheckOnClick = true;
+            this.usePCDirectoriesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.usePCDirectoriesToolStripMenuItem.Name = "usePCDirectoriesToolStripMenuItem";
+            this.usePCDirectoriesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.usePCDirectoriesToolStripMenuItem.Text = "Use PC Directories";
+            this.usePCDirectoriesToolStripMenuItem.Click += new System.EventHandler(this.usePCDirectoriesToolStripMenuItem_Click);
             // 
             // filenameButton
             // 
@@ -1075,15 +1087,14 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // usePCDirectoriesToolStripMenuItem
+            // convertMapTexturesTopngToolStripMenuItem
             // 
-            this.usePCDirectoriesToolStripMenuItem.Checked = true;
-            this.usePCDirectoriesToolStripMenuItem.CheckOnClick = true;
-            this.usePCDirectoriesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.usePCDirectoriesToolStripMenuItem.Name = "usePCDirectoriesToolStripMenuItem";
-            this.usePCDirectoriesToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.usePCDirectoriesToolStripMenuItem.Text = "Use PC Directories";
-            this.usePCDirectoriesToolStripMenuItem.Click += new System.EventHandler(this.usePCDirectoriesToolStripMenuItem_Click);
+            this.convertMapTexturesTopngToolStripMenuItem.Checked = true;
+            this.convertMapTexturesTopngToolStripMenuItem.CheckOnClick = true;
+            this.convertMapTexturesTopngToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.convertMapTexturesTopngToolStripMenuItem.Name = "convertMapTexturesTopngToolStripMenuItem";
+            this.convertMapTexturesTopngToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
+            this.convertMapTexturesTopngToolStripMenuItem.Text = "Convert Map Textures to .png";
             // 
             // AquaModelTool
             // 
@@ -1224,6 +1235,7 @@
         private System.Windows.Forms.ToolStripMenuItem transformMeshToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportLODModelsIfInSameaqpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usePCDirectoriesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem convertMapTexturesTopngToolStripMenuItem;
     }
 }
 
