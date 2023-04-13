@@ -683,8 +683,8 @@
             // assembleNGSMapToolStripMenuItem
             // 
             this.assembleNGSMapToolStripMenuItem.Name = "assembleNGSMapToolStripMenuItem";
-            this.assembleNGSMapToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.assembleNGSMapToolStripMenuItem.Text = "NGS Map Dump (LONG process, MANY files)";
+            this.assembleNGSMapToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
+            this.assembleNGSMapToolStripMenuItem.Text = "PSO2/NGS Map Dump (LONG process, MANY files)";
             this.assembleNGSMapToolStripMenuItem.Click += new System.EventHandler(this.assembleNGSMapToolStripMenuItem_Click_1);
             // 
             // usePCDirectoriesToolStripMenuItem

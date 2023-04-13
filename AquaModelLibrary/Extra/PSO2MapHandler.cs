@@ -162,7 +162,7 @@ namespace AquaModelLibrary.Extra
                     for (int i = 0; i < var80Count; i++)
                     {
                         var trIceName = $"stage/sn_{id:D4}/ln_{id:D4}_{key}_{i + 80:D2}.ice";
-                        var trIceHash = GetRebootHash(GetFileHash(trIceName));
+                        var trIceHash = GetFileHash(trIceName);
                         if (isReboot)
                         {
                             trIceHash = GetRebootHash(trIceHash);
