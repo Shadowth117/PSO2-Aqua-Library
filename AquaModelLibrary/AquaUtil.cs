@@ -2700,12 +2700,13 @@ namespace AquaModelLibrary
         {
             int offset = 0x0; //No NIFL header
             prmModel = new PRMModel();
-            streamReader.Seek(0xC, SeekOrigin.Begin);
             int type = streamReader.Peek<int>();
+            streamReader.Seek(0xC, SeekOrigin.Begin);
+            int iceEnvelopeSize = streamReader.Peek<int>();
             string prmText = "prm\0";
 
             //Deal with deicer's extra header nonsense
-            if (type > 0x10)
+            if (iceEnvelopeSize > 0x10)
             {
                 ReadIceEnvelope(streamReader, Encoding.UTF8.GetString(BitConverter.GetBytes(type)), ref offset, ref prmText);
             }

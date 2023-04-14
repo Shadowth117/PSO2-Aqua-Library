@@ -196,17 +196,17 @@ namespace AquaModelLibrary.Extra
             DumpFromIce(dataPath, Path.Combine(outFolder, "common_ex"), GetIcePath(commonEXModelIce, dataPath, isReboot), isReboot);
 
             //Skybox
-            string weatherIce = $"stage/weather/ln_{id:4}_wtr.ice";
+            string weatherIce = $"stage/weather/ln_{id:D4}_wtr.ice";
             DumpFromIce(dataPath, Path.Combine(outFolder, "skybox"), GetIcePath(weatherIce, dataPath, isReboot), isReboot);
-            string weatherExIce = $"stage/weather/ln_{id:4}_wtr_ex.ice";
+            string weatherExIce = $"stage/weather/ln_{id:D4}_wtr_ex.ice";
             DumpFromIce(dataPath, Path.Combine(outFolder, "skybox"), GetIcePath(weatherExIce, dataPath, isReboot), isReboot);
 
             //Radar
-            string radarIce = $"stage/radar/ln_{id:4}_rad.ice";
+            string radarIce = $"stage/radar/ln_{id:D4}_rad.ice";
             DumpFromIce(dataPath, Path.Combine(outFolder, "radar"), GetIcePath(radarIce, dataPath, isReboot), isReboot);
 
             //Effect
-            string effectIce = $"stage/effect/ef_sn_{id:4}.ice";
+            string effectIce = $"stage/effect/ef_sn_{id:D4}.ice";
             DumpFromIce(dataPath, Path.Combine(outFolder, "effect"), GetIcePath(effectIce, dataPath, isReboot), isReboot);
 
             //Moons
@@ -251,6 +251,10 @@ namespace AquaModelLibrary.Extra
 
                 foreach (var data in iceFiles)
                 {
+                    if(hdModelPath.Contains("a593f690b3c23a567799ced58bd1ca2d"))
+                    {
+                        File.WriteAllBytes(Path.Combine("C:\\", IceFile.getFileName(data)), data);
+                    }
                     var fname = IceFile.getFileName(data);
                     var ext = Path.GetExtension(fname);
                     switch (ext)
