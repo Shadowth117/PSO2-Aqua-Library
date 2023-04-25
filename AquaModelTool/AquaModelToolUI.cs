@@ -4070,6 +4070,80 @@ namespace AquaModelTool
             CharacterMakingIndex.pcDirectory = usePCDirectoriesToolStripMenuItem.Checked;
             AquaGeneralMethods.useFileNameHash = usePCDirectoriesToolStripMenuItem.Checked;
         }
+
+        private void sortCMSHToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select CMSH File",
+                Filter = "CMSH files|*.cmsh",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var baseDir = Path.GetDirectoryName(openFileDialog.FileNames[0]);
+                Directory.CreateDirectory(Path.Combine(baseDir, "NoInfo", "80"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "NoInfo", "81"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSTypeHeader", "82"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "Compact", "88"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "Compact", "89"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "5"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "D"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "15"));
+
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    BluePointConvert.ReadFileTest(file, out int start, out int flags, out int modelType);
+                    switch (start)
+                    {
+                        case 0xA8C:
+                            switch (modelType)
+                            {
+                                case 0x2:
+                                case 0xA:
+                                    break;
+                                case 0x5:
+                                    File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "5", Path.GetFileName(file)));
+                                    continue;
+                                case 0xD:
+                                    File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "D", Path.GetFileName(file)));
+                                    continue;
+                                case 0x15:
+                                    File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "15", Path.GetFileName(file)));
+                                    continue;  
+                                default:
+                                    break;
+                            }
+
+                            switch (flags)
+                            {
+                                case 0x89:
+                                    File.Move(file, Path.Combine(baseDir, "Compact", "89", Path.GetFileName(file)));
+                                    break;
+                                case 0x88:
+                                    File.Move(file, Path.Combine(baseDir, "Compact", "88", Path.GetFileName(file)));
+                                    break;
+                                case 0x80:
+                                    File.Move(file, Path.Combine(baseDir, "NoInfo", "80", Path.GetFileName(file)));
+                                    break;
+                                case 0x81:
+                                    File.Move(file, Path.Combine(baseDir, "NoInfo", "81", Path.GetFileName(file)));
+                                    break;
+                                case 0x82:
+                                    File.Move(file, Path.Combine(baseDir, "DeSTypeHeader", "82", Path.GetFileName(file)));
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
+        }
     }
 }
 

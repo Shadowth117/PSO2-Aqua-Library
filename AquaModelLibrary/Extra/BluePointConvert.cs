@@ -13,6 +13,19 @@ namespace AquaModelLibrary.Extra
 {
     public class BluePointConvert
     {
+        public static void ReadFileTest(string filePath, out int start, out int typeFlags, out int modelType)
+        {
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                start = streamReader.Read<ushort>();
+                streamReader.Seek(0x5, SeekOrigin.Begin);
+                typeFlags = streamReader.Read<byte>();
+                streamReader.Seek(0x9, SeekOrigin.Begin);
+                modelType = streamReader.Read<byte>();
+            }
+        }
+
         public static AquaObject ReadCMDL(string filePath, out AquaNode aqn)
         {
             string cmshPath = Path.ChangeExtension(filePath, ".cmsh");

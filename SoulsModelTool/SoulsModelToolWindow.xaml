@@ -5,8 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SoulsModelTool"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Souls Model Tool" Height="346" Width="462">
     <Grid>
+        <Menu x:Name="menu" Height="18" Margin="0,0,0,0" VerticalAlignment="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Convert From Soft model, TPF, or archive" Click="ConvertModelToFBX"/>
+                <MenuItem Header="Convert BluePoint cmsh to FBX" Click="ConvertCMSHToFBX"/>
+                <Separator/>
+                <MenuItem Header="Convert FBX to Demon's Souls (PS3) flver" Click="ConvertFBXToDeSModel"/>
+                <Separator/>
+                <MenuItem Header="Generate MCG, MCP" Click="GenerateMCPMCG"/>
+            </MenuItem>
+        </Menu>
         <Label x:Name="fromSoftModsLabel" Content="Fromsoft modifiers:" HorizontalAlignment="Left" Margin="5,23,0,0" VerticalAlignment="Top"/>
         <CheckBox x:Name="useMetaDataCB" Content="Convert Flver with metadata" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" IsChecked="True"/>
         <CheckBox x:Name="mirrorCB" Content="Fix FromSoft Mesh Mirorring" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" IsChecked="True"/>

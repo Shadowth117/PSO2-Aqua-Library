@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -26,6 +27,9 @@ namespace SoulsModelTool
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            //CRITICAL, without this, shift jis handling in SoulsFormats will break and kill the application
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             bool launchUi = true;
             List<string> filePaths = new List<string>();
             List<SoulsActionModifiers> modifiers = new List<SoulsActionModifiers>();

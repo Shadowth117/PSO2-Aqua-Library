@@ -831,7 +831,6 @@ namespace AquaModelLibrary.Extra
                     {
                         vertPos = Vector3.Transform(vertPos, mirrorMatX);
                         vertNorm = Vector3.TransformNormal(vertNorm, mirrorMatX);
-                        vertNorm *= -1;
                     }
 
                     int boneTransformationIndex = -1;
@@ -850,15 +849,17 @@ namespace AquaModelLibrary.Extra
                         } else
                         {
                             var f2Mesh = (FLVER2.Mesh)mesh;
+                            bool useDefaultBoneIndex = false;
                             if (useNormalWTransform && f2Mesh.Dynamic == 0)
                             {
                                 boneTransformationIndex = vert.NormalW;
                             } else if(useDefaultBoneTransform && flver.Bones.Count > f2Mesh.DefaultBoneIndex)
                             {
                                 boneTransformationIndex = f2Mesh.DefaultBoneIndex;
+                                useDefaultBoneIndex = true;
                             }
 
-                            if(f2Mesh.BoneIndices.Count > 0)
+                            if(f2Mesh.BoneIndices.Count > 0 && useDefaultBoneIndex == false)
                             {
                                 boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
                             }
@@ -870,7 +871,6 @@ namespace AquaModelLibrary.Extra
 
                             vertPos = Vector3.Transform(vertPos, boneTfm);
                             vertNorm = Vector3.TransformNormal(vertNorm, boneTfm);
-                            vertNorm *= -1;
                         }
                         wasTransformed = true;
                     }
@@ -892,6 +892,7 @@ namespace AquaModelLibrary.Extra
                         minBounding2 = AquaObjectMethods.GetMinimumBounding(alter, (Vector3)minBounding);
                     }
 
+                    vertNorm *= -1;
                     vtxl.vertPositions.Add(vertPos);
                     vtxl.vertNormals.Add(vertNorm);
 
@@ -954,15 +955,13 @@ namespace AquaModelLibrary.Extra
                 List<Vector3> triList = new List<Vector3>();
                 for (int id = 0; id < indices.Count - 2; id += 3)
                 {
-                    triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
-                    /*
-                    if (mirrorMesh)
+                    if(mirrorMesh && !transformMesh)
                     {
-                        triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
+                        triList.Add(new Vector3(indices[id + 1], indices[id + 0], indices[id + 2]));
                     } else
                     {
-                        triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
-                    }*/
+                        triList.Add(new Vector3(indices[id + 2], indices[id + 0], indices[id + 1]));
+                    }
                 }
 
                 genMesh.triList = triList;

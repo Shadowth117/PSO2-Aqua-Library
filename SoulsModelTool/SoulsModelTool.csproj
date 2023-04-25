@@ -5,6 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Configurations>Debug;Release;x86</Configurations>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -16,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-ShellExtensions" Version="1.1.4" />
   </ItemGroup>
 
@@ -31,7 +33,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).dll&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(ProjectName).exe&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).exe&quot;" />
+    <Exec Command="copy /Y &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).dll&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(ProjectName).exe&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).exe&quot;&#xD;&#xA;copy /Y &quot;$(TargetDir)$(ProjectName).runtimeconfig.json&quot; &quot;$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(ProjectName).runtimeconfig.json&quot;" />
   </Target>
 
 </Project>

@@ -24,7 +24,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsFormats", "SoulsFormat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnluacNET", "UnluacNET\UnluacNET.csproj", "{ED5D3E22-804B-4BAA-BD7F-F47F19804CF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoulsModelTool", "SoulsModelTool\SoulsModelTool.csproj", "{1824ABA3-37F1-40E7-B47C-A2461512FA4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsModelTool", "SoulsModelTool\SoulsModelTool.csproj", "{1824ABA3-37F1-40E7-B47C-A2461512FA4B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2C3B66BB-F1A9-4513-AB63-570D7687C6A7} = {2C3B66BB-F1A9-4513-AB63-570D7687C6A7}
+		{7ABBE830-6DE3-4ADE-915C-2FEEB20A45D4} = {7ABBE830-6DE3-4ADE-915C-2FEEB20A45D4}
+		{ED5D3E22-804B-4BAA-BD7F-F47F19804CF8} = {ED5D3E22-804B-4BAA-BD7F-F47F19804CF8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
