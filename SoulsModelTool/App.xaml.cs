@@ -1,8 +1,11 @@
-﻿using System;
+﻿using AquaModelLibrary.Extra;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +18,8 @@ namespace SoulsModelTool
     /// </summary>
     public partial class App : Application
     {
+        public string settingsPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\";
+        public string settingsFile = "SoulsSettings.json";
         public enum SoulsModelAction
         {
             none = 0,
@@ -30,9 +35,11 @@ namespace SoulsModelTool
             //CRITICAL, without this, shift jis handling in SoulsFormats will break and kill the application
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+            SMTSetting smtSetting = new SMTSetting();
+
+            InitializeComponent();
             bool launchUi = true;
             List<string> filePaths = new List<string>();
-            List<SoulsActionModifiers> modifiers = new List<SoulsActionModifiers>();
             if (e.Args.Length > 0)
             {
                 var action = SoulsModelAction.toFBX;
@@ -62,16 +69,16 @@ namespace SoulsModelTool
                             action = SoulsModelAction.toObj;
                             break;
                         case "-nomirror":
-                            modifiers.Add(SoulsActionModifiers.mirror);
+                            smtSetting.mirrorMesh = true;
                             break;
                         case "-dontdumpmetadata":
-                            modifiers.Add(SoulsActionModifiers.useMetadata);
+                            smtSetting.useMetaData = true;
                             break;
                         case "-meshnameismatname":
-                            modifiers.Add(SoulsActionModifiers.meshNameIsMatName);
+                            smtSetting.applyMaterialNamesToMesh = true;
                             break;
                         case "-transformMesh":
-                            modifiers.Add(SoulsActionModifiers.transformMesh);
+                            smtSetting.transformMesh = true;
                             break;
                         case "-launch":
                             launchUi = true;
@@ -96,11 +103,16 @@ namespace SoulsModelTool
                         break;
                 }
             }
-
-
-            if(launchUi)
+            var finalSettingsPath = Path.Combine(settingsPath, settingsFile);
+            var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
+            if (settingText != null)
             {
-                SoulsModelToolWindow wnd = new SoulsModelToolWindow(filePaths, modifiers);
+                smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+            }
+
+            if (launchUi)
+            {
+                SoulsModelToolWindow wnd = new SoulsModelToolWindow(filePaths, smtSetting);
                 wnd.Show();
             }
 

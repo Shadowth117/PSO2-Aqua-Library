@@ -44,6 +44,7 @@ namespace AquaModelLibrary.Extra
             Sekiro
         }
 
+
         public static Matrix4x4 mirrorMatX = new Matrix4x4(-1, 0, 0, 0,
                                                             0, 1, 0, 0,
                                                             0, 0, 1, 0,
@@ -58,6 +59,7 @@ namespace AquaModelLibrary.Extra
                                                             0, 1, 0, 0,
                                                             0, 0, -1, 0,
                                                             0, 0, 0, 1);
+        public static Matrix4x4 mirrorMat = mirrorMatZ;
 
         public static void ReadSoulsFile(string filePath)
         {
@@ -375,6 +377,7 @@ namespace AquaModelLibrary.Extra
 
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
         {
+            mirrorMat = mirrorMatY;
             AquaObject aqp = new NGSAquaObject();
             List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
             aqn = new AquaNode();
@@ -430,7 +433,7 @@ namespace AquaModelLibrary.Extra
                 {
                     var bone = aqn.nodeList[i];
                     Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                    mat *= mirrorMatX;
+                    mat *= mirrorMat;
                     BoneTransforms[i] = mat;
 
                     Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
@@ -472,8 +475,8 @@ namespace AquaModelLibrary.Extra
 
                     if (mirrorMesh && !transformMesh)
                     {
-                        vertPos = Vector3.Transform(vertPos, mirrorMatX);
-                        vertNorm = Vector3.TransformNormal(vertNorm, mirrorMatX);
+                        vertPos = Vector3.Transform(vertPos, mirrorMat);
+                        vertNorm = Vector3.TransformNormal(vertNorm, mirrorMat);
                         vertNorm *= -1;
                     }
 
@@ -680,7 +683,7 @@ namespace AquaModelLibrary.Extra
                 {
                     var bone = aqn.nodeList[i];
                     Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                    mat *= mirrorMatX;
+                    mat *= mirrorMat;
                     BoneTransforms[i] = mat;
 
                     Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
@@ -831,20 +834,13 @@ namespace AquaModelLibrary.Extra
                     useIndexNoWeightTransform = true;
                 }
 
-                List<Vector3> normals = new List<Vector3>();
                 bool wasTransformed = false;
                 for (int v = 0; v < vertCount; v++)
                 {
                     var vert = mesh.Vertices[v];
                     Vector3 vertPos = vert.Position;
                     Vector3 vertNorm = new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z);
-
-                    if (mirrorMesh && !transformMesh)
-                    {
-                        vertPos = Vector3.Transform(vertPos, mirrorMatX);
-                        vertNorm = Vector3.TransformNormal(vertNorm, mirrorMatX);
-                        vertNorm *= -1;
-                    }
+                    Vector3 vertPosNorm = vertPos + vertNorm;
 
                     int boneTransformationIndex = -1;
                     if (transformMesh)
@@ -886,10 +882,15 @@ namespace AquaModelLibrary.Extra
                             var boneTfm = BoneTransforms[boneTransformationIndex];
 
                             vertPos = Vector3.Transform(vertPos, boneTfm);
-                            vertNorm = Vector3.TransformNormal(vertNorm, boneTfm);
-                            vertNorm *= -1;
+                            vertNorm = Vector3.Normalize(Vector3.Transform(vertPosNorm, boneTfm) - vertPos);
+                            wasTransformed = true;
                         }
-                        wasTransformed = true;
+                    }
+
+                    if (mirrorMesh && wasTransformed == false)
+                    {
+                        vertPos = Vector3.Transform(vertPos, mirrorMat);
+                        vertNorm = Vector3.Normalize(Vector3.Transform(vertPosNorm, mirrorMat) -vertPos);
                     }
 
                     var alter = Vector3.Transform(vertPos, flver.Bones[0].ComputeLocalTransform());
@@ -971,15 +972,14 @@ namespace AquaModelLibrary.Extra
                 List<Vector3> triList = new List<Vector3>();
                 for (int id = 0; id < indices.Count - 2; id += 3)
                 {
-                    triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
-                    /*
                     if (mirrorMesh)
                     {
                         triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
-                    } else
+                    }
+                    else
                     {
                         triList.Add(new Vector3(indices[id + 2], indices[id + 1], indices[id]));
-                    }*/
+                    }
                 }
 
                 genMesh.triList = triList;
@@ -1315,7 +1315,7 @@ namespace AquaModelLibrary.Extra
                                     pos = Vector3.Transform(pos, tfm);
                                 }
 
-                                pos = Vector3.Transform(pos, mirrorMatX);
+                                pos = Vector3.Transform(pos, mirrorMat);
                                 vert.Position = pos;
 
                                 //Calc model bounding
@@ -1340,7 +1340,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Normal:
                                 if (vtxl.vertNormals.Count > 0)
                                 {
-                                    vert.Normal = Vector3.Transform(vtxl.vertNormals[v], mirrorMatX);
+                                    vert.Normal = Vector3.Transform(vtxl.vertNormals[v], mirrorMat);
                                 }
                                 else
                                 {
@@ -1351,7 +1351,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Tangent:
                                 if (vtxl.vertTangentList.Count > 0)
                                 {
-                                    vert.Tangents.Add(new Vector4(Vector3.Transform(vtxl.vertTangentList[v], mirrorMatX), 0));
+                                    vert.Tangents.Add(new Vector4(Vector3.Transform(vtxl.vertTangentList[v], mirrorMat), 0));
                                 }
                                 else
                                 {
@@ -1361,7 +1361,7 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Bitangent:
                                 if (vtxl.vertBinormalList.Count > 0)
                                 {
-                                    vert.Bitangent = new Vector4(Vector3.Transform(vtxl.vertBinormalList[v], mirrorMatX), 0);
+                                    vert.Bitangent = new Vector4(Vector3.Transform(vtxl.vertBinormalList[v], mirrorMat), 0);
                                 }
                                 else
                                 {
@@ -1491,7 +1491,7 @@ namespace AquaModelLibrary.Extra
                 {
                     var aqBone = aqn.nodeList[i];
                     Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
-                    aqBoneWorldTfm *= mirrorMatX;
+                    aqBoneWorldTfm *= mirrorMat;
                     aqBoneWorldTfm = MathExtras.SetMatrixScale(aqBoneWorldTfm, new Vector3(1, 1, 1));
 
                     //Set the inverted transform so when we read it back we can use it for parent calls

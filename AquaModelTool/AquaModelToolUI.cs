@@ -28,6 +28,7 @@ using System.Reflection;
 using Microsoft.Win32;
 using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
+using Newtonsoft.Json;
 
 namespace AquaModelTool
 {
@@ -40,11 +41,21 @@ namespace AquaModelTool
         public List<string> motionConfigExtensions = new List<string>() { ".bti" };
         public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public DateTime buildDate = GetLinkerTime(System.Reflection.Assembly.GetExecutingAssembly(), TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+        public string soulsSettingsPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\";
+        public string soulsSettingsFile = "SoulsSettings.json";
+        JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
         public string currentFile;
         public bool isNIFL = false;
 
         public AquaModelTool()
         {
+            SMTSetting smtSetting = new SMTSetting();
+            var finalSettingsPath = Path.Combine(soulsSettingsPath, soulsSettingsFile);
+            var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
+            if (settingText != null)
+            {
+                smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+            }
             InitializeComponent();
             this.DragEnter += new DragEventHandler(AquaUI_DragEnter);
             this.DragDrop += new DragEventHandler(AquaUI_DragDrop);
@@ -54,6 +65,12 @@ namespace AquaModelTool
 #endif
             filenameButton.Enabled = false;
             this.Text = GetTitleString();
+
+            //Souls Settings
+            exportWithMetadataToolStripMenuItem.Checked = smtSetting.useMetaData;
+            fixFromSoftMeshMirroringToolStripMenuItem.Checked = smtSetting.mirrorMesh;
+            applyMaterialNamesToMeshToolStripMenuItem.Checked = smtSetting.applyMaterialNamesToMesh;
+            transformMeshToolStripMenuItem.Checked = smtSetting.transformMesh;
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4143,6 +4160,18 @@ namespace AquaModelTool
 
                 }
             }
+        }
+
+        private void SaveSoulsSettings(object sender, EventArgs e)
+        {
+            SMTSetting smtSetting = new SMTSetting();
+            smtSetting.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
+            smtSetting.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
+            smtSetting.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
+            smtSetting.transformMesh = transformMeshToolStripMenuItem.Checked;
+
+            string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
+            File.WriteAllText(soulsSettingsPath + soulsSettingsFile, smtSettingText);
         }
     }
 }

@@ -1,16 +1,14 @@
 ﻿using AquaModelLibrary.Extra;
-using AquaModelLibrary.Native.Fbx;
 using AquaModelLibrary;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Windows;
-using static AquaModelLibrary.Utility.AquaUtilData;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Reflection;
 using System.IO;
 using Path = System.IO.Path;
+using Newtonsoft.Json;
 
 namespace SoulsModelTool
 {
@@ -19,78 +17,32 @@ namespace SoulsModelTool
     /// </summary>
     public partial class SoulsModelToolWindow : Window
     {
+        public string settingsPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\";
+        public string settingsFile = "SoulsSettings.json";
+        public SMTSetting smtSetting = new SMTSetting();
         public AquaUtil aqua = new AquaUtil();
-        public SoulsModelToolWindow(List<string> paths, List<SoulsActionModifiers> modifiers)
+        JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
+        public SoulsModelToolWindow(List<string> paths, SMTSetting _smtSetting)
         {
+            smtSetting = _smtSetting;
             InitializeComponent();
-            foreach (var modifier in modifiers)
-            {
-                switch(modifier)
-                {
-                    case SoulsActionModifiers.mirror:
-                        mirrorCB.IsChecked = true;
-                        break;
-                    case SoulsActionModifiers.useMetadata:
-                        useMetaDataCB.IsChecked = true;
-                        break;
-                    case SoulsActionModifiers.meshNameIsMatName:
-                        matNamesToMeshCB.IsChecked = true;
-                        break;
-                    case SoulsActionModifiers.transformMesh:
-                        transformMeshCB.IsChecked = true;
-                        break;
-                }
-            }
-        }
-
-        public List<SoulsActionModifiers> GetModifiers()
-        {
-            List<SoulsActionModifiers> modifiers = new List<SoulsActionModifiers>();
-
-            if(useMetaDataCB.IsChecked == true)
-            {
-                modifiers.Add(SoulsActionModifiers.useMetadata);
-            }
-            if (mirrorCB.IsChecked == true)
-            {
-                modifiers.Add(SoulsActionModifiers.mirror);
-            }
-            if (matNamesToMeshCB.IsChecked == true)
-            {
-                modifiers.Add(SoulsActionModifiers.meshNameIsMatName);
-            }
-            if (transformMeshCB.IsChecked == true)
-            {
-                modifiers.Add(SoulsActionModifiers.transformMesh);
-            }
-
-            return modifiers;
+            useMetaDataCB.IsChecked = smtSetting.useMetaData;
+            mirrorCB.IsChecked = smtSetting.mirrorMesh;
+            matNamesToMeshCB.IsChecked = smtSetting.applyMaterialNamesToMesh;
+            transformMeshCB.IsChecked = smtSetting.transformMesh;
         }
 
         private void ConvertModelToFBX(object sender, RoutedEventArgs e)
         {
-            foreach (var mod in GetModifiers())
-            {
-                switch (mod)
-                {
-                    case SoulsActionModifiers.useMetadata:
-                        SoulsConvert.useMetaData = true;
-                        break;
-                    case SoulsActionModifiers.mirror:
-                        SoulsConvert.mirrorMesh = true;
-                        break;
-                    case SoulsActionModifiers.meshNameIsMatName:
-                        SoulsConvert.applyMaterialNamesToMesh = true;
-                        break;
-                    case SoulsActionModifiers.transformMesh:
-                        SoulsConvert.transformMesh = true;
-                        break;
-                }
-            }
+            SoulsConvert.useMetaData = smtSetting.useMetaData;
+            SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
+            SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
+            SoulsConvert.transformMesh = smtSetting.transformMesh;
+
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
-                Title = "Select From Software flver, MDL4, TPF, or BND file(s)",
-                Filter = "From Software flver, MDL4, or BND Files (*.flver, *.flv, *.mdl, *.*bnd, *.dcx, *.tpf)|*.flver;*.flv;*.mdl;*.*bnd;*.dcx;*.tpf|All Files (*.*)|*",
+                Title = "Select From Software flver, MDL4, TPF, BND or BluePoint CMDL or CMSH file(s)",
+                Filter = "From Software flver, MDL4, or BND Files (*.flver, *.flv, *.mdl, *.*bnd, *.dcx, *.tpf, *.cmsh, *.cmdl)|*.flver;*.flv;*.mdl;*.*bnd;*.dcx;*.tpf;*.cmsh;*.cmdl|All Files (*.*)|*",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == true)
@@ -99,37 +51,18 @@ namespace SoulsModelTool
 
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    SoulsConvert.ConvertFile(file);
-                }
-            }
-        }
-        private void ConvertCMSHToFBX(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog openFileDialog = new()
-            {
-                Title = "Select BluePoint cmsh file(s)",
-                Filter = "BluePoint cmsh Files (*.cmsh, *.cmdl)|*.cmsh;*.cmdl|All Files (*.*)|*",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    aqua.aquaModels.Clear();
-                    ModelSet set = new ModelSet();
-                    set.models.Add(BluePointConvert.ReadCMDL(file, out AquaNode aqn));
-                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                    string ext = Path.GetExtension(file);
+                    if (ext == ".cmsh" || ext == ".cmdl")
                     {
-                        aqua.aquaModels.Add(set);
-                        aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
-                        set.models[0].ConvertToLegacyTypes();
-                        set.models[0].CreateTrueVertWeights();
-
-                        FbxExporter.ExportToFile(aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), new List<Matrix4x4>(), false);
+                        FileHandler.ConvertBluepointModel(file);
+                    }
+                    else
+                    {
+                        SoulsConvert.ConvertFile(file);
                     }
                 }
             }
-        }       
+        }
         
         private void GenerateMCPMCG(object sender, RoutedEventArgs e)
         {
@@ -147,24 +80,11 @@ namespace SoulsModelTool
 
         private void ConvertFBXToDeSModel(object sender, RoutedEventArgs e)
         {
-            foreach (var mod in GetModifiers())
-            {
-                switch (mod)
-                {
-                    case SoulsActionModifiers.useMetadata:
-                        SoulsConvert.useMetaData = true;
-                        break;
-                    case SoulsActionModifiers.mirror:
-                        SoulsConvert.mirrorMesh = true;
-                        break;
-                    case SoulsActionModifiers.meshNameIsMatName:
-                        SoulsConvert.applyMaterialNamesToMesh = true;
-                        break;
-                    case SoulsActionModifiers.transformMesh:
-                        SoulsConvert.transformMesh = true;
-                        break;
-                }
-            }
+            SoulsConvert.useMetaData = smtSetting.useMetaData;
+            SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
+            SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
+            SoulsConvert.transformMesh = smtSetting.transformMesh;
+
             using (var ctx = new Assimp.AssimpContext())
             {
                 var formats = ctx.GetSupportedImportFormats().ToList();
@@ -207,6 +127,16 @@ namespace SoulsModelTool
                     SoulsConvert.ConvertModelToFlverAndWrite(openFileDialog.FileName, outStr, 1, true, true, SoulsConvert.SoulsGame.DemonsSouls);
                 }
             }
+        }
+
+        private void smtSettingSet(object sender, RoutedEventArgs e)
+        {
+            smtSetting.useMetaData = (bool)useMetaDataCB.IsChecked;
+            smtSetting.mirrorMesh = (bool)mirrorCB.IsChecked;
+            smtSetting.applyMaterialNamesToMesh = (bool)matNamesToMeshCB.IsChecked;
+            smtSetting.transformMesh = (bool)transformMeshCB.IsChecked;
+            string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
+            File.WriteAllText(settingsPath + settingsFile, smtSettingText);
         }
     }
 }

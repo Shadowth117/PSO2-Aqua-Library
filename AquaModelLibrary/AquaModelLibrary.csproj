@@ -288,6 +288,7 @@
     <Compile Include="Extra\PSO2ObjectNames.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
+    <Compile Include="Extra\SMTSetting.cs" />
     <Compile Include="Extra\Vec3Int.cs" />
     <Compile Include="NNStructs\Marathon\NinjaFlags.cs" />
     <Compile Include="NNStructs\Marathon\NinjaKeyframe.cs" />

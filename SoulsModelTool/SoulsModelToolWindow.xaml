@@ -10,18 +10,16 @@
         <Menu x:Name="menu" Height="18" Margin="0,0,0,0" VerticalAlignment="Top">
             <MenuItem Header="File">
                 <MenuItem Header="Convert From Soft model, TPF, or archive" Click="ConvertModelToFBX"/>
-                <MenuItem Header="Convert BluePoint cmsh to FBX" Click="ConvertCMSHToFBX"/>
                 <Separator/>
                 <MenuItem Header="Convert FBX to Demon's Souls (PS3) flver" Click="ConvertFBXToDeSModel"/>
-                <Separator/>
                 <MenuItem Header="Generate MCG, MCP" Click="GenerateMCPMCG"/>
             </MenuItem>
         </Menu>
         <Label x:Name="fromSoftModsLabel" Content="Fromsoft modifiers:" HorizontalAlignment="Left" Margin="5,23,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="useMetaDataCB" Content="Convert Flver with metadata" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="mirrorCB" Content="Fix FromSoft Mesh Mirorring" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="matNamesToMeshCB" Content="Apply Material Names to Mesh" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="transformMeshCB" Content="Transform Mesh" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" IsChecked="True" />
+        <CheckBox x:Name="useMetaDataCB" Content="Convert Flver with metadata" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
+        <CheckBox x:Name="mirrorCB" Content="Fix FromSoft Mesh Mirorring" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
+        <CheckBox x:Name="matNamesToMeshCB" Content="Apply Material Names to Mesh" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top" Click="smtSettingSet"/>
+        <CheckBox x:Name="transformMeshCB" Content="Transform Mesh" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
 
     </Grid>
 </Window>
