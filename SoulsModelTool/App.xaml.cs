@@ -93,6 +93,12 @@ namespace SoulsModelTool
                             break;
                     }
                 }
+                var finalSettingsPath = Path.Combine(settingsPath, settingsFile);
+                var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
+                if (settingText != null)
+                {
+                    smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+                }
                 switch (action)
                 {
                     case SoulsModelAction.toFBX:
@@ -129,12 +135,6 @@ namespace SoulsModelTool
                     default:
                         break;
                 }
-            }
-            var finalSettingsPath = Path.Combine(settingsPath, settingsFile);
-            var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
-            if (settingText != null)
-            {
-                smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
             }
 
             if (launchUi)
