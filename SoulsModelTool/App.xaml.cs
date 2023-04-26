@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Extra;
+﻿using AquaModelLibrary;
+using AquaModelLibrary.Extra;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace SoulsModelTool
             toFlverDes = 3,
             toCMDL = 4, //lol
             toObj = 5,
+            mcgMCP = 6,
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -65,6 +67,9 @@ namespace SoulsModelTool
                             action = SoulsModelAction.toCMDL;
                             Trace.WriteLine("toCMDL not implemented.");
                             break;
+                        case "-mcgmcp":
+                            action = SoulsModelAction.mcgMCP;
+                            break;
                         case "-toobj":
                             action = SoulsModelAction.toObj;
                             break;
@@ -91,10 +96,32 @@ namespace SoulsModelTool
                 switch (action)
                 {
                     case SoulsModelAction.toFBX:
+                        foreach(var file in filePaths)
+                        {
+                            string ext = Path.GetExtension(file);
+                            if (ext == ".cmsh" || ext == ".cmdl")
+                            {
+                                FileHandler.ConvertBluepointModel(file);
+                            }
+                            else
+                            {
+                                SoulsConvert.ConvertFile(file);
+                            }
+                        }
                         break;
                     case SoulsModelAction.toObj:
                         break;
                     case SoulsModelAction.toFlverDes:
+                        foreach (var file in filePaths)
+                        {
+                            AquaUtil aqua = new AquaUtil();
+                            var ext = Path.GetExtension(file);
+                            var outStr = file.Replace(ext, "_out.flver");
+                            SoulsConvert.ConvertModelToFlverAndWrite(file, outStr, 1, true, true, SoulsConvert.SoulsGame.DemonsSouls);
+                        }
+                        break;
+                    case SoulsModelAction.mcgMCP:
+                        AquaModelLibrary.Extra.FromSoft.SoulsMapMetadataGenerator.Generate(filePaths, out var mcCombo);
                         break;
                     case SoulsModelAction.toFlver:
                     case SoulsModelAction.toCMDL:
