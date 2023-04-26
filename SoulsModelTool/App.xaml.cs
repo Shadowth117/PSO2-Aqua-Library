@@ -38,7 +38,12 @@ namespace SoulsModelTool
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             SMTSetting smtSetting = new SMTSetting();
-
+            var finalSettingsPath = Path.Combine(settingsPath, settingsFile);
+            var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
+            if (settingText != null)
+            {
+                smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+            }
             InitializeComponent();
             bool launchUi = true;
             List<string> filePaths = new List<string>();
@@ -93,12 +98,7 @@ namespace SoulsModelTool
                             break;
                     }
                 }
-                var finalSettingsPath = Path.Combine(settingsPath, settingsFile);
-                var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
-                if (settingText != null)
-                {
-                    smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
-                }
+
                 switch (action)
                 {
                     case SoulsModelAction.toFBX:
