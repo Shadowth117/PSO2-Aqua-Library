@@ -4,6 +4,7 @@ using AquaModelLibrary.BluePoint.CMSH;
 using AquaModelLibrary.BluePoint.CSKL;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -57,7 +58,7 @@ namespace AquaModelLibrary.Extra
             }
             var csklPath = "";
             CSKL cskl = null;
-            if (mdl.boneData != null)
+            if (mdl.boneData != null && mdl.boneData.skeletonPath != null)
             {
                 csklPath = Path.Combine(modelPath, Path.GetFileName(mdl.boneData.skeletonPath));
                 if (File.Exists(csklPath))
@@ -103,9 +104,32 @@ namespace AquaModelLibrary.Extra
             }
             else if (cskl == null && mdl.boneData != null)
             {
+                aqn.nodeList.Clear();
                 for (int i = 0; i < mdl.boneData.nameCount; i++)
                 {
                     aqp.bonePalette.Add((uint)i);
+
+                    //Try to make a skeleton from incomplete bone data. All we really get is a vector4 that seems like it *might* be a rotation? Can't do too much with this, but we'll put it in.
+                    NODE aqNode = new NODE();
+                    aqNode.boneShort1 = 0x1C0;
+                    aqNode.animatedFlag = 1;
+                    aqNode.parentId = i - 1;
+                    aqNode.unkNode = -1;
+
+                    var quat = mdl.boneData.boneVec4Array[i].ToQuat();
+                    aqNode.eulRot = MathExtras.QuaternionToEuler(quat);
+                    aqNode.scale = new Vector3(1, 1, 1);
+                   
+                    var matrix = Matrix4x4.Identity;
+                    matrix *= Matrix4x4.CreateScale(1, 1, 1);
+                    var rotation = Matrix4x4.CreateFromQuaternion(quat);
+                    matrix *= rotation;
+                    matrix *= Matrix4x4.CreateTranslation(new Vector3());
+                    Matrix4x4.Invert(matrix, out var invMat);
+
+                    aqNode.SetInverseBindPoseMatrix(invMat);
+                    aqNode.boneName.SetString(mdl.boneData.boneNames[i]);
+                    aqn.nodeList.Add(aqNode);
                 }
             }
             else
@@ -232,6 +256,31 @@ namespace AquaModelLibrary.Extra
             aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(vtxl, out int vc));
 
             //Face data
+
+            //Do by vertex order if there's no faces
+            if(mesh.faceData.faceList.Count == 0)
+            {
+                int faceCount = mesh.vertData.positionList.Count;
+                for (int i = 0; i < faceCount; i += 3)
+                {
+                    mesh.faceData.faceList.Add(Vector3Integer.Vector3Int.Vec3Int.CreateVec3Int(i, i + 1, i + 2));
+                }
+
+                //Assume mat face stuff is bad
+                mesh.header.matList[0].startingFaceIndex = 0; 
+                mesh.header.matList[0].startingFaceVertIndex = 0;
+                mesh.header.matList[0].endingFaceIndex = mesh.faceData.faceList.Count * 6;
+                mesh.header.matList[0].faceVertIndicesUsed = mesh.faceData.faceList.Count * 3;
+
+                for(int i = 1; i < mesh.header.matList.Count; i++)
+                {
+                    mesh.header.matList[i].startingFaceIndex = 0;
+                    mesh.header.matList[i].startingFaceVertIndex = 0;
+                    mesh.header.matList[i].endingFaceIndex = 0;
+                    mesh.header.matList[i].faceVertIndicesUsed = 0;
+                }
+            }
+
             //Split CMSH by materials. Materials seem to contain a face count after which they split
             int currentFace = 0;
             for (int m = 0; m < mesh.header.matList.Count; m++)
@@ -341,6 +390,11 @@ namespace AquaModelLibrary.Extra
                         AquaObjectMethods.appendVertex(vtxl, matVtxl, tri.Z);
                     }
 
+                    //Avoid degen tris
+                    if (x == y || x == z || y == z)
+                    {
+                        continue;
+                    }
                     triList.Add(new Vector3(x, y, z));
                 }
                 genMesh.triList = triList;
@@ -353,8 +407,11 @@ namespace AquaModelLibrary.Extra
                     genMesh.matIdList[j] = aqp.tempMats.Count - 1;
                 }
 
-                aqp.tempTris.Add(genMesh);
-                aqp.vtxlList.Add(matVtxl);
+                if(genMesh.vertCount > 0)
+                {
+                    aqp.tempTris.Add(genMesh);
+                    aqp.vtxlList.Add(matVtxl);
+                }
             }
 
 

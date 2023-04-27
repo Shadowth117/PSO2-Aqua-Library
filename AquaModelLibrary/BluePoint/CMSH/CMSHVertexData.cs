@@ -1,5 +1,6 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -15,6 +16,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         QUT0 = 0x51555430,
         COL0 = 0x434F4C30,
         COL1 = 0x434F4C31,
+        COL2 = 0x434F4C32,
         TAN0 = 0x54414E30,
         TEX0 = 0x54455830,
         TEX1 = 0x54455831,
@@ -48,6 +50,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public List<byte[]> normalTemp = new List<byte[]>();
         public List<byte[]> colors = new List<byte[]>();
         public List<byte[]> color2s = new List<byte[]>();
+        public List<byte[]> color3s = new List<byte[]>();
         public List<int[]> vertWeightIndices = new List<int[]>();
         public List<Vector4> vertWeights = new List<Vector4>();
         public Dictionary<VertexMagic, List<Vector2>> uvDict = new Dictionary<VertexMagic, List<Vector2>>(); //Access by magic, ex 0XET or 3XET (TEX0 and TEX3) as ints. UVs seem stored as half floats
@@ -96,6 +99,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                         {
                             positionList.Add(sr.Read<Vector3>());
                         }
+                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.NRM0:
                     case VertexMagic.TAN0:
@@ -110,6 +114,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             //Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
                             //normals.Add(quat);
                         }
+                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.COL0:
                         for (int v = 0; v < vertCount; v++)
@@ -124,6 +129,15 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             color2s.Add(sr.ReadBytes(sr.Position(), 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
+                        Debug.WriteLine(sr.Position().ToString("X"));
+                        break;
+                    case VertexMagic.COL2:
+                        for (int v = 0; v < vertCount; v++)
+                        {
+                            color3s.Add(sr.ReadBytes(sr.Position(), 4));
+                            sr.Seek(4, System.IO.SeekOrigin.Current);
+                        }
+                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.TEX0:
                     case VertexMagic.TEX1:
@@ -140,6 +154,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             uvList.Add(new Vector2(sr.Read<Half>(), sr.Read<Half>()));
                         }
                         uvDict.Add(vertDefs[i].dataMagic, uvList);
+                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.BONI:
                         var smolCount = vertDefs[i].dataSize / 0x4;

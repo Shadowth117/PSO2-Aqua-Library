@@ -27,6 +27,9 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public byte unk8C0AInnerBigPtrByte; //Seems to be 0x1 for large pointers and 0x2 for larger ones
         public int unk8C0AModelDataSize; //\Distance from directly after the short value to the end of the face indices
 
+        //Some cmshs have this
+        public int modelType;
+
         public string OtherModelName = null; //For variantFlag2 being 0x41
 
         public CMSHHeader()
@@ -39,14 +42,20 @@ namespace AquaModelLibrary.BluePoint.CMSH
             variantFlag = sr.Read<byte>();
             variantFlag2 = sr.Read<byte>();
             unk0 = sr.Read<byte>();
-            unk1 = sr.Read<ushort>();
+            if (variantFlag == 0xCC && variantFlag2 == 0xA)
+            {
+                modelType = sr.Read<int>();
+            } else
+            {
+                unk1 = sr.Read<ushort>();
+            }
 
             if(variantFlag2 != 0x41)
             {
                 //For certain SOTC models
                 var crcCheck = sr.ReadBytes(sr.Position(), 4);
                 hasExtraFlags = crcCheck[1] > 0 || crcCheck[2] > 0 || crcCheck[3] > 0;
-                if(variantFlag != 0 && variantFlag2 != 2 || hasExtraFlags)
+                if(((variantFlag != 0 && variantFlag2 != 2) && (variantFlag != 0x1 && variantFlag2 != 0xA)) || hasExtraFlags && (variantFlag != 0xCC && variantFlag2 != 0xA))
                 {
                     extraFlags = sr.ReadBytes(sr.Position(), 4);
                     sr.Seek(4, System.IO.SeekOrigin.Current);

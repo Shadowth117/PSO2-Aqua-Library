@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using UnluacNET;
 using Vector3Integer;
 
 namespace AquaModelLibrary.BluePoint.CMSH
@@ -23,21 +25,56 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHFaceData(BufferedStreamReader sr, int vertCount)
+        public CMSHFaceData(BufferedStreamReader sr, int vertCount, int variantFlag, int variantFlag2)
         {
             flags = sr.Read<int>();
             indexCount = sr.Read<int>();
             bool useInts = vertCount > ushort.MaxValue;
-            for(int i = 0; i < indexCount / 3; i++)
+
+            if (variantFlag == 0x1 && variantFlag2 == 0xA)
             {
-                switch(useInts)
+                bool flip = true;
+                for (int i = 0; i < indexCount / 3; i++)
                 {
-                    case true:
-                        faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<int>(), sr.Read<int>(), sr.Read<int>()));
-                        break;
-                    case false:
-                        faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>()));
-                        break;
+                    Vector3Int.Vec3Int vec3Int;
+                    if (useInts)
+                    {
+                        vec3Int = Vector3Int.Vec3Int.CreateVec3Int(sr.Read<int>(), sr.Read<int>(), sr.Read<int>());
+                    }
+                    else
+                    {
+                        vec3Int = Vector3Int.Vec3Int.CreateVec3Int(sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>());
+                    }
+
+                    
+                    if(vec3Int.X == vec3Int.Y || vec3Int.X == vec3Int.Z || vec3Int.Y == vec3Int.Z)
+                    {
+                        //flip = !flip;
+                        //continue;
+                    }
+
+                    if (flip)
+                    {
+                        var temp = vec3Int.Z;
+                        vec3Int.Z = vec3Int.X;
+                        vec3Int.X = temp;
+                    } 
+
+                    faceList.Add(vec3Int);
+                }
+            } else
+            {
+                for (int i = 0; i < indexCount / 3; i++)
+                {
+                    switch (useInts)
+                    {
+                        case true:
+                            faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<int>(), sr.Read<int>(), sr.Read<int>()));
+                            break;
+                        case false:
+                            faceList.Add(Vector3Int.Vec3Int.CreateVec3Int(sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>()));
+                            break;
+                    }
                 }
             }
         }

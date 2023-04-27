@@ -6,16 +6,20 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using UnluacNET;
 
 namespace AquaModelLibrary.BluePoint.CMSH
 {
     public class CMSHBoneData
     {
         public byte skelPathLength;
-        public string skeletonPath;
+        public string skeletonPath = null;
         public int nameCount;
         public int unk0;
         public int size;
+
+        //SOTC 
+        public byte unkSOTCByte;
 
         public List<string> boneNames = new List<string>(); //CString name strings
 
@@ -27,12 +31,24 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHBoneData(BufferedStreamReader sr)
+        public CMSHBoneData(BufferedStreamReader sr, int variantFlag, int variantFlag2)
         {
             var pos = sr.Position();
-            skelPathLength = sr.Read<byte>();
-            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), skelPathLength));
-            sr.Seek(skelPathLength, System.IO.SeekOrigin.Current);
+            if(variantFlag == 0x1 && variantFlag2 == 0xA)
+            {
+                byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
+                if (test[0] == '$')
+                {
+                    ReadSkeletonPath(sr);
+                } else
+                {
+                    unkSOTCByte = sr.Read<byte>();
+                }
+            }
+            else
+            {
+                ReadSkeletonPath(sr);
+            }
             unk0 = sr.Read<int>();
             nameCount = sr.Read<int>();
             size = sr.Read<int>();
@@ -46,6 +62,13 @@ namespace AquaModelLibrary.BluePoint.CMSH
             {
                 boneVec4Array.Add(sr.Read<Vector4>());
             }
+        }
+
+        private void ReadSkeletonPath(BufferedStreamReader sr)
+        {
+            skelPathLength = sr.Read<byte>();
+            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), skelPathLength));
+            sr.Seek(skelPathLength, System.IO.SeekOrigin.Current);
         }
     }
 }

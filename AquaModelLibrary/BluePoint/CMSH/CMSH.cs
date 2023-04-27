@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
             if(header.variantFlag2 != 0x41)
             {
                 vertData = new CMSHVertexData(sr, header.hasExtraFlags);
-                faceData = new CMSHFaceData(sr, vertData.positionList.Count);
+                faceData = new CMSHFaceData(sr, vertData.positionList.Count, header.variantFlag, header.variantFlag2);
+
                 if ((header.variantFlag2 & 0x20) > 0)
                 {
                     unkdata0 = new CMSHUnkData0(sr);
@@ -33,11 +35,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 if ((header.variantFlag & 0x1) > 0)
                 {
                     byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
-                    if (test[0] != '$')
+                    if (test[0] != '$' && !(header.variantFlag == 0x1 && header.variantFlag2 == 0xA))
                     {
                         unkdata2 = new CMSHUnkData2(sr);
                     }
-                    boneData = new CMSHBoneData(sr);
+                    boneData = new CMSHBoneData(sr, header.variantFlag, header.variantFlag2);
                 }
                 footerData = sr.Read<CFooter>();
             }
