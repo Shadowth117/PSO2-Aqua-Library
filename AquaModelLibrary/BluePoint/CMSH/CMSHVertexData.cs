@@ -58,9 +58,13 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHVertexData(BufferedStreamReader sr)
+        public CMSHVertexData(BufferedStreamReader sr, bool hasExtraFlags)
         {
-            flags = sr.Read<int>();
+            //SOTC doesn't do this
+            if(hasExtraFlags)
+            {
+                flags = sr.Read<int>();
+            }
             int_04 = sr.Read<int>();
             int_08 = sr.Read<int>();
             vertexBufferSize = sr.Read<int>();

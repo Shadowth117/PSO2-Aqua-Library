@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.Remoting.Messaging;
 using static AquaModelLibrary.AquaNode;
 
 namespace AquaModelLibrary.Extra
@@ -235,8 +236,17 @@ namespace AquaModelLibrary.Extra
             int currentFace = 0;
             for (int m = 0; m < mesh.header.matList.Count; m++)
             {
-                var startFace = mesh.header.matList[m].startingFaceIndex / 6;
-                var faceCount = mesh.header.matList[m].endingFaceIndex / 6;
+                int startFace;
+                int faceCount;
+                if (mesh.header.hasExtraFlags)
+                {
+                    startFace = mesh.header.matList[m].startingFaceIndex / 6;
+                    faceCount = mesh.header.matList[m].endingFaceIndex / 6;
+                } else //SOTC
+                {
+                    startFace = mesh.header.matList[m].startingFaceVertIndex / 3;
+                    faceCount = mesh.header.matList[m].faceVertIndicesUsed / 3;
+                }
 
                 //Sometimes BluePoint's optimization led to degenerate faces, so we skip
                 if (faceCount == 0 && mesh.header.matList[m].endingFaceIndex > 1)

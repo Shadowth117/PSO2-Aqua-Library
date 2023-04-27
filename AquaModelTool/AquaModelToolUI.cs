@@ -4103,6 +4103,10 @@ namespace AquaModelTool
                 Directory.CreateDirectory(Path.Combine(baseDir, "NoInfo", "80"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "NoInfo", "81"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "DeSTypeHeader", "82"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "200"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "500"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "A01"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "ACC"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "Compact", "88"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "Compact", "89"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "5"));
@@ -4115,6 +4119,7 @@ namespace AquaModelTool
                     switch (start)
                     {
                         case 0xA8C:
+                        case 0x68C:
                             switch (modelType)
                             {
                                 case 0x2:
@@ -4153,6 +4158,18 @@ namespace AquaModelTool
                                 default:
                                     break;
                             }
+                            break;
+                        case 0xACC:
+                            File.Move(file, Path.Combine(baseDir, "DeSType", "ACC", Path.GetFileName(file)));
+                            break;
+                        case 0x200:
+                            File.Move(file, Path.Combine(baseDir, "DeSType", "200", Path.GetFileName(file)));
+                            break;
+                        case 0x500:
+                            File.Move(file, Path.Combine(baseDir, "DeSType", "500", Path.GetFileName(file)));
+                            break;
+                        case 0xA01:
+                            File.Move(file, Path.Combine(baseDir, "DeSType", "A01", Path.GetFileName(file)));
                             break;
                         default:
                             break;

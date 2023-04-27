@@ -21,11 +21,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
         //Demon's Souls check
         public bool hasExtraFlags; //Used if extra flags are detected.
 
-        //0x0, 0x2 data
-        public byte unk0002Byte;
-        public int unk0002Int0;
-        public int unk0002Int1;
-
         //0x8C, 0xA data
         public int unk8C0AInt0;
         public byte unk8C0AByte0;
@@ -102,23 +97,27 @@ namespace AquaModelLibrary.BluePoint.CMSH
                         matRef.matNameLength = sr.Read<byte>();
                         matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), matRef.matNameLength));
                         sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
-                        if (matCount > 1 && (i + 1 != matCount))
+                        if (hasExtraFlags && matCount > 1 && (i + 1 != matCount))
                         {
                             matRef.startingFaceIndex = sr.Read<int>();
                             matRef.endingFaceIndex = sr.Read<int>();
+                        }
+                        else //SOTC
+                        {
+                            matRef.unkByte = sr.Read<byte>();
+                            matRef.startingVertexIndex = sr.Read<int>();
+                            matRef.vertexIndicesUsed = sr.Read<int>();
+                            matRef.startingFaceVertIndex = sr.Read<int>();
+                            matRef.faceVertIndicesUsed = sr.Read<int>();
                         }
                         matList.Add(matRef);
                     }
                 }
 
-                endInt = sr.Read<int>();
-
-                //SOTC 0x0, 0x2 files have these
-                if (variantFlag == 0 && variantFlag2 == 2 && hasExtraFlags == false)
+                //Demon's Souls
+                if (hasExtraFlags)
                 {
-                    unk0002Byte = sr.Read<byte>();
-                    unk0002Int0 = sr.Read<int>();
-                    unk0002Int1 = sr.Read<int>();
+                    endInt = sr.Read<int>();
                 }
             } else
             {

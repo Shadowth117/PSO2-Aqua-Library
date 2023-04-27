@@ -23,7 +23,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             header = new CMSHHeader(sr);
             if(header.variantFlag2 != 0x41)
             {
-                vertData = new CMSHVertexData(sr);
+                vertData = new CMSHVertexData(sr, header.hasExtraFlags);
                 faceData = new CMSHFaceData(sr, vertData.positionList.Count);
                 if ((header.variantFlag2 & 0x20) > 0)
                 {
