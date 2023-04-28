@@ -4102,22 +4102,50 @@ namespace AquaModelTool
                 var baseDir = Path.GetDirectoryName(openFileDialog.FileNames[0]);
                 Directory.CreateDirectory(Path.Combine(baseDir, "NoInfo", "80"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "NoInfo", "81"));
-                Directory.CreateDirectory(Path.Combine(baseDir, "DeSTypeHeader", "82"));
+
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "82"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "200"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "500"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "A01"));
+
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "AA01"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "2A01"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "DeSType", "ACC"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "Compact", "88"));
+
                 Directory.CreateDirectory(Path.Combine(baseDir, "Compact", "89"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "5"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "D"));
                 Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "15"));
+
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "41"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "4901"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "5100"));
+                Directory.CreateDirectory(Path.Combine(baseDir, "CMSH_Ref", "1100"));
 
                 foreach (var file in openFileDialog.FileNames)
                 {
                     BluePointConvert.ReadFileTest(file, out int start, out int flags, out int modelType);
                     switch (start)
                     {
+                        case 0x1100:
+                            File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "1100", Path.GetFileName(file)));
+                            break;
+                        case 0x5100:
+                            File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "5100", Path.GetFileName(file)));
+                            break;
+                        case 0x4901:
+                            File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "4901", Path.GetFileName(file)));
+                            break;
+                        case 0x4100:
+                            File.Move(file, Path.Combine(baseDir, "CMSH_Ref", "41", Path.GetFileName(file)));
+                            break;
+                        case 0xAA01:
+                            File.Move(file, Path.Combine(baseDir, "DeSType", "AA01", Path.GetFileName(file)));
+                            break;
+                        case 0x2A01:
+                            File.Move(file, Path.Combine(baseDir, "DeSType", "2A01", Path.GetFileName(file)));
+                            break;
                         case 0xA8C:
                         case 0x68C:
                             switch (modelType)
@@ -4153,7 +4181,7 @@ namespace AquaModelTool
                                     File.Move(file, Path.Combine(baseDir, "NoInfo", "81", Path.GetFileName(file)));
                                     break;
                                 case 0x82:
-                                    File.Move(file, Path.Combine(baseDir, "DeSTypeHeader", "82", Path.GetFileName(file)));
+                                    File.Move(file, Path.Combine(baseDir, "DeSType", "82", Path.GetFileName(file)));
                                     break;
                                 default:
                                     break;

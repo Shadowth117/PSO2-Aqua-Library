@@ -99,7 +99,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
                         {
                             positionList.Add(sr.Read<Vector3>());
                         }
-                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.NRM0:
                     case VertexMagic.TAN0:
@@ -114,7 +113,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             //Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
                             //normals.Add(quat);
                         }
-                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.COL0:
                         for (int v = 0; v < vertCount; v++)
@@ -129,7 +127,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             color2s.Add(sr.ReadBytes(sr.Position(), 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
-                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.COL2:
                         for (int v = 0; v < vertCount; v++)
@@ -137,7 +134,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             color3s.Add(sr.ReadBytes(sr.Position(), 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
-                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.TEX0:
                     case VertexMagic.TEX1:
@@ -154,7 +150,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             uvList.Add(new Vector2(sr.Read<Half>(), sr.Read<Half>()));
                         }
                         uvDict.Add(vertDefs[i].dataMagic, uvList);
-                        Debug.WriteLine(sr.Position().ToString("X"));
                         break;
                     case VertexMagic.BONI:
                         var smolCount = vertDefs[i].dataSize / 0x4;
