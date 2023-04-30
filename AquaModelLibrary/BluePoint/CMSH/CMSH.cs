@@ -24,8 +24,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
             header = new CMSHHeader(sr);
             if(header.variantFlag2 != 0x41)
             {
-                vertData = new CMSHVertexData(sr, header.hasExtraFlags);
-                faceData = new CMSHFaceData(sr, vertData.positionList.Count, header.variantFlag, header.variantFlag2);
+                vertData = new CMSHVertexData(sr, header, header.hasExtraFlags);
+                faceData = new CMSHFaceData(sr, header, vertData.positionList.Count);
 
                 if ((header.variantFlag2 & 0x20) > 0)
                 {
@@ -39,7 +39,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     {
                         unkdata2 = new CMSHUnkData2(sr);
                     }
-                    boneData = new CMSHBoneData(sr, header.variantFlag, header.variantFlag2);
+                    boneData = new CMSHBoneData(sr, header);
                 }
                 footerData = sr.Read<CFooter>();
             }

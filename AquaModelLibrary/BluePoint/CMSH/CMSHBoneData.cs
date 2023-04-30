@@ -31,10 +31,10 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHBoneData(BufferedStreamReader sr, int variantFlag, int variantFlag2)
+        public CMSHBoneData(BufferedStreamReader sr, CMSHHeader header)
         {
             var pos = sr.Position();
-            if(variantFlag == 0x1 && variantFlag2 == 0xA)
+            if(header.variantFlag == 0x1 && header.variantFlag2 == 0xA)
             {
                 byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
                 if (test[0] == '$')
