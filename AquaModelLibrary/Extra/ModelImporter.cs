@@ -1120,6 +1120,10 @@ namespace AquaModelLibrary
             {
                 return new List<int>();
             }
+            if (name[name.Length - 4] == '.')
+            {
+                name = name.Substring(0, name.Length - 4);
+            }
             if (name.Substring(name.Length - 5, 5) == "_mesh")
             {
                 name = name.Substring(0, name.Length - 5);
