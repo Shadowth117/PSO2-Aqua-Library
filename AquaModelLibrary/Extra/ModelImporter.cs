@@ -766,7 +766,7 @@ namespace AquaModelLibrary
                 }
                 else if (aiMat.TextureDiffuse.FilePath != null)
                 {
-                    genMat.texNames.Add(Path.GetFileName(aiMat.TextureDiffuse.FilePath));
+                    genMat.texNames.Add(Path.GetFileName(NixIllegalCharacters(aiMat.TextureDiffuse.FilePath)));
                 }
                 else
                 {
@@ -1124,7 +1124,7 @@ namespace AquaModelLibrary
             {
                 name = name.Substring(0, name.Length - 4);
             }
-            if (name.Substring(name.Length - 5, 5) == "_mesh")
+            if (name.Length > 5 && name.Substring(name.Length - 5, 5) == "_mesh")
             {
                 name = name.Substring(0, name.Length - 5);
             }
