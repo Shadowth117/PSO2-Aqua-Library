@@ -17,6 +17,7 @@ using static AquaModelLibrary.CharacterMakingIndex;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace AquaModelLibrary.Extra
 {
@@ -284,6 +285,16 @@ namespace AquaModelLibrary.Extra
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
         }
 
+        private static string Escape(string str)
+        {
+            if (Regex.IsMatch(str, "[,\"\\r\\n]"))
+            {
+                return $"\"{str.Replace("\"", "\"\"")}\"";
+            }
+
+            return str;
+        }
+
         private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.textPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.textPair>>> uiRoomByCat)
         {
             string objectOutDir = Path.Combine(outputDirectory, "Objects");
@@ -375,7 +386,7 @@ namespace AquaModelLibrary.Extra
                                 }
                             }
                         }
-                        obj += $"{jpName},{enName},";
+                        obj += $"{Escape(jpName)},{Escape(enName)},";
                     }
                     obj += $"{str},";
 
@@ -449,7 +460,7 @@ namespace AquaModelLibrary.Extra
                                 }
                             }
                         }
-                        obj += $"{jpName},{enName},";
+                        obj += $"{Escape(jpName)},{Escape(enName)},";
                     }
                     obj += $"{str},";
 
@@ -1522,7 +1533,7 @@ namespace AquaModelLibrary.Extra
 
                             if (File.Exists(objFile))
                             {
-                                string roomName = $"{jpName},{enName}";
+                                string roomName = $"{Escape(jpName)},{Escape(enName)}";
                                 string output = roomName + "," + chipBase + "," + chipObj;
                                 if (File.Exists(objFileEx))
                                 {
@@ -6381,27 +6392,27 @@ namespace AquaModelLibrary.Extra
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{jpName},{enName},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
             }
 
             private string GetLineUnhashed()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{jpName},{enName},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
             }
             private string GetLineHashAllIcons()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{jpName},{enName},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
             }
 
             private string GetLineUnhashedAllIcons()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{jpName},{enName},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
             }
 
             private string GetIconStringHashed()
