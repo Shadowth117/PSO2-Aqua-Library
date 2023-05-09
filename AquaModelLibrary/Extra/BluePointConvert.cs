@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Remoting.Messaging;
+using System.Text;
 using static AquaModelLibrary.AquaNode;
 
 namespace AquaModelLibrary.Extra
@@ -26,6 +27,39 @@ namespace AquaModelLibrary.Extra
                 streamReader.Seek(0x9, SeekOrigin.Begin);
                 modelType = streamReader.Read<byte>();
             }
+        }
+
+        public static List<byte> ReadFileTestVertDef(string filePath)
+        {
+            List<byte> bytes = new List<byte>();
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                bool kill = false;
+                while(true && streamReader.Position() < stream.Length && kill == false)
+                {
+                    var posint1 = streamReader.Read<ushort>();
+                    var posint2 = streamReader.Read<byte>();
+                    if (posint1 == 0x4F53 && posint2 == 0x50)
+                    {
+                        while(true && streamReader.Position() < stream.Length)
+                        {
+                            var int1 = streamReader.Read<ushort>();
+                            var int2 = streamReader.Read<byte>();
+                            streamReader.Seek(-3, SeekOrigin.Current);
+                            if((int1 == 0x524D && int2 == 0x4E) || (int1 == 0x4558 && int2 == 0x54))
+                            {
+                                kill = true;
+                                break;
+                            }
+                            bytes.Add(streamReader.Read<byte>());
+                        }
+                    }
+                    streamReader.Seek(-2, SeekOrigin.Current);
+                }
+            }
+
+            return bytes;
         }
 
         public static AquaObject ReadCMDL(string filePath, out AquaNode aqn)

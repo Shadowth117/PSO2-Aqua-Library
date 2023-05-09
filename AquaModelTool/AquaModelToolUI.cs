@@ -4218,6 +4218,57 @@ namespace AquaModelTool
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
             File.WriteAllText(soulsSettingsPath + soulsSettingsFile, smtSettingText);
         }
+
+        private void scanPOS0GapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CommonOpenFileDialog goodFolderDialog = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true,
+                Title = "Select folder of cmshs",
+            };
+            if (goodFolderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                StringBuilder sb = new StringBuilder();
+                Dictionary<int, List<(string fileName, byte[] gap)>> posGaps = new Dictionary<int, List<(string filename, byte[] gap)>>();
+
+                var files = Directory.EnumerateFiles(goodFolderDialog.FileName);
+
+                foreach(var file in files)
+                {
+                    var tuple = (Path.GetFileName(file), BluePointConvert.ReadFileTestVertDef(file).ToArray());
+                    var len = tuple.Item2.Length;
+                    if (posGaps.ContainsKey(len))
+                    {
+                        posGaps[len].Add(tuple);
+                    } else
+                    {
+                        posGaps[len] = new List<(string fileName, byte[] gap)>() { tuple };
+                    }
+                }
+
+                var keys = posGaps.Keys.ToList();
+                keys.Sort();
+
+                foreach (var key in keys)
+                {
+                    sb.Append("\n");
+                    sb.Append(key + "\n");
+                    var posGapSet = posGaps[key];
+                    posGapSet.Sort();
+                    foreach (var pair in posGapSet)
+                    {
+                        foreach (var bt in pair.gap)
+                        {
+                            sb.Append(bt.ToString("X"));
+                        }
+                        sb.Append($" {pair.fileName}");
+                        sb.Append("\n");
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(goodFolderDialog.FileName, "cmshPosGaps.txt"), sb.ToString());
+            }
+        }
     }
 }
 
