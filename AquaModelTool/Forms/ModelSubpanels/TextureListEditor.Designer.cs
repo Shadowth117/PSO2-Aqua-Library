@@ -182,7 +182,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 
         #endregion
 
-        private System.Windows.Forms.ComboBox texListCB;
+        public System.Windows.Forms.ComboBox texListCB;
         private System.Windows.Forms.Label texListLabel;
         private System.Windows.Forms.Panel texListSelectPanel;
         private System.Windows.Forms.ComboBox texSlotCB;

@@ -92,10 +92,6 @@ namespace AquaModelLibrary.Extra
                         maxB = Math.Max(maxB, mcg.Edges[i].UnkIndicesB[j]);
                     }
                     edgesText += "\n";
-                    if (mcg.Edges[i].NodeIndexA > mcg.Edges[i].NodeIndexB)
-                    {
-                        var a = 0;
-                    }
                 }
                 Debug.Write(edgesText);
                 Debug.WriteLine($"Max A: {maxA}\nMax B: {maxB}");
@@ -322,7 +318,7 @@ namespace AquaModelLibrary.Extra
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     Debug.WriteLine(Path.Combine(outPath, fileName));
                 }
@@ -1128,7 +1124,9 @@ namespace AquaModelLibrary.Extra
                     //Grab original material index if possible
                     if (nameSplit.Length > 2)
                     {
-                        ogMatIndex = Int32.Parse(nameSplit[2]);
+                        var index = nameSplit[2];
+                        index = index.Split('.')[0];
+                        ogMatIndex = Int32.Parse(index);
                     }
                 }
 

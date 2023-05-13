@@ -20,6 +20,7 @@ using AquaModelLibrary.Extra;
 using AquaModelLibrary.OtherStructs;
 using AquaModelLibrary.AquaMethods;
 using Newtonsoft.Json;
+using System.Windows.Media.Effects;
 
 namespace AquaModelLibrary
 {
@@ -34,6 +35,7 @@ namespace AquaModelLibrary
         public List<TPNTexturePattern> tpnFiles = new List<TPNTexturePattern>();
         public List<AquaNode> aquaBones = new List<AquaNode>();
         public List<AquaEffect> aquaEffect = new List<AquaEffect>();
+        public List<AquaEffectReboot> aquaEffectReboot = new List<AquaEffectReboot>();
         public List<AnimSet> aquaMotions = new List<AnimSet>();
         public List<SetLayout> aquaSets = new List<SetLayout>();
         public List<AquaBTI_MotionConfig> aquaMotionConfigs = new List<AquaBTI_MotionConfig>();
@@ -3315,7 +3317,7 @@ namespace AquaModelLibrary
             int offsetOffset = streamReader.Read<int>();
             streamReader.Seek(offsetOffset + offset, SeekOrigin.Begin);
             isAlpha = rel0.REL0DataStart == 0x10 && offsetOffset == 0x14;
-            AquaCommon musFile;
+            //AquaCommon musFile;
             if (isAlpha)
             {
                 var mus = new MusicFileAlpha();
@@ -3354,7 +3356,14 @@ namespace AquaModelLibrary
                 //Proceed based on file variant
                 if (type.Equals("NIFL"))
                 {
-                    aquaEffect.Add(ReadNIFLEffect(streamReader, offset));
+                    var effect = ReadNIFLEffect(streamReader, offset);
+                    if(effect is AquaEffect)
+                    {
+                        aquaEffect.Add((AquaEffect)effect);
+                    } else
+                    {
+                        aquaEffectReboot.Add((AquaEffectReboot)effect);
+                    }
                 }
                 else if (type.Equals("VTBF"))
                 {
@@ -3549,12 +3558,77 @@ namespace AquaModelLibrary
             }
         }
 
-        public AquaEffect ReadNIFLEffect(BufferedStreamReader streamReader, int offset)
+        public AquaCommon ReadNIFLEffect(BufferedStreamReader streamReader, int offset)
         {
-            AquaEffect effect = new AquaEffect();
-            effect.nifl = streamReader.Read<AquaCommon.NIFL>();
-            effect.rel0 = streamReader.Read<AquaCommon.REL0>();
+            var nifl = streamReader.Read<AquaCommon.NIFL>();
+            var rel0 = streamReader.Read<AquaCommon.REL0>();
 
+            switch(rel0.version)
+            {
+                case 0:
+                    AquaEffect effect = new AquaEffect();
+                    effect.nifl = nifl;
+                    effect.rel0 = rel0;
+                    ReadClassicNIFLEffect(streamReader, offset, effect);
+                    return effect;
+                case 2:
+                    AquaEffectReboot effectR = new AquaEffectReboot();
+                    effectR.nifl = nifl;
+                    effectR.rel0 = rel0;
+                    ReadRebootNIFLEffect(streamReader, offset, effectR);
+                    return effectR;
+                default:
+                    throw new Exception($"Unknown effect version {rel0.version}");
+            }
+        }
+
+        public void ReadRebootNIFLEffect(BufferedStreamReader streamReader, int offset, AquaEffectReboot effect)
+        {
+            var efct = new AquaEffectReboot.EFCTNGSObject();
+            effect.efct = efct;
+            streamReader.Seek(offset + effect.rel0.REL0DataStart, SeekOrigin.Begin);
+
+            efct.efct = streamReader.Read<AquaEffectReboot.EFCTNGS>();
+            streamReader.Seek(offset + efct.efct.unkIntArrayOffset, SeekOrigin.Begin);
+            for(int i = 0; i < efct.efct.unkIntArrayCount; i++)
+            {
+                efct.unkIntArray.Add(streamReader.Read<int>());
+            }
+
+            streamReader.Seek(offset + efct.efct.offset_04, SeekOrigin.Begin);
+            var root = new AquaEffectReboot.RootSettingsObject();
+            efct.root = root;
+            root.root = streamReader.Read<AquaEffectReboot.RootSettings>();
+            
+            streamReader.Seek(offset + root.root.RootSettingsStruct0Ptr, SeekOrigin.Begin);
+            for (int i = 0; i < root.root.RootSettingsStruct0Count; i++)
+            {
+                root.rootSettingStruct0s.Add(streamReader.Read<AquaEffectReboot.RootSettingsStruct0>());
+            }
+
+            if(root.root.RootSettingsStruct0Count != 2)
+            {
+                throw new Exception("RootSettingsStruct0Count is not count of 2");
+            }
+
+            if(root.root.RootSettingStruct1Count > 1)
+            {
+                throw new Exception("offset_194Count is greater than 1");
+            }
+
+            if (root.root.RootSettingsStruct2Count > 1)
+            {
+                throw new Exception("offset_194Count is greater than 1");
+            }
+
+            if (root.root.offset_320Count != 2)
+            {
+                throw new Exception("offset_320Count is greater than 1");
+            }
+        }
+
+        public void ReadClassicNIFLEffect(BufferedStreamReader streamReader, int offset, AquaEffect effect)
+        {
             var efct = new AquaEffect.EFCTObject();
             efct.efct = streamReader.Read<AquaEffect.EFCT>();
             effect.efct = efct;
@@ -3600,8 +3674,6 @@ namespace AquaModelLibrary
             streamReader.Seek(effect.nifl.NOF0Offset + offset, SeekOrigin.Begin);
             effect.nof0 = AquaCommon.readNOF0(streamReader);
             effect.nend = streamReader.Read<AquaCommon.NEND>();
-
-            return effect;
         }
 
         public void ReadNIFLAQECurves(BufferedStreamReader streamReader, AquaEffect.AnimObject efct, int curvCount, int curvOffset, int offset)
@@ -3736,7 +3808,6 @@ namespace AquaModelLibrary
 
         public static SetLayout LoadSet(string fileName, long end, BufferedStreamReader streamReader)
         {
-            int offset = 0;
             string fileType = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
 
             if (fileType == "set\0")

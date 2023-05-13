@@ -4269,6 +4269,131 @@ namespace AquaModelTool
                 File.WriteAllText(Path.Combine(goodFolderDialog.FileName, "cmshPosGaps.txt"), sb.ToString());
             }
         }
+
+        private void gatherMatchingCMSHNamesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new CommonOpenFileDialog()
+            {
+                Title = "Select Folder",
+                IsFolderPicker = true,
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                var baseDir = openFileDialog.FileName;
+                var files = Directory.GetFiles(baseDir, "*.cmsh", SearchOption.AllDirectories);
+
+                Dictionary<string, List<string>> paths = new Dictionary<string, List<string>>();
+                foreach (var file in files)
+                {
+                    string baseName = Path.GetFileName(file);
+                    string pathStr = baseName;
+
+                    BluePointConvert.ReadFileTest(file, out int start, out int flags, out int modelType);
+                    switch (start)
+                    {
+                        case 0x1100:
+                            pathStr += " CMSH_Ref_1100";
+                            break;
+                        case 0x5100:
+                            pathStr += " CMSH_Ref_5100";
+                            break;
+                        case 0x4901:
+                            pathStr += " CMSH_Ref_4901";
+                            break;
+                        case 0x4100:
+                            pathStr += " CMSH_Ref_41";
+                            break;
+                        case 0xAA01:
+                            pathStr += " DeSType_AA01";
+                            break;
+                        case 0x2A01:
+                            pathStr += " DeSType_2A01";
+                            break;
+                        case 0xA8C:
+                        case 0x68C:
+                            switch (modelType)
+                            {
+                                case 0x2:
+                                case 0xA:
+                                    break;
+                                case 0x5:
+                                    pathStr += " CMSH_Ref_5";
+                                    continue;
+                                case 0xD:
+                                    pathStr += " CMSH_Ref_D";
+                                    continue;
+                                case 0x15:
+                                    pathStr += " CMSH_Ref_15";
+                                    continue;
+                                default:
+                                    break;
+                            }
+
+                            switch (flags)
+                            {
+                                case 0x89:
+                                    pathStr += " Compact_89";
+                                    break;
+                                case 0x88:
+                                    pathStr += " Compact_88";
+                                    break;
+                                case 0x80:
+                                    pathStr += " NoInfo_80";
+                                    break;
+                                case 0x81:
+                                    pathStr += " NoInfo_81";
+                                    break;
+                                case 0x82:
+                                    pathStr += " DeSType_82";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case 0xACC:
+                            pathStr += " DeSType_ACC";
+                            break;
+                        case 0x200:
+                            pathStr += " DeSType_200";
+                            break;
+                        case 0x500:
+                            pathStr += " DeSType_500";
+                            break;
+                        case 0xA01:
+                            pathStr += " DeSType_A01";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (paths.ContainsKey(baseName))
+                    {
+                        paths[baseName].Add(pathStr);
+                    }
+                    else
+                    {
+                        paths[baseName] = new List<string> { pathStr };
+                    }
+                }
+
+                StringBuilder txt = new StringBuilder();
+                foreach (var pathSet in paths)
+                {
+                    if (pathSet.Value.Count > 1)
+                    {
+                        txt.AppendLine(pathSet.Key);
+                        foreach (var path in pathSet.Value)
+                        {
+                            txt.AppendLine(path);
+                        }
+                        txt.AppendLine("");
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(baseDir, "Matches.txt"), txt.ToString());
+            }
+        }
     }
 }
 

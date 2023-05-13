@@ -102,12 +102,17 @@ namespace AquaModelLibrary.AquaMethods
                     var nof0 = AquaCommon.readNOF0(streamReader);
 
                     Dictionary<int, List<int>> addresses = new Dictionary<int, List<int>>();
-                    List<string> output = new List<string>();
-                    output.Add(Path.GetFileName(inFilename));
-                    output.Add("");
-                    output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(rel.magic))} {rel.REL0Size:X} {rel.REL0DataStart:X} {rel.version:X}");
-                    output.Add("");
-                    output.Add($"{Encoding.UTF8.GetString(BitConverter.GetBytes(nof0.magic))} {nof0.NOF0Size:X} {nof0.NOF0EntryCount:X} {nof0.NOF0DataSizeStart:X}");
+                    List<string> output = new List<string>
+                    {
+                        Path.GetFileName(inFilename),
+                        "",
+                        $"REL0 Magic: {Encoding.UTF8.GetString(BitConverter.GetBytes(rel.magic))} | REL0 Size: {rel.REL0Size:X} | REL0 Data Start: {rel.REL0DataStart:X} | REL0 Version: {rel.version:X}",
+                        "",
+                        $"NOF0 Magic: {Encoding.UTF8.GetString(BitConverter.GetBytes(nof0.magic))} | NOF0 Size: {nof0.NOF0Size:X} | NOF0 Entry Count: {nof0.NOF0EntryCount:X} | NOF0 Data Size Start: {nof0.NOF0DataSizeStart:X}",
+                        "",
+                        "NOF0 Ptr Address - Ptr value",
+                        "",
+                    };
                     foreach (var entry in nof0.relAddresses)
                     {
                         streamReader.Seek(entry + offset, SeekOrigin.Begin);
@@ -123,6 +128,8 @@ namespace AquaModelLibrary.AquaMethods
                             addresses[ptr].Sort();
                         }
                     }
+                    output.Add("");
+                    output.Add("Pointer Value, followed by addresses with said value");
                     output.Add("");
                     var addressKeys = addresses.Keys.ToList();
                     addressKeys.Sort();

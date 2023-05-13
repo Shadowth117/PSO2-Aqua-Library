@@ -8,10 +8,12 @@ namespace AquaModelTool.Forms.ModelSubpanels
     {
         private List<AquaObject.TEXF> _texfList;
         private List<AquaObject.TSTA> _tstaList;
+        private TextureListEditor _texListEditor;
         private int curId;
         private bool canUpdate = false;
-        public TextureReferenceEditor()
+        public TextureReferenceEditor(TextureListEditor texListEditor)
         {
+            _texListEditor = texListEditor;
             InitializeComponent();
         }
 
@@ -114,6 +116,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
                 tsta.texName.SetString(texNameTB.Text);
                 _texfList[curId] = texf;
                 _tstaList[curId] = tsta;
+                _texListEditor.UpdateTSTAList(_texListEditor.texListCB.SelectedIndex);
             }
         }
 

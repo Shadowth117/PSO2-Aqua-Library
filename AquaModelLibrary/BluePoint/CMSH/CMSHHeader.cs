@@ -87,7 +87,6 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 case 0x68C:
                     Debug.WriteLine("0x68C unimplemented");
                     throw new Exception();
-                    break;
                 case 0xA8C:
                     ReadA8CHeaderExtras(sr);
                     ReadMaterialList(sr);
@@ -113,7 +112,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         private void ReadMaterialList(BufferedStreamReader sr)
         {
             //For 0x8C types, check the bit which says if there should be material
-            if ((variantFlag == 0x8C && !(subVariantFlag == 0x88 || subVariantFlag == 0x89)) || (extraFlags?.Length > 0 && (extraFlags[0] & 8) > 0))
+            if ((variantFlag == 0x8C && !(subVariantFlag == 0x88 || subVariantFlag == 0x89)) || (extraFlags?.Length > 0 && (extraFlags[0] & 8) > 0) || matCount > 0)
             {
                 for (int i = 0; i < matCount; i++)
                 {
@@ -171,10 +170,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
             {
                 case 1:
                     throw new NotImplementedException();
-                    break;
                 case 2:
                     throw new NotImplementedException();
-                    break;
                 case 0:
                 default:
                     break;

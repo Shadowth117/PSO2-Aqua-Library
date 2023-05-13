@@ -212,6 +212,7 @@
     <Compile Include="AquaMethods\VTBFMethods.cs" />
     <Compile Include="AquaStructs\AddOnIndex.cs" />
     <Compile Include="AquaStructs\AquaBTI_MotionConfig.cs" />
+    <Compile Include="AquaStructs\AquaEffectReboot.cs" />
     <Compile Include="AquaStructs\AquaFigure.cs" />
     <Compile Include="AquaStructs\AquaFigure\FigEffectMapStructs.cs" />
     <Compile Include="AquaStructs\AquaObject.cs" />
