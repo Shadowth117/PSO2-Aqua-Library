@@ -116,7 +116,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
                 tsta.texName.SetString(texNameTB.Text);
                 _texfList[curId] = texf;
                 _tstaList[curId] = tsta;
-                _texListEditor.UpdateTSTAList(_texListEditor.texListCB.SelectedIndex);
+                _texListEditor.UpdateTSTAList(curId);
             }
         }
 
