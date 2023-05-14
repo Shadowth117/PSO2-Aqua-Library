@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using static AquaModelLibrary.AquaObject;
 
 namespace AquaModelTool.Forms.ModelSubpanels
 {
@@ -10,18 +11,21 @@ namespace AquaModelTool.Forms.ModelSubpanels
         private List<AquaObject.TSTA> _tstaList;
         private TextureListEditor _texListEditor;
         private int curId;
+        private int curSelectionId;
         private bool canUpdate = false;
+        private AquaCommon.PSO2String texName = new AquaCommon.PSO2String();
         public TextureReferenceEditor(TextureListEditor texListEditor)
         {
             _texListEditor = texListEditor;
             InitializeComponent();
         }
 
-        public void UpdateTsta(List<AquaObject.TEXF> texfList, List<AquaObject.TSTA> tstaList, int id)
+        public void UpdateTsta(List<AquaObject.TEXF> texfList, List<AquaObject.TSTA> tstaList, int id, int selectionId)
         {
             _texfList = texfList;
             _tstaList = tstaList;
             curId = id;
+            curSelectionId = selectionId;
             canUpdate = false;
 
             if(id == -1 || tstaList.Count == 0 )
@@ -62,6 +66,8 @@ namespace AquaModelTool.Forms.ModelSubpanels
                 unkInt3UD.Value = tsta.unkInt3;
                 unkInt4UD.Value = tsta.unkInt4;
                 unkInt5UD.Value = tsta.unkInt5;
+
+                texName = tsta.texName;
             } else
             {
                 tagUD.Enabled = true;
@@ -101,6 +107,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
                 unkInt4UD.Value = tsta.unkInt4;
                 unkInt5UD.Value = tsta.unkInt5;
 
+                texName = tsta.texName;
                 canUpdate = true;
             }
 
@@ -110,14 +117,52 @@ namespace AquaModelTool.Forms.ModelSubpanels
         {
             if(canUpdate)
             {
-                var texf = _texfList[curId];
+                int texfID = GetTEXFID();
+                var texf = _texfList[texfID];
                 var tsta = _tstaList[curId];
+                texf.texName.SetString(texNameTB.Text);
                 tsta.texName.SetString(texNameTB.Text);
-                tsta.texName.SetString(texNameTB.Text);
-                _texfList[curId] = texf;
+                _texfList[texfID] = texf;
                 _tstaList[curId] = tsta;
-                _texListEditor.UpdateTSTAList(curId);
+                _texListEditor.UpdateTSTAList(curSelectionId, false);
+                texName = tsta.texName;
             }
+        }
+
+        private int GetTEXFID()
+        {
+            int matches = 0;
+            foreach (var tsta in _tstaList)
+            {
+                if(tsta.texName == texName)
+                { 
+                    matches++;
+                }
+            }
+
+            if (matches > 1)
+            {
+                //Make a new TEXF so we're not replacing one that's used
+                TEXF texf = new TEXF();
+                texf.texName = texName;
+                _texfList.Add(texf);
+                _texListEditor._aqp.objc.texfCount++;
+
+                return _texfList.Count - 1;
+            } else
+            {
+                for (int i = 0; i < _texfList.Count; i++)
+                {
+                    var texf = _texfList[i].texName;
+                    if(texf == texName)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            //If we hit here, something is wrong and we deserve an exception
+            return -1;
         }
 
         private void tagUD_ValueChanged(object sender, System.EventArgs e)

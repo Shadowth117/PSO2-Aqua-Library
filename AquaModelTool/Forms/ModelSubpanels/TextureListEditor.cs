@@ -7,7 +7,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 {
     public partial class TextureListEditor : UserControl
     {
-        private AquaObject _aqp;
+        public AquaObject _aqp;
         private int texLimit = 0x10;
         public TextureListEditor(AquaObject aqp)
         {
@@ -37,7 +37,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 
         }
 
-        public void UpdateTSTAList(int goToSlot = -1)
+        public void UpdateTSTAList(int goToSlot = -1, bool doUpdateTstaEditor = true)
         {
             var currentTset = _aqp.tsetList[texListCB.SelectedIndex];
             texSlotCB.Items.Clear();
@@ -53,9 +53,13 @@ namespace AquaModelTool.Forms.ModelSubpanels
                 }
             }
 
+            if(doUpdateTstaEditor)
+            {
+                UpdateTSTAEditor();
+            }
+
             if (goToSlot == -1)
             {
-                UpdateTSTAEditor(); 
                 if (texSlotCB.Items.Count > 0)
                 {
                     texSlotCB.SelectedIndex = 0;
@@ -69,7 +73,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 
         private void UpdateTSTAEditor()
         {
-            ((TextureReferenceEditor)panel1.Controls[0]).UpdateTsta(_aqp.texfList, _aqp.tstaList, texSlotCB.SelectedIndex >= 0 ? _aqp.tsetList[texListCB.SelectedIndex].tstaTexIDs[texSlotCB.SelectedIndex] : -1);
+            ((TextureReferenceEditor)panel1.Controls[0]).UpdateTsta(_aqp.texfList, _aqp.tstaList, texSlotCB.SelectedIndex >= 0 ? _aqp.tsetList[texListCB.SelectedIndex].tstaTexIDs[texSlotCB.SelectedIndex] : -1, texSlotCB.SelectedIndex);
             panel1.Visible = true;
             panel1.Enabled = true;
         }
@@ -101,6 +105,7 @@ namespace AquaModelTool.Forms.ModelSubpanels
 
                 _aqp.tsetList[texListCB.SelectedIndex].tstaTexIDs.Add(_aqp.tstaList.Count - 1);
                 _aqp.tsetList[texListCB.SelectedIndex].texCount = _aqp.tsetList[texListCB.SelectedIndex].tstaTexIDs.Count;
+
                 UpdateTSTAList(texSlotCB.Items.Count);
             } else
             {
