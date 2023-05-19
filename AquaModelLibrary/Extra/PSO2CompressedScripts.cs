@@ -1,10 +1,12 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using UnluacNET;
@@ -43,6 +45,31 @@ namespace AquaModelLibrary.Extra
         public PSO2CompressedScripts(string filePath)
         {
             ParseScripts(filePath);
+        }
+
+        public void ParseLooseScript(string filePath)
+        {
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                var luaStream = new MemoryStream(File.ReadAllBytes(filePath));
+                var header = new BHeader(luaStream);
+                LFunction lfunction = header.Function.Parse(luaStream, header);
+                var decompiler = new Decompiler(lfunction);
+                knownLua.Add(Path.GetFileName(filePath), decompiler);
+            }
+        }
+
+        public void WriteText(string filePath, string key)
+        {
+            var decompiler = knownLua[key];
+            decompiler.Decompile();
+            MemoryStream memStream = new MemoryStream();
+            using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
+            {
+                decompiler.Print(new Output(writer));
+                writer.Flush();
+            }
+            File.WriteAllBytes(filePath, memStream.ToArray());
         }
 
         public void ParseScripts(string filePath)

@@ -4394,6 +4394,46 @@ namespace AquaModelTool
                 File.WriteAllText(Path.Combine(baseDir, "Matches.txt"), txt.ToString());
             }
         }
+
+        private void exportLuaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select lua File",
+                Filter = "lua files|*.lua;*.evt;*.skit",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                PSO2CompressedScripts scriptHandler = new PSO2CompressedScripts();
+
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    scriptHandler.ParseLooseScript(file);
+                    var ext = Path.GetExtension(file);
+                    scriptHandler.WriteText(file.Replace(ext, $".out{ext}"), Path.GetFileName(file));
+                }
+            }
+        }
+
+        private void readFCLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select fcl File",
+                Filter = "fcl files|*.fcl",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    aquaUI.aqua.ReadFCL(file);
+                }
+            }
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary.OtherStructs;
 using Reloaded.Memory.Streams;
+using SoulsFormats;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,12 +19,10 @@ namespace AquaModelLibrary
 {
     public class AquaMiscMethods
     {
-
-        public static AquaBTI_MotionConfig LoadBTI(string inFilename)
+        public static FacialFCL LoadFCL(string inFilename)
         {
-            AquaBTI_MotionConfig bti = new AquaBTI_MotionConfig();
+            FacialFCL fcl = new FacialFCL();
 
-            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
             string ext = Path.GetExtension(inFilename);
             string variant = "";
             int offset;
@@ -35,7 +34,56 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+
+                if (variant == "NIFL")
+                {
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    fcl.header = streamReader.Read<FacialFCL.FCLHeader>();
+
+                    streamReader.Seek(offset + fcl.header.unkIntListOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < fcl.header.unkIntListCount; i++)
+                    {
+                        fcl.unkIntList.Add(streamReader.Read<int>());
+                    }
+
+                    streamReader.Seek(offset + fcl.header.frameListOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < fcl.header.frameCount; i++)
+                    {
+                        var frame = new FacialFCL.FCLFrameObject();
+                        frame.fclFrameStruct = streamReader.Read<FacialFCL.FCLFrame>();
+                        
+                        var tempPos = streamReader.Position();
+                        streamReader.Seek(offset + frame.fclFrameStruct.frameValueOffset, SeekOrigin.Begin);
+                        frame.frameValue = streamReader.Read<float>();
+                        streamReader.Seek(tempPos, SeekOrigin.Begin);
+
+                        fcl.frames.Add(frame);
+                    }
+                }
+            }
+
+            return fcl;
+        }
+
+        public static AquaBTI_MotionConfig LoadBTI(string inFilename)
+        {
+            AquaBTI_MotionConfig bti = new AquaBTI_MotionConfig();
+
+            string ext = Path.GetExtension(inFilename);
+            string variant = "";
+            int offset;
+            if (ext.Length > 4)
+            {
+                ext = ext.Substring(0, 4);
+            }
+
+            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
 
                 if (variant == "NIFL")
                 {

@@ -150,6 +150,8 @@
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.gatherMatchingCMSHNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportLuaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readFCLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -971,7 +973,9 @@
             this.parseDRBToolStripMenuItem,
             this.sortCMSHToolStripMenuItem,
             this.scanPOS0GapToolStripMenuItem,
-            this.gatherMatchingCMSHNamesToolStripMenuItem});
+            this.gatherMatchingCMSHNamesToolStripMenuItem,
+            this.exportLuaToolStripMenuItem,
+            this.readFCLToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -1127,6 +1131,20 @@
             this.gatherMatchingCMSHNamesToolStripMenuItem.Text = "GatherMatchingCMSHNames";
             this.gatherMatchingCMSHNamesToolStripMenuItem.Click += new System.EventHandler(this.gatherMatchingCMSHNamesToolStripMenuItem_Click);
             // 
+            // exportLuaToolStripMenuItem
+            // 
+            this.exportLuaToolStripMenuItem.Name = "exportLuaToolStripMenuItem";
+            this.exportLuaToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.exportLuaToolStripMenuItem.Text = "ExportLua";
+            this.exportLuaToolStripMenuItem.Click += new System.EventHandler(this.exportLuaToolStripMenuItem_Click);
+            // 
+            // readFCLToolStripMenuItem
+            // 
+            this.readFCLToolStripMenuItem.Name = "readFCLToolStripMenuItem";
+            this.readFCLToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readFCLToolStripMenuItem.Text = "ReadFCL";
+            this.readFCLToolStripMenuItem.Click += new System.EventHandler(this.readFCLToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -1270,6 +1288,8 @@
         private System.Windows.Forms.ToolStripMenuItem sortCMSHToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scanPOS0GapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gatherMatchingCMSHNamesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportLuaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readFCLToolStripMenuItem;
     }
 }
 

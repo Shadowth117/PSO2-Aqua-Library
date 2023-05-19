@@ -39,6 +39,7 @@ namespace AquaModelLibrary
         public List<AnimSet> aquaMotions = new List<AnimSet>();
         public List<SetLayout> aquaSets = new List<SetLayout>();
         public List<AquaBTI_MotionConfig> aquaMotionConfigs = new List<AquaBTI_MotionConfig>();
+        public List<FacialFCL> facials = new List<FacialFCL>();
         public List<AquaFigure> aquaFigures = new List<AquaFigure>();
 
         //Returns if the file is a model file or not, for instance to avoid saving over an ICE file with a model.
@@ -4013,6 +4014,11 @@ namespace AquaModelLibrary
         public void ReadBTI(string inFilename)
         {
             aquaMotionConfigs.Add(LoadBTI(inFilename));
+        }
+
+        public void ReadFCL(string inFilename)
+        {
+            facials.Add(LoadFCL(inFilename));
         }
 
         public static void WriteBTI(AquaBTI_MotionConfig bti, string outFileName)
