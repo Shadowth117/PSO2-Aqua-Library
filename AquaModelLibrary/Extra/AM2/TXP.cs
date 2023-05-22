@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.BluePoint.CMSH;
+﻿using AquaModelLibrary.AquaMethods;
+using AquaModelLibrary.BluePoint.CMSH;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
@@ -86,6 +87,8 @@ namespace AquaModelLibrary.Extra.AM2
         public List<int> txpOffsets = new List<int>(); //Relative to start of this TXP3
 
         public List<TXP4> txp4List = new List<TXP4>();
+        public List<long> texNameOffsets = new List<long>();
+        public List<string> txp4Names = new List<string>(); //For sprite sets, since some are spliced out, these aren't used
 
         public TXP3()
         {
@@ -113,11 +116,21 @@ namespace AquaModelLibrary.Extra.AM2
                 txp4List.Add(new TXP4(streamReader));
             }
 
-
             //Some files don't list a proper end offset and we don't want to try to seek through these. Otherwise, we do to get the names
-            if (txp3endOffsetTest == 0x0101)
+            //Probably left out for sprite sheets since the sprite images have their own references and the textures themselves don't need them
+            if (txp3endOffsetTest != 0x0101)
             {
                 streamReader.Seek(endOffset + txp3Start, System.IO.SeekOrigin.Begin);
+                for(int i = 0; i < txp4Count; i++)
+                {
+                    var texNameOffset = streamReader.Read<long>();
+                    texNameOffsets.Add(texNameOffset);
+                }
+                for (int i = 0; i < txp4Count; i++)
+                {
+                    streamReader.Seek(texNameOffsets[i] + txp3Start, System.IO.SeekOrigin.Begin);
+                    txp4Names.Add(AquaGeneralMethods.ReadCString(streamReader)); ;
+                }
             }
         }
     }

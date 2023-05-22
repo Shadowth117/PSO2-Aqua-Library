@@ -4466,6 +4466,36 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void extractBorderBreakPS4SprOrTexbinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select a Border Break texture archive File",
+                Filter = "spr*.bin, *tex.bin files|spr*.bin;*tex.bin",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var pfaFile in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(pfaFile)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var TXP = new TXP(streamReader);
+                        /*
+                        var path = openFileDialog.FileName + "_out";
+                        Directory.CreateDirectory(path);
+                        foreach (var file in pfa.fileEntries)
+                        {
+                            var fname = Path.Combine(path, file.fileName);
+                            File.WriteAllBytes(fname, file.fileData);
+                        }*/
+                    }
+                }
+            }
+        }
     }
 }
 
