@@ -29,6 +29,9 @@ using Microsoft.Win32;
 using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 using Newtonsoft.Json;
+using AquaModelLibrary.Extra.AM2;
+using AquaModelLibrary.BluePoint.CMSH;
+using Reloaded.Memory.Streams;
 
 namespace AquaModelTool
 {
@@ -4431,6 +4434,35 @@ namespace AquaModelTool
                 foreach (var file in openFileDialog.FileNames)
                 {
                     aquaUI.aqua.ReadFCL(file);
+                }
+            }
+        }
+
+        private void extractBorderBreakPS4FARCToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select pfa File",
+                Filter = "pfa files|*.pfa",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach(var pfaFile in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(pfaFile)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var pfa = new FARC(streamReader);
+                        var path = openFileDialog.FileName + "_out";
+                        Directory.CreateDirectory(path);
+                        foreach(var file in pfa.fileEntries)
+                        {
+                            var fname = Path.Combine(path, file.fileName);
+                            File.WriteAllBytes(fname, file.fileData);
+                        }
+                    }
                 }
             }
         }

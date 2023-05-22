@@ -263,6 +263,8 @@
     <Compile Include="BluePoint\CSKL\CSKLMetaData.cs" />
     <Compile Include="BluePoint\CSKL\CSKLNames.cs" />
     <Compile Include="BluePoint\CSKL\CSKLTransform.cs" />
+    <Compile Include="Extra\AM2\FARC.cs" />
+    <Compile Include="Extra\AM2\TXP.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\BluePointConvert.cs" />
     <Compile Include="Extra\CommonForms\NumberPrompt.cs" />

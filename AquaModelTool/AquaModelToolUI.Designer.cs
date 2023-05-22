@@ -152,6 +152,8 @@
             this.gatherMatchingCMSHNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportLuaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readFCLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
+            this.extractBorderBreakPS4FARCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -409,7 +411,9 @@
             this.generateMCGMCPToolStripMenuItem,
             this.convertModelToDemonsSoulsflverToolStripMenuItem,
             this.toolStripSeparator11,
-            this.convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem});
+            this.convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem,
+            this.toolStripSeparator13,
+            this.extractBorderBreakPS4FARCToolStripMenuItem});
             this.otherGamesToolStripMenuItem.Name = "otherGamesToolStripMenuItem";
             this.otherGamesToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
             this.otherGamesToolStripMenuItem.Text = "Other Games";
@@ -1145,6 +1149,18 @@
             this.readFCLToolStripMenuItem.Text = "ReadFCL";
             this.readFCLToolStripMenuItem.Click += new System.EventHandler(this.readFCLToolStripMenuItem_Click);
             // 
+            // toolStripSeparator13
+            // 
+            this.toolStripSeparator13.Name = "toolStripSeparator13";
+            this.toolStripSeparator13.Size = new System.Drawing.Size(310, 6);
+            // 
+            // extractBorderBreakPS4FARCToolStripMenuItem
+            // 
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Name = "extractBorderBreakPS4FARCToolStripMenuItem";
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA";
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Click += new System.EventHandler(this.extractBorderBreakPS4FARCToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -1290,6 +1306,8 @@
         private System.Windows.Forms.ToolStripMenuItem gatherMatchingCMSHNamesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportLuaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readFCLToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
+        private System.Windows.Forms.ToolStripMenuItem extractBorderBreakPS4FARCToolStripMenuItem;
     }
 }
 
