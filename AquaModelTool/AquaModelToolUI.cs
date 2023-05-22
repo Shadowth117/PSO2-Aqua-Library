@@ -4442,57 +4442,72 @@ namespace AquaModelTool
         {
             var openFileDialog = new OpenFileDialog()
             {
-                Title = "Select pfa File",
-                Filter = "pfa files|*.pfa",
+                Title = "Select Border Break archive file",
+                Filter = "*.pfa, spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin;*.pfa|spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin|pfa files|*.pfa",
                 FileName = "",
                 Multiselect = true
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                foreach(var pfaFile in openFileDialog.FileNames)
+                foreach(var archiveFile in openFileDialog.FileNames)
                 {
-                    using (Stream stream = new MemoryStream(File.ReadAllBytes(pfaFile)))
-                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    if(archiveFile.EndsWith("pfa"))
                     {
-                        var pfa = new FARC(streamReader);
-                        var path = openFileDialog.FileName + "_out";
-                        Directory.CreateDirectory(path);
-                        foreach(var file in pfa.fileEntries)
+                        using (Stream stream = new MemoryStream(File.ReadAllBytes(archiveFile)))
+                        using (var streamReader = new BufferedStreamReader(stream, 8192))
                         {
-                            var fname = Path.Combine(path, file.fileName);
-                            File.WriteAllBytes(fname, file.fileData);
+                            var pfa = new FARC(streamReader);
+                            var path = archiveFile + "_out";
+                            Directory.CreateDirectory(path);
+                            foreach(var file in pfa.fileEntries)
+                            {
+                                var fname = Path.Combine(path, file.fileName);
+                                File.WriteAllBytes(fname, file.fileData);
+
+                                //Extract txp
+                                if(file.fileName.StartsWith("spr_") || file.fileName.EndsWith("tex.bin"))
+                                {
+                                    ExtractTXP(fname, file.fileData);
+                                }
+                            }
                         }
+                    } else
+                    {
+                        var txpRaw = File.ReadAllBytes(archiveFile);
+                        ExtractTXP(archiveFile, txpRaw);
                     }
                 }
             }
         }
 
-        private void extractBorderBreakPS4SprOrTexbinToolStripMenuItem_Click(object sender, EventArgs e)
+        private static void ExtractTXP(string txpArchive, byte[] txpRaw)
         {
-            var openFileDialog = new OpenFileDialog()
+            using (Stream stream = new MemoryStream(txpRaw))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                Title = "Select a Border Break texture archive File",
-                Filter = "spr*.bin, *tex.bin files|spr*.bin;*tex.bin",
-                FileName = "",
-                Multiselect = true
-            };
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                foreach (var pfaFile in openFileDialog.FileNames)
+                if (Path.GetFileName(txpArchive).StartsWith("spr_"))
                 {
-                    using (Stream stream = new MemoryStream(File.ReadAllBytes(pfaFile)))
-                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    var int_00 = streamReader.Read<int>();
+                    var txpOffset = streamReader.Read<int>();
+                    streamReader.Seek(txpOffset, SeekOrigin.Begin);
+                }
+
+                //Standard TXP archive
+                var TXP = new TXP(streamReader);
+                var path = txpArchive + "_out";
+                Directory.CreateDirectory(path);
+                for (int i = 0; i < TXP.txp3.txp4List.Count; i++)
+                {
+                    string baseFname;
+                    if (TXP.txp3.txp4Names.Count > 0)
                     {
-                        var TXP = new TXP(streamReader);
-                        /*
-                        var path = openFileDialog.FileName + "_out";
-                        Directory.CreateDirectory(path);
-                        foreach (var file in pfa.fileEntries)
-                        {
-                            var fname = Path.Combine(path, file.fileName);
-                            File.WriteAllBytes(fname, file.fileData);
-                        }*/
+                        baseFname = TXP.txp3.txp4Names[i];
+                    } else
+                    {
+                        baseFname = Path.GetFileName(txpArchive) + $"_{i}";
                     }
+                    var fname = Path.Combine(path, baseFname + ".dds");
+                    File.WriteAllBytes(fname, TXP.txp3.txp4List[i].GetDDS());
                 }
             }
         }

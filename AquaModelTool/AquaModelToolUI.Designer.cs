@@ -154,7 +154,6 @@
             this.readFCLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
             this.extractBorderBreakPS4FARCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -414,8 +413,7 @@
             this.toolStripSeparator11,
             this.convertDemonsSoulsPS5CmdlToFbxToolStripMenuItem,
             this.toolStripSeparator13,
-            this.extractBorderBreakPS4FARCToolStripMenuItem,
-            this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem});
+            this.extractBorderBreakPS4FARCToolStripMenuItem});
             this.otherGamesToolStripMenuItem.Name = "otherGamesToolStripMenuItem";
             this.otherGamesToolStripMenuItem.Size = new System.Drawing.Size(344, 22);
             this.otherGamesToolStripMenuItem.Text = "Other Games";
@@ -1159,16 +1157,9 @@
             // extractBorderBreakPS4FARCToolStripMenuItem
             // 
             this.extractBorderBreakPS4FARCToolStripMenuItem.Name = "extractBorderBreakPS4FARCToolStripMenuItem";
-            this.extractBorderBreakPS4FARCToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
-            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA";
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Size = new System.Drawing.Size(324, 22);
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA, spr_*.bin, *tex.bin";
             this.extractBorderBreakPS4FARCToolStripMenuItem.Click += new System.EventHandler(this.extractBorderBreakPS4FARCToolStripMenuItem_Click);
-            // 
-            // extractBorderBreakPS4SprOrTexbinToolStripMenuItem
-            // 
-            this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem.Name = "extractBorderBreakPS4SprOrTexbinToolStripMenuItem";
-            this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem.Size = new System.Drawing.Size(313, 22);
-            this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem.Text = "Extract Border Break PS4 spr or tex.bin";
-            this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem.Click += new System.EventHandler(this.extractBorderBreakPS4SprOrTexbinToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1317,7 +1308,6 @@
         private System.Windows.Forms.ToolStripMenuItem readFCLToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
         private System.Windows.Forms.ToolStripMenuItem extractBorderBreakPS4FARCToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem extractBorderBreakPS4SprOrTexbinToolStripMenuItem;
     }
 }
 

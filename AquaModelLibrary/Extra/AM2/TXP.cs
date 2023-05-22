@@ -1,11 +1,14 @@
 ﻿using AquaModelLibrary.AquaMethods;
 using AquaModelLibrary.BluePoint.CMSH;
+using DirectXTex;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AquaModelLibrary.PSOXVMConvert;
+using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Extra.AM2
 {
@@ -76,6 +79,100 @@ namespace AquaModelLibrary.Extra.AM2
             {
                 streamReader.Seek(endOffset + txp4Start, System.IO.SeekOrigin.Begin);
             }
+        }
+
+        public byte[] GetDDS()
+        {
+            var outBytes = new List<byte>();
+            outBytes.AddRange(GenerateDDSHeader());
+            foreach(var mip in txp2List)
+            {
+                outBytes.AddRange(mip.buffer);
+            }
+
+            return outBytes.ToArray();
+        }
+        public byte[] GenerateDDSHeader()
+        {
+            var mip0 = txp2List[0];
+            //Map to DXGIFormat based on XVRFormats list, recovered from a PSO1 executable. Redundancies prevent this from being an enum
+            DXGIFormat fmt = DXGIFormat.BC1UNORM;
+            bool PMAlpha = false;
+            bool isDX10 = false;
+            switch (mip0.txpType) //Technically mips could have different types, but HOPEFULLY Sega isn't insane
+            {
+                case 1:
+                    fmt = DXGIFormat.B8G8R8A8UNORM;
+                    break;
+                case 12:
+                case 2:
+                    fmt = DXGIFormat.B5G6R5UNORM;
+                    break;
+                case 13:
+                case 3:
+                    fmt = DXGIFormat.B5G5R5A1UNORM;
+                    break;
+                case 14:
+                case 4:
+                    fmt = DXGIFormat.B4G4R4A4UNORM;
+                    break;
+                case 5:
+                    fmt = DXGIFormat.P8;
+                    break;
+                case 6:
+                    fmt = DXGIFormat.BC1UNORM;
+                    break;
+                case 7:
+                    fmt = DXGIFormat.BC2UNORM;
+                    PMAlpha = true;
+                    break;
+                case 8:
+                    fmt = DXGIFormat.BC2UNORM;
+                    break;
+                case 9:
+                    fmt = DXGIFormat.BC3UNORM;
+                    PMAlpha = true;
+                    break;
+                case 109:
+                case 10:
+                    fmt = DXGIFormat.BC3UNORM;
+                    break;
+                case 11:
+                    fmt = DXGIFormat.BC5UNORM;
+                    break;
+                case 15:
+                    fmt = DXGIFormat.YUY2;
+                    break;
+                case 16:
+                    fmt = DXGIFormat.R8G8SNORM;
+                    break;
+                case 17:
+                    fmt = DXGIFormat.A8UNORM;
+                    break;
+                case 60:
+                    fmt = DXGIFormat.R8G8B8A8UNORMSRGB;
+                    isDX10 = true;
+                    break;
+                case 130:
+                    fmt = DXGIFormat.BC7UNORM;
+                    isDX10 = true;
+                    break;
+            }
+            var meta = GenerateMataData(mip0.width, mip0.height, txp2Count, fmt, false);
+            if (PMAlpha)
+            {
+                meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;
+            }
+            DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header);
+
+            List<byte> outbytes = new List<byte>(AquaGeneralMethods.ConvertStruct(ddsHeader));
+            if(isDX10)
+            {
+                outbytes.AddRange(AquaGeneralMethods.ConvertStruct(dx10Header));
+            }
+            outbytes.InsertRange(0, new byte[] { 0x44, 0x44, 0x53, 0x20 });
+
+            return outbytes.ToArray();
         }
     }
 

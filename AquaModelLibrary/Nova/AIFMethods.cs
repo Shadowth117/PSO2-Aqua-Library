@@ -195,16 +195,16 @@ namespace AquaModelLibrary.Nova
             }
         }
 
-        public static byte[] AssembleDDS(byte[] buffer, int width, int height, byte alphaTesting, byte pixelFormat)
+        public static byte[] AssembleDDS(byte[] buffer, int width, int height, byte alphaTesting, byte pixelFormat, byte mipCount = 1)
         {
             List<byte> outBytes = new List<byte>();
-            outBytes.AddRange(GenerateDDSHeader((ushort)width, (ushort)height, buffer.Length, alphaTesting, pixelFormat));
+            outBytes.AddRange(GenerateDDSHeader((ushort)width, (ushort)height, buffer.Length, alphaTesting, pixelFormat, mipCount));
             outBytes.AddRange(buffer);
 
             return outBytes.ToArray();
         }
 
-        public static byte[] GenerateDDSHeader(ushort height, ushort width, int size, byte alphaTesting, byte pixelFormat)
+        public static byte[] GenerateDDSHeader(ushort height, ushort width, int size, byte alphaTesting, byte pixelFormat, byte mipCount = 1)
         {
             var outBytes = new List<byte>();
 
@@ -214,8 +214,9 @@ namespace AquaModelLibrary.Nova
             outBytes.AddRange(BitConverter.GetBytes(width));
             outBytes.AddRange(new byte[] { 0x00, 0x00 });
             outBytes.AddRange(BitConverter.GetBytes(size));
-            outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
+            outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00, });
+            outBytes.AddRange(new byte[] { mipCount, 0x00, 0x00, 0x00, });
+            outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x20, 0x00, 0x00, 0x00,
                 0x04, 0x00, 0x00, 0x00,  });
