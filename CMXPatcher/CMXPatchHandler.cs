@@ -16,6 +16,7 @@ using AquaExtras;
 using System.ComponentModel;
 using System.Windows.Threading;
 using Zamboni.IceFileFormats;
+using System.Diagnostics;
 
 namespace CMXPatcher
 {
@@ -489,6 +490,27 @@ namespace CMXPatcher
             }
 
             return false;
+        }
+
+        public void OpenModsFolder()
+        {
+            Directory.CreateDirectory(modPath);
+
+            using Process process = new Process();
+            process.StartInfo.FileName = "explorer.exe";
+            process.StartInfo.Arguments = modPath;
+            process.Start();
+        }
+
+        public void OpenDumpsFolder()
+        {
+            string dump = settingsPath + "CMXEntryDumps\\";
+            Directory.CreateDirectory(dump);
+
+            using Process process = new Process();
+            process.StartInfo.FileName = "explorer.exe";
+            process.StartInfo.Arguments = dump;
+            process.Start();
         }
     }
 }

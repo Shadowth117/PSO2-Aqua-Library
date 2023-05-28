@@ -396,7 +396,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             lBindPose->Add( lMeshNode, FbxAMatrix() );
         }
 
-        //If we have instance transforms, we want to acutalize those
+        //If we have instance transforms, we want to actualize those
         for (int i = 0; i < instanceTransforms->Count; i++)
         {
             FbxNode* instanceNode = FbxNode::Create(lScene, Utf8String(aqoName + "_instance_" + i).ToCStr());
