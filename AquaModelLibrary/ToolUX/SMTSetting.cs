@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.Extra
+namespace AquaModelLibrary.ToolUX
 {
     public class SMTSetting
     {

@@ -2,11 +2,14 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using SystemHalf;
 using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary.Extra.AM2
@@ -39,6 +42,8 @@ namespace AquaModelLibrary.Extra.AM2
         {
             public EOBJModelHeader header;
             public List<EOBJMeshObject> meshes = new List<EOBJMeshObject>();
+            public List<EOBJMaterialObject> materials = new List<EOBJMaterialObject>();
+            public int highestBone = -1;
         }
 
         public struct EOBJModelHeader
@@ -89,17 +94,25 @@ namespace AquaModelLibrary.Extra.AM2
         public class EOBJMeshObject
         {
             public EOBJMeshHeader header;
+            public List<EOBJMeshSubStruct> subStructs = new List<EOBJMeshSubStruct>();
+            
             public List<Vector3> vertPositions = new List<Vector3>();
             public List<Vector3> vertNormals = new List<Vector3>();
             public List<Vector2> vertUvs = new List<Vector2>();
             public List<Vector2> vertUv2s = new List<Vector2>();
-            public List<ushort> vertUShortData = new List<ushort>();
+            public List<Vector4> vertWeights = new List<Vector4>();
+            public List<int[]> vertWeightIndices = new List<int[]>();
+            public List<Half> vertRigidWeightIndices = new List<Half>();
+
+            public List<List<ushort>> bonePalettes = new List<List<ushort>>();
+            public List<List<ushort>> faceLists = new List<List<ushort>>();
         }
 
         public struct EOBJMeshHeader
         {
             public int int_00;
-            public Vector3 vec3_04;
+            public float flt_04;
+            public Vector3 vec3_08;
 
             public int eobjMeshSubStructCount;
             public int eobjMeshSubStructOffset;
@@ -112,7 +125,7 @@ namespace AquaModelLibrary.Extra.AM2
 
             public int vertPositionsOffset; //Floats
             public int int_34;
-            public int vertNormalsOffset; //Half
+            public int vertNormalsOffset; //Halfs
             public int int_3C;
 
             public int vertUVsOffset; //Floats
@@ -135,14 +148,14 @@ namespace AquaModelLibrary.Extra.AM2
             public int int_78;
             public int int_7C;
 
-            public int int_80;
+            public int vertWeightsOffset; //Vector4
             public int int_84;
-            public int int_88;
+            public int vertBoneIndicesOffset; //4 byte array
             public int int_8C;
 
             public int int_90;
             public int int_94;
-            public int vertShortListOffset;
+            public int vertRigidWeightIndicesOffset;
             public int int_9C;
 
             public int int_A0;
@@ -244,7 +257,7 @@ namespace AquaModelLibrary.Extra.AM2
                 names.Add(AquaGeneralMethods.ReadCString(streamReader));
             }
 
-            //Read meshes
+            //Read models
             streamReader.Seek(header.meshPointerArrayOffset, System.IO.SeekOrigin.Begin);
             for(int i = 0; i < header.modelCount; i++)
             {
@@ -252,6 +265,144 @@ namespace AquaModelLibrary.Extra.AM2
                 streamReader.Seek(4, System.IO.SeekOrigin.Current);
             }
 
+            foreach(var modelOffs in modelOffsets)
+            {
+                streamReader.Seek(modelOffs, System.IO.SeekOrigin.Begin);
+                EOBJModelObject model = new EOBJModelObject();
+                model.header = streamReader.Read<EOBJModelHeader>();
+
+                //Read meshes
+                for (int i = 0; i < model.header.meshCount; i++)
+                {
+                    EOBJMeshObject meshObj = new EOBJMeshObject();
+                    meshObj.header = streamReader.Read<EOBJMeshHeader>();
+                    model.meshes.Add(meshObj);
+                }
+                foreach(var mesh in model.meshes)
+                {
+                    //Vert positions
+                    if (mesh.header.vertPositionsOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertPositionsOffset, System.IO.SeekOrigin.Begin);
+                        for(int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertPositions.Add(streamReader.Read<Vector3>());
+                        }
+                    }
+
+                    //Vert normals
+                    if (mesh.header.vertNormalsOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertNormalsOffset, System.IO.SeekOrigin.Begin);
+                        for (int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertNormals.Add(new Vector3(streamReader.Read<Half>(), streamReader.Read<Half>(), streamReader.Read<Half>()));
+                        }
+                    }
+
+                    //UV Coordinates
+                    if (mesh.header.vertUVsOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertUVsOffset, System.IO.SeekOrigin.Begin);
+                        for (int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertUvs.Add(streamReader.Read<Vector2>());
+                        }
+                    }
+
+                    //UV Coordinates 2
+                    if (mesh.header.vertUV2sOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertUV2sOffset, System.IO.SeekOrigin.Begin);
+                        for (int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertUv2s.Add(streamReader.Read<Vector2>());
+                        }
+                    }
+
+                    //Vert weights
+                    if (mesh.header.vertWeightsOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertWeightsOffset, System.IO.SeekOrigin.Begin);
+                        for (int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertWeights.Add(streamReader.Read<Vector4>());
+                        }
+                    }
+
+                    //Vert weight indices
+                    if (mesh.header.vertBoneIndicesOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertBoneIndicesOffset, System.IO.SeekOrigin.Begin);
+                        for (int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertWeightIndices.Add(AquaGeneralMethods.Read4BytesToIntArray(streamReader));
+                            for (int i = 0; i < mesh.vertWeightIndices[v].Length; i++)
+                            {
+                                if (mesh.vertWeightIndices[v][i] > model.highestBone)
+                                {
+                                    model.highestBone = (int)mesh.vertWeightIndices[v][i];
+                                }
+                            }
+                            streamReader.Seek(4, System.IO.SeekOrigin.Current);
+                        }
+                    }
+
+                    //Vert rigid weights
+                    if (mesh.header.vertRigidWeightIndicesOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.vertRigidWeightIndicesOffset, System.IO.SeekOrigin.Begin);
+                        for (int v = 0; v < mesh.header.vertCount; v++)
+                        {
+                            mesh.vertRigidWeightIndices.Add(streamReader.Read<Half>());
+                            if (mesh.vertRigidWeightIndices[v] > model.highestBone)
+                            {
+                                model.highestBone = (int)mesh.vertRigidWeightIndices[v];
+                            }
+                        }
+                    }
+
+                    //Faces
+                    if (mesh.header.eobjMeshSubStructCount > 0 && mesh.header.eobjMeshSubStructOffset > 0)
+                    {
+                        streamReader.Seek(modelOffs + mesh.header.eobjMeshSubStructOffset, System.IO.SeekOrigin.Begin);
+                        for (int ms = 0; ms < mesh.header.eobjMeshSubStructCount; ms++)
+                        {
+                            mesh.subStructs.Add(streamReader.Read<EOBJMeshSubStruct>());
+                        }
+                        foreach(var ms in mesh.subStructs)
+                        {
+                            var faceList = new List<ushort>();
+                            var bonePalette = new List<ushort>();
+                            streamReader.Seek(modelOffs + ms.faceIndicesOffset, System.IO.SeekOrigin.Begin);
+                            for (int f = 0; f < ms.faceIndicesCount; f++)
+                            {
+                                faceList.Add(streamReader.Read<ushort>());
+                            }
+
+                            streamReader.Seek(modelOffs + ms.bonePaletteOffset, System.IO.SeekOrigin.Begin);
+                            for (int f = 0; f < ms.bonePaletteCount; f++)
+                            {
+                                bonePalette.Add(streamReader.Read<ushort>());
+                            }
+
+                            mesh.bonePalettes.Add(bonePalette);
+                            mesh.faceLists.Add(faceList);
+                        }
+                    }
+                }
+
+                //Read materials
+                streamReader.Seek(modelOffs + model.header.materialOffset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < model.header.materialCount; i++)
+                {
+                    EOBJMaterialObject matObj = new EOBJMaterialObject();
+                    matObj.matStruct = streamReader.Read<EOBJMaterial>();
+                    model.materials.Add(matObj);
+                }
+
+                models.Add(model);
+            }
         }
     }
 }

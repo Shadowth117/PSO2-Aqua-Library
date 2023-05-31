@@ -6,7 +6,7 @@ namespace AquaModelLibrary
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
     public unsafe class AquaNode : AquaCommon
     {
-        public NDTR ndtr;
+        public NDTR ndtr = new NDTR();
         public List<NODE> nodeList = new List<NODE>();
         public List<NODO> nodoList = new List<NODO>();
         public AquaNode()
@@ -102,11 +102,11 @@ namespace AquaModelLibrary
             public int firstChild;    //0x5, type 0x8
             public int nextSibling;   //0x6, type 0x8
             public int const0_2;      //0xC, type 0x9? Ordering and nebulous usage makes this unclear. Observed only 0.
-            public int ngsRotationOrderChangeCounter;    //Counts up in the case of an NGS bone with a non default rotation order.
+            public int bool_1C;       //Counts up in NGS era models for unknown reasons. Sometimes correlates with eulRot rotation order changes, but not always.
 
             public Vector3 pos;       //0x7, type 0x4A, 0x1
             public int const0_4;
-            public Vector3 eulRot;    //0x8, type 0x4A, 0x1
+            public Vector3 eulRot;    //0x8, type 0x4A, 0x1 //Rotation order changes for unknown reasons
             public int const0_5;
             public Vector3 scale;     //0x9, type 0x4A, 0x1
             public int const0_6;

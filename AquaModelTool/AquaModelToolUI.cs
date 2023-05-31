@@ -1,6 +1,5 @@
 ﻿using AquaModelLibrary;
 using AquaModelLibrary.Extra;
-using AquaModelLibrary.Forms.CommonForms;
 using AquaModelLibrary.Native.Fbx;
 using AquaModelLibrary.NNStructs;
 using AquaModelLibrary.Nova;
@@ -30,8 +29,12 @@ using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
 using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 using Newtonsoft.Json;
 using AquaModelLibrary.Extra.AM2;
-using AquaModelLibrary.BluePoint.CMSH;
 using Reloaded.Memory.Streams;
+using AquaModelLibrary.ToolUX;
+using AquaModelLibrary.ToolUX.CommonForms;
+using AquaModelLibrary.BluePoint.CMSH;
+using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace AquaModelTool
 {
@@ -44,21 +47,32 @@ namespace AquaModelTool
         public List<string> motionConfigExtensions = new List<string>() { ".bti" };
         public List<string> motionExtensions = new List<string>() { ".aqm", ".aqv", ".aqc", ".aqw", ".trm", ".trv", ".trw" };
         public DateTime buildDate = GetLinkerTime(System.Reflection.Assembly.GetExecutingAssembly(), TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
-        public string soulsSettingsPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\";
+        public string mainSettingsPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\";
+        public string mainSettingsFile = "Settings.json";
         public string soulsSettingsFile = "SoulsSettings.json";
+        public string borderBreakPS4BonePath = "";
         JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
         public string currentFile;
         public bool isNIFL = false;
 
         public AquaModelTool()
         {
-            SMTSetting smtSetting = new SMTSetting();
-            var finalSettingsPath = Path.Combine(soulsSettingsPath, soulsSettingsFile);
-            var settingText = File.Exists(finalSettingsPath) ? File.ReadAllText(finalSettingsPath) : null;
-            if (settingText != null)
+            MainSetting mainSetting = new MainSetting();
+            var finalMainSettingsPath = Path.Combine(mainSettingsPath, mainSettingsFile);
+            var mainSettingText = File.Exists(finalMainSettingsPath) ? File.ReadAllText(finalMainSettingsPath) : null;
+            if (mainSettingText != null)
             {
-                smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+                mainSetting = JsonConvert.DeserializeObject<MainSetting>(mainSettingText);
             }
+
+            SMTSetting smtSetting = new SMTSetting();
+            var finalSMTSettingsPath = Path.Combine(mainSettingsPath, soulsSettingsFile);
+            var SMTSettingText = File.Exists(finalSMTSettingsPath) ? File.ReadAllText(finalSMTSettingsPath) : null;
+            if (SMTSettingText != null)
+            {
+                smtSetting = JsonConvert.DeserializeObject<SMTSetting>(SMTSettingText);
+            }
+
             InitializeComponent();
             this.DragEnter += new DragEventHandler(AquaUI_DragEnter);
             this.DragDrop += new DragEventHandler(AquaUI_DragDrop);
@@ -68,6 +82,9 @@ namespace AquaModelTool
 #endif
             filenameButton.Enabled = false;
             this.Text = GetTitleString();
+
+            //Border Break PS4 Settings
+            borderBreakPS4BonePath = mainSetting.BBPS4BonePath;
 
             //Souls Settings
             exportWithMetadataToolStripMenuItem.Checked = smtSetting.useMetaData;
@@ -2555,7 +2572,7 @@ namespace AquaModelTool
                     sb.AppendLine($"=== ({i}) {node.boneName.curString}:");
                     sb.AppendLine($"Bone Short 1 {node.boneShort1.ToString("X")} | Bone Short 2 {node.boneShort2.ToString("X")}");
                     sb.AppendLine($"Animated Flag {node.animatedFlag}");
-                    sb.AppendLine($"First Child {node.firstChild} | Next Sibling {node.nextSibling} | NGS Sibling {node.ngsRotationOrderChangeCounter} | Unk Node {node.unkNode}");
+                    sb.AppendLine($"First Child {node.firstChild} | Next Sibling {node.nextSibling} | NGS Sibling {node.bool_1C} | Unk Node {node.unkNode}");
                     if (i != 0)
                     {
                         sb.AppendLine($"Parent info - ({node.parentId}) {bn.nodeList[node.parentId].boneName.curString}");
@@ -4219,7 +4236,7 @@ namespace AquaModelTool
             smtSetting.transformMesh = transformMeshToolStripMenuItem.Checked;
 
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
-            File.WriteAllText(soulsSettingsPath + soulsSettingsFile, smtSettingText);
+            File.WriteAllText(mainSettingsPath + soulsSettingsFile, smtSettingText);
         }
 
         private void scanPOS0GapToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4443,7 +4460,7 @@ namespace AquaModelTool
             var openFileDialog = new OpenFileDialog()
             {
                 Title = "Select Border Break archive file",
-                Filter = "*.pfa, spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin;*.pfa|spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin|pfa files|*.pfa",
+                Filter = "*_obj.bin, *.pfa, spr_*.bin, *tex.bin files|*_obj.bin;spr_*.bin;*tex.bin;*.pfa|Model archive files *_obj.bin|*_obj.bin|spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin|pfa files|*.pfa",
                 FileName = "",
                 Multiselect = true
             };
@@ -4468,15 +4485,33 @@ namespace AquaModelTool
                                 if(file.fileName.StartsWith("spr_") || file.fileName.EndsWith("tex.bin"))
                                 {
                                     ExtractTXP(fname, file.fileData);
+                                } else if(file.fileName.EndsWith("_obj.bin"))
+                                {
+                                    ConvertAM2BBPS4Model(fname, file.fileData);
                                 }
                             }
                         }
-                    } else
+                    }
+                    else if (archiveFile.EndsWith("_obj.bin"))
+                    {
+                        var objBinRaw = File.ReadAllBytes(archiveFile);
+                        ConvertAM2BBPS4Model(archiveFile, objBinRaw);
+                    }
+                    else
                     {
                         var txpRaw = File.ReadAllBytes(archiveFile);
                         ExtractTXP(archiveFile, txpRaw);
                     }
                 }
+            }
+        }
+
+        public static void ConvertEOBJ(string eobj, byte[] eobjRaw)
+        {
+            using (Stream stream = new MemoryStream(eobjRaw))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                new E_OBJ(streamReader);
             }
         }
 
@@ -4509,6 +4544,94 @@ namespace AquaModelTool
                     var fname = Path.Combine(path, baseFname + ".dds");
                     File.WriteAllBytes(fname, TXP.txp3.txp4List[i].GetDDS());
                 }
+            }
+        }
+
+        private void setMOTBONEbinPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select mot_bone.bin file",
+                Filter = "mot_bone.bin|mot_bone.bin",
+                FileName = "",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                borderBreakPS4BonePath = openFileDialog.FileName;
+                SaveMainSettings();
+            }
+        }
+
+        private void SaveMainSettings()
+        {
+            MainSetting mainSetting = new MainSetting();
+            mainSetting.BBPS4BonePath = borderBreakPS4BonePath;
+
+            string mainSettingText = JsonConvert.SerializeObject(mainSetting, jss);
+            File.WriteAllText(mainSettingsPath + mainSettingsFile, mainSettingText);
+        }
+
+        private void ConvertAM2BBPS4Model(string eobjPath, byte[] eobjRaw)
+        {
+            List<AquaNode> borderBreakPS4Bones;
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(borderBreakPS4BonePath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                borderBreakPS4Bones = BorderBreakPS4Convert.motBonesToAQN(new MOT_BONE(streamReader));
+                borderBreakPS4Bones.Add(AquaNode.GenerateBasicAQN());
+            }
+            List<NGSAquaObject> aqps;
+            E_OBJ eobj;
+            using (Stream stream = new MemoryStream(eobjRaw))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                eobj = new E_OBJ(streamReader);
+                aqps = BorderBreakPS4Convert.EOBJToAqua(eobj);
+            }
+
+            for(int i = 0; i < aqps.Count; i++)
+            {
+                AquaNode aqn;
+                var name = eobj.names[i];
+
+                if (name.Contains("_crw0"))
+                {
+                    aqn = borderBreakPS4Bones[0];
+                } else if (name.Contains("_rba_"))
+                {
+                    aqn = borderBreakPS4Bones[1];
+                } else if(name.Contains("_rbb_"))
+                {
+                    aqn = borderBreakPS4Bones[2];
+                }
+                else if (name.Contains("_rbc_"))
+                {
+                    aqn = borderBreakPS4Bones[3];
+                }
+                else if (name.Contains("_rbd_"))
+                {
+                    aqn = borderBreakPS4Bones[4];
+                } else
+                {
+                    aqn = borderBreakPS4Bones[5];
+                }
+
+                aquaUI.aqua.aquaModels.Clear();
+                ModelSet set = new ModelSet();
+                set.models.Add(aqps[i]);
+                if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                {
+                    aquaUI.aqua.aquaModels.Add(set);
+                    aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                    set.models[0].ConvertToLegacyTypes();
+                    set.models[0].CreateTrueVertWeights();
+
+                    var path = eobjPath + "_out";
+                    Directory.CreateDirectory(path);
+                    var fname = Path.Combine(path, name + ".fbx");
+                    FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), fname, new List<string>(), new List<Matrix4x4>(), false);
+                }
+                
             }
         }
     }

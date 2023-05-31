@@ -263,12 +263,14 @@
     <Compile Include="BluePoint\CSKL\CSKLMetaData.cs" />
     <Compile Include="BluePoint\CSKL\CSKLNames.cs" />
     <Compile Include="BluePoint\CSKL\CSKLTransform.cs" />
+    <Compile Include="Extra\AM2\BorderBreakPS4Convert.cs" />
     <Compile Include="Extra\AM2\E_OBJ.cs" />
     <Compile Include="Extra\AM2\FARC.cs" />
+    <Compile Include="Extra\AM2\MOT_Anim.cs" />
+    <Compile Include="Extra\AM2\MOT_BONE.cs" />
     <Compile Include="Extra\AM2\TXP.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\BluePointConvert.cs" />
-    <Compile Include="Extra\CommonForms\NumberPrompt.cs" />
     <Compile Include="Extra\DDS\DirectXUtil.cs" />
     <Compile Include="Extra\DirectX\D3DEnums.cs" />
     <Compile Include="Extra\EnemyData.cs" />
@@ -293,7 +295,6 @@
     <Compile Include="Extra\PSO2ObjectNames.cs" />
     <Compile Include="Extra\PSONRelConvert.cs" />
     <Compile Include="Extra\PSOXVMConvert.cs" />
-    <Compile Include="Extra\SMTSetting.cs" />
     <Compile Include="Extra\Vec3Int.cs" />
     <Compile Include="NNStructs\Marathon\NinjaFlags.cs" />
     <Compile Include="NNStructs\Marathon\NinjaKeyframe.cs" />
@@ -308,6 +309,9 @@
     <Compile Include="NNStructs\Structures\XNJMaterial.cs" />
     <Compile Include="Nova\Structures\KeyFrameData.cs" />
     <Compile Include="PSU\NOM.cs" />
+    <Compile Include="ToolUX\CommonForms\NumberPrompt.cs" />
+    <Compile Include="ToolUX\MainSetting.cs" />
+    <Compile Include="ToolUX\SMTSetting.cs" />
     <Compile Include="Zero\PSZTextBin.cs" />
     <Compile Include="Extra\ReferenceGenerator.cs" />
     <Compile Include="Extra\SoulsConvert.cs" />

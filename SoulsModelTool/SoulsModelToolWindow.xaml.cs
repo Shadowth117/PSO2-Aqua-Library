@@ -9,6 +9,7 @@ using System.Reflection;
 using System.IO;
 using Path = System.IO.Path;
 using Newtonsoft.Json;
+using AquaModelLibrary.ToolUX;
 
 namespace SoulsModelTool
 {

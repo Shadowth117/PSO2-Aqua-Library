@@ -866,7 +866,7 @@ namespace AquaModelLibrary
                 node.firstChild = -1;
                 node.nextSibling = -1;
                 node.const0_2 = 0;
-                node.ngsRotationOrderChangeCounter = 0; //Unsure how this is truly set. Seems to correlate to an id or bone count subtracted from 0xFFFFFFFF. However 0 seems to work so we just leave it as that.
+                node.bool_1C = 0; //Unsure how this is truly set. Seems to correlate to an id or bone count subtracted from 0xFFFFFFFF. However 0 seems to work so we just leave it as that.
 
                 //Ignore parent logic for node 0 since it may be attached to a root node
                 if (nodeId != 0)

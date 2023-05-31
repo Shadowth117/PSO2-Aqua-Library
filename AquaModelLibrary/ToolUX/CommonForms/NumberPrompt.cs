@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace AquaModelLibrary.Forms.CommonForms
+namespace AquaModelLibrary.ToolUX.CommonForms
 {
     public static class NumberPrompt
     {
