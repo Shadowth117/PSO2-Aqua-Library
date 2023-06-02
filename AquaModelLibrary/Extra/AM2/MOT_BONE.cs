@@ -113,7 +113,8 @@ namespace AquaModelLibrary.Extra.AM2
         {
             public int boneNameOffset;
             public int int_04;
-            public int int_08;
+            public ushort usht_08;
+            public ushort usht_0A;
             public ushort usht_0C;
             public ushort usht_0E;
 

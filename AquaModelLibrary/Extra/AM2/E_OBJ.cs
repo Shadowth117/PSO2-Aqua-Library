@@ -128,12 +128,12 @@ namespace AquaModelLibrary.Extra.AM2
             public int vertNormalsOffset; //Halfs
             public int int_3C;
 
-            public int vertUVsOffset; //Floats
+            public int vertUV2sOffset; //Floats; Swapped with 2nd one since second typically has main UV map stuff for this game.
             public int int_44;
             public int int_48;
             public int int_4C;
 
-            public int vertUV2sOffset; //Floats
+            public int vertUVsOffset; //Floats
             public int int_54;
             public int int_58;
             public int int_5C;
