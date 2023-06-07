@@ -18,6 +18,7 @@ using static AquaModelLibrary.CharacterMakingIndexMethods;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using UnluacNET;
 
 namespace AquaModelLibrary.Extra
 {
@@ -264,18 +265,10 @@ namespace AquaModelLibrary.Extra
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
-            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
-            GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat);
-            GenerateAreaData(pso2_binDir, stageDirOut);
-            GenerateUILists(pso2_binDir, outputDirectory);
-            DumpPaletteData(outputDirectory, aquaCMX);
-            GenerateMusicData(pso2_binDir, musicDirOut);
-            GenerateCasinoData(pso2_binDir, outputDirectory);
-            GenerateUnitLists(pso2_binDir, outputDirectory);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
+            GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
-            GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateMotionChangeLists(pso2_binDir, playerRAnimDirOut, commonTextReboot, commRebootByCat);
             GenerateAnimation_EffectLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, out genAnimList, out genAnimListNGS);
             GenerateMagList(pso2_binDir, playerDirOut, magIds, magIdsReboot);
@@ -283,6 +276,14 @@ namespace AquaModelLibrary.Extra
             GenerateVehicle_SpecialWeaponList(playerDirOut, playerCAnimDirOut, playerRAnimDirOut, genAnimList, genAnimListNGS);
             GeneratePetList(petsDirOut);
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
+            GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat);
+            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
+            GenerateAreaData(pso2_binDir, stageDirOut);
+            GenerateUILists(pso2_binDir, outputDirectory);
+            DumpPaletteData(outputDirectory, aquaCMX);
+            GenerateMusicData(pso2_binDir, musicDirOut);
+            GenerateCasinoData(pso2_binDir, outputDirectory);
+            GenerateUnitLists(pso2_binDir, outputDirectory);
         }
 
         private static string Escape(string str)
@@ -1565,7 +1566,6 @@ namespace AquaModelLibrary.Extra
                 files.AddRange(iceFile.groupOneFiles);
                 files.AddRange(iceFile.groupTwoFiles);
 
-                roomGoodsOut.Add("Data is laid out as follows:\nObject Name (if known), Object Function, Animation type, category 1, category 2, object unhashed name, object hashed name, object _ex textures hashed name\n\n");
                 for (int i = 0; i < files.Count; i++)
                 {
                     var name = IceFile.getFileName(files[i]);
@@ -1573,7 +1573,7 @@ namespace AquaModelLibrary.Extra
                     {
                         var mso = AquaUtil.LoadMSO("mso\0", files[i]);
                         List<string> msoInfo = new List<string>();
-                        msoInfo.Add("Name, Descriptor, Group Name, [Traits]");
+                        msoInfo.Add("Name,LOD1,LOD1 Hash,LOD2,LOD2 Hash,LOD3,LOD3 Hash,LOD4,LOD4 Hash,Collision,Common (Animation, if existant),Effect,Trait 1,Trait 2,Trait 3,Trait 4,Trait 5,Trait 6,Trait 7,Trait 8,Null Hashes indicate unfound files");
                         foreach (var entry in mso.msoEntries)
                         {
                             var objFile1 = $"object/map_object/{entry.asciiName}_l1.ice";
@@ -1592,51 +1592,39 @@ namespace AquaModelLibrary.Extra
                             var objFileComHash = GetRebootHash(GetFileHash(objFileCom));
                             var objFileEffHash = GetRebootHash(GetFileHash(objFileEff));
 
-                            string entryString = $"{entry.asciiName},{entry.utf8Descriptor.Replace(',', '_')},";
-                            bool found = false;
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
                             {
-                                entryString += $"{objFile1Hash},";
-                                found = true;
+                                objFile1Hash = "";
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile2Hash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile2Hash)))
                             {
-                                entryString += $"{objFile2Hash},";
-                                found = true;
+                                objFile2Hash = "";
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile3Hash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile3Hash)))
                             {
-                                entryString += $"{objFile3Hash},";
-                                found = true;
+                                objFile3Hash = "";
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile4Hash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile4Hash)))
                             {
-                                entryString += $"{objFile4Hash},";
-                                found = true;
+                                objFile4Hash = "";
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileColHash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileColHash)))
                             {
-                                entryString += $"{objFileColHash},";
-                                found = true;
+                                objFileColHash = "";
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileComHash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileComHash)))
                             {
-                                entryString += $"{objFileComHash},";
-                                found = true;
+                                objFileComHash = "";
                             }
-                            if (File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileEffHash)))
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileEffHash)))
                             {
-                                entryString += $"{objFileEffHash},";
-                                found = true;
+                                objFileEffHash = "";
                             }
 
+                            string entryString = $"{entry.asciiName},{objFile1},{objFile1Hash},{objFile2},{objFile2Hash},{objFile3},{objFile3Hash},{objFile4},{objFile4Hash},{objFileCol},{objFileColHash},{objFileCom},{objFileComHash},{objFileEff},{objFileEffHash}" +
+                                $",[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]" +
+                                $",[{entry.asciiTrait6.Replace(',', '_')}],[{entry.asciiTrait7.Replace(',', '_')}],[{entry.asciiTrait8.Replace(',', '_')}]";
 
-
-                            entryString += $"{entry.groupName},[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]";
-                            if (found == false)
-                            {
-                                entryString += ",(Not Found)";
-                            }
                             msoInfo.Add(entryString);
                         }
                         WriteCSV(roomOutDir, "MySpace Goods.csv", msoInfo);
@@ -1912,11 +1900,7 @@ namespace AquaModelLibrary.Extra
                 masterNameList.Clear();
                 List<string> iceTracker = new List<string>();
                 GatherTextIdsStringRef(commByCat, masterNameList, strNameDicts, "LobbyAction", true);
-
-                lobbyActions.AppendLine("Files are layed out as: PSO2File NGSfile NGSCastFile NGSCasealFile NGSFigFile");
-                lobbyActions.AppendLine("There may also be a VFX ice and reboot VFX ice, which will be appended last when applicable");
-                lobbyActions.AppendLine("NGS Lobby Actions are in win32reboot, unlike most NGS player files");
-                lobbyActions.AppendLine("The first two characters of each filename are the folder name");
+                lobbyActions.AppendLine("JP Name,EN Name,Chat Command,PSO2 File,PSO2 Hash,Reboot Human,Reboot Human Hash,Reboot Cast Male, Reboot Cast Male Hash,Reboot Cast Female,Reboot Cast Female Hash,Reboot Fig,Reboot Fig Hash,PSO2 VFX,PSO2 VFX Hash,Reboot VFX,Reboot VFX Hash,Gender (Blank usually follows previous)");
 
                 for (int i = 0; i < lac.dataBlocks.Count; i++)
                 {
@@ -1926,79 +1910,79 @@ namespace AquaModelLibrary.Extra
                         continue;
                     }
                     iceTracker.Add(lac.dataBlocks[i].iceName);
-                    string output = "";
-                    bool named = false;
 
-                    output += lac.dataBlocks[i].chatCommand + ",";
-                    foreach (var dict in strNameDicts)
+                    string output = "";
+                    List<string> names = new List<string>()
+                    { 
+                        $"[Unnamed {lac.dataBlocks[i].commonReference1}]",
+                        ""
+                    };
+                    for (int j = 0; j < strNameDicts.Count && j < 2; j++)
                     {
+                        var dict = strNameDicts[j];
                         if (dict.TryGetValue(lac.dataBlocks[i].commonReference1, out string str))
                         {
-                            named = true;
-                            output += str + ",";
+                            names[j] = str;
                         }
-                        else
-                        {
-                            output += ",";
-                        }
-                    }
-
-                    //Account for lack of a name
-                    if (named == false)
-                    {
-                        output = $"[Unnamed {lac.dataBlocks[i].commonReference1}]" + output;
                     }
 
                     string classic = $"{lobbyActionStart}{lac.dataBlocks[i].iceName}";
                     string reboot = $"{lobbyActionStartReboot}{lac.dataBlocks[i].iceName}";
+                    string rebootHuman = reboot.Replace(".ice", rebootLAHuman + ".ice");
+                    string rebootCastMale = reboot.Replace(".ice", rebootLACastMale + ".ice");
+                    string rebootCastFemale = reboot.Replace(".ice", rebootLACastFemale + ".ice");
+                    string rebootF = reboot.Replace(".ice", rebootFig + ".ice");
 
                     var classicHash = GetFileHash(classic);
-                    var rebootHumanHash = GetFileHash(reboot.Replace(".ice", rebootLAHuman + ".ice"));
-                    var rebootCastMalehash = GetFileHash(reboot.Replace(".ice", rebootLACastMale + ".ice"));
-                    var rebootCastFemaleHash = GetFileHash(reboot.Replace(".ice", rebootLACastFemale + ".ice"));
-                    var rebootFigHash = GetFileHash(reboot.Replace(".ice", rebootFig + ".ice"));
-
-                    output += classicHash;
+                    var rebootHumanHash = GetRebootHash(GetFileHash(rebootHuman));
+                    var rebootCastMaleHash = GetRebootHash(GetFileHash(rebootCastMale));
+                    var rebootCastFemaleHash = GetRebootHash(GetFileHash(rebootCastFemale));
+                    var rebootFigHash = GetRebootHash(GetFileHash(rebootF));
 
                     //Some things apparently don't have reboot versions for some reason.
-                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootHumanHash)))
                     {
-                        output += ", " + rebootHumanHash;
-                        output += ", " + rebootCastMalehash;
-                        output += ", " + rebootCastFemaleHash;
-                        output += ", " + rebootFigHash;
+                        rebootHumanHash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootCastMaleHash)))
+                    {
+                        rebootCastMaleHash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootCastFemaleHash)))
+                    {
+                        rebootCastFemaleHash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootFigHash)))
+                    {
+                        rebootFigHash = "";
                     }
 
                     //Handle vfx output
-                    var vfxHash = GetFileHash(lobbyActionStart + lac.dataBlocks[i].vfxIce);
-                    var rebootVfxHash = GetFileHash(lobbyActionStartReboot + lac.dataBlocks[i].vfxIce);
+                    var vfx = lobbyActionStart + lac.dataBlocks[i].vfxIce;
+                    var vfxHash = GetFileHash(vfx);
+                    var rebootVfx = lobbyActionStartReboot + lac.dataBlocks[i].vfxIce;
+                    var rebootVfxHash = GetFileHash(rebootVfx);
 
-                    if (lac.dataBlocks[i].vfxIce != "" && lac.dataBlocks[i].vfxIce != null
-                        && File.Exists(Path.Combine(pso2_binDir, dataDir, vfxHash)))
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, vfxHash)))
                     {
-                        output += ", " + vfxHash;
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
-                        {
-                            output += ", " + rebootVfxHash;
-                        }
+                        vfxHash = "";
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
+                    {
+                        rebootVfxHash = "";
                     }
 
+                    string gender = "";
                     if (lac.dataBlocks[i].iceName.Contains("_m.ice") || lac.dataBlocks[i].iceName.Contains("_m_"))
                     {
-                        output += ", Male";
+                        gender = "Male";
                     }
                     else if (lac.dataBlocks[i].iceName.Contains("_f.ice") || lac.dataBlocks[i].iceName.Contains("_f_"))
                     {
-                        output += ", Female";
+                        gender = "Female";
                     }
-
-                    if (!File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        output += ", (Not found)";
-                    }
-
-                    output += "\n";
+                    
+                    output = $"{names[0]},{names[1]},{lac.dataBlocks[i].chatCommand},{classic},{classicHash},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{vfx},{vfxHash},{rebootVfx},{rebootVfxHash},{gender}\n";
 
                     lobbyActions.Append(output);
                 }
@@ -2016,10 +2000,7 @@ namespace AquaModelLibrary.Extra
                 List<string> iceTracker = new List<string>();
                 GatherTextIdsStringRef(commRebootByCat, masterNameList, strNameDicts, "LobbyAction", true);
 
-                lobbyActionsReboot.AppendLine("Files are layed out as: NGSHumanfile NGSCastFile NGSCasealFile NGSFigFile");
-                lobbyActionsReboot.AppendLine("There may also be a VFX ice and reboot VFX ice, which will be appended last when applicable");
-                lobbyActionsReboot.AppendLine("NGS Lobby Actions are in win32reboot, unlike most NGS player files");
-                lobbyActionsReboot.AppendLine("The first two characters of each filename are the folder name");
+                lobbyActionsReboot.AppendLine("Japanese Name,English Name,Chat Command,Reboot Human,Reboot Human Hash,Reboot Cast Male,Reboot Cast Male Hash,Reboot Cast Female,Reboot Cast Female Hash,Reboot Fig,Reboot Fig Hash,Reboot VFX,Reboot VFX Hash,Gender (Blank usually follows previous)");
 
                 foreach (var reLac in rebootLac)
                 {
@@ -2041,81 +2022,69 @@ namespace AquaModelLibrary.Extra
                             continue;
                         }
                         iceTracker.Add(iceName);
-                        string output = "";
-                        bool named = false;
-                        output += reLac.rebootDataBlocks[i].chatCommand + ",";
-                        foreach (var dict in strNameDicts)
+                        List<string> names = new List<string>()
                         {
+                            $"[Unnamed {reLac.rebootDataBlocks[i].commonReference1}]",
+                            ""
+                        };
+                        for (int j = 0; j < strNameDicts.Count && j < 2; j++)
+                        {
+                            var dict = strNameDicts[j];
                             if (dict.TryGetValue(reLac.rebootDataBlocks[i].commonReference1, out string str))
                             {
-                                named = true;
-                                output += str + ",";
-                            }
-                            else
-                            {
-                                output += ",";
+                                names[j] = str;
                             }
                         }
 
-                        //Account for lack of a name
-                        if (named == false)
-                        {
-                            output = $"[Unnamed {reLac.rebootDataBlocks[i].commonReference1}]" + output;
-                        }
                         string reboot = $"{lobbyActionStartReboot}{iceName}";
+                        string rebootHuman = reboot.Replace(".ice", rebootLAHuman + ".ice");
+                        string rebootCastMale = reboot.Replace(".ice", rebootLACastMale + ".ice");
+                        string rebootCastFemale = reboot.Replace(".ice", rebootLACastFemale + ".ice");
+                        string rebootF = reboot.Replace(".ice", rebootFig + ".ice");
 
-                        var rebootHumanHash = GetFileHash(reboot.Replace(".ice", rebootLAHuman + ".ice"));
-                        var rebootCastMalehash = GetFileHash(reboot.Replace(".ice", rebootLACastMale + ".ice"));
-                        var rebootCastFemaleHash = GetFileHash(reboot.Replace(".ice", rebootLACastFemale + ".ice"));
-                        var rebootFigHash = GetFileHash(reboot.Replace(".ice", rebootFig + ".ice"));
+                        var rebootHumanHash = GetRebootHash(GetFileHash(rebootHuman));
+                        var rebootCastMaleHash = GetRebootHash(GetFileHash(rebootCastMale));
+                        var rebootCastFemaleHash = GetRebootHash(GetFileHash(rebootCastFemale));
+                        var rebootFigHash = GetRebootHash(GetFileHash(rebootF));
 
-                        output += ", ";
                         //Some things apparently don't have reboot versions for some reason.
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootHumanHash)))
                         {
-                            output += rebootHumanHash;
+                            rebootHumanHash = "";
                         }
-                        output += ", ";
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootCastMalehash))))
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootCastMaleHash)))
                         {
-                            output += rebootCastMalehash;
+                            rebootCastMaleHash = "";
                         }
-                        output += ", ";
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootCastFemaleHash))))
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootCastFemaleHash)))
                         {
-                            output += rebootCastFemaleHash;
+                            rebootCastFemaleHash = "";
                         }
-                        output += ", ";
-                        if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootFigHash))))
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootFigHash)))
                         {
-                            output += rebootFigHash;
+                            rebootFigHash = "";
                         }
 
                         //Handle vfx output
-                        var vfxHash = GetFileHash(lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce);
-                        var rebootVfxHash = GetRebootHash(GetFileHash(lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce));
+                        var rebootVfx = lobbyActionStartReboot + reLac.rebootDataBlocks[i].vfxIce;
+                        var rebootVfxHash = GetRebootHash(GetFileHash(rebootVfx));
 
-                        if (reLac.rebootDataBlocks[i].vfxIce != "" && reLac.rebootDataBlocks[i].vfxIce != null
-                            && File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
+                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, rebootVfxHash)))
                         {
-                            output += ", " + vfxHash;
+                            rebootVfxHash = "";
                         }
 
-                        if (iceName.Contains("_m.ice") || iceName.Contains("_m_"))
+                        string gender = "";
+                        if (reLac.rebootDataBlocks[i].iceName.Contains("_m.ice") || reLac.rebootDataBlocks[i].iceName.Contains("_m_"))
                         {
-                            output += ", Male";
+                            gender = "Male";
                         }
-                        else if (iceName.Contains("_f.ice") || iceName.Contains("_f_"))
+                        else if (reLac.rebootDataBlocks[i].iceName.Contains("_f.ice") || reLac.rebootDataBlocks[i].iceName.Contains("_f_"))
                         {
-                            output += ", Female";
-                        }
-
-                        if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(rebootHumanHash))))
-                        {
-                            output += ", (Not found)";
+                            gender = "Female";
                         }
 
-                        output += "\n";
+                        string output = $"{names[0]},{names[1]},{reLac.rebootDataBlocks[i].chatCommand},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{rebootVfx},{rebootVfxHash},{gender}";
 
                         lobbyActionsReboot.Append(output);
                     }

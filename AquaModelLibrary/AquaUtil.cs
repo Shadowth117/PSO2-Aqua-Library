@@ -4235,14 +4235,170 @@ namespace AquaModelLibrary
                     var nifl = streamReader.Read<AquaCommon.NIFL>();
                     var rel = streamReader.Read<AquaCommon.REL0>();
                     streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
-                    mso.entryOffset = streamReader.Read<int>();
-                    mso.entryCount = streamReader.Read<int>();
+                    mso.msoHeader = streamReader.Read<MySpaceObjectsSettings.MSOHeader>();
 
-                    streamReader.Seek(offset + mso.entryOffset, SeekOrigin.Begin);
-                    for (int i = 0; i < mso.entryCount; i++)
+                    //Groups
+                    streamReader.Seek(offset + mso.msoHeader.groupOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < mso.msoHeader.groupCount; i++)
+                    {
+                        MySpaceObjectsSettings.MSOCategoryObject msoPair = new MySpaceObjectsSettings.MSOCategoryObject();
+                        msoPair.pair = streamReader.Read<MySpaceObjectsSettings.MSOAddressPair>();
+
+                        var bookmark = streamReader.Position();
+                        streamReader.Seek(offset + msoPair.pair.offset, SeekOrigin.Begin);
+                        msoPair.name = ReadCString(streamReader);
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+
+                        mso.msoGroups.Add(msoPair);
+                    }
+
+                    //Types
+                    streamReader.Seek(offset + mso.msoHeader.typeOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < mso.msoHeader.typeCount; i++)
+                    {
+                        MySpaceObjectsSettings.MSOCategoryObject msoPair = new MySpaceObjectsSettings.MSOCategoryObject();
+                        msoPair.pair = streamReader.Read<MySpaceObjectsSettings.MSOAddressPair>();
+
+                        var bookmark = streamReader.Position();
+                        streamReader.Seek(offset + msoPair.pair.offset, SeekOrigin.Begin);
+                        msoPair.name = ReadCString(streamReader);
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+
+                        mso.msoTypes.Add(msoPair);
+                    }
+
+                    //Entries
+                    streamReader.Seek(offset + mso.msoHeader.entryOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < mso.msoHeader.entryCount; i++)
                     {
                         MySpaceObjectsSettings.MSOEntryObject msoEntry = new MySpaceObjectsSettings.MSOEntryObject();
                         msoEntry.msoEntry = streamReader.Read<MySpaceObjectsSettings.MSOEntry>();
+
+                        var bookmark = streamReader.Position();
+                        if (msoEntry.msoEntry.asciiNameOffset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiNameOffset, SeekOrigin.Begin);
+                            msoEntry.asciiName = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiName = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait1Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait1Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait1 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait1 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait2Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait2Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait2 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait2 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait3Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait3Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait3 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait3 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait4Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait4Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait4 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait4 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait5Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait5Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait5 = ReadCString(streamReader);
+                        } else
+                        {
+                            msoEntry.asciiTrait5 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait6Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait6Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait6 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait6 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait7Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait7Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait7 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait7 = "";
+                        }
+
+                        if (msoEntry.msoEntry.asciiTrait8Offset > 0x10)
+                        {
+                            streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait8Offset, SeekOrigin.Begin);
+                            msoEntry.asciiTrait8 = ReadCString(streamReader);
+                        }
+                        else
+                        {
+                            msoEntry.asciiTrait8 = "";
+                        }
+
+                        mso.msoEntries.Add(msoEntry);
+                        streamReader.Seek(bookmark, SeekOrigin.Begin);
+                    }
+                }
+            }
+
+            return mso;
+        }
+
+        //Obsolete as of Ver2
+        public static ProtoMySpaceObjectsSettings LoadProtoMSO(string ext, byte[] file)
+        {
+            ProtoMySpaceObjectsSettings mso = null;
+            int offset;
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                string variant = null;
+                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+
+                if (variant == "NIFL")
+                {
+                    mso = new ProtoMySpaceObjectsSettings();
+                    var nifl = streamReader.Read<AquaCommon.NIFL>();
+                    var rel = streamReader.Read<AquaCommon.REL0>();
+                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
+                    mso.entryOffset = streamReader.Read<int>();
+                    mso.entryCount = streamReader.Read<int>();
+
+                    //Entries
+                    streamReader.Seek(offset + mso.entryOffset, SeekOrigin.Begin);
+                    for (int i = 0; i < mso.entryCount; i++)
+                    {
+                        ProtoMySpaceObjectsSettings.MSOEntryObject msoEntry = new ProtoMySpaceObjectsSettings.MSOEntryObject();
+                        msoEntry.msoEntry = streamReader.Read<ProtoMySpaceObjectsSettings.MSOEntry>();
 
                         var bookmark = streamReader.Position();
                         if (msoEntry.msoEntry.asciiNameOffset > 0x10)
@@ -4319,7 +4475,8 @@ namespace AquaModelLibrary
                         {
                             streamReader.Seek(offset + msoEntry.msoEntry.asciiTrait5Offset, SeekOrigin.Begin);
                             msoEntry.asciiTrait5 = ReadCString(streamReader);
-                        } else
+                        }
+                        else
                         {
                             msoEntry.asciiTrait5 = "";
                         }
@@ -4327,7 +4484,6 @@ namespace AquaModelLibrary
                         mso.msoEntries.Add(msoEntry);
                         streamReader.Seek(bookmark, SeekOrigin.Begin);
                     }
-
                 }
             }
 

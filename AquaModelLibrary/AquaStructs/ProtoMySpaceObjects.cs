@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AquaModelLibrary.AquaStructs
 {
-    public class MySpaceObjectsSettings : AquaCommon //Yes really
+    public class ProtoMySpaceObjectsSettings : AquaCommon
     {
         public List<MSOEntryObject> msoEntries = new List<MSOEntryObject>();
         public int entryOffset = -1;

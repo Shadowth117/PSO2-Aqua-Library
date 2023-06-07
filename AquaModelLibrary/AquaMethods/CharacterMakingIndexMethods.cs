@@ -1756,6 +1756,11 @@ namespace AquaModelLibrary
                     body.body2023_1 = streamReader.Read<BODY2023_1>();
                 }
 
+                if (rel0DataStart >= ver2TableAddressInt)
+                {
+                    body.bodyVer2 = streamReader.Read<BODYVer2>();
+                }
+
                 long temp = streamReader.Position();
 
                 if (IsValidOffset(body.body.dataStringPtr))
@@ -1802,6 +1807,11 @@ namespace AquaModelLibrary
                 {
                     streamReader.Seek(body.body2023_1.nodeStrPtr_1 + offset, SeekOrigin.Begin);
                     body.nodeString1 = AquaGeneralMethods.ReadCString(streamReader);
+                }
+                if (IsValidOffset(body.bodyVer2.nodeStrPtr_2))
+                {
+                    streamReader.Seek(body.bodyVer2.nodeStrPtr_2 + offset, SeekOrigin.Begin);
+                    body.nodeString2 = AquaGeneralMethods.ReadCString(streamReader);
                 }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
@@ -1894,6 +1904,10 @@ namespace AquaModelLibrary
                 if (rel0DataStart > dec14_21TableAddressInt)
                 {
                     face.unkFloatRitem = streamReader.Read<float>();
+                }
+                if (rel0DataStart > ver2TableAddressInt)
+                {
+                    face.unkVer2Int = streamReader.Read<int>();
                 }
                 long temp = streamReader.Position();
 
@@ -2075,7 +2089,7 @@ namespace AquaModelLibrary
                 }
                 acce.acceB = streamReader.Read<ACCE_B>();                   //0x1C
                 acce.acce2a = streamReader.Read<ACCE2A>();                  //0x1C
-                //This int was added to the middle of these in the Aug_3_2021 patch
+                //This float was added to the middle of these in the Aug_3_2021 patch
                 if (count >= 5977)
                 {
                     acce.flt_54 = streamReader.Read<float>();                 //0x4
@@ -2085,12 +2099,14 @@ namespace AquaModelLibrary
                 { 
                     acce.acce12List.Add(ReadAcce12Object(streamReader, count));
                 }
-
                 if(cmxDateSize >= oct4_22TableAddressInt)
                 {
                     acce.effectNamePtr = streamReader.Read<int>();
                 }
-
+                if (cmxDateSize >= ver2TableAddressInt)
+                {
+                    acce.accev2 = streamReader.Read<ACCEV2>();
+                }
                 if (cmxDateSize >= aug17_22TableAddressInt)
                 {
                     acce.flt_90 = streamReader.Read<float>();
@@ -2189,6 +2205,24 @@ namespace AquaModelLibrary
                             acce.effectName = AquaGeneralMethods.ReadCString(streamReader);
                         }
 
+                        if (cmxDateSize >= ver2TableAddressInt)
+                        {
+                            if (acce.accev2.acceString16Ptr + offset > 0)
+                            {
+                                streamReader.Seek(acce.accev2.acceString16Ptr + offset, SeekOrigin.Begin);
+                                acce.nodeAttach16 = AquaGeneralMethods.ReadCString(streamReader);
+                            }
+                            if (acce.accev2.acceString17Ptr + offset > 0)
+                            {
+                                streamReader.Seek(acce.accev2.acceString17Ptr + offset, SeekOrigin.Begin);
+                                acce.nodeAttach17 = AquaGeneralMethods.ReadCString(streamReader);
+                            }
+                            if (acce.accev2.acceString18Ptr + offset > 0)
+                            {
+                                streamReader.Seek(acce.accev2.acceString18Ptr + offset, SeekOrigin.Begin);
+                                acce.nodeAttach18 = AquaGeneralMethods.ReadCString(streamReader);
+                            }
+                        }
                     }
                 }
 

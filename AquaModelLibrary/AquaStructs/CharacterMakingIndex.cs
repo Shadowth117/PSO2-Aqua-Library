@@ -11,7 +11,8 @@ namespace AquaModelLibrary
         public static int jun7_22TableAddressInt = 0x2F6C44; //Kvaris update cmx
         public static int aug17_22TableAddressInt = 0x307D6C; //August 17th 2022 update cmx
         public static int oct4_22TableAddressInt = 0x00320b1C; //October 5th 2022 update cmx
-        public static int jan25_23TableAddressInt = 0x0034689C; //October 5th 2022 update cmx
+        public static int jan25_23TableAddressInt = 0x0034689C; //January 25th 2023 update cmx
+        public static int ver2TableAddressInt = 0x0039B5EC; //Version 2, June 6th 2023 update cmx
 
         public static bool pcDirectory = true;
         public static string dataDir 
@@ -181,6 +182,7 @@ namespace AquaModelLibrary
             public BODY2 body2;
             public BODY40Cap body40cap;
             public BODY2023_1 body2023_1;
+            public BODYVer2 bodyVer2;
             public string dataString;
             public string texString1;
             public string texString2;
@@ -190,6 +192,7 @@ namespace AquaModelLibrary
             public string texString6;
             public string nodeString0;
             public string nodeString1;
+            public string nodeString2;
         }
 
         public struct BODY
@@ -252,6 +255,15 @@ namespace AquaModelLibrary
             public int nodeStrPtr_1;
         }
 
+        public struct BODYVer2
+        {
+            public int nodeStrPtr_2;
+            public float flt_8C;
+            public float flt_90;
+            public float flt_94;
+            public float flt_98;
+        }
+
         public class BBLYObject : BaseCMXObject
         {
             public BBLY bbly;
@@ -310,6 +322,7 @@ namespace AquaModelLibrary
             public FACERitem faceRitem;
             public FACE2 face2;
             public float unkFloatRitem;
+            public int unkVer2Int;
 
             public string dataString;
             public string texString1;
@@ -455,6 +468,7 @@ namespace AquaModelLibrary
             public float flt_54;
             public ACCE2B acce2b;
             public List<ACCE_12Object> acce12List = new List<ACCE_12Object>();
+            public ACCEV2 accev2;
             public int effectNamePtr;
             public float flt_90;
 
@@ -480,7 +494,11 @@ namespace AquaModelLibrary
             public string nodeAttach14;
 
             public string nodeAttach15;
+
+            //Ver2 strings
             public string nodeAttach16;
+            public string nodeAttach17;
+            public string nodeAttach18;
 
             public string effectName;
         }
@@ -543,6 +561,13 @@ namespace AquaModelLibrary
             public int unkInt8;
             public int unkInt9;
             public int unkInt10;
+        }
+
+        public struct ACCEV2
+        {
+            public int acceString16Ptr;
+            public int acceString17Ptr;
+            public int acceString18Ptr;
         }
 
         public class ACCE_12Object

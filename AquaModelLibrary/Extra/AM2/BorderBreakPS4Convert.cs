@@ -2,6 +2,7 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -27,6 +28,7 @@ namespace AquaModelLibrary.Extra.AM2
                 for(int b = skeleton.Count - 1; b >= 0; b--)
                 {
                     var bone = skeleton[b];
+                    //Debug.WriteLine($"{bone.boneStruct.usht_08} {bone.boneStruct.usht_0A} {bone.name}");
                     var node = new AquaNode.NODE();
                     node.boneName.SetString(bone.name);
                     node.animatedFlag = 1;
@@ -68,11 +70,23 @@ namespace AquaModelLibrary.Extra.AM2
 
                     Matrix4x4 mat = Matrix4x4.Identity;
                     mat *= Matrix4x4.CreateScale(node.scale);
-                    var rotation = Matrix4x4.CreateRotationX(node.eulRot.X) *
-                        Matrix4x4.CreateRotationY(node.eulRot.Y) *
-                        Matrix4x4.CreateRotationZ(node.eulRot.Z);
-                    mat *= rotation;
-                    mat *= Matrix4x4.CreateTranslation(node.pos);
+                    Matrix4x4 rotation = Matrix4x4.Identity;
+
+                    if (node.boneName.GetString() == "cl_momo_l" || node.boneName.GetString() == "cl_momo_r")
+                    {
+
+                    }
+                    else
+                    {
+                    }
+                        rotation = Matrix4x4.CreateRotationX(node.eulRot.X) *
+                            Matrix4x4.CreateRotationY(node.eulRot.Y) *
+                            Matrix4x4.CreateRotationZ(node.eulRot.Z);
+                        mat *= rotation;
+                        mat *= Matrix4x4.CreateTranslation(node.pos);
+                    //}
+                    
+                    
 
                     //If there's a parent, multiply by it
                     if (node.parentId > -1)
