@@ -20,7 +20,7 @@ namespace AquaModelLibrary
     //Intended to read *n.rel files (n rel files are the geometry)
     public class PSONRelConvert
     {
-        public List<NODE> nodes = new List<NODE>();
+        public AquaNode aqn = AquaNode.GenerateBasicAQN();
         public ClassicAquaObject aqObj = new ClassicAquaObject();
         public const double BAMSvalue = ((2 * Math.PI) / 65536.0);
         public List<string> texNames = new List<string>();
@@ -334,23 +334,6 @@ namespace AquaModelLibrary
                 ExtractXVM(xvmName, texNames, outFolder);
             }
 
-
-
-            //Create root AQN node
-            NODE aqNode = new NODE();
-            aqNode.animatedFlag = 1;
-            aqNode.parentId = -1;
-            aqNode.unkNode = -1;
-            aqNode.pos = new Vector3();
-            aqNode.eulRot = new Vector3();
-            aqNode.scale = new Vector3(1, 1, 1);
-            aqNode.m1 = new Vector4(1, 0, 0, 0);
-            aqNode.m2 = new Vector4(0, 1, 0, 0);
-            aqNode.m3 = new Vector4(0, 0, 1, 0);
-            aqNode.m4 = new Vector4(0, 0, 0, 1);
-            aqNode.boneName.SetString("RootNode");
-            nodes.Add(aqNode);
-
             //Loop through nodes and parse geometry
             for (int i = 0; i < dSections.Count; i++)
             {
@@ -456,8 +439,8 @@ namespace AquaModelLibrary
             aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
             aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
             aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
-            aqNode.boneName.SetString("Node " + nodes.Count);
-            nodes.Add(aqNode);
+            aqNode.boneName.SetString("Node " + aqn.nodeList.Count);
+            aqn.nodeList.Add(aqNode);
 
             //Not sure what it means when these happen, but sometimes they do. Maybe hardcoded logic?
             if(node.attachOffset > fileSize || node.siblingOffset > fileSize || node.childOffset > fileSize)
@@ -476,7 +459,7 @@ namespace AquaModelLibrary
             if (node.childOffset != 0)
             {
                 streamReader.Seek(node.childOffset, SeekOrigin.Begin);
-                readNode(mat, nodes.Count - 1);
+                readNode(mat, aqn.nodeList.Count - 1);
             }
 
             //Read the sibling
@@ -490,7 +473,7 @@ namespace AquaModelLibrary
         public void readMesh(Matrix4x4 mat)
         {
             currentMesh = new GenericTriangles();
-            currentMesh.baseMeshNodeId = nodes.Count - 1;
+            currentMesh.baseMeshNodeId = aqn.nodeList.Count - 1;
             uint vertOffset;
             uint triOffsetA;
             uint triOffsetB;

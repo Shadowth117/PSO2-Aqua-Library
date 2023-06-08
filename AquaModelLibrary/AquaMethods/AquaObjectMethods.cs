@@ -2111,9 +2111,18 @@ namespace AquaModelLibrary
 
         public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
-            outModel.meshNames.Add(model.meshNames[meshId]);
-            outModel.vtxlList.Add(model.vtxlList[meshId]);
-            outModel.tempTris.Add(model.tempTris[meshId]);
+            if(model.meshNames.Count > meshId)
+            {
+                outModel.meshNames.Add(model.meshNames[meshId]);
+            }
+            if(model.vtxlList.Count > meshId)
+            {
+                outModel.vtxlList.Add(model.vtxlList[meshId]);
+            }
+            if(model.tempTris.Count > meshId)
+            {
+                outModel.tempTris.Add(model.tempTris[meshId]);
+            }
         }
 
         //To be honest I don't really know what these actually do, but this seems to generate the structure roughly the way the game's exporter does.

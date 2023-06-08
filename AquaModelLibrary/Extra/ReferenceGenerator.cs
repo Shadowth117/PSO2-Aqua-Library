@@ -2084,7 +2084,7 @@ namespace AquaModelLibrary.Extra
                             gender = "Female";
                         }
 
-                        string output = $"{names[0]},{names[1]},{reLac.rebootDataBlocks[i].chatCommand},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{rebootVfx},{rebootVfxHash},{gender}";
+                        string output = $"{names[0]},{names[1]},{reLac.rebootDataBlocks[i].chatCommand},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{rebootVfx},{rebootVfxHash},{gender}\n";
 
                         lobbyActionsReboot.Append(output);
                     }

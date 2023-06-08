@@ -2972,6 +2972,7 @@ namespace AquaModelTool
             {
                 foreach (var path in openFileDialog.FileNames)
                 {
+                    aquaUI.aqua.aquaModels.Clear();
                     bool useSubPath = true;
                     string subPath = "";
                     string fname = path;
@@ -2991,8 +2992,15 @@ namespace AquaModelTool
                     aqua.aquaModels.Add(set);
                     aqua.ConvertToClassicPSO2Mesh(false, false, false, false, false, false, false);
 
-                    fname = fname.Replace(".rel", ".trp");
-                    aqua.WriteClassicNIFLModel(fname, fname);
+                    if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                    {
+                        aquaUI.aqua.aquaModels.Add(set);
+                        aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                        set.models[0].ConvertToLegacyTypes();
+                        set.models[0].CreateTrueVertWeights();
+
+                        FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], rel.aqn, new List<AquaMotion>(), Path.ChangeExtension(fname, ".fbx"), new List<string>(), new List<Matrix4x4>(), false);
+                    }
                 }
             }
         }
