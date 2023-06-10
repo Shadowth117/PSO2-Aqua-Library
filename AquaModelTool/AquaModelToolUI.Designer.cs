@@ -582,8 +582,8 @@
             // extractBorderBreakPS4FARCToolStripMenuItem
             // 
             this.extractBorderBreakPS4FARCToolStripMenuItem.Name = "extractBorderBreakPS4FARCToolStripMenuItem";
-            this.extractBorderBreakPS4FARCToolStripMenuItem.Size = new System.Drawing.Size(329, 22);
-            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA, spr_*.bin, *tex.bin";
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Size = new System.Drawing.Size(377, 22);
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA, *_obj.bin, spr_*.bin, *tex.bin";
             this.extractBorderBreakPS4FARCToolStripMenuItem.Click += new System.EventHandler(this.extractBorderBreakPS4FARCToolStripMenuItem_Click);
             // 
             // setMOTBONEbinPathToolStripMenuItem

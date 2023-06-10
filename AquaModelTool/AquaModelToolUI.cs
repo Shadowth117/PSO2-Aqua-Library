@@ -4441,7 +4441,7 @@ namespace AquaModelTool
         {
             var openFileDialog = new OpenFileDialog()
             {
-                Title = "Select Border Break archive file",
+                Title = "Select Border Break archive file (Models rigging and skinning is broken at this time)",
                 Filter = "*_obj.bin, *.pfa, spr_*.bin, *tex.bin files|*_obj.bin;spr_*.bin;*tex.bin;*.pfa|Model archive files *_obj.bin|*_obj.bin|spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin|pfa files|*.pfa",
                 FileName = "",
                 Multiselect = true
