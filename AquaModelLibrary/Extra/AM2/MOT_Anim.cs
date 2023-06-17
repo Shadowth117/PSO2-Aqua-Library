@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Extra.AM2
                 mot.btList = streamReader.ReadBytes(motHead.offset0, motHead.offset0ByteCount).ToList();
 
                 //Halves, seemingly frame data? Some data may be a different data type. Unclear at a glance how to use
-                streamReader.Seek(motHead.offset1, System.IO.SeekOrigin.Current);
+                streamReader.Seek(motHead.offset1, System.IO.SeekOrigin.Begin);
                 List<Half> halves = new List<Half>();
                 for(int h = 0; h < motHead.offset1HalfFloatCount; h++)
                 {
