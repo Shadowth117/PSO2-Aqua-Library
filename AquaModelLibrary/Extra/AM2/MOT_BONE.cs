@@ -119,7 +119,7 @@ namespace AquaModelLibrary.Extra.AM2
             public ushort usht_0E;
 
             public Vector3 position;
-            public Vector3 eulerRotation;
+            public Vector3 eulerRotation; //Appears to be local rotations in radians, rotation order may be conditionally swapped
             public Vector3 scale;
             
             public int childBoneCount;

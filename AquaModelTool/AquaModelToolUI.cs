@@ -4561,7 +4561,8 @@ namespace AquaModelTool
             using (Stream stream = new MemoryStream(File.ReadAllBytes(borderBreakPS4BonePath)))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                borderBreakPS4Bones = BorderBreakPS4Convert.motBonesToAQN(new MOT_BONE(streamReader));
+                var motBones = new MOT_BONE(streamReader);
+                borderBreakPS4Bones = BorderBreakPS4Convert.motBonesToAQN(motBones);
                 borderBreakPS4Bones.Add(AquaNode.GenerateBasicAQN());
             }
             List<NGSAquaObject> aqps;
@@ -4619,6 +4620,28 @@ namespace AquaModelTool
                     FbxExporter.ExportToFile(aquaUI.aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), fname, new List<string>(), new List<Matrix4x4>(), false);
                 }
 
+            }
+        }
+
+        private void readMotAnimToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select mot_ animation file",
+                Filter = "mot_man.bin, mot_rba.bin, mot_rbb.bin, mot_rbc.bin, mot_rbd.bin|mot_man.bin;mot_rba.bin;mot_rbb.bin;mot_rbc.bin;mot_rbd.bin",
+                FileName = "",
+                Multiselect = true,
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach(var file in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(file)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var anims = new MOT_Anim(streamReader);
+                    }
+                }
             }
         }
     }

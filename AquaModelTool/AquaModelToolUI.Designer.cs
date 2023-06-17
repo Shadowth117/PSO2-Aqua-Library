@@ -154,6 +154,7 @@
             this.readFCLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.readMotAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -998,7 +999,8 @@
             this.scanPOS0GapToolStripMenuItem,
             this.gatherMatchingCMSHNamesToolStripMenuItem,
             this.exportLuaToolStripMenuItem,
-            this.readFCLToolStripMenuItem});
+            this.readFCLToolStripMenuItem,
+            this.readMotAnimToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -1161,6 +1163,13 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // readMotAnimToolStripMenuItem
+            // 
+            this.readMotAnimToolStripMenuItem.Name = "readMotAnimToolStripMenuItem";
+            this.readMotAnimToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readMotAnimToolStripMenuItem.Text = "ReadMotAnim";
+            this.readMotAnimToolStripMenuItem.Click += new System.EventHandler(this.readMotAnimToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -1308,6 +1317,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
         private System.Windows.Forms.ToolStripMenuItem extractBorderBreakPS4FARCToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setMOTBONEbinPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readMotAnimToolStripMenuItem;
     }
 }
 

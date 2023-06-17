@@ -34,7 +34,7 @@ namespace AquaModelLibrary.Extra.AM2
                     node.animatedFlag = 1;
                     node.boneShort1 = 0x1C0;
                     node.pos = bone.boneStruct.position;
-                    node.eulRot = bone.boneStruct.eulerRotation * (float)(360 / Math.PI);
+                    node.eulRot = bone.boneStruct.eulerRotation * (float)(180 / Math.PI);
                     node.scale = new Vector3(1, 1, 1);
                     node.parentId = -1;
                     node.nextSibling = -1;
@@ -66,27 +66,20 @@ namespace AquaModelLibrary.Extra.AM2
                 //Set inverse world matrices
                 for(int b = 0; b < aqn.nodeList.Count; b++)
                 {
+                    var bone = skeleton[b];
                     var node = aqn.nodeList[b];
 
                     Matrix4x4 mat = Matrix4x4.Identity;
                     mat *= Matrix4x4.CreateScale(node.scale);
                     Matrix4x4 rotation = Matrix4x4.Identity;
 
-                    if (node.boneName.GetString() == "cl_momo_l" || node.boneName.GetString() == "cl_momo_r")
-                    {
 
-                    }
-                    else
-                    {
-                    }
-                        rotation = Matrix4x4.CreateRotationX(node.eulRot.X) *
-                            Matrix4x4.CreateRotationY(node.eulRot.Y) *
-                            Matrix4x4.CreateRotationZ(node.eulRot.Z);
-                        mat *= rotation;
-                        mat *= Matrix4x4.CreateTranslation(node.pos);
-                    //}
-                    
-                    
+                    rotation = Matrix4x4.CreateRotationX(bone.boneStruct.eulerRotation.X) *
+                        Matrix4x4.CreateRotationY(bone.boneStruct.eulerRotation.Y) *
+                        Matrix4x4.CreateRotationZ(bone.boneStruct.eulerRotation.Z);
+
+                    mat *= rotation;
+                    mat *= Matrix4x4.CreateTranslation(node.pos);
 
                     //If there's a parent, multiply by it
                     if (node.parentId > -1)
