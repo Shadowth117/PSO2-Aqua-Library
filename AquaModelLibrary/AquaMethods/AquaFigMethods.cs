@@ -240,12 +240,13 @@ namespace AquaModelLibrary.AquaMethods
                 else
                 {
                     effMapObject.knownType = false;
-                    Trace.WriteLine($"Undefined effect type '{effMapObject.type}' found!");
+                    Debug.WriteLine($"Undefined effect type '{effMapObject.type}' found! Index {i}, address {effPtrList[i]:X}");
                 }
 
                 cmdList.Add(effMapObject);
             }
 
+            
             return cmdList;
         }
 
