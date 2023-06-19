@@ -2,6 +2,7 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -64,7 +65,7 @@ namespace AquaModelLibrary.Extra.AM2
         {
             header = streamReader.Read<motionHeader>();
 
-            //Read skeleton names
+            //Read motion names
             streamReader.Seek(header.motionNameOffsets, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < header.motionCount; i++)
             {
@@ -77,7 +78,7 @@ namespace AquaModelLibrary.Extra.AM2
                 motionNames.Add(AquaGeneralMethods.ReadCString(streamReader));
             }
 
-            //Read skeletons
+            //Read motions
             streamReader.Seek(header.motionOffsets, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < header.motionCount; i++)
             {
