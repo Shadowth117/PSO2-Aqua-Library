@@ -1982,7 +1982,7 @@ namespace AquaModelLibrary.Extra
                         gender = "Female";
                     }
                     
-                    output = $"{names[0]},{names[1]},{lac.dataBlocks[i].chatCommand},{classic},{classicHash},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{vfx},{vfxHash},{rebootVfx},{rebootVfxHash},{gender}\n";
+                    output = $"{Escape(names[0])},{Escape(names[1])},{Escape(lac.dataBlocks[i].chatCommand)},{classic},{classicHash},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{vfx},{vfxHash},{rebootVfx},{rebootVfxHash},{gender}\n";
 
                     lobbyActions.Append(output);
                 }
@@ -2084,7 +2084,7 @@ namespace AquaModelLibrary.Extra
                             gender = "Female";
                         }
 
-                        string output = $"{names[0]},{names[1]},{reLac.rebootDataBlocks[i].chatCommand},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{rebootVfx},{rebootVfxHash},{gender}\n";
+                        string output = $"{Escape(names[0])},{Escape(names[1])},{Escape(reLac.rebootDataBlocks[i].chatCommand)},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{rebootVfx},{rebootVfxHash},{gender}\n";
 
                         lobbyActionsReboot.Append(output);
                     }
