@@ -1877,9 +1877,9 @@ namespace AquaModelLibrary.Extra
                     }
 
 
-                    subMotions[cat].Insert(0, "Files are layed out as: NGSHumanfile NGSCastFile NGSCasealFile NGSFigFile\n" +
-                        "Substitute Motions are in win32reboot, unlike most NGS player files\n" +
-                        "The first two characters of each filename are the folder name\n\n");
+                    subMotions[cat].Insert(0, "JP Name,EN Name,id,Human Hash,Classic Cast Hash,Classic Caseal Hash,.fig Hash," +
+                        "Substitute Motions are in win32reboot, unlike most NGS player files. " +
+                        "The first two characters of each filename are the folder name\n");
 
                     WriteCSV(playerRAnimDirOut, $"SubstituteMotion{sub}.csv", subMotions[cat]);
                 }
