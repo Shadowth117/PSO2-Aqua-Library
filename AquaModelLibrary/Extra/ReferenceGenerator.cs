@@ -1817,9 +1817,10 @@ namespace AquaModelLibrary.Extra
                         if (sub.TryGetValue(i, out List<string> dict))
                         {
                             named = true;
-                            foreach (string str in dict)
+                            for (int j = 0; j < dict.Count && j < 2; j++)
                             {
-                                output += str + ",";
+                                string str = dict[j];
+                                output += Escape(str) + ",";
                             }
                         }
                         else
@@ -1830,7 +1831,7 @@ namespace AquaModelLibrary.Extra
                         //Account for lack of a name
                         if (named == false)
                         {
-                            output = $"[Unnamed {i}]" + output;
+                            output = $"[Unnamed {i}]," + output;
                         }
 
                         output += ToThree(i);
