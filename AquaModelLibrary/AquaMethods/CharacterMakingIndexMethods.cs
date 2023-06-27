@@ -1905,7 +1905,7 @@ namespace AquaModelLibrary
                 {
                     face.unkFloatRitem = streamReader.Read<float>();
                 }
-                if (rel0DataStart > ver2TableAddressInt)
+                if (rel0DataStart >= ver2TableAddressInt)
                 {
                     face.unkVer2Int = streamReader.Read<int>();
                 }
