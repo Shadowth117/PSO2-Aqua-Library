@@ -379,6 +379,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Libraries\NvTriStripDotNet.dll" />
+    <Content Include="Libraries\oo2core_6_win64.dll" />
     <Content Include="Libraries\ooz.x64.dll" />
   </ItemGroup>
   <ItemGroup>
