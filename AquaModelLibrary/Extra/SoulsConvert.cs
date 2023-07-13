@@ -285,8 +285,10 @@ namespace AquaModelLibrary.Extra
                     extension = Path.GetExtension(filePath);
                 }
 
+#if !DEBUG
                 try
                 {
+#endif
                     if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(bndFile.Bytes) || SoulsFormats.SoulsFile<SoulsFormats.FLVER2>.Is(bndFile.Bytes) || SoulsFormats.SoulsFile<SoulsFormats.Other.MDL4>.Is(bndFile.Bytes))
                     {
                         Directory.CreateDirectory(outPath);
@@ -317,11 +319,13 @@ namespace AquaModelLibrary.Extra
                             File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
                         }
                     }
-                }
+#if !DEBUG
+            }
                 catch
                 {
                     Debug.WriteLine(Path.Combine(outPath, fileName));
                 }
+#endif
             }
 
         }
