@@ -124,6 +124,27 @@ namespace AquaModelLibrary.BluePoint.CANI
                     break;
                 case (ushort)CANIFrameType.Rotation:
                 case (ushort)CANIFrameType.x318:
+                    for (int i = 0; i < entryCount; i++)
+                    {
+                        frameDataUshorts.Add(sr.Read<ushort>());
+                    }
+                    AquaGeneralMethods.AlignReader(sr, 0x10);
+
+                    //Similar confusion
+                    bookmark2 = sr.Position();
+                    for (int i = 0; i < entryCount; i++)
+                    {
+                        frameDataVec3s.Add(new Vector3(sr.Read<Half>(), sr.Read<Half>(), sr.Read<Half>()));
+                    }
+                    //Read a second pass as shorts for analysis
+                    sr.Seek(bookmark2, System.IO.SeekOrigin.Begin);
+                    for (int i = 0; i < entryCount; i++)
+                    {
+                        frameDataUshorts2.Add(sr.Read<ushort>());
+                        frameDataUshorts2.Add(sr.Read<ushort>());
+                        frameDataUshorts2.Add(sr.Read<ushort>());
+                    }
+                    break;
                 case (ushort)CANIFrameType.x319:
                 case (ushort)CANIFrameType.vertMorphData0:
                 case (ushort)CANIFrameType.vertMorphData1:
