@@ -39,9 +39,9 @@ namespace AquaModelLibrary.BluePoint.CANI
         public ushort usht_0E;
 
         public int int_10;
-        public int fileFps;
-        public int ptr_18;
-        public float flt_1C;
+        public int int_14; //Usually 0x30
+        public int caniFooterPtr;
+        public float fps;
 
         public ushort usht_20;
         public ushort usht_22;

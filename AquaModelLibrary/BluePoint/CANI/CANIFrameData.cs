@@ -11,7 +11,7 @@ namespace AquaModelLibrary.BluePoint.CANI
 {
     public enum CANIFrameType : ushort
     {
-        Position = 0x315,
+        Position = 0x315,   //Vector3
         Scale = 0x316,      //Scale?
         Rotation = 0x317,
         x318 = 0x318,      //Another Vector3 of halfs
@@ -32,7 +32,8 @@ namespace AquaModelLibrary.BluePoint.CANI
         public List<ushort> frameTimeUshorts = new List<ushort>(); //Usually frame time related?? None of the repeated ushorts at the end are counted
         public List<ushort> frameDataUshorts = new List<ushort>(); 
         public List<Vector3> frameDataVec3s = new List<Vector3>(); 
-        public List<Quaternion> frameDataQuats = new List<Quaternion>(); 
+        public List<Quaternion> frameDataQuats = new List<Quaternion>();
+        public int _baseOffset = -1;
 
         public ushort variant;    //Type? 
         public ushort entryCount;
@@ -49,13 +50,15 @@ namespace AquaModelLibrary.BluePoint.CANI
 
         }
 
-        public CANIFrameData(BufferedStreamReader sr)
+        public CANIFrameData(BufferedStreamReader sr, int baseOffset)
         {
+            _baseOffset = baseOffset;
             variant = sr.Read<ushort>();
             entryCount = sr.Read<ushort>();
             unkShort1 = sr.Read<ushort>();
-            dataOffset = sr.Read<ushort>();
+            dataOffset = sr.Read<ushort>(); //Offset is relative to the start of the frameData definitions
 
+            long bookmark = -1;
             switch (variant)
             {
                 case (ushort)CANIFrameType.Position:
@@ -63,11 +66,13 @@ namespace AquaModelLibrary.BluePoint.CANI
                 case (ushort)CANIFrameType.Rotation:
                 case (ushort)CANIFrameType.x318:
                 case (ushort)CANIFrameType.x319:
+                    bookmark = sr.Position();
                     break;
                 case (ushort)CANIFrameType.vertMorphData0:
                     userData0 = sr.Read<ushort>();
                     userData1 = sr.Read<ushort>();
                     userData2 = sr.Read<ushort>();
+                    bookmark = sr.Position();
                     break;
                 case (ushort)CANIFrameType.vertMorphData1:
                 case (ushort)CANIFrameType.x41C:
@@ -76,12 +81,14 @@ namespace AquaModelLibrary.BluePoint.CANI
                 case (ushort)CANIFrameType.x40F:
                 case (ushort)CANIFrameType.x410:
                     userData0 = sr.Read<ushort>();
+                    bookmark = sr.Position();
                     break;
                 default:
                     Debug.WriteLine($"new Variant detected: {variant:X}");
-                    break;
+                    throw new Exception();
             }
 
+            sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
         }
     }
 }
