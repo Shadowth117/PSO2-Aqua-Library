@@ -31,7 +31,7 @@ namespace CMXPatcher
         public string pso2_binDir;
         public IceFile cmxIce;
         public CharacterMakingIndex cmx;
-        public byte[] cmxRaw; //Would be nice to reassemble these at some point, but it's it's a large format and it's easier to just edit a few things directly.
+        public byte[] cmxRaw;
 
         public CMXPatchHandler()
         {
@@ -276,7 +276,7 @@ namespace CMXPatcher
             {
                 var cmxText = File.ReadAllLines(file);
                 var cmxEntry = new List<string>();
-                string cmxType = null;
+                string cmxType = "";
                 int cmxId = -1;
                 foreach(var line in cmxText)
                 {
@@ -362,7 +362,7 @@ namespace CMXPatcher
                 default:
                     break;
             }
-            cmxType = null;
+            cmxType = "";
             cmxId = -1;
         }
 

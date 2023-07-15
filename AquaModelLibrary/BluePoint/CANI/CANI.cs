@@ -34,7 +34,7 @@ namespace AquaModelLibrary.BluePoint.CANI
                 }
                 caniFrameDataList.Add(caniFrameData);
 
-                //Large data
+                //Large data, under some conditions, this will be empty and simply point to the CANIFooter
                 sr.Seek(set.largeDataPointer, System.IO.SeekOrigin.Begin);
             }
         }

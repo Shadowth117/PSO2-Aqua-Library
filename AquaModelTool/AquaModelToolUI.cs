@@ -1837,7 +1837,7 @@ namespace AquaModelTool
 
                 int frameToHit = 6;
                 int tfmType = 3;
-                int tfmType2 = 2;
+                //int tfmType2 = 2;
                 var vec4 = new System.Numerics.Vector4(5, 5, 5, 0);
                 var vec4_2 = new System.Numerics.Vector4(0.707f, 0, -0.707f, 0);
 
@@ -1940,7 +1940,7 @@ namespace AquaModelTool
 
                 int frameToHit = 62;
                 int tfmType = 3;
-                int tfmType2 = 2;
+                //int tfmType2 = 2;
                 var vec4 = new System.Numerics.Vector4(5, 5, 5, 0);
                 var vec4_2 = new System.Numerics.Vector4(0.707f, 0, -0.707f, 0);
 
