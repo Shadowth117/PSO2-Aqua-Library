@@ -38,6 +38,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
                     default:
                         throw new Exception($"Unexpected object {type0.ToString("X")} discovered");
                 }
+                /*
                 type0 = sr.Peek<int>();
 
                 //Try to account for weird scenarios where sizes don't align? Idk wtf the game is doing
@@ -46,6 +47,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
                     sr.Seek(1, System.IO.SeekOrigin.Current);
                     type0 = sr.Peek<int>();
                 }
+                */
             }
         }
     }
