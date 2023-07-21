@@ -425,3 +425,7 @@ obj/Release/netstandard2.1/
 SoulsModelTool/obj/
 
 SoulsModelTool/bin/
+
+AquaModelLibrary.Noesis/bin/
+
+AquaModelLibrary.Noesis/obj/

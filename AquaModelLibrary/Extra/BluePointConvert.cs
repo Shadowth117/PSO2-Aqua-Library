@@ -375,7 +375,7 @@ namespace AquaModelLibrary.Extra
                 mat.texNames.Add(texName);
                 aqp.tempMats.Add(mat);
 
-                if (mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0)
+                if ((mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0) || (mesh.header.matList[m].startingFaceIndex == -1 && mesh.header.matList[m].endingFaceIndex == -1))
                 {
                     startFace = currentFace;
                     faceCount = mesh.faceData.faceList.Count - currentFace;

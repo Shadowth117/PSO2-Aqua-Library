@@ -377,7 +377,7 @@ namespace AquaModelLibrary.Extra
 
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
         {
-            mirrorMat = mirrorMatY;
+            mirrorMat = mirrorMatZ;
             AquaObject aqp = new NGSAquaObject();
             List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
             aqn = new AquaNode();

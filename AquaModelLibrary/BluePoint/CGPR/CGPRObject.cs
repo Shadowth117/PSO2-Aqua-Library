@@ -8,6 +8,11 @@ using System.Text;
 
 namespace AquaModelLibrary.BluePoint.CAWS
 {
+    public enum CGPRMagic : uint
+    {
+        xC1A69458 = 0x5894A6C1,
+        xFAE88582 = 0x8285E8FA,
+    }
     public abstract class CGPRObject
     {
         public uint magic;
@@ -153,6 +158,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
             {
                 bt_sub2Test0 = sr.Read<byte>();
             }
+            stringLengthPlus1 = sr.Read<byte>();
             stringLength = sr.Read<byte>();
             cmdlPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), stringLength));
             sr.Seek(stringLength, System.IO.SeekOrigin.Current);

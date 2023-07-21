@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary;
 using AquaModelLibrary.AquaMethods;
+using AquaModelLibrary.BluePoint.CAWS;
 using AquaModelLibrary.Extra;
 using AquaModelLibrary.Extra.AM2;
 using AquaModelLibrary.Native.Fbx;
@@ -4640,6 +4641,28 @@ namespace AquaModelTool
                     using (var streamReader = new BufferedStreamReader(stream, 8192))
                     {
                         var anims = new MOT_Anim(streamReader);
+                    }
+                }
+            }
+        }
+
+        private void readCGPRToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select CGPR file",
+                Filter = "CGPR file|*.cgpr",
+                FileName = "",
+                Multiselect = true,
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(file)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var cgpr = new CGPR(streamReader);
                     }
                 }
             }
