@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.AquaMethods;
 using Reloaded.Memory.Streams;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,6 +12,9 @@ namespace AquaModelLibrary.Noesis
         public static int NOESIS_PLUGIN_VERSION = 3;
         public static string g_pPluginName = "PSO2";
         public static string g_pPluginDesc = "Phantasy Star Online 2: New Genesis - aqp, aqo, trp, tro, prm, prx, tcb| Phantasy Star Nova - axs, aif| Phantasy Star Universe .xnj, .xnr (model)| Demon's Souls (2020) .cmsh| plugin by Shadowth117";
+        public static GCHandle dataCheckHandle;
+        public delegate bool AquaModelCheck(byte* fileBuffer, nint bufferLen, noeRAPI_s* rapi);
+
         //=========================================
         //Main Noesis interface
         //=========================================
@@ -21,15 +25,17 @@ namespace AquaModelLibrary.Noesis
         {
             var api = new NoesisFunctions(mathfn, noepfn);
 
-            //var desc = Marshal.StringToBSTR("PSO2 model (.aqp, .aqo, .trp, .tro)");
-            //var types = Marshal.StringToBSTR(".aqp;.aqo;.trp;.tro"); 
-            
+            var desc = Marshal.StringToBSTR("PSO2 model (.aqp, .aqo, .trp, .tro)");
+            var types = Marshal.StringToBSTR(".aqp;.aqo;.trp;.tro");
+
+            dataCheckHandle = GCHandle.Alloc(DummyMethod, GCHandleType.Pinned);
             //pso2 and ngs models
-            //var fh = api.npAPI_Register((byte*)desc.ToPointer(), (byte*)types.ToPointer());
-            
+            //File.WriteAllBytes("C:\\prenpapiregister.bin", new byte[0]);
+            var fh = api.npAPI_Register((byte*)desc.ToPointer(), (byte*)types.ToPointer());
+            //File.WriteAllBytes("C:\\postnpapiregister.bin", BitConverter.GetBytes(fh) );
             //set the data handlers for this format
-            //api.NPAPI_SetTypeHandler_TypeCheck(fh, Model_FF9_Check);
-            //api.NPAPI_SetTypeHandler_LoadModel(fh, Model_FF9_Load);
+            api.NPAPI_SetTypeHandler_TypeCheck(fh, DummyMethod);
+            api.NPAPI_SetTypeHandler_LoadModel(fh, DummyMethod);
             
             return true;
         }
@@ -56,6 +62,12 @@ namespace AquaModelLibrary.Noesis
             StringCopy(g_pPluginDesc, 512, infOut->pluginDesc);
             return true;
         }
+
+        public static bool DummyMethod(byte* fileBuffer, nint bufferLen, noeRAPI_s* rapi)
+        {
+            return true;
+        }
+
         /*
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "NPAPI_GetPluginInfo")]
         public static bool AquaModelCheck(byte* fileBuffer, nint bufferLen, noeRAPI_t* rapi)
