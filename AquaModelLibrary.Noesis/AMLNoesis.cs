@@ -14,6 +14,7 @@ namespace AquaModelLibrary.Noesis
         public static string g_pPluginDesc = "Phantasy Star Online 2: New Genesis - aqp, aqo, trp, tro, prm, prx, tcb| Phantasy Star Nova - axs, aif| Phantasy Star Universe .xnj, .xnr (model)| Demon's Souls (2020) .cmsh| plugin by Shadowth117";
         public static GCHandle dataCheckHandle;
         public delegate bool AquaModelCheck(byte* fileBuffer, nint bufferLen, noeRAPI_s* rapi);
+        public static AquaModelCheck AquaModelCheckDel;
 
         //=========================================
         //Main Noesis interface
@@ -25,18 +26,37 @@ namespace AquaModelLibrary.Noesis
         {
             var api = new NoesisFunctions(mathfn, noepfn);
 
-            var desc = Marshal.StringToBSTR("PSO2 model (.aqp, .aqo, .trp, .tro)");
-            var types = Marshal.StringToBSTR(".aqp;.aqo;.trp;.tro");
+            /* API Test
+            var version = api.nPAPI_GetAPIVersion();
+            File.WriteAllBytes("C:\\apiVer.bin", BitConverter.GetBytes(version));
+            */
 
-            dataCheckHandle = GCHandle.Alloc(DummyMethod, GCHandleType.Pinned);
+            //Descriptions
+            var descPSO2 = Marshal.StringToBSTR("PSO2 model (.aqp, .aqo, .trp, .tro)");
+            var descPSO2Simple = Marshal.StringToBSTR("PSO2 simple model (.prm, .prx)");
+
+            //Types
+            var typesPSO2 = Marshal.StringToBSTR(".aqp;.aqo;.trp;.tro");
+            var typesPSO2Simple = Marshal.StringToBSTR(".prm;.prx");
+
+            AquaModelCheckDel = AquaModelCheckFn;
+            dataCheckHandle = GCHandle.Alloc(AquaModelCheckDel, GCHandleType.Pinned);
+
             //pso2 and ngs models
             //File.WriteAllBytes("C:\\prenpapiregister.bin", new byte[0]);
-            var fh = api.npAPI_Register((byte*)desc.ToPointer(), (byte*)types.ToPointer());
-            //File.WriteAllBytes("C:\\postnpapiregister.bin", BitConverter.GetBytes(fh) );
+            var fh = api.npAPI_Register((byte*)descPSO2.ToPointer(), (byte*)typesPSO2.ToPointer());
+
+            if(fh == 0)
+            {
+                return false;
+            }
             //set the data handlers for this format
-            api.NPAPI_SetTypeHandler_TypeCheck(fh, DummyMethod);
-            api.NPAPI_SetTypeHandler_LoadModel(fh, DummyMethod);
-            
+            File.WriteAllBytes("C:\\preTypeCheck.bin", new byte[0]);
+            api.nPAPI_SetTypeHandler_TypeCheck(fh, Marshal.GetFunctionPointerForDelegate(AquaModelCheckDel));
+            File.WriteAllBytes("C:\\postTypeCheck.bin", BitConverter.GetBytes(fh) );
+
+            //api.nPAPI_SetTypeHandler_LoadModel(fh, DummyMethod);
+
             return true;
         }
 
@@ -68,27 +88,45 @@ namespace AquaModelLibrary.Noesis
             return true;
         }
 
-        /*
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "NPAPI_GetPluginInfo")]
-        public static bool AquaModelCheck(byte* fileBuffer, nint bufferLen, noeRAPI_t* rapi)
+        public static bool AquaModelCheckFn(byte* fileBuffer, nint bufferLen, noeRAPI_s* rapi)
         {
             RAPIObj rapiObj = new RAPIObj(rapi);
-            var fname = rapiObj.Noesis_GetInputNameW();
+            string filename = GetWideCharString(rapiObj.noesis_GetInputNameW());
+            /*
             using (Stream stream = new UnmanagedMemoryStream(fileBuffer, bufferLen))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                var result = AquaGeneralMethods.ReadAquaHeader(streamReader, Path.GetExtension(fname));
+                var result = AquaGeneralMethods.ReadAquaHeader(streamReader, Path.GetExtension(filename));
 
-                if(result == "NIFL" || result == "VTBF")
+                if (result == "NIFL" || result == "VTBF")
                 {
                     return true;
-                } else
+                }
+                else
                 {
                     return false;
                 }
-            }
+            }*/
+
+            return true;
         }
-        */
+
+        private static string GetWideCharString(byte* rawFname)
+        {
+            string filename;
+            int length = -1;
+            for (int i = 0; i < short.MaxValue; i += 2)
+            {
+                if (rawFname[i] == 0 && rawFname[i + 1] == 0)
+                {
+                    length = i;
+                    break;
+                }
+            }
+            filename = Encoding.Unicode.GetString(rawFname, length);
+            return filename;
+        }
+
         public static void StringCopy(string str, int count, byte* strLocation)
         {
             byte[] strArr = Encoding.UTF8.GetBytes(str);

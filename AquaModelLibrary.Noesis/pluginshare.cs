@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static AquaModelLibrary.Noesis.NoesisFunctions;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace AquaModelLibrary.Noesis
@@ -14,10 +15,12 @@ namespace AquaModelLibrary.Noesis
         public delegate nint NPAPI_Register(byte* typeDesc, byte* extList);
         public delegate void NPAPI_SetTypeHandler_TypeCheck(nint th, IntPtr dataCheck); //datacheck is defined as public IntPtr dataCheck)(BYTE *fileBuffer, int bufferLen, noeRAPI_t *rapi)
         public delegate void NPAPI_SetTypeHandler_LoadModel(nint th, IntPtr loadModel); //loadModel is defined as noesisModel_t *(*loadModel)(BYTE *fileBuffer, int bufferLen, int &numMdl, noeRAPI_t *rapi)
+        public delegate nint NPAPI_GetAPIVersion();
         public delegate void Math_CalcPlaneEq(float* x, float* y, float* z, float* planeEq);
         public NPAPI_Register npAPI_Register;
 		public NPAPI_SetTypeHandler_TypeCheck nPAPI_SetTypeHandler_TypeCheck;
 		public NPAPI_SetTypeHandler_LoadModel nPAPI_SetTypeHandler_LoadModel;
+		public NPAPI_GetAPIVersion nPAPI_GetAPIVersion;
         public Math_CalcPlaneEq math_CalcPlaneEq;
 
         public NoesisFunctions(mathImpFn_s* mathStr, noePluginFn_s* noeStr)
@@ -25,8 +28,18 @@ namespace AquaModelLibrary.Noesis
             npAPI_Register = Marshal.GetDelegateForFunctionPointer<NPAPI_Register>(noeStr->NPAPI_Register);
             nPAPI_SetTypeHandler_TypeCheck = Marshal.GetDelegateForFunctionPointer<NPAPI_SetTypeHandler_TypeCheck>(noeStr->NPAPI_SetTypeHandler_TypeCheck);
             nPAPI_SetTypeHandler_LoadModel = Marshal.GetDelegateForFunctionPointer<NPAPI_SetTypeHandler_LoadModel>(noeStr->NPAPI_SetTypeHandler_LoadModel);
+            nPAPI_GetAPIVersion = Marshal.GetDelegateForFunctionPointer<NPAPI_GetAPIVersion>(noeStr->NPAPI_GetAPIVersion);
             math_CalcPlaneEq = Marshal.GetDelegateForFunctionPointer<Math_CalcPlaneEq>(mathStr->Math_CalcPlaneEq);
+        }
+    }
 
+	public unsafe class RAPIObj
+    {
+		public delegate byte* Noesis_GetInputNameW();
+		public Noesis_GetInputNameW noesis_GetInputNameW;
+        public RAPIObj(noeRAPI_s* rapi_s)
+        {
+            noesis_GetInputNameW = Marshal.GetDelegateForFunctionPointer<Noesis_GetInputNameW>(rapi_s->Noesis_GetInputNameW);
         }
     }
 
