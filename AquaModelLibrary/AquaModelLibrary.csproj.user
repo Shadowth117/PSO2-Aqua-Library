@@ -10,4 +10,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <StartProgram>E:\Autodesk\3ds Max 2017\3dsmax.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28x86%29|AnyCPU'">
+    <StartProgram>E:\Autodesk\3ds Max 2017\3dsmax.exe</StartProgram>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28x86%29|x64'">
+    <StartProgram>E:\Autodesk\3ds Max 2017\3dsmax.exe</StartProgram>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28x86%29|x86'">
+    <StartProgram>E:\Autodesk\3ds Max 2017\3dsmax.exe</StartProgram>
+  </PropertyGroup>
 </Project>

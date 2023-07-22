@@ -3938,7 +3938,7 @@ namespace AquaModelLibrary
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                string variant = ReadAquaHeader(streamReader, Path.GetExtension(inFilename), "", out int offset);
+                string variant = ReadAquaHeader(streamReader, Path.GetExtension(inFilename), out int offset);
 
                 if (variant == "NIFL")
                 {
@@ -4050,7 +4050,7 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 string variant = null;
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+                variant = ReadAquaHeader(streamReader, ext, out offset);
 
                 if (variant == "NIFL")
                 {
@@ -4147,7 +4147,7 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 string variant = null;
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+                variant = ReadAquaHeader(streamReader, ext, out offset);
 
                 if (variant == "NIFL")
                 {
@@ -4227,7 +4227,7 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 string variant = null;
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+                variant = ReadAquaHeader(streamReader, ext, out offset);
 
                 if (variant == "NIFL")
                 {
@@ -4382,7 +4382,7 @@ namespace AquaModelLibrary
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 string variant = null;
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset);
+                variant = ReadAquaHeader(streamReader, ext, out offset);
 
                 if (variant == "NIFL")
                 {

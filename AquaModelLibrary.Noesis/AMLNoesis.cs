@@ -92,11 +92,11 @@ namespace AquaModelLibrary.Noesis
         {
             RAPIObj rapiObj = new RAPIObj(rapi);
             string filename = GetWideCharString(rapiObj.noesis_GetInputNameW());
-            /*
+            
             using (Stream stream = new UnmanagedMemoryStream(fileBuffer, bufferLen))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                var result = AquaGeneralMethods.ReadAquaHeader(streamReader, Path.GetExtension(filename));
+                var result = AquaGeneralMethods.ReadAquaHeader(streamReader, Path.GetExtension(filename), out int offset);
 
                 if (result == "NIFL" || result == "VTBF")
                 {
@@ -106,9 +106,12 @@ namespace AquaModelLibrary.Noesis
                 {
                     return false;
                 }
-            }*/
+            }
+        }
 
-            return true;
+        public static IntPtr AquaModelLoadFn(byte* fileBuffer, nint bufferLen, noeRAPI_s* rapi)
+        {
+            RAPIObj rapiObj = new RAPIObj(rapi);
         }
 
         private static string GetWideCharString(byte* rawFname)

@@ -13,8 +13,9 @@ namespace AquaModelLibrary.AquaMethods
 {
     public static class AquaGeneralMethods
     {
-        public static string ReadAquaHeader(BufferedStreamReader streamReader, string ext, string variant, out int offset, AquaPackage.AFPMain afp = new AquaPackage.AFPMain())
+        public static string ReadAquaHeader(BufferedStreamReader streamReader, string ext, out int offset, AquaPackage.AFPMain afp = new AquaPackage.AFPMain())
         {
+            string variant = null;
             string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
             offset = 0x20; //Base offset due to NIFL header
 
@@ -47,10 +48,6 @@ namespace AquaModelLibrary.AquaMethods
             else if (type.Equals("VTBF"))
             {
                 variant = "VTBF";
-            }
-            else
-            {
-                //MessageBox.Show("Improper File Format!");
             }
 
             return variant;
@@ -90,7 +87,7 @@ namespace AquaModelLibrary.AquaMethods
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+                variant = ReadAquaHeader(streamReader, ext, out offset, afp);
 
                 if (variant == "NIFL")
                 {
