@@ -26,7 +26,7 @@ namespace AquaModelLibrary.AquaMethods
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+                variant = ReadAquaHeader(streamReader, ext, out offset, afp);
 
                 if (variant == "NIFL")
                 {
@@ -336,7 +336,7 @@ namespace AquaModelLibrary.AquaMethods
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                variant = ReadAquaHeader(streamReader, ext, variant, out offset, afp);
+                variant = ReadAquaHeader(streamReader, ext, out offset, afp);
 
                 if (variant == "NIFL")
                 {

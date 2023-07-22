@@ -1547,4 +1547,30 @@ namespace AquaModelLibrary.Noesis
 
         public fixed byte resv[512];
     }
+
+	//BONE_STRUCT_VER = 0x246A0E06;
+    //for feeding data back, only this structure and eData.parent matter.
+    //IT IS VERY IMPORTANT THAT EACH BONE'S 'name' CONTAINS A UNIQUE STRING.
+	//MAX_BONE_NAME_LEN = 128 //pushed from 32 to 128 for Noesis 3.7
+    public unsafe struct modelBone_s
+    {
+        //ver is automatically set to the current BONE_STRUCT_VER when you call Noesis_AllocBones.
+        //this is how noesis deals with changes to this bone structure while maintaining compatibility with old plugins.
+        nint ver;
+
+        //index will be filled in for you noesis-side.
+        nint index;
+        public char name[MAX_BONE_NAME_LEN];
+        //plugins should just leave parentName blank and set eData.parent instead. parentName is set and used internally by pure-legacy code.
+        public char parentName[MAX_BONE_NAME_LEN];
+        //you need to fill in mat yourself when passing bone data to noesis - it's the modelspace (not parent-relative) bone matrix.
+        public IntPtr mat; //model_matrix_t
+
+        public IntPtr eData; //modelBoneExData_t
+
+        nint flags;
+        nint userIndex;
+		public fixed nint resv[6];
+    }
+    modelBone_t;
 }
