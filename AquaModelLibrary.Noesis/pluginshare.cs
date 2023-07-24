@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static AquaModelLibrary.Noesis.NoesisFunctions;
+using static AquaModelLibrary.Noesis.RAPIObj;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace AquaModelLibrary.Noesis
@@ -35,11 +37,47 @@ namespace AquaModelLibrary.Noesis
 
 	public unsafe class RAPIObj
     {
-		public delegate byte* Noesis_GetInputNameW();
-		public Noesis_GetInputNameW noesis_GetInputNameW;
+		public delegate IntPtr RpgCreateContext();
+		public delegate void RpgDestroyContext(IntPtr ctx);
+        public delegate byte* Noesis_GetInputNameW();
+		public delegate modelBone_s* Noesis_AllocBones(nint numBones);
+		public delegate noesisMatData_s* Noesis_GetMatData(noesisMaterial_s*[] mats, nint numMats, noesisTex_s*[] tex, nint numTex);
+		public delegate noesisMaterial_s* Noesis_GetMaterialList(nint numMaterials, bool texByIndex);
+		public delegate noesisTex_s* Noesis_LoadTexByHandler(byte* srcBuffer, nint srcSize, byte[] extension);
+        public delegate IntPtr Noesis_PooledAlloc(nint size);
+        public delegate byte* Noesis_PooledString(byte[] str);
+		public delegate void RpgSetBoneMap(nint[] boneRefMap);
+        public delegate void RpgSetExData_Bones(modelBone_s *bones, nint numBones);
+		public delegate void RpgSetExData_Materials(noesisMatData_s* md);
+		public delegate void RpgSetMaterialIndex(nint index);
+
+        public RpgCreateContext rpgCreateContext;
+        public RpgDestroyContext rpgDestroyContext;
+        public Noesis_GetInputNameW noesis_GetInputNameW;
+		public Noesis_AllocBones noesis_AllocBones;
+		public Noesis_GetMatData noesis_GetMatData;
+		public Noesis_GetMaterialList noesis_GetMaterialList;
+		public Noesis_LoadTexByHandler noesis_LoadTexByHandler;
+        public Noesis_PooledAlloc noesis_PooledAlloc;
+        public Noesis_PooledString noesis_PooledString;
+		public RpgSetBoneMap rpgSetBoneMap;
+        public RpgSetExData_Bones rpgSetExData_Bones;
+		public RpgSetExData_Materials rpgSetExData_Materials;
+		public RpgSetMaterialIndex rpgSetMaterialIndex;
         public RAPIObj(noeRAPI_s* rapi_s)
         {
             noesis_GetInputNameW = Marshal.GetDelegateForFunctionPointer<Noesis_GetInputNameW>(rapi_s->Noesis_GetInputNameW);
+            noesis_AllocBones = Marshal.GetDelegateForFunctionPointer<Noesis_AllocBones>(rapi_s->Noesis_AllocBones);
+            noesis_GetMatData = Marshal.GetDelegateForFunctionPointer<Noesis_GetMatData>(rapi_s->Noesis_GetMatData);
+			noesis_LoadTexByHandler = Marshal.GetDelegateForFunctionPointer<Noesis_LoadTexByHandler>(rapi_s->Noesis_LoadTexByHandler);
+            noesis_GetMaterialList = Marshal.GetDelegateForFunctionPointer<Noesis_GetMaterialList>(rapi_s->Noesis_GetMaterialList);
+			noesis_PooledString = Marshal.GetDelegateForFunctionPointer<Noesis_PooledString>(rapi_s->Noesis_PooledString);
+			rpgSetBoneMap = Marshal.GetDelegateForFunctionPointer<RpgSetBoneMap>(rapi_s->rpgSetBoneMap);
+            rpgSetExData_Bones = Marshal.GetDelegateForFunctionPointer<RpgSetExData_Bones>(rapi_s->rpgSetExData_Bones);
+            rpgSetExData_Materials = Marshal.GetDelegateForFunctionPointer<RpgSetExData_Materials>(rapi_s->rpgSetExData_Materials);
+            rpgCreateContext = Marshal.GetDelegateForFunctionPointer<RpgCreateContext>(rapi_s->rpgCreateContext);
+			rpgDestroyContext = Marshal.GetDelegateForFunctionPointer<RpgDestroyContext>(rapi_s->rpgDestroyContext);
+            rpgSetMaterialIndex = Marshal.GetDelegateForFunctionPointer<RpgSetMaterialIndex>(rapi_s->rpgSetMaterialIndex);
         }
     }
 
@@ -1556,21 +1594,317 @@ namespace AquaModelLibrary.Noesis
     {
         //ver is automatically set to the current BONE_STRUCT_VER when you call Noesis_AllocBones.
         //this is how noesis deals with changes to this bone structure while maintaining compatibility with old plugins.
-        nint ver;
+        private nint ver;
 
         //index will be filled in for you noesis-side.
-        nint index;
-        public char name[MAX_BONE_NAME_LEN];
+        private nint index;
+        public fixed byte name[128];
         //plugins should just leave parentName blank and set eData.parent instead. parentName is set and used internally by pure-legacy code.
-        public char parentName[MAX_BONE_NAME_LEN];
+        public fixed byte parentName[128];
         //you need to fill in mat yourself when passing bone data to noesis - it's the modelspace (not parent-relative) bone matrix.
-        public IntPtr mat; //model_matrix_t
+        public modelMatrix_s mat; //model_matrix_t
 
-        public IntPtr eData; //modelBoneExData_t
+        public modelBoneExData_s eData; //modelBoneExData_t
 
-        nint flags;
-        nint userIndex;
-		public fixed nint resv[6];
+        public nint flags;
+        public nint userIndex;
+
+		// nint CANNOT have a fixed array, apparently
+#if WIN32
+		public fixed int resv[6];
+#endif
+#if WIN64
+		public fixed long resv[6];
+#endif
     }
-    modelBone_t;
+
+    public unsafe struct modelBoneExData_s
+    {
+        public IntPtr parent;
+
+        //ignore these fields, they're used internally be pure-legacy code
+        IntPtr next;
+        modelMatrix_s transMat;
+        modelMatrix_s relativeMat;
+        modelMatrix_s baseMat;
+        modelMatrix_s transWithLenMat;
+        private fixed short lastFrameAngles[3];
+
+        //may eventually add extended data pointers, long name strings, etc.
+        public fixed int resv[4];
+    }
+
+    public struct modelMatrix_s
+    {
+        public Vector3 x1;
+        public Vector3 x2;
+        public Vector3 x3;
+        public Vector3 o;
+    }
+
+    public unsafe struct noesisTex_s
+    {
+        public byte* filename;
+        public nint w;
+        public nint h;
+        public nint type;
+        public byte* data;
+        public nint dataLen;
+        public nint gltex;
+        public nint globalIdx; //used optionally by some modules
+        public nint flags;
+        public bool shouldFreeData;
+
+        public nint refCount; //do not modify refCount. it's managed internally.
+        public noesisTexFr_s* frameInfo; //new in 3.31 - allocate with Noesis_TexFrameInfoAlloc if you want to use it
+        public nint mipCount;
+        public fixed short unused[2]; //must be 0
+        public SNoeHDRTexData* pHdr;
+
+        //THESE VALUES MUST BE 0 (this is done by Noesis_TextureAlloc)
+#if WIN32
+		  public fixed int resv[4];
+#endif
+#if WIN64
+        public fixed long resv[4];
+#endif
+    }
+    public unsafe struct SNoeHDRTexData
+    {
+        public IntPtr pData;
+        public nint dataLen;
+        public ENoeHdrTexFormat hdrFormat;
+        public nint hdrFlags;
+
+#if WIN32
+		 public fixed int resv[32];
+#endif
+#if WIN64
+        public fixed long resv[32];
+#endif
+    };
+
+	public enum ENoeHdrTexFormat
+    {
+        kNHDRTF_RGB_F96 = 0,
+        kNHDRTF_RGBA_F128,
+        kNHDRTF_Lum_F32,
+        kNHDRTF_RGBA_F64
+    };
+
+    public unsafe struct noesisTexFr_s
+    {
+        public int ofsX;
+        public int ofsY;
+        public int frameIdx;
+        public int viewType;
+        public float rad; //i have no idea why you'd want this, but it's preserved mainly for quake spr's at the moment
+        public int frameDelay; //3.84
+
+#if WIN32
+		 public fixed int resv[15];
+#endif
+#if WIN64
+        public fixed long resv[15];
+#endif
+    }
+
+    public unsafe struct noesisMaterial_s
+    {
+        public byte* name;
+        public bool skipRender;
+        public Vector4 diffuse;
+        public Vector4 specular;
+        public bool noDefaultBlend;
+        public nint texIdx;
+        public nint extTex; //external texture override
+
+        public nint blendSrc;
+        public nint blendDst;
+        public float alphaTest;
+        public bool noLighting;
+
+        public nint normalTexIdx;
+        public nint specularTexIdx;
+        public nint transTexIdx;
+        public nint obsoleteProgramIndex;
+
+        public nint flags;
+
+        public nint refCount; //do not modify refCount. it's managed internally.
+        public noesisExtTexRef_s* extRefs;
+        public noesisMaterial_s* nextPass;
+
+        public noesisMatExpr_s* expr; //new in Noesis 4.0 - material expressions
+
+        public nint bumpTexIdx;
+        public nint envTexIdx;
+
+        //extended material structure (running out of room in this one to maintain backwards-compatibility)
+        public noesisMatEx_s* ex;
+
+        public IntPtr mCustomData; //CNoeCustomDataList
+
+        public nint resv;
+    }
+
+    public unsafe struct noesisMatEx_s
+    {
+        public fixed float envMapColor[4]; //alpha is the fresnel term multiplier
+        public fixed float ambientColor[4];
+        public fixed float blendedNormalFracs[4];
+
+        public fixed float rimColor[3];
+        public float rimWidth;
+        public float rimPow;
+        public fixed float rimOfs[3];
+        public float rimBias;
+
+        public fixed byte userTag[8];
+        public IntPtr userData;
+        public nint userDataSize;
+
+        //only applicable for pbr. if you have gloss instead of roughness, use roughnessBias 1.0, roughnessScale -1.0
+        public float roughnessScale;
+        public float roughnessBias;
+        public float metalScale;
+        public float metalBias;
+
+        //started out roughness-based, became fake-ass anisotropy. could easily do roughness-x/roughness-y as presented by Disney for lights,
+        //but want it to be unified with IBL and don't want to do importance sampling at runtime.
+        public float roughnessAnisoScale;
+        public float roughnessAnisoAngle;
+
+        //PBR_INTERNAL_TEX_COUNT for array size
+#if WIN32
+		public fixed int pbrGenTexIdx[8];
+#endif
+#if WIN64
+        public fixed long pbrGenTexIdx[8];
+#endif
+
+        public float* pUvScaleBias; //float * 4
+        public float* pUvPlanes; //float * 16
+
+        public float fresnelScale;
+
+        public float* pSpecSwizzle; //float * 4 * 4
+
+#if WIN32
+		 public fixed int resv[25];
+#endif
+#if WIN64
+        public fixed long resv[25];
+#endif
+    }
+
+    public unsafe struct noesisMatData_s
+    {
+        public noesisTex_s* textures;
+        public nint numTextures;
+
+        public noesisMaterial_s* materials;
+        public nint numMaterials;
+
+        public nint refCount; //do not modify refCount. it's managed internally.
+
+#if WIN32
+		 public fixed int resv[8];
+#endif
+#if WIN64
+        public fixed long resv[8];
+#endif
+    }
+
+    public unsafe struct noesisExtTexRef_s
+    {
+        public byte* diffuse;
+        public byte* normal;
+        public byte* specular;
+        public byte* opacity;
+        public byte* bump;
+        public byte* env;
+
+#if WIN32
+		public fixed int resv[30];
+#endif
+#if WIN64
+        public fixed long resv[30];
+#endif
+    }
+
+    public unsafe struct noesisMatExpr_s
+    {
+        //per-vertex expression evaluators
+
+        //All of these are pointer arrays
+#if WIN32
+        public fixed int v_posExpr[3];
+        public fixed int v_nrmExpr[3];
+        public fixed int v_uvExpr[2];
+        public fixed int v_clrExpr[4];
+
+        //global material expression evaluators
+        public fixed int diffuse[4];
+        public fixed int specular[4];
+
+        public fixed int uvTrans[3];
+        public fixed int uvRot[3];
+
+        public int texIdx;
+        public int normalTexIdx;
+        public int specularTexIdx;
+#endif
+#if WIN64
+        public fixed long v_posExpr[3];
+        public fixed long v_nrmExpr[3];
+        public fixed long v_uvExpr[2];
+        public fixed long v_clrExpr[4];
+
+        //global material expression evaluators
+        public fixed long diffuse[4];
+        public fixed long specular[4];
+
+        public fixed long uvTrans[3];
+        public fixed long uvRot[3];
+
+        public long texIdx;
+        public long normalTexIdx;
+        public long specularTexIdx;
+#endif
+
+        public IntPtr resv; //16 slots
+    }
+
+    public enum rpgeoPrimType_e
+    {
+        RPGEO_NONE = 0,
+        RPGEO_POINTS,
+        RPGEO_TRIANGLE,
+        RPGEO_TRIANGLE_STRIP,
+        RPGEO_QUAD, //ABC_DCB
+        RPGEO_POLYGON,
+        RPGEO_TRIANGLE_FAN,
+        RPGEO_QUAD_STRIP,
+        RPGEO_TRIANGLE_STRIP_FLIPPED,
+        RPGEO_QUAD_ABC_BCD,
+        RPGEO_QUAD_ABC_ACD,
+        RPGEO_QUAD_ABC_DCA,
+        NUM_RPGEO_TYPES
+    }
+
+	public enum rpgeoDataType_e
+    {
+        RPGEODATA_FLOAT = 0,
+        RPGEODATA_INT,
+        RPGEODATA_UINT,
+        RPGEODATA_SHORT,
+        RPGEODATA_USHORT,
+        RPGEODATA_HALFFLOAT,
+        RPGEODATA_DOUBLE,
+        RPGEODATA_BYTE,
+        RPGEODATA_UBYTE,
+        NUM_RPGEO_DATATYPES
+    }
+
 }

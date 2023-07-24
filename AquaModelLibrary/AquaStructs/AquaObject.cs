@@ -1905,6 +1905,8 @@ namespace AquaModelLibrary
             public string matName = null;
             public int twoSided = 0; //0 False, 1 True. Higher values give unknown results
             public int alphaCutoff = 0; //0-255, defines when an alhpa value should cull out a pixel entirely
+            public int srcAlpha = 5;
+            public int destAlpha = 6;
 
             public Vector4 diffuseRGBA = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
             public Vector4 unkRGBA0 = new Vector4(.9f, .9f, .9f, 1.0f);
@@ -2216,6 +2218,8 @@ namespace AquaModelLibrary
                     }
                     mat.twoSided = curRend.twosided;
                     mat.alphaCutoff = curRend.alphaCutoff;
+                    mat.srcAlpha = curRend.sourceAlpha;
+                    mat.destAlpha = curRend.destinationAlpha;
 
                     mat.diffuseRGBA = curMate.diffuseRGBA;
                     mat.unkRGBA0 = curMate.unkRGBA0;
