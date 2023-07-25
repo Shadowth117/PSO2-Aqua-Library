@@ -66,7 +66,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
                 return null;
             }
         }

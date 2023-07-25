@@ -167,7 +167,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
             }
 
             return null;
@@ -842,7 +842,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
             }
 
             return null;
@@ -877,7 +877,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
             }
 
             return null;
@@ -975,7 +975,7 @@ namespace AquaModelLibrary
             if (type.Equals("NIFL"))
             {
                 //There shouldn't be a nifl variant of this for now.
-                MessageBox.Show("Error, NIFL .mgx found");
+                Debug.WriteLine("Error, NIFL .mgx found");
                 return null;
             }
             else if (type.Equals("VTBF"))
@@ -984,7 +984,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
                 return null;
             }
         }
@@ -1059,7 +1059,7 @@ namespace AquaModelLibrary
             if (type.Equals("NIFL"))
             {
                 //There shouldn't be a nifl variant of this for now.
-                MessageBox.Show("Error, NIFL .aox found");
+                Debug.WriteLine("Error, NIFL .aox found");
                 return null;
             }
             else if (type.Equals("VTBF"))
@@ -1068,7 +1068,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
                 return null;
             }
         }
@@ -1160,7 +1160,7 @@ namespace AquaModelLibrary
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
             }
 
             return null;
@@ -1266,12 +1266,12 @@ namespace AquaModelLibrary
             }
             else if (type.Equals("VTBF"))
             {
-                MessageBox.Show("Error, VTBF .lps found");
+                Debug.WriteLine("Error, VTBF .lps found");
                 return null;
             }
             else
             {
-                MessageBox.Show("Improper File Format!");
+                Debug.WriteLine("Improper File Format!");
                 return null;
             }
         }

@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -206,7 +207,7 @@ namespace AquaModelLibrary
                         }
                         catch
                         {
-                            MessageBox.Show($"Crashed on unknown vert data type: {vtxeSet.vertDataTypes[vtxeEleIndex].dataType} \n Please report!");
+                            Debug.WriteLine($"Crashed on unknown vert data type: {vtxeSet.vertDataTypes[vtxeEleIndex].dataType} \n Please report!");
                             throw new Exception();
                         }
                     }

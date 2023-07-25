@@ -11,6 +11,7 @@ using AquaModelLibrary.AquaStructs.NGSShaderPresets;
 using AquaModelLibrary.AquaStructs.AquaObjectExtras;
 using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
+using System.Diagnostics;
 
 namespace AquaModelLibrary
 {
@@ -808,7 +809,7 @@ namespace AquaModelLibrary
                             vtxl.vert0x25.Add(Read2Shorts(streamReader));
                             break;
                         default:
-                            MessageBox.Show($"Unknown Vert type {vtxeSet.vertDataTypes[vtxeIndex].dataType.ToString("X")}! Please report!");
+                            Debug.WriteLine($"Unknown Vert type {vtxeSet.vertDataTypes[vtxeIndex].dataType.ToString("X")}! Please report!");
                             break;
                     }
                 }
@@ -2414,7 +2415,7 @@ namespace AquaModelLibrary
                             }
                             break;
                         default:
-                            MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
+                            Debug.WriteLine($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
                             throw new Exception("Not implemented!");
                     }
                 }
@@ -2542,7 +2543,7 @@ namespace AquaModelLibrary
                         size += 0x4;
                         break;
                     default:
-                        MessageBox.Show($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
+                        Debug.WriteLine($"Unknown Vert type {vtxe.vertDataTypes[j].dataType}! Please report!");
                         throw new Exception("Not implemented!");
                 }
 

@@ -5440,7 +5440,7 @@ namespace AquaModelLibrary.Extra
                 }
             }
 
-            MessageBox.Show($"Unexpected id: {id}");
+            Debug.WriteLine($"Unexpected id: {id}");
             throw new Exception();
         }
 
@@ -5795,7 +5795,7 @@ namespace AquaModelLibrary.Extra
                             cat = subSwim;
                             break;
                         default:
-                            MessageBox.Show($"Unknown substitution type: {split[1]} ... halting generation");
+                            Debug.WriteLine($"Unknown substitution type: {split[1]} ... halting generation");
                             throw new Exception();
                     }
 

@@ -2,11 +2,10 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using System.Windows;
+using System.Diagnostics;
 using static AquaModelLibrary.AquaMethods.AquaFigMethods;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
 using static AquaModelLibrary.AquaMiscMethods;
@@ -20,7 +19,6 @@ using AquaModelLibrary.Extra;
 using AquaModelLibrary.OtherStructs;
 using AquaModelLibrary.AquaMethods;
 using Newtonsoft.Json;
-using System.Windows.Media.Effects;
 
 namespace AquaModelLibrary
 {
@@ -104,10 +102,6 @@ namespace AquaModelLibrary
                     set.models = models;
                     aquaModels.Add(set);
                     tpnFiles.AddRange(tpns);
-                }
-                else
-                {
-                    MessageBox.Show("Improper File Format!");
                 }
                 return success;
             }
@@ -1962,7 +1956,7 @@ namespace AquaModelLibrary
 
                 if (bones == null)
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                     return;
                 }
 
@@ -2033,7 +2027,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                 }
 
             }
@@ -2228,7 +2222,7 @@ namespace AquaModelLibrary
                                 }
                                 break;
                             default:
-                                MessageBox.Show($"Unexpected (keytype {motion.motionKeys[i].keyData[j].keyType.ToString("X")}) type {motion.motionKeys[i].keyData[j].dataType.ToString("X")} at {streamReader.Position().ToString("X")}");
+                                Debug.WriteLine($"Unexpected (keytype {motion.motionKeys[i].keyData[j].keyType.ToString("X")}) type {motion.motionKeys[i].keyData[j].dataType.ToString("X")} at {streamReader.Position().ToString("X")}");
                                 throw new Exception();
                         }
                         //Stream aligns to 0x10 again after frames.
@@ -2531,7 +2525,7 @@ namespace AquaModelLibrary
 
                 if (tcbModel == null)
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                     return;
                 }
                 tcbModels.Add(tcbModel);
@@ -2548,7 +2542,7 @@ namespace AquaModelLibrary
 
                 if (tcbModel == null)
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                     return;
                 }
                 tcbModels.Add(tcbModel);
@@ -2742,7 +2736,7 @@ namespace AquaModelLibrary
                     }
                     break;
                 case 2:
-                    MessageBox.Show("Unimplemented PRM version! Please report if found!");
+                    Debug.WriteLine("Unimplemented PRM version! Please report if found!");
                     return;
                 case 3:
                     for (int i = 0; i < prmModel.header.entryCount; i++)
@@ -2783,7 +2777,7 @@ namespace AquaModelLibrary
                     }
                     break;
                 default:
-                    MessageBox.Show("Unknown PRM version! Please report!");
+                    Debug.WriteLine("Unknown PRM version! Please report!");
                     break;
             }
         }
@@ -2858,17 +2852,17 @@ namespace AquaModelLibrary
             switch (version)
             {
                 case 1:
-                    MessageBox.Show("Version 1 unsupported at this time!");
+                    Debug.WriteLine("Version 1 unsupported at this time!");
                     return;
                 case 2:
-                    MessageBox.Show("Version 2 unsupported at this time!");
+                    Debug.WriteLine("Version 2 unsupported at this time!");
                     return;
                 case 3:
                 case 4:
                     finalOutBytes.AddRange(BitConverter.GetBytes(prm.faces.Count * 3));
                     break;
                 default:
-                    MessageBox.Show($"Version {version} unsupported at this time!");
+                    Debug.WriteLine($"Version {version} unsupported at this time!");
                     return;
             }
             finalOutBytes.AddRange(BitConverter.GetBytes(version));
@@ -3235,7 +3229,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                 }
             }
             return;
@@ -3302,7 +3296,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                 }
             }
             return;
@@ -3372,7 +3366,7 @@ namespace AquaModelLibrary
                 }
                 else
                 {
-                    MessageBox.Show("Improper File Format!");
+                    Debug.WriteLine("Improper File Format!");
                 }
 
             }

@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -162,7 +163,7 @@ namespace AquaModelLibrary
                                 data = streamReader.Read<Vector4>();
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subDataAdditions amount {subDataAdditions} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subDataAdditions amount {subDataAdditions} at {streamReader.Position()}");
                                 throw new Exception();
                         }
 
@@ -182,7 +183,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subdataType {subDataType} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
                         data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions);
@@ -204,7 +205,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subdataType {subDataType} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subdataType {subDataType} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
                         data = streamReader.ReadBytes(streamReader.Position(), (int)subDataAdditions);
@@ -226,7 +227,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
 
@@ -262,7 +263,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
                         subDataAdditions *= 4; //The field is stored as some amount of int32s. Therefore, multiplying by 4 gives us the byte buffer length.
@@ -283,7 +284,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<uint>() + 1;
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
                         data = new float[subDataAdditions];
@@ -306,7 +307,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<uint>();
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
+                                Debug.WriteLine($"Unknown subdataType {subDataType.ToString("X")} at {streamReader.Position()}");
                                 throw new NotImplementedException();
                         }
                         uint actualCount = subDataAdditions * 2 + 2;
@@ -328,7 +329,7 @@ namespace AquaModelLibrary
                                 subDataAdditions = streamReader.Read<ushort>() + (uint)1; //last array entry id
                                 break;
                             default:
-                                MessageBox.Show($"Unknown subDataAdditions value {subDataType.ToString("X")}, please report!");
+                                Debug.WriteLine($"Unknown subDataAdditions value {subDataType.ToString("X")}, please report!");
                                 throw new NotImplementedException();
                         }
 
@@ -339,7 +340,7 @@ namespace AquaModelLibrary
                         }
                         break;
                     default:
-                        MessageBox.Show($"Unknown dataType {dataType.ToString("X")} at {streamReader.Position().ToString("X")}, please report!");
+                        Debug.WriteLine($"Unknown dataType {dataType.ToString("X")} at {streamReader.Position().ToString("X")}, please report!");
                         throw new NotImplementedException();
                 }
 
@@ -691,7 +692,7 @@ namespace AquaModelLibrary
                         break;
                     default:
                         vertSize += 0xC;
-                        MessageBox.Show($"Unknown Vert type {vtxeEle.dataType}! Please report!");
+                        Debug.WriteLine($"Unknown Vert type {vtxeEle.dataType}! Please report!");
                         break;
                 }
 

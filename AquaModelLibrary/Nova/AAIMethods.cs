@@ -103,7 +103,7 @@ namespace AquaModelLibrary.Nova
                                 dc.dcString = ((DataClump44)dc.dc).clumpName.GetString();
                                 break;
                             default:
-                                MessageBox.Show($"clumpSize {dc.dcStart.dcType.ToString("X")} at {streamReader.Position().ToString("X")} is unexpected!");
+                                Debug.WriteLine($"clumpSize {dc.dcStart.dcType.ToString("X")} at {streamReader.Position().ToString("X")} is unexpected!");
                                 break;
                         }
                         node.data.Add(dc);

@@ -12,6 +12,7 @@ using Reloaded.Memory;
 using static AquaModelLibrary.PSOXVMConvert;
 using System.Windows;
 using AquaModelLibrary.AquaMethods;
+using System.Diagnostics;
 
 namespace AquaModelLibrary
 {
@@ -259,7 +260,7 @@ namespace AquaModelLibrary
             be = streamReader.PeekBigEndianPrimitiveUInt32() < streamReader.Peek<uint>(); 
             if(be)
             {
-                MessageBox.Show("Sorry, Gamecube n.rel files are not supported at this time.");
+                Debug.WriteLine("Sorry, Gamecube n.rel files are not supported at this time.");
             }
             uint tableOfs = streamReader.ReadBE<uint>(be);
 
