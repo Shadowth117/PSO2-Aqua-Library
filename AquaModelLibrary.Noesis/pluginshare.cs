@@ -102,7 +102,15 @@ namespace AquaModelLibrary.Noesis
             rpgSetMaterialIndex = Marshal.GetDelegateForFunctionPointer<RpgSetMaterialIndex>(rapi_s->rpgSetMaterialIndex);
             rpgConstructModel = Marshal.GetDelegateForFunctionPointer<RpgConstructModel>(rapi_s->rpgConstructModel);
             rpgBindPositionBuffer = Marshal.GetDelegateForFunctionPointer<RpgBindPositionBuffer>(rapi_s->rpgBindPositionBuffer);
+            rpgBindNormalBuffer = Marshal.GetDelegateForFunctionPointer<RpgBindNormalBuffer>(rapi_s->rpgBindNormalBuffer);
+            rpgBindUV1Buffer = Marshal.GetDelegateForFunctionPointer<RpgBindUV1Buffer>(rapi_s->rpgBindUV1Buffer);
+            rpgBindUV2Buffer = Marshal.GetDelegateForFunctionPointer<RpgBindUV2Buffer>(rapi_s->rpgBindUV2Buffer);
+            rpgBindUVXBuffer = Marshal.GetDelegateForFunctionPointer<RpgBindUVXBuffer>(rapi_s->rpgBindUVXBuffer);
+            rpgBindColorBuffer = Marshal.GetDelegateForFunctionPointer<RpgBindColorBuffer>(rapi_s->rpgBindColorBuffer);
+            rpgBindBoneIndexBuffer = Marshal.GetDelegateForFunctionPointer<RpgBindBoneIndexBuffer>(rapi_s->rpgBindBoneIndexBuffer);
+            rpgBindBoneWeightBuffer = Marshal.GetDelegateForFunctionPointer<RpgBindBoneWeightBuffer>(rapi_s->rpgBindBoneWeightBuffer);
             rpgClearBufferBinds = Marshal.GetDelegateForFunctionPointer<RpgClearBufferBinds>(rapi_s->rpgClearBufferBinds);
+            rpgCommitTriangles = Marshal.GetDelegateForFunctionPointer<RpgCommitTriangles>(rapi_s->rpgCommitTriangles);
         }
     }
 
@@ -611,6 +619,7 @@ namespace AquaModelLibrary.Noesis
         public IntPtr resvG;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct noeRAPI_s
     {
         public IntPtr Noesis_PooledAlloc; //pooled allocations are automatically cleared once the preview/conversion is closed/reset
@@ -1603,6 +1612,7 @@ namespace AquaModelLibrary.Noesis
     }
 
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noePluginInfo_s
     {
         public fixed byte pluginName[64];
@@ -1615,6 +1625,7 @@ namespace AquaModelLibrary.Noesis
     //for feeding data back, only this structure and eData.parent matter.
     //IT IS VERY IMPORTANT THAT EACH BONE'S 'name' CONTAINS A UNIQUE STRING.
     //MAX_BONE_NAME_LEN = 128 //pushed from 32 to 128 for Noesis 3.7
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct modelBone_s
     {
         //ver is automatically set to the current BONE_STRUCT_VER when you call Noesis_AllocBones.
@@ -1643,6 +1654,7 @@ namespace AquaModelLibrary.Noesis
 #endif
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct modelBoneExData_s
     {
         public IntPtr parent;
@@ -1659,6 +1671,7 @@ namespace AquaModelLibrary.Noesis
         public fixed int resv[4];
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct modelMatrix_s
     {
         public Vector3 x1;
@@ -1667,6 +1680,7 @@ namespace AquaModelLibrary.Noesis
         public Vector3 o;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisTex_s
     {
         public byte* filename;
@@ -1694,6 +1708,7 @@ namespace AquaModelLibrary.Noesis
         public fixed long resv[4];
 #endif
     }
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct SNoeHDRTexData
     {
         public IntPtr pData;
@@ -1717,6 +1732,7 @@ namespace AquaModelLibrary.Noesis
         kNHDRTF_RGBA_F64
     };
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisTexFr_s
     {
         public int ofsX;
@@ -1734,6 +1750,7 @@ namespace AquaModelLibrary.Noesis
 #endif
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisMaterial_s
     {
         public byte* name;
@@ -1773,6 +1790,7 @@ namespace AquaModelLibrary.Noesis
         public nint resv;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisMatEx_s
     {
         public fixed float envMapColor[4]; //alpha is the fresnel term multiplier
@@ -1823,6 +1841,7 @@ namespace AquaModelLibrary.Noesis
 #endif
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisMatData_s
     {
         public noesisTex_s* textures;
@@ -1841,6 +1860,7 @@ namespace AquaModelLibrary.Noesis
 #endif
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisExtTexRef_s
     {
         public byte* diffuse;
@@ -1858,6 +1878,7 @@ namespace AquaModelLibrary.Noesis
 #endif
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct noesisMatExpr_s
     {
         //per-vertex expression evaluators
