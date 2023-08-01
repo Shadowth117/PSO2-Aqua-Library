@@ -14,17 +14,41 @@ namespace AquaModelLibrary.Noesis
 {
     public unsafe class NoesisFunctions
     {
-        public delegate nint NPAPI_Register(byte[] typeDesc, byte[] extList);
-        public delegate void NPAPI_SetTypeHandler_TypeCheck(nint th, IntPtr dataCheck); //datacheck is defined as public IntPtr dataCheck)(BYTE *fileBuffer, int bufferLen, noeRAPI_t *rapi)
-        public delegate void NPAPI_SetTypeHandler_LoadModel(nint th, IntPtr loadModel); //loadModel is defined as noesisModel_t *(*loadModel)(BYTE *fileBuffer, int bufferLen, int &numMdl, noeRAPI_t *rapi)
-        public delegate nint NPAPI_GetAPIVersion();
+        public delegate int NPAPI_Register(byte[] typeDesc, byte[] extList);
+        public delegate void NPAPI_SetTypeHandler_TypeCheck(int th, IntPtr dataCheck); //datacheck is defined as public IntPtr dataCheck)(BYTE *fileBuffer, int bufferLen, noeRAPI_t *rapi)
+        public delegate void NPAPI_SetTypeHandler_LoadModel(int th, IntPtr loadModel); //loadModel is defined as noesisModel_t *(*loadModel)(BYTE *fileBuffer, int bufferLen, int &numMdl, noeRAPI_t *rapi)
+        public delegate int NPAPI_GetAPIVersion();
         public delegate void Math_CalcPlaneEq(float* x, float* y, float* z, float* planeEq);
+        public delegate IntPtr Array_Alloc(int elementSize, int initialNum); //Returns a cntArray_t
+        public delegate void Array_Free(IntPtr ar); //cntArray_t is the ar IntPtr in these
+	    public delegate void Array_SetGrowth (IntPtr ar, bool exponential);
+        public delegate IntPtr Array_GetElement(IntPtr ar, int index);
+        public delegate IntPtr Array_GetElementGrow(IntPtr ar, int index);
+	    public delegate void Array_Append(IntPtr ar, IntPtr element);
+        public delegate void Array_RemoveLast(IntPtr ar);
+	    public delegate void Array_Insert(IntPtr ar, IntPtr element, int index);
+        public delegate void Array_Remove(IntPtr ar, int index);
+	    public delegate int Array_GetCount(IntPtr ar);
+	    public delegate void Array_Reset(IntPtr ar);
+	    public delegate void Array_Tighten(IntPtr ar);
+
         public NPAPI_Register npAPI_Register;
         public NPAPI_SetTypeHandler_TypeCheck nPAPI_SetTypeHandler_TypeCheck;
         public NPAPI_SetTypeHandler_LoadModel nPAPI_SetTypeHandler_LoadModel;
         public NPAPI_GetAPIVersion nPAPI_GetAPIVersion;
         public Math_CalcPlaneEq math_CalcPlaneEq;
-
+        public Array_Alloc array_Alloc; //Returns a cntArray_t
+        public Array_Free array_Free; //cntArray_t is the ar IntPtr in these
+        public Array_SetGrowth array_SetGrowth;
+        public Array_GetElement array_GetElement;
+        public Array_GetElementGrow array_GetElementGrow;
+        public Array_Append array_Append;
+        public Array_RemoveLast array_RemoveLast;
+        public Array_Insert array_Insert;
+        public Array_Remove array_Remove;
+        public Array_GetCount array_GetCount;
+        public Array_Reset array_Reset;
+        public Array_Tighten array_Tighten;
         public NoesisFunctions(mathImpFn_s* mathStr, noePluginFn_s* noeStr)
         {
             npAPI_Register = Marshal.GetDelegateForFunctionPointer<NPAPI_Register>(noeStr->NPAPI_Register);
@@ -32,6 +56,19 @@ namespace AquaModelLibrary.Noesis
             nPAPI_SetTypeHandler_LoadModel = Marshal.GetDelegateForFunctionPointer<NPAPI_SetTypeHandler_LoadModel>(noeStr->NPAPI_SetTypeHandler_LoadModel);
             nPAPI_GetAPIVersion = Marshal.GetDelegateForFunctionPointer<NPAPI_GetAPIVersion>(noeStr->NPAPI_GetAPIVersion);
             math_CalcPlaneEq = Marshal.GetDelegateForFunctionPointer<Math_CalcPlaneEq>(mathStr->Math_CalcPlaneEq);
+
+            array_Alloc = Marshal.GetDelegateForFunctionPointer<Array_Alloc>(noeStr->Array_Alloc);
+            array_Free = Marshal.GetDelegateForFunctionPointer<Array_Free>(noeStr->Array_Free);
+            array_SetGrowth = Marshal.GetDelegateForFunctionPointer<Array_SetGrowth>(noeStr->Array_SetGrowth);
+            array_GetElement = Marshal.GetDelegateForFunctionPointer<Array_GetElement>(noeStr->Array_GetElement);
+            array_GetElementGrow = Marshal.GetDelegateForFunctionPointer<Array_GetElementGrow>(noeStr->Array_GetElementGrow);
+            array_Append = Marshal.GetDelegateForFunctionPointer<Array_Append>(noeStr->Array_Append);
+            array_RemoveLast = Marshal.GetDelegateForFunctionPointer<Array_RemoveLast>(noeStr->Array_RemoveLast);
+            array_Insert = Marshal.GetDelegateForFunctionPointer<Array_Insert>(noeStr->Array_Insert);
+            array_Remove = Marshal.GetDelegateForFunctionPointer<Array_Remove>(noeStr->Array_Remove);
+            array_GetCount = Marshal.GetDelegateForFunctionPointer<Array_GetCount>(noeStr->Array_GetCount);
+            array_Reset = Marshal.GetDelegateForFunctionPointer<Array_Reset>(noeStr->Array_Reset);
+            array_Tighten = Marshal.GetDelegateForFunctionPointer<Array_Tighten>(noeStr->Array_Tighten);
         }
     }
 
@@ -40,26 +77,29 @@ namespace AquaModelLibrary.Noesis
         public delegate IntPtr RpgCreateContext();
         public delegate void RpgDestroyContext(IntPtr ctx);
         public delegate byte* Noesis_GetInputNameW();
-        public delegate modelBone_s* Noesis_AllocBones(nint numBones);
-        public delegate noesisMatData_s* Noesis_GetMatData(noesisMaterial_s*[] mats, nint numMats, noesisTex_s*[] tex, nint numTex);
-        public delegate noesisMaterial_s* Noesis_GetMaterialList(nint numMaterials, bool texByIndex);
-        public delegate noesisTex_s* Noesis_LoadTexByHandler(byte* srcBuffer, nint srcSize, byte[] extension);
-        public delegate IntPtr Noesis_PooledAlloc(nint size);
+        public delegate modelBone_s* Noesis_AllocBones(int numBones);
+        public delegate noesisMatData_s* Noesis_GetMatData(noesisMaterial_s[] mats, int numMats, noesisTex_s[] tex, int numTex);
+        //public delegate noesisMatData_s* Noesis_GetMatData(IntPtr mats, int numMats, IntPtr tex, int numTex);
+        public delegate noesisMatData_s* Noesis_GetMatDataFromLists(ref IntPtr matsList, ref IntPtr texList);
+        public delegate noesisMaterial_s* Noesis_GetMaterialList(int numMaterials, bool texByIndex);
+        public delegate noesisTex_s* Noesis_LoadTexByHandler(byte* srcBuffer, int srcSize, byte[] extension);
+        public delegate IntPtr Noesis_PooledAlloc(nuint size);
         public delegate byte* Noesis_PooledString(byte[] str);
-        public delegate void RpgSetBoneMap(nint[] boneRefMap);
-        public delegate void RpgSetExData_Bones(modelBone_s* bones, nint numBones);
+
+        public delegate void RpgSetBoneMap(int[] boneRefMap);
+        public delegate void RpgSetExData_Bones(modelBone_s* bones, int numBones);
         public delegate void RpgSetExData_Materials(noesisMatData_s* md);
-        public delegate void RpgSetMaterialIndex(nint index);
+        public delegate void RpgSetMaterialIndex(int index);
         public delegate IntPtr RpgConstructModel();
-        public delegate void RpgBindPositionBuffer(byte[] data, rpgeoDataType_e dataType, nint stride);
-        public delegate void RpgBindNormalBuffer(byte[] data, rpgeoDataType_e dataType, nint stride);
-        public delegate void RpgBindUV1Buffer(byte[] data, rpgeoDataType_e dataType, nint stride);
-        public delegate void RpgBindUV2Buffer(byte[] data, rpgeoDataType_e dataType, nint stride);
-        public delegate void RpgBindUVXBuffer(byte[] data, rpgeoDataType_e dataType, nint stride, nint uvIndex, nint elementCount);
-        public delegate void RpgBindColorBuffer(byte[] data, rpgeoDataType_e dataType, nint stride, nint elementCount);
-        public delegate void RpgBindBoneIndexBuffer(byte[] data, rpgeoDataType_e dataType, nint stride, nint numWeightsPerVert);
-        public delegate void RpgBindBoneWeightBuffer(byte[] data, rpgeoDataType_e dataType, nint stride, nint numWeightsPerVert);
-        public delegate void RpgCommitTriangles(byte[] indexData, rpgeoDataType_e dataType, nint indexCount, rpgeoPrimType_e primType, bool usePlotMap);
+        public delegate void RpgBindPositionBuffer(byte[] data, rpgeoDataType_e dataType, int stride);
+        public delegate void RpgBindNormalBuffer(byte[] data, rpgeoDataType_e dataType, int stride);
+        public delegate void RpgBindUV1Buffer(byte[] data, rpgeoDataType_e dataType, int stride);
+        public delegate void RpgBindUV2Buffer(byte[] data, rpgeoDataType_e dataType, int stride);
+        public delegate void RpgBindUVXBuffer(byte[] data, rpgeoDataType_e dataType, int stride, int uvIndex, int elementCount);
+        public delegate void RpgBindColorBuffer(byte[] data, rpgeoDataType_e dataType, int stride, int elementCount);
+        public delegate void RpgBindBoneIndexBuffer(byte[] data, rpgeoDataType_e dataType, int stride, int numWeightsPerVert);
+        public delegate void RpgBindBoneWeightBuffer(byte[] data, rpgeoDataType_e dataType, int stride, int numWeightsPerVert);
+        public delegate void RpgCommitTriangles(byte[] indexData, rpgeoDataType_e dataType, int indexCount, rpgeoPrimType_e primType, bool usePlotMap);
         public delegate void RpgClearBufferBinds();
 
         public RpgCreateContext rpgCreateContext;
@@ -67,10 +107,12 @@ namespace AquaModelLibrary.Noesis
         public Noesis_GetInputNameW noesis_GetInputNameW;
         public Noesis_AllocBones noesis_AllocBones;
         public Noesis_GetMatData noesis_GetMatData;
+        public Noesis_GetMatDataFromLists noesis_GetMatDataFromLists;
         public Noesis_GetMaterialList noesis_GetMaterialList;
         public Noesis_LoadTexByHandler noesis_LoadTexByHandler;
         public Noesis_PooledAlloc noesis_PooledAlloc;
         public Noesis_PooledString noesis_PooledString;
+
         public RpgSetBoneMap rpgSetBoneMap;
         public RpgSetExData_Bones rpgSetExData_Bones;
         public RpgSetExData_Materials rpgSetExData_Materials;
@@ -86,14 +128,18 @@ namespace AquaModelLibrary.Noesis
         public RpgCommitTriangles rpgCommitTriangles;
         public RpgClearBufferBinds rpgClearBufferBinds;
         public RpgConstructModel rpgConstructModel;
+
         public RAPIObj(noeRAPI_s* rapi_s)
         {
             noesis_GetInputNameW = Marshal.GetDelegateForFunctionPointer<Noesis_GetInputNameW>(rapi_s->Noesis_GetInputNameW);
             noesis_AllocBones = Marshal.GetDelegateForFunctionPointer<Noesis_AllocBones>(rapi_s->Noesis_AllocBones);
             noesis_GetMatData = Marshal.GetDelegateForFunctionPointer<Noesis_GetMatData>(rapi_s->Noesis_GetMatData);
+            noesis_GetMatDataFromLists = Marshal.GetDelegateForFunctionPointer<Noesis_GetMatDataFromLists>(rapi_s->Noesis_GetMatDataFromLists);
             noesis_LoadTexByHandler = Marshal.GetDelegateForFunctionPointer<Noesis_LoadTexByHandler>(rapi_s->Noesis_LoadTexByHandler);
             noesis_GetMaterialList = Marshal.GetDelegateForFunctionPointer<Noesis_GetMaterialList>(rapi_s->Noesis_GetMaterialList);
             noesis_PooledString = Marshal.GetDelegateForFunctionPointer<Noesis_PooledString>(rapi_s->Noesis_PooledString);
+            noesis_PooledAlloc = Marshal.GetDelegateForFunctionPointer<Noesis_PooledAlloc>(rapi_s->Noesis_PooledAlloc);
+
             rpgSetBoneMap = Marshal.GetDelegateForFunctionPointer<RpgSetBoneMap>(rapi_s->rpgSetBoneMap);
             rpgSetExData_Bones = Marshal.GetDelegateForFunctionPointer<RpgSetExData_Bones>(rapi_s->rpgSetExData_Bones);
             rpgSetExData_Materials = Marshal.GetDelegateForFunctionPointer<RpgSetExData_Materials>(rapi_s->rpgSetExData_Materials);
@@ -303,8 +349,8 @@ namespace AquaModelLibrary.Noesis
         public IntPtr Math_CreateIrradianceCubemap;
         public IntPtr Math_CreateIrradianceCubemapLambert;
         public IntPtr Math_PrefilterCubemapGGX;
-        //Math_SampleSphericalProjectionIntoHDRCubemap flags - 1: flip theta, 2: flip phi
-        public IntPtr Math_SampleSphericalProjectionIntoHDRCubemap;
+        //Math_SampleSphericalProjectiointoHDRCubemap flags - 1: flip theta, 2: flip phi
+        public IntPtr Math_SampleSphericalProjectiointoHDRCubemap;
 
         //calculate approximate derivative of pFn(x)
         public IntPtr Math_CalculateDerivative;
@@ -386,7 +432,6 @@ namespace AquaModelLibrary.Noesis
         //NPAPI_EnumerateFiles(noesisPathDir, L"plugins", L"*.dll", myPathHandler);
         public IntPtr NPAPI_EnumerateFiles;
 
-        public IntPtr fileCallback;
         //plugins are allowed a single critical section to avoid processing-previewing conflicts. resv MUST BE 0 for these calls.
         public IntPtr NPAPI_EnterCritical;
         public IntPtr NPAPI_LeaveCritical;
@@ -504,7 +549,7 @@ namespace AquaModelLibrary.Noesis
         public IntPtr Array_GetElementGrow;
         public IntPtr Array_Append;
         public IntPtr Array_RemoveLast;
-
+        public IntPtr Array_Insert;
         public IntPtr Array_Remove;
         public IntPtr Array_GetCount;
         public IntPtr Array_Reset;
@@ -1630,10 +1675,10 @@ namespace AquaModelLibrary.Noesis
     {
         //ver is automatically set to the current BONE_STRUCT_VER when you call Noesis_AllocBones.
         //this is how noesis deals with changes to this bone structure while maintaining compatibility with old plugins.
-        private nint ver;
+        private int ver;
 
         //index will be filled in for you noesis-side.
-        private nint index;
+        private int index;
         public fixed byte name[128];
         //plugins should just leave parentName blank and set eData.parent instead. parentName is set and used internally by pure-legacy code.
         public fixed byte parentName[128];
@@ -1642,16 +1687,11 @@ namespace AquaModelLibrary.Noesis
 
         public modelBoneExData_s eData; //modelBoneExData_t
 
-        public nint flags;
-        public nint userIndex;
+        public int flags;
+        public int userIndex;
 
-        // nint CANNOT have a fixed array, apparently
-#if WIN32
+        // int CANNOT have a fixed array, apparently
 		public fixed int resv[6];
-#endif
-#if WIN64
-        public fixed long resv[6];
-#endif
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -1680,188 +1720,94 @@ namespace AquaModelLibrary.Noesis
         public Vector3 o;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct noesisTex_s
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct noesisTexFr_s
     {
-        public byte* filename;
-        public nint w;
-        public nint h;
-        public nint type;
-        public byte* data;
-        public nint dataLen;
-        public nint gltex;
-        public nint globalIdx; //used optionally by some modules
-        public nint flags;
-        public bool shouldFreeData;
+        public int ofsX;
+        public int ofsY;
+        public int frameIdx;
+        public int viewType;
 
-        public nint refCount; //do not modify refCount. it's managed internally.
-        public noesisTexFr_s* frameInfo; //new in 3.31 - allocate with Noesis_TexFrameInfoAlloc if you want to use it
-        public nint mipCount;
-        public fixed short unused[2]; //must be 0
-        public SNoeHDRTexData* pHdr;
-
-        //THESE VALUES MUST BE 0 (this is done by Noesis_TextureAlloc)
-#if WIN32
-		  public fixed int resv[4];
-#endif
-#if WIN64
-        public fixed long resv[4];
-#endif
+        public float rad;
+        public int frameDelay;
+        public fixed int resv[15];
     }
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct SNoeHDRTexData
-    {
-        public IntPtr pData;
-        public nint dataLen;
-        public ENoeHdrTexFormat hdrFormat;
-        public nint hdrFlags;
-
-#if WIN32
-		 public fixed int resv[32];
-#endif
-#if WIN64
-        public fixed long resv[32];
-#endif
-    };
 
     public enum ENoeHdrTexFormat
     {
         kNHDRTF_RGB_F96 = 0,
         kNHDRTF_RGBA_F128,
         kNHDRTF_Lum_F32,
-        kNHDRTF_RGBA_F64
-    };
-
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct noesisTexFr_s
-    {
-        public int ofsX;
-        public int ofsY;
-        public int frameIdx;
-        public int viewType;
-        public float rad; //i have no idea why you'd want this, but it's preserved mainly for quake spr's at the moment
-        public int frameDelay; //3.84
-
-#if WIN32
-		 public fixed int resv[15];
-#endif
-#if WIN64
-        public fixed long resv[15];
-#endif
+        kNHDRTF_RGBA_F64,
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct noesisMaterial_s
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct SNoeHDRTexData
     {
-        public byte* name;
-        public bool skipRender;
-        public Vector4 diffuse;
-        public Vector4 specular;
-        public bool noDefaultBlend;
-        public nint texIdx;
-        public nint extTex; //external texture override
-
-        public nint blendSrc;
-        public nint blendDst;
-        public float alphaTest;
-        public bool noLighting;
-
-        public nint normalTexIdx;
-        public nint specularTexIdx;
-        public nint transTexIdx;
-        public nint obsoleteProgramIndex;
-
-        public nint flags;
-
-        public nint refCount; //do not modify refCount. it's managed internally.
-        public noesisExtTexRef_s* extRefs;
-        public noesisMaterial_s* nextPass;
-
-        public noesisMatExpr_s* expr; //new in Noesis 4.0 - material expressions
-
-        public nint bumpTexIdx;
-        public nint envTexIdx;
-
-        //extended material structure (running out of room in this one to maintain backwards-compatibility)
-        public noesisMatEx_s* ex;
-
-        public IntPtr mCustomData; //CNoeCustomDataList
-
-        public nint resv;
+        public void* pData;
+        public int dataLen;
+        public ENoeHdrTexFormat hdrFormat;
+        public int hdrFlags;
+        public fixed int resv[32];
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct noesisMatEx_s
+    public enum ENoePalFormat
     {
-        public fixed float envMapColor[4]; //alpha is the fresnel term multiplier
-        public fixed float ambientColor[4];
-        public fixed float blendedNormalFracs[4];
-
-        public fixed float rimColor[3];
-        public float rimWidth;
-        public float rimPow;
-        public fixed float rimOfs[3];
-        public float rimBias;
-
-        public fixed byte userTag[8];
-        public IntPtr userData;
-        public nint userDataSize;
-
-        //only applicable for pbr. if you have gloss instead of roughness, use roughnessBias 1.0, roughnessScale -1.0
-        public float roughnessScale;
-        public float roughnessBias;
-        public float metalScale;
-        public float metalBias;
-
-        //started out roughness-based, became fake-ass anisotropy. could easily do roughness-x/roughness-y as presented by Disney for lights,
-        //but want it to be unified with IBL and don't want to do importance sampling at runtime.
-        public float roughnessAnisoScale;
-        public float roughnessAnisoAngle;
-
-        //PBR_INTERNAL_TEX_COUNT for array size
-#if WIN32
-		public fixed int pbrGenTexIdx[8];
-#endif
-#if WIN64
-        public fixed long pbrGenTexIdx[8];
-#endif
-
-        public float* pUvScaleBias; //float * 4
-        public float* pUvPlanes; //float * 16
-
-        public float fresnelScale;
-
-        public float* pSpecSwizzle; //float * 4 * 4
-
-#if WIN32
-		 public fixed int resv[25];
-#endif
-#if WIN64
-        public fixed long resv[25];
-#endif
+        kNPF_RGB888 = 0,
+        kNPF_RGBA8888,
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct noesisMatData_s
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct SNoePalData
     {
-        public noesisTex_s* textures;
-        public nint numTextures;
-
-        public noesisMaterial_s* materials;
-        public nint numMaterials;
-
-        public nint refCount; //do not modify refCount. it's managed internally.
-
-#if WIN32
-		 public fixed int resv[8];
-#endif
-#if WIN64
-        public fixed long resv[8];
-#endif
+        public void* pData;
+        public int dataLen;
+        public bool notDataOwner;//[NativeTypeName("bool")]
+        public int colorCount;
+        public ENoePalFormat palFormat;
+        public int flags;
+        public int transparentIndex;
+        public void* pOriginalIndices;
+        public int originalIndexBpp;
+        public int originalWidth;
+        public int originalHeight;
+        public fixed int resv[30];
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct noesisExtTexRef_s
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct SNoeTexExtraData
+    {
+        public float mLodBias;
+        public int mInternalFlags;
+        public fixed int mInternalTracking[8];
+        public fixed int mResv[8];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct noesisTex_s
+    {
+        public byte* filename;
+        public int w;
+        public int h;
+        public int type;
+        public byte* data;
+        public int dataLen;
+        public int gltex;
+        public int globalIdx;
+        public int flags;
+        public bool shouldFreeData;
+        public int refCount;
+        public noesisTexFr_s* frameInfo;
+        public int mipCount;
+        public fixed short unused[2];
+        public SNoeHDRTexData* pHdr;
+        public SNoePalData* pPal;
+        public SNoeTexExtraData* pExtra;
+        public fixed int resv[2];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct noesisExtTexRef_s
     {
         public byte* diffuse;
         public byte* normal;
@@ -1869,13 +1815,82 @@ namespace AquaModelLibrary.Noesis
         public byte* opacity;
         public byte* bump;
         public byte* env;
+        public byte* occl;
+        public fixed int reserved[29];
+    }
 
-#if WIN32
-		public fixed int resv[30];
-#endif
-#if WIN64
-        public fixed long resv[30];
-#endif
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct noesisMatEx_s
+    {
+        public Vector4 envMapColor;
+        public Vector4 ambientColor;
+        public Vector4 blendedNormalFracs;
+        public Vector3 rimColor;
+        public float rimWidth;
+        public float rimPow;
+        public Vector3 rimOfs;
+        public float rimBias;
+        public fixed byte userTag[8];
+        public void* userData;
+        public int userDataSize;
+        public float roughnessScale;
+        public float roughnessBias;
+        public float metalScale;
+        public float metalBias;
+        public float roughnessAnisoScale;
+        public float roughnessAnisoAngle;
+        public fixed int pbrGenTexIdx[8];
+        public float* pUvScaleBias;
+        public float* pUvPlanes;
+        public float fresnelScale;
+        public float* pSpecSwizzle;
+        public int flags2;
+        public int occlTexIdx;
+        public float occlScale;
+        public fixed int resv[22];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct noesisMaterial_s
+    {
+        public byte* name;
+        public bool skipRender;
+        public Vector4 diffuse;
+        public Vector4 specular;
+        public bool noDefaultBlend;
+        public int texIdx;
+        public int extTex;
+        public int blendSrc;
+        public int blendDst;
+        public float alphaTest;
+        public bool noLighting;
+        public int normalTexIdx;
+        public int specularTexIdx;
+        public int transTexIdx;
+        public int obsoleteProgramIndex;
+        public int flags;
+        public int refCount;
+        public noesisExtTexRef_s* extRefs;
+        public noesisMaterial_s* nextPass;
+        public noesisMatExpr_s* expr;
+        public int bumpTexIdx;
+        public int envTexIdx;
+        public noesisMatEx_s* ex;
+        public IntPtr mCustomData;
+        public fixed int resv[1];
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe partial struct noesisMatData_s
+    {
+        public noesisTex_s* textures;
+        public int numTextures;
+
+        public noesisMaterial_s* materials;
+        public int numMaterials;
+        public int refCount;
+        public int internalFlags;
+        public fixed int resv[7];
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -1884,42 +1899,64 @@ namespace AquaModelLibrary.Noesis
         //per-vertex expression evaluators
 
         //All of these are pointer arrays
-#if WIN32
-        public fixed int v_posExpr[3];
-        public fixed int v_nrmExpr[3];
-        public fixed int v_uvExpr[2];
-        public fixed int v_clrExpr[4];
+        public IntPtr v_posExpr_0;
+        public IntPtr v_posExpr_1;
+        public IntPtr v_posExpr_2;
+
+        public IntPtr v_nrmExpr_0;
+        public IntPtr v_nrmExpr_1;
+        public IntPtr v_nrmExpr_2;
+
+        public IntPtr v_uvExpr_0;
+        public IntPtr v_uvExpr_1;
+
+        public IntPtr v_clrExpr_0;
+        public IntPtr v_clrExpr_1;
+        public IntPtr v_clrExpr_2;
+        public IntPtr v_clrExpr_3;
 
         //global material expression evaluators
-        public fixed int diffuse[4];
-        public fixed int specular[4];
+        public IntPtr diffuse_0;
+        public IntPtr diffuse_1;
+        public IntPtr diffuse_2;
+        public IntPtr diffuse_3;
 
-        public fixed int uvTrans[3];
-        public fixed int uvRot[3];
+        public IntPtr specular_0;
+        public IntPtr specular_1;
+        public IntPtr specular_2;
+        public IntPtr specular_3;
 
-        public int texIdx;
-        public int normalTexIdx;
-        public int specularTexIdx;
-#endif
-#if WIN64
-        public fixed long v_posExpr[3];
-        public fixed long v_nrmExpr[3];
-        public fixed long v_uvExpr[2];
-        public fixed long v_clrExpr[4];
+        public IntPtr uvTrans_0;
+        public IntPtr uvTrans_1;
+        public IntPtr uvTrans_2;
 
-        //global material expression evaluators
-        public fixed long diffuse[4];
-        public fixed long specular[4];
+        public IntPtr uvRot_0;
+        public IntPtr uvRot_1;
+        public IntPtr uvRot_2;
 
-        public fixed long uvTrans[3];
-        public fixed long uvRot[3];
+        public IntPtr texIdx;
+        public IntPtr normalTexIdx;
+        public IntPtr specularTexIdx;
 
-        public long texIdx;
-        public long normalTexIdx;
-        public long specularTexIdx;
-#endif
+        public IntPtr resv_0; //16 slots
+        public IntPtr resv_1; 
+        public IntPtr resv_2; 
+        public IntPtr resv_3;
 
-        public IntPtr resv; //16 slots
+        public IntPtr resv_4;
+        public IntPtr resv_5;
+        public IntPtr resv_6;
+        public IntPtr resv_7;
+
+        public IntPtr resv_8;
+        public IntPtr resv_9;
+        public IntPtr resv_10;
+        public IntPtr resv_11;
+
+        public IntPtr resv_12;
+        public IntPtr resv_13;
+        public IntPtr resv_14;
+        public IntPtr resv_15;
     }
 
     public enum rpgeoPrimType_e
