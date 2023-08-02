@@ -32,6 +32,16 @@ namespace AquaModelLibrary.Noesis
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) }, EntryPoint = "NPAPI_Init")]
         public static bool NPAPI_Init(mathImpFn_s* mathfn, noePluginFn_s* noepfn)
         {
+            File.WriteAllBytes($"C:\\noesisMaterial_s size {sizeof(noesisMaterial_s)} {sizeof(noesisMaterial_s):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\noesisExtTexRef_s size {sizeof(noesisExtTexRef_s)} {sizeof(noesisExtTexRef_s):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\noesisMatExpr_s size {sizeof(noesisMatExpr_s)} {sizeof(noesisMatExpr_s):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\noesisMatEx_s size {sizeof(noesisMatEx_s)} {sizeof(noesisMatEx_s):X}", new byte[0]);
+
+            File.WriteAllBytes($"C:\\noesisTex_s size {sizeof(noesisTex_s)} {sizeof(noesisTex_s):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\noesisTexFr_s size {sizeof(noesisTexFr_s)} {sizeof(noesisTexFr_s):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\SNoeHDRTexData size {sizeof(SNoeHDRTexData)} {sizeof(SNoeHDRTexData):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\SNoePalData size {sizeof(SNoePalData)} {sizeof(SNoePalData):X}", new byte[0]);
+            File.WriteAllBytes($"C:\\SNoeTexExtraData size {sizeof(SNoeTexExtraData)} {sizeof(SNoeTexExtraData):X}", new byte[0]);
             api = new NoesisFunctions(mathfn, noepfn);
 
             //Descriptions
@@ -125,9 +135,6 @@ namespace AquaModelLibrary.Noesis
 
         public static IntPtr AquaModelLoadFn(byte* fileBuffer, nint bufferLen, ref int numMdl, noeRAPI_s* rapi)
         {
-            File.WriteAllBytes($"C:\\tex size {sizeof(noesisTex_s)}", new byte[0]);
-            File.WriteAllBytes($"C:\\mat size {sizeof(noesisMaterial_s)}", new byte[0]);
-            File.WriteAllBytes("C:\\InLoad.bin", new byte[0]);
             bool isPso2Model = true;
             RAPIObj rapiObj = new RAPIObj(rapi);
             IntPtr ctx = rapiObj.rpgCreateContext();

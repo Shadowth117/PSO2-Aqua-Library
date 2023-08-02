@@ -1689,9 +1689,12 @@ namespace AquaModelLibrary.Noesis
 
         public int flags;
         public int userIndex;
-
-        // int CANNOT have a fixed array, apparently
-		public fixed int resv[6];
+#if WIN64
+        public fixed long resv[6];
+#endif
+#if WIN32
+        public fixed int resv[6];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -1708,7 +1711,12 @@ namespace AquaModelLibrary.Noesis
         private fixed short lastFrameAngles[3];
 
         //may eventually add extended data pointers, long name strings, etc.
+#if WIN64
+        public fixed long resv[4];
+#endif
+#if WIN32
         public fixed int resv[4];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -1730,7 +1738,12 @@ namespace AquaModelLibrary.Noesis
 
         public float rad;
         public int frameDelay;
+#if WIN64
+        public fixed long resv[15];
+#endif
+#if WIN32
         public fixed int resv[15];
+#endif
     }
 
     public enum ENoeHdrTexFormat
@@ -1745,10 +1758,15 @@ namespace AquaModelLibrary.Noesis
     public unsafe partial struct SNoeHDRTexData
     {
         public void* pData;
-        public int dataLen;
+        public nint dataLen;
         public ENoeHdrTexFormat hdrFormat;
         public int hdrFlags;
+#if WIN64
+        public fixed long resv[32];
+#endif
+#if WIN32
         public fixed int resv[32];
+#endif
     }
 
     public enum ENoePalFormat
@@ -1761,7 +1779,7 @@ namespace AquaModelLibrary.Noesis
     public unsafe partial struct SNoePalData
     {
         public void* pData;
-        public int dataLen;
+        public nint dataLen;
         public bool notDataOwner;//[NativeTypeName("bool")]
         public int colorCount;
         public ENoePalFormat palFormat;
@@ -1771,7 +1789,12 @@ namespace AquaModelLibrary.Noesis
         public int originalIndexBpp;
         public int originalWidth;
         public int originalHeight;
+#if WIN64
+        public fixed long resv[30];
+#endif
+#if WIN32
         public fixed int resv[30];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1780,7 +1803,12 @@ namespace AquaModelLibrary.Noesis
         public float mLodBias;
         public int mInternalFlags;
         public fixed int mInternalTracking[8];
+#if WIN64
+        public fixed long mResv[8];
+#endif
+#if WIN32
         public fixed int mResv[8];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1791,7 +1819,7 @@ namespace AquaModelLibrary.Noesis
         public int h;
         public int type;
         public byte* data;
-        public int dataLen;
+        public nint dataLen;
         public int gltex;
         public int globalIdx;
         public int flags;
@@ -1803,7 +1831,12 @@ namespace AquaModelLibrary.Noesis
         public SNoeHDRTexData* pHdr;
         public SNoePalData* pPal;
         public SNoeTexExtraData* pExtra;
+#if WIN64
+        public fixed long resv[2];
+#endif
+#if WIN32
         public fixed int resv[2];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1816,7 +1849,12 @@ namespace AquaModelLibrary.Noesis
         public byte* bump;
         public byte* env;
         public byte* occl;
+#if WIN64
+        public fixed long reserved[29];
+#endif
+#if WIN32
         public fixed int reserved[29];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1825,29 +1863,44 @@ namespace AquaModelLibrary.Noesis
         public Vector4 envMapColor;
         public Vector4 ambientColor;
         public Vector4 blendedNormalFracs;
+
         public Vector3 rimColor;
         public float rimWidth;
         public float rimPow;
         public Vector3 rimOfs;
         public float rimBias;
+        
         public fixed byte userTag[8];
         public void* userData;
         public int userDataSize;
+        
         public float roughnessScale;
         public float roughnessBias;
         public float metalScale;
         public float metalBias;
+        
         public float roughnessAnisoScale;
         public float roughnessAnisoAngle;
+
         public fixed int pbrGenTexIdx[8];
+        
         public float* pUvScaleBias;
         public float* pUvPlanes;
+        
         public float fresnelScale;
+        
         public float* pSpecSwizzle;
+        
         public int flags2;
+        
         public int occlTexIdx;
         public float occlScale;
+#if WIN64
+        public fixed long resv[22];
+#endif
+#if WIN32
         public fixed int resv[22];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1860,24 +1913,31 @@ namespace AquaModelLibrary.Noesis
         public bool noDefaultBlend;
         public int texIdx;
         public int extTex;
+
         public int blendSrc;
         public int blendDst;
         public float alphaTest;
         public bool noLighting;
+
         public int normalTexIdx;
         public int specularTexIdx;
         public int transTexIdx;
         public int obsoleteProgramIndex;
+
         public int flags;
+        
         public int refCount;
         public noesisExtTexRef_s* extRefs;
         public noesisMaterial_s* nextPass;
+
         public noesisMatExpr_s* expr;
+        
         public int bumpTexIdx;
         public int envTexIdx;
+
         public noesisMatEx_s* ex;
         public IntPtr mCustomData;
-        public fixed int resv[1];
+        public nint resv;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1890,7 +1950,12 @@ namespace AquaModelLibrary.Noesis
         public int numMaterials;
         public int refCount;
         public int internalFlags;
+#if WIN64
+        public fixed long resv[7];
+#endif
+#if WIN32
         public fixed int resv[7];
+#endif
     }
 
     [StructLayout(LayoutKind.Sequential)]
