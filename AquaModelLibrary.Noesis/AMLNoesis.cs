@@ -215,7 +215,9 @@ namespace AquaModelLibrary.Noesis
                     bone.eData.parent = aqBone.parentId == -1 ? 0 : (nint)bones + (sizeof(modelBone_s) * aqBone.parentId);
 
                     //Set up name
-                    var name = aqBone.boneName.GetBytes();
+                    var name = new byte[128];
+                    var boneNameStr = aqBone.boneName.GetString();
+                    StringCopy(boneNameStr, boneNameStr.Length, name);
                     var idStr = Encoding.UTF8.GetBytes($"({i})_");
                     if (addId)
                     {
@@ -243,9 +245,14 @@ namespace AquaModelLibrary.Noesis
 
                 File.WriteAllBytes($"C:\\material {i} start.bin", new byte[0]);
                 var mat = rapiObj.noesis_GetMaterialList(1, true);
-                mat->name = rapiObj.noesis_PooledString(Encoding.UTF8.GetBytes(aqMat.matName));
+
+                byte[] matName = new byte[100];
+                StringCopy(aqMat.matName, aqMat.matName.Length, matName);
+                mat->name = rapiObj.noesis_PooledString(matName);
+
                 //Don't overload this if the ngs hair ones comes into play
                 mat->diffuse = aqMat.diffuseRGBA.Length() > 2 ? new Vector4(1, 1, 1, 1) : aqMat.diffuseRGBA;
+                mat->specular = aqMat.unkRGBA0;
                 mat->blendSrc = aqMat.srcAlpha;
                 mat->blendDst = aqMat.destAlpha;
 
@@ -304,7 +311,8 @@ namespace AquaModelLibrary.Noesis
                     File.WriteAllBytes($"C:\\tex {texNames[i]} marshaled.bin", new byte[i]);
                     tex = rapiObj.noesis_LoadTexByHandler((byte*)texBuffer, texBytes.Length, Encoding.UTF8.GetBytes(".dds"));
                     File.WriteAllBytes($"C:\\tex {texNames[i]} loaded.bin", new byte[i]);
-                    var texFilenameBytes = Encoding.UTF8.GetBytes($"{texNames[i]}");
+                    byte[] texFilenameBytes = new byte[4096];
+                    StringCopy(texPath, texPath.Length, texFilenameBytes);
                     tex->filename = rapiObj.noesis_PooledString(texFilenameBytes);
                     File.WriteAllBytes($"C:\\tex {texNames[i]} filename pooled.bin", new byte[i]);
                     texArr[i] = Marshal.PtrToStructure<noesisTex_s>((nint)tex);
@@ -336,11 +344,13 @@ namespace AquaModelLibrary.Noesis
                 if (texSuccessDict.ContainsKey(matIdTemp[i]))
                 {
                     mat.texIdx = texSuccessDict[matIdTemp[i]];
+                    /*
                     mat.alphaTest = (float)aqMat.alphaCutoff / 255;
                     if (mat.alphaTest > 1)
                     {
                         mat.alphaTest = 1;
                     }
+                    */
                 }
 
                 matArr[i] = mat;
@@ -351,8 +361,15 @@ namespace AquaModelLibrary.Noesis
             {
                 File.WriteAllBytes($"C:\\Attempting to bind mats. mat arr len = {matArr.Length}, texArrLen = {texArrFinal.Length} .bin", new byte[0]);
                 var arr2 = new noesisMaterial_s[] { matArr[0] };
+                var matCArrList = new CArrayList() { m_array = matNoesisArray };
+                var texCArrList = new CArrayList() { m_array = texNoesisArray };
+                IntPtr matCArrPtr = new nint();
+                IntPtr texCArrPtr = new nint();
+                Marshal.StructureToPtr(matCArrList, matCArrPtr, false);
+                Marshal.StructureToPtr(texCArrList, texCArrPtr, false);
                 //noesisMatData_s* md = rapiObj.noesis_GetMatData(arr2, arr2.Length, texArr, texArrFinal.Length);
-                noesisMatData_s* md = rapiObj.noesis_GetMatData(matArr, matArr.Length, texArr, texArrFinal.Length);
+                //noesisMatData_s* md = rapiObj.noesis_GetMatData(matArr, matArr.Length, texArr, texArrFinal.Length);
+                noesisMatData_s* md = rapiObj.noesis_GetMatDataFromLists(matCArrPtr, texCArrPtr);
                 //noesisMatData_s* md = rapiObj.noesis_GetMatData(matArr, matArr.Length, texArrFinal, texArrFinal.Length);
                 //noesisMatData_s* md = rapiObj.noesis_GetMatDataFromLists(ref matNoesisArray, ref texNoesisArray);
                 File.WriteAllBytes($"C:\\mat wrapup 1 done.bin", new byte[0]);
@@ -553,5 +570,20 @@ namespace AquaModelLibrary.Noesis
             }
         }
 
+        public static void StringCopy(string str, int count, byte[] strLocation)
+        {
+            byte[] strArr = Encoding.UTF8.GetBytes(str);
+            for (int i = 0; i < count; i++)
+            {
+                if (i < strArr.Length)
+                {
+                    strLocation[i] = strArr[i];
+                }
+                else
+                {
+                    strLocation[i] = 0;
+                }
+            }
+        }
     }
 }

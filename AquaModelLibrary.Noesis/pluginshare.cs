@@ -80,7 +80,7 @@ namespace AquaModelLibrary.Noesis
         public delegate modelBone_s* Noesis_AllocBones(int numBones);
         public delegate noesisMatData_s* Noesis_GetMatData(noesisMaterial_s[] mats, int numMats, noesisTex_s[] tex, int numTex);
         //public delegate noesisMatData_s* Noesis_GetMatData(IntPtr mats, int numMats, IntPtr tex, int numTex);
-        public delegate noesisMatData_s* Noesis_GetMatDataFromLists(ref IntPtr matsList, ref IntPtr texList);
+        public delegate noesisMatData_s* Noesis_GetMatDataFromLists(IntPtr matsList, IntPtr texList);
         public delegate noesisMaterial_s* Noesis_GetMaterialList(int numMaterials, bool texByIndex);
         public delegate noesisTex_s* Noesis_LoadTexByHandler(byte* srcBuffer, int srcSize, byte[] extension);
         public delegate IntPtr Noesis_PooledAlloc(nuint size);
@@ -2055,4 +2055,8 @@ namespace AquaModelLibrary.Noesis
         NUM_RPGEO_DATATYPES
     }
 
+    public struct CArrayList
+    {
+        public IntPtr m_array;
+    }
 }
