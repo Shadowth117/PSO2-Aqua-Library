@@ -266,6 +266,7 @@ namespace AquaModelLibrary.Extra
             List<string> genAnimList, genAnimListNGS;
 
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
+            GenerateUILists(pso2_binDir, outputDirectory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
@@ -279,7 +280,6 @@ namespace AquaModelLibrary.Extra
             GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat);
             GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateAreaData(pso2_binDir, stageDirOut);
-            GenerateUILists(pso2_binDir, outputDirectory);
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateMusicData(pso2_binDir, musicDirOut);
             GenerateCasinoData(pso2_binDir, outputDirectory);
@@ -673,7 +673,9 @@ namespace AquaModelLibrary.Extra
         private static void GenerateUILists(string pso2_binDir, string outputDirectory)
         {
             string outputStampDirectory = Path.Combine(outputDirectory, "UI", "Stamps");
+            string outputVGDirectory = Path.Combine(outputDirectory, "UI", "Vital Gauge");
             Directory.CreateDirectory(outputStampDirectory);
+            Directory.CreateDirectory(outputVGDirectory);
 
             //---------------------------Generate Load Tunnel Lists
             List<string> loadTunnelsOut = new List<string>();
@@ -720,6 +722,37 @@ namespace AquaModelLibrary.Extra
                 File.WriteAllLines(Path.Combine(outputStampDirectory, "stampsNA.csv"), stampsNAOut, Encoding.UTF8);
             }
 
+            //---------------------------Vital Gauge
+            List<string> vgOut = new List<string>();
+            for (int i = 0; i < 10000; i++)
+            {
+                string name = vitalGaugePath + $"{i:D4}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                string pathNA = Path.Combine(pso2_binDir, dataRebootNA, hash);
+                if (File.Exists(path))
+                {
+                    vgOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputVGDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+                if (File.Exists(pathNA))
+                {
+                    stampsNAOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(pathNA);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputVGDirectory, Path.ChangeExtension(Path.GetFileName(name), "NA.png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+
+            File.WriteAllLines(Path.Combine(outputVGDirectory, "Vital Guage.csv"), vgOut, Encoding.UTF8);
         }
         public unsafe static Bitmap GetFirstImageFromIce(string fileName)
         {
