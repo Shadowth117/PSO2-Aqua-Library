@@ -481,6 +481,44 @@ namespace AquaModelLibrary.Extra
             return angles;
         }
 
+        public static Vector3 QuaternionToEulerTest(Quaternion quat)
+        {
+            return QuaternionToEulerRadiansTest(quat) * (float)(180 / Math.PI);
+        }
+
+        public static Vector3 QuaternionToEulerRadiansTest(Quaternion q)
+        {
+            Vector3 eulerAngles = new Vector3();
+
+            Quaternion t = new Quaternion(q.X * q.X, q.Y * q.Y, q.Z * q.Z, q.W * q.W);
+
+            float m = (t.X + t.Y + t.Z + t.W);
+            if (Math.Abs(m) < 0.001d) return eulerAngles;
+            float n = 2 * (q.Y * q.W + q.X * q.Z);
+            float p = m * m - n * n;
+
+            if (p > 0f)
+            {
+                eulerAngles.X = (float)Math.Atan2(2.0f * (q.X * q.W - q.Y * q.Z), (-t.X - t.Y + t.Z + t.W));
+                eulerAngles.Y = (float)Math.Atan2(n, Math.Sqrt(p));
+                eulerAngles.Z = (float)Math.Atan2(2.0f * (q.Z * q.W - q.X * q.Y), t.X - t.Y - t.Z + t.W);
+            }
+            else if (n > 0f)
+            {
+                eulerAngles.X = 0f;
+                eulerAngles.Y = (float)(Math.PI / 2d);
+                eulerAngles.Z = (float)Math.Atan2((q.Z * q.W + q.X * q.Y), 0.5f - t.X - t.Y);
+            }
+            else
+            {
+                eulerAngles.X = 0f;
+                eulerAngles.Y = -(float)(Math.PI / 2d);
+                eulerAngles.Z = (float)Math.Atan2((q.Z * q.W + q.X * q.Y), 0.5f - t.X - t.Z);
+            }
+
+            return eulerAngles;
+        }
+
         public static Vector3 QuaternionToEulerRadiansNoHandle(Quaternion quat)
         {
             Vector3 angles;

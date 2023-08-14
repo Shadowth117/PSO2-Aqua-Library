@@ -8,15 +8,10 @@ using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
 using static AquaModelLibrary.AquaNode;
-using NvTriStripDotNet;
 using AquaModelLibrary.Extra.FromSoft;
 using AquaModelLibrary.Native.Fbx;
 using System.Diagnostics;
-using AquaExtras;
 using static AquaModelLibrary.Utility.AquaUtilData;
-using System.Security.Cryptography;
-using static SoulsFormats.FLVER;
-using Assimp;
 using Matrix4x4 = System.Numerics.Matrix4x4;
 
 namespace AquaModelLibrary.Extra
@@ -323,7 +318,7 @@ namespace AquaModelLibrary.Extra
             }
                 catch
                 {
-                    Debug.WriteLine(Path.Combine(outPath, fileName));
+                    //Debug.WriteLine(Path.Combine(outPath, fileName));
                 }
 #endif
             }
@@ -600,6 +595,7 @@ namespace AquaModelLibrary.Extra
 
                 var tfmMat = Matrix4x4.Identity;
 
+                //Debug.WriteLine($"{i} {flverBone.Rotation.X} {flverBone.Rotation.Y} {flverBone.Rotation.Z}");
                 if (flverBone.Rotation.X > maxTest.X)
                 {
                     maxTest.X = flverBone.Rotation.X;
@@ -625,6 +621,10 @@ namespace AquaModelLibrary.Extra
                     minTest.Z = flverBone.Rotation.Z;
                 }
                 Matrix4x4 mat = flverBone.ComputeLocalTransform();
+
+                Matrix4x4.Decompose(mat, out Vector3 scale, out System.Numerics.Quaternion quatrot, out Vector3 translation);
+
+                Debug.WriteLine($"{i} Quat {quatrot.X} {quatrot.Y} {quatrot.Z} {quatrot.W}");
                 mat *= tfmMat;
 
                 //If there's a parent, multiply by it
@@ -852,7 +852,7 @@ namespace AquaModelLibrary.Extra
                             {
                                 boneTransformationIndex = vert.NormalW;
                             }
-                            else if (useIndexNoWeightTransform && f0Mesh.BoneIndices?[0] != -1)
+                            else if (useIndexNoWeightTransform && f0Mesh.BoneIndices?[0] != -1 && f0Mesh.Dynamic == 0)
                             {
                                 boneTransformationIndex = f0Mesh.BoneIndices[vert.BoneIndices[0]];
                             }
@@ -1202,9 +1202,9 @@ namespace AquaModelLibrary.Extra
                 var flvMat = flver.Materials[matIds[i]];
 
                 FLVER0.Mesh flvMesh = new FLVER0.Mesh();
+                var flverMaterial = flver.Materials[matIds[i]];
                 flvMesh.MaterialIndex = (byte)matIds[i];
                 flvMesh.BackfaceCulling = false;
-                byte isDynamic = 0;
 
                 bool normalWBoneTransform = false;
                 bool foundBoneIndices = false;
@@ -1230,9 +1230,10 @@ namespace AquaModelLibrary.Extra
                         }
                     }
                 }
+                bool isPart = Path.GetFileName(flverMaterial.MTD).ToLower().StartsWith("p"); //Bit of a hack, but if we find this, we should NOT enable dynamic
                 bool hasIndexNoWeightTransform = foundBoneIndices && !foundBoneWeights;
 
-                flvMesh.Dynamic = (byte)((hasIndexNoWeightTransform || normalWBoneTransform) ? 0 : 1);
+                flvMesh.Dynamic = (byte)((hasIndexNoWeightTransform || normalWBoneTransform) && !isPart ? 0 : 1);
 
                 //TODO DECIDE IF DYNAMIC BASED ON LAYOUT AND ALTER VERTEX WEIGHTS, NORMAL W, BONE INDICES APPROPRIATELY
                 flvMesh.Vertices = new List<FLVER.Vertex>();
@@ -1287,7 +1288,7 @@ namespace AquaModelLibrary.Extra
                     var vert = new FLVER.Vertex();
 
                     //Get the bone for transforms if needed
-                    if (normalWBoneTransform || hasIndexNoWeightTransform)
+                    if ((normalWBoneTransform || hasIndexNoWeightTransform) && !isPart)
                     {
                         if (vtxl.vertWeightIndices?.Count > 0 && vtxl.vertWeightIndices[v]?.Length > 0)
                         {
@@ -1311,7 +1312,7 @@ namespace AquaModelLibrary.Extra
                                 var pos = vtxl.vertPositions[v];
 
                                 //transform to inverse position if transforming
-                                if (normalWBoneTransform || hasIndexNoWeightTransform)
+                                if ((normalWBoneTransform || hasIndexNoWeightTransform) && !isPart)
                                 {
                                     var tfm = aqn.nodeList[tfmBone].GetInverseBindPoseMatrix();
                                     pos = Vector3.Transform(pos, tfm);
@@ -1342,7 +1343,13 @@ namespace AquaModelLibrary.Extra
                             case FLVER.LayoutSemantic.Normal:
                                 if (vtxl.vertNormals.Count > 0)
                                 {
-                                    vert.Normal = Vector3.Transform(vtxl.vertNormals[v], mirrorMat);
+                                    var nrm = vtxl.vertNormals[v];
+                                    if ((normalWBoneTransform || hasIndexNoWeightTransform) && !isPart)
+                                    {
+                                        var tfm = aqn.nodeList[tfmBone].GetInverseBindPoseMatrix();
+                                        nrm = Vector3.TransformNormal(nrm, tfm);
+                                    }
+                                    vert.Normal = Vector3.TransformNormal(nrm, mirrorMat);
                                 }
                                 else
                                 {
@@ -1396,10 +1403,10 @@ namespace AquaModelLibrary.Extra
                                 break;
                             case FLVER.LayoutSemantic.BoneIndices:
                                 int[] indices;
-                                if (hasIndexNoWeightTransform)
+                                if (hasIndexNoWeightTransform && tfmBone != -1)
                                 {
                                     indices = new int[] { tfmBone, tfmBone, tfmBone, tfmBone };
-                                }
+                                } 
                                 else if (vtxl.vertWeightIndices.Count == 0)
                                 {
                                     indices = new int[4];
@@ -1442,7 +1449,7 @@ namespace AquaModelLibrary.Extra
                                 {
                                     bone3 = -1;
                                 }
-
+                                
                                 //Calc bone bounding. Bone bounding is made up of extents from each vertex with it assigned. 
                                 CheckBounds(MaxBoundingBoxByBone, MinBoundingBoxByBone, vert.Position, bone0);
                                 CheckBounds(MaxBoundingBoxByBone, MinBoundingBoxByBone, vert.Position, bone1);
@@ -1466,18 +1473,12 @@ namespace AquaModelLibrary.Extra
                                 vert.BoneWeights[1] = weights.Y;
                                 vert.BoneWeights[2] = weights.Z;
                                 vert.BoneWeights[3] = weights.W;
-
-                                if ((weights.X < 0.999f && weights.X > 0) || (weights.Y < 0.999f && weights.Y > 0) || (weights.Z < 0.999f && weights.Z > 0) || (weights.W < 0.999f && weights.W > 0))
-                                {
-                                    isDynamic = 1;
-                                }
                                 break;
                         }
                     }
 
                     flvMesh.Vertices.Add(vert);
                 }
-                flvMesh.Dynamic = isDynamic;
 
                 TangentSolver.SolveTangentsDemonsSouls(flvMesh, flver.Header.Version);
                 flver.Meshes.Add(flvMesh);
@@ -1494,7 +1495,7 @@ namespace AquaModelLibrary.Extra
                     var aqBone = aqn.nodeList[i];
                     Matrix4x4.Invert(aqBone.GetInverseBindPoseMatrix(), out Matrix4x4 aqBoneWorldTfm);
                     aqBoneWorldTfm *= mirrorMat;
-                    aqBoneWorldTfm = MathExtras.SetMatrixScale(aqBoneWorldTfm, new Vector3(1, 1, 1));
+                    //aqBoneWorldTfm = MathExtras.SetMatrixScale(aqBoneWorldTfm, new Vector3(1, 1, 1));
 
                     //Set the inverted transform so when we read it back we can use it for parent calls
                     Matrix4x4.Invert(aqBoneWorldTfm, out Matrix4x4 aqBoneInvWorldTfm);
@@ -1529,7 +1530,10 @@ namespace AquaModelLibrary.Extra
 
                     bone.Translation = translation;
 
-                    var eulerAngles = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
+                    Debug.WriteLine($"{i} Quat {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
+                    var eulerAngles = MathExtras.QuaternionToEulerRadiansTest(rotation);
+                    
+                    var eulerAnglesold = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
 #if DEBUG
                     var eulerAngles2 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XYZ);
                     var eulerAngles3 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.YXZ);
@@ -1537,9 +1541,11 @@ namespace AquaModelLibrary.Extra
                     var eulerAngles5 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.ZXY);
                     var eulerAngles6 = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.ZYX);
 #endif
-                    bone.Rotation = eulerAngles;
-                    bone.Scale = new Vector3(1, 1, 1);
+                    
 
+                    bone.Rotation = eulerAnglesold;
+                    bone.Scale = new Vector3(1, 1, 1);
+                    //Debug.WriteLine($"{i} {bone.Rotation.X} {bone.Rotation.Y} {bone.Rotation.Z}");
                     var mat = bone.ComputeLocalTransform();
                     flver.Bones.Add(bone);
                 }
