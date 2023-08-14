@@ -45,10 +45,20 @@ namespace AquaModelLibrary
 
         public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
         {
-            float baseScale = scaleFactor;
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            double scale = 100;
+            float orgScale = 100;
+            if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
+            {
+                scale = (double)aiScene.Metadata["UnitScaleFactor"].Data;
+            }
+            if (aiScene.Metadata.ContainsKey("OriginalUnitScaleFactor"))
+            {
+                orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
+            }
+            float baseScale = (float)(scale / 100.0);
 
             bool playerExport = aiScene.RootNode.Children[0].Name.Contains("pl_");
             if (playerExport && forceNoPlayerExport)
@@ -609,41 +619,59 @@ namespace AquaModelLibrary
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            double scale = 100;
+            float orgScale = 100;
+            if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
+            {
+                scale = (double)aiScene.Metadata["UnitScaleFactor"].Data;
+            }
+            if (aiScene.Metadata.ContainsKey("OriginalUnitScaleFactor"))
+            {
+                orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
+            }
+            float baseScale = (float)(scale / 100.0);
 
             PRMModel prm = new PRMModel();
 
             int totalVerts = 0;
 
             //Iterate through and combine meshes. PRMs can only have a single mesh
-            IterateAiNodesPRM(prm, ref totalVerts, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)));
+            var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
+            parentMatrix.M41 *= baseScale;
+            parentMatrix.M42 *= baseScale;
+            parentMatrix.M43 *= baseScale;
+            IterateAiNodesPRM(prm, ref totalVerts, aiScene, aiScene.RootNode, parentMatrix, baseScale);
             AquaUtil.WritePRMToFile(prm, finalFilePath, 4);
         }
 
-        private static void IterateAiNodesPRM(PRMModel prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm)
+        private static void IterateAiNodesPRM(PRMModel prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, float baseScale)
         {
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(node.Transform));
+            nodeMat.M41 *= baseScale;
+            nodeMat.M42 *= baseScale;
+            nodeMat.M43 *= baseScale;
             nodeMat = Matrix4x4.Multiply(nodeMat, parentTfm);
 
             foreach (int meshId in node.MeshIndices)
             {
                 var mesh = aiScene.Meshes[meshId];
-                AddAiMeshToPRM(prm, ref totalVerts, mesh, nodeMat);
+                AddAiMeshToPRM(prm, ref totalVerts, mesh, nodeMat, baseScale);
             }
 
             foreach (var childNode in node.Children)
             {
-                IterateAiNodesPRM(prm, ref totalVerts, aiScene, childNode, nodeMat);
+                IterateAiNodesPRM(prm, ref totalVerts, aiScene, childNode, nodeMat, baseScale);
             }
         }
 
-        private static void AddAiMeshToPRM(PRMModel prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat)
+        private static void AddAiMeshToPRM(PRMModel prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat, float baseScale)
         {
             //Convert vertices
             for (int vertId = 0; vertId < aiMesh.VertexCount; vertId++)
             {
                 PRMModel.PRMVert vert = new PRMModel.PRMVert();
                 var aiPos = aiMesh.Vertices[vertId];
-                var newPos = (new Vector3(aiPos.X, aiPos.Y, aiPos.Z));
+                var newPos = new Vector3(aiPos.X, aiPos.Y, aiPos.Z) * baseScale;
                 vert.pos = (Vector3.Transform(newPos, nodeMat));
 
                 if (aiMesh.HasVertexColors(0))
@@ -782,7 +810,12 @@ namespace AquaModelLibrary
             var aqnRoot = GetRootNode(aiScene.RootNode);
             int nodeCounter = 0;
             BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
-            IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform)), baseScale, boneDict);
+
+            var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
+            parentMatrix.M41 *= baseScale;
+            parentMatrix.M42 *= baseScale;
+            parentMatrix.M43 *= baseScale;
+            IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, parentMatrix, baseScale, boneDict);
 
             //Generate bonepalette. No real reason not to just put in every bone at the moment.
             aqp.bonePalette = new List<uint>();
@@ -974,7 +1007,10 @@ namespace AquaModelLibrary
                 }
             }
 
-            Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform));
+            Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform)); 
+            nodeMat.M41 *= baseScale;
+            nodeMat.M42 *= baseScale;
+            nodeMat.M43 *= baseScale;
             nodeMat = Matrix4x4.Multiply(nodeMat, parentTfm);
 
             foreach (int meshId in aiNode.MeshIndices)
