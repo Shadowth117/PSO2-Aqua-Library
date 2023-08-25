@@ -14,9 +14,7 @@ namespace AquaModelLibrary.AquaMethods
         {
             AquaFigure fig = new AquaFigure();
 
-            AquaPackage.AFPMain afp = new AquaPackage.AFPMain();
             string ext = Path.GetExtension(inFilename);
-            string variant = "";
             int offset;
             if (ext.Length > 4)
             {
@@ -26,7 +24,7 @@ namespace AquaModelLibrary.AquaMethods
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                variant = ReadAquaHeader(streamReader, ext, out offset, afp);
+                var variant = ReadAquaHeader(streamReader, ext, out offset);
 
                 if (variant == "NIFL")
                 {
