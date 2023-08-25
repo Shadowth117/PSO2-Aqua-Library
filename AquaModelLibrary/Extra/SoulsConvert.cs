@@ -871,7 +871,7 @@ namespace AquaModelLibrary.Extra
                                 useDefaultBoneIndex = true;
                             }
 
-                            if (f2Mesh.BoneIndices.Count > 0 && useDefaultBoneIndex == false)
+                            if (f2Mesh.BoneIndices.Count > 0 && useDefaultBoneIndex == false && boneTransformationIndex >= 0)
                             {
                                 boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
                             }
@@ -1487,7 +1487,8 @@ namespace AquaModelLibrary.Extra
             List<int> rootSiblings = new List<int>();
             flver.Bones = new List<FLVER.Bone>();
 
-            if (boneDataText == null)
+            if(true)
+            //if (boneDataText == null)
             {
                 //Set up bones
                 for (int i = 0; i < aqn.nodeList.Count; i++)

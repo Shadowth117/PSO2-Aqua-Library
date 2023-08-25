@@ -388,7 +388,7 @@ namespace SoulsFormats
             br.AssertASCII("DCP\0");
             br.AssertASCII("KRAK");
             br.AssertInt32(0x20);
-            br.AssertInt32(0x6000000);
+            br.AssertInt32(0x6000000, 0x9000000);
             br.AssertInt32(0);
             br.AssertInt32(0);
             br.AssertInt32(0);
