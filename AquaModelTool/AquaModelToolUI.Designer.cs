@@ -153,9 +153,11 @@
             this.exportLuaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readFCLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMotAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readCGPRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readCGPRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpAllFromSoulsbndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -409,6 +411,8 @@
             this.fixFromSoftMeshMirroringToolStripMenuItem,
             this.applyMaterialNamesToMeshToolStripMenuItem,
             this.transformMeshToolStripMenuItem,
+            this.toolStripSeparator14,
+            this.dumpAllFromSoulsbndToolStripMenuItem,
             this.toolStripSeparator12,
             this.generateMCGMCPToolStripMenuItem,
             this.convertModelToDemonsSoulsflverToolStripMenuItem,
@@ -502,8 +506,8 @@
             // convertSoulsflverTofbxToolStripMenuItem
             // 
             this.convertSoulsflverTofbxToolStripMenuItem.Name = "convertSoulsflverTofbxToolStripMenuItem";
-            this.convertSoulsflverTofbxToolStripMenuItem.Size = new System.Drawing.Size(377, 22);
-            this.convertSoulsflverTofbxToolStripMenuItem.Text = "Convert From Software .flver/.flv, .mdl to .fbx";
+            this.convertSoulsflverTofbxToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.convertSoulsflverTofbxToolStripMenuItem.Text = "Convert From Software .flver/.flv, .mdl to .fbx, dump .tpf. Can be in dcx/*bnd";
             this.convertSoulsflverTofbxToolStripMenuItem.Click += new System.EventHandler(this.convertSoulsflverTofbxToolStripMenuItem_Click);
             // 
             // exportWithMetadataToolStripMenuItem
@@ -1154,6 +1158,13 @@
             this.readMotAnimToolStripMenuItem.Text = "ReadMotAnim";
             this.readMotAnimToolStripMenuItem.Click += new System.EventHandler(this.readMotAnimToolStripMenuItem_Click);
             // 
+            // readCGPRToolStripMenuItem
+            // 
+            this.readCGPRToolStripMenuItem.Name = "readCGPRToolStripMenuItem";
+            this.readCGPRToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readCGPRToolStripMenuItem.Text = "Read CGPR";
+            this.readCGPRToolStripMenuItem.Click += new System.EventHandler(this.readCGPRToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -1172,12 +1183,17 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readCGPRToolStripMenuItem
+            // dumpAllFromSoulsbndToolStripMenuItem
             // 
-            this.readCGPRToolStripMenuItem.Name = "readCGPRToolStripMenuItem";
-            this.readCGPRToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.readCGPRToolStripMenuItem.Text = "Read CGPR";
-            this.readCGPRToolStripMenuItem.Click += new System.EventHandler(this.readCGPRToolStripMenuItem_Click);
+            this.dumpAllFromSoulsbndToolStripMenuItem.Name = "dumpAllFromSoulsbndToolStripMenuItem";
+            this.dumpAllFromSoulsbndToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.dumpAllFromSoulsbndToolStripMenuItem.Text = "Dump all from Souls .*bnd";
+            this.dumpAllFromSoulsbndToolStripMenuItem.Click += new System.EventHandler(this.dumpAllFromSoulsbndToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator14
+            // 
+            this.toolStripSeparator14.Name = "toolStripSeparator14";
+            this.toolStripSeparator14.Size = new System.Drawing.Size(478, 6);
             // 
             // AquaModelTool
             // 
@@ -1328,6 +1344,8 @@
         private System.Windows.Forms.ToolStripMenuItem setMOTBONEbinPathToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readMotAnimToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readCGPRToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dumpAllFromSoulsbndToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
     }
 }
 

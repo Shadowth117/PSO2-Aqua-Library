@@ -210,6 +210,11 @@ namespace SoulsFormats
                             Normal = ReadByteNormXYZ(br);
                             NormalW = br.ReadByte();
                         }
+                        else if (member.Type == LayoutType.ShortBoneIndices)
+                        {
+                            Normal = ReadShortNormXYZAC6WTF(br);
+                            NormalW = br.ReadUInt16();
+                        }
                         else if (member.Type == LayoutType.Short4toFloat4A)
                         {
                             Normal = ReadShortNormXYZ(br);
@@ -225,6 +230,7 @@ namespace SoulsFormats
                             Normal = ReadByteNormXYZ(br);
                             NormalW = br.ReadByte();
                         }
+
                         else
                             throw new NotImplementedException($"Read not implemented for {member.Type} {member.Semantic}.");
                     }
@@ -377,6 +383,12 @@ namespace SoulsFormats
 
             private static float ReadShortNorm(BinaryReaderEx br)
                 => br.ReadInt16() / 32767f;
+
+            private static float ReadShortNormAC6WTF(BinaryReaderEx br)
+                => (br.ReadInt16() / 127) - 1;
+
+            private static Vector3 ReadShortNormXYZAC6WTF(BinaryReaderEx br)
+                => new Vector3(ReadShortNormAC6WTF(br), ReadShortNormAC6WTF(br), ReadShortNormAC6WTF(br));
 
             private static Vector3 ReadShortNormXYZ(BinaryReaderEx br)
                 => new Vector3(ReadShortNorm(br), ReadShortNorm(br), ReadShortNorm(br));

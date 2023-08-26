@@ -4667,6 +4667,23 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void dumpAllFromSoulsbndToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select From Software *BND or .dcx file(s)",
+                Filter = "From Software BND Files (*bnd)|*.*bnd;*.dcx;|All Files (*.*)|*",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ConvertFile(file, true);
+                }
+            }
+        }
     }
 }
 

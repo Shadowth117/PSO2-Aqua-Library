@@ -224,17 +224,17 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        public static void ConvertFile(string filePath)
+        public static void ConvertFile(string filePath, bool extractAllFiles = false)
         {
-            ConvertFile(Path.GetDirectoryName(filePath), filePath);
+            ConvertFile(Path.GetDirectoryName(filePath), filePath, extractAllFiles);
         }
 
-        public static void ConvertFile(string outDir, string filePath)
+        public static void ConvertFile(string outDir, string filePath, bool extractAllFiles = false)
         {
-            ConvertFile(outDir, filePath, File.ReadAllBytes(filePath));
+            ConvertFile(outDir, filePath, File.ReadAllBytes(filePath), extractAllFiles);
         }
 
-        public static void ConvertFile(string outDir, string filePath, byte[] file)
+        public static void ConvertFile(string outDir, string filePath, byte[] file, bool extractAllFiles = false)
         {
             byte[] newFile = file;
 
@@ -273,11 +273,22 @@ namespace AquaModelLibrary.Extra
                 if (bndFile.Name != null)
                 {
                     extension = Path.GetExtension(bndFile.Name);
-                    outPath = Path.Combine(outDir, fileName);
+                    if(!extractAllFiles)
+                    {
+                        outPath = Path.Combine(outDir, fileName);
+                    }
                 }
                 else
                 {
                     extension = Path.GetExtension(filePath);
+                }
+
+                if(extractAllFiles)
+                {
+                    var path = Path.Combine(outPath, Path.GetFileName(name));
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    File.WriteAllBytes(path, bndFile.Bytes);
+                    continue;
                 }
 
 #if !DEBUG
