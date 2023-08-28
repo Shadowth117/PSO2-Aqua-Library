@@ -534,10 +534,15 @@ namespace AquaModelLibrary.Extra
                     var color = vert.Color;
                     vtxl.vertColors.Add(new byte[] { (color[2]), (color[1]), (color[0]), (color[3]) });
 
-                    if (vert.BoneWeights?.Length > 0)
+                    if ((vert.BoneWeights[0] + vert.BoneWeights[1] + vert.BoneWeights[2] + vert.BoneWeights[3]) > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
                         vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], vert.BoneIndices[1], vert.BoneIndices[2], vert.BoneIndices[3] });
+                    }
+                    else if (vert.Normal.W < 65535)
+                    {
+                        vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+                        vtxl.vertWeightIndices.Add(new int[] { (int)vert.Normal.W, 0, 0, 0 });
                     }
                     else if (vert.BoneIndices?.Length > 0)
                     {
@@ -635,7 +640,7 @@ namespace AquaModelLibrary.Extra
 
                 Matrix4x4.Decompose(mat, out Vector3 scale, out System.Numerics.Quaternion quatrot, out Vector3 translation);
 
-                Debug.WriteLine($"{i} Quat {quatrot.X} {quatrot.Y} {quatrot.Z} {quatrot.W}");
+                //Debug.WriteLine($"{i} Quat {quatrot.X} {quatrot.Y} {quatrot.Z} {quatrot.W}");
                 mat *= tfmMat;
 
                 //If there's a parent, multiply by it
@@ -961,15 +966,15 @@ namespace AquaModelLibrary.Extra
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
                         vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], vert.BoneIndices[1], vert.BoneIndices[2], vert.BoneIndices[3] });
                     }
-                    else if (vert.BoneIndices.Length > 0)
-                    {
-                        vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
-                        vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], 0, 0, 0 });
-                    }
                     else if (vert.NormalW < 65535)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { vert.NormalW, 0, 0, 0 });
+                    }
+                    else if (vert.BoneIndices.Length > 0)
+                    {
+                        vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+                        vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], 0, 0, 0 });
                     }
                 }
 
