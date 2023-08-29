@@ -385,7 +385,7 @@ namespace SoulsFormats
                 => br.ReadInt16() / 32767f;
 
             private static float ReadShortNormAC6WTF(BinaryReaderEx br)
-                => (br.ReadInt16() / 127) - 1;
+                => (br.ReadInt16() - 127) / 127f;
 
             private static Vector3 ReadShortNormXYZAC6WTF(BinaryReaderEx br)
                 => new Vector3(ReadShortNormAC6WTF(br), ReadShortNormAC6WTF(br), ReadShortNormAC6WTF(br));
@@ -496,6 +496,11 @@ namespace SoulsFormats
                         {
                             WriteByteNormXYZ(bw, Normal);
                             bw.WriteByte((byte)NormalW);
+                        }
+                        else if (member.Type == LayoutType.ShortBoneIndices)
+                        {
+                            WriteByteNormXYZAC6WTF(bw, Normal);
+                            bw.WriteInt16((short)NormalW);
                         }
                         else if (member.Type == LayoutType.Short4toFloat4A)
                         {
@@ -662,11 +667,21 @@ namespace SoulsFormats
             private static void WriteByteNorm(BinaryWriterEx bw, float value)
                 => bw.WriteByte((byte)Math.Round(value * 127 + 127));
 
+            private static void WriteShortNormAC6WTF(BinaryWriterEx bw, float value)
+                => bw.WriteInt16((byte)Math.Round(value * 127 + 127));
+
             private static void WriteByteNormXYZ(BinaryWriterEx bw, Vector3 value)
             {
                 WriteByteNorm(bw, value.X);
                 WriteByteNorm(bw, value.Y);
                 WriteByteNorm(bw, value.Z);
+            }
+
+            private static void WriteByteNormXYZAC6WTF(BinaryWriterEx bw, Vector3 value)
+            {
+                WriteShortNormAC6WTF(bw, value.X);
+                WriteShortNormAC6WTF(bw, value.Y);
+                WriteShortNormAC6WTF(bw, value.Z);
             }
 
             private static void WriteByteNormXYZW(BinaryWriterEx bw, Vector4 value)
