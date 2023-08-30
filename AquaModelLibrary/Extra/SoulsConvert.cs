@@ -1031,7 +1031,12 @@ namespace AquaModelLibrary.Extra
                 mat.texNames = new List<string>();
                 foreach (var tex in flverMat.Textures)
                 {
-                    mat.texNames.Add(Path.GetFileName(tex.Path));
+                    var texName = Path.GetFileName(tex.Path);
+                    if(texName != null && Path.HasExtension(texName))
+                    {
+                        texName = Path.ChangeExtension(texName, ".dds");
+                    }
+                    mat.texNames.Add(texName);
                 }
                 aqp.tempMats.Add(mat);
                 aqp.matUnicodeNames.Add(matName);
