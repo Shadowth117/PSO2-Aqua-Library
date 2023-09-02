@@ -23,6 +23,7 @@ namespace FalseIdola
         public FileStream cpkStream;
         public CriCpkArchive cpk;
         public List<string> hcaStr = new List<string>();
+        public List<int> hcaWait = new List<int>();
         public int hcaStrIndex = 0;
         public List<WaveOutEvent> hcaDevices = new List<WaveOutEvent>();
 
@@ -46,7 +47,6 @@ namespace FalseIdola
                     using (var stream = new MemoryStream(ffile))
                     using (var sr = new BufferedStreamReader(stream, 8192))
                     {
-                        File.WriteAllBytes("C:\\testfile.mus", ffile);
                         mus = new MusicFileReboot(sr);
                     }
                 }
@@ -72,6 +72,7 @@ namespace FalseIdola
                                 if(bar.mainClips.Count > 0 && bar.mainClips[0].clipFileName != "")
                                 {
                                     hcaStr.Add(bar.mainClips[0].clipFileName);
+                                    hcaWait.Add((int)(bar.barStruct.beat / ((double)bar.barStruct.beatsPerMinute / 60) * 1000)); //Divide beat count by bpm / seconds in a minute (60) * 1000 to convert to milliseconds for thread sleep
                                 }
                             }
                         }
@@ -99,7 +100,9 @@ namespace FalseIdola
                 outputDevice.Play();
                 //outputDevice.PlaybackStopped += playEventTest;
                 //hcaDevices.Add(outputDevice);
-                Thread.Sleep(2600);
+                //Thread.Sleep(2617);
+                Thread.Sleep(hcaWait[hcaStrIndex]);
+                hcaStrIndex++;
             }
            
             /*
