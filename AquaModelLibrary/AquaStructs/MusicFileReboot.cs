@@ -318,7 +318,7 @@ namespace AquaModelLibrary.AquaStructs
         //Phrase
         public class Phrase
         {
-            public List<Bar> bar = new List<Bar>();
+            public List<Bar> bars = new List<Bar>();
             public PhraseStruct phraseStruct;
 
             public Phrase()
@@ -335,7 +335,7 @@ namespace AquaModelLibrary.AquaStructs
                 sr.Seek(offset + phraseStruct.barOffset, SeekOrigin.Begin);
                 for(int i = 0; i < phraseStruct.barCount; i++)
                 {
-                    bar.Add(new Bar(sr, offset));
+                    bars.Add(new Bar(sr, offset));
                 }
 
                 sr.Seek(bookmark, SeekOrigin.Begin);

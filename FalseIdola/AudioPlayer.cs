@@ -18,16 +18,20 @@ namespace FalseIdola
 {
     public class AudioPlayer
     {
-        public WaveOutEvent outputDevice;
         public IWaveProvider audioFile;
         public FileType type = 0;
+        public FileStream cpkStream;
+        public CriCpkArchive cpk;
+        public List<string> hcaStr = new List<string>();
+        public int hcaStrIndex = 0;
+        public List<WaveOutEvent> hcaDevices = new List<WaveOutEvent>();
 
         public AudioPlayer()
         {
             //Test
             var strm = new MemoryStream(File.ReadAllBytes(@"A:\PS4_NGS_PreRetem\datareboot\sound\music\adaptive\mu_11_bgm02_defense_1.ice"));
             var fVarIce = IceFile.LoadIceFile(strm);
-            MusicFileReboot mus;
+            MusicFileReboot mus = new MusicFileReboot();
             strm.Dispose();
 
             List<byte[]> files = new List<byte[]>(fVarIce.groupOneFiles);
@@ -51,9 +55,54 @@ namespace FalseIdola
             files = null;
 
 
-            var cpkStream = new FileStream(@"A:\PS4_NGS_PreRetem\datareboot\sound\music\adaptive\mu_11_bgm02_defense_1.cpk", FileMode.Open);
-            var cpk = new CriCpkArchive();
+            cpkStream = new FileStream(@"A:\PS4_NGS_PreRetem\datareboot\sound\music\adaptive\mu_11_bgm02_defense_1.cpk", FileMode.Open);
+            cpk = new CriCpkArchive();
             cpk.Read(cpkStream);
+
+            foreach(var composition in mus.compositions)
+            {
+                foreach(var part in composition.parts)
+                {
+                    foreach(var movement in part.movements)
+                    {
+                        foreach(var phrase in movement.phrases)
+                        {
+                            foreach(var bar in phrase.bars)
+                            {
+                                if(bar.mainClips.Count > 0 && bar.mainClips[0].clipFileName != "")
+                                {
+                                    hcaStr.Add(bar.mainClips[0].clipFileName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach(var str in hcaStr)
+            {
+                var file = cpk.GetFileByName(cpkStream, str);
+                var header = cpk.GetByName(str);
+
+                //var testHca = File.ReadAllBytes(@"C:\Users\Shadi\Downloads\PSO2_Audio_Tools\sonicaudiotools\04_player_rod\00000.hca");
+                type = AudioInfo.GetFileTypeFromName(hcaStr[hcaStrIndex]);
+                var hcaFile = Audio.IO.OpenFile(file, type);
+                //var bytes = AudioInfo.Containers[type].GetWriter().GetFile(audioFile, GetConfiguration(SelectedFileType));
+                var bytes = AudioInfo.Containers[FileType.Wave].GetWriter().GetFile(hcaFile, new WaveConfiguration() { Codec = WaveCodec.Pcm16Bit });
+                //File.WriteAllBytes(@"C:\Users\Shadi\Downloads\PSO2_Audio_Tools\sonicaudiotools\04_player_rod\00000.wav", bytes);
+                //audioFile = new AudioFileReader(@"A:\AC6 OST\ACVI_FOR_SOUNDTRACK\47_Stargazer.mp3");
+                //IWaveProvider provider = new RawSourceWaveStream(new MemoryStream(bytes), new WaveFormat(48000, 16, 1));
+                IWaveProvider provider = new WaveFileReader(new MemoryStream(bytes));
+                audioFile = provider;
+                var outputDevice = new WaveOutEvent();
+                outputDevice.Init(audioFile);
+                outputDevice.Play();
+                //outputDevice.PlaybackStopped += playEventTest;
+                //hcaDevices.Add(outputDevice);
+                Thread.Sleep(2600);
+            }
+           
+            /*
             var file = cpk.GetFileByName(cpkStream, "B1-001_O-1_1M_B.hca");
 
             //var testHca = File.ReadAllBytes(@"C:\Users\Shadi\Downloads\PSO2_Audio_Tools\sonicaudiotools\04_player_rod\00000.hca");
@@ -69,7 +118,13 @@ namespace FalseIdola
             outputDevice = new WaveOutEvent();
             outputDevice.Init(audioFile);
             outputDevice.Play();
-            cpkStream.Dispose();
+            */
+        }
+
+        public void playEventTest(object sender, StoppedEventArgs stoppedEvent)
+        {
+            hcaStrIndex++;
+            hcaDevices[hcaStrIndex].Play();
         }
     }
 }
