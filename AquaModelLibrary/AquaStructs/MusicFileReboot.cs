@@ -3,8 +3,8 @@ using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Windows;
 using static AquaModelLibrary.AquaStructs.MusicFileReboot;
 
 namespace AquaModelLibrary.AquaStructs
@@ -14,7 +14,8 @@ namespace AquaModelLibrary.AquaStructs
         public int musHeaderOffset;
         public MusHeader header;
         public List<Composition> compositions = new List<Composition>();
-        public List<Conditions> conditions = new List<Conditions>();
+        public List<TransitionData> transitionData = new List<TransitionData>();
+        public List<Conditions> conditionsData = new List<Conditions>();
         public string musString1C = null;
         public string customVariables = null; //Custom variables are a comma separated list with a variable name, =, and an int value.
 
@@ -32,6 +33,7 @@ namespace AquaModelLibrary.AquaStructs
                 nifl = sr.Read<AquaCommon.NIFL>();
                 rel0 = sr.Read<AquaCommon.REL0>();
                 sr.Seek(offset + rel0.REL0DataStart, SeekOrigin.Begin);
+                sr.Seek(offset + sr.Read<int>(), SeekOrigin.Begin);
                 header = new MusHeader(sr);
 
                 if (header.mus.string_1COffset != 0x10 && header.mus.string_1COffset != 0)
@@ -44,6 +46,27 @@ namespace AquaModelLibrary.AquaStructs
                 {
                     sr.Seek(offset + header.mus.customVariableStringOffset, SeekOrigin.Begin);
                     customVariables = AquaGeneralMethods.ReadCString(sr);
+                }
+
+                //Read compositions
+                sr.Seek(offset + header.mus.compositionOffset, SeekOrigin.Begin);
+                for (int i = 0; i < header.mus.compositionCount; i++)
+                {
+                    compositions.Add(new Composition(sr, offset));
+                }
+
+                //Read transitions
+                sr.Seek(offset + header.mus.transitionDataOffset, SeekOrigin.Begin);
+                for (int i = 0; i < header.mus.transitionDataCount; i++)
+                {
+                    transitionData.Add(new TransitionData(sr, offset));
+                }
+
+                //Read conditions
+                sr.Seek(offset + header.mus.conditionDataOffset, SeekOrigin.Begin);
+                for (int i = 0; i < header.mus.conditionDataCount; i++)
+                {
+                    conditionsData.Add(new Conditions(sr, offset));
                 }
             }
         }
@@ -132,7 +155,28 @@ namespace AquaModelLibrary.AquaStructs
             public List<Part> parts = new List<Part>();
             public List<CompositionCondition> compositionConditions = new List<CompositionCondition>();
             public CompositionStruct compositionStruct;
-            public CompositionCondition compositionConditionStruct;
+
+            public Composition() { }
+
+            public Composition(BufferedStreamReader sr, int offset)
+            {
+                compositionStruct = sr.Read<CompositionStruct>();
+
+                var bookmark = sr.Position();
+
+                sr.Seek(offset + compositionStruct.partOffset, SeekOrigin.Begin);
+                for (int i = 0; i < compositionStruct.partCount; i++)
+                {
+                    parts.Add(new Part(sr, offset));
+                }
+
+                sr.Seek(offset + compositionStruct.compositionConditionOffset, SeekOrigin.Begin);
+                for (int i = 0; i < compositionStruct.compositionConditionCount; i++)
+                {
+                    compositionConditions.Add(new CompositionCondition(sr, offset));
+                }
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         public struct CompositionStruct
@@ -141,7 +185,7 @@ namespace AquaModelLibrary.AquaStructs
             public int compositionConditionOffset;
             public byte partCount;
             public byte bt_9;
-            public byte variantCount;
+            public byte compositionConditionCount;
             public byte bt_B;
         }
 
@@ -149,6 +193,25 @@ namespace AquaModelLibrary.AquaStructs
         {
             public string conditionString;
             public CompositionConditionStruct compositionConditionStruct;
+
+            public CompositionCondition()
+            {
+
+            }
+
+            public CompositionCondition(BufferedStreamReader sr, int offset)
+            {
+                compositionConditionStruct = sr.Read<CompositionConditionStruct>();
+
+                var bookmark = sr.Position();
+
+                if (compositionConditionStruct.conditionStringOffset != 0x10 && compositionConditionStruct.conditionStringOffset != 0)
+                {
+                    sr.Seek(offset + compositionConditionStruct.conditionStringOffset, SeekOrigin.Begin);
+                    conditionString = AquaGeneralMethods.ReadCString(sr);
+                }
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         public struct CompositionConditionStruct
@@ -168,7 +231,32 @@ namespace AquaModelLibrary.AquaStructs
         {
             public List<Movement> movements = new List<Movement>();
             public string conditionString;
-            public PartStruct part;
+            public PartStruct partStruct;
+
+            public Part()
+            {
+
+            }
+
+            public Part(BufferedStreamReader sr, int offset)
+            {
+                partStruct = sr.Read<PartStruct>();
+
+                var bookmark = sr.Position();
+
+                sr.Seek(offset + partStruct.movementOffset, SeekOrigin.Begin);
+                for (int i = 0; i < partStruct.movementCount; i++)
+                {
+                    movements.Add(new Movement(sr, offset));
+                }
+
+                if (partStruct.conditionStringOffset != 0x10 && partStruct.conditionStringOffset != 0)
+                {
+                    sr.Seek(offset + partStruct.conditionStringOffset, SeekOrigin.Begin);
+                    conditionString = AquaGeneralMethods.ReadCString(sr);
+                }
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         public struct PartStruct
@@ -346,12 +434,43 @@ namespace AquaModelLibrary.AquaStructs
             public TransitionDataSubStruct transSubStruct;
             public string transitionClipName;
             public string subStructStr_04;
+
+            public TransitionData()
+            {
+
+            }
+
+            public TransitionData(BufferedStreamReader sr, int offset)
+            {
+                transStruct = sr.Read<TransitionDataStruct>();
+
+                var bookmark = sr.Position();
+                if (transStruct.transitionClipNameOffset != 0x10 && transStruct.transitionClipNameOffset != 0)
+                {
+                    sr.Seek(offset + transStruct.transitionClipNameOffset, SeekOrigin.Begin);
+                    transitionClipName = AquaGeneralMethods.ReadCString(sr);
+                }
+
+                if(transStruct.transitionDataSubstructOffset != 0x10 && transStruct.transitionDataSubstructOffset > 0)
+                {
+                    sr.Seek(offset + transStruct.transitionDataSubstructOffset, SeekOrigin.Begin);
+                    transSubStruct = sr.Read<TransitionDataSubStruct>();
+
+                    if (transSubStruct.str_04 != 0x10 && transSubStruct.str_04 != 0)
+                    {
+                        sr.Seek(offset + transSubStruct.str_04, SeekOrigin.Begin);
+                        subStructStr_04 = AquaGeneralMethods.ReadCString(sr);
+                    }
+                }
+
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         public struct TransitionDataStruct
         {
             public int int_00;
-            public int substructOffset;
+            public int transitionDataSubstructOffset;
             public float flt_08;
             public int transitionClipNameOffset;
         }
@@ -370,6 +489,45 @@ namespace AquaModelLibrary.AquaStructs
             public string str_18;
             public string str_20;
             public string str_28;
+
+            public Conditions()
+            {
+
+            }
+
+            public Conditions(BufferedStreamReader sr, int offset)
+            {
+                conditionstr = sr.Read<ConditionsStruct>();
+
+                var bookmark = sr.Position();
+                if (conditionstr.descriptionStrOffset != 0x10 && conditionstr.descriptionStrOffset != 0)
+                {
+                    sr.Seek(offset + conditionstr.descriptionStrOffset, SeekOrigin.Begin);
+                    description = AquaGeneralMethods.ReadCString(sr);
+                }
+                if (conditionstr.str_14 != 0x10 && conditionstr.str_14 != 0)
+                {
+                    sr.Seek(offset + conditionstr.str_14, SeekOrigin.Begin);
+                    str_14 = AquaGeneralMethods.ReadCString(sr);
+                }
+                if (conditionstr.str_18 != 0x10 && conditionstr.str_18 != 0)
+                {
+                    sr.Seek(offset + conditionstr.str_18, SeekOrigin.Begin);
+                    str_18 = AquaGeneralMethods.ReadCString(sr);
+                }
+                if (conditionstr.str_20 != 0x10 && conditionstr.str_20 != 0)
+                {
+                    sr.Seek(offset + conditionstr.str_20, SeekOrigin.Begin);
+                    str_20 = AquaGeneralMethods.ReadCString(sr);
+                }
+                if (conditionstr.str_28 != 0x10 && conditionstr.str_28 != 0)
+                {
+                    sr.Seek(offset + conditionstr.str_28, SeekOrigin.Begin);
+                    str_28 = AquaGeneralMethods.ReadCString(sr);
+                }
+
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         public struct ConditionsStruct

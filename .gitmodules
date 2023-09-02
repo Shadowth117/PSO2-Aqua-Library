@@ -1,3 +1,9 @@
 [submodule "ZamboniLib"]
 	path = ZamboniLib
 	url = https://github.com/Shadowth117/ZamboniLib
+[submodule "VGAudio"]
+	path = VGAudio
+	url = https://github.com/Shadowth117/VGAudio
+[submodule "SonicAudioTools"]
+	path = SonicAudioTools
+	url = https://github.com/Shadowth117/SonicAudioTools.git

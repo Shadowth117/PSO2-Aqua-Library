@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary;
 using AquaModelLibrary.AquaMethods;
+using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary.BluePoint.CAWS;
 using AquaModelLibrary.Extra;
 using AquaModelLibrary.Extra.AM2;
@@ -4681,6 +4682,27 @@ namespace AquaModelTool
                 foreach (var file in openFileDialog.FileNames)
                 {
                     SoulsConvert.ConvertFile(file, true);
+                }
+            }
+        }
+
+        private void readMusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select .mus file(s)",
+                Filter = "PSO2 Music mus Files (*.mus)|*.mus;",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(file)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var mus = new MusicFileReboot(streamReader);
+                    }
                 }
             }
         }
