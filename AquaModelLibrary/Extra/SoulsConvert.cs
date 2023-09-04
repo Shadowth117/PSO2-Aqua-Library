@@ -877,7 +877,7 @@ namespace AquaModelLibrary.Extra
                         {
                             var f2Mesh = (FLVER2.Mesh)mesh;
                             bool useDefaultBoneIndex = false;
-                            if (useNormalWTransform && f2Mesh.Dynamic == 0)
+                            if (f2Mesh.Dynamic == 0)
                             {
                                 boneTransformationIndex = vert.NormalW;
                             }
