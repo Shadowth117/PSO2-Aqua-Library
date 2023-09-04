@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -101,7 +102,7 @@ namespace FalseIdola
                 //outputDevice.PlaybackStopped += playEventTest;
                 //hcaDevices.Add(outputDevice);
                 //Thread.Sleep(2617);
-                Thread.Sleep(hcaWait[hcaStrIndex]);
+                Thread.Sleep(hcaWait[hcaStrIndex] - 40);
                 hcaStrIndex++;
             }
            

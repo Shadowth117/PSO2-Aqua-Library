@@ -4696,12 +4696,15 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
                 foreach (var file in openFileDialog.FileNames)
                 {
                     using (Stream stream = new MemoryStream(File.ReadAllBytes(file)))
                     using (var streamReader = new BufferedStreamReader(stream, 8192))
                     {
                         var mus = new MusicFileReboot(streamReader);
+                        string musJson = JsonConvert.SerializeObject(mus, jss);
+                        File.WriteAllText(file + ".json", musJson);
                     }
                 }
             }
