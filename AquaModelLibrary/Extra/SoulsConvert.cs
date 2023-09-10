@@ -1207,6 +1207,7 @@ namespace AquaModelLibrary.Extra
                     Vector3 vertPosNorm = vertPos + vertNorm;
 
                     int boneTransformationIndex = -1;
+                    int normalWOverride = -1;
                     if (transformMesh)
                     {
                         if (mesh is FLVER0.Mesh)
@@ -1237,7 +1238,14 @@ namespace AquaModelLibrary.Extra
 
                             if (f2Mesh.BoneIndices.Count > 0 && useDefaultBoneIndex == false && boneTransformationIndex >= 0)
                             {
-                                boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
+                                if(f2Mesh.BoneIndices.Count > boneTransformationIndex)
+                                {
+                                    boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
+                                } else
+                                {
+                                    boneTransformationIndex = f2Mesh.DefaultBoneIndex;
+                                    normalWOverride = boneTransformationIndex;
+                                }
                             }
                         }
 
@@ -1313,6 +1321,11 @@ namespace AquaModelLibrary.Extra
                     {
                         vtxl.vertWeights.Add(new Vector4(vert.BoneWeights[0], vert.BoneWeights[1], vert.BoneWeights[2], vert.BoneWeights[3]));
                         vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], vert.BoneIndices[1], vert.BoneIndices[2], vert.BoneIndices[3] });
+                    } 
+                    else if (normalWOverride > -1)
+                    {
+                        vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+                        vtxl.vertWeightIndices.Add(new int[] { normalWOverride, 0, 0, 0 });
                     }
                     else if (vert.NormalW < 65535)
                     {
