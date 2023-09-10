@@ -153,6 +153,50 @@ namespace AquaModelLibrary.Extra
             return mat;
         }
 
+        public static Matrix4x4 ComposeFromDegreeRotation(Vector3 position, Vector3 eulerRot, Vector3 scale)
+        {
+            return Compose(position, eulerRot * (float)(Math.PI / 180), scale);
+        }
+
+        public static Matrix4x4 Compose(Vector3 position, Vector3 eulerRotRadians, Vector3 scale)
+        {
+            var matrix = Matrix4x4.Identity; 
+                
+            matrix *= Matrix4x4.CreateScale(scale);
+
+            var rotation = Matrix4x4.CreateRotationX(eulerRotRadians.X) *
+                Matrix4x4.CreateRotationY(eulerRotRadians.Y) *
+                Matrix4x4.CreateRotationZ(eulerRotRadians.Z);
+
+            matrix *= rotation;
+
+            matrix *= Matrix4x4.CreateTranslation(position);
+
+            return matrix;
+        }
+
+        public static Matrix4x4 ComposeFromDegreeRotationPRS(Vector3 position, Vector3 eulerRot, Vector3 scale)
+        {
+            return ComposePRS(position, eulerRot * (float)(Math.PI / 180), scale);
+        }
+
+        public static Matrix4x4 ComposePRS(Vector3 position, Vector3 eulerRotRadians, Vector3 scale)
+        {
+            var matrix = Matrix4x4.Identity;
+
+            matrix *= Matrix4x4.CreateTranslation(position);
+
+            var rotation = Matrix4x4.CreateRotationX(eulerRotRadians.X) *
+                Matrix4x4.CreateRotationY(eulerRotRadians.Y) *
+                Matrix4x4.CreateRotationZ(eulerRotRadians.Z);
+
+            matrix *= rotation;
+
+            matrix *= Matrix4x4.CreateScale(scale);
+
+            return matrix;
+        }
+
         /// <summary>
         /// Assumes euler axes angles are stored in Vector components of the same name. Result is in degrees.
         /// </summary>
