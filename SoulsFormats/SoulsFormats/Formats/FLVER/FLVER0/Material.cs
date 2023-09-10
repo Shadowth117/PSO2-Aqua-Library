@@ -16,7 +16,7 @@ namespace SoulsFormats
 
             public List<BufferLayout> Layouts { get; set; }
 
-            public Material(bool useUnicode)
+            public Material()
             {
 
             }

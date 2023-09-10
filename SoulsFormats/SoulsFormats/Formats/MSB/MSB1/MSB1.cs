@@ -58,6 +58,20 @@ namespace SoulsFormats
         }
 
         /// <summary>
+        /// Checks whether the data appears to be a file of this format.
+        /// </summary>
+        protected override bool Is(BinaryReaderEx br)
+        {
+            if (br.Length < 0x14)
+                return false;
+
+            br.BigEndian = false;
+            string magic = br.GetASCII(0, 4);
+            int modelVersion = br.GetInt32(0x10);
+            return magic == "MSB " && modelVersion == 5;
+        }
+
+        /// <summary>
         /// Deserializes file data from a stream.
         /// </summary>
         protected override void Read(BinaryReaderEx br)
