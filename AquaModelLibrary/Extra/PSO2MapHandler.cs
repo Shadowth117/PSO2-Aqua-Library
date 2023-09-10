@@ -109,6 +109,20 @@ namespace AquaModelLibrary.Extra
                 foreach(var mdlName in lhiPair.Value.aqos.Keys)
                 {
                     FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $".fbx"), new List<string>(), new List<Matrix4x4>(), false);
+
+                    //We need to kill the weighting values if we want these to translate properly. They should already be, but yeah. Doesn't matter in the above case^
+                    if (lhiPair.Value.lhiMatrices.Count > 0)
+                    {
+                        foreach (var model in lhiPair.Value.aqos)
+                        {
+                            var aqo = model.Value;
+                            foreach(var vtxl in aqo.vtxlList)
+                            {
+                                vtxl.trueVertWeightIndices.Clear();
+                                vtxl.trueVertWeights.Clear();
+                            }
+                        }
+                    }
                     foreach (var lhiMat in lhiPair.Value.lhiMatrices)
                     {
                         FbxExporter.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $"_{lhiMat.Key}.fbx"), new List<string>(), lhiMat.Value, false);
