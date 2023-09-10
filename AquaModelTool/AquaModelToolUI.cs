@@ -90,6 +90,7 @@ namespace AquaModelTool
             fixFromSoftMeshMirroringToolStripMenuItem.Checked = smtSetting.mirrorMesh;
             applyMaterialNamesToMeshToolStripMenuItem.Checked = smtSetting.applyMaterialNamesToMesh;
             transformMeshToolStripMenuItem.Checked = smtSetting.transformMesh;
+            SoulsConvert.game = smtSetting.soulsGame;
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4212,11 +4213,17 @@ namespace AquaModelTool
 
         private void SaveSoulsSettings(object sender, EventArgs e)
         {
+            SaveSoulsSettingsInternal();
+        }
+
+        private void SaveSoulsSettingsInternal()
+        {
             SMTSetting smtSetting = new SMTSetting();
             smtSetting.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
             smtSetting.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
             smtSetting.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
             smtSetting.transformMesh = transformMeshToolStripMenuItem.Checked;
+            smtSetting.soulsGame = SoulsConvert.game;
 
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
             File.WriteAllText(mainSettingsPath + soulsSettingsFile, smtSettingText);
@@ -4706,6 +4713,60 @@ namespace AquaModelTool
                         string musJson = JsonConvert.SerializeObject(mus, jss);
                         File.WriteAllText(file + ".json", musJson);
                     }
+                }
+            }
+        }
+
+        private void setSoulsGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetSoulsGameInternal();
+            SaveSoulsSettingsInternal();
+        }
+
+        private static void SetSoulsGameInternal()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select .exe, eboot file(s)",
+                Filter = "Exe, Eboot Files (*.exe, eboot.bin)|*.exe;eboot.bin;",
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var tempGame = SoulsConvert.GetGameEnum(openFileDialog.FileName);
+                if (tempGame != SoulsConvert.SoulsGame.None)
+                {
+                    SoulsConvert.game = tempGame;
+                }
+                else
+                {
+                    MessageBox.Show("You must select a valid From Software title!\nCurrent valid titles are: Demon's Souls, Dark Souls: Prepare to Die Edition, Dark Souls Remastered, Dark Souls II: Scholar of the First Sin, Bloodborne, Dark Souls III, Sekiro, Elden Ring");
+                }
+            }
+        }
+
+        private void extractSoulsMapObjectLayoutFrommsbToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select .msb file(s)",
+                Filter = "Msb Files (*.msb, *.msb.dcx)|*.msb;*.msb.dcx",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                if (SoulsConvert.game == SoulsConvert.SoulsGame.None)
+                {
+                    SetSoulsGameInternal();
+                    if (SoulsConvert.game == SoulsConvert.SoulsGame.None)
+                    {
+                        //User already warned when setting game.
+                        return;
+                    }
+                    SaveSoulsSettingsInternal();
+                }
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ExtractMSBMapModels(file);
                 }
             }
         }

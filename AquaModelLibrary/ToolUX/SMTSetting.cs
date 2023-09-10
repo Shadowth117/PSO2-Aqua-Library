@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using static AquaModelLibrary.Extra.SoulsConvert;
 
 namespace AquaModelLibrary.ToolUX
 {
@@ -12,5 +8,6 @@ namespace AquaModelLibrary.ToolUX
         public bool mirrorMesh = true;
         public bool applyMaterialNamesToMesh = false;
         public bool transformMesh = true;
+        public SoulsGame soulsGame = SoulsGame.None;
     }
 }

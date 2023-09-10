@@ -159,6 +159,9 @@
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.readMusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setSoulsGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -413,6 +416,9 @@
             this.applyMaterialNamesToMeshToolStripMenuItem,
             this.transformMeshToolStripMenuItem,
             this.toolStripSeparator14,
+            this.setSoulsGameToolStripMenuItem,
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem,
+            this.toolStripSeparator15,
             this.dumpAllFromSoulsbndToolStripMenuItem,
             this.toolStripSeparator12,
             this.generateMCGMCPToolStripMenuItem,
@@ -1204,6 +1210,25 @@
             this.readMusToolStripMenuItem.Text = "ReadMus";
             this.readMusToolStripMenuItem.Click += new System.EventHandler(this.readMusToolStripMenuItem_Click);
             // 
+            // setSoulsGameToolStripMenuItem
+            // 
+            this.setSoulsGameToolStripMenuItem.Name = "setSoulsGameToolStripMenuItem";
+            this.setSoulsGameToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.setSoulsGameToolStripMenuItem.Text = "Set FromSoft Game";
+            this.setSoulsGameToolStripMenuItem.Click += new System.EventHandler(this.setSoulsGameToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator15
+            // 
+            this.toolStripSeparator15.Name = "toolStripSeparator15";
+            this.toolStripSeparator15.Size = new System.Drawing.Size(478, 6);
+            // 
+            // extractSoulsMapObjectLayoutFrommsbToolStripMenuItem
+            // 
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Name = "extractSoulsMapObjectLayoutFrommsbToolStripMenuItem";
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Text = "Extract Souls MapObject layout from .msb";
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Click += new System.EventHandler(this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem_Click);
+            // 
             // AquaModelTool
             // 
             this.AllowDrop = true;
@@ -1356,6 +1381,9 @@
         private System.Windows.Forms.ToolStripMenuItem dumpAllFromSoulsbndToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
         private System.Windows.Forms.ToolStripMenuItem readMusToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setSoulsGameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator15;
+        private System.Windows.Forms.ToolStripMenuItem extractSoulsMapObjectLayoutFrommsbToolStripMenuItem;
     }
 }
 
