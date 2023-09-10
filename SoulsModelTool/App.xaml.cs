@@ -44,6 +44,7 @@ namespace SoulsModelTool
             if (settingText != null)
             {
                 smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+                SoulsConvert.game = smtSetting.soulsGame;
             }
             InitializeComponent();
             bool launchUi = true;

@@ -39,6 +39,7 @@ namespace SoulsModelTool
             SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
             SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
             SoulsConvert.transformMesh = smtSetting.transformMesh;
+            SoulsConvert.game = smtSetting.soulsGame;
 
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
@@ -136,6 +137,7 @@ namespace SoulsModelTool
             smtSetting.mirrorMesh = (bool)mirrorCB.IsChecked;
             smtSetting.applyMaterialNamesToMesh = (bool)matNamesToMeshCB.IsChecked;
             smtSetting.transformMesh = (bool)transformMeshCB.IsChecked;
+            smtSetting.soulsGame = SoulsConvert.game;
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
             File.WriteAllText(settingsPath + settingsFile, smtSettingText);
         }
