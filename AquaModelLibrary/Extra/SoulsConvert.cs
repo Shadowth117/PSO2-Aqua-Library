@@ -312,6 +312,7 @@ namespace AquaModelLibrary.Extra
                 string outPathDirectory = Path.Combine(outDir, fileName);
                 string outPath = Path.Combine(outPathDirectory, $"{fileName}_map.fbx");
                 Directory.CreateDirectory(outPathDirectory);
+                Directory.CreateDirectory(Path.Combine(outPathDirectory, "Unreferenced"));
 
                 List<AquaObject> aqpList = new List<AquaObject>();
                 List<AquaNode> aqnList = new List<AquaNode>();
@@ -433,7 +434,7 @@ namespace AquaModelLibrary.Extra
                     {
                         for (int m = 0; m < unrefAqpList.Count; m++)
                         {
-                            FbxExporter.ExportToFile(unrefAqpList[m], unrefAqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, $"{unrefModelNames[m]}.fbx"), new List<string>(), new List<Matrix4x4>(), useMetaData);
+                            FbxExporter.ExportToFile(unrefAqpList[m], unrefAqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, "Unreferenced", $"{unrefModelNames[m]}.fbx"), new List<string>(), new List<Matrix4x4>(), useMetaData);
                         }
                     }
                 }
@@ -473,15 +474,18 @@ namespace AquaModelLibrary.Extra
                     var flver = SoulsFile<FLVER2>.Read(bxf.ReadFile(bxfFile));
 
                     //Gather textures that are actually referenced by the model
-                    foreach (var mesh in flver.Meshes)
+                    if(foundKey)
                     {
-                        var mat = flver.Materials[mesh.MaterialIndex];
-                        foreach(var tex in mat.Textures)
+                        foreach (var mesh in flver.Meshes)
                         {
-                            var texName = Path.GetFileNameWithoutExtension(tex.Path);
-                            if (!texFilenameList.Contains(texName))
+                            var mat = flver.Materials[mesh.MaterialIndex];
+                            foreach(var tex in mat.Textures)
                             {
-                                texFilenameList.Add(texName);
+                                var texName = Path.GetFileNameWithoutExtension(tex.Path);
+                                if (!texFilenameList.Contains(texName))
+                                {
+                                    texFilenameList.Add(texName);
+                                }
                             }
                         }
                     }
@@ -534,9 +538,12 @@ namespace AquaModelLibrary.Extra
                         var tpf = TPF.Read(bytes);
                         foreach (var tex in tpf.Textures)
                         {
-                            if(texFilenameList.Contains(tex.Name) || extractUnreferencedMapData)
+                            if(texFilenameList.Contains(tex.Name))
                             {
                                 File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
+                            } else if(extractUnreferencedMapData)
+                            {
+                                File.WriteAllBytes(Path.Combine(outPath, "Unreferenced", Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
                             }
                         }
                         break;
