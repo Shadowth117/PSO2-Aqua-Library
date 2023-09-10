@@ -44,7 +44,7 @@ namespace AquaModelLibrary
             public DetailInfo diStruct;
 
             public string objName;
-            public List<Matrix4x4> matrices = new List<Matrix4x4>();
+            public List<Matrix4x4> matrices = new List<Matrix4x4>(); //Matrices are world space
         }
 
         public struct DetailInfo
