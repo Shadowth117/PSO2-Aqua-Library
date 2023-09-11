@@ -74,6 +74,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 List<AquaNode> unrefAqnList = new List<AquaNode>();
                 List<string> unrefModelNames = new List<string>();
                 List<string> texNames = new List<string>();
+                List<string> unrefTexNames = new List<string>();
                 List<List<Matrix4x4>> instanceTransformList = new List<List<Matrix4x4>>();
                 IMsb msb = null;
                 Dictionary<string, List<Matrix4x4>> objectTransformsDict = new Dictionary<string, List<Matrix4x4>>();
@@ -109,7 +110,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                             var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(modelFile)).ToLower();
                             if (objectTransformsDict.ContainsKey(id) || extractUnreferencedMapData)
                             {
-                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), true, File.ReadAllBytes(modelFile));
+                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), true, File.ReadAllBytes(modelFile));
                             }
                         }
                         foreach (var texFile in tpfFiles)
@@ -142,7 +143,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                             var foundKey = objectTransformsDict.ContainsKey(id);
                             if (foundKey || extractUnreferencedMapData)
                             {
-                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
+                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
                             }
                         }
                         foreach (var texFile in texFilePaths)
@@ -150,6 +151,9 @@ namespace AquaModelLibrary.Extra.FromSoft
                             var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(texFile)).ToLower();
                             //Purposely no extractUnreferencedMapData check. We do NOT want every map texture in Dark Souls 1 dumped here... 
                             if (texNames.Contains(id))
+                            {
+                                GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
+                            } else if(unrefTexNames.Contains(id))
                             {
                                 GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
                             }
@@ -174,7 +178,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                         var texBdtPath = Path.Combine(rootPath, $"model/map/{fileNameTex}.tpfbdt");
                         using (var bxf = new BXF4Reader(modelBhdPath, modelBdtPath))
                         {
-                            GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, bxf, texNames, unrefAqpList, unrefAqnList, unrefModelNames);
+                            GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, bxf, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames);
                         }
                         using (var bxf = new BXF4Reader(texBhdPath, texBdtPath))
                         {
@@ -208,7 +212,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                             var foundKey = objectTransformsDict.ContainsKey(id);
                             if (foundKey || extractUnreferencedMapData)
                             {
-                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
+                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
                             }
                         }
                         foreach (var bhd in texBhds)
@@ -274,7 +278,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                                 }
                                 using (var mapBnd = new BND4Reader(fileBytes))
                                 {
-                                    GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, mapBnd, texNames, unrefAqpList, unrefAqnList, unrefModelNames);
+                                    GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, mapBnd, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames);
                                 }
                             }   
                         }
@@ -346,7 +350,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             }
         }
 
-        private static void GatherModelsFromBinder(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, BinderReader bxf, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames)
+        private static void GatherModelsFromBinder(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, BinderReader bxf, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList)
         {
             foreach (var bxfFile in bxf.Files)
             {
@@ -356,11 +360,11 @@ namespace AquaModelLibrary.Extra.FromSoft
                 bool foundKey = objectTransformsDict.ContainsKey(bFNameSansExt);
                 var fileBytes = bxf.ReadFile(bxfFile);
 
-                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texFilenameList, unrefAqpList, unrefAqnList, unrefModelNames, ext, bFNameSansExt, foundKey, fileBytes);
+                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texFilenameList, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexFilenameList, ext, bFNameSansExt, foundKey, fileBytes);
             }
         }
 
-        private static void GatherModel(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, string ext, string bFNameSansExt, bool foundKey, byte[] fileBytes)
+        private static void GatherModel(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList, string ext, string bFNameSansExt, bool foundKey, byte[] fileBytes)
         {
             if (ext == ".dcx")
             {
@@ -385,7 +389,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 }
 
                 //Gather textures that are actually referenced by the model
-                if (foundKey)
+                if (foundKey || extractUnreferencedMapData)
                 {
                     foreach (var mesh in flver.Meshes)
                     {
@@ -393,9 +397,18 @@ namespace AquaModelLibrary.Extra.FromSoft
                         foreach (var tex in mat.Textures)
                         {
                             var texName = Path.GetFileNameWithoutExtension(tex.Path).ToLower();
-                            if (!texFilenameList.Contains(texName))
+                            if(foundKey)
                             {
-                                texFilenameList.Add(texName);
+                                if (!texFilenameList.Contains(texName))
+                                {
+                                    texFilenameList.Add(texName);
+                                }
+                            } else
+                            {
+                                if (!unrefTexFilenameList.Contains(texName))
+                                {
+                                    unrefTexFilenameList.Add(texName);
+                                }
                             }
                         }
                     }
