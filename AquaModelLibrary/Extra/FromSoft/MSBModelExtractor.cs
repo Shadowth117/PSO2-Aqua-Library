@@ -149,7 +149,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                         {
                             var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(texFile)).ToLower();
                             //Purposely no extractUnreferencedMapData check. We do NOT want every map texture in Dark Souls 1 dumped here... 
-                            if (objectTransformsDict.ContainsKey(id))
+                            if (texNames.Contains(id))
                             {
                                 GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
                             }
