@@ -768,6 +768,7 @@ namespace SoulsFormats
         private TEnum ReadEnum<TEnum, TValue>(Func<TValue> readValue, string valueFormat)
         {
             TValue value = readValue();
+            
             if (!Enum.IsDefined(typeof(TEnum), value))
             {
                 string strValue = string.Format(valueFormat, value);

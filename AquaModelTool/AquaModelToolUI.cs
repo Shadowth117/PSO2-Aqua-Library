@@ -4,6 +4,7 @@ using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary.BluePoint.CAWS;
 using AquaModelLibrary.Extra;
 using AquaModelLibrary.Extra.AM2;
+using AquaModelLibrary.Extra.FromSoft;
 using AquaModelLibrary.Native.Fbx;
 using AquaModelLibrary.NNStructs;
 using AquaModelLibrary.Nova;
@@ -90,6 +91,7 @@ namespace AquaModelTool
             fixFromSoftMeshMirroringToolStripMenuItem.Checked = smtSetting.mirrorMesh;
             applyMaterialNamesToMeshToolStripMenuItem.Checked = smtSetting.applyMaterialNamesToMesh;
             transformMeshToolStripMenuItem.Checked = smtSetting.transformMesh;
+            mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Checked = smtSetting.extractUnreferencedMapData;
             SoulsConvert.game = smtSetting.soulsGame;
         }
 
@@ -3459,6 +3461,7 @@ namespace AquaModelTool
                 SoulsConvert.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
                 SoulsConvert.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
                 SoulsConvert.transformMesh = transformMeshToolStripMenuItem.Checked;
+                SoulsConvert.extractUnreferencedMapData = extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Checked;
                 foreach (var file in openFileDialog.FileNames)
                 {
                     SoulsConvert.ConvertFile(file);
@@ -4224,6 +4227,7 @@ namespace AquaModelTool
             smtSetting.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
             smtSetting.transformMesh = transformMeshToolStripMenuItem.Checked;
             smtSetting.soulsGame = SoulsConvert.game;
+            smtSetting.extractUnreferencedMapData = mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Checked;
 
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
             File.WriteAllText(mainSettingsPath + soulsSettingsFile, smtSettingText);
@@ -4764,9 +4768,14 @@ namespace AquaModelTool
                     }
                     SaveSoulsSettingsInternal();
                 }
+                SoulsConvert.useMetaData = exportWithMetadataToolStripMenuItem.Checked;
+                SoulsConvert.applyMaterialNamesToMesh = applyMaterialNamesToMeshToolStripMenuItem.Checked;
+                SoulsConvert.mirrorMesh = fixFromSoftMeshMirroringToolStripMenuItem.Checked;
+                SoulsConvert.transformMesh = transformMeshToolStripMenuItem.Checked;
+                SoulsConvert.extractUnreferencedMapData = mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Checked;
                 foreach (var file in openFileDialog.FileNames)
                 {
-                    SoulsConvert.ExtractMSBMapModels(file);
+                    MSBModelExtractor.ExtractMSBMapModels(file);
                 }
             }
         }

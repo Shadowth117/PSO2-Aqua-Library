@@ -13,6 +13,9 @@
                 <Separator/>
                 <MenuItem Header="Convert FBX to Demon's Souls (PS3) flver" Click="ConvertFBXToDeSModel"/>
                 <MenuItem Header="Generate MCG, MCP" Click="GenerateMCPMCG"/>
+                <Separator/>
+                <MenuItem Header="Set Game (For MSB Extraction)" Click="SetGame"/>
+                <MenuItem Header="MSB Map Model Extraction" Click="MSBExtract"/>
             </MenuItem>
         </Menu>
         <Label x:Name="fromSoftModsLabel" Content="Fromsoft modifiers:" HorizontalAlignment="Left" Margin="5,23,0,0" VerticalAlignment="Top"/>
@@ -20,6 +23,6 @@
         <CheckBox x:Name="mirrorCB" Content="Fix FromSoft Mesh Mirorring" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
         <CheckBox x:Name="matNamesToMeshCB" Content="Apply Material Names to Mesh" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top" Click="smtSettingSet"/>
         <CheckBox x:Name="transformMeshCB" Content="Transform Mesh" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
-
+        <CheckBox x:Name="extractUnreferencedFilesCB" Content="(MSB Extraction) Extract Unreferenced Files" HorizontalAlignment="Left" Margin="10,153,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
     </Grid>
 </Window>

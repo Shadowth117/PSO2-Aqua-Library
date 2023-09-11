@@ -8,6 +8,7 @@ namespace AquaModelLibrary.ToolUX
         public bool mirrorMesh = true;
         public bool applyMaterialNamesToMesh = false;
         public bool transformMesh = true;
+        public bool extractUnreferencedMapData = true;
         public SoulsGame soulsGame = SoulsGame.None;
     }
 }

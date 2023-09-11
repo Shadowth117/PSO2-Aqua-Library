@@ -340,6 +340,7 @@
     <Compile Include="Extra\FromSoft\DeSAudio\MOIB.cs" />
     <Compile Include="Extra\FromSoft\DeSAudio\MOSB.cs" />
     <Compile Include="Extra\FromSoft\DeSAudio\MOWV.cs" />
+    <Compile Include="Extra\FromSoft\MSBModelExtractor.cs" />
     <Compile Include="Extra\FromSoft\SoulsMapMetadataGenerator.cs" />
     <Compile Include="Extra\FromSoft\TangentSolver.cs" />
     <Compile Include="Extra\Half.cs" />

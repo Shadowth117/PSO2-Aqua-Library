@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary;
 using AquaModelLibrary.Extra;
 using AquaModelLibrary.Native.Fbx;
+using AquaModelLibrary.ToolUX;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
 using System;
@@ -47,6 +48,16 @@ namespace SoulsModelTool
                     SoulsConvert.ConvertFile(file);
                 }
             }
+        }
+
+        public static void SetSMTSettings(SMTSetting smtSetting)
+        {
+            SoulsConvert.useMetaData = smtSetting.useMetaData;
+            SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
+            SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
+            SoulsConvert.transformMesh = smtSetting.transformMesh;
+            SoulsConvert.extractUnreferencedMapData = smtSetting.extractUnreferencedMapData;
+            SoulsConvert.game = smtSetting.soulsGame;
         }
     }
 }

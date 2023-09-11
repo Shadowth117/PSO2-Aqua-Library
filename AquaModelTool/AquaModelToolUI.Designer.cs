@@ -75,6 +75,7 @@
             this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
             this.setSoulsGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
             this.dumpAllFromSoulsbndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
@@ -418,6 +419,7 @@
             this.toolStripSeparator14,
             this.setSoulsGameToolStripMenuItem,
             this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem,
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem,
             this.toolStripSeparator15,
             this.dumpAllFromSoulsbndToolStripMenuItem,
             this.toolStripSeparator12,
@@ -562,7 +564,6 @@
             // 
             // setSoulsGameToolStripMenuItem
             // 
-            this.setSoulsGameToolStripMenuItem.Enabled = false;
             this.setSoulsGameToolStripMenuItem.Name = "setSoulsGameToolStripMenuItem";
             this.setSoulsGameToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
             this.setSoulsGameToolStripMenuItem.Text = "Set FromSoft Game";
@@ -570,11 +571,20 @@
             // 
             // extractSoulsMapObjectLayoutFrommsbToolStripMenuItem
             // 
-            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Enabled = false;
             this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Name = "extractSoulsMapObjectLayoutFrommsbToolStripMenuItem";
             this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
             this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Text = "Extract Souls MapObject layout from .msb";
             this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Click += new System.EventHandler(this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem_Click);
+            // 
+            // mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem
+            // 
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Checked = true;
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.CheckOnClick = true;
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Name = "mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem";
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Text = "(MSB Extraction) Extract Unreferenced Models and Textures";
+            this.mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Click += new System.EventHandler(this.SaveSoulsSettings);
             // 
             // toolStripSeparator15
             // 
@@ -1386,6 +1396,7 @@
         private System.Windows.Forms.ToolStripMenuItem setSoulsGameToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator15;
         private System.Windows.Forms.ToolStripMenuItem extractSoulsMapObjectLayoutFrommsbToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem;
     }
 }
 

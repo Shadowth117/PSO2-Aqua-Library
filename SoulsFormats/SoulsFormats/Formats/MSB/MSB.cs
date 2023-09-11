@@ -90,6 +90,27 @@ namespace SoulsFormats
                 return result;
             }
         }
+        internal static int FindIndex<T>(IMsbEntry referrer, List<T> list, string name) where T : IMsbEntry
+        {
+            if (name == null || name == "")
+            {
+                return -1;
+            }
+            else
+            {
+                int result = list.FindIndex(entry => entry.Name == name);
+                if (result == -1)
+                {
+                    // Fallback case-insensitive check
+                    result = list.FindIndex(entry => entry.Name.ToLower() == name.ToLower());
+                    if (result == -1)
+                    {
+                        throw new System.Exception("");
+                    }
+                }
+                return result;
+            }
+        }
 
         internal static int[] FindIndices<T>(List<T> list, string[] names) where T : IMsbEntry
         {

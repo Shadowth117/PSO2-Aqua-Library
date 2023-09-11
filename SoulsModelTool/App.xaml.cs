@@ -44,11 +44,7 @@ namespace SoulsModelTool
             if (settingText != null)
             {
                 smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
-                SoulsConvert.useMetaData = smtSetting.useMetaData;
-                SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
-                SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
-                SoulsConvert.transformMesh = smtSetting.transformMesh;
-                SoulsConvert.game = smtSetting.soulsGame;
+                FileHandler.SetSMTSettings(smtSetting);
             }
             InitializeComponent();
             bool launchUi = true;

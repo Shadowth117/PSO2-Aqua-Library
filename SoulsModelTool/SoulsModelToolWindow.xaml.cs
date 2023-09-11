@@ -10,6 +10,7 @@ using System.IO;
 using Path = System.IO.Path;
 using Newtonsoft.Json;
 using AquaModelLibrary.ToolUX;
+using AquaModelLibrary.Extra.FromSoft;
 
 namespace SoulsModelTool
 {
@@ -35,11 +36,7 @@ namespace SoulsModelTool
 
         private void ConvertModelToFBX(object sender, RoutedEventArgs e)
         {
-            SoulsConvert.useMetaData = smtSetting.useMetaData;
-            SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
-            SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
-            SoulsConvert.transformMesh = smtSetting.transformMesh;
-            SoulsConvert.game = smtSetting.soulsGame;
+            FileHandler.SetSMTSettings(smtSetting);
 
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
@@ -69,10 +66,7 @@ namespace SoulsModelTool
 
         private void ConvertFBXToDeSModel(object sender, RoutedEventArgs e)
         {
-            SoulsConvert.useMetaData = smtSetting.useMetaData;
-            SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
-            SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
-            SoulsConvert.transformMesh = smtSetting.transformMesh;
+            FileHandler.SetSMTSettings(smtSetting);
 
             using (var ctx = new Assimp.AssimpContext())
             {
@@ -118,15 +112,64 @@ namespace SoulsModelTool
             }
         }
 
-        private void smtSettingSet(object sender, RoutedEventArgs e)
+        private void smtSettingSet(object sender = null, RoutedEventArgs e = null)
         {
             smtSetting.useMetaData = (bool)useMetaDataCB.IsChecked;
             smtSetting.mirrorMesh = (bool)mirrorCB.IsChecked;
             smtSetting.applyMaterialNamesToMesh = (bool)matNamesToMeshCB.IsChecked;
             smtSetting.transformMesh = (bool)transformMeshCB.IsChecked;
             smtSetting.soulsGame = SoulsConvert.game;
+            smtSetting.extractUnreferencedMapData = (bool)extractUnreferencedFilesCB.IsChecked;
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
             File.WriteAllText(settingsPath + settingsFile, smtSettingText);
+        }
+
+        private void MSBExtract(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select .msb file(s)",
+                Filter = "Msb Files (*.msb, *.msb.dcx)|*.msb;*.msb.dcx",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                if (SoulsConvert.game == SoulsConvert.SoulsGame.None)
+                {
+                    SetGame();
+                    if (SoulsConvert.game == SoulsConvert.SoulsGame.None)
+                    {
+                        //User already warned when setting game.
+                        return;
+                    }
+                    smtSettingSet();
+                }
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    MSBModelExtractor.ExtractMSBMapModels(file);
+                }
+            }
+        }
+
+        private void SetGame(object sender = null, RoutedEventArgs e = null)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select .exe, eboot file(s)",
+                Filter = "Exe, Eboot Files (*.exe, eboot.bin)|*.exe;eboot.bin;",
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                var tempGame = SoulsConvert.GetGameEnum(openFileDialog.FileName);
+                if (tempGame != SoulsConvert.SoulsGame.None)
+                {
+                    SoulsConvert.game = tempGame;
+                }
+                else
+                {
+                    MessageBox.Show("You must select a valid From Software title!\nCurrent valid titles are: Demon's Souls, Dark Souls: Prepare to Die Edition, Dark Souls Remastered, Dark Souls II: Scholar of the First Sin, Bloodborne, Dark Souls III, Sekiro, Elden Ring");
+                }
+            }
         }
     }
 }
