@@ -32,5 +32,21 @@ namespace SoulsModelTool
                 FbxExporter.ExportToFile(aqua.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.ChangeExtension(file, ".fbx"), new List<string>(), new List<System.Numerics.Matrix4x4>(), false);
             }
         }
+
+        public static void ConvertFileSMT(string[] FileNames)
+        {
+            foreach (var file in FileNames)
+            {
+                string ext = Path.GetExtension(file);
+                if (ext == ".cmsh" || ext == ".cmdl")
+                {
+                    ConvertBluepointModel(file);
+                }
+                else
+                {
+                    SoulsConvert.ConvertFile(file);
+                }
+            }
+        }
     }
 }

@@ -44,6 +44,10 @@ namespace SoulsModelTool
             if (settingText != null)
             {
                 smtSetting = JsonConvert.DeserializeObject<SMTSetting>(settingText);
+                SoulsConvert.useMetaData = smtSetting.useMetaData;
+                SoulsConvert.mirrorMesh = smtSetting.mirrorMesh;
+                SoulsConvert.applyMaterialNamesToMesh = smtSetting.applyMaterialNamesToMesh;
+                SoulsConvert.transformMesh = smtSetting.transformMesh;
                 SoulsConvert.game = smtSetting.soulsGame;
             }
             InitializeComponent();
@@ -104,18 +108,7 @@ namespace SoulsModelTool
                 switch (action)
                 {
                     case SoulsModelAction.toFBX:
-                        foreach(var file in filePaths)
-                        {
-                            string ext = Path.GetExtension(file);
-                            if (ext == ".cmsh" || ext == ".cmdl")
-                            {
-                                FileHandler.ConvertBluepointModel(file);
-                            }
-                            else
-                            {
-                                SoulsConvert.ConvertFile(file);
-                            }
-                        }
+                        FileHandler.ConvertFileSMT(filePaths.ToArray());
                         break;
                     case SoulsModelAction.toObj:
                         break;
@@ -143,6 +136,9 @@ namespace SoulsModelTool
             {
                 SoulsModelToolWindow wnd = new SoulsModelToolWindow(filePaths, smtSetting);
                 wnd.Show();
+            } else
+            {
+                Current.Shutdown();
             }
 
         }

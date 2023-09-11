@@ -49,23 +49,10 @@ namespace SoulsModelTool
             };
             if (openFileDialog.ShowDialog() == true)
             {
-
-
-                foreach (var file in openFileDialog.FileNames)
-                {
-                    string ext = Path.GetExtension(file);
-                    if (ext == ".cmsh" || ext == ".cmdl")
-                    {
-                        FileHandler.ConvertBluepointModel(file);
-                    }
-                    else
-                    {
-                        SoulsConvert.ConvertFile(file);
-                    }
-                }
+                FileHandler.ConvertFileSMT(openFileDialog.FileNames);
             }
         }
-        
+
         private void GenerateMCPMCG(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog goodFolderDialog = new()

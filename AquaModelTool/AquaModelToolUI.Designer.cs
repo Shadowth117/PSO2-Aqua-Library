@@ -73,6 +73,9 @@
             this.applyMaterialNamesToMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.transformMeshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
+            this.setSoulsGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
             this.dumpAllFromSoulsbndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
             this.generateMCGMCPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -156,12 +159,9 @@
             this.readFCLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMotAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readCGPRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readMusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.setSoulsGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
-            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -559,6 +559,27 @@
             // 
             this.toolStripSeparator14.Name = "toolStripSeparator14";
             this.toolStripSeparator14.Size = new System.Drawing.Size(478, 6);
+            // 
+            // setSoulsGameToolStripMenuItem
+            // 
+            this.setSoulsGameToolStripMenuItem.Enabled = false;
+            this.setSoulsGameToolStripMenuItem.Name = "setSoulsGameToolStripMenuItem";
+            this.setSoulsGameToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.setSoulsGameToolStripMenuItem.Text = "Set FromSoft Game";
+            this.setSoulsGameToolStripMenuItem.Click += new System.EventHandler(this.setSoulsGameToolStripMenuItem_Click);
+            // 
+            // extractSoulsMapObjectLayoutFrommsbToolStripMenuItem
+            // 
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Enabled = false;
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Name = "extractSoulsMapObjectLayoutFrommsbToolStripMenuItem";
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Text = "Extract Souls MapObject layout from .msb";
+            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Click += new System.EventHandler(this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator15
+            // 
+            this.toolStripSeparator15.Name = "toolStripSeparator15";
+            this.toolStripSeparator15.Size = new System.Drawing.Size(478, 6);
             // 
             // dumpAllFromSoulsbndToolStripMenuItem
             // 
@@ -1185,6 +1206,13 @@
             this.readCGPRToolStripMenuItem.Text = "Read CGPR";
             this.readCGPRToolStripMenuItem.Click += new System.EventHandler(this.readCGPRToolStripMenuItem_Click);
             // 
+            // readMusToolStripMenuItem
+            // 
+            this.readMusToolStripMenuItem.Name = "readMusToolStripMenuItem";
+            this.readMusToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readMusToolStripMenuItem.Text = "ReadMus";
+            this.readMusToolStripMenuItem.Click += new System.EventHandler(this.readMusToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -1202,32 +1230,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 253);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // readMusToolStripMenuItem
-            // 
-            this.readMusToolStripMenuItem.Name = "readMusToolStripMenuItem";
-            this.readMusToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.readMusToolStripMenuItem.Text = "ReadMus";
-            this.readMusToolStripMenuItem.Click += new System.EventHandler(this.readMusToolStripMenuItem_Click);
-            // 
-            // setSoulsGameToolStripMenuItem
-            // 
-            this.setSoulsGameToolStripMenuItem.Name = "setSoulsGameToolStripMenuItem";
-            this.setSoulsGameToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
-            this.setSoulsGameToolStripMenuItem.Text = "Set FromSoft Game";
-            this.setSoulsGameToolStripMenuItem.Click += new System.EventHandler(this.setSoulsGameToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator15
-            // 
-            this.toolStripSeparator15.Name = "toolStripSeparator15";
-            this.toolStripSeparator15.Size = new System.Drawing.Size(478, 6);
-            // 
-            // extractSoulsMapObjectLayoutFrommsbToolStripMenuItem
-            // 
-            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Name = "extractSoulsMapObjectLayoutFrommsbToolStripMenuItem";
-            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Size = new System.Drawing.Size(481, 22);
-            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Text = "Extract Souls MapObject layout from .msb";
-            this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Click += new System.EventHandler(this.extractSoulsMapObjectLayoutFrommsbToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1248,7 +1250,7 @@
 
         }
 
-        #endregion
+#endregion
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;

@@ -23,7 +23,7 @@ namespace AquaModelLibrary.Extra
         public static bool applyMaterialNamesToMesh = false;
         public static bool mirrorMesh = false;
         public static bool transformMesh = false;
-        public static bool extractUnreferencedMapData = true;
+        public static bool extractUnreferencedMapData = false;
 
         public static SoulsGame game = SoulsGame.None;
 
@@ -324,9 +324,36 @@ namespace AquaModelLibrary.Extra
                 List<List<Matrix4x4>> instanceTransformList = new List<List<Matrix4x4>>();
                 IMsb msb = null;
                 Dictionary<string, List<Matrix4x4>> objectTransformsDict = new Dictionary<string, List<Matrix4x4>>();
-
+                string rootPath = "";
                 switch(game)
                 {
+                    case SoulsGame.DemonsSouls:
+                        msb = SoulsFormats.SoulsFile<SoulsFormats.MSBD>.Read(bndFile.Bytes);
+                        foreach (var p in msb.Parts.GetEntries())
+                        {
+                            if (p is SoulsFormats.MSBD.Part.MapPiece)
+                            {
+                                AddToTFMDict(objectTransformsDict, p);
+                            }
+                        }
+
+                        var worldString = filePath.Split('_')[0];
+                        rootPath = Path.GetDirectoryName(filePath);
+                        var modelPath = Path.Combine(rootPath, $"{fileName}/");
+                        var texPath = Path.Combine(rootPath, $"{worldString}/");
+
+                        var modelFiles = Directory.GetFiles(modelPath, ".flver.dcx");
+                        var tpfFiles = Directory.GetFiles(modelPath, ".tpf.dcx");
+                        /*
+                        using (var bxf = new BXF4Reader(modelBhdPath, modelBdtPath))
+                        {
+                            GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, bxf, texNames, unrefAqpList, unrefAqnList, unrefModelNames);
+                        }
+                        using (var bxf = new BXF4Reader(texBhdPath, texBdtPath))
+                        {
+                            GatherTexturesFromBinder(bxf, texNames, outPathDirectory);
+                        }*/
+                        break;
                     case SoulsGame.DarkSouls2:
                         msb = SoulsFormats.SoulsFile<SoulsFormats.MSB2>.Read(bndFile.Bytes);
                         foreach (var p in msb.Parts.GetEntries())
@@ -337,7 +364,7 @@ namespace AquaModelLibrary.Extra
                             }
                         }
 
-                        var rootPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filePath)));
+                        rootPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filePath)));
                         var modelBhdPath = Path.Combine(rootPath, $"model/map/{fileName}.mapbhd");
                         var modelBdtPath = Path.Combine(rootPath, $"model/map/{fileName}.mapbdt");
 
@@ -1208,47 +1235,48 @@ namespace AquaModelLibrary.Extra
 
                     int boneTransformationIndex = -1;
                     int normalWOverride = -1;
+
+                    if (mesh is FLVER0.Mesh)
+                    {
+                        var f0Mesh = (FLVER0.Mesh)mesh;
+                        if (useNormalWTransform && f0Mesh.Dynamic == 0)
+                        {
+                            boneTransformationIndex = vert.NormalW;
+                        }
+                        else if (useIndexNoWeightTransform && f0Mesh.BoneIndices?[0] != -1 && f0Mesh.Dynamic == 0)
+                        {
+                            boneTransformationIndex = f0Mesh.BoneIndices[vert.BoneIndices[0]];
+                        }
+                    }
+                    else
+                    {
+                        var f2Mesh = (FLVER2.Mesh)mesh;
+                        bool useDefaultBoneIndex = false;
+                        if (f2Mesh.Dynamic == 0)
+                        {
+                            boneTransformationIndex = vert.NormalW;
+                        }
+                        else if (useDefaultBoneTransform && flver.Bones.Count > f2Mesh.DefaultBoneIndex)
+                        {
+                            boneTransformationIndex = f2Mesh.DefaultBoneIndex;
+                            useDefaultBoneIndex = true;
+                        }
+
+                        if (f2Mesh.BoneIndices.Count > 0 && useDefaultBoneIndex == false && boneTransformationIndex >= 0)
+                        {
+                            if (f2Mesh.BoneIndices.Count > boneTransformationIndex)
+                            {
+                                boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
+                            }
+                            else
+                            {
+                                boneTransformationIndex = 0;
+                                normalWOverride = boneTransformationIndex;
+                            }
+                        }
+                    }
                     if (transformMesh)
                     {
-                        if (mesh is FLVER0.Mesh)
-                        {
-                            var f0Mesh = (FLVER0.Mesh)mesh;
-                            if (useNormalWTransform && f0Mesh.Dynamic == 0)
-                            {
-                                boneTransformationIndex = vert.NormalW;
-                            }
-                            else if (useIndexNoWeightTransform && f0Mesh.BoneIndices?[0] != -1 && f0Mesh.Dynamic == 0)
-                            {
-                                boneTransformationIndex = f0Mesh.BoneIndices[vert.BoneIndices[0]];
-                            }
-                        }
-                        else
-                        {
-                            var f2Mesh = (FLVER2.Mesh)mesh;
-                            bool useDefaultBoneIndex = false;
-                            if (f2Mesh.Dynamic == 0)
-                            {
-                                boneTransformationIndex = vert.NormalW;
-                            }
-                            else if (useDefaultBoneTransform && flver.Bones.Count > f2Mesh.DefaultBoneIndex)
-                            {
-                                boneTransformationIndex = f2Mesh.DefaultBoneIndex;
-                                useDefaultBoneIndex = true;
-                            }
-
-                            if (f2Mesh.BoneIndices.Count > 0 && useDefaultBoneIndex == false && boneTransformationIndex >= 0)
-                            {
-                                if(f2Mesh.BoneIndices.Count > boneTransformationIndex)
-                                {
-                                    boneTransformationIndex = f2Mesh.BoneIndices[boneTransformationIndex];
-                                } else
-                                {
-                                    boneTransformationIndex = f2Mesh.DefaultBoneIndex;
-                                    normalWOverride = boneTransformationIndex;
-                                }
-                            }
-                        }
-
                         if (boneTransformationIndex > -1 && BoneTransforms.Count > boneTransformationIndex)
                         {
                             var boneTfm = BoneTransforms[boneTransformationIndex];
