@@ -13,7 +13,6 @@ using AquaModelLibrary.Native.Fbx;
 using System.Diagnostics;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using Matrix4x4 = System.Numerics.Matrix4x4;
-using UnluacNET;
 
 namespace AquaModelLibrary.Extra
 {
@@ -24,6 +23,7 @@ namespace AquaModelLibrary.Extra
         public static bool mirrorMesh = false;
         public static bool transformMesh = false;
         public static bool extractUnreferencedMapData = false;
+        public static bool separateMSBDumpByModel = false;
 
         public static SoulsGame game = SoulsGame.None;
 
@@ -44,6 +44,7 @@ namespace AquaModelLibrary.Extra
             Sekiro = 5,
             EldenRing = 6,
             ArmoredCore6 = 7,
+            DarkSouls1Remastered = 8,
         }
 
         public static SoulsGame GetGameEnum(string gameExePath)
@@ -64,6 +65,7 @@ namespace AquaModelLibrary.Extra
             switch (gameExe)
             {
                 case "darksoulsremastered.exe":
+                    return SoulsGame.DarkSouls1Remastered;
                 case "darksouls.exe":
                     return SoulsGame.DarkSouls1;
                 case "darksoulsii.exe":
@@ -1021,7 +1023,7 @@ namespace AquaModelLibrary.Extra
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { normalWOverride, 0, 0, 0 });
                     }
-                    else if (vert.NormalW < 65535)
+                    else if (vert.NormalW < 65535 && vert.NormalW < flver.Bones.Count)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { vert.NormalW, 0, 0, 0 });

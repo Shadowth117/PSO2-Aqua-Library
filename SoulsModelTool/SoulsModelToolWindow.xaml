@@ -24,5 +24,6 @@
         <CheckBox x:Name="matNamesToMeshCB" Content="Apply Material Names to Mesh" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top" Click="smtSettingSet"/>
         <CheckBox x:Name="transformMeshCB" Content="Transform Mesh" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
         <CheckBox x:Name="extractUnreferencedFilesCB" Content="(MSB Extraction) Extract Unreferenced Files" HorizontalAlignment="Left" Margin="10,153,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
+        <CheckBox x:Name="separateModelsCB" Content="(MSB Extraction) Separate To .flver Model Instance Sets. **Please have this on for Bloodborne and forward!**" HorizontalAlignment="Left" Margin="10,173,0,0" VerticalAlignment="Top" IsChecked="True" Click="smtSettingSet"/>
     </Grid>
 </Window>

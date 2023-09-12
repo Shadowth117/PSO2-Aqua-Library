@@ -58,6 +58,7 @@ namespace SoulsModelTool
             SoulsConvert.transformMesh = smtSetting.transformMesh;
             SoulsConvert.extractUnreferencedMapData = smtSetting.extractUnreferencedMapData;
             SoulsConvert.game = smtSetting.soulsGame;
+            SoulsConvert.separateMSBDumpByModel = smtSetting.separateMSBDumpByModel;
         }
     }
 }

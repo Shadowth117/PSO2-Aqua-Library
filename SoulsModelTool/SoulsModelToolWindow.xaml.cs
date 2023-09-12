@@ -32,6 +32,8 @@ namespace SoulsModelTool
             mirrorCB.IsChecked = smtSetting.mirrorMesh;
             matNamesToMeshCB.IsChecked = smtSetting.applyMaterialNamesToMesh;
             transformMeshCB.IsChecked = smtSetting.transformMesh;
+            extractUnreferencedFilesCB.IsChecked = smtSetting.extractUnreferencedMapData;
+            separateModelsCB.IsChecked = smtSetting.separateMSBDumpByModel;
         }
 
         private void ConvertModelToFBX(object sender, RoutedEventArgs e)
@@ -120,6 +122,7 @@ namespace SoulsModelTool
             smtSetting.transformMesh = (bool)transformMeshCB.IsChecked;
             smtSetting.soulsGame = SoulsConvert.game;
             smtSetting.extractUnreferencedMapData = (bool)extractUnreferencedFilesCB.IsChecked;
+            smtSetting.separateMSBDumpByModel = (bool)separateModelsCB.IsChecked;
             string smtSettingText = JsonConvert.SerializeObject(smtSetting, jss);
             File.WriteAllText(settingsPath + settingsFile, smtSettingText);
         }

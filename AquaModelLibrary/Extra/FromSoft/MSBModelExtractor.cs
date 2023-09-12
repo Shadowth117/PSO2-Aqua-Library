@@ -24,6 +24,7 @@ namespace AquaModelLibrary.Extra.FromSoft
         }
         public static void ExtractMSBMapModels(string outDir, string filePath, byte[] file, bool useMetaData = false)
         {
+            mirrorMat = mirrorMatZ;
             byte[] newFile = file;
             string msbMapId = Path.GetFileNameWithoutExtension(filePath);
 
@@ -119,6 +120,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                         }
                         break;
                     case SoulsGame.DarkSouls1:
+                    case SoulsGame.DarkSouls1Remastered:
                         msb = SoulsFormats.SoulsFile<SoulsFormats.MSB1>.Read(bndFile.Bytes);
                         foreach (var p in msb.Parts.GetEntries())
                         {
@@ -133,9 +135,12 @@ namespace AquaModelLibrary.Extra.FromSoft
                         texPath = Path.Combine(rootPath, $"{worldString}\\");
                         var txPath = Path.Combine(rootPath, $"tx\\");
 
-                        modelFiles = Directory.GetFiles(modelPath, "*.flver");
-                        var texFilePaths = Directory.GetFiles(texPath, "*.tpf").ToList();
-                        texFilePaths.AddRange(Directory.GetFiles(txPath, "*.tpf"));
+                        modelFiles = Directory.GetFiles(modelPath, "*.flver*");
+                        var texFilePaths = Directory.GetFiles(texPath, "*.tpf*").ToList();
+                        if(game == SoulsGame.DarkSouls1)
+                        {
+                            texFilePaths.AddRange(Directory.GetFiles(txPath, "*.tpf*"));
+                        }
 
                         foreach (var modelFile in modelFiles)
                         {
@@ -146,16 +151,32 @@ namespace AquaModelLibrary.Extra.FromSoft
                                 GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
                             }
                         }
-                        foreach (var texFile in texFilePaths)
+                        if(game == SoulsGame.DarkSouls1Remastered)
                         {
-                            var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(texFile)).ToLower();
-                            //Purposely no extractUnreferencedMapData check. We do NOT want every map texture in Dark Souls 1 dumped here... 
-                            if (texNames.Contains(id))
+                            foreach (var texFile in texFilePaths)
                             {
-                                GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
-                            } else if(unrefTexNames.Contains(id))
+                                if(texFile.Contains("bhd"))
+                                {
+                                    using (var bxf = new BXF3Reader(texFile, texFile.Replace("bhd", "bdt")))
+                                    {
+                                        GatherTexturesFromBinder(bxf, texNames, outPathDirectory);
+                                    }
+                                }
+                            }
+                        } else
+                        {
+                            foreach (var texFile in texFilePaths)
                             {
-                                GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
+                                var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(texFile)).ToLower();
+                                //Purposely no extractUnreferencedMapData check. We do NOT want every map texture in Dark Souls 1 dumped here... 
+                                if (texNames.Contains(id))
+                                {
+                                    GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
+                                }
+                                else if (unrefTexNames.Contains(id))
+                                {
+                                    GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(texFile), Path.GetFileNameWithoutExtension(texFile), File.ReadAllBytes(texFile));
+                                }
                             }
                         }
                         break;
@@ -287,6 +308,11 @@ namespace AquaModelLibrary.Extra.FromSoft
                             texBhds = Directory.GetFiles(texPath, "*.tpfbnd*");
                             foreach (var bnd in texBhds)
                             {
+                                //Avoid LOD textures
+                                if(bnd.Contains("middle") || bnd.Contains("low"))
+                                {
+                                    continue;
+                                }
                                 var fileBytes = File.ReadAllBytes(bnd);
                                 if (SoulsFormats.DCX.Is(fileBytes))
                                 {
@@ -317,7 +343,16 @@ namespace AquaModelLibrary.Extra.FromSoft
                     ProcessModelsForExport(aqu, unrefAqpList);
 
                     //Grab model data if it exists, send to FBX
-                    FbxExporter.ExportToFileSets(aqpList, aqnList, modelNames, outPath, instanceTransformList, useMetaData);
+                    if (separateMSBDumpByModel)
+                    {
+                        for (int m = 0; m < aqpList.Count; m++)
+                        {
+                            FbxExporter.ExportToFile(aqpList[m], aqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, $"{modelNames[m]}.fbx"), new List<string>(), instanceTransformList[m], useMetaData);
+                        }
+                    } else
+                    {
+                        FbxExporter.ExportToFileSets(aqpList, aqnList, modelNames, outPath, instanceTransformList, useMetaData);
+                    }
 
                     if (extractUnreferencedMapData)
                     {
@@ -326,6 +361,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                             FbxExporter.ExportToFile(unrefAqpList[m], unrefAqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, "Unreferenced", $"{unrefModelNames[m]}.fbx"), new List<string>(), new List<Matrix4x4>(), useMetaData);
                         }
                     }
+
                 }
             }
 
@@ -356,6 +392,10 @@ namespace AquaModelLibrary.Extra.FromSoft
             {
                 var bFName = Path.GetFileNameWithoutExtension(bxfFile.Name);
                 var ext = Path.GetExtension(bFName);
+                if(ext == "")
+                {
+                    ext = Path.GetExtension(bxfFile.Name);
+                }
                 var bFNameSansExt = Path.GetFileNameWithoutExtension(bFName).ToLower();
                 bool foundKey = objectTransformsDict.ContainsKey(bFNameSansExt);
                 var fileBytes = bxf.ReadFile(bxfFile);
@@ -483,13 +523,13 @@ namespace AquaModelLibrary.Extra.FromSoft
 
         private static void AddToTFMDict(Dictionary<string, List<Matrix4x4>> objectTransformsDict, IMsbPart p, string mapId = "")
         {
-            mirrorMat = mirrorMatZ;
             var mdlName = p.ModelName;
             var tfm = MathExtras.ComposeFromDegreeRotation(p.Position, p.Rotation, p.Scale);
 
             switch (game)
             {
                 case SoulsGame.DarkSouls1:
+                case SoulsGame.DarkSouls1Remastered:
                     mdlName = $@"{mdlName}A{mapId.Substring(1, 2)}";
                     break;
                 case SoulsGame.DemonsSouls:
@@ -500,10 +540,6 @@ namespace AquaModelLibrary.Extra.FromSoft
                     break;
             }
             mdlName = mdlName.ToLower();
-            if (mirrorMesh)
-            {
-                tfm *= mirrorMat;
-            }
 
             if (objectTransformsDict.ContainsKey(mdlName))
             {
