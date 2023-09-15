@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SoulsModelTool"
         mc:Ignorable="d"
-        Title="Souls Model Tool" Height="346" Width="462">
+        Title="Souls Model Tool" Height="346" Width="700">
     <Grid>
         <Menu x:Name="menu" Height="18" Margin="0,0,0,0" VerticalAlignment="Top">
             <MenuItem Header="File">
@@ -14,7 +14,7 @@
                 <MenuItem Header="Convert FBX to Demon's Souls (PS3) flver" Click="ConvertFBXToDeSModel"/>
                 <MenuItem Header="Generate MCG, MCP" Click="GenerateMCPMCG"/>
                 <Separator/>
-                <MenuItem Header="Set Game (For MSB Extraction)" Click="SetGame"/>
+                <MenuItem x:Name="SetGameOption" Header="Set Game (For MSB Extraction)" Click="SetGame"/>
                 <MenuItem Header="MSB Map Model Extraction" Click="MSBExtract"/>
             </MenuItem>
         </Menu>

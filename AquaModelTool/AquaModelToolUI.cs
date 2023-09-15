@@ -94,6 +94,7 @@ namespace AquaModelTool
             mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem.Checked = smtSetting.extractUnreferencedMapData;
             mSBExtractionSeparateExtractionByModelToolStripMenuItem.Checked = smtSetting.separateMSBDumpByModel;
             SoulsConvert.game = smtSetting.soulsGame;
+            SetSoulsGameToolStripText();
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -4453,7 +4454,7 @@ namespace AquaModelTool
             var openFileDialog = new OpenFileDialog()
             {
                 Title = "Select Border Break archive file (Models rigging and skinning is broken at this time)",
-                Filter = "*_obj.bin, *.pfa, spr_*.bin, *tex.bin files|*_obj.bin;spr_*.bin;*tex.bin;*.pfa|Model archive files *_obj.bin|*_obj.bin|spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin|pfa files|*.pfa",
+                Filter = "*_obj.bin, *.pfa, spr_*.bin, *tex.bin, fld_*.bin files|*_obj.bin;spr_*.bin;*tex.bin;*.pfa;fld_*.bin|Model archive files *_obj.bin|*_obj.bin|spr_*.bin, *tex.bin files|spr_*.bin;*tex.bin|pfa files|*.pfa|FLD Stage Collision Files fld_*.bin|fld_*.bin",
                 FileName = "",
                 Multiselect = true
             };
@@ -4490,6 +4491,10 @@ namespace AquaModelTool
                     {
                         var objBinRaw = File.ReadAllBytes(archiveFile);
                         ConvertAM2BBPS4Model(archiveFile, objBinRaw);
+                    } else if (Path.GetFileName(archiveFile).StartsWith("fld_"))
+                    {
+                        var fldBinRaw = File.ReadAllBytes(archiveFile);
+                        ConvertAM2BBPS4FLD(archiveFile, fldBinRaw);
                     }
                     else
                     {
@@ -4634,6 +4639,48 @@ namespace AquaModelTool
             }
         }
 
+        private void ConvertAM2BBPS4FLD(string fldPath, byte[] fldRaw)
+        {
+            List<NGSAquaObject> aqps;
+            FLD fld;
+            using (Stream stream = new MemoryStream(fldRaw))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                fld = new FLD(streamReader);
+                aqps = BorderBreakPS4Convert.FLDToAqua(fld);
+            }
+
+            List<AquaObject> aqpList = new List<AquaObject>();
+            List<AquaNode> aqnList = new List<AquaNode>();
+            List<string> modelNames = new List<string>();
+            List<List<Matrix4x4>> matrices = new List<List<Matrix4x4>>();
+            for (int i = 0; i < aqps.Count; i++)
+            {
+                var name = fld.fldModels[i].modelName.GetString();
+                AquaNode aqn = AquaNode.GenerateBasicAQN(name);
+                modelNames.Add(name);
+                matrices.Add(new List<Matrix4x4>());
+
+                aquaUI.aqua.aquaModels.Clear();
+                ModelSet set = new ModelSet();
+                set.models.Add(aqps[i]);
+                if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                {
+                    aquaUI.aqua.aquaModels.Add(set);
+                    aquaUI.aqua.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                    set.models[0].ConvertToLegacyTypes();
+                    set.models[0].CreateTrueVertWeights();
+
+                    aqpList.Add(set.models[0]);
+                    aqnList.Add(aqn);
+                }
+
+            }
+            var path = fldPath + $"_out.fbx";
+            FbxExporter.ExportToFileSets(aqpList, aqnList, modelNames, path, new List<List<Matrix4x4>>(), false);
+
+        }
+
         private void readMotAnimToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var openFileDialog = new OpenFileDialog()
@@ -4721,8 +4768,14 @@ namespace AquaModelTool
 
         private void setSoulsGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SetSoulsGameToolStripText();
             SetSoulsGameInternal();
             SaveSoulsSettingsInternal();
+        }
+
+        private void SetSoulsGameToolStripText()
+        {
+            setSoulsGameToolStripMenuItem.Text = $"Set Game (For MSB Extraction) | Current Game: {SoulsConvert.game}";
         }
 
         private static void SetSoulsGameInternal()
@@ -4782,6 +4835,28 @@ namespace AquaModelTool
             SoulsConvert.transformMesh = transformMeshToolStripMenuItem.Checked;
             SoulsConvert.extractUnreferencedMapData = extractSoulsMapObjectLayoutFrommsbToolStripMenuItem.Checked;
             SoulsConvert.separateMSBDumpByModel = mSBExtractionSeparateExtractionByModelToolStripMenuItem.Checked;
+        }
+
+        private void readSTGToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select stage model layout file",
+                Filter = "Stage model layout files stg_*.bin|stg_*.bin",
+                FileName = "",
+                Multiselect = true,
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(file)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var stg = new STG(streamReader);
+                    }
+                }
+            }
         }
     }
 }

@@ -328,8 +328,10 @@
     <Compile Include="Extra\AM2\BorderBreakPS4Convert.cs" />
     <Compile Include="Extra\AM2\E_OBJ.cs" />
     <Compile Include="Extra\AM2\FARC.cs" />
+    <Compile Include="Extra\AM2\FLD.cs" />
     <Compile Include="Extra\AM2\MOT_Anim.cs" />
     <Compile Include="Extra\AM2\MOT_BONE.cs" />
+    <Compile Include="Extra\AM2\STG.cs" />
     <Compile Include="Extra\AM2\TXP.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\BluePointConvert.cs" />

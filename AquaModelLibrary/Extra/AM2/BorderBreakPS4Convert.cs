@@ -170,39 +170,7 @@ namespace AquaModelLibrary.Extra.AM2
                                 tri =new Vector3(faceSet[vertIndex], faceSet[vertIndex + 1], faceSet[vertIndex + 2]);
                             }
 
-                            int x;
-                            int y;
-                            int z;
-                            if (vertIdDict.TryGetValue((int)tri.X, out var value))
-                            {
-                                x = value;
-                            }
-                            else
-                            {
-                                vertIdDict.Add((int)tri.X, matVtxl.vertPositions.Count);
-                                x = matVtxl.vertPositions.Count;
-                                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.X);
-                            }
-                            if (vertIdDict.TryGetValue((int)tri.Y, out var value2))
-                            {
-                                y = value2;
-                            }
-                            else
-                            {
-                                vertIdDict.Add((int)tri.Y, matVtxl.vertPositions.Count);
-                                y = matVtxl.vertPositions.Count;
-                                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.Y);
-                            }
-                            if (vertIdDict.TryGetValue((int)tri.Z, out var value3))
-                            {
-                                z = value3;
-                            }
-                            else
-                            {
-                                vertIdDict.Add((int)tri.Z, matVtxl.vertPositions.Count);
-                                z = matVtxl.vertPositions.Count;
-                                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.Z);
-                            }
+                            AddVertices(vtxl, vertIdDict, matVtxl, tri, out int x, out int y, out int z);
 
                             //Avoid degen tris
                             if (x == y || x == z || y == z)
@@ -235,6 +203,102 @@ namespace AquaModelLibrary.Extra.AM2
             }
 
             return aqpList;
+        }
+
+        public static List<NGSAquaObject> FLDToAqua(FLD mdl)
+        {
+            int matCounter = 0;
+            List<NGSAquaObject> aqpList = new List<NGSAquaObject>();
+
+            for (int m = 0; m < mdl.fldModels.Count; m++)
+            {
+                NGSAquaObject aqp = new NGSAquaObject();
+                var model = mdl.fldModels[m];
+                aqp.bonePalette.Add(0);
+                aqp.objc.bonePaletteOffset = 1;
+
+                AquaObject.VTXL vtxl = new AquaObject.VTXL();
+
+                vtxl.vertPositions.AddRange(model.vertPositions);
+                //vtxl.vertNormals.AddRange(model.vertNormals);
+
+                //Material
+                var mat = new AquaObject.GenericMaterial();
+                mat.matName = $"Material_{matCounter++}";
+                mat.texNames = new List<string>() { "test_d.dds" };
+                aqp.tempMats.Add(mat);
+
+                Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
+                AquaObject.VTXL matVtxl = new AquaObject.VTXL();
+                AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                List<Vector3> triList = new List<Vector3>();
+                foreach (var polygon in model.polygons)
+                {
+                    Vector3 tri0 = new Vector3(polygon.vertId0, polygon.vertId1, polygon.vertId2);
+                    Vector3 tri1 = new Vector3(polygon.vertId0, polygon.vertId2, polygon.vertId3);
+
+                    int x, y, z;
+                    AddVertices(vtxl, vertIdDict, matVtxl, tri0, out x, out y, out z);
+                    triList.Add(new Vector3(x, y, z));
+                    AddVertices(vtxl, vertIdDict, matVtxl, tri1, out x, out y, out z);
+                    triList.Add(new Vector3(x, y, z));
+
+                }
+                genMesh.triList = triList;
+
+                //Extra
+                genMesh.vertCount = matVtxl.vertPositions.Count;
+                genMesh.matIdList = new List<int>(new int[genMesh.triList.Count]);
+                for (int j = 0; j < genMesh.matIdList.Count; j++)
+                {
+                    genMesh.matIdList[j] = aqp.tempMats.Count - 1;
+                }
+
+                if (genMesh.vertCount > 0)
+                {
+                    aqp.tempTris.Add(genMesh);
+                    aqp.vtxlList.Add(matVtxl);
+                    aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(matVtxl, out int vc));
+                }
+                
+                aqpList.Add(aqp);
+            }
+
+            return aqpList;
+        }
+
+        private static void AddVertices(AquaObject.VTXL vtxl, Dictionary<int, int> vertIdDict, AquaObject.VTXL matVtxl, Vector3 tri, out int x, out int y, out int z)
+        {
+            if (vertIdDict.TryGetValue((int)tri.X, out var value))
+            {
+                x = value;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.X, matVtxl.vertPositions.Count);
+                x = matVtxl.vertPositions.Count;
+                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.X);
+            }
+            if (vertIdDict.TryGetValue((int)tri.Y, out var value2))
+            {
+                y = value2;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.Y, matVtxl.vertPositions.Count);
+                y = matVtxl.vertPositions.Count;
+                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.Y);
+            }
+            if (vertIdDict.TryGetValue((int)tri.Z, out var value3))
+            {
+                z = value3;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.Z, matVtxl.vertPositions.Count);
+                z = matVtxl.vertPositions.Count;
+                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.Z);
+            }
         }
     }
 }

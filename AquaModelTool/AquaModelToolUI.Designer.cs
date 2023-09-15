@@ -162,6 +162,7 @@
             this.readMotAnimToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readCGPRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readSTGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.menuStrip1.SuspendLayout();
@@ -652,7 +653,7 @@
             // 
             this.extractBorderBreakPS4FARCToolStripMenuItem.Name = "extractBorderBreakPS4FARCToolStripMenuItem";
             this.extractBorderBreakPS4FARCToolStripMenuItem.Size = new System.Drawing.Size(620, 22);
-            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA, *_obj.bin, spr_*.bin, *tex.bin";
+            this.extractBorderBreakPS4FARCToolStripMenuItem.Text = "Extract Border Break PS4 PFA, *_obj.bin, spr_*.bin, *tex.bin, fld_*.bin";
             this.extractBorderBreakPS4FARCToolStripMenuItem.Click += new System.EventHandler(this.extractBorderBreakPS4FARCToolStripMenuItem_Click);
             // 
             // setMOTBONEbinPathToolStripMenuItem
@@ -810,6 +811,7 @@
             // 
             // filenameButton
             // 
+            this.filenameButton.Enabled = false;
             this.filenameButton.Name = "filenameButton";
             this.filenameButton.Size = new System.Drawing.Size(67, 23);
             this.filenameButton.Text = "Filename";
@@ -1070,7 +1072,8 @@
             this.readFCLToolStripMenuItem,
             this.readMotAnimToolStripMenuItem,
             this.readCGPRToolStripMenuItem,
-            this.readMusToolStripMenuItem});
+            this.readMusToolStripMenuItem,
+            this.readSTGToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -1235,6 +1238,13 @@
             this.readMusToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
             this.readMusToolStripMenuItem.Text = "ReadMus";
             this.readMusToolStripMenuItem.Click += new System.EventHandler(this.readMusToolStripMenuItem_Click);
+            // 
+            // readSTGToolStripMenuItem
+            // 
+            this.readSTGToolStripMenuItem.Name = "readSTGToolStripMenuItem";
+            this.readSTGToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readSTGToolStripMenuItem.Text = "ReadSTG";
+            this.readSTGToolStripMenuItem.Click += new System.EventHandler(this.readSTGToolStripMenuItem_Click);
             // 
             // filePanel
             // 
@@ -1411,6 +1421,7 @@
         private System.Windows.Forms.ToolStripMenuItem extractSoulsMapObjectLayoutFrommsbToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mSBExtractionExtractUnreferencedModelsAndTexturesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mSBExtractionSeparateExtractionByModelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readSTGToolStripMenuItem;
     }
 }
 

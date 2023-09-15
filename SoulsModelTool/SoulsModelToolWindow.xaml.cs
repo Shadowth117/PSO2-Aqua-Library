@@ -34,6 +34,8 @@ namespace SoulsModelTool
             transformMeshCB.IsChecked = smtSetting.transformMesh;
             extractUnreferencedFilesCB.IsChecked = smtSetting.extractUnreferencedMapData;
             separateModelsCB.IsChecked = smtSetting.separateMSBDumpByModel;
+            FileHandler.SetSMTSettings(smtSetting);
+            SetGameLabel();
         }
 
         private void ConvertModelToFBX(object sender, RoutedEventArgs e)
@@ -172,7 +174,13 @@ namespace SoulsModelTool
                 {
                     MessageBox.Show("You must select a valid From Software title!\nCurrent valid titles are: Demon's Souls, Dark Souls: Prepare to Die Edition, Dark Souls Remastered, Dark Souls II: Scholar of the First Sin, Bloodborne, Dark Souls III, Sekiro, Elden Ring");
                 }
+                SetGameLabel();
             }
+        }
+
+        private void SetGameLabel()
+        {
+            SetGameOption.Header = $"Set Game (For MSB Extraction) | Current Game: {SoulsConvert.game}";
         }
     }
 }
