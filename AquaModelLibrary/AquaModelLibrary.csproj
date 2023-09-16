@@ -262,7 +262,7 @@
   <ItemGroup>
     <Compile Include="AquaMethods\AquaFigMethods.cs" />
     <Compile Include="AquaMethods\AquaGeneralMethods.cs" />
-    <Compile Include="AquaMethods\AquaGeneralParsingMethods.cs" />
+    <Compile Include="AquaMethods\AquaMiscMethods.cs" />
     <Compile Include="AquaMethods\AquaNodeParsingMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectMethods.cs" />
     <Compile Include="AquaMethods\AquaObjectParsingMethods.cs" />
@@ -282,6 +282,7 @@
     <Compile Include="AquaStructs\CharacterMakingTemplate.cs" />
     <Compile Include="AquaStructs\FacialFCL.cs" />
     <Compile Include="AquaStructs\FLTDPhysics.cs" />
+    <Compile Include="AquaStructs\LandAreaTemplate.cs" />
     <Compile Include="AquaStructs\LHIObjectDetailLayout.cs" />
     <Compile Include="AquaStructs\LobbyActionCommon.cs" />
     <Compile Include="AquaStructs\LandPieceSettings.cs" />

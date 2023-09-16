@@ -4015,6 +4015,12 @@ namespace AquaModelLibrary
             facials.Add(LoadFCL(inFilename));
         }
 
+        public void ReadLAT(string inFilename)
+        {
+            LoadLAT(inFilename);
+        }
+
+
         public static void WriteBTI(AquaBTI_MotionConfig bti, string outFileName)
         {
             AquaMiscMethods.WriteBTI(bti, outFileName);
