@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using AquaModelLibrary.Native.Fbx;
+using Microsoft.Win32;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelLibrary.Extra.AM2
 {
@@ -103,6 +105,105 @@ namespace AquaModelLibrary.Extra.AM2
             }
 
             return aquaNodes;
+        }
+
+        public static void STGLayoutDump(string stgFileName)
+        {
+            var rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(stgFileName));
+            var objFolderName = Path.GetFileName(Path.GetDirectoryName(stgFileName)).Replace("stg", "objset");
+            var baseFilename = Path.GetFileNameWithoutExtension(stgFileName).Split('_')[1];
+            var objFileName = baseFilename + "_obj.bin";
+            var texFileName = baseFilename + "_tex.bin";
+            var fullObjFileName = Path.Combine(rootFolder, objFolderName, objFileName);
+            var fullTexFileName = Path.Combine(rootFolder, objFolderName, texFileName);
+            var outFolder = stgFileName + "_";
+
+            AquaUtil aqu = new AquaUtil();
+            STG stg;
+            E_OBJ eobj;
+            List<NGSAquaObject> aqpList;
+            List<AquaNode> exportAqnList = new List<AquaNode>();
+            List<AquaObject> exportAqpList = new List<AquaObject>();
+            List<string> modelNames = new List<string>();
+            Dictionary<string, NGSAquaObject> aqpDict = new Dictionary<string, NGSAquaObject>();
+            List<List<Matrix4x4>> instanceTransformListList = new List<List<Matrix4x4>>();
+
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(stgFileName)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                stg = new STG(streamReader);
+            }
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(fullObjFileName)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                eobj = new E_OBJ(streamReader);
+            }
+            ExtractTXP(fullTexFileName, File.ReadAllBytes(fullTexFileName), outFolder);
+            aqpList = EOBJToAqua(eobj);
+
+            for(int i = 0; i < eobj.names.Count; i++)
+            {
+                var aqp = aqpList[i];
+                aqu.aquaModels.Clear();
+                ModelSet set = new ModelSet();
+                set.models.Add(aqp);
+                if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                {
+                    aqu.aquaModels.Add(set);
+                    aqu.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                    set.models[0].ConvertToLegacyTypes();
+                    set.models[0].CreateTrueVertWeights();
+                    aqp = (NGSAquaObject)set.models[0];
+                }
+                aqpDict.Add(eobj.names[i], aqp);
+            }
+            foreach(var obj in stg.objList)
+            {
+                if(obj.modelName != null && aqpDict.ContainsKey(obj.modelName))
+                {
+                    modelNames.Add(obj.modelName);
+                    exportAqnList.Add(new AquaNode(obj.modelName));
+                    exportAqpList.Add(aqpDict[obj.modelName]);
+                    List<Matrix4x4> tfm = new List<Matrix4x4>() { obj.stgObj.transform };
+                    instanceTransformListList.Add(tfm);
+                }
+            }
+
+            string exportName = Path.Combine(outFolder, Path.GetFileName(stgFileName) + ".fbx");
+            FbxExporter.ExportToFileSets(exportAqpList, exportAqnList, modelNames, exportName, instanceTransformListList, false);
+        }
+
+        public static void ExtractTXP(string txpArchive, byte[] txpRaw, string outPath = null)
+        {
+            using (Stream stream = new MemoryStream(txpRaw))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                if (Path.GetFileName(txpArchive).StartsWith("spr_"))
+                {
+                    var int_00 = streamReader.Read<int>();
+                    var txpOffset = streamReader.Read<int>();
+                    streamReader.Seek(txpOffset, SeekOrigin.Begin);
+                }
+
+                //Standard TXP archive
+                var TXP = new TXP(streamReader);
+                var path = outPath ?? txpArchive + "_out";
+                Directory.CreateDirectory(path);
+                for (int i = 0; i < TXP.txp3.txp4List.Count; i++)
+                {
+                    string baseFname;
+                    if (TXP.txp3.txp4Names.Count > 0)
+                    {
+                        baseFname = TXP.txp3.txp4Names[i];
+                    }
+                    else
+                    {
+                        baseFname = Path.GetFileName(txpArchive) + $"_{i}";
+                    }
+                    var fname = Path.Combine(path, baseFname + ".dds");
+                    File.WriteAllBytes(fname, TXP.txp3.txp4List[i].GetDDS());
+                }
+            }
         }
 
         public static List<NGSAquaObject> EOBJToAqua(E_OBJ mdl)

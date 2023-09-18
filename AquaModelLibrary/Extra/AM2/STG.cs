@@ -20,7 +20,6 @@ namespace AquaModelLibrary.Extra.AM2
         {
             header = sr.Read<STGHeader>();
 
-            //Read skeleton names
             sr.Seek(header.objectsOffset, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < header.objectCount; i++)
             {
@@ -53,13 +52,13 @@ namespace AquaModelLibrary.Extra.AM2
             public float flt_04;
         }
 
-        public struct STGObjectTransformSetHeader
+        public struct UnkPlaneHeader
         {
             public long setCount;
             public long setOffset;
         }
 
-        public struct STGObjectTransform
+        public struct UnkPlane
         {
             public Vector3 directionVector;
             public Vector3 vec3_0C;
@@ -71,9 +70,9 @@ namespace AquaModelLibrary.Extra.AM2
         public class STGObjectClass
         {
             public STGObject stgObj;
-            public STGObjectTransformSetHeader transformSetHeader;
-            public List<STGObjectTransform> objTransforms = new List<STGObjectTransform>();
-            public string objProperty = null; //The property is the model name if it's not null
+            public UnkPlaneHeader unkPlaneHeader;
+            public List<UnkPlane> unkPlanes = new List<UnkPlane>();
+            public string modelName = null; //The property is the model name if it's not null
             public string objName = null;
             public STGObjectClass()
             {
@@ -88,19 +87,19 @@ namespace AquaModelLibrary.Extra.AM2
                 if (stgObj.objectTransformSetOffset != 0)
                 {
                     sr.Seek(stgObj.objectTransformSetOffset, System.IO.SeekOrigin.Begin);
-                    transformSetHeader = sr.Read<STGObjectTransformSetHeader>();
+                    unkPlaneHeader = sr.Read<UnkPlaneHeader>();
 
-                    sr.Seek(transformSetHeader.setOffset, System.IO.SeekOrigin.Begin);
-                    for (int i = 0; i < transformSetHeader.setCount; i++)
+                    sr.Seek(unkPlaneHeader.setOffset, System.IO.SeekOrigin.Begin);
+                    for (int i = 0; i < unkPlaneHeader.setCount; i++)
                     {
-                        objTransforms.Add(sr.Read<STGObjectTransform>());
+                        unkPlanes.Add(sr.Read<UnkPlane>());
                     }
                 }
 
                 if (stgObj.objectPropertyOffset != 0)
                 {
                     sr.Seek(stgObj.objectPropertyOffset, System.IO.SeekOrigin.Begin);
-                    objProperty = AquaGeneralMethods.ReadCString(sr);
+                    modelName = AquaGeneralMethods.ReadCString(sr);
                 }
 
                 sr.Seek(stgObj.objectNameOffset, System.IO.SeekOrigin.Begin);

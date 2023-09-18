@@ -4478,7 +4478,7 @@ namespace AquaModelTool
                                 //Extract txp
                                 if (file.fileName.StartsWith("spr_") || file.fileName.EndsWith("tex.bin"))
                                 {
-                                    ExtractTXP(fname, file.fileData);
+                                    BorderBreakPS4Convert.ExtractTXP(fname, file.fileData);
                                 }
                                 else if (file.fileName.EndsWith("_obj.bin"))
                                 {
@@ -4499,7 +4499,7 @@ namespace AquaModelTool
                     else
                     {
                         var txpRaw = File.ReadAllBytes(archiveFile);
-                        ExtractTXP(archiveFile, txpRaw);
+                        BorderBreakPS4Convert.ExtractTXP(archiveFile, txpRaw);
                     }
                 }
             }
@@ -4511,39 +4511,6 @@ namespace AquaModelTool
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
                 new E_OBJ(streamReader);
-            }
-        }
-
-        private static void ExtractTXP(string txpArchive, byte[] txpRaw)
-        {
-            using (Stream stream = new MemoryStream(txpRaw))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                if (Path.GetFileName(txpArchive).StartsWith("spr_"))
-                {
-                    var int_00 = streamReader.Read<int>();
-                    var txpOffset = streamReader.Read<int>();
-                    streamReader.Seek(txpOffset, SeekOrigin.Begin);
-                }
-
-                //Standard TXP archive
-                var TXP = new TXP(streamReader);
-                var path = txpArchive + "_out";
-                Directory.CreateDirectory(path);
-                for (int i = 0; i < TXP.txp3.txp4List.Count; i++)
-                {
-                    string baseFname;
-                    if (TXP.txp3.txp4Names.Count > 0)
-                    {
-                        baseFname = TXP.txp3.txp4Names[i];
-                    }
-                    else
-                    {
-                        baseFname = Path.GetFileName(txpArchive) + $"_{i}";
-                    }
-                    var fname = Path.Combine(path, baseFname + ".dds");
-                    File.WriteAllBytes(fname, TXP.txp3.txp4List[i].GetDDS());
-                }
             }
         }
 
@@ -4873,6 +4840,24 @@ namespace AquaModelTool
                 foreach (var file in openFileDialog.FileNames)
                 {
                     aquaUI.aqua.ReadLAT(file);
+                }
+            }
+        }
+
+        private void sTGExportBustedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select stg File",
+                Filter = "stg_*.bin files|stg_*.bin",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    BorderBreakPS4Convert.STGLayoutDump(file);
                 }
             }
         }
