@@ -1078,7 +1078,6 @@ namespace AquaModelLibrary.Extra
                 {
                     matName = $"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|{mesh.MaterialIndex}";
                     mat.matName = matName;
-
                 }
                 else
                 {
