@@ -8,5 +8,6 @@ namespace SoulsFormats.Formats.Morpheme
 {
     public class NMB
     {
+        //br.Set64BitAndEndianness()
     }
 }

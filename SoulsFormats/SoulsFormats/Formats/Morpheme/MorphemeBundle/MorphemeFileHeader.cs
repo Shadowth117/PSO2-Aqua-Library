@@ -7,25 +7,40 @@ using System.Threading.Tasks;
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
     /// <summary>
-    /// MorphemeBundle format used in Morpheme files in Dark Souls 2.
+    /// Header for Morpheme files.
     /// </summary>
-    public class MorphemeBundleGeneric : MorphemeBundle_Base
+    public class MorphemeFileHeader : MorphemeBundle_Base
     {
         /// <summary>
-        /// Raw data
+        /// Header variable 0
         /// </summary>
-        public byte[] data { get; set; }
+        public long iVar0 { get; set; }
+
+        /// <summary>
+        /// Header variable 1
+        /// </summary>
+        public long iVar1 { get; set; }
+
+        /// <summary>
+        /// Header variable 2
+        /// </summary>
+        public long iVar2 { get; set; }
+
+        /// <summary>
+        /// Header variable 3
+        /// </summary>
+        public long iVar3 { get; set; }
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public MorphemeBundleGeneric() { }
+        public MorphemeFileHeader() { }
 
         /// <summary>
         /// Constructor for reading a MorphemeBundle
         /// </summary>
         /// <param name="br"></param>
-        public MorphemeBundleGeneric(BinaryReaderEx br)
+        public MorphemeFileHeader(BinaryReaderEx br)
         {
             Read(br);
         }
@@ -35,7 +50,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// </summary>
         public override long CalculateBundleSize()
         {
-            return data.LongLength;
+            return isX64 ? 0x20 : 0x10;
         }
 
         /// <summary>
@@ -44,7 +59,10 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         public override void Read(BinaryReaderEx br)
         {
             base.Read(br);
-            data = br.ReadBytes((int)dataSize);
+            iVar0 = br.ReadVarint();
+            iVar1 = br.ReadVarint();
+            iVar2 = br.ReadVarint();
+            iVar3 = br.ReadVarint();
         }
 
         /// <summary>
@@ -53,7 +71,10 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         public override void Write(BinaryWriterEx bw)
         {
             base.Write(bw);
-            bw.WriteBytes(data);
+            bw.WriteVarint(iVar0);
+            bw.WriteVarint(iVar1);
+            bw.WriteVarint(iVar2);
+            bw.WriteVarint(iVar3);
         }
     }
 }

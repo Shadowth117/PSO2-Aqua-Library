@@ -49,15 +49,15 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// Calculates the size of the EventTrack.
         /// </summary>
         /// <returns>Size of the EventTrack</returns>
-        public override ulong CalculateBundleSize()
+        public override long CalculateBundleSize()
         {
-            ulong size = (ulong)(32 + 12 * numEvents + trackName.Length + 1);
+            long size = (isX64 ? 0x20 : 0x10) + 0xC * numEvents + trackName.Length + 1;
 
-            ulong remainder = size % dataAlignment;
+            long remainder = size % dataAlignment;
 
             if (remainder != 0)
             {
-                ulong next_integer = (size - remainder) + 16; //Adjust so that the bundle end address will be aligned to 16 bytes
+                long next_integer = (size - remainder) + 16; //Adjust so that the bundle end address will be aligned to 16 bytes
                 size = next_integer;
             }
 
@@ -72,13 +72,13 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         {
             base.Read(br);
             var dataStart = br.Position;
-            numEvents = br.ReadInt64();
-            trackName = br.GetASCII(br.Position + br.ReadInt64());
-            eventId = br.ReadInt64();
+            numEvents = br.ReadVarint();
+            trackName = br.GetASCII(br.Position + br.ReadVarint());
+            eventId = br.ReadVarint();
 
             if(numEvents > 0)
             {
-                br.Position = br.Position + br.ReadInt64();
+                br.Position = br.Position + br.ReadVarint();
                 for (int i = 0; i < numEvents; i++)
                 {
                     events.Add(new Event() { start = br.ReadSingle(), duration = br.ReadSingle(), value = br.ReadInt32() });
@@ -95,13 +95,13 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         public override void Write(BinaryWriterEx bw)
         {
             base.Write(bw);
-            bw.WriteInt64(events.Count);
-            bw.WriteInt64(0x20 + 0xC * events.Count);
-            bw.WriteInt64(eventId);
+            bw.WriteVarint(events.Count);
+            bw.WriteVarint(0x20 + 0xC * events.Count);
+            bw.WriteVarint(eventId);
 
             if(events.Count > 0)
             {
-                bw.WriteInt64(0x20);
+                bw.WriteVarint(0x20);
                 foreach(var evt in events)
                 {
                     bw.WriteSingle(evt.start);

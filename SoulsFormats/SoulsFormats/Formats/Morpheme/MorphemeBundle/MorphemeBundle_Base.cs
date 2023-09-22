@@ -30,12 +30,17 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// <summary>
         /// Size of this bundle structure
         /// </summary>
-        public ulong dataSize { get; set; }
+        public long dataSize { get; set; }
 
         /// <summary>
         /// Alignment for this bundle structure. Only observed 0x4 and 0x10.
         /// </summary>
-        public ulong dataAlignment { get; set; }
+        public long dataAlignment { get; set; }
+
+        /// <summary>
+        /// Flag for if the data is x64 or not. Only set in software, not actually stored in the file.
+        /// </summary>
+        public bool isX64 { get; set; }
 
         /// <summary>
         /// Method for verifying data is a MorphemeBundle
@@ -50,6 +55,41 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 
             return (tempMagic0 == 0x18) && (tempMagic1 == 0xA);
         }
+
+        /// <summary>
+        /// A check for 64 bit values and the file's endianness. BinaryReader is adjusted as needed for this.
+        /// </summary>
+        public void Set64BitAndEndianness(BinaryReaderEx br)
+        {
+            br.VarintLong = true;
+            var test = br.ReadUInt32();
+            if(test > 0x18)
+            {
+                br.BigEndian = true;
+            }
+
+            //No Dark Souls 2 morpheme structs, much less files, should ever exceed the 32 bit limit. Therefore, if this is 64 bit, the 2nd 4 bytes will ALWAYS be 0.
+            int additiveValue;
+            if (br.BigEndian == true)
+            {
+                additiveValue = 0x1C;
+            } else
+            {
+                additiveValue = 0x20;
+            }
+
+            br.Position += additiveValue;
+            if(br.ReadUInt32() > 0)
+            {
+                br.VarintLong = false;
+            }
+            br.Position -= additiveValue + 4;
+        }
+
+        /// <summary>
+        /// Method for getting size of this MorphemeBundle
+        /// </summary>
+        public abstract long CalculateBundleSize();
 
         /// <summary>
         /// Method for reading a MorphemeBundle
@@ -67,8 +107,8 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 int_08 = br.ReadInt32(),
                 int_0C = br.ReadInt32()
             };
-            dataSize = br.ReadUInt64();
-            dataAlignment = br.ReadUInt64();
+            dataSize = br.ReadVarint();
+            dataAlignment = br.ReadVarint();
             br.Pad((int)dataAlignment);
         }
 
@@ -85,14 +125,9 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             bw.WriteInt32(header.int_04);
             bw.WriteInt32(header.int_08);
             bw.WriteInt32(header.int_0C);
-            bw.WriteUInt64(dataSize);
-            bw.WriteUInt64((uint)CalculateBundleSize());
+            bw.WriteVarint(CalculateBundleSize());
+            bw.WriteVarint(dataAlignment);
             bw.Pad((int)dataAlignment);
         }
-
-        /// <summary>
-        /// Method for getting size of this MorphemeBundle
-        /// </summary>
-        public abstract ulong CalculateBundleSize();
     }
 }
