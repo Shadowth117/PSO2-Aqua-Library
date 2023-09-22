@@ -1072,7 +1072,7 @@ namespace AquaModelLibrary.Extra
                 var flverMat = flver.Materials[mesh.MaterialIndex];
                 if (applyMaterialNamesToMesh)
                 {
-                    aqp.meshNames.Add($"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}_mesh{i}");
+                    aqp.meshNames.Add($"{flverMat.Name}|{Path.GetFileName(flverMat.MTD)}|mesh{i}");
                 }
                 if (useMetaData)
                 {
