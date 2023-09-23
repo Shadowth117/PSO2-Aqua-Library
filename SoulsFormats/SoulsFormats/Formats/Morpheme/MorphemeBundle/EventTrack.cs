@@ -46,6 +46,15 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         }
 
         /// <summary>
+        /// Constructor to read in an event track with a BinaryReaderEx.
+        /// </summary>
+        /// <param name="br"></param>
+        public EventTrack(BinaryReaderEx br)
+        {
+            Read(br);
+        }
+
+        /// <summary>
         /// Calculates the size of the EventTrack.
         /// </summary>
         /// <returns>Size of the EventTrack</returns>

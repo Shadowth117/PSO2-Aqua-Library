@@ -59,7 +59,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// <summary>
         /// A check for 64 bit values and the file's endianness. BinaryReader is adjusted as needed for this.
         /// </summary>
-        public void Set64BitAndEndianness(BinaryReaderEx br)
+        public static void Set64BitAndEndianness(BinaryReaderEx br)
         {
             br.VarintLong = true;
             var test = br.ReadUInt32();
@@ -84,6 +84,22 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 br.VarintLong = false;
             }
             br.Position -= additiveValue + 4;
+        }
+
+        /// <summary>
+        /// Get the type of bundle and then return to the start of the bundle.
+        /// </summary>
+        /// <param name="br"></param>
+        /// <returns></returns>
+        public static eBundleType ReadBundleType(BinaryReaderEx br)
+        {
+            eBundleType bundleTypeCheck;
+            br.StepIn(br.Position); br.AssertInt32(0x18);
+            br.AssertInt32(0xA);
+            bundleTypeCheck = br.ReadEnum32<eBundleType>();
+            br.StepOut();
+
+            return bundleTypeCheck;
         }
 
         /// <summary>

@@ -38,6 +38,11 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         public List<byte> strings = new List<byte>();
 
         /// <summary>
+        /// strings List processed to .NET strings.
+        /// </summary>
+        public List<string> processedStrings = new List<string>();
+
+        /// <summary>
         /// Default constructor.
         /// </summary>
         public LookupTable() { }
@@ -90,6 +95,11 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             {
                 strings.Add(br.ReadByte());
             }
+
+            foreach(var offset in localOffsets)
+            {
+                processedStrings.Add(br.GetASCII(dataStart + offset));
+            }
         }
 
         /// <summary>
@@ -110,6 +120,8 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             {
                 bw.WriteInt32(idxList[i]);
             }
+
+            //TODO, write back processed strings and ultimately get rid of localOffsets and strings once this is understood better.
 
             bw.FillVarint("LTLocalOffsets", bw.Position - dataStart);
             for (int i = 0; i < localOffsets.Count; i++)
