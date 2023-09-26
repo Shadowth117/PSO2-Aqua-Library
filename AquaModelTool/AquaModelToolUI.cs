@@ -4861,6 +4861,24 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readNSAToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select DS2 NSA File",
+                Filter = "DS2 Anim *.nsa files|*.nsa",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ReadNSA(file, File.ReadAllBytes(file));
+                }
+            }
+        }
     }
 }
 

@@ -8,17 +8,17 @@ namespace SoulsFormats.Formats.Morpheme.NSA
 {
     public class NSAVec3
     {
-        public short x;
-        public short y;
-        public short z;
+        public short X;
+        public short Y;
+        public short Z;
 
         public NSAVec3() { }
 
         public NSAVec3(BinaryReaderEx br)
         {
-            x = br.ReadInt16();
-            y = br.ReadInt16();
-            z = br.ReadInt16();
+            X = br.ReadInt16();
+            Y = br.ReadInt16();
+            Z = br.ReadInt16();
         }
     }
 }

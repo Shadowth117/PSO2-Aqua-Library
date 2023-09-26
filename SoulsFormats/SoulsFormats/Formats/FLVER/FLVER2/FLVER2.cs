@@ -124,8 +124,7 @@ namespace SoulsFormats
             int vertexIndicesSize = br.AssertByte(0, 8, 16, 32);
             Header.Unicode = br.ReadBoolean();
             Header.Unk4A = br.ReadBoolean();
-            br.AssertByte(0);
-
+            Header.Unk4B = br.ReadBoolean();
             Header.Unk4C = br.ReadInt32();
 
             int faceSetCount = br.ReadInt32();
@@ -463,6 +462,11 @@ namespace SoulsFormats
             /// Unknown.
             /// </summary>
             public bool Unk4A { get; set; }
+
+            /// <summary>
+            /// Unknown, 1 in some Armored Core Verdict Day models
+            /// </summary>
+            public bool Unk4B { get; set; }
 
             /// <summary>
             /// Unknown; I believe this is the primitive restart constant, but I'm not certain.

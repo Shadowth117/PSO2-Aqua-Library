@@ -13,6 +13,7 @@ using AquaModelLibrary.Native.Fbx;
 using System.Diagnostics;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using Matrix4x4 = System.Numerics.Matrix4x4;
+using SoulsFormats.Formats.Morpheme.NSA;
 
 namespace AquaModelLibrary.Extra
 {
@@ -377,6 +378,13 @@ namespace AquaModelLibrary.Extra
 #endif
             }
 
+        }
+
+        public static void ReadNSA(string filePath, byte[] raw)
+        {
+            BinaryReaderEx br = new BinaryReaderEx(false, raw);
+            NSA.Set64BitAndEndianness(br);
+            NSA test = new NSA(br);
         }
 
         public static AquaObject ReadFlver(string filePath, byte[] raw, out AquaNode aqn)

@@ -16,7 +16,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle.Network
         public short field3_0x6;
         //public long arrayOffset;
 
-        public List<byte> array = new List<byte>();;
+        public List<byte> array = new List<byte>();
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
