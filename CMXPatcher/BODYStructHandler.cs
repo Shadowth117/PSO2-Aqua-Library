@@ -43,6 +43,11 @@ namespace CMXPatcher
             outText.AppendLine("float_60 = " + body.body2.float_60.ToString(new CultureInfo("en-US")));
             outText.AppendLine("int_64 = " + body.body2.int_64.ToString(new CultureInfo("en-US")));
 
+            outText.AppendLine("int_0 = " + body.bodyRitem.int_0.ToString(new CultureInfo("en-US")));
+            outText.AppendLine("int_4 = " + body.bodyRitem.int_4.ToString(new CultureInfo("en-US")));
+            outText.AppendLine("int_8 = " + body.bodyRitem.int_8.ToString(new CultureInfo("en-US")));
+            outText.AppendLine("int_C = " + body.bodyRitem.int_C.ToString(new CultureInfo("en-US")));
+
             return outText;
         }
         
@@ -114,6 +119,19 @@ namespace CMXPatcher
                         break;
                     case "int_64":
                         body.body2.int_64 = Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+
+                    case "int_0":
+                        body.bodyRitem.int_0 = Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+                    case "int_4":
+                        body.bodyRitem.int_4 = Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+                    case "int_8":
+                        body.bodyRitem.int_8 = Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+                    case "int_C":
+                        body.bodyRitem.int_C = Int32.Parse(contents[1], new CultureInfo("en-US"));
                         break;
 
                     default:
