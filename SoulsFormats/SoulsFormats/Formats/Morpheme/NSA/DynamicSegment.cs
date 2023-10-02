@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,10 @@ namespace SoulsFormats.Formats.Morpheme.NSA
         public List<DequantizationInfo> translationDequantizationInfo = new List<DequantizationInfo>();
         public List<RotationSample> rotationSamples = new List<RotationSample>();
         public List<DequantizationInfo> rotationDequantizationInfo = new List<DequantizationInfo>();
+
+        //Dequantized Lists
+        public List<Vector3> translationFrames = new List<Vector3>();
+        public List<Quaternion> rotationFrames = new List<Quaternion>();
 
         public DynamicSegment() { }
 

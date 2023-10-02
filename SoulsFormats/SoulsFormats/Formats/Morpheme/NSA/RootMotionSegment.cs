@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,10 +12,14 @@ namespace SoulsFormats.Formats.Morpheme.NSA
     {
         public float fps;
         public long sampleCount;
-        DequantizationFactor dequantizationFactor;
-        Quaternion rotation;
-        List<TranslationSample> translationSamples = new List<TranslationSample>();
-        List<RotationSample> rotationSamples = new List<RotationSample>();
+        public DequantizationFactor dequantizationFactor;
+        public Quaternion rotation;
+        public List<TranslationSample> translationSamples = new List<TranslationSample>();
+        public List<RotationSample> rotationSamples = new List<RotationSample>();
+
+        //Dequantized Lists
+        public List<Vector3> translationFrames = new List<Vector3>();
+        public List<Quaternion> rotationFrames = new List<Quaternion>();
 
         public RootMotionSegment() { }
 
@@ -25,6 +30,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             fps = br.ReadSingle(); 
             sampleCount = br.ReadInt32();
             dequantizationFactor = new DequantizationFactor(br);
+            //var dequantizationFactor2 = new DequantizationFactor(br);
             rotation = new Quaternion(br.ReadSingle(), br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
 
             br.Position += 0x8;
@@ -49,6 +55,22 @@ namespace SoulsFormats.Formats.Morpheme.NSA
                 for (int i = 0; i < sampleCount; i++)
                 {
                     rotationSamples.Add(new RotationSample(br));
+                }
+            }
+        }
+
+        public void Dequantize()
+        {
+            for (int i = 0; i < sampleCount; i++)
+            {
+                if (i < translationSamples.Count)
+                {
+                    //translationFrames.Add(translationSamples[i].DequantizeTranslation(dequantizationFactor));
+                }
+
+                if (i < rotationSamples.Count)
+                {
+                    translationFrames.Add(translationSamples[i].DequantizeTranslation(dequantizationFactor));
                 }
             }
         }

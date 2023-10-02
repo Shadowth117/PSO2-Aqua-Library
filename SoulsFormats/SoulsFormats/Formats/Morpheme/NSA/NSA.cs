@@ -53,13 +53,13 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             }
 
             br.Position = header.pStaticSegment;
-            staticSegment = new StaticSegment(br);
+            staticSegment = header.pStaticSegment > 0 ? new StaticSegment(br) : new StaticSegment();
 
             br.Position = header.pDynamicSegment;
-            dynamicSegment = new DynamicSegment(br);
+            dynamicSegment = header.pDynamicSegment > 0 ? new DynamicSegment(br) : new DynamicSegment();
 
             br.Position = header.pRootMotionSegment;
-            rootMotionSegment = new RootMotionSegment(br);
+            rootMotionSegment = header.pRootMotionSegment > 0 ? new RootMotionSegment(br) : new RootMotionSegment();
         }
 
         /// <summary>
@@ -79,12 +79,18 @@ namespace SoulsFormats.Formats.Morpheme.NSA
 
         public void DequantizeStaticSegment()
         {
+            if(header.pStaticSegment != 0)
+            {
 
+            }
         }
 
         public void DequantizeDynamicSegment()
         {
+            if(header.pDynamicSegment != 0)
+            {
 
+            }
         }
 
         /// <summary>
