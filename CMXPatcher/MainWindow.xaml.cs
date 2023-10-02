@@ -190,7 +190,7 @@ namespace CMXPatcher
                     string path = settingsPath + $"CMXEntryDumps\\{ type}_{id}_cmxConfig.txt";
                     try
                     {
-                        File.WriteAllText(path, BODYStructHandler.ConvertToString(dict[id], type).ToString());
+                        File.WriteAllText(path, BODYStructHandler.ConvertToString(dict[id], type, !silent).ToString());
                         success = true;
                         if (!silent)
                         {

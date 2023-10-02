@@ -124,6 +124,28 @@ namespace AquaModelLibrary
         public static string cmtName = "pl_making_table.cmt";
         public static string cmxName = "pl_data_info.cmx";
 
+        //Credit to dummyCount and Dillen for these values
+        public enum CharColorMapping : int
+        {
+            PrimaryOuterWear = 1,
+            SecondaryOuterWear = 2,
+            PrimaryBaseWear = 3,
+            SecondaryBaseWear = 4,
+            PrimaryInnerWear = 5,
+            SecondaryInnerWear = 6,
+            CastColor1 = 7,
+            CastColor2 = 8,
+            CastColor3 = 9,
+            CastColor4 = 10,
+            MainSkin = 11,
+            SubSkin = 12,
+            RightEye = 13,
+            LeftEye = 14,
+            EyebrowColor = 15,
+            EyelashColor = 16,
+            HairColor = 17,
+        }
+
         public Dictionary<int, BODYObject> costumeDict = new Dictionary<int, BODYObject>();
         public Dictionary<int, BODYObject> carmDict = new Dictionary<int, BODYObject>();
         public Dictionary<int, BODYObject> clegDict = new Dictionary<int, BODYObject>();
@@ -178,7 +200,7 @@ namespace AquaModelLibrary
         public class BODYObject : BaseCMXObject
         {
             public BODY body;
-            public BODYRitem bodyRitem;
+            public BODYMaskColorMapping bodyMaskColorMapping;
             public BODY2 body2;
             public BODY40Cap body40cap;
             public BODY2023_1 body2023_1;
@@ -210,12 +232,12 @@ namespace AquaModelLibrary
             public int int_20;
         }
 
-        public struct BODYRitem //Body struct section addition added
+        public struct BODYMaskColorMapping //Body struct section addition added with Ritem
         {
-            public int int_0;
-            public int int_4;
-            public int int_8;
-            public int int_C;
+            public CharColorMapping redIndex;
+            public CharColorMapping greenIndex;
+            public CharColorMapping blueIndex;
+            public CharColorMapping alphaIndex;
         }
 
         public struct BODY2

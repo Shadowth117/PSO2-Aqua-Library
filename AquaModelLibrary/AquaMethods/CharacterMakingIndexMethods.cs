@@ -1056,7 +1056,7 @@ namespace AquaModelLibrary
             outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body));
             if (mode >= 1)
             {
-                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.bodyRitem));
+                outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.bodyMaskColorMapping));
             }
             outBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body2));
             if (mode >= 1)
@@ -1150,8 +1150,8 @@ namespace AquaModelLibrary
                     position += sizeof(BODY);
                     if (rel0DataStart >= dec14_21TableAddressInt)
                     {
-                        pointerCheck(position, nof0.relAddresses, sizeof(BODYRitem), BODYRitemPtrs, start);
-                        position += sizeof(BODYRitem);
+                        pointerCheck(position, nof0.relAddresses, sizeof(BODYMaskColorMapping), BODYRitemPtrs, start);
+                        position += sizeof(BODYMaskColorMapping);
                     }
                     pointerCheck(position, nof0.relAddresses, sizeof(BODY2), BODY2Ptrs, start);
                     position += sizeof(BODY2);
@@ -1742,7 +1742,7 @@ namespace AquaModelLibrary
 
                 if (rel0DataStart >= dec14_21TableAddressInt)
                 {
-                    body.bodyRitem = streamReader.Read<BODYRitem>();
+                    body.bodyMaskColorMapping = streamReader.Read<BODYMaskColorMapping>();
                 }
 
                 body.body2 = streamReader.Read<BODY2>();

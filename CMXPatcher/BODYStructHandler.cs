@@ -14,7 +14,7 @@ namespace CMXPatcher
         //Converts a body struct's accessible contents to text
         //Currently strings and such are left alone, though that could be changed in the future
         //Some things like the main id really shouldn't be changed and so are intentionally excluded
-        public static StringBuilder ConvertToString(BODYObject body, string type)
+        public static StringBuilder ConvertToString(BODYObject body, string type, bool includeComments = true)
         {
             StringBuilder outText = new StringBuilder();
 
@@ -42,6 +42,32 @@ namespace CMXPatcher
 
             outText.AppendLine("float_60 = " + body.body2.float_60.ToString(new CultureInfo("en-US")));
             outText.AppendLine("int_64 = " + body.body2.int_64.ToString(new CultureInfo("en-US")));
+            outText.AppendLine("Red Mask Mapping = " + ((int)body.bodyMaskColorMapping.redIndex).ToString(new CultureInfo("en-US")));
+            outText.AppendLine("Green Mask Mapping = " + ((int)body.bodyMaskColorMapping.greenIndex).ToString(new CultureInfo("en-US")));
+            outText.AppendLine("Blue Mask Mapping = " + ((int)body.bodyMaskColorMapping.blueIndex).ToString(new CultureInfo("en-US")));
+            outText.AppendLine("Alpha Mask Mapping = " + ((int)body.bodyMaskColorMapping.alphaIndex).ToString(new CultureInfo("en-US")));
+
+            if(includeComments)
+            {
+                outText.AppendLine("\n//Mask Mapping options. The _m texture for outfits maps character data color slots to its red, green, blue and alpha color channels. Alpha may be unusable and not all outfits may support this.\r\n" +
+                                    "//PrimaryOuterWear = 1\r\n" +
+                                    "//SecondaryOuterWear = 2\r\n" +
+                                    "//PrimaryBaseWear = 3\r\n" +
+                                    "//SecondaryBaseWear = 4\r\n" +
+                                    "//PrimaryInnerWear = 5\r\n" +
+                                    "//SecondaryInnerWear = 6\r\n" +
+                                    "//CastColor1 = 7\r\n" +
+                                    "//CastColor2 = 8\r\n" +
+                                    "//CastColor3 = 9\r\n" +
+                                    "//CastColor4 = 10\r\n" +
+                                    "//MainSkin = 11\r\n" +
+                                    "//SubSkin = 12\r\n" +
+                                    "//RightEye = 13\r\n" +
+                                    "//LeftEye = 14\r\n" +
+                                    "//EyebrowColor = 15\r\n" +
+                                    "//EyelashColor = 16\r\n" +
+                                    "//HairColor = 17");
+            }
 
             return outText;
         }
@@ -115,7 +141,18 @@ namespace CMXPatcher
                     case "int_64":
                         body.body2.int_64 = Int32.Parse(contents[1], new CultureInfo("en-US"));
                         break;
-
+                    case "Red Mask Mapping":
+                        body.bodyMaskColorMapping.redIndex = (CharColorMapping)Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+                    case "Green Mask Mapping":
+                        body.bodyMaskColorMapping.greenIndex = (CharColorMapping)Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+                    case "Blue Mask Mapping":
+                        body.bodyMaskColorMapping.blueIndex = (CharColorMapping)Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
+                    case "Alpha Mask Mapping":
+                        body.bodyMaskColorMapping.alphaIndex = (CharColorMapping)Int32.Parse(contents[1], new CultureInfo("en-US"));
+                        break;
                     default:
                         break;
                 }
@@ -128,7 +165,7 @@ namespace CMXPatcher
             bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body));
             if(postRetem)
             {
-                bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.bodyRitem));
+                bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.bodyMaskColorMapping));
             }
             bodyBytes.AddRange(AquaGeneralMethods.ConvertStruct(body.body2));
 
