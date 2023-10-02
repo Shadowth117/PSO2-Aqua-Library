@@ -702,25 +702,25 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     }
     
     //Expects pre VSET split model
-    void FbxExporterCore::ExportToFile( AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, List<Matrix4x4>^ instanceTransforms, bool includeMetadata)
+    void FbxExporterCore::ExportToFile(AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, List<Matrix4x4>^ instanceTransforms, bool includeMetadata)
     {
-        String^ texturesDirectoryPath = Path::GetDirectoryName( destinationFilePath );
-        String^ aqoName = Path::GetFileNameWithoutExtension ( destinationFilePath );
+        String^ texturesDirectoryPath = Path::GetDirectoryName(destinationFilePath);
+        String^ aqoName = Path::GetFileNameWithoutExtension(destinationFilePath);
 
         int lFileFormat = lManager->GetIOPluginRegistry()->GetNativeWriterFormat();
 
-        ::FbxExporter* lExporter = ::FbxExporter::Create( lManager, "" );
-        lExporter->SetFileExportVersion( FBX_2014_00_COMPATIBLE );
+        ::FbxExporter* lExporter = ::FbxExporter::Create(lManager, "");
+        lExporter->SetFileExportVersion(FBX_2014_00_COMPATIBLE);
 
-        bool lExportStatus = lExporter->Initialize( Utf8String( destinationFilePath ).ToCStr(), lFileFormat, lManager->GetIOSettings() );
+        bool lExportStatus = lExporter->Initialize(Utf8String(destinationFilePath).ToCStr(), lFileFormat, lManager->GetIOSettings());
 
-        if ( !lExportStatus )
-            throw gcnew Exception( String::Format( "Failed to export FBX file ({0})", destinationFilePath ) );
+        if (!lExportStatus)
+            throw gcnew Exception(String::Format("Failed to export FBX file ({0})", destinationFilePath));
 
-        FbxScene* lScene = FbxScene::Create( lManager, "" );
+        FbxScene* lScene = FbxScene::Create(lManager, "");
 
-        FbxPose* lBindPose = FbxPose::Create( lScene, "BindPoses" );
-        lBindPose->SetIsBindPose( true );
+        FbxPose* lBindPose = FbxPose::Create(lScene, "BindPoses");
+        lBindPose->SetIsBindPose(true);
 
         FbxNode* lRootNode = lScene->GetRootNode();
 
@@ -738,13 +738,13 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         FbxNode* lSkeletonNode = CreateFbxNodeFromAqnNode(node0, Matrix4x4::Identity, lScene, lBindPose, 0, includeMetadata);
         convertedBones->Add(IntPtr(lSkeletonNode));
 
-        FbxSkeleton* lSkeleton = FbxSkeleton::Create( lScene, name);
-        lSkeleton->SetSkeletonType( FbxSkeleton::eRoot );
+        FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
+        lSkeleton->SetSkeletonType(FbxSkeleton::eRoot);
 
-        lSkeletonNode->SetNodeAttribute( lSkeleton );
+        lSkeletonNode->SetNodeAttribute(lSkeleton);
 
         //Go through standard nodes
-        for(int i = 0; i < aqn->nodeList->Count; i++)
+        for (int i = 0; i < aqn->nodeList->Count; i++)
         {
             if (i == 0)
             {
@@ -753,22 +753,35 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             AquaNode::NODE node = aqn->nodeList[i];
 
             Matrix4x4 parentInvTfm;
-            FbxNode* parentFbxNode = nullptr;
             if (node.parentId != -1)
             {
-                parentFbxNode = (FbxNode*)convertedBones[node.parentId].ToPointer();
                 parentInvTfm = aqn->nodeList[node.parentId].GetInverseBindPoseMatrix();
             }
             else {
                 parentInvTfm = Matrix4x4::Identity;
             }
             FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose, i, includeMetadata);
-            if (parentFbxNode != nullptr)
-            {
-                parentFbxNode->AddChild(fbxNode);
-            }
 
             convertedBones->Add(IntPtr(fbxNode));
+        }
+
+        //On extremely rare occasion there are bones with parents listed after them, so loop back through for this
+        for (int i = 0; i < aqn->nodeList->Count; i++)
+        {
+            if (i == 0)
+            {
+                continue;
+            }
+            AquaNode::NODE node = aqn->nodeList[i];
+            FbxNode* parentFbxNode = nullptr;
+            if (node.parentId != -1)
+            {
+                parentFbxNode = (FbxNode*)convertedBones[node.parentId].ToPointer();
+            }
+            if (parentFbxNode != nullptr)
+            {
+                parentFbxNode->AddChild((FbxNode*)convertedBones[i].ToPointer());
+            }
         }
 
         //Go through 'effect nodes'. These can't have children or be tied to skinning
