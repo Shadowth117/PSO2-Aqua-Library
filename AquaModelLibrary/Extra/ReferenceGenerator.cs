@@ -1482,7 +1482,7 @@ namespace AquaModelLibrary.Extra
                 if (File.Exists(Path.Combine(pso2_binDir, dataDir, fileHashed)))
                 {
                     string unitName = unitNames.ContainsKey(addo.id) ? unitNames[addo.id] : "";
-                    aoxOut.Add($"{unitName},{addo.leftBoneAttach},{addo.rightBoneAttach},{addo.extraAttach},{file},{fileHashed}");
+                    aoxOut.Add($"{unitName},{addo.leftBoneAttach.GetString()},{addo.rightBoneAttach.GetString()},{addo.extraAttach.GetString()},{file},{fileHashed}");
                 }
             }
 
