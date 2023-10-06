@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
+﻿namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
     /// <summary>
     /// MorphemeBundle format used in Morpheme files in Dark Souls 2.

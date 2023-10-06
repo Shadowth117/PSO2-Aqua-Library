@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
@@ -85,7 +80,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             trackName = br.GetASCII(br.Position + br.ReadVarint());
             eventId = br.ReadVarint();
 
-            if(numEvents > 0)
+            if (numEvents > 0)
             {
                 br.Position = br.Position + br.ReadVarint();
                 for (int i = 0; i < numEvents; i++)
@@ -108,10 +103,10 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             bw.WriteVarint(0x20 + 0xC * events.Count);
             bw.WriteVarint(eventId);
 
-            if(events.Count > 0)
+            if (events.Count > 0)
             {
                 bw.WriteVarint(0x20);
-                foreach(var evt in events)
+                foreach (var evt in events)
                 {
                     bw.WriteSingle(evt.start);
                     bw.WriteSingle(evt.duration);

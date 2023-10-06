@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SoulsFormats.Formats.Morpheme.NSA
+﻿namespace SoulsFormats.Formats.Morpheme.NSA
 {
     public class NSAHeader
     {
@@ -33,7 +27,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
 
         public NSAHeader() { }
 
-        public NSAHeader(BinaryReaderEx br) 
+        public NSAHeader(BinaryReaderEx br)
         {
             var dataStart = br.Position;
             br.Position += 8;

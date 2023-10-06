@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
@@ -25,7 +20,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// <summary>
         /// Indices list.
         /// </summary>
-        public List<int> idxList = new List<int>(); 
+        public List<int> idxList = new List<int>();
 
         /// <summary>
         /// Local offsets.
@@ -51,7 +46,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// Constructsor to read a LookupTable.
         /// </summary>
         /// <param name="br">A BinaryReaderEx to read this strcture from.</param>
-        public LookupTable(BinaryReaderEx br) 
+        public LookupTable(BinaryReaderEx br)
         {
             Read(br);
         }
@@ -96,7 +91,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 strings.Add(br.ReadByte());
             }
 
-            foreach(var offset in localOffsets)
+            foreach (var offset in localOffsets)
             {
                 processedStrings.Add(br.GetASCII(dataStart + offset));
             }
@@ -116,7 +111,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             bw.ReserveVarint("LTStrings");
 
             bw.FillVarint("LTIdxList", bw.Position - dataStart);
-            for(int i = 0; i < idxList.Count; i++)
+            for (int i = 0; i < idxList.Count; i++)
             {
                 bw.WriteInt32(idxList[i]);
             }

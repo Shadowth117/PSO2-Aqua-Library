@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SoulsFormats.Formats.Morpheme.NSA
 {
@@ -13,15 +9,22 @@ namespace SoulsFormats.Formats.Morpheme.NSA
         public int rotationBoneCount;
         public DequantizationFactor translationBoneDequantizationFactor;
         public DequantizationFactor rotationBoneDequantizationFactor;
-        public List<NSAVec3> compressedTranslations = new List<NSAVec3>();
-        public List<NSAVec3> compressedRotations = new List<NSAVec3>();
+        public List<TranslationData> translationSamples = new List<TranslationData>();
+        public List<RotationData> rotationSamples = new List<RotationData>();
 
         //Dequantized Lists
         public List<Vector3> translationFrames = new List<Vector3>();
         public List<Quaternion> rotationFrames = new List<Quaternion>();
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public StaticSegment() { }
 
+        /// <summary>
+        /// Constructor for reading a staticSegment with a BinaryReaderEx
+        /// </summary>
+        /// <param name="br"></param>
         public StaticSegment(BinaryReaderEx br)
         {
             var dataStart = br.Position;
@@ -34,17 +37,40 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             var compressedRotationOffset = br.ReadVarint();
 
             br.StepIn(dataStart + compressedTranslationOffset);
-            for(int i = 0; i < translationBoneCount; i++)
+            for (int i = 0; i < translationBoneCount; i++)
             {
-                compressedTranslations.Add(new NSAVec3(br));
+                translationSamples.Add(new TranslationData(br));
             }
             br.StepOut();
             br.StepIn(dataStart + compressedRotationOffset);
             for (int i = 0; i < rotationBoneCount; i++)
             {
-                compressedRotations.Add(new NSAVec3(br));
+                rotationSamples.Add(new RotationData(br));
             }
             br.StepOut();
+        }
+
+        /// <summary>
+        /// Method for dequantizing this staticSegment
+        /// </summary>
+        public void Dequantize()
+        {
+            for (int i = 0; i < translationBoneCount; i++)
+            {
+                if (i < translationSamples.Count)
+                {
+                    translationFrames.Add(translationSamples[i].DequantizeTranslation(translationBoneDequantizationFactor));
+                }
+            }
+
+            for (int i = 0; i < rotationBoneCount; i++)
+            {
+
+                if (i < rotationSamples.Count)
+                {
+                    rotationFrames.Add(rotationSamples[i].DequantizeRotation(rotationBoneDequantizationFactor));
+                }
+            }
         }
     }
 }

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
+﻿namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     /// <summary>
     /// MorphemeBundle type
     /// </summary>
-    public enum eBundleType : int
+    public enum eBundleType : uint
     {
         Bundle_Invalid = 0,
         Bundle_SkeletonMap = 1,
@@ -26,7 +20,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
     /// <summary>
     /// The type of a particular NMB node.
     /// </summary>
-    public enum NodeType : int
+    public enum NodeType : uint
     {
         NodeType_NetworkInstance = 9,
         NodeType_StateMachine = 10,
@@ -66,7 +60,10 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         Unk550 = 550,
     };
 
-    public enum AttribType : short
+    /// <summary>
+    /// The type of node attributes
+    /// </summary>
+    public enum AttribType : ushort
     {
         ATTRIB_TYPE_BOOL = 0,
         ATTRIB_TYPE_UINT = 1,

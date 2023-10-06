@@ -1,13 +1,7 @@
 ﻿using SoulsFormats.Formats.Morpheme.MorphemeBundle;
-using SoulsFormats.Formats.Morpheme.MorphemeBundle.Network;
-using SoulsFormats.Formats.Morpheme.MorphemeBundle.Network.NodeAttrib;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SoulsFormats.Formats.Morpheme
 {
@@ -25,14 +19,21 @@ namespace SoulsFormats.Formats.Morpheme
 
         public MorphemeBundle_Base networkRaw;
 
+        public NMB() { }
+
+        public NMB(BinaryReaderEx br)
+        {
+            Read(br);
+        }
+
         public void Read(BinaryReaderEx br)
         {
             MorphemeBundle_Base.Set64BitAndEndianness(br);
 
-            while(br.Position > br.Length - 0xC)
+            while (br.Position < br.Length - 0xC)
             {
                 var nextBundle = MorphemeBundle_Base.ReadBundleType(br);
-                switch(nextBundle)
+                switch (nextBundle)
                 {
                     case eBundleType.Bundle_SkeletonMap:
                         skeletonMap.Add(new MorphemeBundleGeneric(br));
@@ -70,18 +71,18 @@ namespace SoulsFormats.Formats.Morpheme
         public void Write(BinaryWriterEx bw)
         {
             fileHeader.Write(bw);
-            if(characterControllerDef.Count == skeletonMap.Count)
+            if (characterControllerDef.Count == skeletonMap.Count)
             {
-                for(int i = 0; i < characterControllerDef.Count; i++)
+                for (int i = 0; i < characterControllerDef.Count; i++)
                 {
                     characterControllerDef[i].Write(bw);
                     skeletonMap[i].Write(bw);
 
-                    bw.WriteBytes(new byte[] { 0xCD, 0xCD, 0xCD, 0xCD});
+                    bw.WriteBytes(new byte[] { 0xCD, 0xCD, 0xCD, 0xCD });
                 }
             }
 
-            foreach(var eTrack in eventTracks)
+            foreach (var eTrack in eventTracks)
             {
                 eTrack.Write(bw);
             }

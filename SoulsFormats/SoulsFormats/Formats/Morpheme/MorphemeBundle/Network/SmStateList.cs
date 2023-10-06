@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle.Network
 {
@@ -39,7 +35,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle.Network
         {
             bw.WriteVarint(stateMachineNodeIDs.Count);
             bw.WriteVarint(bw.VarintLong ? 0x10 : 0x8);
-            for(int i = 0; i < stateMachineNodeIDs.Count; i++)
+            for (int i = 0; i < stateMachineNodeIDs.Count; i++)
             {
                 bw.WriteInt16(stateMachineNodeIDs[i]);
             }

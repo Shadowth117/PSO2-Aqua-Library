@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
@@ -64,7 +60,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             tagList = new LookupTable(br);
 
             br.Position = dataStart + hashOffset;
-            for(int i = 0; i < animTable.elemCount; i++)
+            for (int i = 0; i < animTable.elemCount; i++)
             {
                 hashList.Add(br.ReadInt32());
             }
@@ -100,7 +96,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             tagList.Write(bw);
 
             bw.FillVarint("hashListOffset", bw.Position - dataStart);
-            for(int i = 0; i < hashList.Count; i++)
+            for (int i = 0; i < hashList.Count; i++)
             {
                 bw.WriteInt32(hashList[i]);
             }

@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace SoulsFormats.Formats.Morpheme.NSA
 {
     /// <summary>
     /// Translation keyframe values
     /// </summary>
-    public class TranslationSample
+    public class TranslationData
     {
         /// <summary>
         /// X position
@@ -28,13 +23,23 @@ namespace SoulsFormats.Formats.Morpheme.NSA
         /// <summary>
         /// Default Constructor
         /// </summary>
-        public TranslationSample() { }
+        public TranslationData() { }
+
+        /// <summary>
+        /// Constructor with all axis data
+        /// </summary>
+        public TranslationData(int x, int y, int z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
 
         /// <summary>
         /// Read in translation values. The raw value is an int that must be
         /// </summary>
         /// <param name="br"></param>
-        public TranslationSample(BinaryReaderEx br)
+        public TranslationData(BinaryReaderEx br)
         {
             var sample = br.ReadUInt32();
             X = ExtractBits((int)sample, 21, 0xFFFF);

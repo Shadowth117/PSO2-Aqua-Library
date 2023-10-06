@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SoulsFormats.Formats.Morpheme.NSA
 {
@@ -14,8 +9,8 @@ namespace SoulsFormats.Formats.Morpheme.NSA
         public long sampleCount;
         public DequantizationFactor dequantizationFactor;
         public Quaternion rotation;
-        public List<TranslationSample> translationSamples = new List<TranslationSample>();
-        public List<RotationSample> rotationSamples = new List<RotationSample>();
+        public List<TranslationData> translationSamples = new List<TranslationData>();
+        public List<RotationData> rotationSamples = new List<RotationData>();
 
         //Dequantized Lists
         public List<Vector3> translationFrames = new List<Vector3>();
@@ -27,7 +22,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
         {
             var dataStart = br.Position;
             br.Position += 0x20;
-            fps = br.ReadSingle(); 
+            fps = br.ReadSingle();
             sampleCount = br.ReadInt32();
             dequantizationFactor = new DequantizationFactor(br);
             //var dequantizationFactor2 = new DequantizationFactor(br);
@@ -38,23 +33,23 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             var pTranslationSample = br.ReadVarint();
             var pRotationSample = br.ReadVarint();
 
-            if(pTranslationSample != 0)
+            if (pTranslationSample != 0)
             {
                 br.Position += dataStart + pTranslationSample;
 
-                for(int i = 0; i < sampleCount; i++)
+                for (int i = 0; i < sampleCount; i++)
                 {
-                    translationSamples.Add(new TranslationSample(br));
+                    translationSamples.Add(new TranslationData(br));
                 }
             }
 
-            if(pRotationSample != 0)
+            if (pRotationSample != 0)
             {
                 br.Position += dataStart + pRotationSample;
 
                 for (int i = 0; i < sampleCount; i++)
                 {
-                    rotationSamples.Add(new RotationSample(br));
+                    rotationSamples.Add(new RotationData(br));
                 }
             }
         }
@@ -65,12 +60,12 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             {
                 if (i < translationSamples.Count)
                 {
-                    //translationFrames.Add(translationSamples[i].DequantizeTranslation(dequantizationFactor));
+                    translationFrames.Add(translationSamples[i].DequantizeTranslation(new DequantizationFactor()));
                 }
 
                 if (i < rotationSamples.Count)
                 {
-                    translationFrames.Add(translationSamples[i].DequantizeTranslation(dequantizationFactor));
+                    rotationFrames.Add(rotationSamples[i].DequantizeRotation(dequantizationFactor));
                 }
             }
         }

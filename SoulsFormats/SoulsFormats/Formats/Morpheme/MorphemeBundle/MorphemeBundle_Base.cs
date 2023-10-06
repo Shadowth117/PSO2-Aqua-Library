@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
-{    
-     /// <summary>
-     /// Interface for MorphemeBundle format used in Morpheme files in Dark Souls 2.
-     /// </summary>
+﻿namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
+{
+    /// <summary>
+    /// Interface for MorphemeBundle format used in Morpheme files in Dark Souls 2.
+    /// </summary>
     public abstract class MorphemeBundle_Base
     {
         /// <summary>
@@ -35,7 +28,12 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// <summary>
         /// Alignment for this bundle structure. Only observed 0x4 and 0x10.
         /// </summary>
-        public long dataAlignment { get; set; }
+        public int dataAlignment { get; set; }
+
+        /// <summary>
+        /// Unknown value
+        /// </summary>
+        public int unk0 { get; set; }
 
         /// <summary>
         /// Flag for if the data is x64 or not. Only set in software, not actually stored in the file.
@@ -63,7 +61,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         {
             br.VarintLong = true;
             var test = br.ReadUInt32();
-            if(test > 0x18)
+            if (test > 0x18)
             {
                 br.BigEndian = true;
             }
@@ -73,17 +71,18 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             if (br.BigEndian == true)
             {
                 additiveValue = 0x1C;
-            } else
+            }
+            else
             {
                 additiveValue = 0x20;
             }
 
             br.Position += additiveValue;
-            if(br.ReadUInt32() > 0)
+            if (br.ReadUInt32() > 0)
             {
                 br.VarintLong = false;
             }
-            br.Position -= additiveValue + 4;
+            br.Position = 0;
         }
 
         /// <summary>
@@ -112,6 +111,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// </summary>
         public virtual void Read(BinaryReaderEx br)
         {
+            isX64 = br.VarintLong;
             br.AssertInt32(0x18);
             br.AssertInt32(0xA);
             bundleType = br.ReadEnum32<eBundleType>();
@@ -124,8 +124,10 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 int_0C = br.ReadInt32()
             };
             dataSize = br.ReadVarint();
-            dataAlignment = br.ReadVarint();
-            br.Pad((int)dataAlignment);
+            dataAlignment = br.ReadInt32();
+            unk0 = br.ReadInt32();
+
+            br.Pad(dataAlignment);
         }
 
         /// <summary>
@@ -143,7 +145,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             bw.WriteInt32(header.int_0C);
             bw.WriteVarint(CalculateBundleSize());
             bw.WriteVarint(dataAlignment);
-            bw.Pad((int)dataAlignment);
+            bw.Pad(dataAlignment);
         }
     }
 }
