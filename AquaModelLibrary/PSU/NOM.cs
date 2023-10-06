@@ -1132,7 +1132,7 @@ namespace AquaModelLibrary.PSU
                 //Debug.WriteLine($"Bone {i}");
                 //Positions
                 var motionKey = aqm.motionKeys[i];
-                var posKeys = aqm.motionKeys[i].keyData[0];
+                var posKeys = motionKey.keyData[0];
                 var posBone = posData[i];
 
                 if (posBone != null && posBone.Count > 0)
@@ -1164,7 +1164,7 @@ namespace AquaModelLibrary.PSU
                 {
                     continue;
                 }
-                var rotKeys = aqm.motionKeys[i].keyData[1];
+                var rotKeys = motionKey.keyData[1];
                 var rotBone = rotationFrameList[i];
                 Vector4 lastQuat = new Vector4();
 
