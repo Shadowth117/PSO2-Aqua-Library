@@ -14,6 +14,7 @@ using System.Diagnostics;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using Matrix4x4 = System.Numerics.Matrix4x4;
 using SoulsFormats.Formats.Morpheme.NSA;
+using SoulsFormats.Formats.Morpheme;
 
 namespace AquaModelLibrary.Extra
 {
@@ -387,11 +388,18 @@ namespace AquaModelLibrary.Extra
             NSA test = new NSA(br);
         }
 
+        public static void ReadNMB(string filePath, byte[] raw)
+        {
+            BinaryReaderEx br = new BinaryReaderEx(false, raw);
+            var nmb = new NMB(br);
+        }
+
         public static AquaObject ReadFlver(string filePath, byte[] raw, out AquaNode aqn)
         {
             SoulsFormats.IFlver flver = null;
 
             JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented };
+
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
