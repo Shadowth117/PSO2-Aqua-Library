@@ -4879,6 +4879,24 @@ namespace AquaModelTool
                 }
             }
         }
+
+        private void readNMBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select DS2 NMB File",
+                Filter = "DS2 Anim *.nmb files|*.nmb",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    SoulsConvert.ReadNMB(file, File.ReadAllBytes(file));
+                }
+            }
+        }
     }
 }
 

@@ -354,6 +354,7 @@
     <Compile Include="Extra\MathExtras.cs" />
     <Compile Include="Extra\ModelExporter.cs" />
     <Compile Include="Extra\ModelImporter.cs" />
+    <Compile Include="Extra\Morpheme\NSAConvert.cs" />
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="Extra\PSO2CompressedScripts.cs" />
