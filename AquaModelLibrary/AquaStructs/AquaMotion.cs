@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AquaModelLibrary.Extra;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace AquaModelLibrary
@@ -160,40 +161,84 @@ namespace AquaModelLibrary
                     throw new System.Exception("Time out of range");
                 }
 
-                //Get high and low times
-                Vector4 lowValue = vector4Keys[0];
-                uint lowTime = 1;
-                Vector4 highValue = vector4Keys[vector4Keys.Count - 1];
-                uint highTime = frameTimings[frameTimings.Count - 1];
-                for(int i = 0; i < frameTimings.Count; i++)
-                {
-                    uint frameTime = (uint)frameTimings[i];
-                    if(frameTime <= time)
-                    {
-                        lowTime = frameTime;
-                        lowValue = vector4Keys[i];
-                    }
-                    if(frameTime >= time)
-                    {
-                        highTime = frameTime;
-                        highValue = vector4Keys[i];
-                    }
-                }
-                if(lowTime == time)
+
+                Vector4 lowValue, highValue;
+                uint lowTime, highTime;
+                GetVec4HighLowTimes(time, out lowValue, out lowTime, out highValue, out highTime);
+                if (lowTime == time)
                 {
                     return lowValue;
-                } else if(highTime == time)
+                }
+                else if (highTime == time)
                 {
                     return highValue;
                 }
 
+                double ratio = GetTimeRatio(ref time, ref lowTime, ref highTime);
+
+                return Vector4.Lerp(lowValue, highValue, (float)ratio);
+            }
+
+            //Expects only to be used on a populated MKEY with vector4Keys, particularly a rotation.
+            public Vector4 GetSphericalInterpolatedVec4Key(double time)
+            {
+                if (frameTimings.Count == 0 || time == frameTimings[0] || vector4Keys.Count == 1)
+                {
+                    return vector4Keys[0];
+                }
+                if (time > frameTimings[frameTimings.Count - 1] || time < 0)
+                {
+                    throw new System.Exception("Time out of range");
+                }
+
+                Vector4 lowValue, highValue;
+                uint lowTime, highTime;
+                GetVec4HighLowTimes(time, out lowValue, out lowTime, out highValue, out highTime);
+                if (lowTime == time)
+                {
+                    return lowValue;
+                }
+                else if (highTime == time)
+                {
+                    return highValue;
+                }
+
+                double ratio = GetTimeRatio(ref time, ref lowTime, ref highTime);
+
+                return Quaternion.Slerp(lowValue.ToQuat(), highValue.ToQuat(), (float)ratio).ToVec4();
+            }
+
+            private static double GetTimeRatio(ref double time, ref uint lowTime, ref uint highTime)
+            {
                 //Interpolate based on results
                 time /= 0x10;
                 highTime /= 0x10;
                 lowTime /= 0x10;
                 double ratio = (time - lowTime) / (highTime - lowTime);
+                return ratio;
+            }
 
-                return Vector4.Lerp(lowValue, highValue, (float)ratio);
+            private void GetVec4HighLowTimes(double time, out Vector4 lowValue, out uint lowTime, out Vector4 highValue, out uint highTime)
+            {
+                //Get high and low times
+                lowValue = vector4Keys[0];
+                lowTime = 1;
+                highValue = vector4Keys[vector4Keys.Count - 1];
+                highTime = frameTimings[frameTimings.Count - 1];
+                for (int i = 0; i < frameTimings.Count; i++)
+                {
+                    uint frameTime = (uint)frameTimings[i];
+                    if (frameTime <= time)
+                    {
+                        lowTime = frameTime;
+                        lowValue = vector4Keys[i];
+                    }
+                    if (frameTime >= time)
+                    {
+                        highTime = frameTime;
+                        highValue = vector4Keys[i];
+                    }
+                }
             }
 
             public void CreateVec4KeysAtTimes(List<uint> timesToAdd)
@@ -216,7 +261,14 @@ namespace AquaModelLibrary
                     //Add our missing frames when we reach the first frame that exists after them
                     if (frameTimings[i] > timesToAdd[t])
                     {
-                        var vec4 = GetLinearInterpolatedVec4Key(timesToAdd[t]);
+                        Vector4 vec4;
+                        if (keyType == 2)
+                        {
+                            vec4 = GetSphericalInterpolatedVec4Key(timesToAdd[t]);
+                        } else
+                        {
+                            vec4 = GetLinearInterpolatedVec4Key(timesToAdd[t]);
+                        }
                         vector4Keys.Insert(i, vec4);
                         frameTimings.Insert(i, timesToAdd[t]);
                         t++;
