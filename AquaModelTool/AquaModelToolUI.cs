@@ -4873,9 +4873,17 @@ namespace AquaModelTool
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                foreach (var file in openFileDialog.FileNames)
+                var openFileDialog2 = new OpenFileDialog()
                 {
-                    SoulsConvert.ReadNSA(file, File.ReadAllBytes(file));
+                    Title = "Select DS2 flv File",
+                    Filter = "DS2 Flv *.flv files|*.flv",
+                    FileName = "",
+                    Multiselect = true
+                };
+                if (openFileDialog2.ShowDialog() == DialogResult.OK)
+                {
+
+                    SoulsConvert.ConvertMorphemeAnims(openFileDialog.FileNames.ToList(), openFileDialog2.FileName);
                 }
             }
         }

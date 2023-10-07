@@ -15,6 +15,8 @@ using static AquaModelLibrary.Utility.AquaUtilData;
 using Matrix4x4 = System.Numerics.Matrix4x4;
 using SoulsFormats.Formats.Morpheme.NSA;
 using SoulsFormats.Formats.Morpheme;
+using AquaModelLibrary.Extra.Morpheme;
+using UnluacNET;
 
 namespace AquaModelLibrary.Extra
 {
@@ -381,11 +383,47 @@ namespace AquaModelLibrary.Extra
 
         }
 
-        public static void ReadNSA(string filePath, byte[] raw)
+        public static void ConvertMorphemeAnims(List<string> nsaPaths, string modelPath)
+        {
+            //Temp, delete after testing and fix rotations up to match
+            var temp = mirrorMat;
+            mirrorMat = Matrix4x4.Identity;
+
+            var flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER2>.Read(File.ReadAllBytes(modelPath));
+            List<AquaMotion> motions = new List<AquaMotion>();
+            List<string> nsaNames = new List<string>();
+            foreach(var path in nsaPaths)
+            {
+                nsaNames.Add(Path.GetFileName(path));
+                motions.Add(NSAConvert.GetAquaMotionFromNSA(ReadNSA(path, File.ReadAllBytes(path)), flver));
+            }
+
+            var aqp = FlverToAqua(flver, out var aqn);
+
+            AquaUtil aqu = new AquaUtil();
+            aqu.aquaModels.Clear();
+            ModelSet set = new ModelSet();
+            set.models.Add(aqp);
+            string finalPath = Path.ChangeExtension(modelPath, ".fbx");
+            if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+            {
+                aqu.aquaModels.Add(set);
+                aqu.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true, false);
+                set.models[0].ConvertToLegacyTypes();
+                set.models[0].CreateTrueVertWeights();
+
+                FbxExporter.ExportToFile(aqu.aquaModels[0].models[0], aqn, motions, finalPath, nsaNames, new List<Matrix4x4>(), false);
+            }
+
+            //Temp, delete after testing
+            mirrorMat = temp;
+        }
+
+        public static NSA ReadNSA(string filePath, byte[] raw)
         {
             BinaryReaderEx br = new BinaryReaderEx(false, raw);
             NSA.Set64BitAndEndianness(br);
-            NSA test = new NSA(br);
+            return new NSA(br);
         }
 
         public static void ReadNMB(string filePath, byte[] raw)
