@@ -903,6 +903,12 @@ namespace AquaModelLibrary.Extra
                                         useNormalWTransform = true;
                                     }
                                     break;
+                                case FLVER.LayoutSemantic.BoneIndices:
+                                    foundBoneIndices = true;
+                                    break;
+                                case FLVER.LayoutSemantic.BoneWeights:
+                                    foundBoneWeights = true;
+                                    break;
                             }
                         }
                     }
@@ -974,9 +980,19 @@ namespace AquaModelLibrary.Extra
                     {
                         var f2Mesh = (FLVER2.Mesh)mesh;
                         bool useDefaultBoneIndex = false;
-                        if (f2Mesh.Dynamic == 0)
+                        if (f2Mesh.Dynamic == 0 && vert.NormalW < flver.Bones.Count)
                         {
                             boneTransformationIndex = vert.NormalW;
+                        }
+                        else if (useIndexNoWeightTransform && vert.BoneIndices[0] != -1 && f2Mesh.Dynamic == 0)
+                        {
+                            if(f2Mesh.BoneIndices?.Count > 0 && f2Mesh.BoneIndices[0] != -1)
+                            {
+                                boneTransformationIndex = f2Mesh.BoneIndices[vert.BoneIndices[0]];
+                            } else
+                            {
+                                boneTransformationIndex = vert.BoneIndices[0];
+                            }
                         }
                         else if (useDefaultBoneTransform && flver.Bones.Count > f2Mesh.DefaultBoneIndex)
                         {

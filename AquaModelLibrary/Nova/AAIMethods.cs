@@ -134,7 +134,14 @@ namespace AquaModelLibrary.Nova
                     List<NodeOffsetSet> sets = new List<NodeOffsetSet>();
                     for (int j = 0; j < keyNodeCount; j++)
                     {
-                        NodeOffsetSet set = streamReader.Read<NodeOffsetSet>();
+                        NodeOffsetSet set = new NodeOffsetSet() { nodeId = streamReader.Read<ushort>(), offset = streamReader.Read<ushort>()};
+                        if (j < nodes.Count)
+                        {
+                            set.nodeName = nodes[j].name;
+                        } else
+                        {
+                            set.nodeName = $"node_{j}";
+                        }
                         sets.Add(set);
                     }
                     setsList.Add(sets);
