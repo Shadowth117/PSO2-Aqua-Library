@@ -35,7 +35,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
 
             if (pTranslationSample != 0)
             {
-                br.Position += dataStart + pTranslationSample;
+                br.Position = dataStart + pTranslationSample;
 
                 for (int i = 0; i < sampleCount; i++)
                 {
@@ -45,7 +45,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
 
             if (pRotationSample != 0)
             {
-                br.Position += dataStart + pRotationSample;
+                br.Position = dataStart + pRotationSample;
 
                 for (int i = 0; i < sampleCount; i++)
                 {
