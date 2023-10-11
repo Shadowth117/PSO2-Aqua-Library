@@ -44,7 +44,19 @@ namespace SoulsFormats
             {
                 BufferLayout layout = layouts[LayoutIndex];
                 if (VertexSize != layout.Size)
-                    throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes.");
+                {
+                    //Only try this for DS1
+                    if(header.Version == 0x2000B || header.Version == 0x2000C || header.Version == 0x2000D)
+                    {
+                        if(!layout.DarkSoulsRemasteredFix())
+                        {
+                            throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes for Dark Souls Remastered model.");
+                        }
+                    } else
+                    {
+                        throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes.");
+                    }
+                }
 
                 br.StepIn(dataOffset + BufferOffset);
                 {
