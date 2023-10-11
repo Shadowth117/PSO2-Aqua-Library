@@ -1,55 +1,52 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CMDL
 {
     public class CMDL
     {
         public int magic;
-        public int unk0;
-        public int crc;
+        public int unkInt0;
+        public int unkId0;
+        public CVariableTrail trail0 = null;
+        public int unkInt1;
 
-        public string shaderName;
-        public List<string> texNames = new List<string>();
+        public CVariableTrail matTrail = null;
+        public ushort usht0;
+        public byte unkBt0;
+        public int unkInt2;
+
+        //CMDLs start with a dictionary containing a cmsh material name and a cmat path. This dictionary uses cmsh material name as a key for easy mapping
+        public Dictionary<string, CMDL_CMATMaterialMap> materialDict = new Dictionary<string, CMDL_CMATMaterialMap>();
+        public CMDL_CMSHBorder border = null;
+        public List<CMDL_CMSHReference> cmshReferences = new List<CMDL_CMSHReference>();
+
         public CMDL()
         {
 
         }
         public CMDL(BufferedStreamReader sr)
         {
-            /*
             magic = sr.Read<int>();
-            unk0 = sr.Read<int>();
-            crc = sr.Read<int>();
-            int_0C = sr.Read<int>();
+            unkInt0 = sr.Read<int>();
+            unkId0 = sr.Read<int>();
 
-            int_10 = sr.Read<int>();
-            int_14 = sr.Read<int>();
-            int_18 = sr.Read<int>();
-            int_1C = sr.Read<int>();
+            trail0 = new CVariableTrail(sr);
 
-            byte shaderLen = sr.Read<byte>();
-            shaderName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), shaderLen));
-            sr.Seek(shaderLen, System.IO.SeekOrigin.Current);
+            unkInt1 = sr.Read<int>();
+            matTrail = new CVariableTrail(sr);
 
-            var texCount = sr.Read<int>();
-            for (int i = 0; i < texCount; i++)
+            for (int i = 0; i < matTrail.data[matTrail.data.Count - 1]; i++)
             {
-                meta0List.Add(sr.Read<CMTLMeta0>());
+                var matRef = new CMDL_CMATMaterialMap(sr);
+                materialDict.Add(matRef.cmshMaterialName, matRef);
             }
-            var texCount2 = sr.Read<int>();
-            for (int i = 0; i < texCount2; i++)
+            border = new CMDL_CMSHBorder(sr);
+
+            for (int i = 0; i < border.cmshTrail.data[border.cmshTrail.data.Count - 1]; i++)
             {
-                byte texLen = sr.Read<byte>();
-                Debug.WriteLine($"{texLen}");
-                texNames.Add(Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), texLen)));
-                sr.Seek(texLen, System.IO.SeekOrigin.Current);
+                cmshReferences.Add(new CMDL_CMSHReference(sr));
             }
-            */
         }
     }
 }
