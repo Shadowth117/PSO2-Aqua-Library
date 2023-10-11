@@ -42,7 +42,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
         public TranslationData(BinaryReaderEx br)
         {
             var sample = br.ReadUInt32();
-            X = ExtractBits((int)sample, 21, 0xFFFF);
+            X = ExtractBits((int)sample, 21, 0);
             Y = ExtractBits((int)sample, 10, 0x7FF);
             Z = ExtractBits((int)sample, 0, 0x3FF);
         }

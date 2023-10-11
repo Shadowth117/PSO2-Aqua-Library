@@ -60,7 +60,7 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             {
                 if (i < translationSamples.Count)
                 {
-                    translationFrames.Add(translationSamples[i].DequantizeTranslation(new DequantizationFactor()));
+                    translationFrames.Add(translationSamples[i].DequantizeTranslation(dequantizationFactor));
                 }
 
                 if (i < rotationSamples.Count)

@@ -9,7 +9,7 @@ namespace AquaModelLibrary.Extra.Morpheme
     {
         public static AquaMotion GetAquaMotionFromNSA(NSA nsa, IFlver flv)
         {
-            GetNSAKeyframes(nsa, GetFlverTrueRoot(flv), out var translationKeyFrameListList, out var rotationkeyFrameListList);
+            GetNSAKeyframes(nsa, flv, out var translationKeyFrameListList, out var rotationkeyFrameListList);
 
             AquaMotion aqm = new AquaMotion();
             aqm.moHeader = new AquaMotion.MOHeader();
@@ -101,8 +101,10 @@ namespace AquaModelLibrary.Extra.Morpheme
             return bone;
         }
 
-        public static void GetNSAKeyframes(NSA nsa, int trueRoot, out List<List<Vector3>> translationKeyframeListList, out List<List<Vector4>> rotationKeyframeListList)
+        public static void GetNSAKeyframes(NSA nsa, IFlver flv, out List<List<Vector3>> translationKeyframeListList, out List<List<Vector4>> rotationKeyframeListList)
         {
+            int trueRoot = GetFlverTrueRoot(flv);
+
             translationKeyframeListList = new List<List<Vector3>>();
             rotationKeyframeListList = new List<List<Vector4>>();
 
@@ -126,13 +128,13 @@ namespace AquaModelLibrary.Extra.Morpheme
                     List<Vector3> translationKeys = new List<Vector3>();
                     foreach (var list in nsa.dynamicSegment.translationFrameLists)
                     {
-                        translationKeys.Add(list[translationDynamicIndex]);
+                        translationKeys.Add(list[translationDynamicIndex] + flv.Bones[translationKeyframeListList.Count].Translation);
                     }
                     translationKeyframeListList.Add(translationKeys);
                 }
                 else if (translationStaticIndex != -1)
                 {
-                    translationKeyframeListList.Add(new List<Vector3>() { nsa.staticSegment.translationFrames[translationStaticIndex] });
+                    translationKeyframeListList.Add(new List<Vector3>() { nsa.staticSegment.translationFrames[translationStaticIndex] + flv.Bones[translationKeyframeListList.Count].Translation });
                 }
                 else //Default - in theory we never reach here
                 {
@@ -147,13 +149,13 @@ namespace AquaModelLibrary.Extra.Morpheme
                     List<Vector4> rotationKeys = new List<Vector4>();
                     foreach (var list in nsa.dynamicSegment.rotationFrameLists)
                     {
-                        rotationKeys.Add(list[rotationDynamicIndex].ToVec4());
+                        rotationKeys.Add(list[rotationDynamicIndex].ToVec4() + new Vector4(flv.Bones[rotationKeyframeListList.Count].Rotation.X, flv.Bones[rotationKeyframeListList.Count].Rotation.Y, flv.Bones[rotationKeyframeListList.Count].Rotation.Z, 0));
                     }
                     rotationKeyframeListList.Add(rotationKeys);
                 }
                 else if (rotationStaticIndex != -1)
                 {
-                    rotationKeyframeListList.Add(new List<Vector4>() { nsa.staticSegment.rotationFrames[rotationStaticIndex].ToVec4() });
+                    rotationKeyframeListList.Add(new List<Vector4>() { nsa.staticSegment.rotationFrames[rotationStaticIndex].ToVec4() + new Vector4(flv.Bones[rotationKeyframeListList.Count].Rotation.X, flv.Bones[rotationKeyframeListList.Count].Rotation.Y, flv.Bones[rotationKeyframeListList.Count].Rotation.Z, 0) });
                 }
                 else //Default - in theory we never reach here
                 {
