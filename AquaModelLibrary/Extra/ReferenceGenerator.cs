@@ -967,9 +967,18 @@ namespace AquaModelLibrary.Extra
                 foreach (byte[] file in files)
                 {
                     var fname = IceFile.getFileName(file).ToLower();
+                    int id;
                     if (fname.Contains(".lps"))
                     {
-                        lpsRbList.Add(Int32.Parse(fname.Substring(3, 4)), ReadLPS(file));
+                        id = Int32.Parse(fname.Substring(3, 4));
+                        var lps = ReadLPS(file);
+                        if (!lpsRbList.ContainsKey(id))
+                        {
+                            lpsRbList.Add(id, lps);
+                        } else
+                        {
+                            Debug.WriteLine($"Duplicate of {id}");
+                        }
                     }
                 }
 
