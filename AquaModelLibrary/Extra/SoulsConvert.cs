@@ -1679,7 +1679,9 @@ namespace AquaModelLibrary.Extra
                     bone.Translation = translation;
 
                     Debug.WriteLine($"{i} Quat {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
-                    var eulerAngles = MathExtras.QuaternionToEulerRadiansTest(rotation);
+                    var eulerAngles = MathExtras.GetFlverEulerFromQuaternion_Bone(rotation);
+                    var eulerAnglesTest = MathExtras.QuaternionToEulerRadiansTest(rotation);
+                    var eulerAnglesMirrorMaybe = MathExtras.GetFlverEulerFromQuaternion_Bone(new Quaternion(-rotation.X, rotation.Y, rotation.Z, -rotation.W));
                     
                     var eulerAnglesold = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
 #if DEBUG

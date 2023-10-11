@@ -166,9 +166,10 @@
             this.readLATToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sTGExportBustedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readNSAToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readNMBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filePanel = new System.Windows.Forms.Panel();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.readNMBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readCMDLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -1081,7 +1082,8 @@
             this.readLATToolStripMenuItem,
             this.sTGExportBustedToolStripMenuItem,
             this.readNSAToolStripMenuItem,
-            this.readNMBToolStripMenuItem});
+            this.readNMBToolStripMenuItem,
+            this.readCMDLToolStripMenuItem});
             this.debug2ToolStripMenuItem.Name = "debug2ToolStripMenuItem";
             this.debug2ToolStripMenuItem.Size = new System.Drawing.Size(60, 23);
             this.debug2ToolStripMenuItem.Text = "Debug2";
@@ -1275,6 +1277,13 @@
             this.readNSAToolStripMenuItem.Text = "ReadNSA";
             this.readNSAToolStripMenuItem.Click += new System.EventHandler(this.readNSAToolStripMenuItem_Click);
             // 
+            // readNMBToolStripMenuItem
+            // 
+            this.readNMBToolStripMenuItem.Name = "readNMBToolStripMenuItem";
+            this.readNMBToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readNMBToolStripMenuItem.Text = "ReadNMB";
+            this.readNMBToolStripMenuItem.Click += new System.EventHandler(this.readNMBToolStripMenuItem_Click);
+            // 
             // filePanel
             // 
             this.filePanel.AutoSize = true;
@@ -1293,12 +1302,12 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
-            // readNMBToolStripMenuItem
+            // readCMDLToolStripMenuItem
             // 
-            this.readNMBToolStripMenuItem.Name = "readNMBToolStripMenuItem";
-            this.readNMBToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
-            this.readNMBToolStripMenuItem.Text = "ReadNMB";
-            this.readNMBToolStripMenuItem.Click += new System.EventHandler(this.readNMBToolStripMenuItem_Click);
+            this.readCMDLToolStripMenuItem.Name = "readCMDLToolStripMenuItem";
+            this.readCMDLToolStripMenuItem.Size = new System.Drawing.Size(231, 22);
+            this.readCMDLToolStripMenuItem.Text = "ReadCMDL";
+            this.readCMDLToolStripMenuItem.Click += new System.EventHandler(this.readCMDLToolStripMenuItem_Click);
             // 
             // AquaModelTool
             // 
@@ -1462,6 +1471,7 @@
         private System.Windows.Forms.ToolStripMenuItem sTGExportBustedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readNSAToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem readNMBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readCMDLToolStripMenuItem;
     }
 }
 

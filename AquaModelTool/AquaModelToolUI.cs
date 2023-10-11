@@ -2,6 +2,7 @@
 using AquaModelLibrary.AquaMethods;
 using AquaModelLibrary.AquaStructs;
 using AquaModelLibrary.BluePoint.CAWS;
+using AquaModelLibrary.BluePoint.CMDL;
 using AquaModelLibrary.Extra;
 using AquaModelLibrary.Extra.AM2;
 using AquaModelLibrary.Extra.FromSoft;
@@ -4902,6 +4903,28 @@ namespace AquaModelTool
                 foreach (var file in openFileDialog.FileNames)
                 {
                     SoulsConvert.ReadNMB(file, File.ReadAllBytes(file));
+                }
+            }
+        }
+
+        private void readCMDLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog()
+            {
+                Title = "Select DeSR CMDL File",
+                Filter = "DeSR CMDL *.cmdl files|*.cmdl",
+                FileName = "",
+                Multiselect = true
+            };
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                foreach(var file in openFileDialog.FileNames)
+                {
+                    using (Stream stream = new MemoryStream(File.ReadAllBytes(file)))
+                    using (var streamReader = new BufferedStreamReader(stream, 8192))
+                    {
+                        var cmdl = new CMDL(streamReader);
+                    }
                 }
             }
         }
