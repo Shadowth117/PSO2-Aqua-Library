@@ -39,11 +39,13 @@ namespace AquaModelLibrary.BluePoint.CMDL
             for (int i = 0; i < matTrail.data[matTrail.data.Count - 1]; i++)
             {
                 var matRef = new CMDL_CMATMaterialMap(sr);
-                materialDict.Add(matRef.cmshMaterialName, matRef);
+                materialDict.Add(matRef.cmshMaterialName.str, matRef);
             }
             border = new CMDL_CMSHBorder(sr);
 
-            for (int i = 0; i < border.cmshTrail.data[border.cmshTrail.data.Count - 1]; i++)
+            //for (int i = 0; i < border.cmshTrail.data[border.cmshTrail.data.Count - 1]; i++)
+            var varTrail = border.clumps[border.clumps.Count - 1].trail.data;
+            for (int i = 0; i < varTrail[varTrail.Count - 1]; i++)
             {
                 cmshReferences.Add(new CMDL_CMSHReference(sr));
             }

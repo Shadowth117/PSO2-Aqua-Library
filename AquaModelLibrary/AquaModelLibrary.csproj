@@ -299,6 +299,7 @@
     <Compile Include="AquaStructs\NGSShaderPresets\PSO2ShaderTexInfoPresets.cs" />
     <Compile Include="AquaStructs\PSO2Text.cs" />
     <Compile Include="AquaStructs\ShaderPresetDefaults.cs" />
+    <Compile Include="BluePoint\BPString.cs" />
     <Compile Include="BluePoint\CANI\CANI.cs" />
     <Compile Include="BluePoint\CANI\CANIFooter.cs" />
     <Compile Include="BluePoint\CANI\CANIFrameData.cs" />

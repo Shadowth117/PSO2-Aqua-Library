@@ -13,10 +13,10 @@ namespace AquaModelLibrary.BluePoint
 
         public CVariableTrail() { }
 
-        public CVariableTrail(BufferedStreamReader sr)
+        public CVariableTrail(BufferedStreamReader sr, int limit = 4)
         {
             byte? current = null;
-            for(int i = 0; i < 4; i++)
+            for(int i = 0; i < limit; i++)
             {
                 current = sr.Read<byte>();
                 if(current == 0)
