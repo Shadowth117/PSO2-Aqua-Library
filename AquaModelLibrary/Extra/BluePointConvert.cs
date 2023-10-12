@@ -1,8 +1,11 @@
 ﻿using AquaModelLibrary.BluePoint.CANI;
 using AquaModelLibrary.BluePoint.CMAT;
+using AquaModelLibrary.BluePoint.CMDL;
 using AquaModelLibrary.BluePoint.CMSH;
 using AquaModelLibrary.BluePoint.CSKL;
+using AquaModelLibrary.Native.Fbx;
 using Reloaded.Memory.Streams;
+using SoulsFormats.Other;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -11,6 +14,7 @@ using System.Numerics;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using static AquaModelLibrary.AquaNode;
+using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelLibrary.Extra
 {
@@ -62,15 +66,76 @@ namespace AquaModelLibrary.Extra
             return bytes;
         }
 
-        public static AquaObject ReadCMDL(string filePath, out AquaNode aqn)
+        public static void ReadCMDL(string filePath)
         {
-            string cmshPath = Path.ChangeExtension(filePath, ".cmsh");
+            AquaUtil aqu = new AquaUtil();
+            string rootPath = GetDeSRRootPath(filePath);
+            string outPath = "";
+            List<string> outNames = new List<string>();
+            Dictionary<string, CMAT> materialDict = new Dictionary<string, CMAT>();
+            List<string> cmshPaths = new List<string>();
+
+            if (filePath.EndsWith(".cmdl"))
+            {
+                using (var streamReader = new BufferedStreamReader(new MemoryStream(File.ReadAllBytes(filePath)), 8192))
+                {
+                    var cmdl = new CMDL(streamReader);
+                    foreach (var cmatSet in cmdl.cmatReferences)
+                    {
+                        var cmatPath = Path.Combine(rootPath, cmatSet.cmatPath.str.Substring(2).Replace("****", "_cmn")).Replace("/", "\\");
+                        using (Stream stream = new MemoryStream(File.ReadAllBytes(cmatPath)))
+                        using (var sr = new BufferedStreamReader(stream, 8192))
+                        {
+                            materialDict.Add(cmatSet.cmshMaterialName.str, new CMAT(sr));
+                        }
+                    }
+                    foreach (var cmshPartialPath in cmdl.cmshReferences)
+                    {
+                        cmshPaths.Add(Path.Combine(rootPath, cmshPartialPath.cmshPath.str.Substring(2).Replace("****", "_cmn")).Replace("/", "\\"));
+                        outNames.Add(Path.GetFileName(cmshPartialPath.cmshPath.str));
+                    }
+                }
+                outPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
+                Directory.CreateDirectory(outPath);
+            } else if(filePath.EndsWith(".cmsh"))
+            {
+                outPath = Path.GetDirectoryName(filePath);
+                outNames.Add(Path.GetFileName(filePath));
+                cmshPaths.Add(filePath);
+            } else
+            {
+                return;
+            }
+
+            for(int i = 0; i < cmshPaths.Count; i++)
+            {
+                var mshPath = cmshPaths[i];
+                var outName = outNames[i];
+
+                aqu.aquaModels.Clear();
+                ModelSet set = new ModelSet();
+                set.models.Add(ReadCMSH(mshPath, materialDict, out var aqn));
+                if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
+                {
+                    aqu.aquaModels.Add(set);
+                    aqu.ConvertToNGSPSO2Mesh(false, false, false, true, false, false, false, true);
+                    set.models[0].ConvertToLegacyTypes();
+                    set.models[0].CreateTrueVertWeights();
+
+                    FbxExporter.ExportToFile(aqu.aquaModels[0].models[0], aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false);
+                }
+            }
+
+        }
+
+        public static AquaObject ReadCMSH(string filePath, Dictionary<string, CMAT> materialDict, out AquaNode aqn)
+        {
             string modelPath = Path.GetDirectoryName(filePath);
             string cmtlPath = Path.Combine(Path.GetDirectoryName(modelPath), "materials", "_cmn");
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(cmshPath)))
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
             using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                return CMDLToAqua(new CMSH(streamReader), cmtlPath, modelPath, out aqn);
+                return CMDLToAqua(new CMSH(streamReader), materialDict, cmtlPath, modelPath, out aqn);
             }
         }
 
@@ -83,7 +148,7 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        public static AquaObject CMDLToAqua(CMSH mdl, string cmtlPath, string modelPath, out AquaNode aqn)
+        public static AquaObject CMDLToAqua(CMSH mdl, Dictionary<string, CMAT> materialDict, string cmtlPath, string modelPath, out AquaNode aqn)
         {
             if (mdl.header.variantFlag2 == 0x41)
             {
@@ -107,19 +172,8 @@ namespace AquaModelLibrary.Extra
                 {
                     if (modelPath.Contains("-app0"))
                     {
-                        var currentPath = modelPath;
-                        int i = 0;
-                        while (Path.GetFileName(currentPath).IndexOf("-app0") == -1)
-                        {
-                            currentPath = Path.GetDirectoryName(currentPath);
-                            i++;
-                            //Should seriously never ever ever happen, but screw it
-                            if (i == 255)
-                            {
-                                break;
-                            }
-                        }
-                        csklPath = Path.Combine(currentPath, mdl.boneData.skeletonPath.Substring(2).Replace("****", "_cmn")).Replace("/", "\\");
+                        string rootPath = GetDeSRRootPath(modelPath);
+                        csklPath = Path.Combine(rootPath, mdl.boneData.skeletonPath.Substring(2).Replace("****", "_cmn")).Replace("/", "\\");
 
                         using (Stream stream = new MemoryStream(File.ReadAllBytes(csklPath)))
                         using (var streamReader = new BufferedStreamReader(stream, 8192))
@@ -337,42 +391,58 @@ namespace AquaModelLibrary.Extra
                     continue;
                 }
 
-                var matFileName = mesh.header.matList[m].matName.Replace("_mat1", "");
-                matFileName = matFileName.Replace("_mat", "");
-                var matPath = Path.Combine(cmtlPath, matFileName + ".cmat");
-                var backupMatPath = Path.Combine(modelPath, matFileName + ".cmat");
-                string texName = "test_d.dds";
-                if (File.Exists(matPath))
-                {
-                    using (Stream stream = new MemoryStream(File.ReadAllBytes(matPath)))
-                    using (var streamReader = new BufferedStreamReader(stream, 8192))
-                    {
-                        var cmat = new CMAT(streamReader);
-                        if (cmat.texNames.Count > 0)
-                        {
-                            texName = cmat.texNames[0];
-                        }
-                    }
-                }
-                else if (File.Exists(backupMatPath))
-                {
-                    using (Stream stream = new MemoryStream(File.ReadAllBytes(backupMatPath)))
-                    using (var streamReader = new BufferedStreamReader(stream, 8192))
-                    {
-                        var cmat = new CMAT(streamReader);
-                        if (cmat.texNames.Count > 0)
-                        {
-                            texName = cmat.texNames[0];
-                        }
-                    }
+                var baseMatName = mesh.header.matList[m];
 
+                string texName = "test_d.dds";
+
+                //This should be the primary way to get the material, but fall back to bruteforcing a bit if that fails
+                if (materialDict.ContainsKey(baseMatName.matName))
+                {
+                    var cmat = materialDict[baseMatName.matName];
+                    if(cmat.texNames.Count > 0)
+                    {
+                        texName = cmat.texNames[0];
+                    }
+                } else
+                {
+                    var matFileName = baseMatName.matName.Replace("_mat1", "");
+                    matFileName = matFileName.Replace("_mat", "");
+                    var matPath = Path.Combine(cmtlPath, matFileName + ".cmat");
+                    var backupMatPath = Path.Combine(modelPath, matFileName + ".cmat");
+                    if (File.Exists(matPath))
+                    {
+                        using (Stream stream = new MemoryStream(File.ReadAllBytes(matPath)))
+                        using (var streamReader = new BufferedStreamReader(stream, 8192))
+                        {
+                            var cmat = new CMAT(streamReader);
+                            if (cmat.texNames.Count > 0)
+                            {
+                                texName = cmat.texNames[0];
+                            }
+                        }
+                    }
+                    else if (File.Exists(backupMatPath))
+                    {
+                        using (Stream stream = new MemoryStream(File.ReadAllBytes(backupMatPath)))
+                        using (var streamReader = new BufferedStreamReader(stream, 8192))
+                        {
+                            var cmat = new CMAT(streamReader);
+                            if (cmat.texNames.Count > 0)
+                            {
+                                texName = cmat.texNames[0];
+                            }
+                        }
+
+                    }
                 }
 
                 //Material
                 var mat = new AquaObject.GenericMaterial();
                 mat.matName = $"{mesh.header.matList[m].matName}";
-                mat.texNames = new List<string>();
-                mat.texNames.Add(texName);
+                mat.texNames = new List<string>
+                {
+                    texName
+                };
                 aqp.tempMats.Add(mat);
 
                 if ((mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0) || (mesh.header.matList[m].startingFaceIndex == -1 && mesh.header.matList[m].endingFaceIndex == -1))
@@ -452,5 +522,21 @@ namespace AquaModelLibrary.Extra
             return aqp;
         }
 
+        private static string GetDeSRRootPath(string currentPath)
+        {
+            int i = 0;
+            while (Path.GetFileName(currentPath).IndexOf("-app0") == -1)
+            {
+                currentPath = Path.GetDirectoryName(currentPath);
+                i++;
+                //Should seriously never ever ever happen, but screw it
+                if (i == 255)
+                {
+                    break;
+                }
+            }
+
+            return currentPath;
+        }
     }
 }

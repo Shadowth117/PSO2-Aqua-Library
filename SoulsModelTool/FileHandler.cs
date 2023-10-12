@@ -22,7 +22,7 @@ namespace SoulsModelTool
         {
             aqua.aquaModels.Clear();
             ModelSet set = new ModelSet();
-            set.models.Add(BluePointConvert.ReadCMDL(file, out AquaNode aqn));
+            set.models.Add(BluePointConvert.ReadCMSH(file, out AquaNode aqn));
             if (set.models[0] != null && set.models[0].vtxlList.Count > 0)
             {
                 aqua.aquaModels.Add(set);

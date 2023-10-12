@@ -9,33 +9,6 @@ namespace AquaModelLibrary.BluePoint.CMDL
     {
         public List<BorderClump> clumps = new List<BorderClump>();
 
-        /*
-        public uint int0;
-        public CVariableTrail trail0 = null;
-
-        public uint int1;
-        public CVariableTrail trail1 = null;
-
-        public byte bt0;
-        public ushort usht0;
-
-        public uint int2;
-        public CVariableTrail trail2 = null;
-
-        public byte bt1;
-
-        public uint int3;
-        public CVariableTrail trail3 = null;
-        public byte bt_2;
-        public byte bt_3;
-
-        public uint int4;
-        public CVariableTrail cmshTrail = null;
-
-        public uint int5;
-        public CVariableTrail trail5 = null;
-        */
-
         public CMDL_CMSHBorder() { }
 
         public CMDL_CMSHBorder(BufferedStreamReader sr)
@@ -50,58 +23,6 @@ namespace AquaModelLibrary.BluePoint.CMDL
                     break;
                 }
             }
-            /*
-            int0 = sr.Read<uint>();
-            trail0 = new CVariableTrail(sr);
-            if (trail0.data.Count > 1)
-            {
-                int1 = sr.Read<uint>();
-                trail1 = new CVariableTrail(sr);
-            }
-            bt0 = sr.Read<byte>();
-
-            if (trail1?.data.Count > 0)
-            {
-                usht0 = sr.Read<ushort>();
-            }
-
-            int2 = sr.Read<uint>();
-            trail2 = new CVariableTrail(sr);
-            bt1 = sr.Read<byte>();
-
-            var check = sr.Read<uint>();
-            if (check == 0xEB06473D)
-            {
-                int5 = check;
-                trail5 = new CVariableTrail(sr, 2);
-                check = sr.Read<uint>();
-            }
-            if (check == 0x4A285982)
-            {
-                int4 = check;
-                cmshTrail = new CVariableTrail(sr);
-            }
-            else
-            {
-                int3 = check;
-                trail3 = new CVariableTrail(sr);
-                if(int3 != 0x95CBEB14)
-                {
-                    bt_2 = sr.Read<byte>();
-                    bt_3 = sr.Read<byte>();
-                }
-                check = sr.Read<uint>();
-
-                if (check == 0xEB06473D)
-                {
-                    int5 = check;
-                    trail5 = new CVariableTrail(sr, 2);
-                    check = sr.Read<uint>();
-                }
-
-                int4 = check;
-                cmshTrail = new CVariableTrail(sr);
-            }*/
         }
 
         public class BorderClump

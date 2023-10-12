@@ -17,7 +17,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
         public int unkInt2;
 
         //CMDLs start with a dictionary containing a cmsh material name and a cmat path. This dictionary uses cmsh material name as a key for easy mapping
-        public Dictionary<string, CMDL_CMATMaterialMap> materialDict = new Dictionary<string, CMDL_CMATMaterialMap>();
+        public List<CMDL_CMATMaterialMap> cmatReferences = new List<CMDL_CMATMaterialMap>();
         public CMDL_CMSHBorder border = null;
         public List<CMDL_CMSHReference> cmshReferences = new List<CMDL_CMSHReference>();
 
@@ -38,8 +38,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
 
             for (int i = 0; i < matTrail.data[matTrail.data.Count - 1]; i++)
             {
-                var matRef = new CMDL_CMATMaterialMap(sr);
-                materialDict.Add(matRef.cmshMaterialName.str, matRef);
+                cmatReferences.Add(new CMDL_CMATMaterialMap(sr));
             }
             border = new CMDL_CMSHBorder(sr);
 
