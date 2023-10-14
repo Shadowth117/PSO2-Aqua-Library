@@ -256,7 +256,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="ZstdNet, Version=1.4.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ZstdNet.1.4.5\lib\net45\ZstdNet.dll</HintPath>
+      <HintPath>..\..\packages\ZstdNet.1.4.5\lib\net45\ZstdNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -476,9 +476,9 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ZstdNet.1.4.5\build\ZstdNet.targets'))" />
     <Error Condition="!Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets'))" />
+    <Error Condition="!Exists('..\..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\ZstdNet.1.4.5\build\ZstdNet.targets'))" />
   </Target>
-  <Import Project="..\packages\ZstdNet.1.4.5\build\ZstdNet.targets" Condition="Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" />
   <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />
+  <Import Project="..\..\packages\ZstdNet.1.4.5\build\ZstdNet.targets" Condition="Exists('..\..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" />
 </Project>
