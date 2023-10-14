@@ -248,7 +248,7 @@ namespace SoulsFormats.Other
             internal Vertex(BinaryReaderEx br, VertexFormat format)
             {
                 Position = br.ReadVector3();
-                Normal = Read11_11_10Vector3(br);
+                Normal = br.Read11_11_10Vector3();
                 Color = br.ReadRGBA();
                 UVs = new Vector2[2];
                 for (int i = 0; i < 2; i++)
@@ -265,15 +265,6 @@ namespace SoulsFormats.Other
                     UnkFloatA = br.ReadSingle();
                     UnkFloatB = br.ReadSingle();
                 }
-            }
-
-            private static Vector3 Read11_11_10Vector3(BinaryReaderEx br)
-            {
-                int vector = br.ReadInt32();
-                int x = vector << 21 >> 21;
-                int y = vector << 10 >> 21;
-                int z = vector << 0 >> 22;
-                return new Vector3(x / (float)0b11_1111_1111, y / (float)0b11_1111_1111, z / (float)0b1_1111_1111);
             }
         }
 

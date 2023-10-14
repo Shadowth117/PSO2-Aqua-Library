@@ -1081,6 +1081,30 @@ namespace SoulsFormats
         }
 
         /// <summary>
+        /// Reads a Quaternion of floating point numbers in XYZW order.
+        /// </summary>
+        public Quaternion ReadQuaternion()
+        {
+            float x = ReadSingle();
+            float y = ReadSingle();
+            float z = ReadSingle();
+            float w = ReadSingle();
+            return new Quaternion(x, y, z, w);
+        }
+
+        /// <summary>
+        /// Reads a Vector3 from an int. Expects a Vector3 of floating points compressed to 11, 11, and 10 bits per float.
+        /// </summary>
+        public Vector3 Read11_11_10Vector3()
+        {
+            int vector = ReadInt32();
+            int x = vector << 21 >> 21;
+            int y = vector << 10 >> 21;
+            int z = vector << 0 >> 22;
+            return new Vector3(x / (float)0b11_1111_1111, y / (float)0b11_1111_1111, z / (float)0b1_1111_1111);
+        }
+
+        /// <summary>
         /// Read length number of bytes and assert that they all match the given value.
         /// </summary>
         public void AssertPattern(int length, byte pattern)

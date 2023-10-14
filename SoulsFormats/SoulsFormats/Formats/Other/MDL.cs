@@ -264,9 +264,9 @@ namespace SoulsFormats.Other
             internal Vertex(BinaryReaderEx br, VertexFormat format)
             {
                 Position = br.ReadVector3();
-                Normal = Read11_11_10Vector3(br);
-                Tangent = Read11_11_10Vector3(br);
-                Bitangent = Read11_11_10Vector3(br);
+                Normal = br.Read11_11_10Vector3();
+                Tangent = br.Read11_11_10Vector3();
+                Bitangent = br.Read11_11_10Vector3();
                 Color = br.ReadRGBA();
 
                 UVs = new Vector2[4];
@@ -326,15 +326,15 @@ namespace SoulsFormats.Other
 
                 Normals = new Vector3[16];
                 for (int i = 0; i < 16; i++)
-                    Normals[i] = Read11_11_10Vector3(br);
+                    Normals[i] = br.Read11_11_10Vector3();
 
                 Tangents = new Vector3[16];
                 for (int i = 0; i < 16; i++)
-                    Tangents[i] = Read11_11_10Vector3(br);
+                    Tangents[i] = br.Read11_11_10Vector3();
 
                 Bitangents = new Vector3[16];
                 for (int i = 0; i < 16; i++)
-                    Bitangents[i] = Read11_11_10Vector3(br);
+                    Bitangents[i] = br.Read11_11_10Vector3();
 
                 Color = br.ReadRGBA();
 
@@ -347,15 +347,6 @@ namespace SoulsFormats.Other
                 UnkFloatA = br.ReadSingle();
                 UnkFloatB = br.ReadSingle();
             }
-        }
-
-        private static Vector3 Read11_11_10Vector3(BinaryReaderEx br)
-        {
-            int vector = br.ReadInt32();
-            int x = vector << 21 >> 21;
-            int y = vector << 10 >> 21;
-            int z = vector << 0 >> 22;
-            return new Vector3(x / (float)0b11_1111_1111, y / (float)0b11_1111_1111, z / (float)0b1_1111_1111);
         }
 
         public class Struct7
