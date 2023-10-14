@@ -1,9 +1,5 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CANI
 {
@@ -28,7 +24,7 @@ namespace AquaModelLibrary.BluePoint.CANI
             {
                 List<CANIFrameData> caniFrameData = new List<CANIFrameData>();
                 sr.Seek(set.frameDataSetPointer, System.IO.SeekOrigin.Begin);
-                while(sr.Peek<int>() != 0) //Seemingly no note of count??
+                while (sr.Peek<int>() != 0) //Seemingly no note of count??
                 {
                     caniFrameData.Add(new CANIFrameData(sr, set.frameDataSetPointer));
                 }

@@ -1,9 +1,4 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -33,7 +28,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
         public int boneMetadataOffset; //Data including parent ids, child ids, sibling ids, etc.
 
         public ushort boneCount3; //Same numbers again
-        public ushort boneCount4; 
+        public ushort boneCount4;
         public ushort secondaryBoneCount2;
         public ushort secondaryBoneCount3;
         public int int_58;

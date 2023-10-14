@@ -65,7 +65,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public CMSHVertexData(BufferedStreamReader sr, CMSHHeader header, bool hasExtraFlags)
         {
             //SOTC doesn't do this
-            if(hasExtraFlags)
+            if (hasExtraFlags)
             {
                 flags = sr.Read<int>();
             }
@@ -85,7 +85,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 {
                     var vertDef = new CMSHVertexDataDefinition();
                     vertDef.dataMagic = sr.Read<VertexMagic>();
-                    switch(vertDef.dataMagic)
+                    switch (vertDef.dataMagic)
                     {
                         case VertexMagic.POS0:
                             break;
@@ -118,7 +118,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     }
                     vertDefs.Add(vertDef);
                 }
-            } else
+            }
+            else
             {
                 for (int i = 0; i < vertDefinitionsCount; i++)
                 {
@@ -137,10 +138,10 @@ namespace AquaModelLibrary.BluePoint.CMSH
             for (int i = 0; i < vertDefinitionsCount; i++)
             {
                 sr.Seek(vertexDataStart + vertDefs[i].dataStart, System.IO.SeekOrigin.Begin);
-                switch(vertDefs[i].dataMagic)
+                switch (vertDefs[i].dataMagic)
                 {
                     case VertexMagic.POS0:
-                        for(int v = 0; v < vertCount; v++)
+                        for (int v = 0; v < vertCount; v++)
                         {
                             positionList.Add(sr.Read<Vector3>());
                         }
@@ -222,7 +223,8 @@ namespace AquaModelLibrary.BluePoint.CMSH
                             {
                                 vertWeightIndices.Add(new int[] { sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>(), sr.Read<ushort>() });
                             }
-                        } else
+                        }
+                        else
                         {
                             for (int v = 0; v < vertCount; v++)
                             {
@@ -255,10 +257,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         public float ConvertBPSbyte(byte b)
         {
-            if(b < 128)
+            if (b < 128)
             {
                 return (float)((double)b / 127.0);
-            } else
+            }
+            else
             {
                 b -= 127;
                 return (float)((double)b / 127.0);

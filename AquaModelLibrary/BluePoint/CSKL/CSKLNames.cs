@@ -1,10 +1,6 @@
 ﻿using AquaModelLibrary.AquaMethods;
 using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -26,7 +22,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
             public CSKLNameList(BufferedStreamReader sr)
             {
                 int count = sr.Read<int>();
-                for(int i = 0; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
                     int relativeOffset = sr.Read<int>();
                     long absoluteOffset = relativeOffset + sr.Position();
@@ -82,7 +78,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
             secondaryParamOffsetListAbsoluteOffset = secondaryParamOffsetListOffsetPosition + secondaryParamOffsetListOffset;
             //Primary Name List
             primaryNames = new CSKLNameList(sr);
-            if(secondaryNameCount > 0 && secondaryNameOffsetListOffset > 0)
+            if (secondaryNameCount > 0 && secondaryNameOffsetListOffset > 0)
             {
                 sr.Seek(secondaryNameOffsetListAbsoluteOffset, System.IO.SeekOrigin.Begin);
                 secondaryNames = new CSKLNameList(sr);
@@ -98,7 +94,8 @@ namespace AquaModelLibrary.BluePoint.CSKL
             if (secondaryNames != null && secondaryNames.names.Count > 0)
             {
                 sr.Seek(secondaryNames.absoluteOffsets[secondaryNames.absoluteOffsets.Count - 1], System.IO.SeekOrigin.Begin);
-            } else
+            }
+            else
             {
                 sr.Seek(primaryNames.absoluteOffsets[primaryNames.absoluteOffsets.Count - 1], System.IO.SeekOrigin.Begin);
             }
@@ -106,5 +103,5 @@ namespace AquaModelLibrary.BluePoint.CSKL
         }
     }
 
-    
+
 }

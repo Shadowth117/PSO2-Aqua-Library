@@ -1,9 +1,5 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint
 {
@@ -16,10 +12,10 @@ namespace AquaModelLibrary.BluePoint
         public CVariableTrail(BufferedStreamReader sr, int limit = 4)
         {
             byte? current = null;
-            for(int i = 0; i < limit; i++)
+            for (int i = 0; i < limit; i++)
             {
                 current = sr.Read<byte>();
-                if(current == 0)
+                if (current == 0)
                 {
                     break;
                 }

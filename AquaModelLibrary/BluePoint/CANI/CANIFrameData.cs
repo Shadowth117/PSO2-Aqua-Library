@@ -3,11 +3,7 @@ using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using SystemHalf;
 
 namespace AquaModelLibrary.BluePoint.CANI
@@ -33,7 +29,7 @@ namespace AquaModelLibrary.BluePoint.CANI
     {
         public List<ushort> frameDataUshorts = new List<ushort>();
         public List<ushort> frameDataUshorts2 = new List<ushort>();
-        public List<Vector3> frameDataVec3s = new List<Vector3>(); 
+        public List<Vector3> frameDataVec3s = new List<Vector3>();
         public List<Quaternion> frameDataQuats = new List<Quaternion>();
         public List<Half> frameDataHalfs = new List<Half>();
         public List<byte> frameDataBytes = new List<byte>();
@@ -127,7 +123,7 @@ namespace AquaModelLibrary.BluePoint.CANI
                     break;
                 case (ushort)CANIFrameType.Rotation:
                     ReadCommonUshorts(sr);
-                    for(int i = 0; i < entryCount; i++)
+                    for (int i = 0; i < entryCount; i++)
                     {
                         frameDataQuats.Add(sr.Read<Quaternion>());
                     }

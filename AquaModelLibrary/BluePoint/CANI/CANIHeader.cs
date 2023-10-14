@@ -1,9 +1,5 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CANI
 {
@@ -13,7 +9,7 @@ namespace AquaModelLibrary.BluePoint.CANI
     {
         public CANIMainHeader caniHeader;
         public List<CANIFrameDataSetInfo> info = new List<CANIFrameDataSetInfo>();
-        
+
         public CANIHeader()
         {
 
@@ -23,9 +19,9 @@ namespace AquaModelLibrary.BluePoint.CANI
         {
             caniHeader = sr.Read<CANIMainHeader>();
             info = new List<CANIFrameDataSetInfo>();
-            for(int i = 0; i < caniHeader.frameDataSetCount; i++)
+            for (int i = 0; i < caniHeader.frameDataSetCount; i++)
             {
-                 info.Add(sr.Read<CANIFrameDataSetInfo>());
+                info.Add(sr.Read<CANIFrameDataSetInfo>());
             }
         }
     }

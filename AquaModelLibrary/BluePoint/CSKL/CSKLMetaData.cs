@@ -1,9 +1,5 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -44,7 +40,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
             var absoluteCsklNamesOffset = csklNamesOffset + start;
 
             sr.Seek(absoluteFamilyIdListOffset, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < absoluteFamilyIdListOffset; i++)
+            for (int i = 0; i < absoluteFamilyIdListOffset; i++)
             {
                 familyIds.Add(new CSKLFamilyIds(sr));
             }

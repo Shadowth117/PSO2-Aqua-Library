@@ -1,10 +1,5 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CANI
 {
@@ -41,14 +36,15 @@ namespace AquaModelLibrary.BluePoint.CANI
             public int finalInt3;
         }
 
-        public CANIFooter() { 
+        public CANIFooter()
+        {
         }
 
         public CANIFooter(BufferedStreamReader sr)
         {
             footerHead = sr.Read<CANIFooterHead>();
             footerHeadPadding = new int[(footerHead.footerHeadSizeWithPadding - 0xC) / 4];
-            for(int i = 0; i < footerHeadPadding.Length; i++)
+            for (int i = 0; i < footerHeadPadding.Length; i++)
             {
                 footerHeadPadding[i] = sr.Read<int>();
             }

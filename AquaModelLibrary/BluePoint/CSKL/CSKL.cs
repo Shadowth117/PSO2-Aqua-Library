@@ -1,10 +1,6 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -26,7 +22,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
         {
             header = new CSKLHeader(sr);
             sr.Seek(header.transformListOffset, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < header.boneCount; i++)
+            for (int i = 0; i < header.boneCount; i++)
             {
                 transforms.Add(new CSKLTransform(sr));
             }

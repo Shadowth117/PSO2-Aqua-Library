@@ -13,12 +13,12 @@ namespace AquaModelLibrary.BluePoint.CMDL
 
         public CMDL_CMSHBorder(BufferedStreamReader sr)
         {
-            while(true)
+            while (true)
             {
                 var check = sr.Read<uint>();
                 var clump = new BorderClump(sr, check);
                 clumps.Add(clump);
-                if(check == 0x4A285982)
+                if (check == 0x4A285982)
                 {
                     break;
                 }
@@ -31,7 +31,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
             public CVariableTrail trail;
             public List<byte> extraBytes = new List<byte>();
             public BorderClump() { }
-            
+
             public BorderClump(BufferedStreamReader sr, uint check)
             {
                 Read(sr, check);
@@ -42,7 +42,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
                 magic = check;
                 int limit = 4;
                 int readExtra = 0;
-                switch(check)
+                switch (check)
                 {
                     case 0xA5428144:
                         readExtra = 2;
@@ -68,19 +68,19 @@ namespace AquaModelLibrary.BluePoint.CMDL
                         throw new Exception();
                 }
                 trail = new CVariableTrail(sr, limit);
-                if((check == 0x09258d3b || check == 0x2354F238) && sr.Peek<byte>() == 0)
+                if ((check == 0x09258d3b || check == 0x2354F238) && sr.Peek<byte>() == 0)
                 {
                     readExtra++;
                 }
-                for(int i = 0; i < readExtra; i++)
+                for (int i = 0; i < readExtra; i++)
                 {
                     extraBytes.Add(sr.Read<byte>());
                 }
                 var zeroCheck = sr.Peek<byte>();
-                while(zeroCheck == 0)
+                while (zeroCheck == 0)
                 {
                     zeroCheck = sr.Peek<byte>();
-                    if(zeroCheck == 0)
+                    if (zeroCheck == 0)
                     {
                         sr.Read<byte>();
                     }

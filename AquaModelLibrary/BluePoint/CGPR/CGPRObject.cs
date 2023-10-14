@@ -1,8 +1,5 @@
-﻿using AquaModelLibrary.BluePoint.CANI;
-using Reloaded.Memory.Streams;
+﻿using Reloaded.Memory.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -126,7 +123,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
             magic = sr.Peek<uint>();
             mainHeader = sr.Read<cgprCommonHeader>();
             var byteTest = sr.Peek<byte>();
-            if(byteTest == 0x1)
+            if (byteTest == 0x1)
             {
                 bt_mainTest = sr.Read<byte>();
             }
@@ -224,7 +221,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
             vecFlag0 = sr.Read<byte>();
             vecFlag1 = sr.Read<byte>();
 
-            switch(vecFlag0)
+            switch (vecFlag0)
             {
                 case 1:
                     break;

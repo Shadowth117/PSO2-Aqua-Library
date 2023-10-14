@@ -1,12 +1,8 @@
 ﻿using AquaModelLibrary.AquaMethods;
 using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
-using UnluacNET;
 
 namespace AquaModelLibrary.BluePoint.CMSH
 {
@@ -34,13 +30,14 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public CMSHBoneData(BufferedStreamReader sr, CMSHHeader header)
         {
             var pos = sr.Position();
-            if(header.variantFlag == 0x1 && header.variantFlag2 == 0xA)
+            if (header.variantFlag == 0x1 && header.variantFlag2 == 0xA)
             {
                 byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
                 if (test[0] == '$')
                 {
                     ReadSkeletonPath(sr);
-                } else
+                }
+                else
                 {
                     unkSOTCByte = sr.Read<byte>();
                 }
@@ -53,12 +50,12 @@ namespace AquaModelLibrary.BluePoint.CMSH
             nameCount = sr.Read<int>();
             size = sr.Read<int>();
 
-            for(int i = 0; i < nameCount; i++)
+            for (int i = 0; i < nameCount; i++)
             {
                 boneNames.Add(AquaGeneralMethods.ReadCStringSeek(sr));
             }
             boneVec4Count = sr.Read<int>(); //Should be the same as before, but in case it's not
-            for(int i = 0; i < boneVec4Count; i++)
+            for (int i = 0; i < boneVec4Count; i++)
             {
                 boneVec4Array.Add(sr.Read<Vector4>());
             }

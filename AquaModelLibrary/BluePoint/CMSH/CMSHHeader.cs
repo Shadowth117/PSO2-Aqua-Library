@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace AquaModelLibrary.BluePoint.CMSH
@@ -50,7 +49,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             variantFlag = sr.Read<byte>();
             variantFlag2 = sr.Read<byte>();
 
-            switch(variantFlags)
+            switch (variantFlags)
             {
                 //Reference mesh variants
                 case 0x1100:
@@ -76,7 +75,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     CheckForExtraFlags(sr);
                     matCount = sr.Read<int>();
                     ReadMaterialList(sr);
-                    
+
                     //Demon's Souls
                     if (hasExtraFlags)
                     {
@@ -94,10 +93,11 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 case 0xACC:
                     unk0 = sr.Read<byte>();
                     modelType = sr.Read<int>();
-                    if(modelType == 0x5)
+                    if (modelType == 0x5)
                     {
                         ReadReferenceModelPath(sr);
-                    } else
+                    }
+                    else
                     {
                         matCount = sr.Read<int>();
                         ReadMaterialList(sr);
@@ -189,7 +189,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             {
                 hasExtraFlags = true;
             }
-            
+
             if (hasExtraFlags)
             {
                 extraFlags = sr.ReadBytes(sr.Position(), 4);

@@ -1,6 +1,4 @@
 ﻿using Reloaded.Memory.Streams;
-using System.IO;
-using System.Text;
 
 namespace AquaModelLibrary.BluePoint.CMDL
 {

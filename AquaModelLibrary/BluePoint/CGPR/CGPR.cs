@@ -1,10 +1,6 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CAWS
 {
@@ -25,16 +21,16 @@ namespace AquaModelLibrary.BluePoint.CAWS
             var cgprObjCount = sr.Read<int>(); //Doesn't always line up right. Correlates, but needs more research
 
             //Should just be an empty cgpr
-            if(cgprObjCount == 0)
+            if (cgprObjCount == 0)
             {
                 int_04 = sr.Read<int>();
                 cfooter = sr.Read<CFooter>();
             }
 
             uint type0 = sr.Peek<uint>();
-            while(!(type0 == 0 || type0 == 0x47505250))
+            while (!(type0 == 0 || type0 == 0x47505250))
             {
-                switch(type0)
+                switch (type0)
                 {
                     case (uint)CGPRMagic.xC1A69458:
                         objects.Add(new _C1A69458_Object(sr));
@@ -45,16 +41,16 @@ namespace AquaModelLibrary.BluePoint.CAWS
                     default:
                         throw new Exception($"Unexpected object {type0.ToString("X")} discovered");
                 }
-                
+
                 type0 = sr.Peek<uint>();
 
                 //Try to account for weird scenarios where sizes don't align? Idk wtf the game is doing
-                if(sr.Peek<byte>() == 0)
+                if (sr.Peek<byte>() == 0)
                 {
                     sr.Seek(1, System.IO.SeekOrigin.Current);
                     type0 = sr.Peek<uint>();
                 }
-                
+
             }
         }
     }

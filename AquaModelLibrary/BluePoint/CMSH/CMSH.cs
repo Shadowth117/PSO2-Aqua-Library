@@ -1,10 +1,4 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CMSH
 {
@@ -22,7 +16,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public CMSH(BufferedStreamReader sr)
         {
             header = new CMSHHeader(sr);
-            if(header.variantFlag2 != 0x41)
+            if (header.variantFlag2 != 0x41)
             {
                 vertData = new CMSHVertexData(sr, header, header.hasExtraFlags);
                 faceData = new CMSHFaceData(sr, header, vertData.positionList.Count);

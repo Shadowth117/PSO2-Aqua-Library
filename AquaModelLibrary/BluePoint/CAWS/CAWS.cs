@@ -1,9 +1,5 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.BluePoint.CAWS
 {
@@ -11,7 +7,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
     {
         public string name = null;
         public int cawsObjectCount;
-        
+
         /*
         public ulong hashThing;
         public int const27B; //Always 0x27B???
