@@ -161,10 +161,14 @@ namespace SoulsFormats.Formats
 
         public class Vertex
         {
+            /// <summary>
+            /// These positions are all VERY large for some reason. 
+            /// Based on the white house model in m000, the first mmd model, we can estimate that these positions are about 2000x the scale they should be.
+            /// </summary>
             public virtual Vector3 Position { get; set; }
             public virtual Vector3 Normal { get; set; }
-            public byte[] WeightIndices { get; set; } //Always 0? Unknown
-            public byte[] Weights { get; set; }       //Always 0? Unknown
+            public byte[] WeightIndices { get; set; }     //Always 0? Unknown
+            public byte[] Weights { get; set; }           //Always 0? Unknown
 
             public Vector2[] UVs;
             public Color Color;
