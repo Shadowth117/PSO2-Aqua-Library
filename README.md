@@ -1,7 +1,7 @@
 # PSO2-Aqua-Library  
 A library for handling PSO2 Aqua formats, with a focus on models, functional in grabbing model data from the game's format.   
 
-A number of programs are now included which perform a variety of tasks related to PSO2.  
+Programs utilizing this lib have been moved to: https://github.com/Shadowth117/Aqua-Toolset
 
 Aqua Model Tool - A tool for editing PSO2 models, along with various other utilities.  
   -Allows for editing many of the various structures in a model directly  
