@@ -3234,6 +3234,38 @@ namespace AquaModelLibrary
             return shaderList;
         }
 
-
+        public static void AddVertices(VTXL sourceVtxl, Dictionary<int, int> vertIdDict, VTXL destinationVtxl, Vector3 tri, out int x, out int y, out int z)
+        {
+            if (vertIdDict.TryGetValue((int)tri.X, out var value))
+            {
+                x = value;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.X, destinationVtxl.vertPositions.Count);
+                x = destinationVtxl.vertPositions.Count;
+                appendVertex(sourceVtxl, destinationVtxl, (int)tri.X);
+            }
+            if (vertIdDict.TryGetValue((int)tri.Y, out var value2))
+            {
+                y = value2;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.Y, destinationVtxl.vertPositions.Count);
+                y = destinationVtxl.vertPositions.Count;
+                appendVertex(sourceVtxl, destinationVtxl, (int)tri.Y);
+            }
+            if (vertIdDict.TryGetValue((int)tri.Z, out var value3))
+            {
+                z = value3;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.Z, destinationVtxl.vertPositions.Count);
+                z = destinationVtxl.vertPositions.Count;
+                appendVertex(sourceVtxl, destinationVtxl, (int)tri.Z);
+            }
+        }
     }
 }

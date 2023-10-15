@@ -18,6 +18,13 @@ namespace SoulsFormats.Formats
         public List<Bone> bones = new List<Bone>();
         public List<string> texNames = new List<string>();
 
+        public MMD() { }
+
+        public MMD(BinaryReaderEx br)
+        {
+            Read(br);
+        }
+
         protected override bool Is(BinaryReaderEx br)
         {
             if (br.Length < 8)
@@ -37,12 +44,12 @@ namespace SoulsFormats.Formats
             header.usht_0A = br.ReadUInt16();
             header.int_0C = br.ReadInt32();
             
-            header.unkCount0 = br.ReadInt32();
+            header.meshCount = br.ReadInt32();
             header.faceIndexCount = br.ReadInt32();
             header.vertexCount = br.ReadInt32();
             header.boneCount = br.ReadInt32();
 
-            header.meshCount = br.ReadInt32();
+            header.textureCount = br.ReadInt32();
             var meshHeaderOffset = br.ReadInt32();
             var faceIndicesOffset = br.ReadInt32();
             var vertexDataOffset = br.ReadInt32();
@@ -112,6 +119,12 @@ namespace SoulsFormats.Formats
 
                 bones.Add(bone);
             }
+
+            br.Position = textureNameOffset;
+            for(int i = 0; i < header.textureCount; i++)
+            {
+                texNames.Add(br.ReadASCII());
+            }
         }
 
         public struct MMDHeader
@@ -122,12 +135,12 @@ namespace SoulsFormats.Formats
             public ushort usht_0A;
             public int int_0C;
 
-            public int unkCount0;
+            public int meshCount;
             public int faceIndexCount;
             public int vertexCount;
             public int boneCount;
 
-            public int meshCount;
+            public int textureCount;
             //public int meshHeaderOffset;
             //public int faceIndicesOffset;
             //public int vertexDataOffset;
@@ -150,8 +163,8 @@ namespace SoulsFormats.Formats
         {
             public virtual Vector3 Position { get; set; }
             public virtual Vector3 Normal { get; set; }
-            public byte[] WeightIndices { get; set; }
-            public byte[] Weights { get; set; }
+            public byte[] WeightIndices { get; set; } //Always 0? Unknown
+            public byte[] Weights { get; set; }       //Always 0? Unknown
 
             public Vector2[] UVs;
             public Color Color;

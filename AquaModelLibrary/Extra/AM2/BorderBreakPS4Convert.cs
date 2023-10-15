@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using static AquaModelLibrary.Utility.AquaUtilData;
+using static AquaModelLibrary.AquaObjectMethods;
 
 namespace AquaModelLibrary.Extra.AM2
 {
@@ -295,7 +296,7 @@ namespace AquaModelLibrary.Extra.AM2
                         {
                             aqp.tempTris.Add(genMesh);
                             aqp.vtxlList.Add(matVtxl);
-                            aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(matVtxl, out int vc));
+                            aqp.vtxeList.Add(ConstructClassicVTXE(matVtxl, out int vc));
                         }
                     }
                 }
@@ -359,47 +360,13 @@ namespace AquaModelLibrary.Extra.AM2
                 {
                     aqp.tempTris.Add(genMesh);
                     aqp.vtxlList.Add(matVtxl);
-                    aqp.vtxeList.Add(AquaObjectMethods.ConstructClassicVTXE(matVtxl, out int vc));
+                    aqp.vtxeList.Add(ConstructClassicVTXE(matVtxl, out int vc));
                 }
                 
                 aqpList.Add(aqp);
             }
 
             return aqpList;
-        }
-
-        private static void AddVertices(AquaObject.VTXL vtxl, Dictionary<int, int> vertIdDict, AquaObject.VTXL matVtxl, Vector3 tri, out int x, out int y, out int z)
-        {
-            if (vertIdDict.TryGetValue((int)tri.X, out var value))
-            {
-                x = value;
-            }
-            else
-            {
-                vertIdDict.Add((int)tri.X, matVtxl.vertPositions.Count);
-                x = matVtxl.vertPositions.Count;
-                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.X);
-            }
-            if (vertIdDict.TryGetValue((int)tri.Y, out var value2))
-            {
-                y = value2;
-            }
-            else
-            {
-                vertIdDict.Add((int)tri.Y, matVtxl.vertPositions.Count);
-                y = matVtxl.vertPositions.Count;
-                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.Y);
-            }
-            if (vertIdDict.TryGetValue((int)tri.Z, out var value3))
-            {
-                z = value3;
-            }
-            else
-            {
-                vertIdDict.Add((int)tri.Z, matVtxl.vertPositions.Count);
-                z = matVtxl.vertPositions.Count;
-                AquaObjectMethods.appendVertex(vtxl, matVtxl, (int)tri.Z);
-            }
         }
     }
 }
