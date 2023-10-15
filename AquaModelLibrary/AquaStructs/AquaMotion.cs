@@ -156,7 +156,10 @@ namespace AquaModelLibrary
                 {
                     return vector4Keys[0];
                 }
-                if (time > frameTimings[frameTimings.Count - 1] || time < 0)
+                if (time > frameTimings[frameTimings.Count - 1] )
+                {
+                    return vector4Keys[vector4Keys.Count - 1];
+                } else if (time < 0)
                 {
                     throw new System.Exception("Time out of range");
                 }

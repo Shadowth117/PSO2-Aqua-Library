@@ -2430,7 +2430,12 @@ namespace AquaModelLibrary
                         SetByteListInt(outBytes, dataOffsets[keySet], outBytes.Count);
                         for (int data = 0; data < motion.motionKeys[i].keyData[keySet].keyCount; data++)
                         {
-                            switch (motion.motionKeys[i].keyData[keySet].dataType)
+                            var dataType = motion.motionKeys[i].keyData[keySet].dataType;
+                            if ((dataType & 0x80) > 0)
+                            {
+                                dataType -= 0x80;
+                            }
+                            switch (dataType)
                             {
                                 //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
                                 case 0x1:
