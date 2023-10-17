@@ -345,6 +345,7 @@
     <Compile Include="Extra\DirectX\D3DEnums.cs" />
     <Compile Include="Extra\EnemyData.cs" />
     <Compile Include="Extra\FilenameConstants.cs" />
+    <Compile Include="Extra\FromSoft\BNDHandler.cs" />
     <Compile Include="Extra\FromSoft\DeSAudio\MOIB.cs" />
     <Compile Include="Extra\FromSoft\DeSAudio\MOSB.cs" />
     <Compile Include="Extra\FromSoft\DeSAudio\MOWV.cs" />

@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SoulsFormats.Formats
+namespace SoulsFormats.Formats.Other.MWC
 {
     public class MMD : SoulsFile<MMD>
     {
@@ -43,7 +43,7 @@ namespace SoulsFormats.Formats
             header.usht_08 = br.ReadUInt16();
             header.usht_0A = br.ReadUInt16();
             header.int_0C = br.ReadInt32();
-            
+
             header.meshCount = br.ReadInt32();
             header.faceIndexCount = br.ReadInt32();
             header.vertexCount = br.ReadInt32();
@@ -60,7 +60,7 @@ namespace SoulsFormats.Formats
             header.unkCount4 = br.ReadInt32();
 
             br.Position = meshHeaderOffset;
-            for(int i = 0; i < header.meshCount; i++)
+            for (int i = 0; i < header.meshCount; i++)
             {
                 MeshHeader msh = new MeshHeader();
                 msh.materialId = br.ReadInt32();
@@ -73,17 +73,17 @@ namespace SoulsFormats.Formats
             br.Position = faceIndicesOffset;
             for (int i = 0; i < header.faceIndexCount; i++)
             {
-                faceIndices.Add( br.ReadUInt16() );
+                faceIndices.Add(br.ReadUInt16());
             }
 
             br.Position = vertexDataOffset;
-            for(int i = 0; i < header.vertexCount; i++)
+            for (int i = 0; i < header.vertexCount; i++)
             {
                 vertices.Add(new Vertex(br));
             }
 
             br.Position = boneOffset;
-            for(int i = 0; i < header.boneCount; i++)
+            for (int i = 0; i < header.boneCount; i++)
             {
                 var bone = new Bone();
                 bone.int00 = br.ReadInt32();
@@ -121,7 +121,7 @@ namespace SoulsFormats.Formats
             }
 
             br.Position = textureNameOffset;
-            for(int i = 0; i < header.textureCount; i++)
+            for (int i = 0; i < header.textureCount; i++)
             {
                 texNames.Add(br.ReadASCII());
             }

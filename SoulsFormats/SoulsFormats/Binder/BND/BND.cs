@@ -44,6 +44,11 @@ namespace SoulsFormats
         public List<BinderFile> Files { get; set; }
 
         /// <summary>
+        /// The root file path. Not all BNDs have this.
+        /// </summary>
+        public string rootFilePath = "";
+
+        /// <summary>
         /// Checks whether the data appears to be a file of this format.
         /// </summary>
         protected override bool Is(BinaryReaderEx br)
@@ -77,15 +82,14 @@ namespace SoulsFormats
             br.AssertASCII("BND\0");
             br.AssertUInt16(0xFFFF);
             br.AssertUInt16(0);
-            bnd.internalVersion = br.ReadUInt16();
+            bnd.internalVersion = br.ReadInt32();
             br.ReadUInt32(); //Filesize
             var fileCount = br.ReadInt32();
             var rootFilePathOffset = br.ReadInt32(); //This will be 0 if there is no rootFilePath
-            string rootFilePath = "";
             if(rootFilePathOffset != 0)
             {
                 br.StepIn(rootFilePathOffset);
-                rootFilePath = br.ReadASCII();
+                bnd.rootFilePath = br.ReadASCII();
                 br.StepOut();
             }
 
@@ -96,7 +100,7 @@ namespace SoulsFormats
             var fileHeaders = new List<BinderFileHeader>(fileCount);
             for (int i = 0; i < fileCount; i++)
             {
-                fileHeaders.Add(ReadBinderFileHeader(br, rootFilePath));
+                fileHeaders.Add(ReadBinderFileHeader(br));
             }
 
             return fileHeaders;
@@ -108,9 +112,8 @@ namespace SoulsFormats
         /// <param name="br"></param>
         /// <param name="rootFilePath"></param>
         /// <returns>BinderFileHeader which contains everything needed to grab a file from the BinaryReaderEx</returns>
-        internal static BinderFileHeader ReadBinderFileHeader(BinaryReaderEx br, string rootFilePath)
+        internal static BinderFileHeader ReadBinderFileHeader(BinaryReaderEx br)
         {
-            var rootFilePathOffsetClean = rootFilePath.Substring(0, rootFilePath.Length - 1);
             var id = br.ReadInt32();
             var dataOffset = br.ReadUInt32();
             var fileSize = br.ReadUInt32();
@@ -120,11 +123,82 @@ namespace SoulsFormats
             if(nameOffset != 0)
             {
                 br.StepIn(nameOffset);
-                name = rootFilePathOffsetClean + br.ReadASCII();
+                name = br.ReadShiftJIS();
                 br.StepOut();
             } 
 
-            return new BinderFileHeader(id, name) { DataOffset = dataOffset, UncompressedSize = fileSize };
+            return new BinderFileHeader(id, name) { DataOffset = dataOffset, UncompressedSize = fileSize, CompressedSize = fileSize };
+        }
+
+        /// <summary>
+        /// Write BND with rootFilePath
+        /// </summary>
+        /// <param name="bw"></param>
+        /// <param name="rootFilePath"></param>
+        protected void Write(BinaryWriterEx bw, string rootFilePath)
+        {
+            this.rootFilePath = rootFilePath;
+            Write(bw);
+        }
+
+        /// <summary>
+        /// Write BND
+        /// </summary>
+        /// <param name="bw"></param>
+        protected override void Write(BinaryWriterEx bw)
+        {
+            bw.WriteASCII("BND\0");
+            bw.WriteUInt16(0xFFFF);
+            bw.WriteUInt16(0);
+            bw.WriteInt32(internalVersion);
+            bw.ReserveInt32("FileSize");
+
+            bw.WriteInt32(Files.Count);
+            bw.ReserveInt32("RootFilePath");
+            bw.WriteUInt16(format0);
+            bw.WriteUInt16(format1);
+            bw.WriteUInt32(0);
+            
+            //Write file headers
+            for(int i = 0; i < Files.Count; i++)
+            {
+                bw.WriteInt32(i);
+                bw.ReserveInt32($"FileOffset{i}");
+                bw.WriteInt32(Files[i].Bytes.Length);
+                bw.ReserveInt32($"FileName{i}");
+            }
+
+            //Write RootFilePath
+            if(rootFilePath != "")
+            {
+                bw.FillInt32("RootFilePath", (int)bw.Position);
+                bw.WriteShiftJIS(rootFilePath, true);
+            } else
+            {
+                bw.FillInt32("RootFilePath", 0);
+            }
+
+            //Names
+            for(int i = 0; i < Files.Count; i++)
+            {
+                bw.FillInt32($"FileName{i}", (int)bw.Position);
+                bw.WriteShiftJIS(Files[i].Name, true);
+            }
+            bw.Pad(0x10);
+
+            //Files
+            for(int i = 0; i < Files.Count; i++)
+            {
+                bw.FillInt32($"FileOffset{i}", (int)bw.Position);
+                bw.WriteBytes(Files[i].Bytes);
+
+                if(i != Files.Count - 1)
+                {
+                    bw.Pad(0x10);
+                }
+            }
+
+            bw.FillInt32("FileSize", (int)bw.Position);
         }
     }
 }

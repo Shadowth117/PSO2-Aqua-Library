@@ -1,6 +1,6 @@
 ﻿using Reloaded.Memory.Streams;
 using SoulsFormats;
-using SoulsFormats.Formats;
+using SoulsFormats.Formats.Other.MWC;
 using System.Collections.Generic;
 using System.Numerics;
 
