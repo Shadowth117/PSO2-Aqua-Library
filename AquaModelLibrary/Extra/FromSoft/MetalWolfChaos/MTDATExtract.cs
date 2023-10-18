@@ -15,19 +15,34 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                 Directory.CreateDirectory(outPathBase);
 
                 var mdlPath = Path.Combine(outPathBase, Path.GetFileName(fileBase + ".mdl"));
-                File.WriteAllBytes(mdlPath, mdat.mdlData);
+                if(mdat.mdlData?.Length > 0)
+                {
+                    File.WriteAllBytes(mdlPath, mdat.mdlData);
+                }
 
                 var data2Path = Path.Combine(outPathBase, Path.GetFileName(fileBase + "_2"));
-                File.WriteAllBytes(data2Path, mdat.Data2);
+                if (mdat.Data2?.Length > 0)
+                {
+                    File.WriteAllBytes(data2Path, mdat.Data2);
+                }
 
                 var data3Path = Path.Combine(outPathBase, Path.GetFileName(fileBase + "_3"));
-                File.WriteAllBytes(data3Path, mdat.Data3);
+                if (mdat.Data3?.Length > 0)
+                {
+                    File.WriteAllBytes(data3Path, mdat.Data3);
+                }
 
                 var data5Path = Path.Combine(outPathBase, Path.GetFileName(fileBase + "_5"));
-                File.WriteAllBytes(data5Path, mdat.Data5);
+                if (mdat.Data5?.Length > 0)
+                {
+                    File.WriteAllBytes(data5Path, mdat.Data5);
+                }
 
                 var data6Path = Path.Combine(outPathBase, Path.GetFileName(fileBase + "_6"));
-                File.WriteAllBytes(data6Path, mdat.Data6);
+                if (mdat.Data6?.Length > 0)
+                {
+                    File.WriteAllBytes(data6Path, mdat.Data6);
+                }
 
             }
             else if (fileName.EndsWith("_t.dat"))
