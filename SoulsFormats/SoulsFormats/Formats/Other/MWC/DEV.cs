@@ -26,14 +26,14 @@ namespace SoulsFormats.Formats.Other.MWC
             magic = br.AssertASCII("DEV\0", "DIV\0");
             br.AssertUInt16(0xFFFF);
             br.AssertUInt16(0);
-            br.AssertUInt32(0x3F947AE1);
+            br.AssertUInt32(0x3F947AE1, 0xCA);
             br.ReadInt32(); //File size
 
             br.ReadInt32(); //Data size, file size above -0x20
             var archiveFileCount = br.ReadInt32(); //Archive file count (Should only be 1 or 2 for Metal Wolf Chaos)
             br.AssertUInt32(0);
             br.AssertInt16(0x10);
-            br.AssertInt16(0x5);
+            br.AssertInt16(0x2, 0x5);
 
             for (int i = 0; i < archiveFileCount; i++)
             {
@@ -60,7 +60,7 @@ namespace SoulsFormats.Formats.Other.MWC
                     fileHeader.nameOffset = br.ReadUInt32();
 
                     br.StepIn(fileHeader.nameOffset);
-                    fileHeader.fileName = br.ReadASCII();
+                    fileHeader.fileName = br.ReadShiftJIS();
                     br.StepOut();
 
                     fileHeaderSet.Add(fileHeader);
