@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Windows.Documents;
 
 namespace AquaModelLibrary.Extra
 {
@@ -15,6 +17,47 @@ namespace AquaModelLibrary.Extra
 
     public static class MathExtras
     {
+        public const float kEpsilonNormalSqrt = 1e-15F;
+
+        public static Vector3 GetFaceNormal(Vector3 vert0, Vector3 vert1, Vector3 vert2)
+        {
+            //Calculate face normal
+            Vector3 u = vert1 - vert0;
+            Vector3 v = vert2 - vert0;
+
+            return Vector3.Normalize(Vector3.Cross(u, v));
+        }
+
+        // Returns the angle in degrees between /from/ and /to/. This is always the smallest
+        public static float Angle(Vector3 from, Vector3 to)
+        {
+            // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
+            float denominator = (float)Math.Sqrt(from.GetSquareMagnitude() * to.GetSquareMagnitude());
+            if (denominator < kEpsilonNormalSqrt)
+                return 0F;
+
+            float dot = Clamp(Vector3.Dot(from, to) / denominator, -1F, 1F);
+            return (float)((Math.Acos(dot)) * (180 / Math.PI));
+        }
+
+        // Clamps value between min and max and returns value.
+        // Set the position of the transform to be that of the time
+        // but never less than 1 or more than 3
+        //
+        public static int Clamp(int value, int min, int max)
+        {
+            if (value < min)
+                value = min;
+            else if (value > max)
+                value = max;
+            return value;
+        }
+
+        public static float GetSquareMagnitude(this Vector3 vec3)
+        {
+            return vec3.X * vec3.X + vec3.Y * vec3.Y + vec3.Z * vec3.Z;
+        }
+
         public static bool EpsEqual(this float flt, float otherFloat, float epsilon)
         {
             return otherFloat <= flt + epsilon && otherFloat >= flt - epsilon;

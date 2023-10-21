@@ -21,7 +21,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 var bnd = SoulsFile<BND>.Read(bndRaw);
                 foreach(var file in bnd.Files)
                 {
-                    File.WriteAllBytes(Path.Combine(folderPath, file.Name), file.Bytes);
+                    File.WriteAllBytes(Path.Combine(folderPath, Path.GetFileName(file.Name)), file.Bytes);
                 }
             }
         }

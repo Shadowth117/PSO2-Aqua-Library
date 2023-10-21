@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace SoulsFormats.Formats.Other.MWC
 {
+    /// <summary>
+    /// Metal Wolf Chaos Map Model Data
+    /// </summary>
     public class MMD : SoulsFile<MMD>
     {
         public MMDHeader header;

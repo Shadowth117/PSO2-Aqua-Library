@@ -15,13 +15,13 @@ namespace SoulsFormats.Other
         public int Unk10;
         public int Unk14;
 
-        public List<Bone> Meshes;
+        public List<Bone> Bones;
         public ushort[] Indices;
         public List<Vertex> VerticesA;
         public List<Vertex> VerticesB;
         public List<Vertex> VerticesC;
         public List<VertexD> VerticesD;
-        public List<Struct7> Struct7s;
+        public List<Dummy> Dummies;
         public List<Material> Materials;
         public List<string> Textures;
 
@@ -46,7 +46,7 @@ namespace SoulsFormats.Other
             Unk10 = br.ReadInt32();
             Unk14 = br.ReadInt32();
 
-            int meshCount = br.ReadInt32();
+            int boneCount = br.ReadInt32();
             int indexCount = br.ReadInt32();
             int vertexCountA = br.ReadInt32();
             int vertexCountB = br.ReadInt32();
@@ -67,9 +67,9 @@ namespace SoulsFormats.Other
             int texturesOffset = br.ReadInt32();
 
             br.Position = meshesOffset;
-            Meshes = new List<Bone>();
-            for (int i = 0; i < meshCount; i++)
-                Meshes.Add(new Bone(br));
+            Bones = new List<Bone>();
+            for (int i = 0; i < boneCount; i++)
+                Bones.Add(new Bone(br));
 
             Indices = br.GetUInt16s(indicesOffset, indexCount);
 
@@ -94,9 +94,9 @@ namespace SoulsFormats.Other
                 VerticesD.Add(new VertexD(br));
 
             br.Position = offset7;
-            Struct7s = new List<Struct7>(count7);
+            Dummies = new List<Dummy>(count7);
             for (int i = 0; i < count7; i++)
-                Struct7s.Add(new Struct7(br));
+                Dummies.Add(new Dummy(br));
 
             br.Position = materialsOffset;
             Materials = new List<Material>(materialCount);
@@ -109,6 +109,9 @@ namespace SoulsFormats.Other
                 Textures.Add(br.ReadShiftJIS());
         }
 
+        /// <summary>
+        /// Bones nodes may also reference model data, but should otherwise be seen as normal bones.
+        /// </summary>
         public class Bone
         {
             public Vector3 Translation;
@@ -251,10 +254,20 @@ namespace SoulsFormats.Other
             public Color Color;
             public Vector2[] UVs;
 
-            public short UnkShortA;
+            /// <summary>
+            /// Flag for staticly weighted vertices to indicate a different bone. 0x4 is the parent bone.
+            /// </summary>
+            public short StaticWeightFlag;
             public short UnkShortB;
-            public float UnkFloatA;
-            public float UnkFloatB;
+
+            /// <summary>
+            /// Weight for dynamically weighted vertices to indicate weight to the current bone.
+            /// </summary>
+            public float PrimaryVertexWeight;
+            /// <summary>
+            /// Weight for dynamically weighted vertices to indicate weight to a different bone.
+            /// </summary>
+            public float SecondaryVertexWeight;
 
             public Vertex()
             {
@@ -276,14 +289,14 @@ namespace SoulsFormats.Other
                 if (format >= VertexFormat.B)
                 {
                     // Both may be 0, 4, 8, 12, etc
-                    UnkShortA = br.ReadInt16();
+                    StaticWeightFlag = br.ReadInt16();
                     UnkShortB = br.ReadInt16();
                 }
 
                 if (format >= VertexFormat.C)
                 {
-                    UnkFloatA = br.ReadSingle();
-                    UnkFloatB = br.ReadSingle();
+                    PrimaryVertexWeight = br.ReadSingle();
+                    SecondaryVertexWeight = br.ReadSingle();
                 }
             }
         }
@@ -342,19 +355,19 @@ namespace SoulsFormats.Other
                 for (int i = 0; i < 4; i++)
                     UVs[i] = br.ReadVector2();
 
-                UnkShortA = br.ReadInt16();
+                StaticWeightFlag = br.ReadInt16();
                 UnkShortB = br.ReadInt16();
-                UnkFloatA = br.ReadSingle();
-                UnkFloatB = br.ReadSingle();
+                PrimaryVertexWeight = br.ReadSingle();
+                SecondaryVertexWeight = br.ReadSingle();
             }
         }
 
-        public class Struct7
+        public class Dummy
         {
             public float Unk00, Unk04, Unk08, Unk0C, Unk10, Unk14;
             public int Unk18, Unk1C;
 
-            internal Struct7(BinaryReaderEx br)
+            internal Dummy(BinaryReaderEx br)
             {
                 Unk00 = br.ReadSingle();
                 Unk04 = br.ReadSingle();
@@ -372,7 +385,11 @@ namespace SoulsFormats.Other
             public int Unk04, Unk08, Unk0C;
             public int TextureIndex;
             public int Unk14, Unk18, Unk1C;
-            public float Unk20, Unk24, Unk28, Unk2C, Unk30, Unk34, Unk38, Unk3C, Unk40, Unk44, Unk48, Unk4C;
+
+            /// <summary>
+            /// Color definitions guessed based on order and 3ds Max defaults matching some test models
+            /// </summary>
+            public Vector4 diffuseColor, unknownColor, ambientColor;
             public float Unk60, Unk64, Unk68;
             public int Unk6C;
 
@@ -386,18 +403,9 @@ namespace SoulsFormats.Other
                 Unk14 = br.ReadInt32();
                 Unk18 = br.ReadInt32();
                 Unk1C = br.ReadInt32();
-                Unk20 = br.ReadSingle();
-                Unk24 = br.ReadSingle();
-                Unk28 = br.ReadSingle();
-                Unk2C = br.ReadSingle();
-                Unk30 = br.ReadSingle();
-                Unk34 = br.ReadSingle();
-                Unk38 = br.ReadSingle();
-                Unk3C = br.ReadSingle();
-                Unk40 = br.ReadSingle();
-                Unk44 = br.ReadSingle();
-                Unk48 = br.ReadSingle();
-                Unk4C = br.ReadSingle();
+                diffuseColor = br.ReadVector4();
+                unknownColor = br.ReadVector4();
+                ambientColor = br.ReadVector4();
                 br.AssertInt32(0);
                 br.AssertInt32(0);
                 br.AssertInt32(0);

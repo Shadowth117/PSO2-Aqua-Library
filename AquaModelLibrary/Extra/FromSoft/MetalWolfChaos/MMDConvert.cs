@@ -30,11 +30,11 @@ namespace AquaModelLibrary.Extra.FromSoft
                 node.animatedFlag = 1;
                 node.boneName.SetString($"bone_{i}");
 
-                var mat = MathExtras.Compose(bone.translation, bone.rotation, bone.scale);
+                var mat = MathExtras.Compose(bone.translation / 2000, bone.rotation, bone.scale);
                 Matrix4x4.Invert(mat, out var invMat);
 
                 node.SetInverseBindPoseMatrix(invMat);
-                node.pos = bone.translation;
+                node.pos = bone.translation / 2000;
                 node.eulRot = MathExtras.QuaternionToEuler(bone.rotation);
                 node.scale = bone.scale;
                 node.parentId = i == 0 ? -1 : 0;
@@ -87,7 +87,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                     AquaObjectMethods.AddVertices(vtxl, vertIdDict, matVtxl, tri, out int x, out int y, out int z);
 
                     //Avoid degen tris
-                    if (x == y || x == z || y == z)
+                    if (x == y || x == z || y == z && x != 0xFFFF && y != 0xFFFF && z != 0xFFFF)
                     {
                         continue;
                     }

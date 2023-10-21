@@ -14,6 +14,13 @@ namespace Vector3Integer
             public int Y;
             public int Z;
 
+            public Vec3Int(int x, int y, int z)
+            {
+                X = x;
+                Y = y;
+                Z = z;
+            }
+
             public int[] GetAsArray()
             {
                 return new int[] { X, Y, Z };

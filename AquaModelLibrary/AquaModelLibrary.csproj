@@ -350,6 +350,7 @@
     <Compile Include="Extra\FromSoft\DeSAudio\MOSB.cs" />
     <Compile Include="Extra\FromSoft\DeSAudio\MOWV.cs" />
     <Compile Include="Extra\FromSoft\MetalWolfChaos\DEVDIVExtract.cs" />
+    <Compile Include="Extra\FromSoft\MetalWolfChaos\MDLConvert.cs" />
     <Compile Include="Extra\FromSoft\MetalWolfChaos\MMDConvert.cs" />
     <Compile Include="Extra\FromSoft\MetalWolfChaos\MTDATExtract.cs" />
     <Compile Include="Extra\FromSoft\MetalWolfChaos\OTRConvert.cs" />
