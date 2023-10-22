@@ -188,13 +188,26 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                         continue;
                     }
 
+                    Vector3 vertexNormal = Vector3.Normalize((vertA.Normal + vertB.Normal + vertC.Normal) / 3);
+                    Vector3 faceNormal = Vector3.Normalize(Vector3.Cross(vertB.Position - vertA.Position, vertC.Position - vertA.Position));
+                    float angle = Vector3.Dot(faceNormal, vertexNormal) / (faceNormal.Length() * vertexNormal.Length());
+                    if (angle <= 0)
+                    {
+                        var temp = triIndices.X;
+                        triIndices.X = triIndices.Z;
+                        triIndices.Z = temp;
+
+                        var tempVert = vertA;
+                        vertA = vertC;
+                        vertC = tempVert;
+                    }
                     /*
                     var vertNormSum = vertA.Normal + vertB.Normal + vertC.Normal;
                     var vertNormSum2 = GetVertNormal(vertA, bone, worldMats, boneId) + GetVertNormal(vertB, bone, worldMats, boneId) + GetVertNormal(vertC, bone, worldMats, boneId);
                     var test0FNormal = MathExtras.GetFaceNormal(vertA.Position, vertB.Position, vertC.Position);
-                    var test0 = MathExtras.Angle(test0FNormal, vertNormSum);
+                    var test0 = MathExtras.Angle(test0FNormal, vertNormSum2);
                     var test1FNormal = MathExtras.GetFaceNormal(vertC.Position, vertB.Position, vertA.Position);
-                    var test1 = MathExtras.Angle(test1FNormal, vertNormSum);
+                    var test1 = MathExtras.Angle(test1FNormal, vertNormSum2);
                     if (test0 > test1)
                     {
                         var temp = triIndices.X;
@@ -207,7 +220,7 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                     }
                     else
                     {*/
-                        flip = !flip;
+                    flip = !flip;
                     //}
 
                     //faceIndicesListList.Add(triIndices);
@@ -263,8 +276,8 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                     break;
             }
             faceVtxl.vertPositions.Add(Vector3.Transform(vert.Position / 2000, worldMats[boneId]));
-            faceVtxl.vertColors.Add(new byte[] { vert.Color.B, vert.Color.G, vert.Color.R, vert.Color.A });
             faceVtxl.vertNormals.Add(Vector3.TransformNormal(vert.Normal, worldMats[boneId]));
+            faceVtxl.vertColors.Add(new byte[] { vert.Color.B, vert.Color.G, vert.Color.R, vert.Color.A });
             faceVtxl.uv1List.Add(vert.UVs[0]);
             faceVtxl.uv2List.Add(vert.UVs[1]);
             faceVtxl.uv3List.Add(vert.UVs[2]);
@@ -272,10 +285,16 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
 
             if(vert.PrimaryVertexWeight != 0|| vert.SecondaryVertexWeight != 0)
             {
+                //var finalPos = Vector3.Transform(vert.Position / 2000, worldMats[boneId]) * vert.PrimaryVertexWeight + Vector3.Transform(vert.Position / 2000, worldMats[bone.ParentIndex]) * vert.SecondaryVertexWeight;
+                //faceVtxl.vertPositions.Add(finalPos);
+                //var finalNrm = Vector3.TransformNormal(vert.Normal / 2000, worldMats[boneId]) * vert.PrimaryVertexWeight + Vector3.TransformNormal(vert.Normal / 2000, worldMats[bone.ParentIndex]) * vert.SecondaryVertexWeight;
+                //faceVtxl.vertNormals.Add(finalNrm);
                 faceVtxl.vertWeightIndices.Add(new int[] { boneId, bone.ParentIndex, 0, 0 });
                 faceVtxl.vertWeights.Add(new Vector4(vert.PrimaryVertexWeight, vert.SecondaryVertexWeight, 0, 0));
             } else
             {
+                //faceVtxl.vertPositions.Add(Vector3.Transform(vert.Position / 2000, worldMats[boneId]));
+                //faceVtxl.vertNormals.Add(Vector3.TransformNormal(vert.Normal, worldMats[boneId]));
                 faceVtxl.vertWeightIndices.Add(new int[] { boneId, 0, 0, 0 });
                 faceVtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
             }
