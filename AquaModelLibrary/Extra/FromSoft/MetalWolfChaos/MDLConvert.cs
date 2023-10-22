@@ -1,4 +1,5 @@
-﻿using SoulsFormats;
+﻿using Assimp.Configs;
+using SoulsFormats;
 using SoulsFormats.Other;
 using System;
 using System.Collections.Generic;
@@ -107,10 +108,6 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
         private static void AddMesh(NGSAquaObject aqp, MDL model, Dictionary<int, int> usedMatIds, MDL.Bone bone, int vertSetAddition, List<MDL.Vertex> vertices, List<MDL.Faceset> faceSets, List<Matrix4x4> worldMats, int boneId, MDL.VertexFormat fmt)
         {
             int fs = 0;
-            if(boneId == 14)
-            {
-                var a = 0;
-            }
             foreach (var faceSet in faceSets)
             {
                 Dictionary<int, int> vertMap = new Dictionary<int, int>();
@@ -138,9 +135,25 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                     aqp.tempMats.Add(genMat);
                 }
 
+
+                //DEBUG REMOVE AFTER
+                /*
+                List<int> indexList = new List<int>();
+                List<int> indexListValues = new List<int>();
+                for (int f = faceSet.StartIndex; f < faceSet.StartIndex + faceSet.IndexCount - 2; f++)
+                {
+                    indexList.Add(f);
+                    indexListValues.Add(model.Indices[f]);
+                }
+                List<bool> faceFlipList = new List<bool>();
+                List<Vec3Int> faceIndicesListList = new List<Vec3Int>();
+                */
+                //DEBUG REMOVE AFTER
+
+
                 //Mesh data
                 int vertCounter = 0;
-                bool flip = (faceSet.StartIndex & 1) > 0;
+                bool flip = ((faceSet.StartIndex & 1) > 0);
                 for (int f = faceSet.StartIndex; f < faceSet.StartIndex + faceSet.IndexCount - 2; f++)
                 {
                     AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
@@ -148,26 +161,25 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
 
                     //When index is odd, flip
                     MDL.Vertex vertA, vertB, vertC;
-
+                    bool currentFlip = flip;
                     if (flip)
                     {
                         triIndices = new Vec3Int(model.Indices[f + 2], model.Indices[f + 1], model.Indices[f]);
-                        vertA = vertices[model.Indices[f + 2]];
-                        vertB = vertices[model.Indices[f + 1]];
-                        vertC = vertices[model.Indices[f]];
                     }
                     else
                     {
                         triIndices = new Vec3Int(model.Indices[f], model.Indices[f + 1], model.Indices[f + 2]);
-                        vertA = vertices[model.Indices[f]];
-                        vertB = vertices[model.Indices[f + 1]];
-                        vertC = vertices[model.Indices[f + 2]];
                     }
-                    flip = !flip;
+                    vertA = vertices[triIndices.X];
+                    vertB = vertices[triIndices.Y];
+                    vertC = vertices[triIndices.Z];
 
                     //Avoid degen tris
+                    //Apparently MWC just has some faces made from vertices that are share the same position. We obviously don't want lines.
                     bool nullVert = triIndices.X != 0xFFFF && triIndices.Y != 0xFFFF && triIndices.Z != 0xFFFF;
-                    if (triIndices.X == triIndices.Y || triIndices.X == triIndices.Z || triIndices.Y == triIndices.Z && nullVert)
+                    if (triIndices.X == triIndices.Y || triIndices.X == triIndices.Z || triIndices.Y == triIndices.Z && nullVert || 
+                        MathExtras.EpsEqual(vertA.Position, vertB.Position, MathExtras.basicEpsilon) || MathExtras.EpsEqual(vertA.Position, vertC.Position, MathExtras.basicEpsilon) ||
+                        MathExtras.EpsEqual(vertB.Position, vertC.Position, MathExtras.basicEpsilon))
                     {
                         if(nullVert)
                         {
@@ -175,6 +187,31 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                         }
                         continue;
                     }
+
+                    /*
+                    var vertNormSum = vertA.Normal + vertB.Normal + vertC.Normal;
+                    var vertNormSum2 = GetVertNormal(vertA, bone, worldMats, boneId) + GetVertNormal(vertB, bone, worldMats, boneId) + GetVertNormal(vertC, bone, worldMats, boneId);
+                    var test0FNormal = MathExtras.GetFaceNormal(vertA.Position, vertB.Position, vertC.Position);
+                    var test0 = MathExtras.Angle(test0FNormal, vertNormSum);
+                    var test1FNormal = MathExtras.GetFaceNormal(vertC.Position, vertB.Position, vertA.Position);
+                    var test1 = MathExtras.Angle(test1FNormal, vertNormSum);
+                    if (test0 > test1)
+                    {
+                        var temp = triIndices.X;
+                        triIndices.X = triIndices.Z;
+                        triIndices.Z = temp;
+
+                        var tempVert = vertA;
+                        vertA = vertC;
+                        vertC = tempVert;
+                    }
+                    else
+                    {*/
+                        flip = !flip;
+                    //}
+
+                    //faceIndicesListList.Add(triIndices);
+                    //faceFlipList.Add(currentFlip);
 
                     if(!vertMap.ContainsKey(triIndices.X))
                     {
@@ -198,12 +235,23 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
 
                     genMesh.triList.Add(tri);
                     genMesh.faceVerts.Add(faceVtxl);
-                    genMesh.vertCount += 3;
                 }
-
+                genMesh.vertCount = vertCounter;
                 aqp.tempTris.Add(genMesh);
                 fs++;
             }
+        }
+
+        private static Vector3 GetVertNormal(MDL.Vertex vert, MDL.Bone bone, List<Matrix4x4> worldMats, int boneId)
+        {
+            switch (vert.StaticWeightFlag)
+            {
+                case 0x4:
+                    boneId = bone.ParentIndex;
+                    break;
+            }
+
+            return Vector3.TransformNormal(vert.Normal, worldMats[boneId]);
         }
 
         private static void AddVert(AquaObject.VTXL faceVtxl, MDL.Vertex vert, MDL.Bone bone, List<Matrix4x4> worldMats, int boneId)
@@ -221,8 +269,16 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
             faceVtxl.uv2List.Add(vert.UVs[1]);
             faceVtxl.uv3List.Add(vert.UVs[2]);
             faceVtxl.uv4List.Add(vert.UVs[3]);
-            faceVtxl.vertWeightIndices.Add(new int[] { boneId, 0, 0, 0 });
-            faceVtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+
+            if(vert.PrimaryVertexWeight != 0|| vert.SecondaryVertexWeight != 0)
+            {
+                faceVtxl.vertWeightIndices.Add(new int[] { boneId, bone.ParentIndex, 0, 0 });
+                faceVtxl.vertWeights.Add(new Vector4(vert.PrimaryVertexWeight, vert.SecondaryVertexWeight, 0, 0));
+            } else
+            {
+                faceVtxl.vertWeightIndices.Add(new int[] { boneId, 0, 0, 0 });
+                faceVtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+            }
         }
     }
 }

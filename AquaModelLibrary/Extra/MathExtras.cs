@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Windows.Documents;
+using System.Windows.Input;
 
 namespace AquaModelLibrary.Extra
 {
@@ -17,6 +18,7 @@ namespace AquaModelLibrary.Extra
 
     public static class MathExtras
     {
+        public const float basicEpsilon = 0.00001f;
         public const float kEpsilonNormalSqrt = 1e-15F;
 
         public static Vector3 GetFaceNormal(Vector3 vert0, Vector3 vert1, Vector3 vert2)
@@ -37,7 +39,9 @@ namespace AquaModelLibrary.Extra
                 return 0F;
 
             float dot = Clamp(Vector3.Dot(from, to) / denominator, -1F, 1F);
-            return (float)((Math.Acos(dot)) * (180 / Math.PI));
+            var finalValue = (float)((Math.Acos(dot)) * (180 / Math.PI));
+
+            return finalValue;
         }
 
         // Clamps value between min and max and returns value.
