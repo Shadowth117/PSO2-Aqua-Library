@@ -188,20 +188,6 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                         continue;
                     }
 
-                    Vector3 vertexNormal = Vector3.Normalize((vertA.Normal + vertB.Normal + vertC.Normal) / 3);
-                    Vector3 faceNormal = Vector3.Normalize(Vector3.Cross(vertB.Position - vertA.Position, vertC.Position - vertA.Position));
-                    float angle = Vector3.Dot(faceNormal, vertexNormal) / (faceNormal.Length() * vertexNormal.Length());
-                    if (angle <= 0)
-                    {
-                        var temp = triIndices.X;
-                        triIndices.X = triIndices.Z;
-                        triIndices.Z = temp;
-
-                        var tempVert = vertA;
-                        vertA = vertC;
-                        vertC = tempVert;
-                    }
-                    /*
                     var vertNormSum = vertA.Normal + vertB.Normal + vertC.Normal;
                     var vertNormSum2 = GetVertNormal(vertA, bone, worldMats, boneId) + GetVertNormal(vertB, bone, worldMats, boneId) + GetVertNormal(vertC, bone, worldMats, boneId);
                     var test0FNormal = MathExtras.GetFaceNormal(vertA.Position, vertB.Position, vertC.Position);
@@ -219,9 +205,9 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                         vertC = tempVert;
                     }
                     else
-                    {*/
-                    flip = !flip;
-                    //}
+                    {
+                        flip = !flip;
+                    }
 
                     //faceIndicesListList.Add(triIndices);
                     //faceFlipList.Add(currentFlip);
