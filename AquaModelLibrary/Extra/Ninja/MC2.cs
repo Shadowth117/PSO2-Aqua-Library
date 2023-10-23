@@ -53,7 +53,7 @@ namespace AquaModelLibrary.Extra.Ninja
                 mc2FaceData.bt2 = sr.ReadBE<byte>();
                 mc2FaceData.bt3 = sr.ReadBE<byte>();
 
-                mc2FaceData.unkVec3 = sr.ReadBEV3();
+                mc2FaceData.faceNormal = sr.ReadBEV3();
                 mc2FaceData.unkVec4 = sr.ReadBEV4();
 
                 faceData.Add(mc2FaceData);
@@ -106,7 +106,7 @@ namespace AquaModelLibrary.Extra.Ninja
             public byte bt2;
             public byte bt3;
 
-            public Vector3 unkVec3;
+            public Vector3 faceNormal;
             public Vector4 unkVec4;
         }
 

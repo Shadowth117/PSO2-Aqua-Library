@@ -53,6 +53,9 @@ namespace AquaModelLibrary.Extra.Ninja
                 faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert0] / 10);
                 faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert1] / 10);
                 faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert2] / 10);
+                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
+                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
+                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
 
                 genMesh.faceVerts.Add(faceVtxl);
                 genMesh.triList.Add(face);
