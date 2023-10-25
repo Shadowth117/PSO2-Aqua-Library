@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Reloaded.Memory.Streams;
 
 namespace AquaModelLibrary.Extra.Ninja
 {
-    internal class ARC
+    public class ARC
     {
+        List<byte[]> files = new List<byte[]>();
+        public ARC() { }
+
+        public ARC(BufferedStreamReader sr)
+        {
+
+        }
     }
 }

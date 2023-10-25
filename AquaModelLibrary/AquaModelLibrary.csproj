@@ -374,6 +374,8 @@
     <Compile Include="Extra\Morpheme\NSAConvert.cs" />
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
+    <Compile Include="Extra\Ninja\ARC.cs" />
+    <Compile Include="Extra\Ninja\LND.cs" />
     <Compile Include="Extra\Ninja\MC2.cs" />
     <Compile Include="Extra\Ninja\MC2Convert.cs" />
     <Compile Include="Extra\Ninja\NinjaHeader.cs" />

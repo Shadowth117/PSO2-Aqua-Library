@@ -21,7 +21,7 @@ namespace AquaModelLibrary.Extra.Ninja
         }
 
         /// <summary>
-        /// Specifically for 
+        /// This seems to be mainly for older LND archives. They have an actual LND magic unlike the more common type
         /// </summary>
         public void ReadAltLND(BufferedStreamReader sr)
         {
