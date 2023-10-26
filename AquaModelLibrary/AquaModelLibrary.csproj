@@ -153,10 +153,10 @@
       <HintPath>..\packages\AssimpNet.5.0.0-beta1\lib\net40\AssimpNet.dll</HintPath>
     </Reference>
     <Reference Include="csharp-prs, Version=2.1.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\csharp-prs.2.1.3\lib\netstandard2.0\csharp-prs.dll</HintPath>
+      <HintPath>..\packages\csharp-prs.2.1.3\lib\netstandard2.0\csharp-prs.dll</HintPath>
     </Reference>
     <Reference Include="csharp-prs-interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\csharp-prs-interfaces.1.0.0\lib\netstandard2.0\csharp-prs-interfaces.dll</HintPath>
+      <HintPath>..\packages\csharp-prs-interfaces.1.0.0\lib\netstandard2.0\csharp-prs-interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0-preview.3.23174.8\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
@@ -497,9 +497,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ZstdNet.1.4.5\build\ZstdNet.targets'))" />
     <Error Condition="!Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets'))" />
-    <Error Condition="!Exists('..\..\packages\csharp-prs.2.1.3\build\csharp-prs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\csharp-prs.2.1.3\build\csharp-prs.targets'))" />
+    <Error Condition="!Exists('..\packages\csharp-prs.2.1.3\build\csharp-prs.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\csharp-prs.2.1.3\build\csharp-prs.targets'))" />
   </Target>
   <Import Project="..\packages\ZstdNet.1.4.5\build\ZstdNet.targets" Condition="Exists('..\packages\ZstdNet.1.4.5\build\ZstdNet.targets')" />
   <Import Project="..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.5.0.0-beta1\build\AssimpNet.targets')" />
-  <Import Project="..\..\packages\csharp-prs.2.1.3\build\csharp-prs.targets" Condition="Exists('..\..\packages\csharp-prs.2.1.3\build\csharp-prs.targets')" />
+  <Import Project="..\packages\csharp-prs.2.1.3\build\csharp-prs.targets" Condition="Exists('..\packages\csharp-prs.2.1.3\build\csharp-prs.targets')" />
 </Project>
