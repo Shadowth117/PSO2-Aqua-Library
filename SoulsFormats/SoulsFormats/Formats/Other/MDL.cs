@@ -457,7 +457,7 @@ namespace SoulsFormats.Other
                     {
                         Vertex v1 = vertices[vi1];
                         Vertex v2 = vertices[vi2];
-                        Vertex v3 = vertices[vi3];
+                        Vertex v3 = vertices[vi3];                       
                         Vector3 vertexNormal = Vector3.Normalize((v1.Normal + v2.Normal + v3.Normal) / 3);
                         Vector3 faceNormal = Vector3.Normalize(Vector3.Cross(v2.Position - v1.Position, v3.Position - v1.Position));
                         float angle = Vector3.Dot(faceNormal, vertexNormal) / (faceNormal.Length() * vertexNormal.Length());

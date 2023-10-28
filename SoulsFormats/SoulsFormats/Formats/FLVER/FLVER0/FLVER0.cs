@@ -52,7 +52,7 @@ namespace SoulsFormats
                 do
                 {
                     bone = Bones[bone.ParentIndex];
-                    matrix *= Bones[index].ComputeLocalTransform();
+                    matrix *= bone.ComputeLocalTransform();
                 } while (bone.ParentIndex != -1);
             }
 
