@@ -375,6 +375,7 @@
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="Extra\Ninja\ARC.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\PATH.cs" />
     <Compile Include="Extra\Ninja\LND.cs" />
     <Compile Include="Extra\Ninja\MC2.cs" />
     <Compile Include="Extra\Ninja\MC2Convert.cs" />

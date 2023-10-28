@@ -27,7 +27,8 @@ namespace AquaModelLibrary.Extra.Ninja
             header.unkCount = sr.ReadBE<int>();
             header.stripDataOffset = sr.ReadBE<int>();
             header.stripDataCount = sr.ReadBE<int>();
-            header.unkVec4 = sr.ReadBEV4();
+            header.minBounding = sr.ReadBEV2();
+            header.maxBounding = sr.ReadBEV2();
             header.ushort0 = sr.Read<ushort>();
             header.ushort1 = sr.Read<ushort>();
             header.ushort2 = sr.Read<ushort>();
@@ -54,7 +55,8 @@ namespace AquaModelLibrary.Extra.Ninja
                 mc2FaceData.bt3 = sr.ReadBE<byte>();
 
                 mc2FaceData.faceNormal = sr.ReadBEV3();
-                mc2FaceData.unkVec4 = sr.ReadBEV4();
+                header.minBounding = sr.ReadBEV2();
+                header.maxBounding = sr.ReadBEV2();
 
                 faceData.Add(mc2FaceData);
             }
@@ -87,7 +89,8 @@ namespace AquaModelLibrary.Extra.Ninja
 
             public int stripDataOffset;
             public int stripDataCount;
-            public Vector4 unkVec4;
+            public Vector2 minBounding;
+            public Vector2 maxBounding;
             public ushort ushort0;
             public ushort ushort1;
             public ushort ushort2;
@@ -107,7 +110,8 @@ namespace AquaModelLibrary.Extra.Ninja
             public byte bt3;
 
             public Vector3 faceNormal;
-            public Vector4 unkVec4;
+            public Vector2 minBounding;
+            public Vector2 maxBounding;
         }
 
         public class MC2Sector
@@ -126,7 +130,8 @@ namespace AquaModelLibrary.Extra.Ninja
                 mc2Sector.usesOffset = sr.ReadBE<ushort>();
                 mc2Sector.indexCount = sr.ReadBE<ushort>();
                 mc2Sector.indexOffset = sr.ReadBE<int>();
-                mc2Sector.vec4 = sr.ReadBE<Vector4>();
+                mc2Sector.minBounding = sr.ReadBEV2();
+                mc2Sector.maxBounding = sr.ReadBEV2();
                 mc2Sector.index0 = sr.ReadBE<short>();
                 mc2Sector.index1 = sr.ReadBE<short>();
                 mc2Sector.index2 = sr.ReadBE<short>();
@@ -157,7 +162,8 @@ namespace AquaModelLibrary.Extra.Ninja
             public ushort usesOffset;
             public ushort indexCount;
             public int indexOffset;
-            public Vector4 vec4;
+            public Vector2 minBounding;
+            public Vector2 maxBounding;
 
             //If usesOffset is 0, indices are here
             public short index0;
