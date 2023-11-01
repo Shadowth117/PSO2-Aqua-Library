@@ -16,6 +16,7 @@ namespace AquaModelLibrary.Extra.Ninja
         public List<int> extraFileOffsets = new List<int>();
         public ARCLNDRefTableHead refTable;
         public List<ARCLNDRefEntry> refTableEntries = new List<ARCLNDRefEntry>();
+        public ARCLNDMainDataHeader mainDataHeader;
 
         //LND Data
         public NinjaHeader nHeader;
@@ -80,7 +81,7 @@ namespace AquaModelLibrary.Extra.Ninja
             arcLndHeader.mainDataOffset = sr.ReadBE<int>();
             arcLndHeader.extraFileCount = sr.ReadBE<int>();
             arcLndHeader.extraFileOffsetsOffset = sr.ReadBE<int>();
-            arcLndHeader.unkFileOffset = sr.ReadBE<int>();
+            arcLndHeader.motionFileOffset = sr.ReadBE<int>();
 
             arcLndHeader.texRefTableOffset = sr.ReadBE<int>();
             arcLndHeader.GVMOffset = sr.ReadBE<int>();
@@ -90,6 +91,28 @@ namespace AquaModelLibrary.Extra.Ninja
             {
                 extraFileOffsets.Add(sr.ReadBE<int>());
             }
+
+            foreach (var offset in extraFileOffsets)
+            {
+                sr.Seek(0x20 + offset, System.IO.SeekOrigin.Begin);
+                //TODO
+            }
+
+            //Model
+            sr.Seek(0x20 + arcLndHeader.mainDataOffset, System.IO.SeekOrigin.Begin);
+            mainDataHeader = new ARCLNDMainDataHeader();
+            mainDataHeader.mainOffsetTableOffset = sr.ReadBE<int>();
+            mainDataHeader.unkOffset0 = sr.ReadBE<int>();
+            mainDataHeader.unkCount = sr.ReadBE<int>();
+            mainDataHeader.unkOffset1 = sr.ReadBE<int>();
+
+            mainDataHeader.unkInt_10 = sr.ReadBE<int>();
+            mainDataHeader.unkInt_14 = sr.ReadBE<int>();
+            mainDataHeader.unkInt_18 = sr.ReadBE<int>();
+            mainDataHeader.unkInt_1C = sr.ReadBE<int>();
+
+
+
 
             //Read texture reference table
             sr.Seek(0x20 + arcLndHeader.texRefTableOffset, System.IO.SeekOrigin.Begin);
@@ -107,7 +130,12 @@ namespace AquaModelLibrary.Extra.Ninja
                 refTableEntries.Add(refEntry);
             }
 
-            //
+            //Read motions
+            if(arcLndHeader.motionFileOffset > 0)
+            {
+                sr.Seek(0x20 + arcLndHeader.motionFileOffset, System.IO.SeekOrigin.Begin);
+                //TODO
+            }
 
             sr.Seek(0x20 + arcLndHeader.GVMOffset, System.IO.SeekOrigin.Begin);
             sr.Seek(sr.ReadBE<int>() + 0x20, System.IO.SeekOrigin.Begin);
@@ -152,6 +180,8 @@ namespace AquaModelLibrary.Extra.Ninja
                 head.dataCount = sr.ReadBE<int>();
                 motionDataHead2List.Add(head);
             }
+
+            //TODO
             /*
             foreach (var motionHead in motionDataHead2List)
             {
