@@ -1,11 +1,6 @@
 ﻿using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -106,7 +101,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             sr.Seek(pathHeader.rawPathOffset + 0x8, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < pathHeader.rawPathCount / 8; i++)
+            for (int i = 0; i < pathHeader.rawPathCount / 8; i++)
             {
                 RawPathDefinition pathDef = new RawPathDefinition();
                 pathDef.unkShort0 = sr.ReadBE<ushort>();
@@ -134,7 +129,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public ushort lengthsCount;
             public int id;
             public int unkInt;
-            public float totalLength; 
+            public float totalLength;
             public int definitionOffset;
             public int lengthsOffset;
         }

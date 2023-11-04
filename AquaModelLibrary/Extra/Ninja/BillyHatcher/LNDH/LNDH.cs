@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
+namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
     //LND header
     public struct LNDHeader
@@ -92,8 +92,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
     {
         public int layoutsOffset;
         public int unkOffset0;
-        public int polyInfoOffset;
-        public int unkOffset1;
+        public int polyInfo0Offset; //Strips start with 0x98
+        public int polyInfo1Offset; //Strips start with 0x90
 
         public ushort extraVertDataCount;
         public ushort usht12;
@@ -101,8 +101,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
         public Vector3 Position;
 
         //SubObjs
-        public PolyInfo polyInfo = null;
+        public PolyInfo polyInfo0 = null;
+        public PolyInfo polyInfo1 = null;
         public List<LNDVertLayout> layouts = new List<LNDVertLayout>();
+        public VertData vertData = null;
     }
 
     public class PolyInfo
@@ -116,6 +118,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
         //SubObjs
         public List<MaterialInfo> matInfo = new List<MaterialInfo>();
         public List<List<List<int>>> triIndicesList = new List<List<List<int>>>();
+        public List<List<List<int>>> triIndicesListStarts = new List<List<List<int>>>();
+
+        //Helper
+        public Dictionary<int, int> vertIndexMapping = new Dictionary<int, int>();
     }
 
     public struct MaterialInfo
@@ -140,7 +146,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
     public class VertData
     {
         public List<Vector3> vertPositions = new List<Vector3>();  //1, position data
-        public List<short[]> vert2Data = new List<short[]>();      //2, unknown data
+        public List<byte[]> vert2Data = new List<byte[]>();        //2, 3 bytes
         public List<short> vertColorData = new List<short>();      //3, possibly color data
         public List<short[]> vertUVData = new List<short[]>();     //5, probably uv data?
     }

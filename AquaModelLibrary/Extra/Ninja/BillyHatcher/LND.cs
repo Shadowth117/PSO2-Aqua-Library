@@ -1,14 +1,17 @@
-﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
-using Reloaded.Memory.Streams;
+﻿using Reloaded.Memory.Streams;
 using System.Collections.Generic;
-using static AquaModelLibrary.Extra.Ninja.ARC;
+using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
+using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
+using System.Diagnostics;
 
-namespace AquaModelLibrary.Extra.Ninja
+namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
     public class LND
     {
         public byte[] gvmBytes = null;
         public List<uint> pof0Offsets = new List<uint>();
+
+        public bool isArcLND = false;
 
         //ARCLND Data
         public ARCHeader arcHeader;
@@ -57,6 +60,7 @@ namespace AquaModelLibrary.Extra.Ninja
                     gvmBytes = GVMUtil.ReadGVMBytes(sr);
                 }
             } else {
+                isArcLND = true;
                 //This is based more around the .arc format
                 ReadARCLND(sr);
                 gvmBytes = GVMUtil.ReadGVMBytes(sr);
@@ -296,8 +300,8 @@ namespace AquaModelLibrary.Extra.Ninja
                     LNDMeshInfo2 lndMeshInfo2 = new LNDMeshInfo2();
                     lndMeshInfo2.layoutsOffset = sr.ReadBE<int>();
                     lndMeshInfo2.unkOffset0 = sr.ReadBE<int>();
-                    lndMeshInfo2.polyInfoOffset = sr.ReadBE<int>();
-                    lndMeshInfo2.unkOffset1 = sr.ReadBE<int>();
+                    lndMeshInfo2.polyInfo0Offset = sr.ReadBE<int>();
+                    lndMeshInfo2.polyInfo1Offset = sr.ReadBE<int>();
 
                     lndMeshInfo2.extraVertDataCount = sr.ReadBE<ushort>();
                     lndMeshInfo2.usht12 = sr.ReadBE<ushort>();
@@ -307,6 +311,7 @@ namespace AquaModelLibrary.Extra.Ninja
 
                     sr.Seek(lndMeshInfo2.layoutsOffset + 0x8, System.IO.SeekOrigin.Begin);
                     List<LNDVertLayout> layouts = new List<LNDVertLayout>();
+                    var vertTypeCount = 0;
                     while (true) //not sure wtf defines the count here
                     {
                         LNDVertLayout lyt = new LNDVertLayout();
@@ -315,6 +320,7 @@ namespace AquaModelLibrary.Extra.Ninja
                         {
                             break;
                         }
+                        vertTypeCount++;
                         lyt.dataType = sr.Read<byte>();
                         lyt.vertCount = sr.ReadBE<ushort>();
                         lyt.unkCount = sr.ReadBE<int>();
@@ -325,6 +331,10 @@ namespace AquaModelLibrary.Extra.Ninja
                     lndMeshInfo2.layouts = layouts;
 
                     //Vertex data
+                    if (layouts.Count > 0)
+                    {
+                        lndMeshInfo2.vertData = new VertData();
+                    }
                     foreach (var lyt in layouts)
                     {
                         sr.Seek(lyt.vertDataOffset + 0x8, System.IO.SeekOrigin.Begin);
@@ -333,12 +343,16 @@ namespace AquaModelLibrary.Extra.Ninja
                             switch (lyt.vertType)
                             {
                                 case 0x1:
+                                    lndMeshInfo2.vertData.vertPositions.Add(sr.ReadBEV3());
                                     break;
                                 case 0x2:
+                                    lndMeshInfo2.vertData.vert2Data.Add(new byte[] { sr.Read<byte>(), sr.Read<byte>(), sr.Read<byte>() });
                                     break;
                                 case 0x3:
+                                    lndMeshInfo2.vertData.vertColorData.Add(sr.ReadBE<short>());
                                     break;
                                 case 0x5:
+                                    lndMeshInfo2.vertData.vertUVData.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
                                     break;
                                 default:
                                     throw new System.Exception($"Unk Vert type: {lyt.vertType:X} Data type: {lyt.dataType:X}");
@@ -347,62 +361,167 @@ namespace AquaModelLibrary.Extra.Ninja
                     }
 
                     //Polygon data
-                    sr.Seek(lndMeshInfo2.polyInfoOffset + 0x8, System.IO.SeekOrigin.Begin);
-                    PolyInfo polyInfo = new PolyInfo();
-                    polyInfo.materialOffset = sr.ReadBE<int>();
-                    polyInfo.unkCount = sr.ReadBE<ushort>();
-                    polyInfo.materialDataCount = sr.ReadBE<ushort>();
-                    polyInfo.polyDataOffset = sr.ReadBE<int>();
-                    polyInfo.polyDataBufferSize = sr.ReadBE<int>();
-                    lndMeshInfo2.polyInfo = polyInfo;
-
-                    //Material data
-                    sr.Seek(polyInfo.materialOffset + 0x8, System.IO.SeekOrigin.Begin);
-                    List<MaterialInfo> matInfoList = new List<MaterialInfo>();
-                    for (int i = 0; i < polyInfo.materialDataCount; i++)
+                    if (lndMeshInfo2.polyInfo0Offset != 0)
                     {
-                        MaterialInfo matInfo = new MaterialInfo();
-                        matInfo.matInfoType = sr.ReadBE<int>();
-                        matInfo.matData0 = sr.Read<byte>();
-                        matInfo.matData1 = sr.Read<byte>();
-                        matInfo.matData2 = sr.Read<byte>();
-                        matInfo.matData3 = sr.Read<byte>();
-                        matInfoList.Add(matInfo);
+                        sr.Seek(lndMeshInfo2.polyInfo0Offset + 0x8, System.IO.SeekOrigin.Begin);
+                        PolyInfo polyInfo = new PolyInfo();
+                        polyInfo.materialOffset = sr.ReadBE<int>();
+                        polyInfo.unkCount = sr.ReadBE<ushort>();
+                        polyInfo.materialDataCount = sr.ReadBE<ushort>();
+                        polyInfo.polyDataOffset = sr.ReadBE<int>();
+                        polyInfo.polyDataBufferSize = sr.ReadBE<int>();
+                        lndMeshInfo2.polyInfo0 = polyInfo;
+                        ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo);
                     }
-                    polyInfo.matInfo = matInfoList;
-
-                    //Polygons
-                    sr.Seek(polyInfo.polyDataOffset + 0x8, System.IO.SeekOrigin.Begin);
-                    List<List<List<int>>> triIndicesList = new List<List<List<int>>>();
-                    while (sr.Position() < polyInfo.polyDataBufferSize + polyInfo.polyDataOffset + 8)
+                    if (lndMeshInfo2.polyInfo1Offset != 0)
                     {
-                        var type = sr.Read<byte>();
-                        var count = sr.ReadBE<ushort>();
-                        if (type == 0)
-                        {
-                            break;
-                        }
-                        List<List<int>> triIndices = new List<List<int>>();
-                        for (int i = 0; i < count; i++)
-                        {
-                            List<int> triIndex = new List<int>();
-                            for (int j = 0; j < lndMeshInfo2.extraVertDataCount + 1; j++)
-                            {
-                                triIndex.Add(sr.Read<byte>());
-                            }
-                            triIndices.Add(triIndex);
-                        }
-                        triIndicesList.Add(triIndices);
+                        sr.Seek(lndMeshInfo2.polyInfo1Offset + 0x8, System.IO.SeekOrigin.Begin);
+                        PolyInfo polyInfo = new PolyInfo();
+                        polyInfo.materialOffset = sr.ReadBE<int>();
+                        polyInfo.unkCount = sr.ReadBE<ushort>();
+                        polyInfo.materialDataCount = sr.ReadBE<ushort>();
+                        polyInfo.polyDataOffset = sr.ReadBE<int>();
+                        polyInfo.polyDataBufferSize = sr.ReadBE<int>();
+                        lndMeshInfo2.polyInfo1 = polyInfo;
+                        ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo);
                     }
-                    polyInfo.triIndicesList = triIndicesList;
 
                     meshInfo.Add(lndMeshInfo);
-                }  
+                }
             }
 
             //Seek for other data
             sr.Seek(nHeader.fileSize + 0x8, System.IO.SeekOrigin.Begin);
         }
 
+        private static void ReadPolyData(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, PolyInfo polyInfo)
+        {
+            //Material data
+            byte[] indexSizes = null;
+            if (polyInfo != null)
+            {
+                sr.Seek(polyInfo.materialOffset + 0x8, System.IO.SeekOrigin.Begin);
+                List<MaterialInfo> matInfoList = new List<MaterialInfo>();
+                for (int i = 0; i < polyInfo.materialDataCount; i++)
+                {
+                    MaterialInfo matInfo = new MaterialInfo();
+                    matInfo.matInfoType = sr.ReadBE<int>();
+                    matInfo.matData0 = sr.Read<byte>();
+                    matInfo.matData1 = sr.Read<byte>();
+                    matInfo.matData2 = sr.Read<byte>();
+                    matInfo.matData3 = sr.Read<byte>();
+                    matInfoList.Add(matInfo);
+
+                    switch(matInfo.matInfoType)
+                    {
+                        case 0x09000000:
+                            var mapping = new byte[8];
+                            mapping[0] = (byte)(matInfo.matData3 % 0x10);
+                            mapping[1] = (byte)(matInfo.matData3 / 0x10);
+                            mapping[2] = (byte)(matInfo.matData2 % 0x10);
+                            mapping[3] = (byte)(matInfo.matData2 / 0x10);
+                            mapping[4] = (byte)(matInfo.matData1 % 0x10);
+                            mapping[5] = (byte)(matInfo.matData1 / 0x10);
+                            mapping[6] = (byte)(matInfo.matData0 % 0x10);
+                            mapping[7] = (byte)(matInfo.matData0 / 0x10);
+
+                            var tempDict = new Dictionary<int, int>();
+                            for(int j = 0; j < mapping.Length; j++)
+                            {
+                                //It's likely only 8 maps to another vertex index, but just in case
+                                if (mapping[j] != 0 && !tempDict.ContainsKey(mapping[j]))
+                                {
+                                    tempDict.Add(mapping[j], j);
+                                    polyInfo.vertIndexMapping.Add(j, j);
+                                } else if (mapping[j] == 0) //0 only maps to itself
+                                {
+                                    polyInfo.vertIndexMapping.Add(j, j);
+                                } else
+                                {
+                                    polyInfo.vertIndexMapping.Add(j, tempDict[mapping[j]]);
+                                }
+                            }
+                            break;
+                        //Get the sizes of individual indices for the triangle definitions
+                        case 0x01000000:
+                            indexSizes = new byte[8];
+                            indexSizes[0] = (byte)(matInfo.matData3 % 0x10);
+                            indexSizes[1] = (byte)(matInfo.matData3 / 0x10);
+                            indexSizes[2] = (byte)(matInfo.matData2 % 0x10);
+                            indexSizes[3] = (byte)(matInfo.matData2 / 0x10);
+                            indexSizes[4] = (byte)(matInfo.matData1 % 0x10);
+                            indexSizes[5] = (byte)(matInfo.matData1 / 0x10);
+                            indexSizes[6] = (byte)(matInfo.matData0 % 0x10);
+                            indexSizes[7] = (byte)(matInfo.matData0 / 0x10);
+                            break;
+                    }
+                }
+                polyInfo.matInfo = matInfoList;
+            }
+
+            //Polygons
+            if (polyInfo != null && polyInfo.polyDataOffset != 0)
+            {
+                sr.Seek(polyInfo.polyDataOffset + 0x8, System.IO.SeekOrigin.Begin);
+                List<List<List<int>>> triIndicesList = new List<List<List<int>>>();
+                List<List<List<int>>> triIndicesListStarts = new List<List<List<int>>>();
+                while (sr.Position() < polyInfo.polyDataBufferSize + polyInfo.polyDataOffset + 8)
+                {
+                    var type = sr.Read<byte>();
+                    var count = sr.ReadBE<ushort>();
+
+                    if (type == 0)
+                    {
+                        break;
+                    }
+                    List<List<int>> triIndices = new List<List<int>>();
+                    List<List<int>> triIndicesStarts = new List<List<int>>();
+                    var starts = new List<int>();
+                    starts.Add(type);
+                    starts.Add(count);
+                    triIndicesStarts.Add(starts);
+                    for (int i = 0; i < count; i++)
+                    {
+                        List<int> triIndex = new List<int>();
+                        for (int j = 0; j < vertTypeCount; j++)
+                        {
+                            var lyt = lndMeshInfo2.layouts[j];
+                            if(indexSizes?.Length > j )
+                            {
+                                switch(indexSizes[j])
+                                {
+                                    case 0: //Skip
+                                        break;
+                                    case 0x2:
+                                    case 0x8:
+                                        triIndex.Add(sr.Read<byte>());
+                                        break;
+                                    case 0xC:
+                                        triIndex.Add(sr.ReadBE<ushort>());
+                                        break;
+                                    default:
+                                        throw new System.Exception();
+                                }
+                            } else //Fallback for if for some godforsaken reason this doesn't exist
+                            {
+                                if (lyt.vertCount > 0xFF)
+                                {
+                                    triIndex.Add(sr.ReadBE<ushort>());
+                                }
+                                else
+                                {
+                                    triIndex.Add(sr.Read<byte>());
+                                }
+                            }
+                        }
+                        triIndices.Add(triIndex);
+                    }
+                    triIndicesList.Add(triIndices);
+                    triIndicesListStarts.Add(triIndicesStarts);
+                }
+                polyInfo.triIndicesList = triIndicesList;
+                polyInfo.triIndicesListStarts = triIndicesListStarts;
+            }
+        }
     }
 }

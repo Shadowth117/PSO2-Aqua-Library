@@ -374,10 +374,11 @@
     <Compile Include="Extra\Morpheme\NSAConvert.cs" />
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
-    <Compile Include="Extra\Ninja\BillyHatcher\LND\LND.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\LNDConvert.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\LNDH\LNDH.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\ARC.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\GLK.cs" />
-    <Compile Include="Extra\Ninja\BillyHatcher\LND\ARCLND.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\LNDH\ARCLND.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\PATH.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LND.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\MC2.cs" />

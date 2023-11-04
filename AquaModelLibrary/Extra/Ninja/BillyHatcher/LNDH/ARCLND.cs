@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
+namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
     //ARCLND
     public struct ARCLNDHeader
@@ -52,10 +53,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
         public int vertDataCount;
         public int vertDataOffset;
 
-        public int unkCount1;
-        public int unkOffset1;
-        public int unkCount2;
-        public int unkOffset2;
+        public int faceSetsCount;
+        public int faceSetsOffset;
+        public int nodeBoundingCount;
+        public int nodeBoundingOffset;
 
         public int unkCount3;
         public int unkCount4;
@@ -108,4 +109,50 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LND
         public int offset;
     }
 
+    public struct ARCLNDFaceDataRef
+    {
+        public int unkInt;
+        public int offset;
+    }
+
+    public struct ARCLNDFaceDataHead
+    {
+        public int unkInt0;
+        public int unkInt1;
+        public int unkInt2;
+        public int faceDataOffset;
+        public int bufferSize;
+    }
+
+    public struct ARCLNDNodeBounding
+    {
+        public float unkFlt_00;
+        public ushort usht_04;
+        public ushort usht_06;
+        public ushort usht_08;
+        public ushort usht_0A;
+        public int int_0C;
+
+        public int int_10;
+        public int int_14;
+        public int int_18;
+        public int int_1C;
+
+        public int int_20;
+        public int int_24;
+        public int int_28;
+        public int int_2C;
+
+        public Vector2 minBounding;
+        public Vector2 maxBounding;
+    }
+
+    public struct unkData
+    {
+        public int int_00;
+        public int int_04;
+        public int int_08;
+        public int int_0C;
+        public int int_10;
+    }
 }

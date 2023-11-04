@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja
+namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
     public class MC2
     {

@@ -642,9 +642,11 @@ namespace AquaModelLibrary
             {
                 genMat.blendType = "opaque";
             }
-            genMat.shaderNames = new List<string>();
-            genMat.shaderNames.Add("0002p");
-            genMat.shaderNames.Add("0002");
+            genMat.shaderNames = new List<string>
+            {
+                "0002p",
+                "0002"
+            };
             genMat.texNames = new List<string>();
 
             int def0;

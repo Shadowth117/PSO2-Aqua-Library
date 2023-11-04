@@ -2,9 +2,8 @@
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 
-namespace AquaModelLibrary.Extra.Ninja
+namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
     public class PRD
     {

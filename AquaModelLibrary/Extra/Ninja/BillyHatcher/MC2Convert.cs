@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Runtime.InteropServices.WindowsRuntime;
 
-namespace AquaModelLibrary.Extra.Ninja
+namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
     public class MC2Convert
     {
