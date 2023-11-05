@@ -16,10 +16,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         //ARCLND Data
         public ARCHeader arcHeader;
         public ARCLNDHeader arcLndHeader;
-        public List<int> extraFileOffsets = new List<int>();
-        public ARCLNDRefTableHead refTable;
-        public List<ARCLNDRefEntry> refTableEntries = new List<ARCLNDRefEntry>();
-        public ARCLNDMainDataHeader mainDataHeader;
+        public List<int> arcExtraFileOffsets = new List<int>();
+        public ARCLNDRefTableHead arcRefTable;
+        public List<ARCLNDRefEntry> arcRefTableEntries = new List<ARCLNDRefEntry>();
+        public ARCLNDMainDataHeader arcMainDataHeader;
 
         //LND Data
         public NinjaHeader nHeader;
@@ -27,7 +27,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public LNDHeader2 header2;
         public LNDNodeIdSet nodeIdSet;
         public List<LandEntry> nodes = new List<LandEntry>();
-        public List<ushort> nodeIds = new List<ushort>();
+        /// <summary>
+        /// List of ids of meshInfos that have actual models
+        /// </summary>
+        public List<ushort> modelNodeIds = new List<ushort>();
         public List<uint> objectOffsets = new List<uint>();
         public List<LNDMeshInfo> meshInfo = new List<LNDMeshInfo>();
         public LNDTexDataEntryHead texDataEntryHead;
@@ -93,10 +96,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(0x20 + arcLndHeader.extraFileOffsetsOffset, System.IO.SeekOrigin.Begin);
             for(int i = 0; i < arcLndHeader.extraFileCount; i++)
             {
-                extraFileOffsets.Add(sr.ReadBE<int>());
+                arcExtraFileOffsets.Add(sr.ReadBE<int>());
             }
 
-            foreach (var offset in extraFileOffsets)
+            foreach (var offset in arcExtraFileOffsets)
             {
                 sr.Seek(0x20 + offset, System.IO.SeekOrigin.Begin);
                 //TODO
@@ -104,34 +107,34 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             //Model
             sr.Seek(0x20 + arcLndHeader.mainDataOffset, System.IO.SeekOrigin.Begin);
-            mainDataHeader = new ARCLNDMainDataHeader();
-            mainDataHeader.mainOffsetTableOffset = sr.ReadBE<int>();
-            mainDataHeader.unkOffset0 = sr.ReadBE<int>();
-            mainDataHeader.unkCount = sr.ReadBE<int>();
-            mainDataHeader.unkOffset1 = sr.ReadBE<int>();
+            arcMainDataHeader = new ARCLNDMainDataHeader();
+            arcMainDataHeader.mainOffsetTableOffset = sr.ReadBE<int>();
+            arcMainDataHeader.unkOffset0 = sr.ReadBE<int>();
+            arcMainDataHeader.unkCount = sr.ReadBE<int>();
+            arcMainDataHeader.unkOffset1 = sr.ReadBE<int>();
 
-            mainDataHeader.unkInt_10 = sr.ReadBE<int>();
-            mainDataHeader.unkInt_14 = sr.ReadBE<int>();
-            mainDataHeader.unkInt_18 = sr.ReadBE<int>();
-            mainDataHeader.unkInt_1C = sr.ReadBE<int>();
+            arcMainDataHeader.unkInt_10 = sr.ReadBE<int>();
+            arcMainDataHeader.unkInt_14 = sr.ReadBE<int>();
+            arcMainDataHeader.unkInt_18 = sr.ReadBE<int>();
+            arcMainDataHeader.unkInt_1C = sr.ReadBE<int>();
 
 
 
 
             //Read texture reference table
             sr.Seek(0x20 + arcLndHeader.texRefTableOffset, System.IO.SeekOrigin.Begin);
-            refTable = new ARCLNDRefTableHead();
-            refTable.entryOffset = sr.ReadBE<int>();
-            refTable.entryCount = sr.ReadBE<int>();
+            arcRefTable = new ARCLNDRefTableHead();
+            arcRefTable.entryOffset = sr.ReadBE<int>();
+            arcRefTable.entryCount = sr.ReadBE<int>();
 
-            sr.Seek(0x20 + refTable.entryOffset, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < refTable.entryCount; i++)
+            sr.Seek(0x20 + arcRefTable.entryOffset, System.IO.SeekOrigin.Begin);
+            for(int i = 0; i < arcRefTable.entryCount; i++)
             {
                 ARCLNDRefEntry refEntry = new ARCLNDRefEntry();
                 refEntry.textOffset = sr.ReadBE<int>();
                 refEntry.unkInt0 = sr.ReadBE<int>();
                 refEntry.unkInt1 = sr.ReadBE<int>();
-                refTableEntries.Add(refEntry);
+                arcRefTableEntries.Add(refEntry);
             }
 
             //Read motions
@@ -246,8 +249,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 node.flag = (ContentFlag)sr.ReadBE<int>();
                 node.objectIndex = sr.ReadBE<ushort>();
                 node.motionIndex = sr.ReadBE<ushort>();
-                node.Position = sr.ReadBEV3();
-                node.flt14 = sr.ReadBE<float>();
+                node.minBounding = sr.ReadBEV2();
+                node.maxBounding = sr.ReadBEV2();
                 node.unkVec3 = sr.ReadBEV3();
                 node.int24 = sr.ReadBE<int>();
                 node.int28 = sr.ReadBE<int>();
@@ -265,7 +268,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(nodeIdSet.nodeIdsOffset + 0x8, System.IO.SeekOrigin.Begin);
             for(int i = 0; i < nodeIdSet.nodeCount; i++)
             {
-                nodeIds.Add(sr.ReadBE<ushort>());
+                modelNodeIds.Add(sr.ReadBE<ushort>());
             }
 
             //Mesh data
@@ -303,10 +306,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     lndMeshInfo2.polyInfo0Offset = sr.ReadBE<int>();
                     lndMeshInfo2.polyInfo1Offset = sr.ReadBE<int>();
 
-                    lndMeshInfo2.extraVertDataCount = sr.ReadBE<ushort>();
-                    lndMeshInfo2.usht12 = sr.ReadBE<ushort>();
-                    lndMeshInfo2.flt14 = sr.ReadBE<float>();
-                    lndMeshInfo2.Position = sr.ReadBEV3();
+                    lndMeshInfo2.polyInfo0Count = sr.ReadBE<ushort>();
+                    lndMeshInfo2.polyInfo1Count = sr.ReadBE<ushort>();
+                    lndMeshInfo2.minBounding = sr.ReadBEV2();
+                    lndMeshInfo2.maxBounding = sr.ReadBEV2();
                     lndMeshInfo.lndMeshInfo2 = lndMeshInfo2;
 
                     sr.Seek(lndMeshInfo2.layoutsOffset + 0x8, System.IO.SeekOrigin.Begin);
@@ -349,7 +352,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                     lndMeshInfo2.vertData.vert2Data.Add(new byte[] { sr.Read<byte>(), sr.Read<byte>(), sr.Read<byte>() });
                                     break;
                                 case 0x3:
-                                    lndMeshInfo2.vertData.vertColorData.Add(sr.ReadBE<short>());
+                                    lndMeshInfo2.vertData.vertColorData.Add(sr.ReadBE<ushort>());
                                     break;
                                 case 0x5:
                                     lndMeshInfo2.vertData.vertUVData.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
@@ -363,41 +366,48 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     //Polygon data
                     if (lndMeshInfo2.polyInfo0Offset != 0)
                     {
+                        byte[] indexSizes = null;
                         sr.Seek(lndMeshInfo2.polyInfo0Offset + 0x8, System.IO.SeekOrigin.Begin);
-                        PolyInfo polyInfo = new PolyInfo();
-                        polyInfo.materialOffset = sr.ReadBE<int>();
-                        polyInfo.unkCount = sr.ReadBE<ushort>();
-                        polyInfo.materialDataCount = sr.ReadBE<ushort>();
-                        polyInfo.polyDataOffset = sr.ReadBE<int>();
-                        polyInfo.polyDataBufferSize = sr.ReadBE<int>();
-                        lndMeshInfo2.polyInfo0 = polyInfo;
-                        ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo);
+                        for (int i = 0; i < lndMeshInfo2.polyInfo0Count; i++)
+                        {
+                            lndMeshInfo2.polyInfo0List.Add(ReadPolyInfo(sr, lndMeshInfo2, vertTypeCount, ref indexSizes));
+                        }
                     }
                     if (lndMeshInfo2.polyInfo1Offset != 0)
                     {
+                        byte[] indexSizes = null;
                         sr.Seek(lndMeshInfo2.polyInfo1Offset + 0x8, System.IO.SeekOrigin.Begin);
-                        PolyInfo polyInfo = new PolyInfo();
-                        polyInfo.materialOffset = sr.ReadBE<int>();
-                        polyInfo.unkCount = sr.ReadBE<ushort>();
-                        polyInfo.materialDataCount = sr.ReadBE<ushort>();
-                        polyInfo.polyDataOffset = sr.ReadBE<int>();
-                        polyInfo.polyDataBufferSize = sr.ReadBE<int>();
-                        lndMeshInfo2.polyInfo1 = polyInfo;
-                        ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo);
+                        for (int i = 0; i < lndMeshInfo2.polyInfo1Count; i++)
+                        {
+                            lndMeshInfo2.polyInfo1List.Add(ReadPolyInfo(sr, lndMeshInfo2, vertTypeCount, ref indexSizes));
+                        }
                     }
-
-                    meshInfo.Add(lndMeshInfo);
                 }
+
+                meshInfo.Add(lndMeshInfo);
             }
 
             //Seek for other data
             sr.Seek(nHeader.fileSize + 0x8, System.IO.SeekOrigin.Begin);
         }
 
-        private static void ReadPolyData(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, PolyInfo polyInfo)
+        private static PolyInfo ReadPolyInfo(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, ref byte[] indexSizes)
+        {
+            PolyInfo polyInfo = new PolyInfo();
+            polyInfo.materialOffset = sr.ReadBE<int>();
+            polyInfo.unkCount = sr.ReadBE<ushort>();
+            polyInfo.materialDataCount = sr.ReadBE<ushort>();
+            polyInfo.polyDataOffset = sr.ReadBE<int>();
+            polyInfo.polyDataBufferSize = sr.ReadBE<int>();
+            var bookmark = sr.Position();
+            ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo, ref indexSizes);
+            sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+            return polyInfo;
+        }
+
+        private static void ReadPolyData(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, PolyInfo polyInfo, ref byte[] indexSizes)
         {
             //Material data
-            byte[] indexSizes = null;
             if (polyInfo != null)
             {
                 sr.Seek(polyInfo.materialOffset + 0x8, System.IO.SeekOrigin.Begin);

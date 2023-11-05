@@ -95,14 +95,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int polyInfo0Offset; //Strips start with 0x98
         public int polyInfo1Offset; //Strips start with 0x90
 
-        public ushort extraVertDataCount;
-        public ushort usht12;
-        public float flt14;
-        public Vector3 Position;
+        public ushort polyInfo0Count;
+        public ushort polyInfo1Count;
+        public Vector2 minBounding;
+        public Vector2 maxBounding;
 
         //SubObjs
-        public PolyInfo polyInfo0 = null;
-        public PolyInfo polyInfo1 = null;
+        public List<PolyInfo> polyInfo0List = new List<PolyInfo>();
+        public List<PolyInfo> polyInfo1List = new List<PolyInfo>();
         public List<LNDVertLayout> layouts = new List<LNDVertLayout>();
         public VertData vertData = null;
     }
@@ -122,6 +122,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         //Helper
         public Dictionary<int, int> vertIndexMapping = new Dictionary<int, int>();
+
+        public MaterialInfo? GetMaterialInfoByType(int type)
+        {
+            foreach(var info in matInfo)
+            {
+                if(info.matInfoType == type)
+                {
+                    return info;
+                }
+            }
+
+            return null;
+        }
     }
 
     public struct MaterialInfo
@@ -147,7 +160,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     {
         public List<Vector3> vertPositions = new List<Vector3>();  //1, position data
         public List<byte[]> vert2Data = new List<byte[]>();        //2, 3 bytes
-        public List<short> vertColorData = new List<short>();      //3, possibly color data
+        public List<ushort> vertColorData = new List<ushort>();      //3, possibly color data
         public List<short[]> vertUVData = new List<short[]>();     //5, probably uv data?
     }
 
@@ -164,8 +177,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public ushort objectIndex;
         public ushort motionIndex;
 
-        public Vector3 Position;
-        public float flt14;
+        public Vector2 minBounding;
+        public Vector2 maxBounding;
         public Vector3 unkVec3; //0 If flag is 0
         public int int24;
         public int int28;

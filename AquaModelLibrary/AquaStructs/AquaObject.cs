@@ -1797,8 +1797,14 @@ namespace AquaModelLibrary
         {
             public List<VTXL> faceVerts = new List<VTXL>();
             public List<Vector3> triList = new List<Vector3>();
+            /// <summary>
+            /// Should have at least 1 value set for the mesh material. Otherwise, one per face. 
+            /// </summary>
             public List<int> matIdList = new List<int>();
-            public Dictionary<int, int> matIdDict = new Dictionary<int, int>(); //For helping convert mat ids if they need to be reindexed
+            /// <summary>
+            /// For helping convert mat ids if they need to be reindexed. This is helpful if you'd rather offload remapping of material ids for whatever reason.
+            /// </summary>
+            public Dictionary<int, int> matIdDict = new Dictionary<int, int>();
             public List<uint> bonePalette = new List<uint>(); 
             public int baseMeshNodeId;
             public int baseMeshDummyId;
