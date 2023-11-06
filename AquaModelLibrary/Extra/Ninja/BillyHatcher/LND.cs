@@ -1,8 +1,7 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
+using Reloaded.Memory.Streams;
 using System.Collections.Generic;
-using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
-using System.Diagnostics;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -10,6 +9,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
     {
         public byte[] gvmBytes = null;
         public List<uint> pof0Offsets = new List<uint>();
+        public List<string> texnames = new List<string>();
 
         public bool isArcLND = false;
 
@@ -20,6 +20,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public ARCLNDRefTableHead arcRefTable;
         public List<ARCLNDRefEntry> arcRefTableEntries = new List<ARCLNDRefEntry>();
         public ARCLNDMainDataHeader arcMainDataHeader;
+        public ARCLNDMainOffsetTable arcMainOffsetTable;
+        public List<ARCLNDLandEntryRef> arcLandEntryRefList = new List<ARCLNDLandEntryRef>();
+        public List<ARCLNDLandEntry> arcLandEntryList = new List<ARCLNDLandEntry>();
+        public List<ARCLNDVertDataRef> arcVertDataRefList = new List<ARCLNDVertDataRef>();
+        public List<ARCLNDVertDataSet> arcVertDataSetList = new List<ARCLNDVertDataSet>();
+        public List<ARCLNDFaceDataRef> arcFaceDataRefList = new List<ARCLNDFaceDataRef>();
+        public List<ARCLNDFaceDataHead> arcFaceDataList = new List<ARCLNDFaceDataHead>();
+        public List<ARCLNDNodeBounding> arcBoundingList = new List<ARCLNDNodeBounding>();
+        public List<ARCLNDUnkDataRef> arcUnkDataRefList = new List<ARCLNDUnkDataRef>();
+        public List<List<ARCLNDUnkData>> arcUnkDataList = new List<List<ARCLNDUnkData>>();
 
         //LND Data
         public NinjaHeader nHeader;
@@ -35,7 +45,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public List<LNDMeshInfo> meshInfo = new List<LNDMeshInfo>();
         public LNDTexDataEntryHead texDataEntryHead;
         public List<LNDTexDataEntry> texDataEntries = new List<LNDTexDataEntry>();
-        public List<string> texnames = new List<string>();
         public List<int> motionDataOffsets = new List<int>();
         public List<LNDMotionDataHead> motionDataHeadList = new List<LNDMotionDataHead>();
         public List<LNDMotionDataHead2> motionDataHead2List = new List<LNDMotionDataHead2>();
@@ -62,7 +71,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     gvmBytes = GVMUtil.ReadGVMBytes(sr);
                 }
-            } else {
+            }
+            else
+            {
                 isArcLND = true;
                 //This is based more around the .arc format
                 ReadARCLND(sr);
@@ -94,7 +105,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcLndHeader.GVMOffset = sr.ReadBE<int>();
 
             sr.Seek(0x20 + arcLndHeader.extraFileOffsetsOffset, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < arcLndHeader.extraFileCount; i++)
+            for (int i = 0; i < arcLndHeader.extraFileCount; i++)
             {
                 arcExtraFileOffsets.Add(sr.ReadBE<int>());
             }
@@ -118,8 +129,236 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcMainDataHeader.unkInt_18 = sr.ReadBE<int>();
             arcMainDataHeader.unkInt_1C = sr.ReadBE<int>();
 
+            arcMainOffsetTable = new ARCLNDMainOffsetTable();
+            arcMainOffsetTable.landEntryCount = sr.ReadBE<int>();
+            arcMainOffsetTable.landEntryOffset = sr.ReadBE<int>();
+            arcMainOffsetTable.vertDataCount = sr.ReadBE<int>();
+            arcMainOffsetTable.vertDataOffset = sr.ReadBE<int>();
 
+            arcMainOffsetTable.faceSetsCount = sr.ReadBE<int>();
+            arcMainOffsetTable.faceSetsOffset = sr.ReadBE<int>();
+            arcMainOffsetTable.nodeBoundingCount = sr.ReadBE<int>();
+            arcMainOffsetTable.nodeBoundingOffset = sr.ReadBE<int>();
 
+            arcMainOffsetTable.unkCount = sr.ReadBE<int>();
+            arcMainOffsetTable.unkDataCount = sr.ReadBE<int>();
+            arcMainOffsetTable.unkDataOffset = sr.ReadBE<int>();
+
+            //Land entries
+            sr.Seek(0x20 + arcMainOffsetTable.landEntryOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcMainOffsetTable.landEntryCount; i++)
+            {
+                ARCLNDLandEntryRef lndRef = new ARCLNDLandEntryRef();
+                lndRef.unkInt = sr.ReadBE<int>();
+                lndRef.offset = sr.ReadBE<int>();
+                arcLandEntryRefList.Add(lndRef);
+            }
+            foreach (var lndRef in arcLandEntryRefList)
+            {
+                sr.Seek(0x20 + lndRef.offset, System.IO.SeekOrigin.Begin);
+                ARCLNDLandEntry lndEntry = new ARCLNDLandEntry();
+                lndEntry.unkInt0 = sr.ReadBE<int>();
+                lndEntry.unkInt1 = sr.ReadBE<int>();
+                lndEntry.unkInt2 = sr.ReadBE<int>();
+                lndEntry.unkInt3 = sr.ReadBE<int>();
+
+                lndEntry.unkInt4 = sr.ReadBE<int>();
+                lndEntry.unkInt5 = sr.ReadBE<int>();
+                lndEntry.unkInt6 = sr.ReadBE<int>();
+                lndEntry.unkInt7 = sr.ReadBE<int>();
+
+                lndEntry.ushort0 = sr.ReadBE<ushort>();
+                lndEntry.ushort1 = sr.ReadBE<ushort>();
+                lndEntry.unkInt8 = sr.ReadBE<int>();
+                arcLandEntryList.Add(lndEntry);
+            }
+
+            //Vertex data. Should only be one reference offset, but technically there could be more
+            sr.Seek(0x20 + arcMainOffsetTable.vertDataOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcMainOffsetTable.vertDataCount; i++)
+            {
+                ARCLNDVertDataRef vertRef = new ARCLNDVertDataRef();
+                vertRef.unkInt = sr.ReadBE<int>();
+                vertRef.offset = sr.ReadBE<int>();
+                arcVertDataRefList.Add(vertRef);
+            }
+            foreach (var vertRef in arcVertDataRefList)
+            {
+                sr.Seek(0x20 + vertRef.offset, System.IO.SeekOrigin.Begin);
+                ARCLNDVertDataSet arcVertDataSet = new ARCLNDVertDataSet();
+                for (int i = 0; i < 6; i++)
+                {
+                    ARCLNDVertData vertInfo = new ARCLNDVertData();
+                    vertInfo.type = sr.ReadBE<ushort>();
+                    vertInfo.count = sr.ReadBE<ushort>();
+                    vertInfo.offset = sr.ReadBE<int>();
+                    switch (i)
+                    {
+                        case 0:
+                            arcVertDataSet.Position = vertInfo;
+                            break;
+                        case 1:
+                            arcVertDataSet.Normal = vertInfo;
+                            break;
+                        case 2:
+                            arcVertDataSet.VertColor = vertInfo;
+                            break;
+                        case 3:
+                            arcVertDataSet.VertColor2 = vertInfo;
+                            break;
+                        case 4:
+                            arcVertDataSet.UV1 = vertInfo;
+                            break;
+                        case 5:
+                            arcVertDataSet.UV2 = vertInfo;
+                            break;
+                    }
+                }
+                arcVertDataSetList.Add(arcVertDataSet);
+            }
+            foreach (var vertInfoSet in arcVertDataSetList)
+            {
+                sr.Seek(0x20 + vertInfoSet.Position.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < vertInfoSet.Position.count; i++)
+                {
+                    vertInfoSet.PositionData.Add(sr.ReadBEV3());
+                }
+                sr.Seek(0x20 + vertInfoSet.Normal.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < vertInfoSet.Normal.count; i++)
+                {
+                    vertInfoSet.NormalData.Add(sr.ReadBEV3());
+                }
+                sr.Seek(0x20 + vertInfoSet.VertColor.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < vertInfoSet.VertColor.count; i++)
+                {
+                    vertInfoSet.VertColorData.Add(sr.ReadBytes(sr.Position(), 4));
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
+                }
+                sr.Seek(0x20 + vertInfoSet.VertColor2.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < vertInfoSet.VertColor2.count; i++)
+                {
+                    vertInfoSet.VertColor2Data.Add(sr.ReadBytes(sr.Position(), 4));
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
+                }
+                sr.Seek(0x20 + vertInfoSet.UV1.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < vertInfoSet.UV1.count; i++)
+                {
+                    vertInfoSet.UV1Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
+                }
+                sr.Seek(0x20 + vertInfoSet.UV2.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < vertInfoSet.UV2.count; i++)
+                {
+                    vertInfoSet.UV2Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
+                }
+            }
+
+            //Read triangle data
+            sr.Seek(0x20 + arcMainOffsetTable.faceSetsOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcMainOffsetTable.faceSetsCount; i++)
+            {
+                ARCLNDFaceDataRef faceRef = new ARCLNDFaceDataRef();
+                faceRef.unkInt = sr.ReadBE<int>();
+                faceRef.offset = sr.ReadBE<int>();
+                arcFaceDataRefList.Add(faceRef);
+            }
+            foreach (var faceRef in arcFaceDataRefList)
+            {
+                sr.Seek(0x20 + faceRef.offset, System.IO.SeekOrigin.Begin);
+                ARCLNDFaceDataHead faceDataHead = new ARCLNDFaceDataHead();
+                faceDataHead.flags = sr.ReadBE<ArcLndVertType>();
+                faceDataHead.faceDataOffset0 = sr.ReadBE<int>();
+                faceDataHead.bufferSize0 = sr.ReadBE<int>();
+                faceDataHead.faceDataOffset1 = sr.ReadBE<int>();
+                faceDataHead.bufferSize1 = sr.ReadBE<int>();
+                arcFaceDataList.Add(faceDataHead);
+            }
+
+            //TriIndices
+            foreach (var faceDataHead in arcFaceDataList)
+            {
+                ReadArcLndTris(sr, faceDataHead.flags, faceDataHead.faceDataOffset0, faceDataHead.bufferSize0, out faceDataHead.triIndicesList0, out faceDataHead.triIndicesListStarts0);
+                ReadArcLndTris(sr, faceDataHead.flags, faceDataHead.faceDataOffset1, faceDataHead.bufferSize1, out faceDataHead.triIndicesList1, out faceDataHead.triIndicesListStarts1);
+            }
+
+            //Node bounding
+            sr.Seek(0x20 + arcMainOffsetTable.nodeBoundingOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcMainOffsetTable.nodeBoundingCount; i++)
+            {
+                ARCLNDNodeBounding bounding = new ARCLNDNodeBounding();
+                bounding.unkFlt_00 = sr.ReadBE<float>();
+                bounding.usht_04 = sr.ReadBE<ushort>();
+                bounding.usht_06 = sr.ReadBE<ushort>();
+                bounding.usht_08 = sr.ReadBE<ushort>();
+                bounding.usht_0A = sr.ReadBE<ushort>();
+                bounding.int_0C = sr.ReadBE<int>();
+
+                bounding.int_10 = sr.ReadBE<int>();
+                bounding.int_14 = sr.ReadBE<int>();
+                bounding.int_18 = sr.ReadBE<int>();
+                bounding.int_1C = sr.ReadBE<int>();
+
+                bounding.int_20 = sr.ReadBE<int>();
+                bounding.int_24 = sr.ReadBE<int>();
+                bounding.int_28 = sr.ReadBE<int>();
+                bounding.int_2C = sr.ReadBE<int>();
+
+                bounding.minBounding = sr.ReadBEV2();
+                bounding.maxBounding = sr.ReadBEV2();
+                arcBoundingList.Add(bounding);
+            }
+
+            //Unk data
+            sr.Seek(0x20 + arcMainOffsetTable.unkDataOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcMainOffsetTable.unkDataCount; i++)
+            {
+                ARCLNDUnkDataRef unkDataRef = new ARCLNDUnkDataRef();
+                unkDataRef.id = sr.ReadBE<int>();
+                unkDataRef.count = sr.ReadBE<int>();
+                unkDataRef.offset = sr.ReadBE<int>();
+                arcUnkDataRefList.Add(unkDataRef);
+            }
+            int UnkDataint_00Max = 0;
+            int UnkDataint_04Max = 0;
+            int UnkDataint_08Max = 0;
+            int UnkDataint_0CMax = 0;
+            int UnkDataint_10Max = 0;
+            foreach(var unkDataRef in arcUnkDataRefList)
+            {
+                sr.Seek(0x20 + unkDataRef.offset, System.IO.SeekOrigin.Begin);
+                List<ARCLNDUnkData> unkDataList = new List<ARCLNDUnkData>();
+                for(int i = 0; i < unkDataRef.count; i++)
+                {
+                    ARCLNDUnkData unkData = new ARCLNDUnkData();
+                    unkData.int_00 = sr.ReadBE<int>();
+                    unkData.int_04 = sr.ReadBE<int>();
+                    unkData.int_08 = sr.ReadBE<int>();
+                    unkData.int_0C = sr.ReadBE<int>();
+                    unkData.int_10 = sr.ReadBE<int>();
+                    unkDataList.Add(unkData);
+
+                    if(unkData.int_00 > UnkDataint_00Max)
+                    {
+                        UnkDataint_00Max = unkData.int_00;
+                    }
+                    if (unkData.int_04 > UnkDataint_04Max)
+                    {
+                        UnkDataint_04Max = unkData.int_04;
+                    }
+                    if (unkData.int_08 > UnkDataint_08Max)
+                    {
+                        UnkDataint_08Max = unkData.int_08;
+                    }
+                    if (unkData.int_0C > UnkDataint_0CMax)
+                    {
+                        UnkDataint_0CMax = unkData.int_0C;
+                    }
+                    if (unkData.int_10 > UnkDataint_10Max)
+                    {
+                        UnkDataint_10Max = unkData.int_10;
+                    }
+                }
+                arcUnkDataList.Add(unkDataList);
+            }
 
             //Read texture reference table
             sr.Seek(0x20 + arcLndHeader.texRefTableOffset, System.IO.SeekOrigin.Begin);
@@ -128,7 +367,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcRefTable.entryCount = sr.ReadBE<int>();
 
             sr.Seek(0x20 + arcRefTable.entryOffset, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < arcRefTable.entryCount; i++)
+            for (int i = 0; i < arcRefTable.entryCount; i++)
             {
                 ARCLNDRefEntry refEntry = new ARCLNDRefEntry();
                 refEntry.textOffset = sr.ReadBE<int>();
@@ -136,16 +375,80 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 refEntry.unkInt1 = sr.ReadBE<int>();
                 arcRefTableEntries.Add(refEntry);
             }
+            foreach (ARCLNDRefEntry entry in arcRefTableEntries)
+            {
+                sr.Seek(entry.textOffset + 0x20, System.IO.SeekOrigin.Begin);
+                texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+            }
 
             //Read motions
-            if(arcLndHeader.motionFileOffset > 0)
+            if (arcLndHeader.motionFileOffset > 0)
             {
                 sr.Seek(0x20 + arcLndHeader.motionFileOffset, System.IO.SeekOrigin.Begin);
                 //TODO
             }
 
             sr.Seek(0x20 + arcLndHeader.GVMOffset, System.IO.SeekOrigin.Begin);
-            sr.Seek(sr.ReadBE<int>() + 0x20, System.IO.SeekOrigin.Begin);
+        }
+
+        private static void ReadArcLndTris(BufferedStreamReader sr, ArcLndVertType flags, int offset, int bufferSize, out List<List<List<int>>> triIndicesList, out List<List<List<int>>> triIndicesListStarts)
+        {
+            sr.Seek(offset + 0x20, System.IO.SeekOrigin.Begin);
+            triIndicesList = new List<List<List<int>>>();
+            triIndicesListStarts = new List<List<List<int>>>();
+            while (sr.Position() < bufferSize + offset + 20)
+            {
+                var type = sr.Read<byte>();
+                var count = sr.ReadBE<ushort>();
+
+
+                if (type != 0x98 && type != 0x90 && type != 0)
+                {
+                    var pos = sr.Position();
+                    throw new System.Exception();
+                }
+                if (type == 0)
+                {
+                    break;
+                }
+                List<List<int>> triIndices = new List<List<int>>();
+                List<List<int>> triIndicesStarts = new List<List<int>>();
+                var starts = new List<int>();
+                starts.Add(type);
+                starts.Add(count);
+                triIndicesStarts.Add(starts);
+                for (int i = 0; i < count; i++)
+                {
+                    List<int> triIndex = new List<int>();
+                    if ((flags & ArcLndVertType.Position) > 0)
+                    {
+                        triIndex.Add(sr.ReadBE<ushort>());
+                    }
+                    if ((flags & ArcLndVertType.Normal) > 0)
+                    {
+                        triIndex.Add(sr.ReadBE<ushort>());
+                    }
+                    if ((flags & ArcLndVertType.VertColor) > 0)
+                    {
+                        triIndex.Add(sr.ReadBE<ushort>());
+                    }
+                    if ((flags & ArcLndVertType.VertColor2) > 0)
+                    {
+                        triIndex.Add(sr.ReadBE<ushort>());
+                    }
+                    if ((flags & ArcLndVertType.UV1) > 0)
+                    {
+                        triIndex.Add(sr.ReadBE<ushort>());
+                    }
+                    if ((flags & ArcLndVertType.UV2) > 0)
+                    {
+                        triIndex.Add(sr.ReadBE<ushort>());
+                    }
+                    triIndices.Add(triIndex);
+                }
+                triIndicesList.Add(triIndices);
+                triIndicesListStarts.Add(triIndicesStarts);
+            }
         }
 
         /// <summary>
@@ -164,11 +467,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             //Motion data
             sr.Seek(header.motionDataOffset + 0x8, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < header.motionDataCount; i++)
+            for (int i = 0; i < header.motionDataCount; i++)
             {
                 motionDataOffsets.Add(sr.ReadBE<int>());
             }
-            foreach(var offset in motionDataOffsets)
+            foreach (var offset in motionDataOffsets)
             {
                 sr.Seek(offset + 0x8, System.IO.SeekOrigin.Begin);
                 LNDMotionDataHead head = new LNDMotionDataHead();
@@ -207,7 +510,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }*/
 
             //Tex name list
-            if(header.lndTexNameListOffset > 0)
+            if (header.lndTexNameListOffset > 0)
             {
                 sr.Seek(header.lndTexNameListOffset + 0x8, System.IO.SeekOrigin.Begin);
                 texDataEntryHead = new LNDTexDataEntryHead();
@@ -243,7 +546,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header2.LNDNodeIdSetOffset = sr.ReadBE<int>();
 
             sr.Seek(header2.nodesOffset + 0x8, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < header2.nodeCount; i++)
+            for (int i = 0; i < header2.nodeCount; i++)
             {
                 var node = new LandEntry();
                 node.flag = (ContentFlag)sr.ReadBE<int>();
@@ -266,19 +569,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             nodeIdSet.usht02 = sr.ReadBE<ushort>();
             nodeIdSet.nodeIdsOffset = sr.ReadBE<int>();
             sr.Seek(nodeIdSet.nodeIdsOffset + 0x8, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < nodeIdSet.nodeCount; i++)
+            for (int i = 0; i < nodeIdSet.nodeCount; i++)
             {
                 modelNodeIds.Add(sr.ReadBE<ushort>());
             }
 
             //Mesh data
             sr.Seek(header.lndMeshInfoOffset + 0x8, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < header.nodeCount; i++)
+            for (int i = 0; i < header.nodeCount; i++)
             {
                 objectOffsets.Add(sr.ReadBE<uint>());
             }
 
-            foreach(var offset in objectOffsets)
+            foreach (var offset in objectOffsets)
             {
                 sr.Seek(offset + 0x8, System.IO.SeekOrigin.Begin);
                 LNDMeshInfo lndMeshInfo = new LNDMeshInfo();
@@ -286,7 +589,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 lndMeshInfo.lndMeshInfo2Offset = sr.ReadBE<int>();
                 lndMeshInfo.int08 = sr.ReadBE<int>();
                 lndMeshInfo.int0C = sr.ReadBE<int>();
-                
+
                 lndMeshInfo.int10 = sr.ReadBE<int>();
                 lndMeshInfo.int14 = sr.ReadBE<int>();
                 lndMeshInfo.int18 = sr.ReadBE<int>();
@@ -297,7 +600,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 lndMeshInfo.unkOffset1 = sr.ReadBE<int>();
                 lndMeshInfo.unkData = sr.ReadBE<int>();
 
-                if(lndMeshInfo.lndMeshInfo2Offset > 0)
+                if (lndMeshInfo.lndMeshInfo2Offset > 0)
                 {
                     sr.Seek(lndMeshInfo.lndMeshInfo2Offset + 0x8, System.IO.SeekOrigin.Begin);
                     LNDMeshInfo2 lndMeshInfo2 = new LNDMeshInfo2();
@@ -422,7 +725,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     matInfo.matData3 = sr.Read<byte>();
                     matInfoList.Add(matInfo);
 
-                    switch(matInfo.matInfoType)
+                    switch (matInfo.matInfoType)
                     {
                         case 0x09000000:
                             var mapping = new byte[8];
@@ -436,17 +739,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                             mapping[7] = (byte)(matInfo.matData0 / 0x10);
 
                             var tempDict = new Dictionary<int, int>();
-                            for(int j = 0; j < mapping.Length; j++)
+                            for (int j = 0; j < mapping.Length; j++)
                             {
                                 //It's likely only 8 maps to another vertex index, but just in case
                                 if (mapping[j] != 0 && !tempDict.ContainsKey(mapping[j]))
                                 {
                                     tempDict.Add(mapping[j], j);
                                     polyInfo.vertIndexMapping.Add(j, j);
-                                } else if (mapping[j] == 0) //0 only maps to itself
+                                }
+                                else if (mapping[j] == 0) //0 only maps to itself
                                 {
                                     polyInfo.vertIndexMapping.Add(j, j);
-                                } else
+                                }
+                                else
                                 {
                                     polyInfo.vertIndexMapping.Add(j, tempDict[mapping[j]]);
                                 }
@@ -496,9 +801,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         for (int j = 0; j < vertTypeCount; j++)
                         {
                             var lyt = lndMeshInfo2.layouts[j];
-                            if(indexSizes?.Length > j )
+                            if (indexSizes?.Length > j)
                             {
-                                switch(indexSizes[j])
+                                switch (indexSizes[j])
                                 {
                                     case 0: //Skip
                                         break;
@@ -512,7 +817,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                     default:
                                         throw new System.Exception();
                                 }
-                            } else //Fallback for if for some godforsaken reason this doesn't exist
+                            }
+                            else //Fallback for if for some godforsaken reason this doesn't exist
                             {
                                 if (lyt.vertCount > 0xFF)
                                 {

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
@@ -58,9 +54,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int nodeBoundingCount;
         public int nodeBoundingOffset;
 
-        public int unkCount3;
-        public int unkCount4;
-        public int unkOffset3;
+        public int unkCount;
+        public int unkDataCount;
+        public int unkDataOffset;
     }
 
     public struct ARCLNDLandEntryRef
@@ -81,8 +77,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int unkInt6;
         public int unkInt7;
 
-        public int ushort0;
-        public int ushort1;
+        public ushort ushort0;
+        public ushort ushort1;
         public int unkInt8;
     }
 
@@ -92,14 +88,21 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int offset;
     }
 
-    public struct ARCLNDVertDataInfo
+    public class ARCLNDVertDataSet
     {
         public ARCLNDVertData Position;
         public ARCLNDVertData Normal;
         public ARCLNDVertData VertColor;
         public ARCLNDVertData VertColor2;
-        public ARCLNDVertData UV1; //??
-        public ARCLNDVertData UV2; //??
+        public ARCLNDVertData UV1; 
+        public ARCLNDVertData UV2; 
+
+        public List<Vector3> PositionData = new List<Vector3>();
+        public List<Vector3> NormalData = new List<Vector3>();
+        public List<byte[]> VertColorData = new List<byte[]>();
+        public List<byte[]> VertColor2Data = new List<byte[]>();
+        public List<short[]> UV1Data = new List<short[]>();
+        public List<short[]> UV2Data = new List<short[]>();
     }
 
     public struct ARCLNDVertData
@@ -115,13 +118,28 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int offset;
     }
 
-    public struct ARCLNDFaceDataHead
+    public enum ArcLndVertType : int
     {
-        public int unkInt0;
-        public int unkInt1;
-        public int unkInt2;
-        public int faceDataOffset;
-        public int bufferSize;
+        Position = 0x1,
+        Normal = 0x2,
+        VertColor = 0x4,
+        VertColor2 = 0x8,
+        UV1 = 0x10,
+        UV2 = 0x20,
+    }
+
+    public class ARCLNDFaceDataHead
+    {
+        public ArcLndVertType flags;
+        public int faceDataOffset0;
+        public int bufferSize0;
+        public int faceDataOffset1;
+        public int bufferSize1;
+
+        public List<List<List<int>>> triIndicesList0 = new List<List<List<int>>>();
+        public List<List<List<int>>> triIndicesListStarts0 = new List<List<List<int>>>();
+        public List<List<List<int>>> triIndicesList1 = new List<List<List<int>>>();
+        public List<List<List<int>>> triIndicesListStarts1 = new List<List<List<int>>>();
     }
 
     public struct ARCLNDNodeBounding
@@ -147,7 +165,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public Vector2 maxBounding;
     }
 
-    public struct unkData
+    public struct ARCLNDUnkDataRef
+    {
+        public int id;
+        public int count;
+        public int offset;
+    }
+
+    public struct ARCLNDUnkData
     {
         public int int_00;
         public int int_04;

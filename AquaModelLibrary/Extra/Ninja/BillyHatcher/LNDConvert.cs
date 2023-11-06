@@ -20,6 +20,25 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public static NGSAquaObject LNDToAqua(LND lnd, out AquaNode aqn)
         {
+            if(lnd.isArcLND)
+            {
+                return ARCLNDToAqua(lnd, out aqn);
+            } else
+            {
+                return LNDHToAqua(lnd, out aqn);
+            }
+        }
+
+        public static NGSAquaObject ARCLNDToAqua(LND lnd, out AquaNode aqn)
+        {
+            NGSAquaObject aqp = new NGSAquaObject();
+            aqn = AquaNode.GenerateBasicAQN();
+
+            return aqp;
+        }
+
+        public static NGSAquaObject LNDHToAqua(LND lnd, out AquaNode aqn)
+        {
             NGSAquaObject aqp = new NGSAquaObject();
             aqn = AquaNode.GenerateBasicAQN();
             
