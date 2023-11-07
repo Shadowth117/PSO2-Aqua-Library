@@ -28,8 +28,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public List<ARCLNDFaceDataRef> arcFaceDataRefList = new List<ARCLNDFaceDataRef>();
         public List<ARCLNDFaceDataHead> arcFaceDataList = new List<ARCLNDFaceDataHead>();
         public List<ARCLNDNodeBounding> arcBoundingList = new List<ARCLNDNodeBounding>();
-        public List<ARCLNDUnkDataRef> arcUnkDataRefList = new List<ARCLNDUnkDataRef>();
-        public List<List<ARCLNDUnkData>> arcUnkDataList = new List<List<ARCLNDUnkData>>();
+        public List<ARCLNDMeshDataRef> meshDataRefList = new List<ARCLNDMeshDataRef>();
+        public List<List<ARCLNDMeshData>> arcMeshDataList = new List<List<ARCLNDMeshData>>();
 
         //LND Data
         public NinjaHeader nHeader;
@@ -153,6 +153,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 lndRef.offset = sr.ReadBE<int>();
                 arcLandEntryRefList.Add(lndRef);
             }
+
             foreach (var lndRef in arcLandEntryRefList)
             {
                 sr.Seek(0x20 + lndRef.offset, System.IO.SeekOrigin.Begin);
@@ -169,7 +170,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 lndEntry.ushort0 = sr.ReadBE<ushort>();
                 lndEntry.ushort1 = sr.ReadBE<ushort>();
-                lndEntry.unkInt8 = sr.ReadBE<int>();
+                lndEntry.TextureId = sr.ReadBE<int>();
                 arcLandEntryList.Add(lndEntry);
             }
 
@@ -307,57 +308,31 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 arcBoundingList.Add(bounding);
             }
 
-            //Unk data
+            //Mesh data
             sr.Seek(0x20 + arcMainOffsetTable.unkDataOffset, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < arcMainOffsetTable.unkDataCount; i++)
             {
-                ARCLNDUnkDataRef unkDataRef = new ARCLNDUnkDataRef();
-                unkDataRef.id = sr.ReadBE<int>();
-                unkDataRef.count = sr.ReadBE<int>();
-                unkDataRef.offset = sr.ReadBE<int>();
-                arcUnkDataRefList.Add(unkDataRef);
+                ARCLNDMeshDataRef meshDataRef = new ARCLNDMeshDataRef();
+                meshDataRef.id = sr.ReadBE<int>();
+                meshDataRef.count = sr.ReadBE<int>();
+                meshDataRef.offset = sr.ReadBE<int>();
+                meshDataRefList.Add(meshDataRef);
             }
-            int UnkDataint_00Max = 0;
-            int UnkDataint_04Max = 0;
-            int UnkDataint_08Max = 0;
-            int UnkDataint_0CMax = 0;
-            int UnkDataint_10Max = 0;
-            foreach(var unkDataRef in arcUnkDataRefList)
+            foreach (var datMeshaRef in meshDataRefList)
             {
-                sr.Seek(0x20 + unkDataRef.offset, System.IO.SeekOrigin.Begin);
-                List<ARCLNDUnkData> unkDataList = new List<ARCLNDUnkData>();
-                for(int i = 0; i < unkDataRef.count; i++)
+                sr.Seek(0x20 + datMeshaRef.offset, System.IO.SeekOrigin.Begin);
+                List<ARCLNDMeshData> meshDataList = new List<ARCLNDMeshData>();
+                for (int i = 0; i < datMeshaRef.count; i++)
                 {
-                    ARCLNDUnkData unkData = new ARCLNDUnkData();
-                    unkData.int_00 = sr.ReadBE<int>();
-                    unkData.int_04 = sr.ReadBE<int>();
-                    unkData.int_08 = sr.ReadBE<int>();
-                    unkData.int_0C = sr.ReadBE<int>();
-                    unkData.int_10 = sr.ReadBE<int>();
-                    unkDataList.Add(unkData);
-
-                    if(unkData.int_00 > UnkDataint_00Max)
-                    {
-                        UnkDataint_00Max = unkData.int_00;
-                    }
-                    if (unkData.int_04 > UnkDataint_04Max)
-                    {
-                        UnkDataint_04Max = unkData.int_04;
-                    }
-                    if (unkData.int_08 > UnkDataint_08Max)
-                    {
-                        UnkDataint_08Max = unkData.int_08;
-                    }
-                    if (unkData.int_0C > UnkDataint_0CMax)
-                    {
-                        UnkDataint_0CMax = unkData.int_0C;
-                    }
-                    if (unkData.int_10 > UnkDataint_10Max)
-                    {
-                        UnkDataint_10Max = unkData.int_10;
-                    }
+                    ARCLNDMeshData meshData = new ARCLNDMeshData();
+                    meshData.BoundingData = sr.ReadBE<int>();
+                    meshData.int_04 = sr.ReadBE<int>();
+                    meshData.lndEntry = sr.ReadBE<int>();
+                    meshData.int_0C = sr.ReadBE<int>();
+                    meshData.faceDataId = sr.ReadBE<int>();
+                    meshDataList.Add(meshData);
                 }
-                arcUnkDataList.Add(unkDataList);
+                arcMeshDataList.Add(meshDataList);
             }
 
             //Read texture reference table
@@ -401,7 +376,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var type = sr.Read<byte>();
                 var count = sr.ReadBE<ushort>();
 
-
                 if (type != 0x98 && type != 0x90 && type != 0)
                 {
                     var pos = sr.Position();
@@ -409,13 +383,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
                 if (type == 0)
                 {
+                    var pos = sr.Position();
                     break;
                 }
                 List<List<int>> triIndices = new List<List<int>>();
                 List<List<int>> triIndicesStarts = new List<List<int>>();
-                var starts = new List<int>();
-                starts.Add(type);
-                starts.Add(count);
+                var starts = new List<int>
+                {
+                    type,
+                    count
+                };
                 triIndicesStarts.Add(starts);
                 for (int i = 0; i < count; i++)
                 {

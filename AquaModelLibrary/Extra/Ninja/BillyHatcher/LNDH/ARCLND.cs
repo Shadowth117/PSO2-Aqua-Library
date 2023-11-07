@@ -79,7 +79,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         public ushort ushort0;
         public ushort ushort1;
-        public int unkInt8;
+        public int TextureId;
     }
 
     public struct ARCLNDVertDataRef
@@ -165,19 +165,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public Vector2 maxBounding;
     }
 
-    public struct ARCLNDUnkDataRef
+    public struct ARCLNDMeshDataRef
     {
         public int id;
         public int count;
         public int offset;
     }
 
-    public struct ARCLNDUnkData
+    public struct ARCLNDMeshData
     {
-        public int int_00;
+        public int BoundingData;
         public int int_04;
-        public int int_08;
+        public int lndEntry;
         public int int_0C;
-        public int int_10;
+        public int faceDataId;
     }
 }
