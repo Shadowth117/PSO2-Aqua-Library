@@ -75,15 +75,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             int f = 0;
             if (faceData.triIndicesList0.Count > 0)
             {
-                AddFromARCPolyData(lnd, genMesh, faceData.triIndicesList0, faceData.triIndicesListStarts0, vertTracker, faceData.flags, texId, ref f);
+                AddFromARCPolyData(lnd, genMesh, faceData.triIndicesList0, faceData.triIndicesListStarts0, vertTracker, faceData.flags, texId, ref f, 0);
             }
             if (faceData.triIndicesList1.Count > 0)
             {
-                AddFromARCPolyData(lnd, genMesh, faceData.triIndicesList1, faceData.triIndicesListStarts1, vertTracker, faceData.flags, texId, ref f);
+                AddFromARCPolyData(lnd, genMesh, faceData.triIndicesList1, faceData.triIndicesListStarts1, vertTracker, faceData.flags, texId, ref f, 1);
             }
         }
 
-        private static void AddFromARCPolyData(LND lnd, AquaObject.GenericTriangles genMesh, List<List<List<int>>> triIndicesList, List<List<List<int>>> triIndicesListStarts, Dictionary<string, int> vertTracker, ArcLndVertType flags, int texId, ref int f)
+        private static void AddFromARCPolyData(LND lnd, AquaObject.GenericTriangles genMesh, List<List<List<int>>> triIndicesList, List<List<List<int>>> triIndicesListStarts, Dictionary<string, int> vertTracker, ArcLndVertType flags, int texId, ref int f, int listFlip)
         {
             for (int s = 0; s < triIndicesList.Count; s++)
             {
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         faceVtxl.rawFaceId.Add(f++);
 
                         int x, y, z;
-                        if ((i & 1) > 0)
+                        if (((i + listFlip) & 1) > 0)
                         {
                             x = AddARCVert(lnd, faceVtxl, strip[i], flags, genMesh, vertTracker);
                             y = AddARCVert(lnd, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
