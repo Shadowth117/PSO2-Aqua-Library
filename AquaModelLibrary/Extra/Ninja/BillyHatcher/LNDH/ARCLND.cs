@@ -145,6 +145,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         public List<Vector3> PositionData = new List<Vector3>();
         public List<Vector3> NormalData = new List<Vector3>();
+        /// <summary>
+        /// RGBA order
+        /// </summary>
         public List<byte[]> VertColorData = new List<byte[]>();
         public List<byte[]> VertColor2Data = new List<byte[]>();
         public List<short[]> UV1Data = new List<short[]>();
