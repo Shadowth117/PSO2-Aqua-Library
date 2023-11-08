@@ -30,6 +30,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public List<ARCLNDNodeBounding> arcBoundingList = new List<ARCLNDNodeBounding>();
         public List<ARCLNDMeshDataRef> meshDataRefList = new List<ARCLNDMeshDataRef>();
         public List<List<ARCLNDMeshData>> arcMeshDataList = new List<List<ARCLNDMeshData>>();
+        public ARCLNDAltVertColorRef arcAltVertRef;
+        public List<ARCLNDAltVertColorMainRef> arcAltVertRefs = new List<ARCLNDAltVertColorMainRef>();
+        public List<ARCLNDAltVertColorInfo> arcAltVertColorList = new List<ARCLNDAltVertColorInfo>();
 
         //LND Data
         public NinjaHeader nHeader;
@@ -120,7 +123,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(0x20 + arcLndHeader.mainDataOffset, System.IO.SeekOrigin.Begin);
             arcMainDataHeader = new ARCLNDMainDataHeader();
             arcMainDataHeader.mainOffsetTableOffset = sr.ReadBE<int>();
-            arcMainDataHeader.unkOffset0 = sr.ReadBE<int>();
+            arcMainDataHeader.altVertexColorOffset = sr.ReadBE<int>();
             arcMainDataHeader.unkCount = sr.ReadBE<int>();
             arcMainDataHeader.unkOffset1 = sr.ReadBE<int>();
 
@@ -143,6 +146,61 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcMainOffsetTable.unkCount = sr.ReadBE<int>();
             arcMainOffsetTable.unkDataCount = sr.ReadBE<int>();
             arcMainOffsetTable.unkDataOffset = sr.ReadBE<int>();
+
+            //Alt Vertex Colors
+            if(arcMainDataHeader.altVertexColorOffset > 0)
+            {
+                sr.Seek(0x20 + arcMainDataHeader.altVertexColorOffset, System.IO.SeekOrigin.Begin);
+                arcAltVertRef = new ARCLNDAltVertColorRef();
+                arcAltVertRef.count = sr.ReadBE<int>();
+                arcAltVertRef.offset = sr.ReadBE<int>();
+                sr.Seek(0x20 + arcAltVertRef.offset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < arcAltVertRef.count; i++)
+                {
+                    ARCLNDAltVertColorMainRef altVert = new ARCLNDAltVertColorMainRef();
+                    altVert.id = sr.ReadBE<int>();
+                    altVert.offset = sr.ReadBE<int>();
+                    arcAltVertRefs.Add(altVert);
+
+                    var bookmark = sr.Position();
+                    sr.Seek(0x20 + altVert.offset, System.IO.SeekOrigin.Begin);
+                    ARCLNDAltVertColorInfo altColors = new ARCLNDAltVertColorInfo();
+                    altColors.usht00 = sr.ReadBE<ushort>();
+                    altColors.usht02 = sr.ReadBE<ushort>();
+                    altColors.usht04 = sr.ReadBE<ushort>();
+                    altColors.usht06 = sr.ReadBE<ushort>();
+                    altColors.usht08 = sr.ReadBE<ushort>();
+                    altColors.usht0A = sr.ReadBE<ushort>();
+                    altColors.usht0C = sr.ReadBE<ushort>();
+                    altColors.usht0E = sr.ReadBE<ushort>();
+
+                    altColors.usht10 = sr.ReadBE<ushort>();
+                    altColors.vertColorCount = sr.ReadBE<ushort>();
+                    altColors.vertColorOffset = sr.ReadBE<int>();
+                    altColors.usht18 = sr.ReadBE<ushort>();
+                    altColors.usht1A = sr.ReadBE<ushort>();
+                    altColors.usht1C = sr.ReadBE<ushort>();
+                    altColors.usht1E = sr.ReadBE<ushort>();
+
+                    altColors.usht20 = sr.ReadBE<ushort>();
+                    altColors.usht22 = sr.ReadBE<ushort>();
+                    altColors.usht24 = sr.ReadBE<ushort>();
+                    altColors.usht26 = sr.ReadBE<ushort>();
+                    altColors.usht28 = sr.ReadBE<ushort>();
+                    altColors.usht2A = sr.ReadBE<ushort>();
+                    altColors.usht2C = sr.ReadBE<ushort>();
+                    altColors.usht2E = sr.ReadBE<ushort>();
+                    sr.Seek(0x20 + altColors.vertColorOffset, System.IO.SeekOrigin.Begin);
+                    for (int j = 0; j < altColors.vertColorCount; j++)
+                    {
+                        altColors.vertColors.Add(sr.ReadBytes(sr.Position(), 4));
+                        sr.Seek(4, System.IO.SeekOrigin.Current);
+                    }
+                    arcAltVertColorList.Add(altColors);
+
+                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+                }
+            }
 
             //Land entries
             sr.Seek(0x20 + arcMainOffsetTable.landEntryOffset, System.IO.SeekOrigin.Begin);

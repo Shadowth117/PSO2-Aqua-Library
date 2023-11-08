@@ -163,13 +163,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             if ((flags & ArcLndVertType.VertColor) > 0)
             {
-                var billyColor = lnd.arcVertDataSetList[0].VertColorData[faceIds[i]];
+                var billyColor = (byte[])lnd.arcVertDataSetList[0].VertColorData[faceIds[i]].Clone();
+                var temp = billyColor[0];
+                billyColor[0] = billyColor[2];
+                billyColor[2] = temp;
                 vtxl.vertColors.Add(billyColor);
                 vertId += ((int)ArcLndVertType.VertColor).ToString() + faceIds[i++];
             }
             if ((flags & ArcLndVertType.VertColor2) > 0)
             {
-                var billyColor = lnd.arcVertDataSetList[0].VertColor2Data[faceIds[i]];
+                var billyColor = (byte[])lnd.arcVertDataSetList[0].VertColor2Data[faceIds[i]].Clone();
+                var temp = billyColor[0];
+                billyColor[0] = billyColor[2];
+                billyColor[2] = temp;
                 vtxl.vertColor2s.Add(billyColor);
                 vertId += ((int)ArcLndVertType.VertColor2).ToString() + faceIds[i++];
             }
@@ -395,6 +401,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         r = (int)(((((float)r + 1) / 256f) * matColorData[2]) * 256 - 1);
                         a = (int)(((((float)a + 1) / 256f) * matColorData[3]) * 256 - 1);
                         */
+
                         vtxl.vertColors.Add(new byte[] { (byte)b, (byte)g, (byte)r, (byte)a });
                         break;
                     case 0x5:

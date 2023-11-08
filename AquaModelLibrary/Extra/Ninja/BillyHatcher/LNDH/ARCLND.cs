@@ -31,7 +31,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     public struct ARCLNDMainDataHeader
     {
         public int mainOffsetTableOffset;
-        public int unkOffset0;
+        public int altVertexColorOffset;
         public int unkCount;
         public int unkOffset1;
 
@@ -39,6 +39,52 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int unkInt_14;
         public int unkInt_18;
         public int unkInt_1C;
+    }
+
+    public struct ARCLNDAltVertColorRef
+    {
+        public int count;
+        public int offset;
+    }
+
+    public struct ARCLNDAltVertColorMainRef
+    {
+        public int id;
+        public int offset;
+    }
+
+    public class ARCLNDAltVertColorInfo
+    {
+        public ushort usht00;
+        public ushort usht02;
+        public ushort usht04;
+        public ushort usht06;
+        public ushort usht08;
+        public ushort usht0A;
+        public ushort usht0C;
+        public ushort usht0E;
+
+        public ushort usht10;
+        /// <summary>
+        /// Should match file's usual vert count
+        /// </summary>
+        public ushort vertColorCount;
+        public int vertColorOffset;
+        public ushort usht18;
+        public ushort usht1A;
+        public ushort usht1C;
+        public ushort usht1E;
+
+        public ushort usht20;
+        public ushort usht22;
+        public ushort usht24;
+        public ushort usht26;
+        public ushort usht28;
+        public ushort usht2A;
+        public ushort usht2C;
+        public ushort usht2E;
+
+        public List<byte[]> vertColors = new List<byte[]>();
     }
 
     //Similar to NN's main branching point struct
