@@ -71,7 +71,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     sr.Seek(pof0Header.fileSize, System.IO.SeekOrigin.Current);
                 }
                 if (sr.Peek<int>() == 0x484D5647)
-                {
+                {   
                     gvmBytes = GVMUtil.ReadGVMBytes(sr);
                 }
             }

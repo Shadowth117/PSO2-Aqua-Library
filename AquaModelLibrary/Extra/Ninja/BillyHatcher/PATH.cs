@@ -37,7 +37,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             for (int i = 0; i < pathHeader.pathInfoCount; i++)
             {
                 PathInfo pathInfo = new PathInfo();
-                pathInfo.unkByte0 = sr.Read<byte>();
+                pathInfo.doesNotUseNormals = sr.Read<byte>();
                 pathInfo.unkByte1 = sr.Read<byte>();
                 pathInfo.lengthsCount = sr.ReadBE<ushort>();
                 pathInfo.id = sr.ReadBE<int>();
@@ -47,41 +47,55 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 pathInfo.lengthsOffset = sr.ReadBE<int>();
                 pathInfoList.Add(pathInfo);
 
-                var bookmark = sr.Position();
-                sr.Seek(pathInfo.definitionOffset + 0x8, System.IO.SeekOrigin.Begin);
-                VertDefinition vertDef = new VertDefinition();
-                vertDef.unkByte0 = sr.Read<byte>();
-                vertDef.unkByte1 = sr.Read<byte>();
-                vertDef.vertCount = sr.ReadBE<ushort>();
-                vertDef.vertPositionsOffset = sr.ReadBE<int>();
-                vertDef.vertNormalsOffset = sr.ReadBE<int>();
-                vertDefinitions.Add(vertDef);
-
-                sr.Seek(vertDef.vertPositionsOffset + 0x8, System.IO.SeekOrigin.Begin);
-                List<Vector3> positions = new List<Vector3>();
-                for (int j = 0; j < vertDef.vertCount; j++)
+                if(pathInfo.definitionOffset != 0)
                 {
-                    positions.Add(sr.ReadBEV3());
-                }
-                pointListList.Add(positions);
+                    var bookmark = sr.Position();
+                    sr.Seek(pathInfo.definitionOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    VertDefinition vertDef = new VertDefinition();
+                    vertDef.unkByte0 = sr.Read<byte>();
+                    vertDef.unkByte1 = sr.Read<byte>();
+                    vertDef.vertCount = sr.ReadBE<ushort>();
+                    vertDef.vertPositionsOffset = sr.ReadBE<int>();
+                    if (pathInfo.doesNotUseNormals == 0)
+                    {
+                        vertDef.vertNormalsOffset = sr.ReadBE<int>();
+                    }
+                    vertDefinitions.Add(vertDef);
 
-                sr.Seek(vertDef.vertNormalsOffset + 0x8, System.IO.SeekOrigin.Begin);
-                List<Vector3> normals = new List<Vector3>();
-                for (int j = 0; j < vertDef.vertCount; j++)
+                    sr.Seek(vertDef.vertPositionsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    List<Vector3> positions = new List<Vector3>();
+                    for (int j = 0; j < vertDef.vertCount; j++)
+                    {
+                        positions.Add(sr.ReadBEV3());
+                    }
+                    pointListList.Add(positions);
+                    if (pathInfo.doesNotUseNormals == 0)
+                    {
+                        sr.Seek(vertDef.vertNormalsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                        List<Vector3> normals = new List<Vector3>();
+                        for (int j = 0; j < vertDef.vertCount; j++)
+                        {
+                            normals.Add(sr.ReadBEV3());
+                        }
+                        normalListList.Add(normals);
+                    }
+
+                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+                }
+
+                if (pathInfo.lengthsOffset != 0)
                 {
-                    normals.Add(sr.ReadBEV3());
+                    var bookmark = sr.Position();
+                    sr.Seek(pathInfo.lengthsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    List<float> lengths = new List<float>();
+                    for (int j = 0; j < pathInfo.lengthsCount; j++)
+                    {
+                        lengths.Add(sr.ReadBE<float>());
+                    }
+                    lengthsListList.Add(lengths);
+                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
                 }
-                normalListList.Add(normals);
 
-                sr.Seek(pathInfo.lengthsOffset + 0x8, System.IO.SeekOrigin.Begin);
-                List<float> lengths = new List<float>();
-                for (int j = 0; j < pathInfo.lengthsCount; j++)
-                {
-                    lengths.Add(sr.ReadBE<float>());
-                }
-                lengthsListList.Add(lengths);
-
-                sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
             }
 
             sr.Seek(pathHeader.pathOffset + 0x8, System.IO.SeekOrigin.Begin);
@@ -124,7 +138,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public struct PathInfo
         {
-            public byte unkByte0;
+            public byte doesNotUseNormals;
             public byte unkByte1;
             public ushort lengthsCount;
             public int id;
