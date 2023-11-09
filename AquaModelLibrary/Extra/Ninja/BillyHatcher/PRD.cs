@@ -1,7 +1,9 @@
 ﻿using csharp_prs;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -21,8 +23,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header = new PRDHeader();
             BigEndianHelper._active = initialSR.Peek<int>() > 0;
             header.endianness = initialSR.ReadBE<int>();
-            header.int04 = initialSR.ReadBE<int>();
-            header.int08 = initialSR.ReadBE<int>();
+            header.totalBufferSize = initialSR.ReadBE<int>();
+            header.totalBufferDifferenceFromCompressed = initialSR.ReadBE<int>();
             header.uncompressedDataSize = initialSR.ReadBE<int>();
 
             header.compressedDataSize = initialSR.ReadBE<int>();
@@ -69,11 +71,95 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
         }
 
+        public byte[] GetBytes()
+        {
+            ByteListExtension.AddAsBigEndian = true;
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddValue((int)1);
+            outBytes.ReserveInt("totalBufferSize");
+            outBytes.ReserveInt("totalBufferDifferenceFromCompressed");
+            outBytes.ReserveInt("uncompressedDataSize");
+
+            outBytes.ReserveInt("compressedDataSize");
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+
+            List<byte> innerBytes = new List<byte>()
+            {
+                0x55,
+                0xAA,
+                0x38,
+                0x2D,
+                0x0,
+                0x0,
+                0x0,
+                0x20,
+            };
+            innerBytes.ReserveInt("fileEntriesSize");
+            innerBytes.ReserveInt("fullSize");
+
+            innerBytes.AddValue(0xCCCCCCCCCCCCCCCC);
+            innerBytes.AddValue(0xCCCCCCCCCCCCCCCC);
+
+            innerBytes.Add((byte)0x1);
+            innerBytes.Add((byte)0x0);
+            innerBytes.Add((byte)0x0);
+            innerBytes.Add((byte)0x0);
+            innerBytes.AddValue((int)0);
+            innerBytes.AddValue((int)fileNames.Count + 1);
+
+            for (int i = 0; i < fileNames.Count; i++)
+            {
+                innerBytes.ReserveInt($"nameOffset{i}");
+                innerBytes.ReserveInt($"fileOffset{i}");
+                innerBytes.AddValue((int)files[i].Length);
+            }
+            var namesStart = innerBytes.Count;
+            innerBytes.Add((byte)0);
+            for (int i = 0; i < fileNames.Count; i++)
+            {
+                innerBytes.FillInt($"nameOffset{i}", innerBytes.Count - namesStart);
+                innerBytes.AddRange(Encoding.UTF8.GetBytes(fileNames[i]));
+                innerBytes.Add((byte)0);
+            }
+            innerBytes.FillInt("fileEntriesSize", innerBytes.Count - 0x20);
+            innerBytes.AlignWrite(0x20);
+            innerBytes.FillInt("fullSize", innerBytes.Count);
+
+            for (int i = 0; i < files.Count; i++)
+            {
+                innerBytes.FillInt($"fileOffset{i}", innerBytes.Count);
+                innerBytes.AddRange(files[i]);
+                if (i != files.Count - 1)
+                {
+                    innerBytes.AlignWrite(0x20);
+                }
+            }
+
+            var prs = Prs.Compress(innerBytes.ToArray(), 0x1FFF);
+            outBytes.AddRange(prs);
+            outBytes.FillInt("uncompressedDataSize", innerBytes.Count);
+            outBytes.FillInt("compressedDataSize", prs.Length);
+            var bufferAddition = 0x20 - ((innerBytes.Count - prs.Length) % 0x20);
+            if (bufferAddition == 0x1 || bufferAddition == 0)
+            {
+                bufferAddition += 0x20;
+            }
+            var compressionDifference = (innerBytes.Count - prs.Length);
+            var finalDifference = compressionDifference + bufferAddition;
+            var finalTotalBufferSize = finalDifference + prs.Length;
+            outBytes.FillInt("totalBufferSize", finalTotalBufferSize);
+            outBytes.FillInt("totalBufferDifferenceFromCompressed", finalDifference);
+
+            return outBytes.ToArray();
+        }
+
         public struct PRDHeader
         {
             public int endianness; //Endianness check?
-            public int int04; //Size of int08 + compressedSize
-            public int int08; //Unknown, size above compressed data size needed for memory allocation?
+            public int totalBufferSize; //Size of totalBufferDifferenceFromCompressed + compressedSize
+            public int totalBufferDifferenceFromCompressed; //Uncompressed + compressed difference, rounded up to nearest multiple of 0x20. 0x20 is also added if modulo is 1 or 0, perhaps due to a bug.
             public int uncompressedDataSize;
 
             public int compressedDataSize;

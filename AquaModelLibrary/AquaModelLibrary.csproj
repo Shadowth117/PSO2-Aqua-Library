@@ -347,6 +347,7 @@
     <Compile Include="Extra\AM2\TXP.cs" />
     <Compile Include="Extra\BigEndianHelper.cs" />
     <Compile Include="Extra\BluePointConvert.cs" />
+    <Compile Include="Extra\ByteListExtension.cs" />
     <Compile Include="Extra\DDS\DirectXUtil.cs" />
     <Compile Include="Extra\DirectX\D3DEnums.cs" />
     <Compile Include="Extra\EnemyData.cs" />
@@ -374,6 +375,7 @@
     <Compile Include="Extra\Morpheme\NSAConvert.cs" />
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\EggLevel.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LNDConvert.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LNDH\LNDH.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\ARC.cs" />
@@ -383,6 +385,8 @@
     <Compile Include="Extra\Ninja\BillyHatcher\LND.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\MC2.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\MC2Convert.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\PlayerParam.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\SetLightParam.cs" />
     <Compile Include="Extra\Ninja\GVMUtil.cs" />
     <Compile Include="Extra\Ninja\NinjaHeader.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\PRD.cs" />
