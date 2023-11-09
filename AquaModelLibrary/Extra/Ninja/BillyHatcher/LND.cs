@@ -144,8 +144,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcMainOffsetTable.nodeBoundingOffset = sr.ReadBE<int>();
 
             arcMainOffsetTable.unkCount = sr.ReadBE<int>();
-            arcMainOffsetTable.unkDataCount = sr.ReadBE<int>();
-            arcMainOffsetTable.unkDataOffset = sr.ReadBE<int>();
+            arcMainOffsetTable.meshDataCount = sr.ReadBE<int>();
+            arcMainOffsetTable.meshDataOffset = sr.ReadBE<int>();
 
             //Alt Vertex Colors
             if(arcMainDataHeader.altVertexColorOffset > 0)
@@ -367,8 +367,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Mesh data
-            sr.Seek(0x20 + arcMainOffsetTable.unkDataOffset, System.IO.SeekOrigin.Begin);
-            for (int i = 0; i < arcMainOffsetTable.unkDataCount; i++)
+            sr.Seek(0x20 + arcMainOffsetTable.meshDataOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcMainOffsetTable.meshDataCount; i++)
             {
                 ARCLNDMeshDataRef meshDataRef = new ARCLNDMeshDataRef();
                 meshDataRef.id = sr.ReadBE<int>();
@@ -873,6 +873,25 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 polyInfo.triIndicesList = triIndicesList;
                 polyInfo.triIndicesListStarts = triIndicesListStarts;
             }
+        }
+
+        public byte[] GetBytes()
+        {
+            if(isArcLND)
+            {
+                return GetBytesARCLND();
+            }
+            return GetBytesLNDH();
+        }
+
+        private byte[] GetBytesLNDH()
+        {
+            return null;
+        }
+
+        private byte[] GetBytesARCLND()
+        {
+            
         }
     }
 }

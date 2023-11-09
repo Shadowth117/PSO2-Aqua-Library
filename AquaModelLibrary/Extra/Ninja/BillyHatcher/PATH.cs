@@ -11,8 +11,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
     {
         public NinjaHeader header;
         public PATHHeader pathHeader;
-        public List<List<Vector3>> pointListList = new List<List<Vector3>>();
-        public List<List<Vector3>> normalListList = new List<List<Vector3>>();
         public List<List<float>> lengthsListList = new List<List<float>>();
         public List<PathInfo> pathInfoList = new List<PathInfo>();
         public List<VertDefinition> vertDefinitions = new List<VertDefinition>();
@@ -68,7 +66,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     {
                         positions.Add(sr.ReadBEV3());
                     }
-                    pointListList.Add(positions);
+                    vertDef.vertPositions = positions;
                     if (pathInfo.doesNotUseNormals == 0)
                     {
                         sr.Seek(vertDef.vertNormalsOffset + 0x8, System.IO.SeekOrigin.Begin);
@@ -77,7 +75,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         {
                             normals.Add(sr.ReadBEV3());
                         }
-                        normalListList.Add(normals);
+                        vertDef.vertNormals = normals;
                     }
 
                     sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
@@ -148,13 +146,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public int lengthsOffset;
         }
 
-        public struct VertDefinition
+        public class VertDefinition
         {
             public byte unkByte0;
             public byte unkByte1;
             public ushort vertCount;
             public int vertPositionsOffset;
             public int vertNormalsOffset;
+
+            public List<Vector3> vertPositions = new List<Vector3>();
+            public List<Vector3> vertNormals = new List<Vector3>();
         }
 
         public struct PathDefinition

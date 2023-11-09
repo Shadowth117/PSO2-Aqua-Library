@@ -101,8 +101,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int nodeBoundingOffset;
 
         public int unkCount;
-        public int unkDataCount;
-        public int unkDataOffset;
+        public int meshDataCount;
+        public int meshDataOffset;
     }
 
     public struct ARCLNDLandEntryRef
