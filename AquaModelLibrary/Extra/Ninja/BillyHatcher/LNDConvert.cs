@@ -33,6 +33,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             NGSAquaObject aqp = new NGSAquaObject();
             aqn = AquaNode.GenerateBasicAQN();
+            return null;
+            /*
 
             //Materials
             CreateMaterials(lnd, aqp);
@@ -67,6 +69,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             return aqp;
+            */
         }
 
         private static void AddMeshData(LND lnd, ARCLNDFaceDataHead faceData, AquaObject.GenericTriangles genMesh, Dictionary<string, int> vertTracker, int texId)
@@ -151,6 +154,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             string vertId = "";
             int i = 0;
+            /*
             if ((flags & ArcLndVertType.Position) > 0)
             {
                 vtxl.vertPositions.Add(lnd.arcVertDataSetList[0].PositionData[faceIds[i]] / 10);
@@ -191,7 +195,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 vtxl.uv1List.Add(new Vector2((float)(billyUv[0] / 255.0), (float)(billyUv[1] / 255.0)));
                 vertId += ((int)ArcLndVertType.UV2).ToString() + faceIds[i++];
             }
-
+            
+            */
             if (vertTracker.ContainsKey(vertId))
             {
                 return vertTracker[vertId];

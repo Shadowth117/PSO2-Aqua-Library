@@ -85,7 +85,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcHeader.fileSize = sr.ReadBE<int>();
             arcHeader.pof0Offset = sr.ReadBE<int>();
             arcHeader.pof0OffsetsSize = sr.ReadBE<int>();
-            arcHeader.nameCount = sr.ReadBE<int>();
+            arcHeader.fileCount = sr.ReadBE<int>();
 
             arcHeader.unkCount = sr.ReadBE<int>();
             arcHeader.magic = sr.ReadBE<int>();

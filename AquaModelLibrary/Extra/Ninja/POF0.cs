@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Windows.Documents;
 
 namespace AquaModelLibrary.Extra.Ninja
 {
@@ -112,39 +114,33 @@ namespace AquaModelLibrary.Extra.Ninja
         /// </summary>
         public static List<uint> GetRawPOF0Offsets(byte[] pof0Bytes)
         {
+            uint currentOffset = 0;
             List<uint> pof = new List<uint>();
-            int size = pof0Bytes.Length - 1;
-            while (size >= 0)
+            int index = 0;
+            while (index < pof0Bytes.Length)
             {
-                uint pointer = pof0Bytes[size--];
-                if (pointer == 0)
-                {
-                    break;
-                }
+                uint pointer = pof0Bytes[index++];
+
                 switch (pointer & mask)
                 {
                     case 0x40:
                         pointer -= 0x40;
-                        pof.Add(4 * pointer);
                         break;
                     case 0x80:
                         pointer -= 0x80;
                         pointer *= 0x100;
-                        pointer += pof0Bytes[size--];
-                        pof.Add(4 * pointer);
-                        size -= 1;
+                        pointer += pof0Bytes[index++];
                         break;
                     case 0xC0:
                         pointer -= 0xC0;
                         pointer *= 0x1000000;
-                        pointer += pof0Bytes[size--] * (uint)0x10000;
-                        pointer += pof0Bytes[size--] * (uint)0x100;
-                        pointer += pof0Bytes[size--];
-                        pof.Add(4 * pointer);
-                        size -= 3;
+                        pointer += pof0Bytes[index++] * (uint)0x10000;
+                        pointer += pof0Bytes[index++] * (uint)0x100;
+                        pointer += pof0Bytes[index++];
                         break;
                 }
-                size -= 1;
+                currentOffset += 4 * pointer;
+                pof.Add(currentOffset);
             }
 
             return pof;

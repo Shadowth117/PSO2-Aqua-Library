@@ -4,9 +4,18 @@ using System.Numerics;
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
     //ARCLND
+    /// <summary>
+    /// These are placed directly after POF0 data.
+    /// </summary>
+    public struct ARCLNDModelRef
+    {
+        public int modelOffset;
+        public int relativeNameOffset;
+    }
+
     public struct ARCLNDHeader
     {
-        public int mainDataOffset;
+        public int nextDataOffset;
         public int extraFileCount;
         public int extraFileOffsetsOffset;
         public int motionFileOffset;    //Often 0
