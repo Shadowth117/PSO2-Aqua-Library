@@ -1,5 +1,8 @@
-﻿using Reloaded.Memory.Streams;
+﻿using Marathon.Formats.Mesh.Ninja;
+using Reloaded.Memory.Streams;
 using System.Collections.Generic;
+using System.Numerics;
+using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH.MPL;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
@@ -10,7 +13,22 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     {
         public MPLHeader header;
         public List<MPLMotionMapping> motionMappingList = new List<MPLMotionMapping>();
-        public List<MPLUnkRef> mplLinkRefList = new List<MPLUnkRef>();
+        public List<MPLMotionStart> motionList = new List<MPLMotionStart>();
+
+        public enum MPLMotionLayout : ushort
+        {
+            ShortBAMSEuler = 0x21,
+            ShortBAMSEulerAndExtra = 0x25,
+            ShortBAMSEulerAndExtra2 = 0x3,
+            Quaternion = 0x2001,
+        }
+
+        public enum MPLMotionType : ushort
+        {
+            Rotation = 0x2,
+            RotationAndUnknown = 0x3,
+            RotationAndUnknown2 = 0x42,
+        }
 
         public MPL() { }
         public MPL(BufferedStreamReader sr)
@@ -25,8 +43,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             header.int_04 = sr.ReadBE<int>();
             header.motionMappingCount = sr.ReadBE<int>();
             header.motionMappingOffset = sr.ReadBE<int>();
-            header.mPLUnkRefCount = sr.ReadBE<int>();
-            header.mPLUnkRefOffset = sr.ReadBE<int>();
+            header.motionCount = sr.ReadBE<int>();
+            header.motionOffset = sr.ReadBE<int>();
 
             sr.Seek(header.motionMappingOffset + 0x20, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < header.motionMappingCount; i++)
@@ -34,51 +52,60 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 MPLMotionMapping motionMap = new MPLMotionMapping();
                 motionMap.mplMotionKey = sr.ReadBE<short>();
                 motionMap.mplMotionId = sr.ReadBE<short>();
-                motionMap.isValidMapping = sr.ReadBE<float>();
+                motionMap.flt_04 = sr.ReadBE<float>();
                 motionMappingList.Add(motionMap);
             }
 
-            sr.Seek(header.mPLUnkRefOffset + 0x20, System.IO.SeekOrigin.Begin);
-            for (int i = 0; i < header.mPLUnkRefCount; i++)
+            sr.Seek(header.motionOffset + 0x20, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < header.motionCount; i++)
             {
-                MPLUnkRef unkRef = new MPLUnkRef();
-                unkRef.int_00 = sr.ReadBE<int>();
-                unkRef.offset = sr.ReadBE<int>();
-                mplLinkRefList.Add(unkRef);
+                MPLMotionStart motionStart = new MPLMotionStart();
+                motionStart.int_00 = sr.ReadBE<int>();
+                motionStart.offset = sr.ReadBE<int>();
+                motionList.Add(motionStart);
             }
 
-            foreach (var unkRef in mplLinkRefList)
+            foreach (var motionStart in motionList)
             {
-                sr.Seek(unkRef.offset + 0x20, System.IO.SeekOrigin.Begin);
-                unkRef.unkRefRef = new MPLUnkRefRef();
-                unkRef.unkRefRef.int_00 = sr.ReadBE<int>();
-                unkRef.unkRefRef.offset = sr.ReadBE<int>();
-                var info0 = unkRef.unkRefRef.unkData1Info0 = new MPLUnkData1Info0();
+                sr.Seek(motionStart.offset + 0x20, System.IO.SeekOrigin.Begin);
+                motionStart.motionRef = new MPLMotionRef();
+                motionStart.motionRef.int_00 = sr.ReadBE<int>();
+                motionStart.motionRef.offset = sr.ReadBE<int>();
+                var info0 = motionStart.motionRef.motinInfo0 = new MPLMotionInfo0();
                 info0.offset = sr.ReadBE<int>();
                 info0.int_04 = sr.ReadBE<int>();
-                info0.bt_08 = sr.ReadBE<byte>();
-                info0.bt_09 = sr.ReadBE<byte>();
-                info0.bt_0A = sr.ReadBE<byte>();
-                info0.bt_0B = sr.ReadBE<byte>();
+                info0.motionLayout = (MPLMotionLayout)sr.ReadBE<ushort>();
+                info0.motionType = (MPLMotionType)sr.ReadBE<ushort>();
 
-                info0.unkData1Info1 = new MPLUnkData1Info1();
-                info0.unkData1Info1.int_00 = sr.ReadBE<int>();
-                info0.unkData1Info1.offset = sr.ReadBE<int>();
-                info0.unkData1Info1.int_08 = sr.ReadBE<int>();
-                info0.unkData1Info1.bt_0C = sr.ReadBE<byte>();
-                info0.unkData1Info1.bt_0D = sr.ReadBE<byte>();
-                info0.unkData1Info1.bt_0E = sr.ReadBE<byte>();
-                info0.unkData1Info1.unkData1Count = sr.ReadBE<byte>();
+                info0.motionInfo1 = new MPLMotionInfo1();
+                info0.motionInfo1.int_00 = sr.ReadBE<int>();
+                info0.motionInfo1.offset = sr.ReadBE<int>();
+                info0.motionInfo1.int_08 = sr.ReadBE<int>();
+                info0.motionInfo1.bt_0C = sr.ReadBE<byte>();
+                info0.motionInfo1.bt_0D = sr.ReadBE<byte>();
+                info0.motionInfo1.bt_0E = sr.ReadBE<byte>();
+                info0.motionInfo1.motionDataCount = sr.ReadBE<byte>();
 
-                for (int i = 0; i < info0.unkData1Info1.unkData1Count; i++)
+                for (int i = 0; i < info0.motionInfo1.motionDataCount; i++)
                 {
-                    MPLUnkData1 unkData1 = new MPLUnkData1();
-                    unkData1.int_00 = sr.ReadBE<int>();
-                    unkData1.flt_04 = sr.ReadBE<float>();
-                    unkData1.flt_08 = sr.ReadBE<float>();
-                    unkData1.int_0C = sr.ReadBE<int>();
-                    unkData1.int_10 = sr.ReadBE<int>();
-                    info0.unkData1Info1.unkData1List.Add(unkData1);
+                    MPLMotionData motionData = new MPLMotionData();
+                    motionData.frame = sr.ReadBE<int>();
+                    switch(info0.motionLayout)
+                    {
+                        case MPLMotionLayout.ShortBAMSEuler:
+                            motionData.shortsFrame = new short[] {sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()};
+                            break;
+                        case MPLMotionLayout.Quaternion:
+                            motionData.quatFrame = new Quaternion(sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>());
+                            break;
+                        case MPLMotionLayout.ShortBAMSEulerAndExtra:
+                        case MPLMotionLayout.ShortBAMSEulerAndExtra2:
+                            motionData.shortsFrame = new short[] {sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()};
+                            break;
+                        default:
+                            throw new System.Exception();
+                    }
+                    info0.motionInfo1.motionData.Add(motionData);
                 }
             }
         }
@@ -94,68 +121,84 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             outBytes.AddValue(motionMappingList.Count);
 
             offsets.Add(offset + outBytes.Count);
-            outBytes.ReserveInt("UnkData0Offset");
-            outBytes.AddValue(mplLinkRefList.Count);
+            outBytes.ReserveInt("MPLMotionMapping");
+            outBytes.AddValue(motionList.Count);
             offsets.Add(offset + outBytes.Count);
-            outBytes.ReserveInt("UnkRefOffset");
+            outBytes.ReserveInt("MotionStartOffset");
 
-            //Write unkData0
-            outBytes.FillInt("UnkData0Offset", outBytes.Count - 0x20);
+            //Write MotionMapping
+            outBytes.FillInt("MPLMotionMapping", outBytes.Count - 0x20);
             for (int i = 0; i < motionMappingList.Count; i++)
             {
                 var unkData0 = motionMappingList[i];
                 outBytes.AddValue(unkData0.mplMotionKey);
                 outBytes.AddValue(unkData0.mplMotionId);
-                outBytes.AddValue(unkData0.isValidMapping);
+                outBytes.AddValue(unkData0.flt_04);
             }
 
-            //Write unkData1
-            outBytes.FillInt("UnkRefOffset", outBytes.Count - 0x20);
-            for (int i = 0; i < mplLinkRefList.Count; i++)
+            //Write Motion
+            outBytes.FillInt("MotionStartOffset", outBytes.Count - 0x20);
+            for (int i = 0; i < motionList.Count; i++)
             {
-                var unkData1 = mplLinkRefList[i];
-                outBytes.AddValue(unkData1.int_00);
+                var motionStart = motionList[i];
+                outBytes.AddValue(motionStart.int_00);
                 offsets.Add(offset + outBytes.Count);
-                outBytes.ReserveInt($"UnkRefRefOffset{i}");
+                outBytes.ReserveInt($"MotionRefOffset{i}");
             }
 
-            for (int i = 0; i < mplLinkRefList.Count; i++)
+            for (int i = 0; i < motionList.Count; i++)
             {
-                var refRef = mplLinkRefList[i].unkRefRef;
-                outBytes.FillInt($"UnkRefRefOffset{i}", outBytes.Count - 0x20);
+                var refRef = motionList[i].motionRef;
+                outBytes.FillInt($"MotionRefOffset{i}", outBytes.Count - 0x20);
                 outBytes.AddValue(refRef.int_00);
                 offsets.Add(offset + outBytes.Count);
-                outBytes.ReserveInt($"MPLUnkData1Info0{i}");
+                outBytes.ReserveInt($"MotionInfo0{i}");
 
-                var info0 = refRef.unkData1Info0;
-                outBytes.FillInt($"MPLUnkData1Info0{i}", outBytes.Count - 0x20);
+                var info0 = refRef.motinInfo0;
+                outBytes.FillInt($"MotionInfo0{i}", outBytes.Count - 0x20);
                 offsets.Add(offset + outBytes.Count);
-                outBytes.ReserveInt($"MPLUnkData1Info1{i}");
+                outBytes.ReserveInt($"MotionInfo1{i}");
                 outBytes.AddValue(info0.int_04);
-                outBytes.Add(info0.bt_08);
-                outBytes.Add(info0.bt_09);
-                outBytes.Add(info0.bt_0A);
-                outBytes.Add(info0.bt_0B);
+                outBytes.AddValue((ushort)info0.motionLayout);
+                outBytes.AddValue((ushort)info0.motionType);
 
-                var info1 = info0.unkData1Info1;
-                outBytes.FillInt($"MPLUnkData1Info1{i}", outBytes.Count - 0x20);
+                var info1 = info0.motionInfo1;
+                outBytes.FillInt($"MotionInfo1{i}", outBytes.Count - 0x20);
                 outBytes.AddValue(info1.int_00);
                 offsets.Add(offset + outBytes.Count);
-                outBytes.ReserveInt($"MPLUnkData1{i}");
+                outBytes.ReserveInt($"MPLMotionData{i}");
                 outBytes.AddValue(info1.int_08);
                 outBytes.AddValue(info1.bt_0C);
                 outBytes.AddValue(info1.bt_0D);
                 outBytes.AddValue(info1.bt_0E);
-                outBytes.AddValue(info1.unkData1Count);
+                outBytes.AddValue(info1.motionDataCount);
 
-                outBytes.FillInt($"MPLUnkData1{i}", outBytes.Count - 0x20);
-                foreach (var unkData1 in info1.unkData1List)
+                outBytes.FillInt($"MPLMotionData{i}", outBytes.Count - 0x20);
+                foreach (var motionData in info1.motionData)
                 {
-                    outBytes.AddValue(unkData1.int_00);
-                    outBytes.AddValue(unkData1.flt_04);
-                    outBytes.AddValue(unkData1.flt_08);
-                    outBytes.AddValue(unkData1.int_0C);
-                    outBytes.AddValue(unkData1.int_10);
+                    outBytes.AddValue(motionData.frame);
+                    switch(info0.motionLayout)
+                    {
+                        case MPLMotionLayout.ShortBAMSEuler:
+                            outBytes.AddValue(motionData.shortsFrame[0]);
+                            outBytes.AddValue(motionData.shortsFrame[1]);
+                            outBytes.AddValue(motionData.shortsFrame[2]);
+                            break;
+                        case MPLMotionLayout.Quaternion:
+                            outBytes.AddValue(motionData.quatFrame.X);
+                            outBytes.AddValue(motionData.quatFrame.Y);
+                            outBytes.AddValue(motionData.quatFrame.Z);
+                            outBytes.AddValue(motionData.quatFrame.W);
+                            break;
+                        case MPLMotionLayout.ShortBAMSEulerAndExtra:
+                            outBytes.AddValue(motionData.shortsFrame[0]);
+                            outBytes.AddValue(motionData.shortsFrame[1]);
+                            outBytes.AddValue(motionData.shortsFrame[2]);
+                            outBytes.AddValue(motionData.shortsFrame[3]);
+                            outBytes.AddValue(motionData.shortsFrame[4]);
+                            outBytes.AddValue(motionData.shortsFrame[5]);
+                            break;
+                    }
                 }
             }
 
@@ -169,8 +212,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int int_04; //The starting value of offset0's data
         public int motionMappingCount;
         public int motionMappingOffset;
-        public int mPLUnkRefCount;
-        public int mPLUnkRefOffset;
+        public int motionCount;
+        public int motionOffset;
     }
 
     /// <summary>
@@ -188,40 +231,38 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// </summary>
         public short mplMotionId;
         /// <summary>
-        /// Usually 1. Signifies if it's a valid map?? Mistakenly not a boolean?
+        /// Usually 1.
         /// </summary>
-        public float isValidMapping;
+        public float flt_04;
     }
 
-    public class MPLUnkRef
+    public class MPLMotionStart
     {
         public int int_00;
         public int offset;
 
-        public MPLUnkRefRef unkRefRef = null;
+        public MPLMotionRef motionRef = null;
     }
 
-    public class MPLUnkRefRef
+    public class MPLMotionRef
     {
         public int int_00;
         public int offset;
 
-        public MPLUnkData1Info0 unkData1Info0 = null;
+        public MPLMotionInfo0 motinInfo0 = null;
     }
 
-    public class MPLUnkData1Info0
+    public class MPLMotionInfo0
     {
         public int offset;
         public int int_04;
-        public byte bt_08;
-        public byte bt_09;
-        public byte bt_0A;
-        public byte bt_0B;
+        public MPLMotionLayout motionLayout;
+        public MPLMotionType motionType;
 
-        public MPLUnkData1Info1 unkData1Info1 = null;
+        public MPLMotionInfo1 motionInfo1 = null;
     }
 
-    public class MPLUnkData1Info1
+    public class MPLMotionInfo1
     {
         public int int_00;
         public int offset;
@@ -229,18 +270,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public byte bt_0C;
         public byte bt_0D;
         public byte bt_0E;
-        public byte unkData1Count;
+        public byte motionDataCount;
 
-        public List<MPLUnkData1> unkData1List = new List<MPLUnkData1>();
+        public List<MPLMotionData> motionData = new List<MPLMotionData>();
     }
 
-    public class MPLUnkData1
+    public class MPLMotionData
     {
-        public int int_00;
-        public float flt_04;
-        public float flt_08;
-        public int int_0C;
-        public int int_10;
+        public int frame;
+        public Quaternion quatFrame;
+        public short[] shortsFrame;
     }
 
 }
