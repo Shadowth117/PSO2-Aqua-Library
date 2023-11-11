@@ -58,6 +58,30 @@ namespace AquaModelLibrary.Extra.Ninja
         }
 
         /// <summary>
+        /// Incoming pointers MUST be aligned to 4 bytes! Setting align to false will ensure the POF0 byte array itself is not aligned.
+        /// </summary>
+        public static byte[] GenerateRawPOF0(List<int> offsets, bool align = true)
+        {
+            List<byte> pofBytes = new List<byte>();
+            int lastPof = 0;
+            foreach (var offset in offsets)
+            {
+                pofBytes.AddRange(CalcPOF0Pointer((uint)lastPof, (uint)offset));
+                lastPof = offset;
+            }
+
+            if (align == true)
+            {
+                while (pofBytes.Count % 4 != 0)
+                {
+                    pofBytes.Add(0);
+                }
+            }
+
+            return pofBytes.ToArray();
+        }
+
+        /// <summary>
         /// Takes in the previous POF0 address (before it's compressed) and the current address. As POF0 is made up of relative addresses, we need both to calculate the return here.
         /// </summary>
         private static byte[] CalcPOF0Pointer(uint lastPOF, uint currentAddress)

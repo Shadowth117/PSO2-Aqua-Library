@@ -1,8 +1,8 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
+using System.Text;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
-using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -11,22 +11,40 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public byte[] gvmBytes = null;
         public List<uint> pof0Offsets = new List<uint>();
         public List<string> texnames = new List<string>();
-        public List<string> modelNames = new List<string>(); //? not 100% wtf these are
+        public List<string> fileNames = new List<string>(); //? not 100% wtf these are
 
         public bool isArcLND = false;
 
         //ARCLND Data
         public ARCHeader arcHeader;
         public List<ARCLNDModelRef> arcLndModelRefs = new List<ARCLNDModelRef>();
-        public List<ARCLNDModel> arcLndModels = new List<ARCLNDModel>();
+        public Dictionary<string, ARCLNDModel> arcLndModels = new Dictionary<string, ARCLNDModel>();
+        public List<ARCLNDAnimatedMeshSet> arcLndAnimatedMeshSets = new List<ARCLNDAnimatedMeshSet>();
+        public List<ARCLNDModel> arcLndAnimatedModels = new List<ARCLNDModel>();
+        public List<Motion> arcLndMotions = new List<Motion>();
+        public ARCLNDLand arcLand = null;
+        public MPL arcMPL = null;
+
+        public class ARCLNDLand
+        {
+            public ARCLNDHeader arcLndHeader;
+            public List<int> arcExtraModeloffsets = new List<int>();
+            public ARCLNDRefTableHead arcRefTable;
+            public List<ARCLNDRefEntry> arcRefTableEntries = new List<ARCLNDRefEntry>();
+
+            public byte[] GetBytes(int offset, out List<int> offsets)
+            {
+                offsets = new List<int>();
+                List<byte> outBytes = new List<byte>();
+
+
+
+                return outBytes.ToArray();
+            }
+        }
 
         public class ARCLNDModel
         {
-            public byte[] gvmBytes = null;
-            public ARCLNDHeader arcLndHeader;
-            public List<int> arcExtraFileOffsets = new List<int>();
-            public ARCLNDRefTableHead arcRefTable;
-            public List<ARCLNDRefEntry> arcRefTableEntries = new List<ARCLNDRefEntry>();
             public ARCLNDMainDataHeader arcMainDataHeader;
             public ARCLNDMainOffsetTable arcMainOffsetTable;
             public List<ARCLNDLandEntryRef> arcLandEntryRefList = new List<ARCLNDLandEntryRef>();
@@ -41,6 +59,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public ARCLNDAltVertColorRef arcAltVertRef;
             public List<ARCLNDAltVertColorMainRef> arcAltVertRefs = new List<ARCLNDAltVertColorMainRef>();
             public List<ARCLNDAltVertColorInfo> arcAltVertColorList = new List<ARCLNDAltVertColorInfo>();
+
+            public byte[] GetBytes(int offset, out List<int> offsets)
+            {
+                offsets = new List<int>();
+                List<byte> outBytes = new List<byte>();
+
+
+
+                return outBytes.ToArray();
+            }
         }
 
 
@@ -81,7 +109,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     sr.Seek(pof0Header.fileSize, System.IO.SeekOrigin.Current);
                 }
                 if (sr.Peek<int>() == 0x484D5647)
-                {   
+                {
                     gvmBytes = GVMUtil.ReadGVMBytes(sr);
                 }
             }
@@ -112,7 +140,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(0x20 + arcHeader.pof0Offset, System.IO.SeekOrigin.Begin);
             pof0Offsets = POF0.GetRawPOF0Offsets(sr.ReadBytes(sr.Position(), arcHeader.pof0OffsetsSize));
             sr.Seek(arcHeader.pof0OffsetsSize, System.IO.SeekOrigin.Current);
-            for(int i = 0; i < arcHeader.fileCount; i++)
+            for (int i = 0; i < arcHeader.fileCount; i++)
             {
                 ARCLNDModelRef modelRef = new ARCLNDModelRef();
                 modelRef.modelOffset = sr.ReadBE<int>();
@@ -122,66 +150,99 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             //Get model names
             var nameStart = sr.Position();
-            foreach(var modelRef in arcLndModelRefs)
+            foreach (var modelRef in arcLndModelRefs)
             {
                 sr.Seek(nameStart + modelRef.relativeNameOffset, System.IO.SeekOrigin.Begin);
-                modelNames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+                fileNames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
             }
 
-            for(int mdl = 0; mdl < arcHeader.fileCount; mdl++)
+            for (int mdl = 0; mdl < arcHeader.fileCount; mdl++)
             {
                 sr.Seek(0x20 + arcLndModelRefs[mdl].modelOffset, System.IO.SeekOrigin.Begin);
-                var name = modelNames[mdl];
+                var name = fileNames[mdl];
 
+                //In retail, lnds have Block (Always main level data), models named 'Sphere' that sometimes have trailing numbers, land, and mpl here.
                 switch (name)
                 {
                     case "land":
-                        ReadArcLndLandTable(sr);
+                        arcLand = ReadARCLand(sr);
+                        break;
+                    case "mpl":
+                        arcMPL = new MPL(sr);
+                        break;
+                    default:
+                        arcLndModels.Add(name, ReadArcLndModel(sr));
                         break;
                 }
             }
 
-
+            sr.Seek(0x20 + arcLand.arcLndHeader.GVMOffset, System.IO.SeekOrigin.Begin);
         }
 
-        private void ReadArcLndLandTable(BufferedStreamReader sr)
+        private ARCLNDLand ReadARCLand(BufferedStreamReader sr)
+        {
+            ARCLNDLand arcLand = new ARCLNDLand();
+            arcLand.arcLndHeader = new ARCLNDHeader();
+            //Core ARCLND header
+            arcLand.arcLndHeader.nextDataOffset = sr.ReadBE<int>();
+            arcLand.arcLndHeader.extraModelCount = sr.ReadBE<int>();
+            arcLand.arcLndHeader.extraModelOffsetsOffset = sr.ReadBE<int>();
+            arcLand.arcLndHeader.mpbFileOffset = sr.ReadBE<int>(); //We'll read this separately since this gets another reference.
+
+            arcLand.arcLndHeader.texRefTableOffset = sr.ReadBE<int>();
+            arcLand.arcLndHeader.GVMOffset = sr.ReadBE<int>();
+
+            if (arcLand.arcLndHeader.extraModelOffsetsOffset != 0)
+            {
+                sr.Seek(0x20 + arcLand.arcLndHeader.extraModelOffsetsOffset, System.IO.SeekOrigin.Begin);
+                for (int i = 0; i < arcLand.arcLndHeader.extraModelCount; i++)
+                {
+                    arcLand.arcExtraModeloffsets.Add(sr.ReadBE<int>());
+                }
+            }
+
+            //Read texture reference table
+            sr.Seek(0x20 + arcLand.arcLndHeader.texRefTableOffset, System.IO.SeekOrigin.Begin);
+            arcLand.arcRefTable = new ARCLNDRefTableHead();
+            arcLand.arcRefTable.entryOffset = sr.ReadBE<int>();
+            arcLand.arcRefTable.entryCount = sr.ReadBE<int>();
+
+            sr.Seek(0x20 + arcLand.arcRefTable.entryOffset, System.IO.SeekOrigin.Begin);
+            for (int i = 0; i < arcLand.arcRefTable.entryCount; i++)
+            {
+                ARCLNDRefEntry refEntry = new ARCLNDRefEntry();
+                refEntry.textOffset = sr.ReadBE<int>();
+                refEntry.unkInt0 = sr.ReadBE<int>();
+                refEntry.unkInt1 = sr.ReadBE<int>();
+                arcLand.arcRefTableEntries.Add(refEntry);
+            }
+            foreach (ARCLNDRefEntry entry in arcLand.arcRefTableEntries)
+            {
+                sr.Seek(entry.textOffset + 0x20, System.IO.SeekOrigin.Begin);
+                texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+            }
+
+            return arcLand;
+        }
+
+        private ARCLNDModel ReadArcLndModel(BufferedStreamReader sr, bool isAnimModel = false)
         {
             ARCLNDModel arcModel = new ARCLNDModel();
-            arcModel.arcLndHeader = new ARCLNDHeader();
 
-            //Core ARCLND header
-            arcModel.arcLndHeader.nextDataOffset = sr.ReadBE<int>();
-            arcModel.arcLndHeader.extraFileCount = sr.ReadBE<int>();
-            arcModel.arcLndHeader.extraFileOffsetsOffset = sr.ReadBE<int>();
-            arcModel.arcLndHeader.motionFileOffset = sr.ReadBE<int>();
-
-            arcModel.arcLndHeader.texRefTableOffset = sr.ReadBE<int>();
-            arcModel.arcLndHeader.GVMOffset = sr.ReadBE<int>();
-
-            sr.Seek(0x20 + arcModel.arcLndHeader.extraFileOffsetsOffset, System.IO.SeekOrigin.Begin);
-            for (int i = 0; i < arcModel.arcLndHeader.extraFileCount; i++)
+            //Model stuff
+            if (!isAnimModel)
             {
-                arcModel.arcExtraFileOffsets.Add(sr.ReadBE<int>());
+                arcModel.arcMainDataHeader = new ARCLNDMainDataHeader();
+                arcModel.arcMainDataHeader.mainOffsetTableOffset = sr.ReadBE<int>();
+                arcModel.arcMainDataHeader.altVertexColorOffset = sr.ReadBE<int>();
+                arcModel.arcMainDataHeader.animatedModelSetCount = sr.ReadBE<int>();
+                arcModel.arcMainDataHeader.animatedModelSetOffset = sr.ReadBE<int>();
+
+                arcModel.arcMainDataHeader.unkInt_10 = sr.ReadBE<int>();
+                arcModel.arcMainDataHeader.unkInt_14 = sr.ReadBE<int>();
+                arcModel.arcMainDataHeader.unkInt_18 = sr.ReadBE<int>();
+                arcModel.arcMainDataHeader.unkInt_1C = sr.ReadBE<int>();
             }
-
-            foreach (var offset in arcModel.arcExtraFileOffsets)
-            {
-                sr.Seek(0x20 + offset, System.IO.SeekOrigin.Begin);
-                //TODO
-            }
-
-            //Model
-            sr.Seek(0x20 + arcModel.arcLndHeader.nextDataOffset, System.IO.SeekOrigin.Begin);
-            arcModel.arcMainDataHeader = new ARCLNDMainDataHeader();
-            arcModel.arcMainDataHeader.mainOffsetTableOffset = sr.ReadBE<int>();
-            arcModel.arcMainDataHeader.altVertexColorOffset = sr.ReadBE<int>();
-            arcModel.arcMainDataHeader.unkCount = sr.ReadBE<int>();
-            arcModel.arcMainDataHeader.unkOffset1 = sr.ReadBE<int>();
-
-            arcModel.arcMainDataHeader.unkInt_10 = sr.ReadBE<int>();
-            arcModel.arcMainDataHeader.unkInt_14 = sr.ReadBE<int>();
-            arcModel.arcMainDataHeader.unkInt_18 = sr.ReadBE<int>();
-            arcModel.arcMainDataHeader.unkInt_1C = sr.ReadBE<int>();
 
             arcModel.arcMainOffsetTable = new ARCLNDMainOffsetTable();
             arcModel.arcMainOffsetTable.landEntryCount = sr.ReadBE<int>();
@@ -197,6 +258,26 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcModel.arcMainOffsetTable.unkCount = sr.ReadBE<int>();
             arcModel.arcMainOffsetTable.meshDataCount = sr.ReadBE<int>();
             arcModel.arcMainOffsetTable.meshDataOffset = sr.ReadBE<int>();
+
+            if(arcModel.arcMainDataHeader.animatedModelSetOffset != 0)
+            {
+                sr.Seek(0x20 + arcModel.arcMainDataHeader.animatedModelSetOffset, System.IO.SeekOrigin.Begin);
+                for(int i = 0; i < arcModel.arcMainDataHeader.animatedModelSetCount; i++)
+                {
+                    ARCLNDAnimatedMeshSet set = new ARCLNDAnimatedMeshSet();
+                    set.modelOffset = sr.ReadBE<int>();
+                    set.motionOffset = sr.ReadBE<int>();
+                    set.MPLAnimId = sr.ReadBE<int>();
+                    arcLndAnimatedMeshSets.Add(set);
+                }
+                foreach(var set in arcLndAnimatedMeshSets)
+                {
+                    sr.Seek(0x20 + set.modelOffset, System.IO.SeekOrigin.Begin);
+                    arcLndAnimatedModels.Add(ReadArcLndModel(sr, true));
+                    sr.Seek(0x20 + set.motionOffset, System.IO.SeekOrigin.Begin);
+                    arcLndMotions.Add(new Motion(sr, 0x20));
+                }
+            }
 
             //Alt Vertex Colors
             if (arcModel.arcMainDataHeader.altVertexColorOffset > 0)
@@ -265,22 +346,26 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             foreach (var lndRef in arcModel.arcLandEntryRefList)
             {
-                sr.Seek(0x20 + lndRef.offset, System.IO.SeekOrigin.Begin);
-                ARCLNDLandEntry lndEntry = new ARCLNDLandEntry();
-                lndEntry.unkInt0 = sr.ReadBE<int>();
-                lndEntry.unkInt1 = sr.ReadBE<int>();
-                lndEntry.unkInt2 = sr.ReadBE<int>();
-                lndEntry.unkInt3 = sr.ReadBE<int>();
+                if(lndRef.offset != 0)
+                {
+                    sr.Seek(0x20 + lndRef.offset, System.IO.SeekOrigin.Begin);
+                    ARCLNDLandEntry lndEntry = new ARCLNDLandEntry();
+                    lndEntry.unkInt0 = sr.ReadBE<int>();
+                    lndEntry.unkInt1 = sr.ReadBE<int>();
+                    lndEntry.unkInt2 = sr.ReadBE<int>();
+                    lndEntry.unkInt3 = sr.ReadBE<int>();
 
-                lndEntry.unkInt4 = sr.ReadBE<int>();
-                lndEntry.unkInt5 = sr.ReadBE<int>();
-                lndEntry.unkInt6 = sr.ReadBE<int>();
-                lndEntry.unkInt7 = sr.ReadBE<int>();
+                    lndEntry.unkInt4 = sr.ReadBE<int>();
+                    lndEntry.unkInt5 = sr.ReadBE<int>();
+                    lndEntry.unkInt6 = sr.ReadBE<int>();
+                    lndEntry.unkInt7 = sr.ReadBE<int>();
 
-                lndEntry.ushort0 = sr.ReadBE<ushort>();
-                lndEntry.ushort1 = sr.ReadBE<ushort>();
-                lndEntry.TextureId = sr.ReadBE<int>();
-                arcModel.arcLandEntryList.Add(lndEntry);
+                    lndEntry.ushort0 = sr.ReadBE<ushort>();
+                    lndEntry.ushort1 = sr.ReadBE<ushort>();
+                    lndEntry.TextureId = sr.ReadBE<int>();
+                    arcModel.arcLandEntryList.Add(lndEntry);
+                    lndRef.entry = lndEntry;
+                }
             }
 
             //Vertex data. Should only be one reference offset, but technically there could be more
@@ -400,18 +485,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 bounding.usht_06 = sr.ReadBE<ushort>();
                 bounding.usht_08 = sr.ReadBE<ushort>();
                 bounding.usht_0A = sr.ReadBE<ushort>();
-                bounding.int_0C = sr.ReadBE<int>();
-
-                bounding.int_10 = sr.ReadBE<int>();
-                bounding.int_14 = sr.ReadBE<int>();
-                bounding.int_18 = sr.ReadBE<int>();
-                bounding.int_1C = sr.ReadBE<int>();
-
-                bounding.int_20 = sr.ReadBE<int>();
-                bounding.int_24 = sr.ReadBE<int>();
-                bounding.int_28 = sr.ReadBE<int>();
-                bounding.int_2C = sr.ReadBE<int>();
-
+                bounding.Position = sr.ReadBEV3();
+                bounding.Rotation = sr.ReadBEV3();
+                bounding.scale = sr.ReadBEV3();
                 bounding.minBounding = sr.ReadBEV2();
                 bounding.maxBounding = sr.ReadBEV2();
                 arcModel.arcBoundingList.Add(bounding);
@@ -444,36 +520,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 arcModel.arcMeshDataList.Add(meshDataList);
             }
 
-            //Read texture reference table
-            sr.Seek(0x20 + arcModel.arcLndHeader.texRefTableOffset, System.IO.SeekOrigin.Begin);
-            arcModel.arcRefTable = new ARCLNDRefTableHead();
-            arcModel.arcRefTable.entryOffset = sr.ReadBE<int>();
-            arcModel.arcRefTable.entryCount = sr.ReadBE<int>();
-
-            sr.Seek(0x20 + arcModel.arcRefTable.entryOffset, System.IO.SeekOrigin.Begin);
-            for (int i = 0; i < arcModel.arcRefTable.entryCount; i++)
-            {
-                ARCLNDRefEntry refEntry = new ARCLNDRefEntry();
-                refEntry.textOffset = sr.ReadBE<int>();
-                refEntry.unkInt0 = sr.ReadBE<int>();
-                refEntry.unkInt1 = sr.ReadBE<int>();
-                arcModel.arcRefTableEntries.Add(refEntry);
-            }
-            foreach (ARCLNDRefEntry entry in arcModel.arcRefTableEntries)
-            {
-                sr.Seek(entry.textOffset + 0x20, System.IO.SeekOrigin.Begin);
-                texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
-            }
-
-            //Read motions
-            if (arcModel.arcLndHeader.motionFileOffset > 0)
-            {
-                sr.Seek(0x20 + arcModel.arcLndHeader.motionFileOffset, System.IO.SeekOrigin.Begin);
-                //TODO
-            }
-            sr.Seek(0x20 + arcModel.arcLndHeader.GVMOffset, System.IO.SeekOrigin.Begin);
-
-            arcLndModels.Add(arcModel);
+            return arcModel;
         }
 
         private static void ReadArcLndTris(BufferedStreamReader sr, ArcLndVertType flags, int offset, int bufferSize, out List<List<List<int>>> triIndicesList, out List<List<List<int>>> triIndicesListStarts)
@@ -929,11 +976,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         /// <summary>
         /// For all variants, a .gvm with its contents should be stored as a byte array. Texture names should also be set outside it, though they should mirror the texnames in the GVM itself.
-        /// For ARCLND, vertex data should be populated, strip data should be populated as well as LNDEntry data with an appropriate Mesh entry linking these. If bounding info is not present, it can be generated. 
+        /// For ARCLND, filenames should be populated, vertex data should be populated, strip data should be populated as well as LNDEntry data with an appropriate Mesh entry linking these. If bounding info is not present, it can be generated. 
         /// </summary>
         public byte[] GetBytes()
         {
-            if(isArcLND)
+            if (isArcLND)
             {
                 return GetBytesARCLND();
             }
@@ -949,22 +996,59 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             ByteListExtension.AddAsBigEndian = true;
             List<byte> outBytes = new List<byte>();
-            List<uint> offsets = new List<uint>();
+            List<int> offsets = new List<int>();
+            List<uint> fileOffsets = new List<uint>();
+            uint lndOffset = 0;
+            uint mplOffset = 0;
+
+            //Write lnd
+            //Write models
+
+
+            //Write mpl
+            if(arcMPL != null)
+            {
+                mplOffset = (uint)outBytes.Count;
+                outBytes.AddRange(arcMPL.GetBytes(outBytes.Count, out var mplOffsets));
+                offsets.AddRange(mplOffsets);
+            }
+
+            //Add offsets to list
+            fileOffsets.Add(lndOffset);
+            if (mplOffset != 0)
+            {
+                fileOffsets.Add(mplOffset);
+            }
 
             //Write headerless POF0
             int pof0Offset = outBytes.Count;
+            offsets.Sort();
             outBytes.AddRange(POF0.GenerateRawPOF0(offsets));
             int pof0End = outBytes.Count;
             int pof0Size = pof0Offset - pof0End;
 
             //Write ARC POF trailing data
+            int relativeOffset = 0;
+            for (int i = 0; i < fileOffsets.Count; i++)
+            {
+                var name = fileNames[i];
+                var offset = fileOffsets[i];
+                outBytes.AddValue(offset);
+                outBytes.AddValue(relativeOffset);
+                relativeOffset += name.Length + 1;
+            }
+            foreach (var name in fileNames)
+            {
+                outBytes.AddRange(Encoding.ASCII.GetBytes(name));
+                outBytes.Add(0);
+            }
 
             //ARC Header (insert at the end to make less messy)
             List<byte> arcHead = new List<byte>();
             arcHead.AddValue(outBytes.Count + 0x20);
             arcHead.AddValue(pof0Offset);
             arcHead.AddValue(pof0Size);
-            arcHead.AddValue(modelNames.Count);
+            arcHead.AddValue(fileNames.Count);
 
             arcHead.AddValue((int)0);
             arcHead.Add(0x30);

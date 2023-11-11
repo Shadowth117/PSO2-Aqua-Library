@@ -181,6 +181,46 @@ namespace AquaModelLibrary.Extra
             outBytes.AddRange(newBytes);
         }
 
+        public static void AddValue(this List<byte> outBytes, float value)
+        {
+            var newBytes = BitConverter.GetBytes(value);
+            if (AddAsBigEndian)
+            {
+                Array.Reverse(newBytes);
+            }
+            outBytes.AddRange(newBytes);
+        }
+
+        public static void AddValue(this List<byte> outBytes, double value)
+        {
+            var newBytes = BitConverter.GetBytes(value);
+            if (AddAsBigEndian)
+            {
+                Array.Reverse(newBytes);
+            }
+            outBytes.AddRange(newBytes);
+        }
+
+        public static void AddValue(this List<byte> outBytes, byte value)
+        {
+            var newBytes = BitConverter.GetBytes(value);
+            if (AddAsBigEndian)
+            {
+                Array.Reverse(newBytes);
+            }
+            outBytes.AddRange(newBytes);
+        }
+
+        public static void AddValue(this List<byte> outBytes, sbyte value)
+        {
+            var newBytes = BitConverter.GetBytes(value);
+            if (AddAsBigEndian)
+            {
+                Array.Reverse(newBytes);
+            }
+            outBytes.AddRange(newBytes);
+        }
+
         public static int AlignWrite(this List<byte> outBytes, int alignmentValue, byte fillValue = 0)
         {
             //Align to int align

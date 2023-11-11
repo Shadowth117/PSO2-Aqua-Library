@@ -16,9 +16,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     public struct ARCLNDHeader
     {
         public int nextDataOffset;
-        public int extraFileCount;
-        public int extraFileOffsetsOffset;
-        public int motionFileOffset;    //Often 0
+        public int extraModelCount;
+        public int extraModelOffsetsOffset;
+        public int mpbFileOffset;    //Often 0
 
         public int texRefTableOffset;
         public int GVMOffset;
@@ -41,8 +41,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     {
         public int mainOffsetTableOffset;
         public int altVertexColorOffset;
-        public int unkCount;
-        public int unkOffset1;
+        /// <summary>
+        /// The animated model data should only be defined for the Block model.
+        /// </summary>
+        public int animatedModelSetCount;
+        public int animatedModelSetOffset;
 
         public int unkInt_10;
         public int unkInt_14;
@@ -62,6 +65,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int offset;
     }
 
+    /// <summary>
+    /// The data here may allow for substituing all vertex data, but faces and collision would remain the same so this wouldn't be super useful. Maybe UV data would.
+    /// </summary>
     public class ARCLNDAltVertColorInfo
     {
         public ushort usht00;
@@ -114,13 +120,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int meshDataOffset;
     }
 
-    public struct ARCLNDLandEntryRef
+    public class ARCLNDLandEntryRef
     {
         public int unkInt;
         public int offset;
+
+        public ARCLNDLandEntry entry = null;
     }
 
-    public struct ARCLNDLandEntry
+    public class ARCLNDLandEntry
     {
         public int unkInt0;
         public int unkInt1;
@@ -207,17 +215,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public ushort usht_06;
         public ushort usht_08;
         public ushort usht_0A;
-        public int int_0C;
-
-        public int int_10;
-        public int int_14;
-        public int int_18;
-        public int int_1C;
-
-        public int int_20;
-        public int int_24;
-        public int int_28;
-        public int int_2C;
+        /// <summary>
+        /// This isn't always used, for unknown reasons
+        /// </summary>
+        public Vector3 Position;
+        public Vector3 Rotation;
+        /// <summary>
+        /// This isn't always used, for unknown reasons
+        /// </summary>
+        public Vector3 scale; 
 
         public Vector2 minBounding;
         public Vector2 maxBounding;
@@ -233,9 +239,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     public struct ARCLNDMeshData
     {
         public int BoundingData;
-        public int int_04;
+        public int int_04;   //int_04 or int_0c is probably a vertex set. If so, it may be important to test since vertex sets cap out at either short.Max or ushort.Max
         public int lndEntry;
         public int int_0C;
         public int faceDataId;
+    }
+
+    /// <summary>
+    /// When placed, these should align to 0x20
+    /// </summary>
+    public struct ARCLNDAnimatedMeshSet
+    {
+        public int modelOffset;
+        public int motionOffset;
+        public int MPLAnimId;
     }
 }
