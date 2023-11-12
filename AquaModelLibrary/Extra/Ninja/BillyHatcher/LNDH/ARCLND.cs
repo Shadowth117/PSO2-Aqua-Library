@@ -219,7 +219,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// This isn't always used, for unknown reasons
         /// </summary>
         public Vector3 Position;
-        public Vector3 Rotation;
+        public short sht0;
+        public short sht1;
+        public short BAMS0;
+        public short BAMS1;
+        public short BAMS2;
+        public short BAMS3;
         /// <summary>
         /// This isn't always used, for unknown reasons
         /// </summary>
@@ -248,7 +253,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     /// <summary>
     /// When placed, these should align to 0x20
     /// </summary>
-    public struct ARCLNDAnimatedMeshSet
+    public struct ARCLNDAnimatedMeshRefSet
     {
         public int modelOffset;
         public int motionOffset;

@@ -19,12 +19,22 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public ARCHeader arcHeader;
         public List<ARCLNDModelRef> arcLndModelRefs = new List<ARCLNDModelRef>();
         public Dictionary<string, ARCLNDModel> arcLndModels = new Dictionary<string, ARCLNDModel>();
-        public List<ARCLNDAnimatedMeshSet> arcLndAnimatedMeshSets = new List<ARCLNDAnimatedMeshSet>();
-        public List<ARCLNDModel> arcLndAnimatedModels = new List<ARCLNDModel>();
-        public List<Motion> arcLndMotions = new List<Motion>();
+        public List<ARCLNDAnimatedMeshData> arcLndAnimatedMeshDataList = new List<ARCLNDAnimatedMeshData>();
+        /// <summary>
+        ///Animated models. All models here can have 2 animations. An 'animation' that only contains vertex color data for night and a more typical animation.
+        ///The former is not always there in retail, however technically the other animation doesn't need to be there either.
+        ///These models typically have a transform associated with them, unlike the normal models.
+        /// </summary>
+        public List<ARCLNDAnimatedMeshRefSet> arcLndAnimatedModelRefs = new List<ARCLNDAnimatedMeshRefSet>();
         public ARCLNDLand arcLand = null;
         public MPL arcMPL = null;
 
+        public class ARCLNDAnimatedMeshData
+        {
+            public ARCLNDModel model = null;
+            public Motion motion = null;
+            public MPLMotionStart mplMotion = null;
+        }
         public class ARCLNDLand
         {
             public ARCLNDHeader arcLndHeader;
@@ -176,6 +186,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
 
+            //Assign MPL Motions
+            if(arcMPL != null)
+            {
+                for (int i = 0; i < arcLndAnimatedModelRefs.Count; i++)
+                {
+                    var id = arcLndAnimatedModelRefs[i].MPLAnimId;
+                    if (arcMPL.motionDict.ContainsKey(id))
+                    {
+                        arcLndAnimatedMeshDataList[i].mplMotion = arcMPL.motionDict[id];
+                    }
+                }
+            }
+
             sr.Seek(0x20 + arcLand.arcLndHeader.GVMOffset, System.IO.SeekOrigin.Begin);
         }
 
@@ -264,18 +287,23 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 sr.Seek(0x20 + arcModel.arcMainDataHeader.animatedModelSetOffset, System.IO.SeekOrigin.Begin);
                 for(int i = 0; i < arcModel.arcMainDataHeader.animatedModelSetCount; i++)
                 {
-                    ARCLNDAnimatedMeshSet set = new ARCLNDAnimatedMeshSet();
+                    ARCLNDAnimatedMeshRefSet set = new ARCLNDAnimatedMeshRefSet();
                     set.modelOffset = sr.ReadBE<int>();
                     set.motionOffset = sr.ReadBE<int>();
                     set.MPLAnimId = sr.ReadBE<int>();
-                    arcLndAnimatedMeshSets.Add(set);
+                    arcLndAnimatedModelRefs.Add(set);
                 }
-                foreach(var set in arcLndAnimatedMeshSets)
+                foreach(var set in arcLndAnimatedModelRefs)
                 {
+                    ARCLNDAnimatedMeshData meshData = new ARCLNDAnimatedMeshData();
                     sr.Seek(0x20 + set.modelOffset, System.IO.SeekOrigin.Begin);
-                    arcLndAnimatedModels.Add(ReadArcLndModel(sr, true));
-                    sr.Seek(0x20 + set.motionOffset, System.IO.SeekOrigin.Begin);
-                    arcLndMotions.Add(new Motion(sr, 0x20));
+                    meshData.model = ReadArcLndModel(sr, true);
+                    if (set.motionOffset != 0)
+                    {
+                        sr.Seek(0x20 + set.motionOffset, System.IO.SeekOrigin.Begin);
+                        meshData.motion = new Motion(sr, 0x20);
+                    }
+                    arcLndAnimatedMeshDataList.Add(meshData);
                 }
             }
 
@@ -486,7 +514,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 bounding.usht_08 = sr.ReadBE<ushort>();
                 bounding.usht_0A = sr.ReadBE<ushort>();
                 bounding.Position = sr.ReadBEV3();
-                bounding.Rotation = sr.ReadBEV3();
+                bounding.sht0 = sr.ReadBE<short>();
+                bounding.sht1 = sr.ReadBE<short>();
+                bounding.BAMS0 = sr.ReadBE<short>();
+                bounding.BAMS1 = sr.ReadBE<short>();
+                bounding.BAMS2 = sr.ReadBE<short>();
+                bounding.BAMS3 = sr.ReadBE<short>();
                 bounding.scale = sr.ReadBEV3();
                 bounding.minBounding = sr.ReadBEV2();
                 bounding.maxBounding = sr.ReadBEV2();

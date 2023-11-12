@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
@@ -39,7 +40,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         /// <summary>
         /// RGBA Order
         /// </summary>
-        public List<List<byte[]>> colorAnimation = new List<List<byte[]>>();
+        public List<List<byte[]>> colorAnimations = new List<List<byte[]>>();
 
         public struct MotionStart
         {
@@ -112,7 +113,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             motHeader.usht_2A = sr.ReadBE<ushort>();
             motHeader.int_2C = sr.ReadBE<int>();
 
-
+            //If this is used outside of LND this needs fixing, but otherwise, this works for now.
+            sr.Seek(motHeader.dataOffset + offset, System.IO.SeekOrigin.Begin);
+            List<byte[]> colorAnimation = new List<byte[]>();
+            for (int i = 0; i < motHeader.count; i++)
+            {
+                colorAnimation.Add(new byte[] { sr.Read<byte>(), sr.Read<byte>(), sr.Read<byte>(), sr.Read<byte>() });
+            }
+            colorAnimations.Add(colorAnimation);
         }
 
         public byte[] GetBytes(int offset, out List<int> offsets)
@@ -123,10 +131,38 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.AddValue(0);
             offsets.Add(outBytes.Count + offset);
             outBytes.AddValue(offset + 0x8);
+
             outBytes.AddValue(0);
             offsets.Add(outBytes.Count + offset);
             outBytes.AddValue(offset + 0x10);
-            //outBytes.Add
+
+            outBytes.AddValue(motHeader.usht_00);
+            outBytes.AddValue(motHeader.usht_02);
+            outBytes.AddValue(motHeader.int_04);
+            outBytes.AddValue(motHeader.usht_08);
+            outBytes.AddValue(motHeader.usht_0A);
+            outBytes.AddValue(motHeader.int_0C);
+
+            var animType = BitConverter.GetBytes((short)motHeader.animationType);
+            outBytes.AddValue(animType[0]);
+            outBytes.AddValue(animType[1]);
+            outBytes.AddValue(motHeader.count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.AddValue(outBytes.Count + offset + 0x24);
+            var animType2 = BitConverter.GetBytes((short)motHeader.animationTypeAgain);
+            outBytes.AddValue(animType2[0]);
+            outBytes.AddValue(animType2[1]);
+            outBytes.AddValue(motHeader.usht_1A);
+            outBytes.AddValue(motHeader.int_1C);
+
+            outBytes.AddValue(motHeader.usht_20);
+            outBytes.AddValue(motHeader.usht_22);
+            outBytes.AddValue(motHeader.int_24);
+            outBytes.AddValue(motHeader.usht_28);
+            outBytes.AddValue(motHeader.usht_2A);
+            outBytes.AddValue(motHeader.int_2C);
+
+            outBytes.AddRange(colorAnimations[0][0]);
 
             return outBytes.ToArray();
         }

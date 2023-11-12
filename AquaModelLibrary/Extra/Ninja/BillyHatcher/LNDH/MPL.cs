@@ -3,6 +3,7 @@ using Reloaded.Memory.Streams;
 using System.Collections.Generic;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH.MPL;
+using static AquaModelLibrary.Extra.Ninja.BillyHatcher.Motion;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
@@ -13,6 +14,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     {
         public MPLHeader header;
         public List<MPLMotionMapping> motionMappingList = new List<MPLMotionMapping>();
+        public Dictionary<int, MPLMotionStart> motionDict = new Dictionary<int, MPLMotionStart>();
         public List<MPLMotionStart> motionList = new List<MPLMotionStart>();
 
         public enum MPLMotionLayout : ushort
@@ -71,11 +73,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 motionStart.motionRef = new MPLMotionRef();
                 motionStart.motionRef.int_00 = sr.ReadBE<int>();
                 motionStart.motionRef.offset = sr.ReadBE<int>();
-                var info0 = motionStart.motionRef.motinInfo0 = new MPLMotionInfo0();
+                sr.Seek(motionStart.motionRef.offset + 0x20, System.IO.SeekOrigin.Begin);
+                var info0 = motionStart.motionRef.motionInfo0 = new MPLMotionInfo0();
                 info0.offset = sr.ReadBE<int>();
                 info0.int_04 = sr.ReadBE<int>();
                 info0.motionLayout = (MPLMotionLayout)sr.ReadBE<ushort>();
                 info0.motionType = (MPLMotionType)sr.ReadBE<ushort>();
+                sr.Seek(motionStart.motionRef.motionInfo0.offset + 0x20, System.IO.SeekOrigin.Begin);
 
                 info0.motionInfo1 = new MPLMotionInfo1();
                 info0.motionInfo1.int_00 = sr.ReadBE<int>();
@@ -85,27 +89,40 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 info0.motionInfo1.bt_0D = sr.ReadBE<byte>();
                 info0.motionInfo1.bt_0E = sr.ReadBE<byte>();
                 info0.motionInfo1.motionDataCount = sr.ReadBE<byte>();
+                sr.Seek(motionStart.motionRef.motionInfo0.motionInfo1.offset + 0x20, System.IO.SeekOrigin.Begin);
 
                 for (int i = 0; i < info0.motionInfo1.motionDataCount; i++)
                 {
                     MPLMotionData motionData = new MPLMotionData();
-                    motionData.frame = sr.ReadBE<int>();
                     switch(info0.motionLayout)
                     {
                         case MPLMotionLayout.ShortBAMSEuler:
+                            motionData.frame = sr.ReadBE<ushort>();
                             motionData.shortsFrame = new short[] {sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()};
                             break;
                         case MPLMotionLayout.Quaternion:
-                            motionData.quatFrame = new Quaternion(sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>());
+                            motionData.frame = sr.ReadBE<int>();
+                            var w = sr.ReadBE<float>();
+                            motionData.quatFrame = new Quaternion(sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>(), w);
                             break;
                         case MPLMotionLayout.ShortBAMSEulerAndExtra:
                         case MPLMotionLayout.ShortBAMSEulerAndExtra2:
+                            motionData.frame = sr.ReadBE<ushort>();
                             motionData.shortsFrame = new short[] {sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()};
                             break;
                         default:
                             throw new System.Exception();
                     }
                     info0.motionInfo1.motionData.Add(motionData);
+                }
+            }
+
+            //Create a dictionary for quick reference
+            foreach(var map in motionMappingList)
+            {
+                if(map.mplMotionKey != -1)
+                {
+                    motionDict.Add(map.mplMotionKey, motionList[map.mplMotionId]);
                 }
             }
         }
@@ -154,7 +171,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 offsets.Add(offset + outBytes.Count);
                 outBytes.ReserveInt($"MotionInfo0{i}");
 
-                var info0 = refRef.motinInfo0;
+                var info0 = refRef.motionInfo0;
                 outBytes.FillInt($"MotionInfo0{i}", outBytes.Count - 0x20);
                 offsets.Add(offset + outBytes.Count);
                 outBytes.ReserveInt($"MotionInfo1{i}");
@@ -185,10 +202,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                             outBytes.AddValue(motionData.shortsFrame[2]);
                             break;
                         case MPLMotionLayout.Quaternion:
+                            outBytes.AddValue(motionData.quatFrame.W);
                             outBytes.AddValue(motionData.quatFrame.X);
                             outBytes.AddValue(motionData.quatFrame.Y);
                             outBytes.AddValue(motionData.quatFrame.Z);
-                            outBytes.AddValue(motionData.quatFrame.W);
                             break;
                         case MPLMotionLayout.ShortBAMSEulerAndExtra:
                             outBytes.AddValue(motionData.shortsFrame[0]);
@@ -249,7 +266,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int int_00;
         public int offset;
 
-        public MPLMotionInfo0 motinInfo0 = null;
+        public MPLMotionInfo0 motionInfo0 = null;
     }
 
     public class MPLMotionInfo0
@@ -280,6 +297,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int frame;
         public Quaternion quatFrame;
         public short[] shortsFrame;
+
+        public Vector3 BAMSToDeg()
+        {
+            return new Vector3((float)(shortsFrame[0] / (65536 / 360.0)), (float)(shortsFrame[1] / (65536 / 360.0)), (float)(shortsFrame[2] / (65536 / 360.0)));
+        }
     }
+
 
 }
