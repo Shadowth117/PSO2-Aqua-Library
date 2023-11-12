@@ -21,7 +21,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         {
             ShortBAMSEuler = 0x21,
             ShortBAMSEulerAndExtra = 0x25,
-            ShortBAMSEulerAndExtra2 = 0x3,
+            IntBAMSEuler = 0x3,
+            IntBAMSEuler2 = 0x7,
             Quaternion = 0x2001,
         }
 
@@ -88,10 +89,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 info0.motionInfo1.bt_0C = sr.ReadBE<byte>();
                 info0.motionInfo1.bt_0D = sr.ReadBE<byte>();
                 info0.motionInfo1.bt_0E = sr.ReadBE<byte>();
-                info0.motionInfo1.motionDataCount = sr.ReadBE<byte>();
+                info0.motionInfo1.motionDataCount0 = sr.ReadBE<byte>();
+                if(info0.motionInfo1.motionDataCount0 == 0)
+                {
+                    info0.motionInfo1.motionDataCount1 = sr.ReadBE<int>();
+                }
                 sr.Seek(motionStart.motionRef.motionInfo0.motionInfo1.offset + 0x20, System.IO.SeekOrigin.Begin);
 
-                for (int i = 0; i < info0.motionInfo1.motionDataCount; i++)
+                info0.motionInfo1.motCount = info0.motionInfo1.motionDataCount0 > 0 ? info0.motionInfo1.motionDataCount0 : info0.motionInfo1.motionDataCount1;
+
+                for (int i = 0; i < info0.motionInfo1.motCount; i++)
                 {
                     MPLMotionData motionData = new MPLMotionData();
                     switch(info0.motionLayout)
@@ -106,9 +113,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                             motionData.quatFrame = new Quaternion(sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>(), w);
                             break;
                         case MPLMotionLayout.ShortBAMSEulerAndExtra:
-                        case MPLMotionLayout.ShortBAMSEulerAndExtra2:
                             motionData.frame = sr.ReadBE<ushort>();
-                            motionData.shortsFrame = new short[] {sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()};
+                            motionData.shortsFrame = new short[] { sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>() };
+                            break;
+                        case MPLMotionLayout.IntBAMSEuler:
+                        case MPLMotionLayout.IntBAMSEuler2:
+                            motionData.frame = sr.ReadBE<int>();
+                            motionData.intsFrame = new int[] { sr.ReadBE<int>(), sr.ReadBE<int>(), sr.ReadBE<int>()};
                             break;
                         default:
                             throw new System.Exception();
@@ -188,7 +199,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.AddValue(info1.bt_0C);
                 outBytes.AddValue(info1.bt_0D);
                 outBytes.AddValue(info1.bt_0E);
-                outBytes.AddValue(info1.motionDataCount);
+                outBytes.AddValue(info1.motionDataCount0);
+                if(info1.motionDataCount1 > 0)
+                {
+                    outBytes.AddValue(info1.motionDataCount1);
+                }
 
                 outBytes.FillInt($"MPLMotionData{i}", outBytes.Count - 0x20);
                 foreach (var motionData in info1.motionData)
@@ -214,6 +229,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                             outBytes.AddValue(motionData.shortsFrame[3]);
                             outBytes.AddValue(motionData.shortsFrame[4]);
                             outBytes.AddValue(motionData.shortsFrame[5]);
+                            break;
+                        case MPLMotionLayout.IntBAMSEuler:
+                        case MPLMotionLayout.IntBAMSEuler2:
+                            outBytes.AddValue(motionData.intsFrame[0]);
+                            outBytes.AddValue(motionData.intsFrame[1]);
+                            outBytes.AddValue(motionData.intsFrame[2]);
                             break;
                     }
                 }
@@ -287,8 +308,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public byte bt_0C;
         public byte bt_0D;
         public byte bt_0E;
-        public byte motionDataCount;
+        public byte motionDataCount0;
+        public int motionDataCount1;
 
+        public int motCount;
         public List<MPLMotionData> motionData = new List<MPLMotionData>();
     }
 
@@ -296,11 +319,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     {
         public int frame;
         public Quaternion quatFrame;
+        public int[] intsFrame;
         public short[] shortsFrame;
 
-        public Vector3 BAMSToDeg()
+        public Vector3 BAMSToDegShorts()
         {
             return new Vector3((float)(shortsFrame[0] / (65536 / 360.0)), (float)(shortsFrame[1] / (65536 / 360.0)), (float)(shortsFrame[2] / (65536 / 360.0)));
+        }
+        public Vector3 BAMSToDegInts()
+        {
+            return new Vector3((float)(intsFrame[0] / (65536 / 360.0)), (float)(intsFrame[1] / (65536 / 360.0)), (float)(intsFrame[2] / (65536 / 360.0)));
         }
     }
 

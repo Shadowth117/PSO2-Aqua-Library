@@ -17,7 +17,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         //ARCLND Data
         public ARCHeader arcHeader;
-        public List<ARCLNDModelRef> arcLndModelRefs = new List<ARCLNDModelRef>();
+        public List<ARCFileRef> arcLndModelRefs = new List<ARCFileRef>();
         public Dictionary<string, ARCLNDModel> arcLndModels = new Dictionary<string, ARCLNDModel>();
         public List<ARCLNDAnimatedMeshData> arcLndAnimatedMeshDataList = new List<ARCLNDAnimatedMeshData>();
         /// <summary>
@@ -152,7 +152,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(arcHeader.pof0OffsetsSize, System.IO.SeekOrigin.Current);
             for (int i = 0; i < arcHeader.fileCount; i++)
             {
-                ARCLNDModelRef modelRef = new ARCLNDModelRef();
+                ARCFileRef modelRef = new ARCFileRef();
                 modelRef.modelOffset = sr.ReadBE<int>();
                 modelRef.relativeNameOffset = sr.ReadBE<int>();
                 arcLndModelRefs.Add(modelRef);

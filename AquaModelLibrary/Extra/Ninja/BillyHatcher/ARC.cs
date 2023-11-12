@@ -8,7 +8,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
     /// </summary>
     public class ARC
     {
-        List<byte[]> files = new List<byte[]>();
+        public List<ARCFileRef> fileReferences = new List<ARCFileRef>();
+        public List<string> fileNames = new List<string>();
+        public List<byte[]> files = new List<byte[]>();
         public ARC() { }
 
         public ARC(BufferedStreamReader sr)
@@ -27,6 +29,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public int magic; //0100
             public int unkInt0;
             public int unkInt1;
+        }
+
+        //ARCLND
+        /// <summary>
+        /// These are placed directly after POF0 data. Not all ARCs have these.
+        /// </summary>
+        public struct ARCFileRef
+        {
+            public int modelOffset;
+            public int relativeNameOffset;
         }
     }
 }

@@ -85,7 +85,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     }
                     mdlData.aqm = new AquaMotion();
                     mdlData.aqm.moHeader = new AquaMotion.MOHeader();
-                    mdlData.aqm.moHeader.endFrame = modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionDataCount - 1;
+                    mdlData.aqm.moHeader.endFrame = modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motCount - 1;
 
                     mdlData.aqm.motionKeys = new List<AquaMotion.KeyData>();
 
@@ -104,8 +104,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 break;
                             case MPL.MPLMotionLayout.ShortBAMSEuler:
                             case MPL.MPLMotionLayout.ShortBAMSEulerAndExtra:
-                            case MPL.MPLMotionLayout.ShortBAMSEulerAndExtra2:
-                                mkey.vector4Keys.Add(MathExtras.EulerToQuaternion(modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].BAMSToDeg()).ToVec4());
+                                mkey.vector4Keys.Add(MathExtras.EulerToQuaternion(modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].BAMSToDegShorts()).ToVec4());
+                                break;
+                            case MPL.MPLMotionLayout.IntBAMSEuler:
+                            case MPL.MPLMotionLayout.IntBAMSEuler2:
+                                mkey.vector4Keys.Add(MathExtras.EulerToQuaternion(modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].BAMSToDegInts()).ToVec4());
                                 break;
                         }
                     }
