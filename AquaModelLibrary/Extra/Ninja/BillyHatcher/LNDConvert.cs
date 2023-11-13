@@ -236,7 +236,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
         }
-
         public static int AddARCVert(ARCLNDModel mdl, AquaObject.VTXL vtxl, List<int> faceIds, ArcLndVertType flags, AquaObject.GenericTriangles genMesh, Dictionary<string, int> vertTracker)
         {
             string vertId = "";
