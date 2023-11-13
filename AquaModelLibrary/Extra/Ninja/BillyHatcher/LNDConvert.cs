@@ -53,9 +53,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 ModelData mdlData = new ModelData();
                 mdlData.name = modelSet.name;
                 mdlData.aqp = AddModelData(lnd, modelSet.model);
-                if (modelSet.model.arcAltVertColorList?.Count > 0 && modelSet.model.arcAltVertColorList[0].vertColorCount > 0)
+                if (modelSet.model.arcAltVertColorList?.Count > 0 && modelSet.model.arcAltVertColorList[0].VertColorData.Count > 0)
                 {
-                    modelSet.model.arcVertDataSetList[0].VertColorData = modelSet.model.arcAltVertColorList[0].vertColors;
+                    modelSet.model.arcVertDataSetList[0].VertColorData = modelSet.model.arcAltVertColorList[0].VertColorData;
                     mdlData.nightAqp = AddModelData(lnd, modelSet.model);
                 }
                 mdlList.Add(mdlData);

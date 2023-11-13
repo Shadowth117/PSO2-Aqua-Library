@@ -158,6 +158,80 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public List<byte[]> VertColor2Data = new List<byte[]>();
         public List<short[]> UV1Data = new List<short[]>();
         public List<short[]> UV2Data = new List<short[]>();
+
+
+        public byte[] GetVertDataBytes(int offset, out List<int> offsets)
+        {
+            offsets = new List<int>();
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddValue((ushort)1);
+            outBytes.AddValue((ushort)PositionData.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("PositionOffset");
+            outBytes.AddValue((ushort)3);
+            outBytes.AddValue((ushort)NormalData.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("NormalOffset");
+            outBytes.AddValue((ushort)2);
+            outBytes.AddValue((ushort)VertColorData.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("VertColorDataOffset");
+            outBytes.AddValue((ushort)2);
+            outBytes.AddValue((ushort)VertColor2Data.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("VertColor2DataOffset");
+            outBytes.AddValue((ushort)1);
+            outBytes.AddValue((ushort)UV1Data.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("UV1DataOffset");
+            outBytes.AddValue((ushort)1);
+            outBytes.AddValue((ushort)UV2Data.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("UV2DataOffset");
+
+            outBytes.FillInt("PositionOffset", outBytes.Count + offset);
+            for (int i = 0; i < PositionData.Count; i++)
+            {
+                var pos = PositionData[i];
+                outBytes.AddValue(pos.X);
+                outBytes.AddValue(pos.Y);
+                outBytes.AddValue(pos.Z);
+            }
+            outBytes.FillInt("NormalOffset", outBytes.Count + offset);
+            for (int i = 0; i < NormalData.Count; i++)
+            {
+                var nrm = NormalData[i];
+                outBytes.AddValue(nrm.X);
+                outBytes.AddValue(nrm.Y);
+                outBytes.AddValue(nrm.Z);
+            }
+            outBytes.FillInt("VertColorDataOffset", outBytes.Count + offset);
+            for (int i = 0; i < VertColorData.Count; i++)
+            {
+                outBytes.AddRange(VertColorData[i]);
+            }
+            outBytes.FillInt("VertColor2DataOffset", outBytes.Count + offset);
+            for (int i = 0; i < VertColor2Data.Count; i++)
+            {
+                outBytes.AddRange(VertColor2Data[i]);
+            }
+            outBytes.FillInt("UV1DataOffset", outBytes.Count + offset);
+            for (int i = 0; i < UV1Data.Count; i++)
+            {
+                var uv1 = UV1Data[i];
+                outBytes.AddValue(uv1[0]);
+                outBytes.AddValue(uv1[1]);
+            }
+            outBytes.FillInt("UV2DataOffset", outBytes.Count + offset);
+            for (int i = 0; i < UV2Data.Count; i++)
+            {
+                var uv2 = UV2Data[i];
+                outBytes.AddValue(uv2[0]);
+                outBytes.AddValue(uv2[1]);
+            }
+
+            return outBytes.ToArray();
+        }
     }
 
     public struct ARCLNDVertData

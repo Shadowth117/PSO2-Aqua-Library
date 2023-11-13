@@ -2,6 +2,7 @@
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Text;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
 
@@ -118,7 +119,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public List<List<ARCLNDMeshData>> arcMeshDataList = new List<List<ARCLNDMeshData>>();
             public ARCLNDAltVertColorRef arcAltVertRef;
             public List<ARCLNDAltVertColorMainRef> arcAltVertRefs = new List<ARCLNDAltVertColorMainRef>();
-            public List<ARCLNDAltVertColorInfo> arcAltVertColorList = new List<ARCLNDAltVertColorInfo>();
+            public List<ARCLNDVertDataSet> arcAltVertColorList = new List<ARCLNDVertDataSet>();
 
             public byte[] GetBytes(int offset, List<ARCLNDAnimatedMeshData> arcLndAnimatedMeshDataList, out List<int> offsets)
             {
@@ -187,6 +188,21 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
 
                 //Vert data
+                offsets.Add(outBytes.Count + offset);
+                outBytes.FillInt($"VertDataOffset", outBytes.Count + offset);
+                for(int i = 0; i < arcVertDataRefList.Count; i++)
+                {
+                    outBytes.AddValue((int)0); //This is either i or just 0 every time. Probably the latter based on faces. Either way, retail has no example of how this should look.
+                    offsets.Add(outBytes.Count + offset);
+                    outBytes.ReserveInt($"VertData{i}");
+                }
+                for(int i = 0; i < arcVertDataSetList.Count; i++)
+                {
+                    var vertInfo = arcVertDataSetList[i];
+                    outBytes.FillInt($"VertData{i}", outBytes.Count + offset);
+                    outBytes.AddRange(vertInfo.GetVertDataBytes(offset, out var verDataOffsets));
+                    offsets.AddRange(verDataOffsets);
+                }
 
                 //Face data
 
@@ -200,6 +216,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 return outBytes.ToArray();
             }
+
         }
 
 
@@ -446,34 +463,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                     var bookmark = sr.Position();
                     sr.Seek(0x20 + altVert.offset, System.IO.SeekOrigin.Begin);
-                    ARCLNDAltVertColorInfo altColors = new ARCLNDAltVertColorInfo();
-                    altColors.vertPositionUnk = sr.ReadBE<ushort>();
-                    altColors.vertPositionCount = sr.ReadBE<ushort>();
-                    altColors.vertPositionOffset = sr.ReadBE<int>();
-                    altColors.vertNormalUnk = sr.ReadBE<ushort>();
-                    altColors.vertNormalCount = sr.ReadBE<ushort>();
-                    altColors.vertNormalOffset = sr.ReadBE<int>();
-
-                    altColors.vertColorCount = sr.ReadBE<ushort>();
-                    altColors.vertColorCount = sr.ReadBE<ushort>();
-                    altColors.vertColorOffset = sr.ReadBE<int>();
-                    altColors.vertColor2Count = sr.ReadBE<ushort>();
-                    altColors.vertColor2Count = sr.ReadBE<ushort>();
-                    altColors.vertColor2Offset = sr.ReadBE<int>();
-
-                    altColors.uv1Count = sr.ReadBE<ushort>();
-                    altColors.uv1Count = sr.ReadBE<ushort>();
-                    altColors.uv1Offset = sr.ReadBE<int>();
-                    altColors.uv2Count = sr.ReadBE<ushort>();
-                    altColors.uv2Count = sr.ReadBE<ushort>();
-                    altColors.uv2Offset = sr.ReadBE<int>();
-                    sr.Seek(0x20 + altColors.vertColorOffset, System.IO.SeekOrigin.Begin);
-                    for (int j = 0; j < altColors.vertColorCount; j++)
-                    {
-                        altColors.vertColors.Add(sr.ReadBytes(sr.Position(), 4));
-                        sr.Seek(4, System.IO.SeekOrigin.Current);
-                    }
-                    arcModel.arcAltVertColorList.Add(altColors);
+                    ARCLNDVertDataSet arcVertDataSet = new ARCLNDVertDataSet();
+                    ReadVertDataSet(sr, arcVertDataSet);
+                    arcModel.arcAltVertColorList.Add(arcVertDataSet);
 
                     sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
                 }
@@ -525,70 +517,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 sr.Seek(0x20 + vertRef.offset, System.IO.SeekOrigin.Begin);
                 ARCLNDVertDataSet arcVertDataSet = new ARCLNDVertDataSet();
-                for (int i = 0; i < 6; i++)
-                {
-                    ARCLNDVertData vertInfo = new ARCLNDVertData();
-                    vertInfo.type = sr.ReadBE<ushort>();
-                    vertInfo.count = sr.ReadBE<ushort>();
-                    vertInfo.offset = sr.ReadBE<int>();
-                    switch (i)
-                    {
-                        case 0:
-                            arcVertDataSet.Position = vertInfo;
-                            break;
-                        case 1:
-                            arcVertDataSet.Normal = vertInfo;
-                            break;
-                        case 2:
-                            arcVertDataSet.VertColor = vertInfo;
-                            break;
-                        case 3:
-                            arcVertDataSet.VertColor2 = vertInfo;
-                            break;
-                        case 4:
-                            arcVertDataSet.UV1 = vertInfo;
-                            break;
-                        case 5:
-                            arcVertDataSet.UV2 = vertInfo;
-                            break;
-                    }
-                }
+                ReadVertDataSet(sr, arcVertDataSet);
                 arcModel.arcVertDataSetList.Add(arcVertDataSet);
-            }
-            foreach (var vertInfoSet in arcModel.arcVertDataSetList)
-            {
-                sr.Seek(0x20 + vertInfoSet.Position.offset, System.IO.SeekOrigin.Begin);
-                for (int i = 0; i < vertInfoSet.Position.count; i++)
-                {
-                    vertInfoSet.PositionData.Add(sr.ReadBEV3());
-                }
-                sr.Seek(0x20 + vertInfoSet.Normal.offset, System.IO.SeekOrigin.Begin);
-                for (int i = 0; i < vertInfoSet.Normal.count; i++)
-                {
-                    vertInfoSet.NormalData.Add(sr.ReadBEV3());
-                }
-                sr.Seek(0x20 + vertInfoSet.VertColor.offset, System.IO.SeekOrigin.Begin);
-                for (int i = 0; i < vertInfoSet.VertColor.count; i++)
-                {
-                    vertInfoSet.VertColorData.Add(sr.ReadBytes(sr.Position(), 4));
-                    sr.Seek(4, System.IO.SeekOrigin.Current);
-                }
-                sr.Seek(0x20 + vertInfoSet.VertColor2.offset, System.IO.SeekOrigin.Begin);
-                for (int i = 0; i < vertInfoSet.VertColor2.count; i++)
-                {
-                    vertInfoSet.VertColor2Data.Add(sr.ReadBytes(sr.Position(), 4));
-                    sr.Seek(4, System.IO.SeekOrigin.Current);
-                }
-                sr.Seek(0x20 + vertInfoSet.UV1.offset, System.IO.SeekOrigin.Begin);
-                for (int i = 0; i < vertInfoSet.UV1.count; i++)
-                {
-                    vertInfoSet.UV1Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
-                }
-                sr.Seek(0x20 + vertInfoSet.UV2.offset, System.IO.SeekOrigin.Begin);
-                for (int i = 0; i < vertInfoSet.UV2.count; i++)
-                {
-                    vertInfoSet.UV2Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
-                }
             }
 
             //Read triangle data
@@ -670,6 +600,70 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             return arcModel;
+        }
+
+        private static void ReadVertDataSet(BufferedStreamReader sr, ARCLNDVertDataSet arcVertDataSet)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                ARCLNDVertData vertInfo = new ARCLNDVertData();
+                vertInfo.type = sr.ReadBE<ushort>();
+                vertInfo.count = sr.ReadBE<ushort>();
+                vertInfo.offset = sr.ReadBE<int>();
+                switch (j)
+                {
+                    case 0:
+                        arcVertDataSet.Position = vertInfo;
+                        break;
+                    case 1:
+                        arcVertDataSet.Normal = vertInfo;
+                        break;
+                    case 2:
+                        arcVertDataSet.VertColor = vertInfo;
+                        break;
+                    case 3:
+                        arcVertDataSet.VertColor2 = vertInfo;
+                        break;
+                    case 4:
+                        arcVertDataSet.UV1 = vertInfo;
+                        break;
+                    case 5:
+                        arcVertDataSet.UV2 = vertInfo;
+                        break;
+                }
+            }
+            sr.Seek(0x20 + arcVertDataSet.Position.offset, System.IO.SeekOrigin.Begin);
+            for (int j = 0; j < arcVertDataSet.Position.count; j++)
+            {
+                arcVertDataSet.PositionData.Add(sr.ReadBEV3());
+            }
+            sr.Seek(0x20 + arcVertDataSet.Normal.offset, System.IO.SeekOrigin.Begin);
+            for (int j = 0; j < arcVertDataSet.Normal.count; j++)
+            {
+                arcVertDataSet.NormalData.Add(sr.ReadBEV3());
+            }
+            sr.Seek(0x20 + arcVertDataSet.VertColor.offset, System.IO.SeekOrigin.Begin);
+            for (int j = 0; j < arcVertDataSet.VertColor.count; j++)
+            {
+                arcVertDataSet.VertColorData.Add(sr.ReadBytes(sr.Position(), 4));
+                sr.Seek(4, System.IO.SeekOrigin.Current);
+            }
+            sr.Seek(0x20 + arcVertDataSet.VertColor2.offset, System.IO.SeekOrigin.Begin);
+            for (int j = 0; j < arcVertDataSet.VertColor2.count; j++)
+            {
+                arcVertDataSet.VertColor2Data.Add(sr.ReadBytes(sr.Position(), 4));
+                sr.Seek(4, System.IO.SeekOrigin.Current);
+            }
+            sr.Seek(0x20 + arcVertDataSet.UV1.offset, System.IO.SeekOrigin.Begin);
+            for (int j = 0; j < arcVertDataSet.UV1.count; j++)
+            {
+                arcVertDataSet.UV1Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
+            }
+            sr.Seek(0x20 + arcVertDataSet.UV2.offset, System.IO.SeekOrigin.Begin);
+            for (int j = 0; j < arcVertDataSet.UV2.count; j++)
+            {
+                arcVertDataSet.UV2Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
+            }
         }
 
         private static void ReadArcLndTris(BufferedStreamReader sr, ArcLndVertType flags, int offset, int bufferSize, out List<List<List<int>>> triIndicesList, out List<List<List<int>>> triIndicesListStarts)
