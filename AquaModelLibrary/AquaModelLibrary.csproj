@@ -396,8 +396,8 @@
     <Compile Include="Extra\PSO2CompressedScripts.cs" />
     <Compile Include="Extra\PSO2MapHandler.cs" />
     <Compile Include="Extra\PSO2ObjectNames.cs" />
-    <Compile Include="Extra\PSONRelConvert.cs" />
-    <Compile Include="Extra\PSOXVMConvert.cs" />
+    <Compile Include="Extra\Ninja\PSO\PSONRelConvert.cs" />
+    <Compile Include="Extra\Ninja\PSO\PSOXVMConvert.cs" />
     <Compile Include="Extra\TransformUtil.cs" />
     <Compile Include="Extra\Vec3Int.cs" />
     <Compile Include="NNStructs\Marathon\NinjaFlags.cs" />

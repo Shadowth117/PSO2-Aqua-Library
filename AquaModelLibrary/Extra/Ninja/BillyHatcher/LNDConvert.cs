@@ -51,12 +51,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             foreach (var modelSet in lnd.arcLndModels)
             {
                 ModelData mdlData = new ModelData();
-                mdlData.name = modelSet.Key;
-                mdlData.aqp = AddModelData(lnd, modelSet.Value);
-                if (modelSet.Value.arcAltVertColorList?.Count > 0 && modelSet.Value.arcAltVertColorList[0].vertColorCount > 0)
+                mdlData.name = modelSet.name;
+                mdlData.aqp = AddModelData(lnd, modelSet.model);
+                if (modelSet.model.arcAltVertColorList?.Count > 0 && modelSet.model.arcAltVertColorList[0].vertColorCount > 0)
                 {
-                    modelSet.Value.arcVertDataSetList[0].VertColorData = modelSet.Value.arcAltVertColorList[0].vertColors;
-                    mdlData.nightAqp = AddModelData(lnd, modelSet.Value);
+                    modelSet.model.arcVertDataSetList[0].VertColorData = modelSet.model.arcAltVertColorList[0].vertColors;
+                    mdlData.nightAqp = AddModelData(lnd, modelSet.model);
                 }
                 mdlList.Add(mdlData);
             }
@@ -134,14 +134,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     var meshInfo = mdl.arcMeshDataList[i][m];
                     var faceData = mdl.arcFaceDataList[meshInfo.faceDataId];
                     var lndEntry = mdl.arcLandEntryList[meshInfo.lndEntry];
-                    var texId = lndEntry.TextureId;
+                    var texId = lndEntry.entry.TextureId;
 
                     AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
                     Dictionary<string, int> vertTracker = new Dictionary<string, int>();
                     genMesh.triList = new List<Vector3>();
 
                     //Create material for textureless meshes
-                    if (lndEntry.TextureId == -1)
+                    if (lndEntry.entry.TextureId == -1)
                     {
                         if (!createdDefaultMat)
                         {

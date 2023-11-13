@@ -122,7 +122,7 @@ namespace AquaModelLibrary.Extra.Ninja
             var magic = Encoding.UTF8.GetString(pof0Bytes, 0, 4);
             if (magic == "POF0")
             {
-                var size = BitConverter.ToInt32(pof0Bytes, 0);
+                var size = BitConverter.ToInt32(pof0Bytes, 4);
                 byte[] arr = new byte[size];
                 Array.Copy(pof0Bytes, 8, arr, 0, pof0Bytes.Length - 8);
                 return GetRawPOF0Offsets(arr);

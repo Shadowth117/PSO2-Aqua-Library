@@ -57,39 +57,38 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
     /// <summary>
     /// The data here may allow for substituing all vertex data, but faces and collision would remain the same so this wouldn't be super useful. Maybe UV data would.
+    /// In retail, only the first vert color set is used
+    /// Should 
     /// </summary>
     public class ARCLNDAltVertColorInfo
     {
-        public ushort usht00;
-        public ushort usht02;
-        public ushort usht04;
-        public ushort usht06;
-        public ushort usht08;
-        public ushort usht0A;
-        public ushort usht0C;
-        public ushort usht0E;
+        public ushort vertPositionUnk;
+        public ushort vertPositionCount;
+        public int vertPositionOffset;
+        public ushort vertNormalUnk;
+        public ushort vertNormalCount;
+        public int vertNormalOffset;
 
-        public ushort usht10;
-        /// <summary>
-        /// Should match file's usual vert count
-        /// </summary>
+        public ushort vertColorUnk;
         public ushort vertColorCount;
         public int vertColorOffset;
-        public ushort usht18;
-        public ushort usht1A;
-        public ushort usht1C;
-        public ushort usht1E;
+        public ushort vertColor2Unk;
+        public ushort vertColor2Count;
+        public int vertColor2Offset;
 
-        public ushort usht20;
-        public ushort usht22;
-        public ushort usht24;
-        public ushort usht26;
-        public ushort usht28;
-        public ushort usht2A;
-        public ushort usht2C;
-        public ushort usht2E;
+        public ushort uv1Unk;
+        public ushort uv1Count;
+        public int uv1Offset;
+        public ushort uv2Unk;
+        public ushort uv2Count;
+        public int uv2Offset;
 
+        public List<Vector3> PositionData = new List<Vector3>();
+        public List<Vector3> NormalData = new List<Vector3>();
         public List<byte[]> vertColors = new List<byte[]>();
+        public List<byte[]> vertColor2s = new List<byte[]>();
+        public List<short[]> UV1Data = new List<short[]>();
+        public List<short[]> UV2Data = new List<short[]>();
     }
 
     //Similar to NN's main branching point struct
