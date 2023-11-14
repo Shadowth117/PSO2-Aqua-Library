@@ -155,7 +155,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             outBytes.ReserveInt("MotionStartOffset");
 
             //Write MotionMapping
-            outBytes.FillInt("MPLMotionMapping", outBytes.Count - 0x20);
+            outBytes.FillInt("MPLMotionMapping", outBytes.Count + offset);
             for (int i = 0; i < motionMappingList.Count; i++)
             {
                 var unkData0 = motionMappingList[i];
@@ -165,7 +165,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             }
 
             //Write Motion
-            outBytes.FillInt("MotionStartOffset", outBytes.Count - 0x20);
+            outBytes.FillInt("MotionStartOffset", outBytes.Count + offset);
             for (int i = 0; i < motionList.Count; i++)
             {
                 var motionStart = motionList[i];
@@ -177,13 +177,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             for (int i = 0; i < motionList.Count; i++)
             {
                 var refRef = motionList[i].motionRef;
-                outBytes.FillInt($"MotionRefOffset{i}", outBytes.Count - 0x20);
+                outBytes.FillInt($"MotionRefOffset{i}", outBytes.Count + offset);
                 outBytes.AddValue(refRef.int_00);
                 offsets.Add(offset + outBytes.Count);
                 outBytes.ReserveInt($"MotionInfo0{i}");
 
                 var info0 = refRef.motionInfo0;
-                outBytes.FillInt($"MotionInfo0{i}", outBytes.Count - 0x20);
+                outBytes.FillInt($"MotionInfo0{i}", outBytes.Count + offset);
                 offsets.Add(offset + outBytes.Count);
                 outBytes.ReserveInt($"MotionInfo1{i}");
                 outBytes.AddValue(info0.int_04);
@@ -191,21 +191,21 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.AddValue((ushort)info0.motionType);
 
                 var info1 = info0.motionInfo1;
-                outBytes.FillInt($"MotionInfo1{i}", outBytes.Count - 0x20);
+                outBytes.FillInt($"MotionInfo1{i}", outBytes.Count + offset);
                 outBytes.AddValue(info1.int_00);
                 offsets.Add(offset + outBytes.Count);
                 outBytes.ReserveInt($"MPLMotionData{i}");
                 outBytes.AddValue(info1.int_08);
-                outBytes.AddValue(info1.bt_0C);
-                outBytes.AddValue(info1.bt_0D);
-                outBytes.AddValue(info1.bt_0E);
-                outBytes.AddValue(info1.motionDataCount0);
+                outBytes.Add(info1.bt_0C);
+                outBytes.Add(info1.bt_0D);
+                outBytes.Add(info1.bt_0E);
+                outBytes.Add(info1.motionDataCount0);
                 if(info1.motionDataCount1 > 0)
                 {
                     outBytes.AddValue(info1.motionDataCount1);
                 }
 
-                outBytes.FillInt($"MPLMotionData{i}", outBytes.Count - 0x20);
+                outBytes.FillInt($"MPLMotionData{i}", outBytes.Count + offset);
                 foreach (var motionData in info1.motionData)
                 {
                     outBytes.AddValue(motionData.frame);

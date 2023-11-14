@@ -1050,14 +1050,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             for (int i = 0; i < arcLndModels.Count; i++)
             {
                 var modelSet = arcLndModels[i];
+                List<ARCLNDAnimatedMeshData> animData = new List<ARCLNDAnimatedMeshData>();
                 if(i == 0)
                 {
+                    animData = arcLndAnimatedMeshDataList;
                     outBytes.FillInt("MainModelOffset", outBytes.Count);
                 } else
                 {
                     outBytes.FillInt($"ExtraModel{i - 1}Offset", outBytes.Count);
                 }
-                outBytes.AddRange(modelSet.model.GetBytes(outBytes.Count, arcLndAnimatedMeshDataList, out var modelOffsets));
+                outBytes.AddRange(modelSet.model.GetBytes(outBytes.Count, animData, out var modelOffsets));
                 outBytes.AlignWrite(0x20);
                 offsets.AddRange(modelOffsets);
             }
@@ -1084,7 +1086,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             offsets.Sort();
             outBytes.AddRange(POF0.GenerateRawPOF0(offsets));
             int pof0End = outBytes.Count;
-            int pof0Size = pof0Offset - pof0End;
+            int pof0Size = pof0End - pof0Offset;
 
             //Write ARC POF trailing data
             int relativeOffset = 0;
