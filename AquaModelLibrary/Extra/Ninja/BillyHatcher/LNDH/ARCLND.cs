@@ -1,8 +1,294 @@
-﻿using System.Collections.Generic;
+﻿using Assimp;
+using System.Collections.Generic;
 using System.Numerics;
+using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
+
+    public class ARCLNDModel
+    {
+        public bool isAnimModel = false;
+        public ARCLNDMainDataHeader arcMainDataHeader;
+        public ARCLNDMainOffsetTable arcMainOffsetTable;
+        public List<ARCLNDLandEntryRef> arcLandEntryList = new List<ARCLNDLandEntryRef>();
+        public List<ARCLNDVertDataRef> arcVertDataRefList = new List<ARCLNDVertDataRef>();
+        public List<ARCLNDVertDataSet> arcVertDataSetList = new List<ARCLNDVertDataSet>();
+        public List<ARCLNDFaceDataRef> arcFaceDataRefList = new List<ARCLNDFaceDataRef>();
+        public List<ARCLNDFaceDataHead> arcFaceDataList = new List<ARCLNDFaceDataHead>();
+        public List<ARCLNDNodeBounding> arcBoundingList = new List<ARCLNDNodeBounding>();
+        public List<ARCLNDMeshDataRef> arcMeshDataRefList = new List<ARCLNDMeshDataRef>();
+        public List<List<ARCLNDMeshData>> arcMeshDataList = new List<List<ARCLNDMeshData>>();
+        public ARCLNDAltVertColorRef arcAltVertRef;
+        public List<ARCLNDAltVertColorMainRef> arcAltVertRefs = new List<ARCLNDAltVertColorMainRef>();
+        public List<ARCLNDVertDataSet> arcAltVertColorList = new List<ARCLNDVertDataSet>();
+
+        public byte[] GetBytes(int offset, List<ARCLNDAnimatedMeshData> arcLndAnimatedMeshDataList, out List<int> offsets)
+        {
+            offsets = new List<int>();
+            List<byte> outBytes = new List<byte>();
+
+            
+            if (isAnimModel == false)
+            {
+                //Main offset table offset
+                offsets.Add(outBytes.Count + offset);
+                outBytes.AddValue(offset + 0x20);
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt("AltVertColorOffset");
+                outBytes.AddValue(arcLndAnimatedMeshDataList.Count);
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt("AnimatedMeshOffsetsOffset");
+
+                outBytes.AddValue((int)0);
+                outBytes.AddValue((int)0);
+                outBytes.AddValue((int)0);
+                outBytes.AddValue((int)0);
+            }
+
+            //Main Offset Table
+            outBytes.AddValue(arcLandEntryList.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("LandEntryOffset");
+            outBytes.AddValue(arcVertDataSetList.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("VertDataOffset");
+
+            outBytes.AddValue(arcFaceDataList.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("FaceDataoffset");
+            outBytes.AddValue(arcBoundingList.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("BoundingOffset");
+
+            outBytes.AddValue(1);
+            outBytes.AddValue(arcMeshDataList.Count);
+            offsets.Add(outBytes.Count + offset);
+            outBytes.ReserveInt("MeshOffset");
+
+            //Land Entries
+            outBytes.FillInt($"LandEntryOffset", outBytes.Count + offset);
+            for (int i = 0; i < arcLandEntryList.Count; i++)
+            {
+                var landRef = arcLandEntryList[i];
+
+                //This value seems like it's sometimes 0 for the first land entry in the model, but is 1 otherwise. For some models, it is always 1.
+                outBytes.AddValue(landRef.unkInt);
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt($"LandEntry{i}");
+            }
+            for (int i = 0; i < arcLandEntryList.Count; i++)
+            {
+                outBytes.FillInt($"LandEntry{i}", outBytes.Count + offset);
+                var landRef = arcLandEntryList[i];
+                outBytes.AddValue((int)landRef.entry.unkInt0);
+                outBytes.AddValue((int)landRef.entry.unkInt1);
+                outBytes.AddValue((int)landRef.entry.unkInt2);
+                outBytes.AddValue((int)landRef.entry.unkInt3);
+                outBytes.AddValue((int)landRef.entry.unkInt4);
+                outBytes.AddValue((int)landRef.entry.unkInt5);
+                outBytes.AddValue((int)landRef.entry.unkInt6);
+                outBytes.AddValue((int)landRef.entry.unkInt7);
+
+                if(landRef.unkInt > 0)
+                {
+                    outBytes.AddValue((ushort)landRef.entry.ushort0);
+                    outBytes.AddValue((ushort)landRef.entry.ushort1);
+                    outBytes.AddValue((int)landRef.entry.TextureId);
+                }
+            }
+
+            //Vert data
+            outBytes.FillInt($"VertDataOffset", outBytes.Count + offset);
+            for (int i = 0; i < arcVertDataRefList.Count; i++)
+            {
+                outBytes.AddValue((int)0); //This is either i or just 0 every time. Probably the latter based on faces. Either way, retail has no example of how this should look.
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt($"VertData{i}");
+            }
+            for (int i = 0; i < arcVertDataSetList.Count; i++)
+            {
+                var vertInfo = arcVertDataSetList[i];
+                outBytes.FillInt($"VertData{i}", outBytes.Count + offset);
+                outBytes.AddRange(vertInfo.GetVertDataBytes(outBytes.Count + offset, out var verDataOffsets));
+                offsets.AddRange(verDataOffsets);
+            }
+
+            //Face data
+            outBytes.FillInt($"FaceDataoffset", outBytes.Count + offset);
+            for(int i = 0; i < arcFaceDataList.Count; i++)
+            {
+                outBytes.AddValue((int)0); 
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt($"FaceData{i}");
+            }
+            for (int i = 0; i < arcFaceDataList.Count; i++)
+            {
+                var faceData = arcFaceDataList[i];
+                outBytes.FillInt($"FaceData{i}", outBytes.Count + offset);
+                outBytes.AddValue((uint)faceData.flags);
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt($"FaceDataOffset0{i}");
+                outBytes.ReserveInt($"FaceDataBufferSize0{i}");
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt($"FaceDataOffset1{i}");
+                outBytes.ReserveInt($"FaceDataBufferSize1{i}");
+            }
+            outBytes.AlignWrite(0x20);
+
+            for (int i = 0; i < arcFaceDataList.Count; i++)
+            {
+                var faceData = arcFaceDataList[i];
+                //Write tridata
+                if (faceData.triIndicesList0.Count > 0)
+                {
+                    outBytes.FillInt($"FaceDataOffset0{i}", outBytes.Count + offset);
+                    var size = outBytes.Count;
+                    for (int j = 0; j < faceData.triIndicesList0.Count; j++)
+                    {
+                        outBytes.Add((byte)faceData.triIndicesListStarts0[j][0][0]);
+                        outBytes.AddValue((ushort)faceData.triIndicesListStarts0[j][0][1]);
+                        var set = faceData.triIndicesList0[j];
+                        for (int k = 0; k < set.Count; k++)
+                        {
+                            for (int l = 0; l < set[k].Count; l++)
+                            {
+                                outBytes.AddValue((ushort)set[k][l]);
+                            }
+                        }
+                    }
+                    outBytes.AlignWrite(0x20);
+                    size = outBytes.Count - size;
+                    outBytes.FillInt($"FaceDataBufferSize0{i}", size);
+                }
+
+                if (faceData.triIndicesList1.Count > 0)
+                {
+                    outBytes.FillInt($"FaceDataOffset1{i}", outBytes.Count + offset);
+                    var size = outBytes.Count;
+                    for (int j = 0; j < faceData.triIndicesList1.Count; j++)
+                    {
+                        outBytes.Add((byte)faceData.triIndicesListStarts1[j][0][0]);
+                        outBytes.AddValue((ushort)faceData.triIndicesListStarts1[j][0][1]);
+                        var set = faceData.triIndicesList1[j];
+                        for (int k = 0; k < set.Count; k++)
+                        {
+                            for (int l = 0; l < set[k].Count; l++)
+                            {
+                                outBytes.AddValue((ushort)set[k][l]);
+                            }
+                        }
+                    }
+                    outBytes.AlignWrite(0x20);
+                    size = outBytes.Count - size;
+                    outBytes.FillInt($"FaceDataBufferSize1{i}", size);
+                }
+            }
+            //Bounding data
+            outBytes.FillInt($"BoundingOffset", outBytes.Count + offset);
+            for (int i = 0; i < arcBoundingList.Count; i++)
+            {
+                var bounds = arcBoundingList[i];
+                outBytes.AddValue(bounds.unkFlt_00);
+                outBytes.AddValue(bounds.usht_04);
+                outBytes.AddValue(bounds.usht_06);
+                outBytes.AddValue(bounds.usht_08);
+                outBytes.AddValue(bounds.usht_0A);
+                outBytes.AddValue(bounds.Position.X);
+                outBytes.AddValue(bounds.Position.Y);
+                outBytes.AddValue(bounds.Position.Z);
+                outBytes.AddValue(bounds.sht0);
+                outBytes.AddValue(bounds.sht1);
+                outBytes.AddValue(bounds.BAMS0);
+                outBytes.AddValue(bounds.BAMS1);
+                outBytes.AddValue(bounds.BAMS2);
+                outBytes.AddValue(bounds.BAMS3);
+                outBytes.AddValue(bounds.Scale.X);
+                outBytes.AddValue(bounds.Scale.Y);
+                outBytes.AddValue(bounds.Scale.Z);
+                outBytes.AddValue(bounds.minBounding.X);
+                outBytes.AddValue(bounds.minBounding.Y);
+                outBytes.AddValue(bounds.maxBounding.X);
+                outBytes.AddValue(bounds.maxBounding.Y);
+            }
+
+            //Mesh data
+            outBytes.FillInt($"MeshOffset", outBytes.Count + offset);
+            for(int i = 0; i < arcMeshDataRefList.Count; i++)
+            {
+                var meshRef = arcMeshDataRefList[i];
+                outBytes.AddValue(meshRef.unkEnum);
+                outBytes.AddValue(arcMeshDataList[i].Count);
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt($"MeshGroup{i}Offset");
+            }
+            for(int i = 0; i < arcMeshDataList.Count; i++)
+            {
+                outBytes.FillInt($"MeshGroup{i}Offset", outBytes.Count + offset);
+                foreach (var meshData in arcMeshDataList[i])
+                {
+                    outBytes.AddValue(meshData.BoundingData);
+                    outBytes.AddValue(meshData.int_04);
+                    outBytes.AddValue(meshData.lndEntry);
+                    outBytes.AddValue(meshData.int_0C);
+                    outBytes.AddValue(meshData.faceDataId);
+                }
+            }
+            outBytes.AlignWrite(0x20);
+
+            //Alt Vert data
+            if (arcAltVertColorList.Count > 0)
+            {
+                outBytes.FillInt($"AltVertColorOffset", outBytes.Count + offset);
+                outBytes.AddValue(arcAltVertColorList.Count);
+                offsets.Add(outBytes.Count + offset);
+                outBytes.ReserveInt("AltVertColorRefOffset");
+
+                outBytes.FillInt("AltVertColorRefOffset", outBytes.Count + offset);
+                for (int i = 0; i < arcAltVertColorList.Count; i++)
+                {
+                    outBytes.AddValue(i);
+                    offsets.Add(outBytes.Count + offset);
+                    outBytes.ReserveInt($"AltVerts{i}");
+                }
+                for (int i = 0; i < arcAltVertColorList.Count; i++)
+                {
+                    outBytes.FillInt($"AltVerts{i}", outBytes.Count + offset);
+                    outBytes.AddRange(arcAltVertColorList[i].GetVertDataBytes(outBytes.Count + offset, out var verDataOffsets));
+                    offsets.AddRange(verDataOffsets);
+                }
+            }
+            
+            //Animated Models
+            if(arcLndAnimatedMeshDataList.Count > 0)
+            {
+                outBytes.FillInt($"AnimatedMeshOffsetsOffset", outBytes.Count + offset);
+                for (int i = 0; i < arcLndAnimatedMeshDataList.Count; i++)
+                {
+                    offsets.Add(outBytes.Count + offset);
+                    outBytes.ReserveInt($"AnimatedModel{i}");
+                    offsets.Add(outBytes.Count + offset);
+                    outBytes.ReserveInt($"AnimatedMotion{i}");
+                    outBytes.AddValue(arcLndAnimatedMeshDataList[i].MPLAnimId);
+                }
+                outBytes.AlignWrite(0x20);
+                for (int i = 0; i < arcLndAnimatedMeshDataList.Count; i++)
+                {
+                    outBytes.FillInt($"AnimatedModel{i}", outBytes.Count + offset);
+                    outBytes.AddRange(arcLndAnimatedMeshDataList[i].model.GetBytes(outBytes.Count + offset, new List<ARCLNDAnimatedMeshData>(), out var animModelOffsets));
+                    offsets.AddRange(animModelOffsets);
+                    outBytes.FillInt($"AnimatedMotion{i}", outBytes.Count + offset);
+                    outBytes.AddRange(arcLndAnimatedMeshDataList[i].motion.GetBytes(outBytes.Count + offset, out var animOffsets));
+                    offsets.AddRange(animOffsets);
+                    outBytes.AlignWrite(0x20);
+                }
+            }
+
+            return outBytes.ToArray();
+        }
+
+    }
+
     public struct ARCLNDHeader
     {
         public int nextDataOffset;
@@ -193,45 +479,63 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             offsets.Add(outBytes.Count + offset);
             outBytes.ReserveInt("UV2DataOffset");
 
-            outBytes.FillInt("PositionOffset", outBytes.Count + offset);
-            for (int i = 0; i < PositionData.Count; i++)
+            if(PositionData.Count > 0)
             {
-                var pos = PositionData[i];
-                outBytes.AddValue(pos.X);
-                outBytes.AddValue(pos.Y);
-                outBytes.AddValue(pos.Z);
+                outBytes.FillInt("PositionOffset", outBytes.Count + offset);
+                for (int i = 0; i < PositionData.Count; i++)
+                {
+                    var pos = PositionData[i];
+                    outBytes.AddValue(pos.X);
+                    outBytes.AddValue(pos.Y);
+                    outBytes.AddValue(pos.Z);
+                }
             }
-            outBytes.FillInt("NormalOffset", outBytes.Count + offset);
-            for (int i = 0; i < NormalData.Count; i++)
+            if(NormalData.Count > 0)
             {
-                var nrm = NormalData[i];
-                outBytes.AddValue(nrm.X);
-                outBytes.AddValue(nrm.Y);
-                outBytes.AddValue(nrm.Z);
+                outBytes.FillInt("NormalOffset", outBytes.Count + offset);
+                for (int i = 0; i < NormalData.Count; i++)
+                {
+                    var nrm = NormalData[i];
+                    outBytes.AddValue(nrm.X);
+                    outBytes.AddValue(nrm.Y);
+                    outBytes.AddValue(nrm.Z);
+                }
             }
-            outBytes.FillInt("VertColorDataOffset", outBytes.Count + offset);
-            for (int i = 0; i < VertColorData.Count; i++)
+            if(VertColorData.Count > 0)
             {
-                outBytes.AddRange(VertColorData[i]);
+                outBytes.FillInt("VertColorDataOffset", outBytes.Count + offset);
+                for (int i = 0; i < VertColorData.Count; i++)
+                {
+                    outBytes.AddRange(VertColorData[i]);
+                }
             }
-            outBytes.FillInt("VertColor2DataOffset", outBytes.Count + offset);
-            for (int i = 0; i < VertColor2Data.Count; i++)
+            if(VertColor2Data.Count > 0)
             {
-                outBytes.AddRange(VertColor2Data[i]);
+                outBytes.FillInt("VertColor2DataOffset", outBytes.Count + offset);
+                for (int i = 0; i < VertColor2Data.Count; i++)
+                {
+                    outBytes.AddRange(VertColor2Data[i]);
+                }
             }
-            outBytes.FillInt("UV1DataOffset", outBytes.Count + offset);
-            for (int i = 0; i < UV1Data.Count; i++)
+            if(UV1Data.Count > 0)
             {
-                var uv1 = UV1Data[i];
-                outBytes.AddValue(uv1[0]);
-                outBytes.AddValue(uv1[1]);
+                outBytes.FillInt("UV1DataOffset", outBytes.Count + offset);
+                for (int i = 0; i < UV1Data.Count; i++)
+                {
+                    var uv1 = UV1Data[i];
+                    outBytes.AddValue(uv1[0]);
+                    outBytes.AddValue(uv1[1]);
+                }
             }
+            if(UV2Data.Count > 0)
+            {
             outBytes.FillInt("UV2DataOffset", outBytes.Count + offset);
             for (int i = 0; i < UV2Data.Count; i++)
             {
                 var uv2 = UV2Data[i];
                 outBytes.AddValue(uv2[0]);
                 outBytes.AddValue(uv2[1]);
+            }
             }
 
             return outBytes.ToArray();
@@ -271,6 +575,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         public List<List<List<int>>> triIndicesList0 = new List<List<List<int>>>();
         public List<List<List<int>>> triIndicesListStarts0 = new List<List<List<int>>>();
+
         public List<List<List<int>>> triIndicesList1 = new List<List<List<int>>>();
         public List<List<List<int>>> triIndicesListStarts1 = new List<List<List<int>>>();
     }
@@ -286,6 +591,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// This isn't always used, for unknown reasons
         /// </summary>
         public Vector3 Position;
+
+        //Something in these shorts and BAMS values is probably a rotation. But it's just a guess
         public short sht0;
         public short sht1;
         public short BAMS0;
@@ -295,7 +602,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// <summary>
         /// This isn't always used, for unknown reasons
         /// </summary>
-        public Vector3 scale; 
+        public Vector3 Scale; 
 
         public Vector2 minBounding;
         public Vector2 maxBounding;
@@ -303,7 +610,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
     public struct ARCLNDMeshDataRef
     {
-        public int id;
+        public int unkEnum;
         public int count;
         public int offset;
     }

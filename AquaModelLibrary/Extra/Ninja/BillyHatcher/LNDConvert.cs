@@ -66,7 +66,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 var modelRef = lnd.arcLndAnimatedMeshDataList[i];
                 ModelData mdlData = new ModelData();
-                mdlData.name = $"Animated_{i}";
+                mdlData.name = $"Animated_{i}_{modelRef.MPLAnimId}";
                 addWeight = modelRef.mplMotion != null;
                 mdlData.aqp = AddModelData(lnd, modelRef.model);
                 if (modelRef.motion != null)
@@ -138,6 +138,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                     AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
                     Dictionary<string, int> vertTracker = new Dictionary<string, int>();
+                    genMesh.name = $"Mesh_{i}_{m}";
                     genMesh.triList = new List<Vector3>();
 
                     //Create material for textureless meshes

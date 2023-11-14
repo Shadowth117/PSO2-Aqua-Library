@@ -14,7 +14,7 @@ namespace AquaModelLibrary.Extra.Ninja
         /// GVM unfortunately does not give a full filesize and so when it's embedded within other files, we need to seek through it to get everything.
         /// GVR is a bit of an involved format as well so it's best to extract and leave the rest to puyo tools, frankly.
         /// </summary>
-        public static byte[] ReadGVMBytes(BufferedStreamReader sr)
+        public static byte[] ReadGVMBytes(BufferedStreamReader sr, bool isArcGVM = false)
         {
             List<byte> gvmBytes = new List<byte>();
             var magic = sr.Read<int>();
@@ -30,9 +30,12 @@ namespace AquaModelLibrary.Extra.Ninja
                 var currentFileOffset = sr.Position();
                 sr.Seek(4, System.IO.SeekOrigin.Current);
                 var fileSize = sr.Read<int>(); //little endian
-                if (i == entryCount - 1 && sr.BaseStream().Length > fileSize + sr.Position() + 9)
+                if (isArcGVM == false && i == entryCount - 1 && sr.BaseStream().Length > fileSize + sr.Position() + 9)
                 {
                     fileSize += 0x10;
+                } else if(isArcGVM && i == entryCount - 1)
+                {
+                    fileSize -= 0x10;
                 }
                 gvmBytes.AddRange(sr.ReadBytes(currentFileOffset, 8 + fileSize));
                 AquaGeneralMethods.AlignWriter(gvmBytes, 0x10);

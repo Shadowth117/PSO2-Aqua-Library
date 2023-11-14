@@ -7,6 +7,13 @@ namespace AquaModelLibrary.Extra
     {
         public static bool AddAsBigEndian = false;
         private static Dictionary<string, int> reserveIntDict = new Dictionary<string, int>();
+
+        public static void Reset()
+        {
+            AddAsBigEndian = false;
+            reserveIntDict.Clear();
+        }
+
         public static void ReserveInt(this List<byte> outBytes, string key)
         {
             reserveIntDict[key] = outBytes.Count;

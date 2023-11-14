@@ -1,8 +1,6 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 using Reloaded.Memory.Streams;
-using System;
 using System.Collections.Generic;
-using System.Security.Policy;
 using System.Text;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
 
@@ -41,6 +39,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             public ARCLNDModel model = null;
             public Motion motion = null;
+            public int MPLAnimId = -1;
             public MPLMotionStart mplMotion = null;
         }
 
@@ -104,122 +103,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
         }
 
-        public class ARCLNDModel
-        {
-            public bool isAnimModel = false;
-            public ARCLNDMainDataHeader arcMainDataHeader;
-            public ARCLNDMainOffsetTable arcMainOffsetTable;
-            public List<ARCLNDLandEntryRef> arcLandEntryList = new List<ARCLNDLandEntryRef>();
-            public List<ARCLNDVertDataRef> arcVertDataRefList = new List<ARCLNDVertDataRef>();
-            public List<ARCLNDVertDataSet> arcVertDataSetList = new List<ARCLNDVertDataSet>();
-            public List<ARCLNDFaceDataRef> arcFaceDataRefList = new List<ARCLNDFaceDataRef>();
-            public List<ARCLNDFaceDataHead> arcFaceDataList = new List<ARCLNDFaceDataHead>();
-            public List<ARCLNDNodeBounding> arcBoundingList = new List<ARCLNDNodeBounding>();
-            public List<ARCLNDMeshDataRef> meshDataRefList = new List<ARCLNDMeshDataRef>();
-            public List<List<ARCLNDMeshData>> arcMeshDataList = new List<List<ARCLNDMeshData>>();
-            public ARCLNDAltVertColorRef arcAltVertRef;
-            public List<ARCLNDAltVertColorMainRef> arcAltVertRefs = new List<ARCLNDAltVertColorMainRef>();
-            public List<ARCLNDVertDataSet> arcAltVertColorList = new List<ARCLNDVertDataSet>();
-
-            public byte[] GetBytes(int offset, List<ARCLNDAnimatedMeshData> arcLndAnimatedMeshDataList, out List<int> offsets)
-            {
-                offsets = new List<int>();
-                List<byte> outBytes = new List<byte>();
-                
-                if(isAnimModel == false)
-                {
-                    //Main offset table offset
-                    offsets.Add(outBytes.Count + offset);
-                    outBytes.AddValue(offset + 0x20);
-                    offsets.Add(outBytes.Count + offset);
-                    outBytes.ReserveInt("AltVertColorOffset");
-                    outBytes.AddValue(arcLndAnimatedMeshDataList.Count);
-                    offsets.Add(outBytes.Count + offset);
-                    outBytes.ReserveInt("AnimatedMeshOffsetsOffset");
-
-                    outBytes.AddValue((int)0);
-                    outBytes.AddValue((int)0);
-                    outBytes.AddValue((int)0);
-                    outBytes.AddValue((int)0);
-                }
-
-                //Main Offset Table
-                outBytes.AddValue(arcLandEntryList.Count);
-                outBytes.ReserveInt("LandEntryOffset");
-                outBytes.AddValue(arcVertDataSetList.Count);
-                outBytes.ReserveInt("VertDataOffset");
-
-                outBytes.AddValue(arcFaceDataList.Count);
-                outBytes.ReserveInt("FaceDataoffset");
-                outBytes.AddValue(arcBoundingList.Count);
-                outBytes.ReserveInt("BoundingOffset");
-
-                outBytes.AddValue(1);
-                outBytes.AddValue(arcMeshDataList.Count);
-                outBytes.ReserveInt("MeshOffset");
-
-                //Land Entries
-                offsets.Add(outBytes.Count + offset);
-                outBytes.FillInt($"LandEntryOffset", outBytes.Count + offset);
-                for (int i = 0; i < arcLandEntryList.Count; i++)
-                {
-                    var landRef = arcLandEntryList[i];
-
-                    //This value seems like it's sometimes 0 for the first land entry in the model, but is 1 otherwise. For some models, it is always 1.
-                    outBytes.AddValue(landRef.unkInt);
-                    outBytes.ReserveInt($"LandEntry{i}");
-                }
-                for(int i = 0; i < arcLandEntryList.Count; i++)
-                {
-                    offsets.Add(outBytes.Count + offset);
-                    outBytes.FillInt($"LandEntry{i}", outBytes.Count + offset);
-                    var landRef = arcLandEntryList[i];
-                    outBytes.AddValue(landRef.entry.unkInt0);
-                    outBytes.AddValue(landRef.entry.unkInt1);
-                    outBytes.AddValue(landRef.entry.unkInt2);
-                    outBytes.AddValue(landRef.entry.unkInt3);
-                    outBytes.AddValue(landRef.entry.unkInt4);
-                    outBytes.AddValue(landRef.entry.unkInt5);
-                    outBytes.AddValue(landRef.entry.unkInt6);
-                    outBytes.AddValue(landRef.entry.unkInt7);
-                    outBytes.AddValue(landRef.entry.ushort0);
-                    outBytes.AddValue(landRef.entry.ushort1);
-                    outBytes.AddValue(landRef.entry.TextureId);
-                }
-
-                //Vert data
-                offsets.Add(outBytes.Count + offset);
-                outBytes.FillInt($"VertDataOffset", outBytes.Count + offset);
-                for(int i = 0; i < arcVertDataRefList.Count; i++)
-                {
-                    outBytes.AddValue((int)0); //This is either i or just 0 every time. Probably the latter based on faces. Either way, retail has no example of how this should look.
-                    offsets.Add(outBytes.Count + offset);
-                    outBytes.ReserveInt($"VertData{i}");
-                }
-                for(int i = 0; i < arcVertDataSetList.Count; i++)
-                {
-                    var vertInfo = arcVertDataSetList[i];
-                    outBytes.FillInt($"VertData{i}", outBytes.Count + offset);
-                    outBytes.AddRange(vertInfo.GetVertDataBytes(offset, out var verDataOffsets));
-                    offsets.AddRange(verDataOffsets);
-                }
-
-                //Face data
-
-                //Bounding data
-
-                //Mesh data
-
-                //Alt Vert data
-
-                //Animated Models
-
-                return outBytes.ToArray();
-            }
-
-        }
-
-
         //LND Data
         public NinjaHeader nHeader;
         public LNDHeader header;
@@ -266,7 +149,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 isArcLND = true;
                 //This is based more around the .arc format
                 ReadARCLND(sr);
-                gvmBytes = GVMUtil.ReadGVMBytes(sr);
+                gvmBytes = GVMUtil.ReadGVMBytes(sr, true);
             }
         }
 
@@ -435,6 +318,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 foreach(var set in arcLndAnimatedModelRefs)
                 {
                     ARCLNDAnimatedMeshData meshData = new ARCLNDAnimatedMeshData();
+                    meshData.MPLAnimId = set.MPLAnimId;
                     sr.Seek(0x20 + set.modelOffset, System.IO.SeekOrigin.Begin);
                     meshData.model = ReadArcLndModel(sr, true);
                     if (set.motionOffset != 0)
@@ -497,9 +381,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     lndEntry.unkInt6 = sr.ReadBE<int>();
                     lndEntry.unkInt7 = sr.ReadBE<int>();
 
-                    lndEntry.ushort0 = sr.ReadBE<ushort>();
-                    lndEntry.ushort1 = sr.ReadBE<ushort>();
-                    lndEntry.TextureId = sr.ReadBE<int>();
+                    if(lndRef.unkInt > 0)
+                    {
+                        lndEntry.ushort0 = sr.ReadBE<ushort>();
+                        lndEntry.ushort1 = sr.ReadBE<ushort>();
+                        lndEntry.TextureId = sr.ReadBE<int>();
+                    }
                     lndRef.entry = lndEntry;
                 }
             }
@@ -566,7 +453,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 bounding.BAMS1 = sr.ReadBE<short>();
                 bounding.BAMS2 = sr.ReadBE<short>();
                 bounding.BAMS3 = sr.ReadBE<short>();
-                bounding.scale = sr.ReadBEV3();
+                bounding.Scale = sr.ReadBEV3();
                 bounding.minBounding = sr.ReadBEV2();
                 bounding.maxBounding = sr.ReadBEV2();
                 arcModel.arcBoundingList.Add(bounding);
@@ -577,12 +464,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             for (int i = 0; i < arcModel.arcMainOffsetTable.meshDataCount; i++)
             {
                 ARCLNDMeshDataRef meshDataRef = new ARCLNDMeshDataRef();
-                meshDataRef.id = sr.ReadBE<int>();
+                meshDataRef.unkEnum = sr.ReadBE<int>();
                 meshDataRef.count = sr.ReadBE<int>();
                 meshDataRef.offset = sr.ReadBE<int>();
-                arcModel.meshDataRefList.Add(meshDataRef);
+                arcModel.arcMeshDataRefList.Add(meshDataRef);
             }
-            foreach (var datMeshaRef in arcModel.meshDataRefList)
+            foreach (var datMeshaRef in arcModel.arcMeshDataRefList)
             {
                 sr.Seek(0x20 + datMeshaRef.offset, System.IO.SeekOrigin.Begin);
                 List<ARCLNDMeshData> meshDataList = new List<ARCLNDMeshData>();
@@ -1231,6 +1118,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcHead.AddValue((int)0);
             outBytes.InsertRange(0, arcHead);
 
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

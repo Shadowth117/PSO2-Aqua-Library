@@ -128,7 +128,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             offsets = new List<int>();
             List<byte> outBytes = new List<byte>();
 
-            outBytes.AddValue(0);
+            outBytes.AddValue(1);
             offsets.Add(outBytes.Count + offset);
             outBytes.AddValue(offset + 0x8);
 
@@ -144,14 +144,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.AddValue(motHeader.int_0C);
 
             var animType = BitConverter.GetBytes((short)motHeader.animationType);
-            outBytes.AddValue(animType[0]);
-            outBytes.AddValue(animType[1]);
+            outBytes.Add(animType[0]);
+            outBytes.Add(animType[1]);
             outBytes.AddValue(motHeader.count);
             offsets.Add(outBytes.Count + offset);
-            outBytes.AddValue(outBytes.Count + offset + 0x24);
+            outBytes.AddValue(outBytes.Count + offset + 0x1C);
             var animType2 = BitConverter.GetBytes((short)motHeader.animationTypeAgain);
-            outBytes.AddValue(animType2[0]);
-            outBytes.AddValue(animType2[1]);
+            outBytes.Add(animType2[0]);
+            outBytes.Add(animType2[1]);
             outBytes.AddValue(motHeader.usht_1A);
             outBytes.AddValue(motHeader.int_1C);
 
@@ -162,7 +162,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.AddValue(motHeader.usht_2A);
             outBytes.AddValue(motHeader.int_2C);
 
-            outBytes.AddRange(colorAnimations[0][0]);
+            for(int i = 0; i < colorAnimations[0].Count; i++)
+            {
+                outBytes.AddRange(colorAnimations[0][i]);
+            }
 
             return outBytes.ToArray();
         }
