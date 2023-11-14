@@ -94,13 +94,13 @@ namespace AquaModelLibrary.Extra.Ninja
             {
                 if (offsetDiff > 0xFFFF)
                 {
-                    var bytes = BitConverter.GetBytes(offsetDiff);
+                    var bytes = BitConverter.GetBytes(offsetDiff / 4);
                     finalPOF = new byte[] { (byte)(0xC0 + bytes[3]), bytes[2], bytes[1], bytes[0] };
                 }
                 else
                 {
                     short shortCalc = (short)(offsetDiv);
-                    var bytes = BitConverter.GetBytes(shortCalc);
+                    var bytes = BitConverter.GetBytes(shortCalc / 4);
                     finalPOF = new byte[] { (byte)(0x80 + bytes[1]), bytes[0] };
                 }
             }

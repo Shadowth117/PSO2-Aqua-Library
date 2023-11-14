@@ -1059,6 +1059,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     outBytes.FillInt($"ExtraModel{i - 1}Offset", outBytes.Count);
                 }
+                fileOffsets.Add((uint)outBytes.Count);
                 outBytes.AddRange(modelSet.model.GetBytes(outBytes.Count, animData, out var modelOffsets));
                 outBytes.AlignWrite(0x20);
                 offsets.AddRange(modelOffsets);
