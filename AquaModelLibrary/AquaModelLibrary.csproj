@@ -382,6 +382,7 @@
     <Compile Include="Extra\Ninja\BillyHatcher\GLK.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LNDH\ARCLND.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LNDH\MPL.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\MesBin.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\Motion.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\PATH.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LND.cs" />
