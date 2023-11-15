@@ -1,5 +1,4 @@
-﻿using Assimp;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
 
@@ -8,6 +7,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
     public class ARCLNDModel
     {
+        public static int counter = 0;
+
         public bool isAnimModel = false;
         public ARCLNDMainDataHeader arcMainDataHeader;
         public ARCLNDMainOffsetTable arcMainOffsetTable;
@@ -28,16 +29,22 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             offsets = new List<int>();
             List<byte> outBytes = new List<byte>();
 
-            
+
             if (isAnimModel == false)
             {
                 //Main offset table offset
                 offsets.Add(outBytes.Count + offset);
                 outBytes.AddValue(offset + 0x20);
-                offsets.Add(outBytes.Count + offset);
+                if(arcAltVertColorList.Count > 0)
+                {
+                    offsets.Add(outBytes.Count + offset);
+                }
                 outBytes.ReserveInt("AltVertColorOffset");
                 outBytes.AddValue(arcLndAnimatedMeshDataList.Count);
-                offsets.Add(outBytes.Count + offset);
+                if(arcLndAnimatedMeshDataList.Count > 0)
+                {
+                    offsets.Add(outBytes.Count + offset);
+                }
                 outBytes.ReserveInt("AnimatedMeshOffsetsOffset");
 
                 outBytes.AddValue((int)0);
@@ -90,7 +97,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.AddValue((int)landRef.entry.unkInt6);
                 outBytes.AddValue((int)landRef.entry.unkInt7);
 
-                if(landRef.unkInt > 0)
+                if (landRef.unkInt > 0)
                 {
                     outBytes.AddValue((ushort)landRef.entry.ushort0);
                     outBytes.AddValue((ushort)landRef.entry.ushort1);
@@ -116,9 +123,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
             //Face data
             outBytes.FillInt($"FaceDataoffset", outBytes.Count + offset);
-            for(int i = 0; i < arcFaceDataList.Count; i++)
+            for (int i = 0; i < arcFaceDataList.Count; i++)
             {
-                outBytes.AddValue((int)0); 
+                outBytes.AddValue((int)0);
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"FaceData{i}");
             }
@@ -127,10 +134,16 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 var faceData = arcFaceDataList[i];
                 outBytes.FillInt($"FaceData{i}", outBytes.Count + offset);
                 outBytes.AddValue((uint)faceData.flags);
-                offsets.Add(outBytes.Count + offset);
+                if (faceData.triIndicesList0.Count > 0)
+                {
+                    offsets.Add(outBytes.Count + offset);
+                }
                 outBytes.ReserveInt($"FaceDataOffset0{i}");
                 outBytes.ReserveInt($"FaceDataBufferSize0{i}");
-                offsets.Add(outBytes.Count + offset);
+                if (faceData.triIndicesList1.Count > 0)
+                {
+                    offsets.Add(outBytes.Count + offset);
+                }
                 outBytes.ReserveInt($"FaceDataOffset1{i}");
                 outBytes.ReserveInt($"FaceDataBufferSize1{i}");
             }
@@ -214,7 +227,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
             //Mesh data
             outBytes.FillInt($"MeshOffset", outBytes.Count + offset);
-            for(int i = 0; i < arcMeshDataRefList.Count; i++)
+            for (int i = 0; i < arcMeshDataRefList.Count; i++)
             {
                 var meshRef = arcMeshDataRefList[i];
                 outBytes.AddValue(meshRef.unkEnum);
@@ -222,7 +235,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"MeshGroup{i}Offset");
             }
-            for(int i = 0; i < arcMeshDataList.Count; i++)
+            for (int i = 0; i < arcMeshDataList.Count; i++)
             {
                 outBytes.FillInt($"MeshGroup{i}Offset", outBytes.Count + offset);
                 foreach (var meshData in arcMeshDataList[i])
@@ -258,9 +271,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     offsets.AddRange(verDataOffsets);
                 }
             }
-            
+
             //Animated Models
-            if(arcLndAnimatedMeshDataList.Count > 0)
+            if (arcLndAnimatedMeshDataList.Count > 0)
             {
                 outBytes.FillInt($"AnimatedMeshOffsetsOffset", outBytes.Count + offset);
                 for (int i = 0; i < arcLndAnimatedMeshDataList.Count; i++)
@@ -432,8 +445,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public ARCLNDVertData Normal;
         public ARCLNDVertData VertColor;
         public ARCLNDVertData VertColor2;
-        public ARCLNDVertData UV1; 
-        public ARCLNDVertData UV2; 
+        public ARCLNDVertData UV1;
+        public ARCLNDVertData UV2;
 
         public List<Vector3> PositionData = new List<Vector3>();
         /// <summary>
@@ -456,30 +469,49 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             List<byte> outBytes = new List<byte>();
             outBytes.AddValue((ushort)1);
             outBytes.AddValue((ushort)PositionData.Count);
-            offsets.Add(outBytes.Count + offset);
+
+            if (PositionData.Count > 0)
+            {
+                offsets.Add(outBytes.Count + offset);
+            }
             outBytes.ReserveInt("PositionOffset");
             outBytes.AddValue((ushort)3);
             outBytes.AddValue((ushort)NormalData.Count);
-            offsets.Add(outBytes.Count + offset);
+            if (NormalData.Count > 0)
+            {
+                offsets.Add(outBytes.Count + offset);
+            }
             outBytes.ReserveInt("NormalOffset");
             outBytes.AddValue((ushort)2);
             outBytes.AddValue((ushort)VertColorData.Count);
-            offsets.Add(outBytes.Count + offset);
+            if (VertColorData.Count > 0)
+            {
+                offsets.Add(outBytes.Count + offset);
+            }
             outBytes.ReserveInt("VertColorDataOffset");
             outBytes.AddValue((ushort)2);
             outBytes.AddValue((ushort)VertColor2Data.Count);
-            offsets.Add(outBytes.Count + offset);
+            if (VertColor2Data.Count > 0)
+            {
+                offsets.Add(outBytes.Count + offset);
+            }
             outBytes.ReserveInt("VertColor2DataOffset");
             outBytes.AddValue((ushort)1);
             outBytes.AddValue((ushort)UV1Data.Count);
-            offsets.Add(outBytes.Count + offset);
+            if (UV1Data.Count > 0)
+            {
+                offsets.Add(outBytes.Count + offset);
+            }
             outBytes.ReserveInt("UV1DataOffset");
             outBytes.AddValue((ushort)1);
             outBytes.AddValue((ushort)UV2Data.Count);
-            offsets.Add(outBytes.Count + offset);
+            if (UV2Data.Count > 0)
+            {
+                offsets.Add(outBytes.Count + offset);
+            }
             outBytes.ReserveInt("UV2DataOffset");
 
-            if(PositionData.Count > 0)
+            if (PositionData.Count > 0)
             {
                 outBytes.FillInt("PositionOffset", outBytes.Count + offset);
                 for (int i = 0; i < PositionData.Count; i++)
@@ -490,7 +522,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.AddValue(pos.Z);
                 }
             }
-            if(NormalData.Count > 0)
+            if (NormalData.Count > 0)
             {
                 outBytes.FillInt("NormalOffset", outBytes.Count + offset);
                 for (int i = 0; i < NormalData.Count; i++)
@@ -501,7 +533,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.AddValue(nrm.Z);
                 }
             }
-            if(VertColorData.Count > 0)
+            if (VertColorData.Count > 0)
             {
                 outBytes.FillInt("VertColorDataOffset", outBytes.Count + offset);
                 for (int i = 0; i < VertColorData.Count; i++)
@@ -509,7 +541,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.AddRange(VertColorData[i]);
                 }
             }
-            if(VertColor2Data.Count > 0)
+            if (VertColor2Data.Count > 0)
             {
                 outBytes.FillInt("VertColor2DataOffset", outBytes.Count + offset);
                 for (int i = 0; i < VertColor2Data.Count; i++)
@@ -517,7 +549,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.AddRange(VertColor2Data[i]);
                 }
             }
-            if(UV1Data.Count > 0)
+            if (UV1Data.Count > 0)
             {
                 outBytes.FillInt("UV1DataOffset", outBytes.Count + offset);
                 for (int i = 0; i < UV1Data.Count; i++)
@@ -527,15 +559,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.AddValue(uv1[1]);
                 }
             }
-            if(UV2Data.Count > 0)
+            if (UV2Data.Count > 0)
             {
-            outBytes.FillInt("UV2DataOffset", outBytes.Count + offset);
-            for (int i = 0; i < UV2Data.Count; i++)
-            {
-                var uv2 = UV2Data[i];
-                outBytes.AddValue(uv2[0]);
-                outBytes.AddValue(uv2[1]);
-            }
+                outBytes.FillInt("UV2DataOffset", outBytes.Count + offset);
+                for (int i = 0; i < UV2Data.Count; i++)
+                {
+                    var uv2 = UV2Data[i];
+                    outBytes.AddValue(uv2[0]);
+                    outBytes.AddValue(uv2[1]);
+                }
             }
 
             return outBytes.ToArray();
@@ -602,7 +634,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// <summary>
         /// This isn't always used, for unknown reasons
         /// </summary>
-        public Vector3 Scale; 
+        public Vector3 Scale;
 
         public Vector2 minBounding;
         public Vector2 maxBounding;

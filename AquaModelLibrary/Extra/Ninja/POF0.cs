@@ -36,6 +36,26 @@ namespace AquaModelLibrary.Extra.Ninja
         /// <summary>
         /// Incoming pointers MUST be aligned to 4 bytes! Setting align to false will ensure the POF0 byte array itself is not aligned.
         /// </summary>
+        public static byte[] GeneratePOF0(List<int> offsets, bool align = true)
+        {
+            List<byte> bytes = new List<byte>
+            {
+                0x50,
+                0x4F,
+                0x46,
+                0x30
+            };
+
+            var data = GenerateRawPOF0(offsets, align);
+            bytes.AddRange(BitConverter.GetBytes(data.Length));
+            bytes.AddRange(data);
+
+            return bytes.ToArray();
+        }
+
+        /// <summary>
+        /// Incoming pointers MUST be aligned to 4 bytes! Setting align to false will ensure the POF0 byte array itself is not aligned.
+        /// </summary>
         public static byte[] GenerateRawPOF0(List<uint> offsets, bool align = true)
         {
             List<byte> pofBytes = new List<byte>();
@@ -100,7 +120,7 @@ namespace AquaModelLibrary.Extra.Ninja
                 else
                 {
                     short shortCalc = (short)(offsetDiv);
-                    var bytes = BitConverter.GetBytes(shortCalc / 4);
+                    var bytes = BitConverter.GetBytes(shortCalc);
                     finalPOF = new byte[] { (byte)(0x80 + bytes[1]), bytes[0] };
                 }
             }
