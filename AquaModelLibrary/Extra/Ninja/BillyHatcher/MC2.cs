@@ -54,10 +54,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 mc2FaceData.vert2 = sr.ReadBE<ushort>();
                 mc2FaceData.usht3 = sr.ReadBE<ushort>();
 
-                mc2FaceData.bt0 = sr.ReadBE<byte>();
-                mc2FaceData.bt1 = sr.ReadBE<byte>();
-                mc2FaceData.bt2 = sr.ReadBE<byte>();
-                mc2FaceData.bt3 = sr.ReadBE<byte>();
+                mc2FaceData.bt_4 = sr.ReadBE<byte>();
+                mc2FaceData.bt_5 = sr.ReadBE<byte>();
+                mc2FaceData.flagSet2 = sr.ReadBE<byte>();
+                mc2FaceData.flagSet3 = sr.ReadBE<byte>();
 
                 mc2FaceData.faceNormal = sr.ReadBEV3();
                 header.minBounding = sr.ReadBEV2();
@@ -142,10 +142,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 outBytes.AddValue(faceData[i].vert1);
                 outBytes.AddValue(faceData[i].vert2);
                 outBytes.AddValue(faceData[i].usht3);
-                outBytes.Add(faceData[i].bt0);
-                outBytes.Add(faceData[i].bt1);
-                outBytes.Add(faceData[i].bt2);
-                outBytes.Add(faceData[i].bt3);
+                outBytes.Add(faceData[i].bt_4);
+                outBytes.Add(faceData[i].bt_5);
+                outBytes.Add(faceData[i].flagSet2);
+                outBytes.Add(faceData[i].flagSet3);
                 outBytes.AddValue(faceData[i].faceNormal.X);
                 outBytes.AddValue(faceData[i].faceNormal.Y);
                 outBytes.AddValue(faceData[i].faceNormal.Z);
@@ -252,17 +252,63 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public int unkCount;
         }
 
-        public struct MC2FaceData
+        public enum FlagSet0 : byte
+        {
+            None = 0x0,
+            Lava = 0x1,
+            Unk0x2 = 0x2,
+            Slide = 0x4,
+            Unk0x8 = 0x8,
+            Unk0x10 = 0x10,
+            /// <summary>
+            /// This one is a little weird. When Billy grabs an egg, the egg no longer collides with faces marked with this.
+            /// The camera will also follow the egg while it is in the 'held' state, even if it falls thorugh the floor, until Billy backs off from it.
+            /// Billy will fall through the ground too while he is 'attached' to the egg, such as when he rolls with the egg, attempts to bounce, or slam with it.
+            /// </summary>
+            NoBillyAndEggCollision = 0x20,
+            Unk0x40 = 0x40,
+            /// <summary>
+            /// Billy just dies upon touching this. Can look awkward if DefaultGround is on.
+            /// </summary>
+            Death = 0x80,
+        }
+
+        public enum FlagSet1 : byte
+        {
+            None = 0,
+            /// <summary>
+            /// Default ground collision. For normal Billy Hatchering about.
+            /// </summary>
+            DefaultGround = 0x1,
+            Unk0x2 = 0x2,
+            /// <summary>
+            /// Billy just instantly dies a water death on touching this.
+            /// </summary>
+            Drown = 0x4,
+            /// <summary>
+            /// Billy just instantly dies a sand death on touching this.
+            /// </summary>
+            Quicksand = 0x8,
+            Unk0x10 = 0x10,
+            Unk0x20 = 0x20,
+            Unk0x40 = 0x40,
+            /// <summary>
+            /// Ground gives use snow sound effects.
+            /// </summary>
+            Snow = 0x80, 
+        }
+
+        public class MC2FaceData
         {
             public ushort vert0;
             public ushort vert1;
             public ushort vert2;
             public ushort usht3;
 
-            public byte bt0;
-            public byte bt1;
-            public byte bt2;
-            public byte bt3;
+            public byte bt_4; //4 and 5 might be flags, but don't seem to directly affect Billy or the egg.
+            public byte bt_5;
+            public byte flagSet2;
+            public byte flagSet3;
 
             public Vector3 faceNormal;
             public Vector2 minBounding;
