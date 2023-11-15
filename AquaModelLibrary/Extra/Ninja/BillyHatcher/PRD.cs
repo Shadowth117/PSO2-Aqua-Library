@@ -142,10 +142,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.FillInt("uncompressedDataSize", innerBytes.Count);
             outBytes.FillInt("compressedDataSize", prs.Length);
             var bufferAddition = 0x20 - ((innerBytes.Count - prs.Length) % 0x20);
-            if (bufferAddition == 0x1 || bufferAddition == 0)
-            {
-                bufferAddition += 0x20;
-            }
+            //Hack to ensure the buffersize is enough
+            bufferAddition += 0x40;
             var compressionDifference = (innerBytes.Count - prs.Length);
             var finalDifference = compressionDifference + bufferAddition;
             var finalTotalBufferSize = finalDifference + prs.Length;
