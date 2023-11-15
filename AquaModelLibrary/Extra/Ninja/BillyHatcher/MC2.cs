@@ -56,8 +56,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 mc2FaceData.bt_4 = sr.ReadBE<byte>();
                 mc2FaceData.bt_5 = sr.ReadBE<byte>();
-                mc2FaceData.flagSet2 = sr.ReadBE<byte>();
-                mc2FaceData.flagSet3 = sr.ReadBE<byte>();
+                mc2FaceData.flagSet0 = (FlagSet0)sr.ReadBE<byte>();
+                mc2FaceData.flagSet1 = (FlagSet1)sr.ReadBE<byte>();
 
                 mc2FaceData.faceNormal = sr.ReadBEV3();
                 header.minBounding = sr.ReadBEV2();
@@ -144,8 +144,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 outBytes.AddValue(faceData[i].usht3);
                 outBytes.Add(faceData[i].bt_4);
                 outBytes.Add(faceData[i].bt_5);
-                outBytes.Add(faceData[i].flagSet2);
-                outBytes.Add(faceData[i].flagSet3);
+                outBytes.Add((byte)faceData[i].flagSet0);
+                outBytes.Add((byte)faceData[i].flagSet1);
                 outBytes.AddValue(faceData[i].faceNormal.X);
                 outBytes.AddValue(faceData[i].faceNormal.Y);
                 outBytes.AddValue(faceData[i].faceNormal.Z);
@@ -252,6 +252,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public int unkCount;
         }
 
+        [Flags]
         public enum FlagSet0 : byte
         {
             None = 0x0,
@@ -273,6 +274,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             Death = 0x80,
         }
 
+        [Flags]
         public enum FlagSet1 : byte
         {
             None = 0,
@@ -307,8 +309,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             public byte bt_4; //4 and 5 might be flags, but don't seem to directly affect Billy or the egg.
             public byte bt_5;
-            public byte flagSet2;
-            public byte flagSet3;
+            public FlagSet0 flagSet0;
+            public FlagSet1 flagSet1;
 
             public Vector3 faceNormal;
             public Vector2 minBounding;
