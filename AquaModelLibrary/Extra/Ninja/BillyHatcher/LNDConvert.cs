@@ -243,7 +243,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             int i = 0;
             if ((flags & ArcLndVertType.Position) > 0)
             {
-                vtxl.vertPositions.Add(mdl.arcVertDataSetList[0].PositionData[faceIds[i]] / 10);
+                vtxl.vertPositions.Add(mdl.arcVertDataSetList[0].PositionData[faceIds[i]]);
                 vertId += ((int)ArcLndVertType.Position).ToString() + faceIds[i++];
             }
             if ((flags & ArcLndVertType.Normal) > 0)
@@ -477,7 +477,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 switch (lyt.vertType)
                 {
                     case 0x1:
-                        vtxl.vertPositions.Add(mesh.vertData.vertPositions[faceIds[vertIndexMapping[i]]] / 10);
+                        vtxl.vertPositions.Add(mesh.vertData.vertPositions[faceIds[vertIndexMapping[i]]]);
                         break;
                     case 0x2:
                         //mesh.vertData.vert2Data.Add(new byte[] { sr.Read<byte>(), sr.Read<byte>(), sr.Read<byte>() });
@@ -525,4 +525,5 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
         }
     }
+
 }

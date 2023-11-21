@@ -42,11 +42,20 @@ namespace AquaModelLibrary
 
             return str;
         }
+        
+        public static Assimp.Scene GetAssimpScene(string path, Assimp.PostProcessSteps pps)
+        {
+            Assimp.AssimpContext context = new Assimp.AssimpContext();
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
+            Assimp.Scene aiScene = context.ImportFile(path, pps);
+
+            return aiScene;
+        }
 
         public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
             double scale = 100;
             float orgScale = 100;
@@ -617,7 +626,7 @@ namespace AquaModelLibrary
         public static void AssimpPRMConvert(string initialFilePath, string finalFilePath)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
             double scale = 100;
             float orgScale = 100;
@@ -733,7 +742,7 @@ namespace AquaModelLibrary
         {
             AquaUtil aquaUtil = new AquaUtil();
             Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
             double scale = 100;
