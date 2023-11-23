@@ -391,6 +391,7 @@
     <Compile Include="Extra\Ninja\BillyHatcher\PlayerParam.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\SetLightParam.cs" />
     <Compile Include="Extra\Ninja\GVMUtil.cs" />
+    <Compile Include="Extra\Ninja\NinjaConstants.cs" />
     <Compile Include="Extra\Ninja\NinjaHeader.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\PRD.cs" />
     <Compile Include="Extra\Ninja\POF0.cs" />

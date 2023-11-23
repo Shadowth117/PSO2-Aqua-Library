@@ -1,18 +1,32 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
+using System.Windows.Documents;
+using System.Windows.Documents.DocumentStructures;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
     public class MC2
     {
         public static int maxDepth = 6;
-
+        public static Dictionary<int, int> maxDepthFaces = new Dictionary<int, int>() 
+        { 
+            { 0, 0},
+            { 1, 0},
+            { 2, 16},
+            { 3, 16},
+            { 4, 19},
+            { 5, 19},
+            { 6, 256},
+            { 7, 65536},
+        };
         public NinjaHeader njHeader;
         public MC2Header header;
         public List<Vector3> vertPositions = new List<Vector3>();
         public List<MC2FaceData> faceData = new List<MC2FaceData>();
+        public List<MC2FaceBounds> faceBounds = new List<MC2FaceBounds>(); 
         public List<MC2Sector> sectors = new List<MC2Sector>(); //While depth is 6 or less, considering root depth 0, subdivide until 64 faces or less. At depth 6, take what's left. Retail has no higher than 231 for any particular mc2.
         public MC2Sector rootSector = null;
         public List<MC2UnkData> unkDataList = new List<MC2UnkData>();
@@ -32,10 +46,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header.faceCount = sr.ReadBE<int>();
             header.sectorDataOffset = sr.ReadBE<int>();
             header.sectorDataCount = sr.ReadBE<int>();
-            header.unkBoundingRange = sr.ReadBEV2();
+            header.smallestBoundingRange = sr.ReadBEV2();
             header.greatestBoundingRange = sr.ReadBEV2();
             header.ushort0 = sr.ReadBE<ushort>();
-            header.ushort1 = sr.ReadBE<ushort>();
+            header.maxStripLength = sr.ReadBE<ushort>();
             header.maxDepth = sr.ReadBE<ushort>();
             header.ushort3 = sr.ReadBE<ushort>();
             header.unkOffset = sr.ReadBE<int>();
@@ -96,7 +110,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 mc2FaceData.usht3 = sr.ReadBE<ushort>();
 
                 mc2FaceData.bt_4 = sr.ReadBE<byte>();
-                mc2FaceData.bt_5 = sr.ReadBE<byte>();
+                mc2FaceData.flagSet2 = (FlagSet2)sr.ReadBE<byte>();
                 mc2FaceData.flagSet0 = (FlagSet0)sr.ReadBE<byte>();
                 mc2FaceData.flagSet1 = (FlagSet1)sr.ReadBE<byte>();
 
@@ -194,9 +208,56 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
         }
 
+        public void GetSectorMaxRanges(out Vector2 XRange, out Vector2 ZRange)
+        {
+            XRange = new Vector2();
+            ZRange = new Vector2();
+            foreach(var pos in vertPositions)
+            {
+                XRange.X = Math.Min(pos.X, XRange.X);
+                XRange.Y = Math.Max(pos.X, XRange.Y);
+                ZRange.X = Math.Min(pos.Z, ZRange.X);
+                ZRange.Y = Math.Max(pos.Z, ZRange.Y);
+            }
+        }
+
+        public void PopulateFaceBounds()
+        {
+            faceBounds.Clear();
+            foreach(var face in faceData)
+            {
+                float MinX = vertPositions[face.vert0].X;
+                if (vertPositions[face.vert1].X < MinX)
+                    MinX = vertPositions[face.vert1].X;
+                if (vertPositions[face.vert2].X < MinX)
+                    MinX = vertPositions[face.vert2].X;
+
+                float MinZ = vertPositions[face.vert0].Z;
+                if (vertPositions[face.vert1].Z < MinZ)
+                    MinZ = vertPositions[face.vert1].Z;
+                if (vertPositions[face.vert2].Z < MinZ)
+                    MinZ = vertPositions[face.vert2].Z;
+
+                float MaxX = vertPositions[face.vert0].X;
+                if (vertPositions[face.vert1].X > MaxX)
+                    MaxX = vertPositions[face.vert1].X;
+                if (vertPositions[face.vert2].X > MaxX)
+                    MaxX = vertPositions[face.vert2].X;
+
+                float MaxZ = vertPositions[face.vert0].Z;
+                if (vertPositions[face.vert1].Z > MaxZ)
+                    MaxZ = vertPositions[face.vert1].Z;
+                if (vertPositions[face.vert2].Z > MaxZ)
+                    MaxZ = vertPositions[face.vert2].Z;
+
+                faceBounds.Add(new MC2FaceBounds() { Left = MinX, Right = MaxX, Down = MinZ, Up = MaxZ});
+            }
+        }
+
         public MC2Sector SubdivideSector(Vector2 XRange, Vector2 ZRange, List<ushort> faceIndices, int depth)
         {
             MC2Sector sector = new MC2Sector();
+            sectors.Add(sector);
             sector.XRange = XRange;
             sector.ZRange = ZRange;
 
@@ -208,21 +269,27 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             foreach(var faceId in faceIndices)
             {
                 var face = faceData[faceId];
-
+                var bounds = faceBounds[faceId];
                 var vertX = vertPositions[face.vert0];
                 var vertY = vertPositions[face.vert1];
                 var vertZ = vertPositions[face.vert2];
 
-                //Check if this vertex is within the bounds of the bounding box. If it is, we include all faces it's used in
-                if ((IsInBounds(vertX.X, XRange) && IsInBounds(vertX.Z, ZRange)) || (IsInBounds(vertY.X, XRange) && IsInBounds(vertY.Z, ZRange)) || (IsInBounds(vertZ.X, XRange) && IsInBounds(vertZ.Z, ZRange)))
+                //Check if this vertex is within the bounds of the bounding box. If it is, we include all faces it's used in.
+                //This check should include situations where an edge of a triangle interesects the bounding or the triangle surrounds the bounding.
+
+                //if ((IsInBounds(vertX.X, XRange) || IsInBounds(vertY.X, XRange) || IsInBounds(vertZ.X, XRange)) && (IsInBounds(vertX.Z, ZRange) || IsInBounds(vertY.Z, ZRange) || IsInBounds(vertZ.Z, ZRange)))
+                //if ((IsInBounds(vertX.X, XRange) && IsInBounds(vertX.Z, ZRange)) || (IsInBounds(vertY.X, XRange) && IsInBounds(vertY.Z, ZRange)) || (IsInBounds(vertZ.X, XRange) && IsInBounds(vertZ.Z, ZRange)))
+                if ((bounds.Left <= XRange.Y && XRange.X <= bounds.Right && bounds.Up >= ZRange.X && ZRange.Y >= bounds.Down) 
+                    || (bounds.Left >= XRange.Y && XRange.X >= bounds.Right && bounds.Up <= ZRange.X && ZRange.Y <= bounds.Down))
                 {
                     newFaceIndices.Add(faceId);
                     newFaces.Add(face);
                 }
             }
 
+            var maxFaceCount = maxDepthFaces[depth];
             //We continue until we've reached the maximum depth or we hit under or equal to 64
-            if (depth >= maxDepth || newFaceIndices.Count <= 64 || newFaceIndices.Count == 0)
+            if (depth >= maxDepth || newFaceIndices.Count <= maxFaceCount || newFaceIndices.Count == 0)
             {
                 sector.stripData = newFaceIndices;
                 sector.indexCount = (ushort)newFaceIndices.Count;
@@ -231,10 +298,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     sector.faceData.Add(faceData[face]);
                 }
+                header.maxStripLength = Math.Max(header.maxStripLength, sector.indexCount);
             } else
             {
-                var XHalfRange = Math.Abs(XRange.Y - XRange.X) / 2;
-                var ZHalfRange = Math.Abs(ZRange.Y - ZRange.X) / 2;
+                var XDistance = Math.Abs(XRange.Y - XRange.X);
+                var ZDistance = Math.Abs(ZRange.Y - ZRange.X);
+
+                header.greatestBoundingRange.Y = Math.Max(XDistance, header.greatestBoundingRange.Y);
+                header.greatestBoundingRange.Y = Math.Max(ZDistance, header.greatestBoundingRange.Y);
+                header.smallestBoundingRange.Y = Math.Min(XDistance, header.smallestBoundingRange.Y);
+                header.smallestBoundingRange.Y = Math.Min(ZDistance, header.smallestBoundingRange.Y);
+
+                var XHalfRange = XDistance / 2;
+                var ZHalfRange = ZDistance / 2;
 
                 var leftRange = new Vector2(XRange.X, XRange.Y - XHalfRange);
                 var rightRange = new Vector2(XRange.X + XHalfRange, XRange.Y);
@@ -243,23 +319,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 var child0 = SubdivideSector(leftRange, downRange, newFaceIndices, depth + 1);
                 sector.childSector0 = child0;
-                sectors.Add(child0);
-                sector.childId0 = (short)sectors.Count;
+                sector.childId0 = (short)sectors.IndexOf(child0);
 
                 var child1 = SubdivideSector(leftRange, upRange, newFaceIndices, depth + 1);
                 sector.childSector1 = child1;
-                sectors.Add(child1);
-                sector.childId1 = (short)sectors.Count;
+                sector.childId1 = (short)sectors.IndexOf(child1);
 
                 var child2 = SubdivideSector(rightRange, downRange, newFaceIndices, depth + 1);
                 sector.childSector2 = child2;
-                sectors.Add(child2);
-                sector.childId2 = (short)sectors.Count;
+                sector.childId2 = (short)sectors.IndexOf(child2);
 
                 var child3 = SubdivideSector(rightRange, upRange, newFaceIndices, depth + 1);
                 sector.childSector3 = child3;
-                sectors.Add(child3);
-                sector.childId3 = (short)sectors.Count;
+                sector.childId3 = (short)sectors.IndexOf(child3);
             }
             
             return sector;
@@ -286,12 +358,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             offsets.Add(outBytes.Count);
             outBytes.ReserveInt("SectorDataOffset");
             outBytes.AddValue(sectors.Count);
-            outBytes.AddValue(header.unkBoundingRange.X);
-            outBytes.AddValue(header.unkBoundingRange.Y);
+            outBytes.AddValue(header.smallestBoundingRange.X);
+            outBytes.AddValue(header.smallestBoundingRange.Y);
             outBytes.AddValue(header.greatestBoundingRange.X);
             outBytes.AddValue(header.greatestBoundingRange.Y);
             outBytes.AddValue(header.ushort0);
-            outBytes.AddValue(header.ushort1);
+            outBytes.AddValue(header.maxStripLength);
             outBytes.AddValue(header.maxDepth);
             outBytes.AddValue(header.ushort3);
 
@@ -325,7 +397,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 outBytes.AddValue(faceData[i].vert2);
                 outBytes.AddValue(faceData[i].usht3);
                 outBytes.Add(faceData[i].bt_4);
-                outBytes.Add(faceData[i].bt_5);
+                outBytes.Add((byte)faceData[i].flagSet2);
                 outBytes.Add((byte)faceData[i].flagSet0);
                 outBytes.Add((byte)faceData[i].flagSet1);
                 outBytes.AddValue(faceData[i].faceNormal.X);
@@ -407,6 +479,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public ushort usht3;
         }
 
+        public struct MC2FaceBounds
+        {
+            public float Left;
+            public float Right;
+            public float Down;
+            public float Up;
+        }
+
         public struct MC2Header
         {
             public int vertPositionsOffset;
@@ -417,10 +497,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public int sectorDataOffset;
             public int sectorDataCount;
             //These ranges are in every mc2, but don't seem to be used in the retail game.
-            public Vector2 unkBoundingRange;
+            public Vector2 smallestBoundingRange;
             public Vector2 greatestBoundingRange;
             public ushort ushort0;
-            public ushort ushort1;
+            public ushort maxStripLength;
             /// <summary>
             /// Almost always 0x6
             /// </summary>
@@ -483,6 +563,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             Snow = 0x80, 
         }
 
+        public enum FlagSet2
+        {
+            None = 0,
+            Unk2_0x1 = 0x1,
+            Unk2_0x2 = 0x2,
+            Unk2_0x4 = 0x4,
+            Unk2_0x8 = 0x8,
+            Unk2_0x10 = 0x10,
+            Unk2_0x20 = 0x20,
+            Unk2_0x40 = 0x40,
+            Unk2_0x80 = 0x80,
+        }
+
         public class MC2FaceData
         {
             public ushort vert0;
@@ -490,8 +583,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public ushort vert2;
             public ushort usht3;
 
-            public byte bt_4; //4 and 5 might be flags, but don't seem to directly affect Billy or the egg.
-            public byte bt_5;
+            public byte bt_4; //4 is always 0.
+            public FlagSet2 flagSet2; 
             public FlagSet0 flagSet0;
             public FlagSet1 flagSet1;
 

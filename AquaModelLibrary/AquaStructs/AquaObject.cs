@@ -2031,8 +2031,14 @@ namespace AquaModelLibrary
             {
                 GenericMaterial genMat = new GenericMaterial();
                 genMat.texNames = new List<string>(texNames);
-                genMat.texUVSets = new List<int>(texUVSets);
-                genMat.shaderNames = new List<string>(shaderNames);
+                if(texUVSets != null)
+                {
+                    genMat.texUVSets = new List<int>(texUVSets);
+                }
+                if(shaderNames != null)
+                {
+                    genMat.shaderNames = new List<string>(shaderNames);
+                }
                 genMat.blendType = blendType;
                 genMat.specialType = specialType;
                 genMat.matName = matName;

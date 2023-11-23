@@ -1,9 +1,11 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
+using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -20,6 +22,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             public NGSAquaObject nightAqp = null;
             public AquaNode aqn = AquaNode.GenerateBasicAQN();
             public AquaMotion aqm = null;
+
+            public NGSAquaObject placementAqp = null;
+            public AquaNode placementAqn = null;
         }
 
         public static List<ModelData> ConvertLND(byte[] file)
@@ -65,15 +70,58 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             for (int i = 0; i < lnd.arcLndAnimatedMeshDataList.Count; i++)
             {
                 var modelRef = lnd.arcLndAnimatedMeshDataList[i];
+                var boundData = modelRef.model.arcBoundingList[0];
+
                 ModelData mdlData = new ModelData();
+                
+                //Set up bounding data transform
+                var bndRot = boundData.GetRotation();
+                var rot = MathExtras.EulerToQuaternionRadian(bndRot);
+                var mat = MathExtras.Compose(boundData.Position, rot, boundData.Scale);
+                Matrix4x4.Invert(mat, out var invMat);
+
                 mdlData.name = $"Animated_{i}_{modelRef.MPLAnimId}";
                 addWeight = modelRef.mplMotion != null;
                 mdlData.aqp = AddModelData(lnd, modelRef.model);
+                mdlData.placementAqp = AddModelData(lnd, modelRef.model);
                 if (modelRef.motion != null)
                 {
                     modelRef.model.arcVertDataSetList[0].VertColorData = modelRef.motion.colorAnimations[0];
                     mdlData.nightAqp = AddModelData(lnd, modelRef.model);
                 }
+
+                //Set up transformed Animated Model. We do it this way to keep the animation clean
+                mdlData.placementAqn = AquaNode.GenerateBasicAQN();
+                AquaNode.NODE node = new AquaNode.NODE();
+                node.boneName = new AquaCommon.PSO2String();
+                node.boneName.SetString($"Animated_{i}_Root");
+                node.SetInverseBindPoseMatrix(invMat);
+                mdlData.placementAqn.nodeList.Add(node);
+
+                foreach (var group in mdlData.placementAqp.tempTris)
+                {
+                    foreach (var vtxl in group.faceVerts)
+                    {
+                        for (int y = 0; y < vtxl.vertPositions.Count; y++)
+                        {
+                            vtxl.vertPositions[y] = Vector3.Transform(vtxl.vertPositions[y], mat);
+                        }
+                        for (int y = 0; y < vtxl.vertNormals.Count; y++)
+                        {
+                            vtxl.vertNormals[y] = Vector3.TransformNormal(vtxl.vertNormals[y], mat);
+                        }
+                        for (int y = 0; y < vtxl.vertWeightIndices.Count; y++)
+                        {
+                            vtxl.vertWeightIndices[y][0] = 1;
+                        }
+                    }
+                }
+                if (mdlData.placementAqp != null)
+                {
+                    mdlData.placementAqp.objc.bonePaletteOffset = 1;
+                    mdlData.placementAqp.bonePalette = new List<uint> { 0, 1 };
+                }
+
                 if (modelRef.mplMotion != null)
                 {
                     mdlData.aqp.objc.bonePaletteOffset = 1;
@@ -522,6 +570,33 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 vertTracker.Add(vertId, genMesh.vertCount);
                 return genMesh.vertCount++;
+            }
+        }
+
+        public LND ConvertToLND(List<ModelData> modelData)
+        {
+            LND lnd = new LND();
+            lnd.isArcLND = true;
+            List<ModelData> animModels = new List<ModelData>();
+
+            foreach(var mdl in modelData)
+            {
+                AquaToLND(lnd, mdl, mdl.aqm == null);
+            }
+
+            return lnd;
+        }
+
+        public void AquaToLND(LND lnd, ModelData mdl, bool isAnimatedModel)
+        {
+            ARCLNDModel lndMdl = new ARCLNDModel();
+            foreach (var mesh in mdl.aqp.meshList)
+            {
+                var strips = mdl.aqp.strips[mesh.psetIndex];
+                strips.toStrips(strips.triStrips.ToArray());
+                var vtxl = mdl.aqp.vtxlList[mesh.vsetIndex];
+                
+
             }
         }
     }

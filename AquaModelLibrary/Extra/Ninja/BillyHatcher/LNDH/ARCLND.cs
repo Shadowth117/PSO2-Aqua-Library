@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
+using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
@@ -206,16 +207,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.AddValue(bounds.usht_04);
                 outBytes.AddValue(bounds.usht_06);
                 outBytes.AddValue(bounds.usht_08);
-                outBytes.AddValue(bounds.usht_0A);
+                outBytes.AddValue(bounds.index);
                 outBytes.AddValue(bounds.Position.X);
                 outBytes.AddValue(bounds.Position.Y);
                 outBytes.AddValue(bounds.Position.Z);
-                outBytes.AddValue(bounds.sht0);
-                outBytes.AddValue(bounds.sht1);
-                outBytes.AddValue(bounds.BAMS0);
-                outBytes.AddValue(bounds.BAMS1);
-                outBytes.AddValue(bounds.BAMS2);
-                outBytes.AddValue(bounds.BAMS3);
+                outBytes.AddValue(bounds.BAMSX);
+                outBytes.AddValue(bounds.BAMSY);
+                outBytes.AddValue(bounds.BAMSZ);
                 outBytes.AddValue(bounds.Scale.X);
                 outBytes.AddValue(bounds.Scale.Y);
                 outBytes.AddValue(bounds.Scale.Z);
@@ -612,25 +610,41 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public List<List<List<int>>> triIndicesListStarts1 = new List<List<List<int>>>();
     }
 
-    public struct ARCLNDNodeBounding
+    public class ARCLNDNodeBounding
     {
         public float unkFlt_00;
+        /// <summary>
+        /// Always 0
+        /// </summary>
         public ushort usht_04;
+        /// <summary>
+        /// Always 65535
+        /// </summary>
         public ushort usht_06;
+        /// <summary>
+        /// Always 65535
+        /// </summary>
         public ushort usht_08;
-        public ushort usht_0A;
+        /// <summary>
+        /// 1 based index for bounding data. Final bounding data entry will ALWAYS have 0xFFFF as the index, even if it's the only one.
+        /// </summary>
+        public ushort index;
         /// <summary>
         /// This isn't always used, for unknown reasons
         /// </summary>
         public Vector3 Position;
-
-        //Something in these shorts and BAMS values is probably a rotation. But it's just a guess
-        public short sht0;
-        public short sht1;
-        public short BAMS0;
-        public short BAMS1;
-        public short BAMS2;
-        public short BAMS3;
+        /// <summary>
+        /// X Rotation in Binary Angle Measurement System
+        /// </summary>
+        public int BAMSX;
+        /// <summary>
+        /// Y Rotation in Binary Angle Measurement System
+        /// </summary>
+        public int BAMSY;
+        /// <summary>
+        /// Z Rotation in Binary Angle Measurement System
+        /// </summary>
+        public int BAMSZ;
         /// <summary>
         /// This isn't always used, for unknown reasons
         /// </summary>
@@ -638,6 +652,18 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         public Vector2 minBounding;
         public Vector2 maxBounding;
+
+        public Vector3 GetRotation()
+        {
+            return new Vector3((float)(BAMSX * FromBAMSvalue), (float)(BAMSY * FromBAMSvalue), (float)(BAMSZ * FromBAMSvalue));
+        }
+
+        public void SetRotation(Vector3 radianEulerRot)
+        {
+            BAMSX = (short)(radianEulerRot.X * ToBAMSValue);
+            BAMSY = (short)(radianEulerRot.Y * ToBAMSValue);
+            BAMSZ = (short)(radianEulerRot.Z * ToBAMSValue);
+        }
     }
 
     public struct ARCLNDMeshDataRef

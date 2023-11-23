@@ -1,18 +1,15 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.AquaMethods;
+using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using static AquaModelLibrary.AquaNode;
 using static AquaModelLibrary.AquaObject;
-using Reloaded.Memory;
+using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
 using static AquaModelLibrary.PSOXVMConvert;
-using System.Windows;
-using AquaModelLibrary.AquaMethods;
-using System.Diagnostics;
 
 namespace AquaModelLibrary
 {
@@ -23,7 +20,6 @@ namespace AquaModelLibrary
     {
         public AquaNode aqn = AquaNode.GenerateBasicAQN();
         public ClassicAquaObject aqObj = new ClassicAquaObject();
-        public const double BAMSvalue = ((2 * Math.PI) / 65536.0);
         public List<string> texNames = new List<string>();
         private GenericTriangles currentMesh;
         private BufferedStreamReader streamReader;
@@ -155,7 +151,7 @@ namespace AquaModelLibrary
             public uint triangleStripListBOffset;
 
             public ushort triangleStripListACount;
-            public ushort triangleStripListBCount; 
+            public ushort triangleStripListBCount;
 
             public Vector3 center;
             public float radius;
@@ -252,13 +248,13 @@ namespace AquaModelLibrary
             rootScale = scale;
             List<dSection> dSections = new List<dSection>();
             streamReader = new BufferedStreamReader(new MemoryStream(file), 8192);
-            
+
             //Get header offset
             streamReader.Seek(file.Length - 0x10, SeekOrigin.Begin);
 
             //Check Endianness. No offset should ever come close to half of the int max value.
-            be = streamReader.PeekBigEndianPrimitiveUInt32() < streamReader.Peek<uint>(); 
-            if(be)
+            be = streamReader.PeekBigEndianPrimitiveUInt32() < streamReader.Peek<uint>();
+            if (be)
             {
                 Debug.WriteLine("Sorry, Gamecube n.rel files are not supported at this time.");
             }
@@ -270,7 +266,7 @@ namespace AquaModelLibrary
 
             //Read draw Sections
             streamReader.Seek(header.drawOffset, SeekOrigin.Begin);
-            for(int i = 0; i < header.drawCount; i++)
+            for (int i = 0; i < header.drawCount; i++)
             {
                 dSection section = new dSection();
                 section.id = streamReader.ReadBE<int>(be);
@@ -278,7 +274,7 @@ namespace AquaModelLibrary
                 var rotX = streamReader.ReadBE<int>(be);
                 var rotY = streamReader.ReadBE<int>(be);
                 var rotZ = streamReader.ReadBE<int>(be);
-                section.rot = new Vector3((float)(rotX * BAMSvalue), (float)(rotY * BAMSvalue), (float)(rotZ * BAMSvalue));
+                section.rot = new Vector3((float)(rotX * FromBAMSvalue), (float)(rotY * FromBAMSvalue), (float)(rotZ * FromBAMSvalue));
                 section.radius = streamReader.ReadBE<float>(be);
                 section.staticOffset = streamReader.ReadBE<uint>(be);
                 section.animatedOffset = streamReader.ReadBE<uint>(be);
@@ -295,7 +291,7 @@ namespace AquaModelLibrary
             var nameCount = streamReader.ReadBE<uint>(be);
             streamReader.Seek(nameOffset, SeekOrigin.Begin);
             List<uint> nameOffsets = new List<uint>();
-            for(int i = 0; i < nameCount; i++)
+            for (int i = 0; i < nameCount; i++)
             {
                 nameOffsets.Add(streamReader.ReadBE<uint>(be));
                 var unk0 = streamReader.ReadBE<uint>(be);
@@ -310,14 +306,14 @@ namespace AquaModelLibrary
                     Console.WriteLine($"Iteration {i} unk1 == {unk1}");
                 }
             }
-            foreach(uint offset in nameOffsets)
+            foreach (uint offset in nameOffsets)
             {
                 streamReader.Seek(offset, SeekOrigin.Begin);
                 texNames.Add(AquaGeneralMethods.ReadCString(streamReader));
             }
 
             //If there's an .xvm, dump that too with texture names from the .rel
-            if(fileName != null)
+            if (fileName != null)
             {
                 //Naming patterns for *n.rel files are *_12n.rel for example or *n.rel  vs *.xvm. We can determine which we have, edit, and proceed
                 var basename = fileName.Substring(0, fileName.Length - 5);
@@ -353,7 +349,7 @@ namespace AquaModelLibrary
                 //Read static meshes
                 List<staticMeshOffset> staticMeshOffsets = new List<staticMeshOffset>();
                 streamReader.Seek(dSections[i].staticOffset, SeekOrigin.Begin);
-                for(int st = 0; st < dSections[i].staticCount; st++)
+                for (int st = 0; st < dSections[i].staticCount; st++)
                 {
                     staticMeshOffsets.Add(ReadStaticMeshOffset(streamReader, be));
                 }
@@ -363,7 +359,7 @@ namespace AquaModelLibrary
                     readNode(matrix, 0);
                 }
 
-                
+
                 //Read animated meshes
                 List<animMeshOffset> animatedMeshOffsets = new List<animMeshOffset>();
                 streamReader.Seek(dSections[i].animatedOffset, SeekOrigin.Begin);
@@ -376,11 +372,11 @@ namespace AquaModelLibrary
                     streamReader.Seek(animatedMeshOffsets[ofs].offset, SeekOrigin.Begin);
                     readNode(matrix, 0);
                 }
-                
+
             }
 
             //Set material names
-            for(int i = 0; i < aqObj.tempMats.Count; i++)
+            for (int i = 0; i < aqObj.tempMats.Count; i++)
             {
                 aqObj.tempMats[i].matName = $"PSOMat {i}";
             }
@@ -396,7 +392,7 @@ namespace AquaModelLibrary
             var rotX = streamReader.ReadBE<int>(be);
             var rotY = streamReader.ReadBE<int>(be);
             var rotZ = streamReader.ReadBE<int>(be);
-            node.rot = new Vector3((float)(rotX * BAMSvalue), (float)(rotY * BAMSvalue), (float)(rotZ * BAMSvalue));
+            node.rot = new Vector3((float)(rotX * FromBAMSvalue), (float)(rotY * FromBAMSvalue), (float)(rotZ * FromBAMSvalue));
             node.scl = streamReader.ReadBEV3(be);
             node.childOffset = streamReader.ReadBE<uint>(be);
             node.siblingOffset = streamReader.ReadBE<uint>(be);
@@ -408,7 +404,7 @@ namespace AquaModelLibrary
             var rotation = Matrix4x4.CreateRotationX(node.rot.X) *
                 Matrix4x4.CreateRotationY(node.rot.Y) *
                 Matrix4x4.CreateRotationZ(node.rot.Z);
-            
+
             mat *= rotation;
 
             mat *= Matrix4x4.CreateTranslation(node.pos * rootScale);
@@ -425,12 +421,13 @@ namespace AquaModelLibrary
             aqNode.parentId = parentId;
             aqNode.unkNode = -1;
             aqNode.pos = node.pos;
-            aqNode.eulRot = new Vector3((float)((rotX * BAMSvalue) * 180/Math.PI), (float)((rotY * BAMSvalue) * 180 / Math.PI), (float)((rotZ * BAMSvalue) * 180 / Math.PI));
+            aqNode.eulRot = new Vector3((float)((rotX * FromBAMSvalue) * 180 / Math.PI), (float)((rotY * FromBAMSvalue) * 180 / Math.PI), (float)((rotZ * FromBAMSvalue) * 180 / Math.PI));
 
-            if(Math.Abs(aqNode.eulRot.Y) > 120)
+            if (Math.Abs(aqNode.eulRot.Y) > 120)
             {
                 aqNode.scale = new Vector3(-1, -1, -1);
-            } else
+            }
+            else
             {
                 aqNode.scale = new Vector3(1, 1, 1);
             }
@@ -444,7 +441,7 @@ namespace AquaModelLibrary
             aqn.nodeList.Add(aqNode);
 
             //Not sure what it means when these happen, but sometimes they do. Maybe hardcoded logic?
-            if(node.attachOffset > fileSize || node.siblingOffset > fileSize || node.childOffset > fileSize)
+            if (node.attachOffset > fileSize || node.siblingOffset > fileSize || node.childOffset > fileSize)
             {
                 return;
             }
@@ -481,7 +478,7 @@ namespace AquaModelLibrary
             uint triCountA;
             uint triCountB;
 
-            if(be)
+            if (be)
             {
                 var meshGC = ReadNjMeshGC(streamReader, be);
 
@@ -490,7 +487,8 @@ namespace AquaModelLibrary
                 triOffsetB = meshGC.triangleStripListBOffset;
                 triCountA = meshGC.triangleStripListACount;
                 triCountB = meshGC.triangleStripListBCount;
-            } else
+            }
+            else
             {
                 var mesh = ReadNjMesh(streamReader, be);
                 vertOffset = mesh.vertexInfoListOffset;
@@ -499,16 +497,16 @@ namespace AquaModelLibrary
                 triCountA = mesh.triangleStripListACount;
                 triCountB = mesh.triangleStripListBCount;
             }
-            
+
             streamReader.Seek(vertOffset, SeekOrigin.Begin);
             readVertexList(mat);
 
-            if(triCountA > 0)
+            if (triCountA > 0)
             {
                 streamReader.Seek(triOffsetA, SeekOrigin.Begin);
                 readStripList(triCountA, false);
             }
-            
+
             if (triCountB > 0)
             {
                 streamReader.Seek(triOffsetB, SeekOrigin.Begin);
@@ -550,7 +548,7 @@ namespace AquaModelLibrary
                 size -= 0x4;
             }
 
-            if(size != 0)
+            if (size != 0)
             {
                 Console.WriteLine($"Vert size is not 0 at vtxe {(streamReader.Position() - 0x10).ToString("X")}");
             }
@@ -561,14 +559,14 @@ namespace AquaModelLibrary
                 var newPos = Vector3.Transform(pos, mat);
                 vtxl.vertPositions.Add(newPos);
 
-                if(readNormal)
+                if (readNormal)
                 {
                     var nrm = streamReader.ReadBEV3(be);
                     var newNrm = Vector3.TransformNormal(nrm, mat);
 
                     vtxl.vertNormals.Add(newNrm);
                 }
-                if(readColor)
+                if (readColor)
                 {
                     byte[] color = new byte[4];
                     color[0] = streamReader.Read<byte>();
@@ -578,15 +576,15 @@ namespace AquaModelLibrary
 
                     vtxl.vertColors.Add(color);
                 }
-                if(readUv)
+                if (readUv)
                 {
                     vtxl.uv1List.Add(streamReader.ReadBEV2(be));
                 }
 
                 //skip unexpected sections
-                if(size > 0)
+                if (size > 0)
                 {
-                   streamReader.Seek(size, SeekOrigin.Current);
+                    streamReader.Seek(size, SeekOrigin.Current);
                 }
             }
 
@@ -596,13 +594,13 @@ namespace AquaModelLibrary
         public void readStripList(uint count, bool useAlpha = false)
         {
             List<stripInfo> info = new List<stripInfo>();
-            for(int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 info.Add(ReadStripInfo(streamReader, be));
             }
             int materialId = 0;
 
-            foreach(var strip in info)
+            foreach (var strip in info)
             {
                 //Read material
                 if (strip.materialPropertyListOffset > 0)
@@ -615,7 +613,7 @@ namespace AquaModelLibrary
                 streamReader.Seek(strip.indexListOffset, SeekOrigin.Begin);
                 var triStrip = new stripData();
                 triStrip.psoTris = true;
-                for(int i = 0; i < strip.indexCount; i++)
+                for (int i = 0; i < strip.indexCount; i++)
                 {
                     var id = streamReader.ReadBE<ushort>(be);
                     triStrip.triStrips.Add(id);
@@ -623,7 +621,7 @@ namespace AquaModelLibrary
 
                 //Set triangles
                 var triSet = triStrip.GetTriangles(true);
-                for(int i = 0; i < triSet.Count; i++)
+                for (int i = 0; i < triSet.Count; i++)
                 {
                     currentMesh.matIdList.Add(materialId);
                 }
@@ -635,10 +633,11 @@ namespace AquaModelLibrary
         public int readMaterial(uint propertyCount, bool useAlpha)
         {
             GenericMaterial genMat = new GenericMaterial();
-            if(useAlpha == true)
+            if (useAlpha == true)
             {
                 genMat.blendType = "blendalpha";
-            } else
+            }
+            else
             {
                 genMat.blendType = "opaque";
             }
@@ -655,7 +654,7 @@ namespace AquaModelLibrary
             for (int i = 0; i < propertyCount; i++)
             {
                 uint type = streamReader.ReadBE<uint>(be);
-                switch(type)
+                switch (type)
                 {
                     case 2:
                         var dstAlpha = streamReader.Read<uint>();
@@ -700,9 +699,9 @@ namespace AquaModelLibrary
                 }
             }
             //Compare against existing materials and only add if different
-            for(int i = 0; i < aqObj.tempMats.Count; i++)
+            for (int i = 0; i < aqObj.tempMats.Count; i++)
             {
-                if(aqObj.tempMats[i] == genMat)
+                if (aqObj.tempMats[i] == genMat)
                 {
                     return i;
                 }
@@ -711,7 +710,7 @@ namespace AquaModelLibrary
 
             if (genMat.texNames.Count == 0)
             {
-                Console.WriteLine("No texture name on mat " + (aqObj.tempMats.Count - 1) + " at: " + streamReader.Position() );
+                Console.WriteLine("No texture name on mat " + (aqObj.tempMats.Count - 1) + " at: " + streamReader.Position());
             }
 
             return (aqObj.tempMats.Count - 1);

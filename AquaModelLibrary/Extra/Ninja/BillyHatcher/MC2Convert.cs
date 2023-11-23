@@ -1,13 +1,75 @@
-﻿using System;
+﻿using Assimp;
+using Reloaded.Memory.Streams;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
+using static SoulsFormats.BHD5;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
     public class MC2Convert
     {
-        public static Assimp.Scene AssimpMC2Export(string filePath, MC2 mc2)
+
+        public static NGSAquaObject ConvertMC2(byte[] file, out AquaNode aqn)
+        {
+            using (Stream stream = (Stream)new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                return MC2ToAqua(new MC2(streamReader), out aqn);
+            }
+        }
+
+        public static NGSAquaObject MC2ToAqua(MC2 mc2, out AquaNode aqn)
+        {
+            NGSAquaObject aqp = new NGSAquaObject();
+            aqn = AquaNode.GenerateBasicAQN();
+
+            aqn.ndtr.boneCount = aqn.nodeList.Count;
+            aqp.objc.bonePaletteOffset = 1;
+
+            //Material
+            var mat = new AquaObject.GenericMaterial();
+            mat.matName = $"Material_{0}";
+            mat.texNames = new List<string>() { "tex0.dds" };
+            aqp.tempMats.Add(mat);
+
+            AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+            genMesh.triList = new List<Vector3>();
+            genMesh.matIdList.Add(0);
+            genMesh.vertCount = mc2.vertPositions.Count;
+            int f = 0;
+            int v = 0;
+            for (int i = 0; i < mc2.faceData.Count; i++)
+            {
+                var mc2Face = mc2.faceData[i];
+                Vector3 face = new Vector3(mc2Face.vert0, mc2Face.vert1, mc2Face.vert2);
+                AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
+                faceVtxl.rawFaceId.Add(f);
+                faceVtxl.rawFaceId.Add(f);
+                faceVtxl.rawFaceId.Add(f++);
+
+                faceVtxl.rawVertId.Add(mc2Face.vert0);
+                faceVtxl.rawVertId.Add(mc2Face.vert1);
+                faceVtxl.rawVertId.Add(mc2Face.vert2);
+
+                faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert0]);
+                faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert1]);
+                faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert2]);
+                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
+                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
+                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
+
+                genMesh.faceVerts.Add(faceVtxl);
+                genMesh.triList.Add(face);
+            }
+            aqp.tempTris.Add(genMesh);
+
+            return aqp;
+        }
+
+        public static Assimp.Scene AssimpMC2Export(string filePath, MC2 mc2, bool doBounding = false)
         {
             Assimp.Scene aiScene = new Assimp.Scene();
             
@@ -50,6 +112,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 foreach (var flag in Enum.GetValues(typeof(MC2.FlagSet1)))
                 {
                     if ((tri.flagSet1 & (MC2.FlagSet1)flag) > 0)
+                    {
+                        name += $"#{flag}";
+                    }
+                }
+                foreach (var flag in Enum.GetValues(typeof(MC2.FlagSet2)))
+                {
+                    if ((tri.flagSet2 & (MC2.FlagSet2)flag) > 0)
                     {
                         name += $"#{flag}";
                     }
@@ -134,6 +203,54 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 m++;
             }
 
+            //DEBUG
+            if(doBounding)
+            {
+                int b = 0;
+                foreach (var sector in mc2.sectors)
+                {
+                    var mesh = new Assimp.Mesh();
+                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.X, 0, sector.ZRange.X) * 100);
+                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.X, 0, sector.ZRange.Y) * 100);
+                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.Y, 0, sector.ZRange.X) * 100);
+                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.Y, 0, sector.ZRange.Y) * 100);
+
+                    mesh.Faces.Add(new Assimp.Face(new int[] { 0, 1, 2 }));
+                    mesh.Faces.Add(new Assimp.Face(new int[] { 2, 1, 3 }));
+
+                    mesh.MaterialIndex = 0;
+
+                    //Handle rigid meshes
+                    {
+                        var aiBone = new Assimp.Bone();
+                        var aqnBone = boneArray[0];
+
+                        // Name
+                        aiBone.Name = aiNode.Name;
+
+                        // VertexWeights
+                        for (int vw = 0; vw < mesh.Vertices.Count; vw++)
+                        {
+                            var aiVertexWeight = new Assimp.VertexWeight(vw, 1f);
+                            aiBone.VertexWeights.Add(aiVertexWeight);
+                        }
+
+                        aiBone.OffsetMatrix = Assimp.Matrix4x4.Identity;
+
+                        mesh.Bones.Add(aiBone);
+                    }
+                    aiScene.Meshes.Add(mesh);
+                    // Set up mesh node and add this mesh's index to it (This tells assimp to export it as a mesh for various formats)
+                    string meshNodeName = $"bounding_{b++}_depth_{sector.depth}";
+                    var meshNode = new Assimp.Node(meshNodeName, aiScene.RootNode);
+                    meshNode.Transform = Assimp.Matrix4x4.Identity;
+
+                    aiScene.RootNode.Children.Add(meshNode);
+
+                    meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
+                }
+            }
+
             return aiScene;
         }
 
@@ -198,6 +315,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var flagsSplit = scene.Materials[mesh.MaterialIndex].Name.Split('#');
                 MC2.FlagSet0 flags0 = new MC2.FlagSet0();
                 MC2.FlagSet1 flags1 = new MC2.FlagSet1();
+                MC2.FlagSet2 flags2 = new MC2.FlagSet2();
 
                 if (flagsSplit.Length > 1)
                 {
@@ -253,6 +371,30 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                             case "death":
                                 flags0 |= MC2.FlagSet0.Death;
                                 break;
+                            case "unk2_0x1":
+                                flags2 |= MC2.FlagSet2.Unk2_0x1;
+                                break;
+                            case "unk2_0x2":
+                                flags2 |= MC2.FlagSet2.Unk2_0x2;
+                                break;
+                            case "unk2_0x4":
+                                flags2 |= MC2.FlagSet2.Unk2_0x4;
+                                break;
+                            case "unk2_0x8":
+                                flags2 |= MC2.FlagSet2.Unk2_0x8;
+                                break;
+                            case "unk2_0x10":
+                                flags2 |= MC2.FlagSet2.Unk2_0x10;
+                                break;
+                            case "unk2_0x20":
+                                flags2 |= MC2.FlagSet2.Unk2_0x20;
+                                break;
+                            case "unk2_0x40":
+                                flags2 |= MC2.FlagSet2.Unk2_0x40;
+                                break;
+                            case "unk2_0x80":
+                                flags2 |= MC2.FlagSet2.Unk2_0x80;
+                                break;
                         }
                     }
                 }
@@ -263,6 +405,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     var tri = new MC2.MC2FaceData();
                     tri.flagSet0 = flags0;
                     tri.flagSet1 = flags1;
+                    tri.flagSet2 = flags2;
 
                     //Ensure we remap vert indices to their new, combined ids as needed
                     tri.vert0 = (ushort)(vertIndexRemapper.ContainsKey(face.Indices[0]) ? vertIndexRemapper[face.Indices[0]] : face.Indices[0]);
@@ -287,8 +430,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 faceIndices.Add((ushort)i);
             }
 
+            mc2.PopulateFaceBounds();
             mc2.rootSector = mc2.SubdivideSector(new Vector2(rootBoxMinExtents.X, rootBoxMaxExtents.X), new Vector2(rootBoxMinExtents.Z, rootBoxMaxExtents.Z), faceIndices, 0);
-            mc2.sectors.Insert(0, mc2.rootSector);
             mc2.header.maxDepth = (ushort)MC2.maxDepth;
             mc2.header.ushort3 = 0x14;
 
