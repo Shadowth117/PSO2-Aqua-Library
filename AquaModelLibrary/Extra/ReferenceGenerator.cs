@@ -6,7 +6,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows;
 using Zamboni;
 using static AquaExtras.FilenameConstants;
 using static AquaModelLibrary.Extra.MusicFilenameConstants;
@@ -24,8 +23,8 @@ namespace AquaModelLibrary.Extra
 {
     public unsafe class ReferenceGenerator
     {
-        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Face Model,Hair Model";
-        public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures";
+        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
+        public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
 
         //Takes in pso2_bin directory and outputDirectory. From there, it will read to memory various files in order to determine namings. 
@@ -5767,7 +5766,7 @@ namespace AquaModelLibrary.Extra
                     }
                 } else
                 {
-                    string classic = $"{classicStart}hr_{headId}.ice";
+                    string classic = $"{classicStart}hr_{headId:D5}.ice";
                     var classicHash = GetFileHash(classic);
 
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
@@ -5779,7 +5778,7 @@ namespace AquaModelLibrary.Extra
                     //Cast heads
                     if(headId >= 40000)
                     {
-                        classic = $"{classicStart}fc_{headId}.ice";
+                        classic = $"{classicStart}fc_{headId:D5}.ice";
                         classicHash = GetFileHash(classic);
 
                         if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
