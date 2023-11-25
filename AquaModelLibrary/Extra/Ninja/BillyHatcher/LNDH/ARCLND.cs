@@ -30,7 +30,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             offsets = new List<int>();
             List<byte> outBytes = new List<byte>();
 
-
             if (isAnimModel == false)
             {
                 //Main offset table offset
@@ -108,7 +107,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
             //Vert data
             outBytes.FillInt($"VertDataOffset", outBytes.Count + offset);
-            for (int i = 0; i < arcVertDataRefList.Count; i++)
+            for (int i = 0; i < arcVertDataSetList.Count; i++)
             {
                 outBytes.AddValue((int)0); //This is either i or just 0 every time. Probably the latter based on faces. Either way, retail has no example of how this should look.
                 offsets.Add(outBytes.Count + offset);
@@ -217,10 +216,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.AddValue(bounds.Scale.X);
                 outBytes.AddValue(bounds.Scale.Y);
                 outBytes.AddValue(bounds.Scale.Z);
-                outBytes.AddValue(bounds.minBounding.X);
-                outBytes.AddValue(bounds.minBounding.Y);
-                outBytes.AddValue(bounds.maxBounding.X);
-                outBytes.AddValue(bounds.maxBounding.Y);
+                outBytes.AddValue(bounds.center.X);
+                outBytes.AddValue(bounds.center.Y);
+                outBytes.AddValue(bounds.center.Z);
+                outBytes.AddValue(bounds.radius);
             }
 
             //Mesh data
@@ -650,8 +649,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// </summary>
         public Vector3 Scale;
 
-        public Vector2 minBounding;
-        public Vector2 maxBounding;
+        /// <summary>
+        /// Bounding sphere data
+        /// </summary>
+        public Vector3 center;
+        public float radius;
 
         public Vector3 GetRotation()
         {
@@ -666,14 +668,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         }
     }
 
-    public struct ARCLNDMeshDataRef
+    public class ARCLNDMeshDataRef
     {
         public int unkEnum;
         public int count;
         public int offset;
     }
 
-    public struct ARCLNDMeshData
+    public class ARCLNDMeshData
     {
         public int BoundingData;
         public int int_04;   //int_04 or int_0c is probably a vertex set. If so, it may be important to test since vertex sets cap out at either short.Max or ushort.Max
@@ -685,7 +687,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     /// <summary>
     /// When placed, these should align to 0x20
     /// </summary>
-    public struct ARCLNDAnimatedMeshRefSet
+    public class ARCLNDAnimatedMeshRefSet
     {
         public int modelOffset;
         public int motionOffset;

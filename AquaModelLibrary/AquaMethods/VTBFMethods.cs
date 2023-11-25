@@ -1957,7 +1957,7 @@ namespace AquaModelLibrary
 
             body.body2.int_24_0x9_0x9 = GetObject<int>(bodyRaw[0], 0x9);
             body.body2.costumeSoundId = GetObject<int>(bodyRaw[0], 0xA);
-            body.body2.reference_id = GetObject<int>(bodyRaw[0], 0xD);
+            body.body2.headId = GetObject<int>(bodyRaw[0], 0xD);
             body.body2.legLength = GetObject<float>(bodyRaw[0], 0x8);
             body.body2.float_4C_0xB = GetObject<float>(bodyRaw[0], 0xB);
 

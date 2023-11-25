@@ -247,7 +247,7 @@ namespace AquaModelLibrary
             public int int_2C;           //One byte of this is a set of bitflags for parts to hide if it's outer wear. They follow the order of basewear ids.
 
             public int costumeSoundId;   //0xA, 0x8
-            public int reference_id;  //0xD, 0x8 //Contains the id for a linked part, such as madoka's hair or bask repca's helmet
+            public int headId;  //0xD, 0x8 //Contains the id for a linked head piece, such as madoka's hair or bask repca's helmet. If they exist, this will be both the head part, 
             public int int_38;         //Usually -1
             public int int_3C;         //Usually -1
 

@@ -10,8 +10,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
     {
         public byte[] gvmBytes = null;
         public List<uint> pof0Offsets = new List<uint>();
+        /// <summary>
+        /// Model texture references. All model textures map to this and so use its order ids. The GVM textures are then referenced by the texture names here.
+        /// Essentially, order here doesn't need to match the GVM order. Howevever all models must go off the order in this list.
+        /// </summary>
         public List<string> texnames = new List<string>();
-        public List<string> fileNames = new List<string>(); //? not 100% wtf these are
+        /// <summary>
+        /// The names of 'files' within the lnd. These will always be the main model followed by non animated supplemental models and finally the land definition and the mpl, if it exists.
+        /// </summary>
+        public List<string> fileNames = new List<string>();
 
         public bool isArcLND = false;
 
@@ -451,8 +458,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 bounding.BAMSY = sr.ReadBE<int>();
                 bounding.BAMSZ = sr.ReadBE<int>();
                 bounding.Scale = sr.ReadBEV3();
-                bounding.minBounding = sr.ReadBEV2();
-                bounding.maxBounding = sr.ReadBEV2();
+                bounding.center = sr.ReadBEV3();
+                bounding.radius = sr.ReadBE<float>();
                 arcModel.arcBoundingList.Add(bounding);
             }
 

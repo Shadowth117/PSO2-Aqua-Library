@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Windows.Documents;
@@ -20,6 +21,66 @@ namespace AquaModelLibrary.Extra
     {
         public const float basicEpsilon = 0.00001f;
         public const float kEpsilonNormalSqrt = 1e-15F;
+
+        /// <summary>
+        /// SA Tools implementation
+        /// We are using this implementation of Ritter's Bounding Sphere,
+        /// because whatever was going on with SharpDX's BoundingSphere class was catastrophically under-shooting
+        /// the bounds.
+        /// </summary>
+        /// <param name="aPoints"></param>
+        /// <returns></returns>
+        private static void CalculateBoundingSphere(IEnumerable<Vector3> aPoints, out Vector3 center, out float radius)
+        {
+            Vector3 one = new Vector3(1, 1, 1);
+
+            Vector3 xmin, xmax, ymin, ymax, zmin, zmax;
+            xmin = ymin = zmin = one * float.PositiveInfinity;
+            xmax = ymax = zmax = one * float.NegativeInfinity;
+            foreach (Vector3 p in aPoints)
+            {
+                if (p.X < xmin.X) xmin = p;
+                if (p.X > xmax.X) xmax = p;
+                if (p.Y < ymin.Y) ymin = p;
+                if (p.Y > ymax.Y) ymax = p;
+                if (p.Z < zmin.Z) zmin = p;
+                if (p.Z > zmax.Z) zmax = p;
+            }
+            float xSpan = (xmax - xmin).LengthSquared();
+            float ySpan = (ymax - ymin).LengthSquared();
+            float zSpan = (zmax - zmin).LengthSquared();
+            Vector3 dia1 = xmin;
+            Vector3 dia2 = xmax;
+            var maxSpan = xSpan;
+            if (ySpan > maxSpan)
+            {
+                maxSpan = ySpan;
+                dia1 = ymin; dia2 = ymax;
+            }
+            if (zSpan > maxSpan)
+            {
+                dia1 = zmin; dia2 = zmax;
+            }
+            center = (dia1 + dia2) * 0.5f;
+            float sqRad = (dia2 - center).LengthSquared();
+            radius = (float)Math.Sqrt(sqRad);
+
+            foreach (var p in aPoints)
+            {
+                float d = (p - center).LengthSquared();
+                if (d > sqRad)
+                {
+                    var r = (float)Math.Sqrt(d);
+                    radius = r;
+                    sqRad = radius * radius;
+                    var offset = r - radius;
+                    center = (radius * center + offset * p) / r;
+                }
+            }
+            
+            //SA Tools had this due to the assumption they underestimated. This is still mainly for Sega stuff so it should fit.
+            radius *= 1.125f;
+        }
 
         public static Vector3 GetFaceNormal(Vector3 vert0, Vector3 vert1, Vector3 vert2)
         {

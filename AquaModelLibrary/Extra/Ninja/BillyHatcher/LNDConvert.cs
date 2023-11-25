@@ -1,11 +1,8 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Numerics;
-using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
-using static AquaModelLibrary.Utility.AquaUtilData;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -80,7 +77,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var mat = MathExtras.Compose(boundData.Position, rot, boundData.Scale);
                 Matrix4x4.Invert(mat, out var invMat);
 
-                mdlData.name = $"Animated_{i}_{modelRef.MPLAnimId}";
+                mdlData.name = $"animModel_{i}_{modelRef.MPLAnimId}";
                 addWeight = modelRef.mplMotion != null;
                 mdlData.aqp = AddModelData(lnd, modelRef.model);
                 mdlData.placementAqp = AddModelData(lnd, modelRef.model);
@@ -573,21 +570,36 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
         }
 
-        public LND ConvertToLND(List<ModelData> modelData)
+        public LND ConvertToLND(List<ModelData> modelData, byte[] gvmBytes)
         {
             LND lnd = new LND();
             lnd.isArcLND = true;
             List<ModelData> animModels = new List<ModelData>();
 
-            foreach(var mdl in modelData)
+            //Get texture lists
+            foreach (var mdl in modelData)
             {
-                AquaToLND(lnd, mdl, mdl.aqm == null);
+            }
+
+            //Get model data
+            foreach (var mdl in modelData)
+            {
+                if(mdl.aqm == null)
+                {
+                    lnd.arcLndModels.Add(new LND.ARCLNDStaticMeshData() { name = mdl.name, model = AquaToLND(lnd, mdl, false) });
+                } else
+                {
+                    var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true) };
+                    //animModel.motion = GetAnimatedNightColors(mdl.nightAqp);
+                    //animModel.mplMotion = GetMPLMotion(mdl.aqm);
+                    lnd.arcLndAnimatedMeshDataList.Add(animModel);
+                }
             }
 
             return lnd;
         }
 
-        public void AquaToLND(LND lnd, ModelData mdl, bool isAnimatedModel)
+        public ARCLNDModel AquaToLND(LND lnd, ModelData mdl, bool isAnimatedModel)
         {
             ARCLNDModel lndMdl = new ARCLNDModel();
             foreach (var mesh in mdl.aqp.meshList)
@@ -598,6 +610,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 
 
             }
+
+            return lndMdl;
         }
     }
 

@@ -24,7 +24,7 @@ namespace AquaModelLibrary.Extra
 {
     public unsafe class ReferenceGenerator
     {
-        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures";
+        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Face Model,Hair Model";
         public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures";
         public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
 
@@ -2464,6 +2464,7 @@ namespace AquaModelLibrary.Extra
 
                 //Decide if bd or ow
                 int soundId = -1;
+                int headId = -1;
                 int linkedInnerId = id + 50000;
                 string typeString = "bd_";
                 bool classicOwCheck = id >= 20000 && id < 40000;
@@ -2475,6 +2476,7 @@ namespace AquaModelLibrary.Extra
                     {
                         soundId = aquaCMX.outerDict[id].body2.costumeSoundId;
                         linkedInnerId = aquaCMX.outerDict[id].body2.linkedInnerId;
+                        headId = aquaCMX.outerDict[id].body2.headId;
                     }
                 }
                 else
@@ -2483,6 +2485,7 @@ namespace AquaModelLibrary.Extra
                     {
                         soundId = aquaCMX.costumeDict[id].body2.costumeSoundId;
                         linkedInnerId = aquaCMX.costumeDict[id].body2.linkedInnerId;
+                        headId = aquaCMX.costumeDict[id].body2.headId;
                     }
                 }
 
@@ -2523,7 +2526,6 @@ namespace AquaModelLibrary.Extra
                         partData.linkedInnerExHash = rebLinkedInnerExHash;
                         partData.linkedInnerName = rebLinkedInnerEx;
                     }
-                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2543,8 +2545,9 @@ namespace AquaModelLibrary.Extra
                     GetCostumeOuterIconString(partData, pso2_binDir, finalIdIcon);
 
                     AddBodyExtraFiles(partData, classic, pso2_binDir, "_" + typeString, true);
-                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
+                AddOutfitSound(partData, pso2_binDir, soundId);
+                AddHeadPart(partData, pso2_binDir, headId);
 
                 string output = partData.GetLine();
                 partData = null;
@@ -2649,10 +2652,12 @@ namespace AquaModelLibrary.Extra
                 //Get SoundID
                 int soundId = -1;
                 int linkedInnerId = -1;
+                int headId = -1;
                 if (aquaCMX.baseWearDict.ContainsKey(id))
                 {
                     soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
                     linkedInnerId = aquaCMX.baseWearDict[id].body2.linkedInnerId;
+                    headId = aquaCMX.baseWearDict[id].body2.headId;
                 }
 
                 //Double check these ids and use an adjustedId if needed
@@ -2708,7 +2713,6 @@ namespace AquaModelLibrary.Extra
                         partData.linkedInnerExHash = rebLinkedInnerExHash;
                         partData.linkedInnerName = rebLinkedInnerEx;
                     }
-                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
                 else
                 {
@@ -2733,8 +2737,9 @@ namespace AquaModelLibrary.Extra
                     }
 
                     AddBasewearExtraFiles(partData, classic, pso2_binDir, true);
-                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
+                AddOutfitSound(partData, pso2_binDir, soundId);
+                AddHeadPart(partData, pso2_binDir, headId);
 
                 string output = partData.GetLine();
                 partData = null;
@@ -2929,9 +2934,11 @@ namespace AquaModelLibrary.Extra
                 //Double check these ids and use an adjustedId if needed
                 int adjustedId = id;
                 int linkedInnerId = -1;
+                int headId = -1;
                 if (aquaCMX.carmDict.ContainsKey(id))
                 {
                     linkedInnerId = aquaCMX.carmDict[id].body2.linkedInnerId;
+                    headId = aquaCMX.carmDict[id].body2.headId;
                 }
                 if (aquaCMX.castArmIdLink.ContainsKey(id))
                 {
@@ -3002,6 +3009,7 @@ namespace AquaModelLibrary.Extra
                     }
 
                 }
+                AddHeadPart(partData, pso2_binDir, headId);
                 string output = partData.GetLine();
                 partData = null;
 
@@ -3069,10 +3077,12 @@ namespace AquaModelLibrary.Extra
                 int adjustedId = id; 
                 int linkedInnerId = -1;
                 int soundId = -1;
+                int headId = -1;
                 if (aquaCMX.clegDict.ContainsKey(id))
                 {
                     linkedInnerId = aquaCMX.clegDict[id].body2.linkedInnerId;
                     soundId = aquaCMX.clegDict[id].body2.costumeSoundId;
+                    headId = aquaCMX.clegDict[id].body2.headId;
                 }
                 if (aquaCMX.clegIdLink.ContainsKey(id))
                 {
@@ -3120,7 +3130,6 @@ namespace AquaModelLibrary.Extra
                         partData.linkedInnerExHash = rebLinkedInnerExHash;
                         partData.linkedInnerName = rebLinkedInnerEx;
                     }
-                    AddOutfitSound(partData, pso2_binDir, soundId);
                 }
                 else
                 {
@@ -3142,9 +3151,10 @@ namespace AquaModelLibrary.Extra
                         partData.iconHash = iconStr;
                         partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
                     }
-                    AddOutfitSound(partData, pso2_binDir, soundId);
-
                 }
+                AddOutfitSound(partData, pso2_binDir, soundId);
+                AddHeadPart(partData, pso2_binDir, headId);
+
                 string output = partData.GetLine();
                 partData = null;
 
@@ -5714,6 +5724,74 @@ namespace AquaModelLibrary.Extra
             return;
         }
 
+        public static void AddHeadPart(PartData partData, string pso2_binDir, int headId)
+        {
+            if(headId != -1)
+            {
+                if(headId >= 100000)
+                {
+                    string reb = $"{rebootStart}hr_{headId}.ice";
+                    string rebEx = $"{rebootStart}hr_{headId}.ice";
+
+                    //Cast heads
+                    if (headId >= 300000 && headId < 500000)
+                    {
+                        reb = reb.Replace("hr", "fc");
+                        rebEx = reb.Replace("hr", "fc");
+                        string rebHash = GetFileHash(reb);
+                        string rebExHash = GetFileHash(reb);
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            partData.faceModelHash = rebHash;
+                            partData.faceModelName = reb;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                        {
+                            partData.faceExModelHash = rebExHash;
+                            partData.faceExModelName = rebEx;
+                        }
+                    } else
+                    {
+                        string rebHash = GetFileHash(reb);
+                        string rebExHash = GetFileHash(reb);
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            partData.hairModelHash = rebHash;
+                            partData.hairModelName = reb;
+                        }
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                        {
+                            partData.hairExModelHash = rebExHash;
+                            partData.hairExModelName = rebEx;
+                        }
+                    }
+                } else
+                {
+                    string classic = $"{classicStart}hr_{headId}.ice";
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.hairModelHash = classicHash;
+                        partData.hairModelName = classic;
+                    }
+
+                    //Cast heads
+                    if(headId >= 40000)
+                    {
+                        classic = $"{classicStart}fc_{headId}.ice";
+                        classicHash = GetFileHash(classic);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            partData.faceModelHash = classicHash;
+                            partData.faceModelName = classic;
+                        }
+                    }
+                }
+            }
+        }
+
         public static void GatherDictKeys<T>(List<int> masterIdList, Dictionary<int, T>.KeyCollection keys)
         {
             foreach (int key in keys)
@@ -6346,6 +6424,14 @@ namespace AquaModelLibrary.Extra
             public string linkedInnerHash = "";
             public string linkedInnerExName = "";
             public string linkedInnerExHash = "";
+            public string faceModelName = "";
+            public string faceModelHash = "";
+            public string faceExModelName = "";
+            public string faceExModelHash = "";
+            public string hairModelName = "";
+            public string hairModelHash = "";
+            public string hairExModelName = "";
+            public string hairExModelHash = "";
 
             public void CopyFiles(string pso2BinDir, string destinationPso2BinDir)
             {
@@ -6364,6 +6450,10 @@ namespace AquaModelLibrary.Extra
                 CopyFile(pso2BinDir, destinationPso2BinDir, matAnimExHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, linkedInnerHash);
                 CopyFile(pso2BinDir, destinationPso2BinDir, linkedInnerExHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, faceModelHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, faceExModelHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, hairModelHash);
+                CopyFile(pso2BinDir, destinationPso2BinDir, hairExModelHash);
             }
 
             private void CopyFile(string pso2BinDir, string destinationPso2BinDir, string name)
@@ -6404,27 +6494,27 @@ namespace AquaModelLibrary.Extra
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash},{hairModelHash},{hairExModelHash},{faceModelHash},{faceExModelHash}\n";
             }
 
             private string GetLineUnhashed()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName},{hairModelName},{hairExModelName},{faceModelName},{faceExModelName}\n";
             }
             private string GetLineHashAllIcons()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash},{hairModelHash},{hairExModelHash},{faceModelHash},{faceExModelHash}\n";
             }
 
             private string GetLineUnhashedAllIcons()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName},{hairModelName},{hairExModelName},{faceModelName},{faceExModelName}\n";
             }
 
             private string GetIconStringHashed()

@@ -108,14 +108,14 @@ namespace AquaModelLibrary
         {
             public ushort boneShort1; //0x3, type 0x9 //First 2 bytes of this.
             public ushort boneShort2; //Latter 2 bytes of above. Bones with 0x400 in this value are not exported in animations.
-            public int animatedFlag;  //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format Never really used normally?
+            public int animatedFlag;  //0xB, type 0x9 //Should generally be 1. I assume this is what it is based on PSU's bone format. Never really used normally?
             public int parentId;      //0x4, type 0x8
             public int unkNode;       //0xF, type 0x8 //Always observed -1
 
             public int firstChild;    //0x5, type 0x8
             public int nextSibling;   //0x6, type 0x8
             public int const0_2;      //0xC, type 0x9? Ordering and nebulous usage makes this unclear. Observed only 0.
-            public int bool_1C;       //Counts up in NGS era models for unknown reasons. Sometimes correlates with eulRot rotation order changes, but not always.
+            public int bool_1C;       //Counts up in NGS era models for unknown reasons. 
 
             public Vector3 pos;       //0x7, type 0x4A, 0x1
             public int const0_4;
