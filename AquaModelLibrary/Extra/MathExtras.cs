@@ -30,7 +30,7 @@ namespace AquaModelLibrary.Extra
         /// </summary>
         /// <param name="aPoints"></param>
         /// <returns></returns>
-        private static void CalculateBoundingSphere(IEnumerable<Vector3> aPoints, out Vector3 center, out float radius)
+        public static void CalculateBoundingSphere(IEnumerable<Vector3> aPoints, out Vector3 center, out float radius)
         {
             Vector3 one = new Vector3(1, 1, 1);
 

@@ -1,5 +1,7 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
+using AquaModelLibrary.NNStructs.Structures;
 using Reloaded.Memory.Streams;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -170,33 +172,57 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         private static NGSAquaObject AddModelData(LND lnd, ARCLNDModel mdl)
         {
             NGSAquaObject aqp = new NGSAquaObject();
-            CreateMaterials(lnd, aqp);
-            bool createdDefaultMat = false;
+            //Has mat name as key and the list id as the value
+            Dictionary<string, int> materialDict = new Dictionary<string, int>();
             for (int i = 0; i < mdl.arcMeshDataList.Count; i++)
             {
                 for (int m = 0; m < mdl.arcMeshDataList[i].Count; m++)
                 {
                     var meshInfo = mdl.arcMeshDataList[i][m];
                     var faceData = mdl.arcFaceDataList[meshInfo.faceDataId];
-                    var lndEntry = mdl.arcLandEntryList[meshInfo.lndEntry];
-                    var texId = lndEntry.entry.TextureId;
+                    var mat = mdl.arcMatEntryList[meshInfo.matEntryId];
+                    var texId = mat.entry.TextureId;
 
                     AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
                     Dictionary<string, int> vertTracker = new Dictionary<string, int>();
                     genMesh.name = $"Mesh_{i}_{m}";
+                    aqp.meshNames.Add(genMesh.name);
                     genMesh.triList = new List<Vector3>();
 
-                    //Create material for textureless meshes
-                    if (lndEntry.entry.TextureId == -1)
+                    //Create material
+                    var matName = "Mat";
+                    foreach (var flag in Enum.GetValues(typeof(ARCLNDRenderFlags)))
                     {
-                        if (!createdDefaultMat)
+                        if ((mat.entry.RenderFlags & (ARCLNDRenderFlags)flag) > 0)
                         {
-                            CreateDefaultMaterial(aqp);
-                            createdDefaultMat = true;
+                            matName += $"#{flag}";
                         }
-                        texId = aqp.tempMats.Count - 1;
                     }
-                    AddMeshData(mdl, faceData, genMesh, vertTracker, texId);
+                    foreach (var flag in Enum.GetValues(typeof(ARCLNDTextureFlags)))
+                    {
+                        if ((mat.entry.textureFlags & (ARCLNDTextureFlags)flag) > 0)
+                        {
+                            matName += $"#{flag}";
+                        }
+                    }
+                    matName += $"#S_{mat.entry.sourceAlpha}";
+                    matName += $"#D_{mat.entry.destinationAlpha}";
+                    int matId;
+                    if(materialDict.ContainsKey(matName))
+                    {
+                        matId = materialDict[matName];
+                    } else
+                    {
+                        var tex = texId < 0 ? lnd.texnames[0] : lnd.texnames[texId];
+                        var genMat = new AquaObject.GenericMaterial();
+                        genMat.matName = matName;
+                        genMat.texNames = new List<string>() { $"{tex}.png" };
+                        materialDict.Add(matName, aqp.tempMats.Count);
+                        matId = aqp.tempMats.Count;
+                        aqp.tempMats.Add(genMat);
+                    }
+
+                    AddMeshData(mdl, faceData, genMesh, vertTracker, matId);
 
                     aqp.tempTris.Add(genMesh);
                 }
@@ -586,10 +612,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 if(mdl.aqm == null)
                 {
-                    lnd.arcLndModels.Add(new LND.ARCLNDStaticMeshData() { name = mdl.name, model = AquaToLND(lnd, mdl, false) });
+                    lnd.arcLndModels.Add(new LND.ARCLNDStaticMeshData() { name = mdl.name, model = AquaToLND(lnd, mdl, false, lnd.texnames) });
                 } else
                 {
-                    var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true) };
+                    var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true, lnd.texnames) };
                     //animModel.motion = GetAnimatedNightColors(mdl.nightAqp);
                     //animModel.mplMotion = GetMPLMotion(mdl.aqm);
                     lnd.arcLndAnimatedMeshDataList.Add(animModel);
@@ -599,17 +625,164 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             return lnd;
         }
 
-        public ARCLNDModel AquaToLND(LND lnd, ModelData mdl, bool isAnimatedModel)
+        public ARCLNDModel AquaToLND(LND lnd, ModelData mdl, bool isAnimatedModel, List<string> texNames)
         {
             ARCLNDModel lndMdl = new ARCLNDModel();
+
+            //While the original format has an array of arrays of these, used to separate rendering mesh types. However this doesn't seem to matter for performance? 
+            List<ARCLNDMeshData> meshData = new List<ARCLNDMeshData>();
             foreach (var mesh in mdl.aqp.meshList)
             {
+                var mate = mdl.aqp.mateList[mesh.mateIndex];
+                var matName = mdl.aqp.matUnicodeNames[mesh.mateIndex];
+                var tset = mdl.aqp.tsetList[mesh.tsetIndex];
                 var strips = mdl.aqp.strips[mesh.psetIndex];
                 strips.toStrips(strips.triStrips.ToArray());
                 var vtxl = mdl.aqp.vtxlList[mesh.vsetIndex];
-                
 
+                ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
+                if (isAnimatedModel)
+                {
+                    var node = mdl.aqn.nodeList[mdl.aqn.nodeList.Count - 1];
+                    Matrix4x4.Decompose(node.GetInverseBindPoseMatrixInverted(), out var scale, out var rot, out var pos);
+                    bnd.Position = pos;
+                    bnd.Scale = scale;
+                    bnd.SetRotation(MathExtras.QuaternionToEuler(rot));
+                }
+                else
+                {
+                    MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
+                    bnd.center = center;
+                    bnd.radius = rad;
+                }
+                lndMdl.arcBoundingList.Add(bnd);
+
+                //Material
+                ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();
+                matEntry.TextureId = texNames.IndexOf(mdl.aqp.texfList[tset.tstaTexIDs[0]].texName.GetString());
+                ARCLNDMaterialEntryRef matRef = new ARCLNDMaterialEntryRef();
+                matRef.extraDataEnabled = 1;
+
+                var flagsSplit = matName.Split('#');
+
+                if (flagsSplit.Length > 1)
+                {
+                    for (int f = 1; f < flagsSplit.Length; f++)
+                    {
+                        switch (flagsSplit[f].ToLower())
+                        {
+                            case "s_zero":
+                                matEntry.sourceAlpha = AlphaInstruction.Zero;
+                                break;
+                            case "s_one":
+                                matEntry.sourceAlpha = AlphaInstruction.One;
+                                break;
+                            case "s_othercolor":
+                                matEntry.sourceAlpha = AlphaInstruction.OtherColor;
+                                break;
+                            case "s_inverseothercolor":
+                                matEntry.sourceAlpha = AlphaInstruction.InverseOtherColor;
+                                break;
+                            case "s_sourcealpha":
+                                matEntry.sourceAlpha = AlphaInstruction.SourceAlpha;
+                                break;
+                            case "s_inversesourcealpha":
+                                matEntry.sourceAlpha = AlphaInstruction.InverseSourceAlpha;
+                                break;
+                            case "s_destinationalpha":
+                                matEntry.sourceAlpha = AlphaInstruction.DestinationAlpha;
+                                break;
+                            case "s_inversedestinationalpha":
+                                matEntry.sourceAlpha = AlphaInstruction.InverseDestinationAlpha;
+                                break;
+                            case "d_zero":
+                                matEntry.destinationAlpha = AlphaInstruction.Zero;
+                                break;
+                            case "d_one":
+                                matEntry.destinationAlpha = AlphaInstruction.One;
+                                break;
+                            case "d_othercolor":
+                                matEntry.destinationAlpha = AlphaInstruction.OtherColor;
+                                break;
+                            case "d_inverseothercolor":
+                                matEntry.destinationAlpha = AlphaInstruction.InverseOtherColor;
+                                break;
+                            case "d_sourcealpha":
+                                matEntry.destinationAlpha = AlphaInstruction.SourceAlpha;
+                                break;
+                            case "d_inversesourcealpha":
+                                matEntry.destinationAlpha = AlphaInstruction.InverseSourceAlpha;
+                                break;
+                            case "d_destinationalpha":
+                                matEntry.destinationAlpha = AlphaInstruction.DestinationAlpha;
+                                break;
+                            case "d_inversedestinationalpha":
+                                matEntry.destinationAlpha = AlphaInstruction.InverseDestinationAlpha;
+                                break;
+                            case "enablelighting":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.EnableLighting;
+                                break;
+                            case "rfunknown0x2":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.RFUnknown0x2;
+                                break;
+                            case "twosided":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.TwoSided;
+                                break;
+                            case "rfunknown0x8":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.RFUnknown0x8;
+                                break;
+                            case "renderorderthing":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.renderOrderThing;
+                                break;
+                            case "renderorderthing2":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.renderOrderThing2;
+                                break;
+                            case "rfunknown0x40":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.RFUnknown0x40;
+                                break;
+                            case "rfunknown0x80":
+                                matEntry.RenderFlags |= ARCLNDRenderFlags.RFUnknown0x80;
+                                break;
+                            case "tfunknownx0x1":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.TFUnknownX0x1;
+                                break;
+                            case "tilex":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.TileX;
+                                break;
+                            case "mirroredtilex":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.MirroredTileX;
+                                break;
+                            case "tfunknownx0x8":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.TFUnknownY0x8;
+                                break;
+                            case "tiley":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.TileY;
+                                break;
+                            case "mirroredtiley":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.MirroredTileY;
+                                break;
+                            case "tfunknown0x40":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.TFUnknown0x40;
+                                break;
+                            case "tfunknown0x80":
+                                matEntry.textureFlags |= ARCLNDTextureFlags.TFUnknown0x80;
+                                break;
+                        }
+                    }
+                }
+
+                matRef.entry = matEntry;
+                lndMdl.arcMatEntryList.Add(matRef);
+
+                //Mesh
+                ARCLNDMeshData arcMesh = new ARCLNDMeshData();
+                arcMesh.matEntryId = lndMdl.arcMatEntryList.Count - 1;
+                arcMesh.BoundingDataId = lndMdl.arcBoundingList.Count - 1;
+                arcMesh.faceDataId = lndMdl.arcFaceDataList.Count - 1;
+                meshData.Add(arcMesh);
             }
+            lndMdl.arcMeshDataList.Add(meshData);
+            lndMdl.arcMeshDataRefList.Add(new ARCLNDMeshDataRef() { count = meshData .Count, unkEnum = 1});
 
             return lndMdl;
         }

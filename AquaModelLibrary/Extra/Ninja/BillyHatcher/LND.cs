@@ -200,6 +200,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var fileName = fileNames[mdl];
 
                 //In retail, lnds have Block (Always main level data), models named 'Sphere' that sometimes have trailing numbers, land, and mpl here.
+                //2nd model is usually the day skybox, 3rd model is the night skybox
                 switch (fileName)
                 {
                     case "land":
@@ -366,35 +367,35 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(0x20 + arcModel.arcMainOffsetTable.landEntryOffset, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < arcModel.arcMainOffsetTable.landEntryCount; i++)
             {
-                ARCLNDLandEntryRef lndRef = new ARCLNDLandEntryRef();
-                lndRef.unkInt = sr.ReadBE<int>();
+                ARCLNDMaterialEntryRef lndRef = new ARCLNDMaterialEntryRef();
+                lndRef.extraDataEnabled = sr.ReadBE<int>();
                 lndRef.offset = sr.ReadBE<int>();
-                arcModel.arcLandEntryList.Add(lndRef);
+                arcModel.arcMatEntryList.Add(lndRef);
             }
 
-            foreach (var lndRef in arcModel.arcLandEntryList)
+            foreach (var matRef in arcModel.arcMatEntryList)
             {
-                if(lndRef.offset != 0)
+                if(matRef.offset != 0)
                 {
-                    sr.Seek(0x20 + lndRef.offset, System.IO.SeekOrigin.Begin);
-                    ARCLNDLandEntry lndEntry = new ARCLNDLandEntry();
-                    lndEntry.unkInt0 = sr.ReadBE<int>();
-                    lndEntry.unkInt1 = sr.ReadBE<int>();
-                    lndEntry.unkInt2 = sr.ReadBE<int>();
-                    lndEntry.unkInt3 = sr.ReadBE<int>();
+                    sr.Seek(0x20 + matRef.offset, System.IO.SeekOrigin.Begin);
+                    ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();
+                    matEntry.RenderFlags = (ARCLNDRenderFlags)sr.ReadBE<int>();
+                    matEntry.diffuseColor = sr.ReadBE<int>();
+                    matEntry.specularColor = sr.ReadBE<int>();
+                    matEntry.unkBool = sr.ReadBE<int>();
 
-                    lndEntry.unkInt4 = sr.ReadBE<int>();
-                    lndEntry.unkInt5 = sr.ReadBE<int>();
-                    lndEntry.unkInt6 = sr.ReadBE<int>();
-                    lndEntry.unkInt7 = sr.ReadBE<int>();
+                    matEntry.sourceAlpha = (AlphaInstruction)sr.ReadBE<int>();
+                    matEntry.destinationAlpha = (AlphaInstruction)sr.ReadBE<int>();
+                    matEntry.unkInt6 = sr.ReadBE<int>();
+                    matEntry.unkFlags1 = sr.ReadBE<int>();
 
-                    if(lndRef.unkInt > 0)
+                    if(matRef.extraDataEnabled > 0)
                     {
-                        lndEntry.ushort0 = sr.ReadBE<ushort>();
-                        lndEntry.ushort1 = sr.ReadBE<ushort>();
-                        lndEntry.TextureId = sr.ReadBE<int>();
+                        matEntry.textureFlags = (ARCLNDTextureFlags)sr.ReadBE<ushort>();
+                        matEntry.ushort0 = sr.ReadBE<ushort>();
+                        matEntry.TextureId = sr.ReadBE<int>();
                     }
-                    lndRef.entry = lndEntry;
+                    matRef.entry = matEntry;
                 }
             }
 
@@ -480,9 +481,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 for (int i = 0; i < datMeshaRef.count; i++)
                 {
                     ARCLNDMeshData meshData = new ARCLNDMeshData();
-                    meshData.BoundingData = sr.ReadBE<int>();
+                    meshData.BoundingDataId = sr.ReadBE<int>();
                     meshData.int_04 = sr.ReadBE<int>();
-                    meshData.lndEntry = sr.ReadBE<int>();
+                    meshData.matEntryId = sr.ReadBE<int>();
                     meshData.int_0C = sr.ReadBE<int>();
                     meshData.faceDataId = sr.ReadBE<int>();
                     meshDataList.Add(meshData);

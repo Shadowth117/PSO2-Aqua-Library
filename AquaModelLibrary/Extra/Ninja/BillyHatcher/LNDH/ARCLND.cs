@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
 using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
@@ -13,12 +14,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public bool isAnimModel = false;
         public ARCLNDMainDataHeader arcMainDataHeader;
         public ARCLNDMainOffsetTable arcMainOffsetTable;
-        public List<ARCLNDLandEntryRef> arcLandEntryList = new List<ARCLNDLandEntryRef>();
+        public List<ARCLNDMaterialEntryRef> arcMatEntryList = new List<ARCLNDMaterialEntryRef>();
         public List<ARCLNDVertDataRef> arcVertDataRefList = new List<ARCLNDVertDataRef>();
         public List<ARCLNDVertDataSet> arcVertDataSetList = new List<ARCLNDVertDataSet>();
         public List<ARCLNDFaceDataRef> arcFaceDataRefList = new List<ARCLNDFaceDataRef>();
         public List<ARCLNDFaceDataHead> arcFaceDataList = new List<ARCLNDFaceDataHead>();
         public List<ARCLNDNodeBounding> arcBoundingList = new List<ARCLNDNodeBounding>();
+        /// <summary>
+        /// Mesh array 0 seems to be opaque, 1 and 2 appear to be alpha testing. No notable performance changes from putting these all into the same list, nor visual differences. Likely a debug or vestigial thing.
+        /// </summary>
         public List<ARCLNDMeshDataRef> arcMeshDataRefList = new List<ARCLNDMeshDataRef>();
         public List<List<ARCLNDMeshData>> arcMeshDataList = new List<List<ARCLNDMeshData>>();
         public ARCLNDAltVertColorRef arcAltVertRef;
@@ -54,7 +58,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             }
 
             //Main Offset Table
-            outBytes.AddValue(arcLandEntryList.Count);
+            outBytes.AddValue(arcMatEntryList.Count);
             offsets.Add(outBytes.Count + offset);
             outBytes.ReserveInt("LandEntryOffset");
             outBytes.AddValue(arcVertDataSetList.Count);
@@ -75,32 +79,32 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
             //Land Entries
             outBytes.FillInt($"LandEntryOffset", outBytes.Count + offset);
-            for (int i = 0; i < arcLandEntryList.Count; i++)
+            for (int i = 0; i < arcMatEntryList.Count; i++)
             {
-                var landRef = arcLandEntryList[i];
+                var landRef = arcMatEntryList[i];
 
                 //This value seems like it's sometimes 0 for the first land entry in the model, but is 1 otherwise. For some models, it is always 1.
-                outBytes.AddValue(landRef.unkInt);
+                outBytes.AddValue(landRef.extraDataEnabled);
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"LandEntry{i}");
             }
-            for (int i = 0; i < arcLandEntryList.Count; i++)
+            for (int i = 0; i < arcMatEntryList.Count; i++)
             {
                 outBytes.FillInt($"LandEntry{i}", outBytes.Count + offset);
-                var landRef = arcLandEntryList[i];
-                outBytes.AddValue((int)landRef.entry.unkInt0);
-                outBytes.AddValue((int)landRef.entry.unkInt1);
-                outBytes.AddValue((int)landRef.entry.unkInt2);
-                outBytes.AddValue((int)landRef.entry.unkInt3);
-                outBytes.AddValue((int)landRef.entry.unkInt4);
-                outBytes.AddValue((int)landRef.entry.unkInt5);
+                var landRef = arcMatEntryList[i];
+                outBytes.AddValue((int)landRef.entry.RenderFlags);
+                outBytes.AddValue((int)landRef.entry.diffuseColor);
+                outBytes.AddValue((int)landRef.entry.specularColor);
+                outBytes.AddValue((int)landRef.entry.unkBool);
+                outBytes.AddValue((int)landRef.entry.sourceAlpha);
+                outBytes.AddValue((int)landRef.entry.destinationAlpha);
                 outBytes.AddValue((int)landRef.entry.unkInt6);
-                outBytes.AddValue((int)landRef.entry.unkInt7);
+                outBytes.AddValue((int)landRef.entry.unkFlags1);
 
-                if (landRef.unkInt > 0)
+                if (landRef.extraDataEnabled > 0)
                 {
+                    outBytes.AddValue((ushort)landRef.entry.textureFlags);
                     outBytes.AddValue((ushort)landRef.entry.ushort0);
-                    outBytes.AddValue((ushort)landRef.entry.ushort1);
                     outBytes.AddValue((int)landRef.entry.TextureId);
                 }
             }
@@ -237,9 +241,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.FillInt($"MeshGroup{i}Offset", outBytes.Count + offset);
                 foreach (var meshData in arcMeshDataList[i])
                 {
-                    outBytes.AddValue(meshData.BoundingData);
+                    outBytes.AddValue(meshData.BoundingDataId);
                     outBytes.AddValue(meshData.int_04);
-                    outBytes.AddValue(meshData.lndEntry);
+                    outBytes.AddValue(meshData.matEntryId);
                     outBytes.AddValue(meshData.int_0C);
                     outBytes.AddValue(meshData.faceDataId);
                 }
@@ -351,42 +355,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int offset;
     }
 
-    /// <summary>
-    /// The data here may allow for substituing all vertex data, but faces and collision would remain the same so this wouldn't be super useful. Maybe UV data would.
-    /// In retail, only the first vert color set is used
-    /// Should 
-    /// </summary>
-    public class ARCLNDAltVertColorInfo
-    {
-        public ushort vertPositionUnk;
-        public ushort vertPositionCount;
-        public int vertPositionOffset;
-        public ushort vertNormalUnk;
-        public ushort vertNormalCount;
-        public int vertNormalOffset;
-
-        public ushort vertColorUnk;
-        public ushort vertColorCount;
-        public int vertColorOffset;
-        public ushort vertColor2Unk;
-        public ushort vertColor2Count;
-        public int vertColor2Offset;
-
-        public ushort uv1Unk;
-        public ushort uv1Count;
-        public int uv1Offset;
-        public ushort uv2Unk;
-        public ushort uv2Count;
-        public int uv2Offset;
-
-        public List<Vector3> PositionData = new List<Vector3>();
-        public List<Vector3> NormalData = new List<Vector3>();
-        public List<byte[]> vertColors = new List<byte[]>();
-        public List<byte[]> vertColor2s = new List<byte[]>();
-        public List<short[]> UV1Data = new List<short[]>();
-        public List<short[]> UV2Data = new List<short[]>();
-    }
-
     //Similar to NN's main branching point struct
     public struct ARCLNDMainOffsetTable
     {
@@ -405,29 +373,81 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         public int meshDataOffset;
     }
 
-    public class ARCLNDLandEntryRef
+    public class ARCLNDMaterialEntryRef
     {
-        public int unkInt;
+        public int extraDataEnabled;
         public int offset;
 
-        public ARCLNDLandEntry entry = null;
+        public ARCLNDMaterialEntry entry = null;
     }
 
-    public class ARCLNDLandEntry
+    /// <summary>
+    /// It's not super clear what a lot of the unknown stuff does which thankfully means that defaulting them to what we know are valid valeus for the game will probably be enough.
+    /// </summary>
+    public class ARCLNDMaterialEntry
     {
-        public int unkInt0;
-        public int unkInt1;
-        public int unkInt2;
-        public int unkInt3;
+        /// <summary>
+        /// 3 is one of the more common values for this.
+        /// </summary>
+        public ARCLNDRenderFlags RenderFlags = (ARCLNDRenderFlags)0x3;
+        /// <summary>
+        /// Always pure white, 0xFFFFFFFF in retail. Color is overriden by vertex colors.
+        /// </summary>
+        public int diffuseColor = -1;
+        /// <summary>
+        /// Unclear if this is used
+        /// </summary>
+        public int specularColor = 0;
+        public int unkBool = 0;
 
-        public int unkInt4;
-        public int unkInt5;
-        public int unkInt6;
-        public int unkInt7;
+        public AlphaInstruction sourceAlpha = AlphaInstruction.SourceAlpha;
+        public AlphaInstruction destinationAlpha = AlphaInstruction.DestinationAlpha;
+        /// <summary>
+        /// Always 3 in retail
+        /// </summary>
+        public int unkInt6 = 0x3;
+        public int unkFlags1 = 0x0;
 
-        public ushort ushort0;
-        public ushort ushort1;
-        public int TextureId;
+        /// <summary>
+        /// Ushort flags? Really not clear...
+        /// </summary>
+        public ARCLNDTextureFlags textureFlags = ARCLNDTextureFlags.TileX | ARCLNDTextureFlags.TileY;
+        /// <summary>
+        /// Either 0 or 0x100
+        /// </summary>
+        public ushort ushort0 = 0x100;
+        public int TextureId = -1;
+    }
+
+    [Flags]
+    public enum ARCLNDRenderFlags
+    {
+        None = 0x0,
+        EnableLighting = 0x1,
+        RFUnknown0x2 = 0x2,
+        TwoSided = 0x4,
+        RFUnknown0x8 = 0x8,
+        /// <summary>
+        /// This breaks things a bunch. Not sure how it works, but seems like it messes with render order or something.
+        /// </summary>
+        renderOrderThing = 0x10,
+        renderOrderThing2 = 0x20,
+        RFUnknown0x40 = 0x40,
+        RFUnknown0x80 = 0x80,
+    }
+
+    [Flags]
+    public enum ARCLNDTextureFlags : ushort
+    {
+        None = 0x0,
+        TFUnknownX0x1 = 0x1,
+        TileX = 0x2,
+        MirroredTileX = 0x4,
+        TFUnknownY0x8,
+        TileY = 0x10,
+        MirroredTileY = 0x20,
+        TFUnknown0x40 = 0x40,
+        TFUnknown0x80 = 0x80,
     }
 
     public struct ARCLNDVertDataRef
@@ -611,7 +631,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
     public class ARCLNDNodeBounding
     {
-        public float unkFlt_00;
+        /// <summary>
+        /// Some kind of epsilon or maybe a struct magic? Really unsure. Always the same.
+        /// </summary>
+        public float unkFlt_00 = 8.82818E-44f;
         /// <summary>
         /// Always 0
         /// </summary>
@@ -619,15 +642,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// <summary>
         /// Always 65535
         /// </summary>
-        public ushort usht_06;
+        public ushort usht_06 = ushort.MaxValue;
         /// <summary>
         /// Always 65535
         /// </summary>
-        public ushort usht_08;
+        public ushort usht_08 = ushort.MaxValue;
         /// <summary>
         /// 1 based index for bounding data. Final bounding data entry will ALWAYS have 0xFFFF as the index, even if it's the only one.
         /// </summary>
-        public ushort index;
+        public ushort index = ushort.MaxValue;
         /// <summary>
         /// This isn't always used, for unknown reasons
         /// </summary>
@@ -677,9 +700,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
     public class ARCLNDMeshData
     {
-        public int BoundingData;
-        public int int_04;   //int_04 or int_0c is probably a vertex set. If so, it may be important to test since vertex sets cap out at either short.Max or ushort.Max
-        public int lndEntry;
+        public int BoundingDataId;
+        public int int_04;   
+        public int matEntryId;
         public int int_0C;
         public int faceDataId;
     }
