@@ -614,6 +614,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         UV2 = 0x20,
     }
 
+    /// <summary>
+    /// Unlike many models of this era, data0 and data1 are not opaque and translucent seemingly. At least not in the final game. Both can have fully working transparent data.
+    /// At this time, the difference between this model data is unknown.
+    /// </summary>
     public class ARCLNDFaceDataHead
     {
         public ArcLndVertType flags;

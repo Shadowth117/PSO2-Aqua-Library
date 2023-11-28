@@ -631,8 +631,18 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             //While the original format has an array of arrays of these, used to separate rendering mesh types. However this doesn't seem to matter for performance? 
             List<ARCLNDMeshData> meshData = new List<ARCLNDMeshData>();
+            var vertSet = new ARCLNDVertDataSet();
+
+            lndMdl.arcVertDataSetList.Add(vertSet);
             foreach (var mesh in mdl.aqp.meshList)
             {
+                //For reassigning vertex ids in faces after they've been combined.
+                //Billy stores separate indices per vertex data type so we may as well optimize them where possible.
+                Dictionary<int, int> vertIndexRemapper = new Dictionary<int, int>();
+                Dictionary<int, int> normalIndexRemapper = new Dictionary<int, int>();
+                Dictionary<int, int> colorIndexRemapper = new Dictionary<int, int>();
+                Dictionary<int, int> uvIndexRemapper = new Dictionary<int, int>();
+
                 var mate = mdl.aqp.mateList[mesh.mateIndex];
                 var matName = mdl.aqp.matUnicodeNames[mesh.mateIndex];
                 var tset = mdl.aqp.tsetList[mesh.tsetIndex];
@@ -640,6 +650,118 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 strips.toStrips(strips.triStrips.ToArray());
                 var vtxl = mdl.aqp.vtxlList[mesh.vsetIndex];
 
+                //Vertices
+                List<Vector3> posList = new List<Vector3>();
+                for (int v = 0; v < vtxl.vertPositions.Count; v++)
+                {
+                    var vertData = vtxl.vertPositions[v] / 100;
+                    var normalData = vtxl.vertNormals[v];
+                    var colorData = new byte[] { vtxl.vertColors[v][2], vtxl.vertColors[v][1], vtxl.vertColors[v][0], vtxl.vertColors[v][3] };
+                    var uvData = new short[] { (short)(vtxl.uv1List[v].X * 255), (short)(vtxl.uv1List[v].Y * 255) };
+
+                    //Combine and remap repeated vertices as needed.
+                    //Assimp splits things by material by necessity and so we need to recombine them.
+                    bool foundDuplicateVert = false;
+                    bool foundDuplicateNormal = false;
+                    bool foundDuplicateColor = false;
+                    bool foundDuplicateUv = false;
+                    for (int vt = 0; vt < vertSet.PositionData.Count; vt++)
+                    {
+                        if (foundDuplicateVert == false && vertData == vertSet.PositionData[vt])
+                        {
+                            foundDuplicateVert = true;
+                            vertIndexRemapper.Add(v, vt);
+                        }
+                        if (foundDuplicateNormal == false && normalData == vertSet.NormalData[vt])
+                        {
+                            foundDuplicateNormal = true;
+                            normalIndexRemapper.Add(v, vt);
+                        }
+                        if (foundDuplicateColor == false && colorData[0] == vertSet.VertColorData[vt][0] && colorData[1] == vertSet.VertColorData[vt][1] && colorData[2] == vertSet.VertColorData[vt][2] && colorData[3] == vertSet.VertColorData[vt][3])
+                        {
+                            foundDuplicateColor = true;
+                            colorIndexRemapper.Add(v, vt);
+                        }
+                        if (foundDuplicateUv == false && uvData[0] == vertSet.UV1Data[vt][0] && uvData[1] == vertSet.UV1Data[vt][1])
+                        {
+                            foundDuplicateUv = true;
+                            uvIndexRemapper.Add(v, vt);
+                        }
+                    }
+                    if (!foundDuplicateVert)
+                    {
+                        vertIndexRemapper.Add(v, vertSet.PositionData.Count);
+                        vertSet.PositionData.Add(vertData);
+                        posList.Add(vertData);
+                    }
+                    if (!foundDuplicateNormal)
+                    {
+                        normalIndexRemapper.Add(v, vertSet.NormalData.Count);
+                        vertSet.NormalData.Add(normalData);
+                    }
+                    if (!foundDuplicateColor)
+                    {
+                        colorIndexRemapper.Add(v, vertSet.VertColorData.Count);
+                        vertSet.VertColorData.Add(colorData);
+                    }
+                    if (!foundDuplicateUv)
+                    {
+                        uvIndexRemapper.Add(v, vertSet.UV1Data.Count);
+                        vertSet.UV1Data.Add(uvData);
+                    }
+                }
+
+                //Strips
+                //Seemingly, list1 doesn't matter and we can write everything to list0.
+                var faceData = new ARCLNDFaceDataHead();
+                faceData.flags = ArcLndVertType.Position | ArcLndVertType.Normal | ArcLndVertType.VertColor | ArcLndVertType.UV1;
+                bool startNewStrip = true;
+                for (int f = 0; f < strips.triStrips.Count - 2; f++)
+                {
+                    if (strips.triStrips[f] == strips.triStrips[f + 1] || strips.triStrips[f] == strips.triStrips[f + 2]
+                        || strips.triStrips[f + 1] == strips.triStrips[f + 2])
+                    {
+                        //Check the strip has data before adding the count.
+                        if (faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Count > 0 || startNewStrip == true)
+                        {
+                            continue;
+                        }
+
+                        //Since the strip has ended, add the count and set the flag
+                        startNewStrip = true;
+                        faceData.triIndicesListStarts0[faceData.triIndicesListStarts0.Count - 1][0].Add(faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Count);
+                        continue;
+                    }
+
+                    //Start the strip, add the count on exit
+                    if(startNewStrip)
+                    {
+                        startNewStrip = false;
+                        faceData.triIndicesListStarts0.Add(new List<List<int>>() { new List<int>() { 0x98 } });
+                        faceData.triIndicesList0.Add(new List<List<int>>());
+                    }
+
+                    if ((f & 1) > 0)
+                    {
+                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
+                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
+                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
+                    }
+                    else
+                    {
+                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
+                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
+                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
+                    }
+                }
+                //Set the final count of the facedata
+                if(faceData.triIndicesListStarts0[faceData.triIndicesListStarts0.Count - 1][0].Count == 1)
+                {
+                    faceData.triIndicesListStarts0[faceData.triIndicesListStarts0.Count - 1][0].Add(faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Count);
+                }
+                lndMdl.arcFaceDataList.Add(faceData);
+                
+                //Bounding
                 ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
                 if (isAnimatedModel)
                 {
@@ -648,10 +770,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     bnd.Position = pos;
                     bnd.Scale = scale;
                     bnd.SetRotation(MathExtras.QuaternionToEuler(rot));
+                    MathExtras.CalculateBoundingSphere(posList, out var center, out var rad);
+                    bnd.center = center;
+                    bnd.radius = rad;
                 }
                 else
                 {
-                    MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
+                    MathExtras.CalculateBoundingSphere(posList, out var center, out var rad);
                     bnd.center = center;
                     bnd.radius = rad;
                 }

@@ -303,6 +303,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         {
                             foundDuplicateVert = true;
                             vertIndexRemapper.Add(v, vt);
+                            break;
                         }
                     }
                     if (!foundDuplicateVert)
