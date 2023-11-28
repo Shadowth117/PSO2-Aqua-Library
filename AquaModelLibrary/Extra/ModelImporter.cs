@@ -52,6 +52,24 @@ namespace AquaModelLibrary
             return aiScene;
         }
 
+        public static AquaMotion AssimpAQMConvertNoNameSingle(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
+        {
+            var animSet = AssimpAQMConvertNoNames(initialFilePath, forceNoPlayerExport, useScaleFrames, scaleFactor);
+            return animSet != null && animSet.Count > 0 ? animSet[0] : null;
+        }
+
+        public static List<AquaMotion> AssimpAQMConvertNoNames(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
+        {
+            var list = AssimpAQMConvert(initialFilePath, forceNoPlayerExport, useScaleFrames, scaleFactor);
+            List<AquaMotion> animList = new List<AquaMotion>();
+            foreach(var pair in list)
+            {
+                animList.Add(pair.aqm);
+            }
+
+            return animList;
+        }
+
         public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames, float scaleFactor)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
