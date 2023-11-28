@@ -722,7 +722,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 if(mdl.aqm == null)
                 {
-                    lnd.arcLndModels.Add(new LND.ARCLNDStaticMeshData() { name = mdl.name, model = AquaToLND(lnd, mdl, false, lnd.texnames) });
+                    var model = AquaToLND(lnd, mdl, false, lnd.texnames);
+                    if (mdl.name.ToLower() != "block")
+                    {
+                        model.arcAltVertColorList.Clear();
+                    }
+                    lnd.arcLndModels.Add(new LND.ARCLNDStaticMeshData() { name = mdl.name, model = model });
                     lnd.fileNames.Add(mdl.name);
                 } else
                 {
