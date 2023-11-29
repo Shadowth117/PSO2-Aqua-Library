@@ -443,7 +443,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         TFUnknownX0x1 = 0x1,
         TileX = 0x2,
         MirroredTileX = 0x4,
-        TFUnknownY0x8,
+        TFUnknownY0x8 = 0x8,
         TileY = 0x10,
         MirroredTileY = 0x20,
         TFUnknown0x40 = 0x40,

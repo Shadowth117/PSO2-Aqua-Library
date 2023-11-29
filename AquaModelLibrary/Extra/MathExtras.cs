@@ -78,8 +78,6 @@ namespace AquaModelLibrary.Extra
                 }
             }
             
-            //SA Tools had this due to the assumption they underestimated. This is still mainly for Sega stuff so it should fit.
-            radius *= 1.125f;
         }
 
         public static Vector3 GetFaceNormal(Vector3 vert0, Vector3 vert1, Vector3 vert2)
