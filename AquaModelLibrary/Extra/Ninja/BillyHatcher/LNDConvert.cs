@@ -225,6 +225,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     {
                         var genMat = new AquaObject.GenericMaterial();
                         genMat.matName = matName;
+                        genMat.diffuseRGBA = new Vector4(1, 1, 1, 1);
                         genMat.texNames = new List<string>() { $"{tex}.png" };
                         materialDict.Add(matName + $"#{tex}", aqp.tempMats.Count);
                         matId = aqp.tempMats.Count;
@@ -235,6 +236,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                     aqp.tempTris.Add(genMesh);
                 }
+            }
+
+            for(int i = 0; i < aqp.tempMats.Count; i++)
+            {
+                var mat = aqp.tempMats[i];
+                mat.matName += $"{i:D3}";
             }
 
             return aqp;
