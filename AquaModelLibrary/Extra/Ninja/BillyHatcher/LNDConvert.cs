@@ -915,20 +915,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     {
                         AssignFaceVertIds(faceData.flags, vertIndexRemapper, normalIndexRemapper, colorIndexRemapper, uvIndexRemapper, strips, currentList, f + 2);
                     }
-
-                    /*
-                    if ((f & 1) > 0)
-                    {
-                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
-                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
-                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
-                    }
-                    else
-                    {
-                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
-                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
-                        faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
-                    }*/
                 }
                 //Set the final count of the facedata
                 if (currentStartList[currentStartList.Count - 1][0].Count == 1)

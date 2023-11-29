@@ -75,6 +75,7 @@ namespace AquaModelLibrary
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            /*
             double scale = 100;
             float orgScale = 100;
             if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
@@ -85,7 +86,8 @@ namespace AquaModelLibrary
             {
                 orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
             }
-            float baseScale = (float)(scale / 100.0);
+            float baseScale = (float)(scale / 100.0);*/
+            float baseScale = 1;
 
             bool playerExport = aiScene.RootNode.Children[0].Name.Contains("pl_");
             if (playerExport && forceNoPlayerExport)
@@ -646,6 +648,8 @@ namespace AquaModelLibrary
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            float baseScale = 1;
+            /*
             double scale = 100;
             float orgScale = 100;
             if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
@@ -656,7 +660,7 @@ namespace AquaModelLibrary
             {
                 orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
             }
-            float baseScale = (float)(scale / 100.0);
+            float baseScale = (float)(scale / 100.0);*/
 
             PRMModel prm = new PRMModel();
 
@@ -763,17 +767,15 @@ namespace AquaModelLibrary
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
+            float baseScale = 1;
+            /*
             double scale = 100;
-            float orgScale = 100;
+            double unitScaleFactor = 1;
             if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
             {
-                scale = (double)aiScene.Metadata["UnitScaleFactor"].Data;
+                unitScaleFactor = (double)aiScene.Metadata["UnitScaleFactor"].Data;
             }
-            if (aiScene.Metadata.ContainsKey("OriginalUnitScaleFactor"))
-            {
-                orgScale = (float)aiScene.Metadata["OriginalUnitScaleFactor"].Data;
-            }
-            float baseScale = (float)(scale / 100.0);
+            float baseScale = (float)(scale / unitScaleFactor);*/
             AquaObject aqp;
             aqn = new AquaNode();
             if (isNGS)
