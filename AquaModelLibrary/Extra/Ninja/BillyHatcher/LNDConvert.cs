@@ -959,7 +959,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     bnd.center = center;
                     bnd.radius = rad;
                 }
-                if (boundCount == 0)
+                if (boundCount != mdl.aqp.meshList.Count - 1)
                 {
                     bnd.index = boundCount;
                 }
@@ -968,11 +968,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 //Material
                 ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();
-                matEntry.TextureId = texNames.IndexOf(mdl.aqp.texfList[tset.tstaTexIDs[0]].texName.GetString());
+                var texName = Path.GetFileNameWithoutExtension(mdl.aqp.texfList[tset.tstaTexIDs[0]].texName.GetString());
+                matEntry.TextureId = texNames.IndexOf(texName);
                 ARCLNDMaterialEntryRef matRef = new ARCLNDMaterialEntryRef();
                 matRef.extraDataEnabled = 1;
 
                 var flagsSplit = matName.Split('#');
+                matEntry.RenderFlags = 0;
+                matEntry.textureFlags = 0;
                 if (flagsSplit.Length > 1)
                 {
                     for (int f = 1; f < flagsSplit.Length; f++)
@@ -1077,6 +1080,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 break;
                         }
                     }
+                }
+                if(matEntry.RenderFlags == 0)
+                {
+                    matEntry.RenderFlags = (ARCLNDRenderFlags)0x3;
+                }
+                if(matEntry.textureFlags == 0)
+                {
+                    matEntry.textureFlags = ARCLNDTextureFlags.TileX | ARCLNDTextureFlags.TileY;
                 }
 
                 matRef.entry = matEntry;
