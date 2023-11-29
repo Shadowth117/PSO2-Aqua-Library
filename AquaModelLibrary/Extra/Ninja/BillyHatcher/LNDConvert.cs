@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Windows.Documents;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -82,7 +80,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var boundData = modelRef.model.arcBoundingList[0];
 
                 ModelData mdlData = new ModelData();
-                
+
                 //Set up bounding data transform
                 var bndRot = boundData.GetRotation();
                 var rot = MathExtras.EulerToQuaternionRadian(bndRot);
@@ -135,7 +133,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     mdlData.aqp.objc.bonePaletteOffset = 1;
                     mdlData.aqp.bonePalette = new List<uint> { 0 };
-                    if(mdlData.nightAqp != null)
+                    if (mdlData.nightAqp != null)
                     {
                         mdlData.nightAqp.objc.bonePaletteOffset = 1;
                         mdlData.nightAqp.bonePalette = new List<uint> { 0 };
@@ -218,10 +216,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     matName += $"#S_{mat.entry.sourceAlpha}";
                     matName += $"#D_{mat.entry.destinationAlpha}";
                     int matId;
-                    if(materialDict.ContainsKey(matName))
+                    if (materialDict.ContainsKey(matName))
                     {
                         matId = materialDict[matName];
-                    } else
+                    }
+                    else
                     {
                         var tex = texId < 0 ? lnd.texnames[0] : lnd.texnames[texId];
                         var genMat = new AquaObject.GenericMaterial();
@@ -363,11 +362,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 vtxl.uv1List.Add(new Vector2((float)(billyUv[0] / 255.0), (float)(billyUv[1] / 255.0)));
                 vertId += ((int)ArcLndVertType.UV2).ToString() + faceIds[i++];
             }
-            
-            if(addWeight)
+
+            if (addWeight)
             {
-                vtxl.vertWeightIndices.Add(new int[] { 0,0,0,0 } );
-                vtxl.vertWeights.Add(new Vector4(1,0,0,0));
+                vtxl.vertWeightIndices.Add(new int[] { 0, 0, 0, 0 });
+                vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
             }
 
             if (vertTracker.ContainsKey(vertId))
@@ -611,7 +610,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             Dictionary<string, ModelData> tempModelData = new Dictionary<string, ModelData>();
             List<ModelData> modelData = new List<ModelData>();
-            var files = Directory.GetFiles(folderPath); 
+            var files = Directory.GetFiles(folderPath);
             byte[] gvmBytes = null;
 
             foreach (var file in files)
@@ -655,39 +654,40 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         mdl = new ModelData();
                         mdl.name = splitName[0];
                         tempModelData.Add(splitName[0].ToLower(), mdl);
-                    } else
+                    }
+                    else
                     {
                         mdl = tempModelData[splitName[0].ToLower()];
                     }
 
                     //Assign data
-                    if(aqp != null)
+                    if (aqp != null)
                     {
                         mdl.aqp = (NGSAquaObject)aqp;
                     }
-                    if(placementAqn != null)
+                    if (placementAqn != null)
                     {
                         mdl.placementAqn = placementAqn;
                     }
-                    if(aqm != null)
+                    if (aqm != null)
                     {
                         mdl.aqm = aqm;
                     }
-                    if(nightAqp != null)
+                    if (nightAqp != null)
                     {
                         mdl.nightAqp = nightAqp;
                     }
                 }
             }
 
-            if(!tempModelData.ContainsKey("block"))
+            if (!tempModelData.ContainsKey("block"))
             {
                 throw new Exception("Error, main terrain model, block, is missing!");
             }
             modelData.Add(tempModelData["block"]);
-            foreach(var pair in tempModelData)
+            foreach (var pair in tempModelData)
             {
-                if(pair.Key != "block" && pair.Value.aqp != null)
+                if (pair.Key != "block" && pair.Value.aqp != null)
                 {
                     modelData.Add(pair.Value);
                 }
@@ -704,23 +704,17 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             lnd.isArcLND = true;
             List<ModelData> animModels = new List<ModelData>();
 
-            //Get texture lists
-            lnd.texnames = new List<string>();
-            foreach (var mdl in modelData)
+            //Get texture lists;
+            using (Stream stream = new MemoryStream(gvmBytes))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
             {
-                foreach(var texf in mdl.aqp.texfList)
-                {
-                    if(!lnd.texnames.Contains(texf.texName.GetString()))
-                    {
-                        lnd.texnames.Add(texf.texName.GetString());
-                    }
-                }
+                lnd.texnames = GVMUtil.ReadGVMFileNames(streamReader);
             }
 
             //Get model data
             foreach (var mdl in modelData)
             {
-                if(mdl.aqm == null)
+                if (mdl.aqm == null)
                 {
                     var model = AquaToLND(lnd, mdl, false, lnd.texnames);
                     if (mdl.name.ToLower() != "block")
@@ -729,7 +723,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     }
                     lnd.arcLndModels.Add(new LND.ARCLNDStaticMeshData() { name = mdl.name, model = model });
                     lnd.fileNames.Add(mdl.name);
-                } else
+                }
+                else
                 {
                     /*
                     var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true, lnd.texnames) };
@@ -740,7 +735,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
             lnd.fileNames.Add("land");
-            if(lnd.arcMPL != null)
+            if (lnd.arcMPL != null)
             {
                 lnd.fileNames.Add("mpl");
             }
@@ -758,6 +753,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             var vertSet = new ARCLNDVertDataSet();
 
             lndMdl.arcVertDataSetList.Add(vertSet);
+            ushort boundCount = 0;
             foreach (var mesh in mdl.aqp.meshList)
             {
                 //For reassigning vertex ids in faces after they've been combined.
@@ -780,23 +776,25 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     var vertData = vtxl.vertPositions[v];
                     Vector3 normalData;
-                    if(vtxl.vertNormals.Count > v)
+                    if (vtxl.vertNormals.Count > v)
                     {
                         normalData = vtxl.vertNormals[v];
-                    } else
+                    }
+                    else
                     {
                         normalData = new Vector3(0, 1, 0);
                     }
                     byte[] colorData;
-                    if(vtxl.vertColors.Count > v)
+                    if (vtxl.vertColors.Count > v)
                     {
                         colorData = new byte[] { vtxl.vertColors[v][2], vtxl.vertColors[v][1], vtxl.vertColors[v][0], vtxl.vertColors[v][3] };
-                    } else
+                    }
+                    else
                     {
                         colorData = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
                     }
                     short[] uvData = new short[2];
-                    if(vtxl.uv1List.Count > v)
+                    if (vtxl.uv1List.Count > v)
                     {
                         uvData = new short[] { (short)(vtxl.uv1List[v].X * 255), (short)(vtxl.uv1List[v].Y * 255) };
                     }
@@ -813,7 +811,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         {
                             foundDuplicateVert = true;
                             vertIndexRemapper.Add(v, vt);
-                            if(!optimizeVertColors)
+                            if (!optimizeVertColors)
                             {
                                 foundDuplicateColor = true;
                                 colorIndexRemapper.Add(v, vt);
@@ -859,17 +857,18 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
 
                 //Strips
-                //Seemingly, list1 doesn't matter and we can write everything to list0.
                 var faceData = new ARCLNDFaceDataHead();
                 faceData.flags = ArcLndVertType.Position | ArcLndVertType.Normal | ArcLndVertType.VertColor | ArcLndVertType.UV1;
                 bool startNewStrip = true;
+                var currentList = faceData.triIndicesList0;
+                var currentStartList = faceData.triIndicesListStarts0;
                 for (int f = 0; f < strips.triStrips.Count - 2; f++)
                 {
                     if (strips.triStrips[f] == strips.triStrips[f + 1] || strips.triStrips[f] == strips.triStrips[f + 2]
                         || strips.triStrips[f + 1] == strips.triStrips[f + 2])
                     {
                         //Check the strip has data before adding the count.
-                        if (startNewStrip == true || faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Count > 0)
+                        if (startNewStrip == true || currentList[currentList.Count - 1].Count == 0)
                         {
                             continue;
                         }
@@ -878,23 +877,42 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         startNewStrip = true;
                         if (!assignNormalsOnExport)
                         {
-                            foreach (var vertData in faceData.triIndicesList0[faceData.triIndicesList0.Count - 1])
+                            foreach (var vertData in currentList[currentList.Count - 1])
                             {
                                 vertData.RemoveAt(1);
                             }
                         }
-                        faceData.triIndicesListStarts0[faceData.triIndicesListStarts0.Count - 1][0].Add(faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Count);
+                        currentStartList[currentStartList.Count - 1][0].Add(currentList[currentList.Count - 1].Count);
                         continue;
                     }
 
                     //Start the strip, add the count on exit
-                    if(startNewStrip)
+                    if (startNewStrip)
                     {
+                        //Swap lists if needed to preserve face normals
+                        if ((f & 1) > 0)
+                        {
+                            currentList = faceData.triIndicesList0;
+                            currentStartList = faceData.triIndicesListStarts0;
+                        }
+                        else
+                        {
+                            currentList = faceData.triIndicesList1;
+                            currentStartList = faceData.triIndicesListStarts1;
+                        }
                         startNewStrip = false;
-                        faceData.triIndicesListStarts0.Add(new List<List<int>>() { new List<int>() { 0x90 } });
-                        faceData.triIndicesList0.Add(new List<List<int>>());
+                        currentStartList.Add(new List<List<int>>() { new List<int>() { 0x98 } });
+                        currentList.Add(new List<List<int>>());
+                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
+                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
+                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
                     }
-                    
+                    else
+                    {
+                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
+                    }
+
+                    /*
                     if ((f & 1) > 0)
                     {
                         faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
@@ -906,22 +924,22 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
                         faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
                         faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
-                    }
+                    }*/
                 }
                 //Set the final count of the facedata
-                if(faceData.triIndicesListStarts0[faceData.triIndicesListStarts0.Count - 1][0].Count == 1)
+                if (currentStartList[currentStartList.Count - 1][0].Count == 1)
                 {
                     if (!assignNormalsOnExport)
                     {
-                        foreach (var vertData in faceData.triIndicesList0[faceData.triIndicesList0.Count - 1])
+                        foreach (var vertData in currentList[currentList.Count - 1])
                         {
                             vertData.RemoveAt(1);
                         }
                     }
-                    faceData.triIndicesListStarts0[faceData.triIndicesListStarts0.Count - 1][0].Add(faceData.triIndicesList0[faceData.triIndicesList0.Count - 1].Count);
+                    currentStartList[currentStartList.Count - 1][0].Add(currentList[currentList.Count - 1].Count);
                 }
                 lndMdl.arcFaceDataList.Add(faceData);
-                
+
                 //Bounding
                 ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
                 if (isAnimatedModel)
@@ -941,6 +959,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     bnd.center = center;
                     bnd.radius = rad;
                 }
+                if (boundCount == 0)
+                {
+                    bnd.index = boundCount;
+                }
+                boundCount++;
                 lndMdl.arcBoundingList.Add(bnd);
 
                 //Material
@@ -1067,7 +1090,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 meshData.Add(arcMesh);
             }
             lndMdl.arcMeshDataList.Add(meshData);
-            lndMdl.arcMeshDataRefList.Add(new ARCLNDMeshDataRef() { count = meshData .Count, unkEnum = 1});
+            lndMdl.arcMeshDataRefList.Add(new ARCLNDMeshDataRef() { count = meshData.Count, unkEnum = 1 });
 
             //If we're optimizing vert colors, we need to dummy out the alt vert color set since we can no longer make a normal night vert color set 
             lndMdl.arcAltVertColorList = new List<ARCLNDVertDataSet>();
@@ -1075,7 +1098,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             if (optimizeVertColors || mdl.nightAqp == null)
             {
                 lndMdl.arcAltVertColorList[0].VertColor = lndMdl.arcVertDataSetList[0].VertColor;
-            } else
+            }
+            else
             {
                 //Recycle here, it's already been assigned and we don't really want to add more to the old one
                 vertSet = new ARCLNDVertDataSet();

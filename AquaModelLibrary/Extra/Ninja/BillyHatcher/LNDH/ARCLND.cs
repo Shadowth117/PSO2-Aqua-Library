@@ -39,13 +39,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 //Main offset table offset
                 offsets.Add(outBytes.Count + offset);
                 outBytes.AddValue(offset + 0x20);
-                if(arcAltVertColorList.Count > 0)
+                if (arcAltVertColorList.Count > 0)
                 {
                     offsets.Add(outBytes.Count + offset);
                 }
                 outBytes.ReserveInt("AltVertColorOffset");
                 outBytes.AddValue(arcLndAnimatedMeshDataList.Count);
-                if(arcLndAnimatedMeshDataList.Count > 0)
+                if (arcLndAnimatedMeshDataList.Count > 0)
                 {
                     offsets.Add(outBytes.Count + offset);
                 }
@@ -615,8 +615,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     }
 
     /// <summary>
-    /// Unlike many models of this era, data0 and data1 are not opaque and translucent seemingly. At least not in the final game. Both can have fully working transparent data.
-    /// At this time, the difference between this model data is unknown.
+    /// Unlike many models of this era, data0 and data1 are not opaque and translucent. Instead, they were used to separate flipped and unflipped faces due to how sega used tristripping here.
     /// </summary>
     public class ARCLNDFaceDataHead
     {
@@ -705,7 +704,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
     public class ARCLNDMeshData
     {
         public int BoundingDataId;
-        public int int_04;   
+        public int int_04;
         public int matEntryId;
         public int int_0C;
         public int faceDataId;

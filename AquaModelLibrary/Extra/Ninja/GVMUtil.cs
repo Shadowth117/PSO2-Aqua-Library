@@ -5,11 +5,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SoulsFormats.MQB;
 
 namespace AquaModelLibrary.Extra.Ninja
 {
     public class GVMUtil
     {
+        [Flags]
+        internal enum GvmFlags : ushort
+        {
+            /// <summary>
+            /// Specifies global indexes are provided.
+            /// </summary>
+            GlobalIndexes = (1 << 0),
+
+            /// <summary>
+            /// Specifies texture dimensions are provided within the entry table.
+            /// </summary>
+            Dimensions = (1 << 1),
+
+            /// <summary>
+            /// Specifies pixel and data formats are provided within the entry table.
+            /// </summary>
+            Formats = (1 << 2),
+
+            /// <summary>
+            /// Specifies filenames are present within the entry table.
+            /// </summary>
+            Filenames = (1 << 3),
+        }
+
         /// <summary>
         /// GVM unfortunately does not give a full filesize and so when it's embedded within other files, we need to seek through it to get everything.
         /// GVR is a bit of an involved format as well so it's best to extract and leave the rest to puyo tools, frankly.
@@ -43,6 +68,74 @@ namespace AquaModelLibrary.Extra.Ninja
             }
 
             return gvmBytes.ToArray();
+        }
+
+
+        public static List<string> ReadGVMFileNames(BufferedStreamReader sr)
+        {
+            BigEndianHelper._active = true;
+            var magic = sr.Read<int>();
+            var gvmFirstEntryOffset = sr.Read<int>();
+            GvmFlags properties = (GvmFlags)sr.ReadBE<ushort>();
+            var _hasFilenames = (properties & GvmFlags.Filenames) != 0;
+            var _hasFormats = (properties & GvmFlags.Formats) != 0;
+            var _hasDimensions = (properties & GvmFlags.Dimensions) != 0;
+            var _hasGlobalIndexes = (properties & GvmFlags.GlobalIndexes) != 0;
+
+            // Calculate the size of each entry in the entry table.
+            var _tableEntryLength = 2;
+            int _globalIndexOffset = -1;
+            if (_hasFilenames)
+            {
+                _tableEntryLength += 28;
+            }
+            if (_hasFormats)
+            {
+                _tableEntryLength += 2;
+            }
+            if (_hasDimensions)
+            {
+                _tableEntryLength += 2;
+            }
+            if (_hasGlobalIndexes)
+            {
+                _globalIndexOffset = _tableEntryLength;
+                _tableEntryLength += 4;
+            }
+
+            var entryCount = sr.ReadBE<ushort>();
+            List<string> gvmNames = new List<string>();
+            // Loop through all of the entries.
+            for (int i = 0; i < entryCount; i++)
+            {
+                var pos = sr.Position();
+                var id = sr.ReadBE<ushort>();
+                if(_hasFilenames)
+                {
+                    gvmNames.Add(AquaGeneralMethods.ReadCString(sr, 0x1C));
+                    sr.Seek(0x1C, System.IO.SeekOrigin.Current);
+                } else
+                {
+                    gvmNames.Add($"tex_{i}");
+                }
+                if(_hasFormats)
+                {
+                    var format0 = sr.Read<byte>();
+                    var format1 = sr.Read<byte>();
+                }
+                if(_hasDimensions)
+                {
+                    var dim0 = sr.Read<byte>();
+                    var dim1 = sr.Read<byte>();
+                }
+                if(_hasGlobalIndexes)
+                {
+                    var globalIndex = sr.ReadBE<int>();
+                }
+            }
+
+            BigEndianHelper._active = false;
+            return gvmNames;
         }
     }
 }

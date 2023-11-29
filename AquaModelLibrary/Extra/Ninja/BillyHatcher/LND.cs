@@ -74,7 +74,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt("GVMOffset");
 
-                if(extraModelCount > 0)
+                if (extraModelCount > 0)
                 {
                     outBytes.FillInt("ExtraModelOffsetsOffset", outBytes.Count);
                     for (int i = 0; i < extraModelCount; i++)
@@ -84,7 +84,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     }
                 }
 
-                if(texNames.Count > 0)
+                if (texNames.Count > 0)
                 {
                     outBytes.FillInt("TexListOffset", outBytes.Count);
                     offsets.Add(outBytes.Count + offset);
@@ -216,7 +216,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Assign MPL Motions
-            if(arcMPL != null)
+            if (arcMPL != null)
             {
                 for (int i = 0; i < arcLndAnimatedModelRefs.Count; i++)
                 {
@@ -312,10 +312,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcModel.arcMainOffsetTable.meshDataCount = sr.ReadBE<int>();
             arcModel.arcMainOffsetTable.meshDataOffset = sr.ReadBE<int>();
 
-            if(arcModel.arcMainDataHeader.animatedModelSetOffset != 0)
+            if (arcModel.arcMainDataHeader.animatedModelSetOffset != 0)
             {
                 sr.Seek(0x20 + arcModel.arcMainDataHeader.animatedModelSetOffset, System.IO.SeekOrigin.Begin);
-                for(int i = 0; i < arcModel.arcMainDataHeader.animatedModelSetCount; i++)
+                for (int i = 0; i < arcModel.arcMainDataHeader.animatedModelSetCount; i++)
                 {
                     ARCLNDAnimatedMeshRefSet set = new ARCLNDAnimatedMeshRefSet();
                     set.modelOffset = sr.ReadBE<int>();
@@ -323,7 +323,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     set.MPLAnimId = sr.ReadBE<int>();
                     arcLndAnimatedModelRefs.Add(set);
                 }
-                foreach(var set in arcLndAnimatedModelRefs)
+                foreach (var set in arcLndAnimatedModelRefs)
                 {
                     ARCLNDAnimatedMeshData meshData = new ARCLNDAnimatedMeshData();
                     meshData.MPLAnimId = set.MPLAnimId;
@@ -375,7 +375,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             foreach (var matRef in arcModel.arcMatEntryList)
             {
-                if(matRef.offset != 0)
+                if (matRef.offset != 0)
                 {
                     sr.Seek(0x20 + matRef.offset, System.IO.SeekOrigin.Begin);
                     ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();
@@ -389,7 +389,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     matEntry.unkInt6 = sr.ReadBE<int>();
                     matEntry.unkFlags1 = sr.ReadBE<int>();
 
-                    if(matRef.extraDataEnabled > 0)
+                    if (matRef.extraDataEnabled > 0)
                     {
                         matEntry.textureFlags = (ARCLNDTextureFlags)sr.ReadBE<ushort>();
                         matEntry.ushort0 = sr.ReadBE<ushort>();
@@ -1056,11 +1056,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 var modelSet = arcLndModels[i];
                 List<ARCLNDAnimatedMeshData> animData = new List<ARCLNDAnimatedMeshData>();
-                if(i == 0)
+                if (i == 0)
                 {
                     animData = arcLndAnimatedMeshDataList;
                     outBytes.FillInt("MainModelOffset", outBytes.Count);
-                } else
+                }
+                else
                 {
                     outBytes.FillInt($"ExtraModel{i - 1}Offset", outBytes.Count);
                 }
