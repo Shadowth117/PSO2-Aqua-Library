@@ -746,6 +746,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public static ARCLNDModel AquaToLND(LND lnd, ModelData mdl, bool isAnimatedModel, List<string> texNames)
         {
+            //Unfortunately normals disable vert colors, but they can be auto calculated by the game.
+            assignNormalsOnExport = false;
             ARCLNDModel lndMdl = new ARCLNDModel();
 
             //While the original format has an array of arrays of these, used to separate rendering mesh types. However this doesn't seem to matter for performance? 
@@ -771,7 +773,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var vtxl = mdl.aqp.vtxlList[mesh.vsetIndex];
 
                 //Vertices
-                List<Vector3> posList = new List<Vector3>();
                 for (int v = 0; v < vtxl.vertPositions.Count; v++)
                 {
                     var vertData = vtxl.vertPositions[v];
@@ -817,7 +818,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 colorIndexRemapper.Add(v, vt);
                             }
                         }
-                        if (foundDuplicateNormal == false && vertSet.NormalData.Count > vt && normalData == vertSet.NormalData[vt])
+                        if (assignNormalsOnExport && foundDuplicateNormal == false && vertSet.NormalData.Count > vt && normalData == vertSet.NormalData[vt])
                         {
                             foundDuplicateNormal = true;
                             normalIndexRemapper.Add(v, vt);
@@ -837,9 +838,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     {
                         vertIndexRemapper.Add(v, vertSet.PositionData.Count);
                         vertSet.PositionData.Add(vertData);
-                        posList.Add(vertData);
                     }
-                    if (!foundDuplicateNormal)
+                    if (assignNormalsOnExport && !foundDuplicateNormal)
                     {
                         normalIndexRemapper.Add(v, vertSet.NormalData.Count);
                         vertSet.NormalData.Add(normalData);
@@ -858,7 +858,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 //Strips
                 var faceData = new ARCLNDFaceDataHead();
-                faceData.flags = ArcLndVertType.Position | ArcLndVertType.Normal | ArcLndVertType.VertColor | ArcLndVertType.UV1;
+                faceData.flags = ArcLndVertType.Position | ArcLndVertType.VertColor | ArcLndVertType.UV1;
+                if(assignNormalsOnExport)
+                {
+                    faceData.flags |= ArcLndVertType.Normal;
+                }
                 bool startNewStrip = true;
                 var currentList = faceData.triIndicesList0;
                 var currentStartList = faceData.triIndicesListStarts0;
@@ -875,13 +879,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                         //Since the strip has ended, add the count and set the flag
                         startNewStrip = true;
-                        if (!assignNormalsOnExport)
-                        {
-                            foreach (var vertData in currentList[currentList.Count - 1])
-                            {
-                                vertData.RemoveAt(1);
-                            }
-                        }
                         currentStartList[currentStartList.Count - 1][0].Add(currentList[currentList.Count - 1].Count);
                         continue;
                     }
@@ -903,13 +900,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         startNewStrip = false;
                         currentStartList.Add(new List<List<int>>() { new List<int>() { 0x98 } });
                         currentList.Add(new List<List<int>>());
-                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f]], normalIndexRemapper[strips.triStrips[f]], colorIndexRemapper[strips.triStrips[f]], uvIndexRemapper[strips.triStrips[f]] });
-                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 1]], normalIndexRemapper[strips.triStrips[f + 1]], colorIndexRemapper[strips.triStrips[f + 1]], uvIndexRemapper[strips.triStrips[f + 1]] });
-                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
+                        AssignFaceVertIds(faceData.flags, vertIndexRemapper, normalIndexRemapper, colorIndexRemapper, uvIndexRemapper, strips, currentList, f);
+                        AssignFaceVertIds(faceData.flags, vertIndexRemapper, normalIndexRemapper, colorIndexRemapper, uvIndexRemapper, strips, currentList, f + 1);
+                        AssignFaceVertIds(faceData.flags, vertIndexRemapper, normalIndexRemapper, colorIndexRemapper, uvIndexRemapper, strips, currentList, f + 2);
                     }
                     else
                     {
-                        currentList[currentList.Count - 1].Add(new List<int>() { vertIndexRemapper[strips.triStrips[f + 2]], normalIndexRemapper[strips.triStrips[f + 2]], colorIndexRemapper[strips.triStrips[f + 2]], uvIndexRemapper[strips.triStrips[f + 2]] });
+                        AssignFaceVertIds(faceData.flags, vertIndexRemapper, normalIndexRemapper, colorIndexRemapper, uvIndexRemapper, strips, currentList, f + 2);
                     }
 
                     /*
@@ -929,13 +926,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 //Set the final count of the facedata
                 if (currentStartList[currentStartList.Count - 1][0].Count == 1)
                 {
-                    if (!assignNormalsOnExport)
-                    {
-                        foreach (var vertData in currentList[currentList.Count - 1])
-                        {
-                            vertData.RemoveAt(1);
-                        }
-                    }
                     currentStartList[currentStartList.Count - 1][0].Add(currentList[currentList.Count - 1].Count);
                 }
                 lndMdl.arcFaceDataList.Add(faceData);
@@ -949,13 +939,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     bnd.Position = pos;
                     bnd.Scale = scale;
                     bnd.SetRotation(MathExtras.QuaternionToEuler(rot));
-                    MathExtras.CalculateBoundingSphere(posList, out var center, out var rad);
+                    MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
                     bnd.center = center;
                     bnd.radius = rad;
                 }
                 else
                 {
-                    MathExtras.CalculateBoundingSphere(posList, out var center, out var rad);
+                    MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
                     bnd.center = center;
                     bnd.radius = rad;
                 }
@@ -1195,6 +1185,29 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             return lndMdl;
+        }
+
+        private static void AssignFaceVertIds(ArcLndVertType flags, Dictionary<int, int> vertIndexRemapper, Dictionary<int, int> normalIndexRemapper, Dictionary<int, int> colorIndexRemapper, Dictionary<int, int> uvIndexRemapper, AquaObject.stripData strips, List<List<List<int>>> currentList, int f)
+        {
+            var vert = new List<int>();
+            if ((flags & ArcLndVertType.Position) > 0)
+            {
+                vert.Add(vertIndexRemapper[strips.triStrips[f]]);
+            }
+            if ((flags & ArcLndVertType.Normal) > 0)
+            {
+                vert.Add(normalIndexRemapper[strips.triStrips[f]]);
+            }
+            if ((flags & ArcLndVertType.VertColor) > 0)
+            {
+                vert.Add(colorIndexRemapper[strips.triStrips[f]]);
+            }
+            if ((flags & ArcLndVertType.UV1) > 0)
+            {
+                vert.Add(uvIndexRemapper[strips.triStrips[f]]);
+            }
+
+            currentList[currentList.Count - 1].Add(vert);
         }
     }
 

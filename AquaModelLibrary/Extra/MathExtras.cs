@@ -77,7 +77,7 @@ namespace AquaModelLibrary.Extra
                     center = (radius * center + offset * p) / r;
                 }
             }
-            
+
         }
 
         public static Vector3 GetFaceNormal(Vector3 vert0, Vector3 vert1, Vector3 vert2)
