@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Windows.Forms;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -642,7 +643,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         switch (splitName[1].ToLower())
                         {
                             case "animation":
-                                aqm = ModelImporter.AssimpAQMConvertNoNameSingle(file, false, true, 1);
+                                //aqm = ModelImporter.AssimpAQMConvertNoNameSingle(file, false, true, 1);
                                 break;
                             case "night":
                                 nightAqp = (NGSAquaObject)aqp;
@@ -763,8 +764,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             lndMdl.arcVertDataSetList.Add(vertSet);
             ushort boundCount = 1;
-            foreach (var mesh in mdl.aqp.meshList)
+            List<int> badMeshIndices = new List<int>();
+            for(int msh = 0; msh < mdl.aqp.meshList.Count; msh++)
             {
+                var mesh = mdl.aqp.meshList[msh];
                 //For reassigning vertex ids in faces after they've been combined.
                 //Billy stores separate indices per vertex data type so we may as well optimize them where possible.
                 Dictionary<int, int> vertIndexRemapper = new Dictionary<int, int>();
@@ -776,6 +779,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var matName = mdl.aqp.matUnicodeNames[mesh.mateIndex];
                 var tset = mdl.aqp.tsetList[mesh.tsetIndex];
                 var strips = mdl.aqp.strips[mesh.psetIndex];
+                if(AquaObject.stripData.RemoveDegenerateFaces(strips.triStrips.ToArray()).Count == 0)
+                {
+                    badMeshIndices.Add(msh);
+                    continue;
+                }
                 strips.toStrips(strips.triStrips.ToArray());
                 var vtxl = mdl.aqp.vtxlList[mesh.vsetIndex];
 
@@ -1115,8 +1123,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 //Recycle here, it's already been assigned and we don't really want to add more to the old one
                 vertSet = new ARCLNDVertDataSet();
-                foreach (var mesh in mdl.nightAqp.meshList)
+                for (int msh = 0; msh < mdl.nightAqp.meshList.Count; msh++)
                 {
+                    if(badMeshIndices.Contains(msh))
+                    {
+                        continue;
+                    }
+                    var mesh = mdl.aqp.meshList[msh];
                     //For reassigning vertex ids in faces after they've been combined.
                     //Billy stores separate indices per vertex data type so we may as well optimize them where possible.
                     Dictionary<int, int> vertIndexRemapper = new Dictionary<int, int>();

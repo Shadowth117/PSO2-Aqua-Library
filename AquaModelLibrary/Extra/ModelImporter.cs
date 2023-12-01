@@ -23,6 +23,14 @@ namespace AquaModelLibrary
             {'?', '_'},
             {'*', '_'},
         };
+        public static Dictionary<char, char> illegalCharsPath = new Dictionary<char, char>() {
+            { '<', '[' },
+            { '>', ']'},
+            {'"', '\''},
+            {'|', '_'},
+            {'?', '_'},
+            {'*', '_'},
+        };
 
         public static string GetLastPipeString(string str)
         {
@@ -42,7 +50,20 @@ namespace AquaModelLibrary
 
             return str;
         }
-        
+
+        public static string NixIllegalCharactersPath(string str)
+        {
+            foreach (var ch in illegalCharsPath.Keys)
+            {
+                if (str.Contains(ch))
+                {
+                    str = str.Replace(ch, illegalCharsPath[ch]);
+                }
+            }
+
+            return str;
+        }
+
         public static Assimp.Scene GetAssimpScene(string path, Assimp.PostProcessSteps pps)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
@@ -823,7 +844,7 @@ namespace AquaModelLibrary
                 }
                 else if (aiMat.TextureDiffuse.FilePath != null)
                 {
-                    genMat.texNames.Add(Path.GetFileName(NixIllegalCharacters(aiMat.TextureDiffuse.FilePath)));
+                    genMat.texNames.Add(Path.GetFileName(NixIllegalCharactersPath(aiMat.TextureDiffuse.FilePath)));
                 }
                 else
                 {

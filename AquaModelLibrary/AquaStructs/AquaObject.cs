@@ -1717,12 +1717,30 @@ namespace AquaModelLibrary
 
             public void toStrips(ushort[] indices)
             {
-                triStrips.Clear();
+                indices = RemoveDegenerateFaces(indices).ToArray();
+
                 NvStripifier stripifier = new NvStripifier();
 
                 var nvStrips = stripifier.GenerateStripsReturner(indices, true);
                 triIdCount = nvStrips[0].Indices.Length; //Should in theory be twice the actual length as it's counting bytes.
+                triStrips.Clear();
                 triStrips = nvStrips[0].Indices.ToList();
+            }
+
+            public static List<ushort> RemoveDegenerateFaces(ushort[] indices)
+            {
+                List<ushort> newIndices = new List<ushort>();
+                for (int i = 0; i < indices.Length; i += 3)
+                {
+                    if (indices[i] != indices[i + 1] && indices[i] != indices[i + 2] && indices[i + 1] != indices[i + 2])
+                    {
+                        newIndices.Add(indices[i]);
+                        newIndices.Add(indices[i + 1]);
+                        newIndices.Add(indices[i + 2]);
+                    }
+                }
+
+                return newIndices;
             }
 
             public List<Vector3> GetTriangles(bool removeDegenFaces = true)

@@ -1,11 +1,8 @@
-﻿using Assimp;
-using Reloaded.Memory.Streams;
+﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
-using static SoulsFormats.BHD5;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -29,69 +26,6 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             aqn.ndtr.boneCount = aqn.nodeList.Count;
             aqp.objc.bonePaletteOffset = 1;
 
-            //Material
-            var mat = new AquaObject.GenericMaterial();
-            mat.matName = $"Material_{0}";
-            mat.texNames = new List<string>() { "tex0.dds" };
-            aqp.tempMats.Add(mat);
-
-            AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
-            genMesh.triList = new List<Vector3>();
-            genMesh.matIdList.Add(0);
-            genMesh.vertCount = mc2.vertPositions.Count;
-            int f = 0;
-            int v = 0;
-            for (int i = 0; i < mc2.faceData.Count; i++)
-            {
-                var mc2Face = mc2.faceData[i];
-                Vector3 face = new Vector3(mc2Face.vert0, mc2Face.vert1, mc2Face.vert2);
-                AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
-                faceVtxl.rawFaceId.Add(f);
-                faceVtxl.rawFaceId.Add(f);
-                faceVtxl.rawFaceId.Add(f++);
-
-                faceVtxl.rawVertId.Add(mc2Face.vert0);
-                faceVtxl.rawVertId.Add(mc2Face.vert1);
-                faceVtxl.rawVertId.Add(mc2Face.vert2);
-
-                faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert0]);
-                faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert1]);
-                faceVtxl.vertPositions.Add(mc2.vertPositions[mc2Face.vert2]);
-                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
-                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
-                faceVtxl.vertNormals.Add(mc2Face.faceNormal);
-
-                genMesh.faceVerts.Add(faceVtxl);
-                genMesh.triList.Add(face);
-            }
-            aqp.tempTris.Add(genMesh);
-
-            return aqp;
-        }
-
-        public static Assimp.Scene AssimpMC2Export(string filePath, MC2 mc2, bool doBounding = false)
-        {
-            Assimp.Scene aiScene = new Assimp.Scene();
-            
-            //Create an array to hold references to these since Assimp lacks a way to grab these by order or id
-            //We don't need the nodo count in this since they can't be parents
-            Assimp.Node[] boneArray = new Assimp.Node[2];
-
-            //Set up root node
-            var aiRootNode = new Assimp.Node("RootNode", null);
-            aiRootNode.Transform = Assimp.Matrix4x4.Identity;
-
-            boneArray[0] = aiRootNode;
-            aiScene.RootNode = aiRootNode;
-
-            //Set up single child node
-            var aiNode = new Assimp.Node(Path.GetFileNameWithoutExtension(filePath) + "_node", aiRootNode);
-
-            //Get local transform
-            aiNode.Transform = aiRootNode.Transform;
-
-            aiRootNode.Children.Add(aiNode);
-            boneArray[1] = aiNode;
 
             //Separate out to meshes by flag combos
             int i = 0;
@@ -138,120 +72,51 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             foreach (var pair in meshDict)
             {
                 Dictionary<int, int> vertIndexRemap = new Dictionary<int, int>();
-                var mesh = new Assimp.Mesh();
-                var mat = new Assimp.Material();
-                mesh.Name = $"mesh_{m}";
-                mat.Name = pair.Key;
-                mat.ColorDiffuse = new Assimp.Color4D(1, 1, 1, 1);
-                mat.ShadingMode = Assimp.ShadingMode.Phong;
+                AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                var genMat = new AquaObject.GenericMaterial();
+                genMesh.triList = new List<Vector3>();
+                genMat.matName = pair.Key;
+                genMat.diffuseRGBA = new Vector4(1, 1, 1, 1);
+                int f = 0;
 
                 foreach (var tri in pair.Value)
                 {
+                    AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
+                    faceVtxl.rawFaceId.Add(f);
+                    faceVtxl.rawFaceId.Add(f);
+                    faceVtxl.rawFaceId.Add(f++);
+
                     if (!vertIndexRemap.ContainsKey(tri.vert0))
                     {
-                        vertIndexRemap.Add(tri.vert0, mesh.Vertices.Count);
-                        var vert0 = mc2.vertPositions[tri.vert0];
-                        mesh.Vertices.Add(new Assimp.Vector3D(vert0.X, vert0.Y, vert0.Z) * 100);
+                        vertIndexRemap.Add(tri.vert0, genMesh.vertCount++);
                     }
                     if (!vertIndexRemap.ContainsKey(tri.vert1))
                     {
-                        vertIndexRemap.Add(tri.vert1, mesh.Vertices.Count);
-                        var vert1 = mc2.vertPositions[tri.vert1];
-                        mesh.Vertices.Add(new Assimp.Vector3D(vert1.X, vert1.Y, vert1.Z) * 100);
+                        vertIndexRemap.Add(tri.vert1, genMesh.vertCount++);
                     }
                     if (!vertIndexRemap.ContainsKey(tri.vert2))
                     {
-                        vertIndexRemap.Add(tri.vert2, mesh.Vertices.Count);
-                        var vert2 = mc2.vertPositions[tri.vert2];
-                        mesh.Vertices.Add(new Assimp.Vector3D(vert2.X, vert2.Y, vert2.Z) * 100);
+                        vertIndexRemap.Add(tri.vert2, genMesh.vertCount++);
                     }
-                    mesh.Faces.Add(new Assimp.Face(new int[] { vertIndexRemap[tri.vert0], vertIndexRemap[tri.vert1], vertIndexRemap[tri.vert2] }));
+                    faceVtxl.vertPositions.Add(mc2.vertPositions[tri.vert0]);
+                    faceVtxl.vertPositions.Add(mc2.vertPositions[tri.vert1]);
+                    faceVtxl.vertPositions.Add(mc2.vertPositions[tri.vert2]);
+                    genMesh.matIdList.Add(aqp.tempMats.Count);
+                    genMesh.triList.Add(new Vector3(vertIndexRemap[tri.vert0], vertIndexRemap[tri.vert1], vertIndexRemap[tri.vert2]));
+                    faceVtxl.rawVertId.Add(vertIndexRemap[tri.vert0]);
+                    faceVtxl.rawVertId.Add(vertIndexRemap[tri.vert1]);
+                    faceVtxl.rawVertId.Add(vertIndexRemap[tri.vert2]);
+
+                    genMesh.faceVerts.Add(faceVtxl);
                 }
 
-                //Handle rigid meshes
-                {
-                    var aiBone = new Assimp.Bone();
-                    var aqnBone = boneArray[0];
+                aqp.tempMats.Add(genMat);
+                aqp.tempTris.Add(genMesh);
 
-                    // Name
-                    aiBone.Name = aiNode.Name;
-
-                    // VertexWeights
-                    for (int vw = 0; vw < mesh.Vertices.Count; vw++)
-                    {
-                        var aiVertexWeight = new Assimp.VertexWeight(vw, 1f);
-                        aiBone.VertexWeights.Add(aiVertexWeight);
-                    }
-
-                    aiBone.OffsetMatrix = Assimp.Matrix4x4.Identity;
-
-                    mesh.Bones.Add(aiBone);
-                }
-
-                mesh.MaterialIndex = m;
-                aiScene.Materials.Add(mat);
-                aiScene.Meshes.Add(mesh);
-
-                // Set up mesh node and add this mesh's index to it (This tells assimp to export it as a mesh for various formats)
-                string meshNodeName = $"mesh_{m}";
-                var meshNode = new Assimp.Node(meshNodeName, aiScene.RootNode);
-                meshNode.Transform = Assimp.Matrix4x4.Identity;
-
-                aiScene.RootNode.Children.Add(meshNode);
-
-                meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
                 m++;
             }
 
-            //DEBUG
-            if(doBounding)
-            {
-                int b = 0;
-                foreach (var sector in mc2.sectors)
-                {
-                    var mesh = new Assimp.Mesh();
-                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.X, 0, sector.ZRange.X) * 100);
-                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.X, 0, sector.ZRange.Y) * 100);
-                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.Y, 0, sector.ZRange.X) * 100);
-                    mesh.Vertices.Add(new Assimp.Vector3D(sector.XRange.Y, 0, sector.ZRange.Y) * 100);
-
-                    mesh.Faces.Add(new Assimp.Face(new int[] { 0, 1, 2 }));
-                    mesh.Faces.Add(new Assimp.Face(new int[] { 2, 1, 3 }));
-
-                    mesh.MaterialIndex = 0;
-
-                    //Handle rigid meshes
-                    {
-                        var aiBone = new Assimp.Bone();
-                        var aqnBone = boneArray[0];
-
-                        // Name
-                        aiBone.Name = aiNode.Name;
-
-                        // VertexWeights
-                        for (int vw = 0; vw < mesh.Vertices.Count; vw++)
-                        {
-                            var aiVertexWeight = new Assimp.VertexWeight(vw, 1f);
-                            aiBone.VertexWeights.Add(aiVertexWeight);
-                        }
-
-                        aiBone.OffsetMatrix = Assimp.Matrix4x4.Identity;
-
-                        mesh.Bones.Add(aiBone);
-                    }
-                    aiScene.Meshes.Add(mesh);
-                    // Set up mesh node and add this mesh's index to it (This tells assimp to export it as a mesh for various formats)
-                    string meshNodeName = $"bounding_{b++}_depth_{sector.depth}";
-                    var meshNode = new Assimp.Node(meshNodeName, aiScene.RootNode);
-                    meshNode.Transform = Assimp.Matrix4x4.Identity;
-
-                    aiScene.RootNode.Children.Add(meshNode);
-
-                    meshNode.MeshIndices.Add(aiScene.Meshes.Count - 1);
-                }
-            }
-
-            return aiScene;
+            return aqp;
         }
 
         /// <summary>
@@ -262,7 +127,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             MC2 mc2 = new MC2();
             var scene = ModelImporter.GetAssimpScene(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
-            Vector3 rootBoxMinExtents = new Vector3(scene.Meshes[0].Vertices[0].X, scene.Meshes[0].Vertices[0].Y, scene.Meshes[0].Vertices[0].Z) / 100;
+            Vector3 rootBoxMinExtents = new Vector3(scene.Meshes[0].Vertices[0].X, scene.Meshes[0].Vertices[0].Y, scene.Meshes[0].Vertices[0].Z);
             Vector3 rootBoxMaxExtents = rootBoxMinExtents;
             for (int i = 0; i < scene.MeshCount; i++)
             {
@@ -271,7 +136,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 for (int v = 0; v < mesh.VertexCount; v++)
                 {
-                    var vert = mesh.Vertices[v] / 100;
+                    var vert = mesh.Vertices[v];
 
                     //Min extents
                     if (rootBoxMinExtents.X > vert.X)
@@ -398,6 +263,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 break;
                         }
                     }
+                }
+
+                //Default ground if no flags
+                if (flags0 == 0 && flags1 == 0 && flags2 == 0)
+                {
+                    flags1 = MC2.FlagSet1.DefaultGround;
                 }
 
                 for (int f = 0; f < mesh.FaceCount; f++)
