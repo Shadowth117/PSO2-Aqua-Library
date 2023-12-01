@@ -36,38 +36,44 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             using (var stream = new MemoryStream(archiveData))
             using (var sr = new BufferedStreamReader(stream, 8192))
             {
-                archiveHeader = new PRDArchiveHeader();
-                archiveHeader.magic = sr.ReadBE<int>();
-                archiveHeader.baseSize = sr.ReadBE<int>();
-                archiveHeader.fileEntriesSize = sr.ReadBE<int>();
-                archiveHeader.fullSize = sr.ReadBE<int>();
+                ReadNRC(sr);
+            }
+        }
 
-                archiveHeader.ccInt0 = sr.ReadBE<int>();
-                archiveHeader.ccInt1 = sr.ReadBE<int>();
-                archiveHeader.ccInt2 = sr.ReadBE<int>();
-                archiveHeader.ccInt3 = sr.ReadBE<int>();
+        public void ReadNRC(BufferedStreamReader sr)
+        {
+            BigEndianHelper._active = true;
+            archiveHeader = new PRDArchiveHeader();
+            archiveHeader.magic = sr.ReadBE<int>();
+            archiveHeader.baseSize = sr.ReadBE<int>();
+            archiveHeader.fileEntriesSize = sr.ReadBE<int>();
+            archiveHeader.fullSize = sr.ReadBE<int>();
 
-                fileEntryHeader = new PRDFileEntryHeader();
-                fileEntryHeader.int00 = sr.ReadBE<int>();
-                fileEntryHeader.reserve0 = sr.ReadBE<int>();
-                fileEntryHeader.nullTerminatorCount = sr.ReadBE<int>();
+            archiveHeader.ccInt0 = sr.ReadBE<int>();
+            archiveHeader.ccInt1 = sr.ReadBE<int>();
+            archiveHeader.ccInt2 = sr.ReadBE<int>();
+            archiveHeader.ccInt3 = sr.ReadBE<int>();
 
-                for (int i = 0; i < fileEntryHeader.nullTerminatorCount - 1; i++)
-                {
-                    var entry = new PRDFileEntry();
-                    entry.fileNameStringRelativeOffset = sr.ReadBE<int>();
-                    entry.fileOffset = sr.ReadBE<int>();
-                    entry.fileSize = sr.ReadBE<int>();
-                    fileEntries.Add(entry);
-                }
-                var entriesEndOffset = sr.Position();
-                for (int i = 0; i < fileEntryHeader.nullTerminatorCount - 1; i++)
-                {
-                    var entry = fileEntries[i];
-                    sr.Seek(entry.fileNameStringRelativeOffset + entriesEndOffset, SeekOrigin.Begin);
-                    fileNames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
-                    files.Add(sr.ReadBytes(entry.fileOffset, entry.fileSize));
-                }
+            fileEntryHeader = new PRDFileEntryHeader();
+            fileEntryHeader.int00 = sr.ReadBE<int>();
+            fileEntryHeader.reserve0 = sr.ReadBE<int>();
+            fileEntryHeader.nullTerminatorCount = sr.ReadBE<int>();
+
+            for (int i = 0; i < fileEntryHeader.nullTerminatorCount - 1; i++)
+            {
+                var entry = new PRDFileEntry();
+                entry.fileNameStringRelativeOffset = sr.ReadBE<int>();
+                entry.fileOffset = sr.ReadBE<int>();
+                entry.fileSize = sr.ReadBE<int>();
+                fileEntries.Add(entry);
+            }
+            var entriesEndOffset = sr.Position();
+            for (int i = 0; i < fileEntryHeader.nullTerminatorCount - 1; i++)
+            {
+                var entry = fileEntries[i];
+                sr.Seek(entry.fileNameStringRelativeOffset + entriesEndOffset, SeekOrigin.Begin);
+                fileNames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+                files.Add(sr.ReadBytes(entry.fileOffset, entry.fileSize));
             }
         }
 
@@ -85,6 +91,27 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.AddValue((int)0);
             outBytes.AddValue((int)0);
 
+            List<byte> innerBytes = NRCGetBytes();
+
+            var prs = Prs.Compress(innerBytes.ToArray(), 0x1FFF);
+            outBytes.AddRange(prs);
+            outBytes.FillInt("uncompressedDataSize", innerBytes.Count);
+            outBytes.FillInt("compressedDataSize", prs.Length);
+            var bufferAddition = 0x20 - ((innerBytes.Count - prs.Length) % 0x20);
+            //Hack to ensure the buffersize is enough
+            bufferAddition += 0x40;
+            var compressionDifference = (innerBytes.Count - prs.Length);
+            var finalDifference = compressionDifference + bufferAddition;
+            var finalTotalBufferSize = finalDifference + prs.Length;
+            outBytes.FillInt("totalBufferSize", finalTotalBufferSize);
+            outBytes.FillInt("totalBufferDifferenceFromCompressed", finalDifference);
+
+            return outBytes.ToArray();
+        }
+
+        public List<byte> NRCGetBytes()
+        {
+            ByteListExtension.AddAsBigEndian = true;
             List<byte> innerBytes = new List<byte>()
             {
                 0x55,
@@ -137,20 +164,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
 
-            var prs = Prs.Compress(innerBytes.ToArray(), 0x1FFF);
-            outBytes.AddRange(prs);
-            outBytes.FillInt("uncompressedDataSize", innerBytes.Count);
-            outBytes.FillInt("compressedDataSize", prs.Length);
-            var bufferAddition = 0x20 - ((innerBytes.Count - prs.Length) % 0x20);
-            //Hack to ensure the buffersize is enough
-            bufferAddition += 0x40;
-            var compressionDifference = (innerBytes.Count - prs.Length);
-            var finalDifference = compressionDifference + bufferAddition;
-            var finalTotalBufferSize = finalDifference + prs.Length;
-            outBytes.FillInt("totalBufferSize", finalTotalBufferSize);
-            outBytes.FillInt("totalBufferDifferenceFromCompressed", finalDifference);
-
-            return outBytes.ToArray();
+            return innerBytes;
         }
 
         public struct PRDHeader

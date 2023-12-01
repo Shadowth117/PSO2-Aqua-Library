@@ -376,6 +376,7 @@
     <Compile Include="Extra\MusicFilenameConstants.cs" />
     <Compile Include="Extra\NGSAnimUpdater.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\EggLevel.cs" />
+    <Compile Include="Extra\Ninja\BillyHatcher\GPL.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LNDConvert.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\LNDH\LNDH.cs" />
     <Compile Include="Extra\Ninja\BillyHatcher\ARC.cs" />
