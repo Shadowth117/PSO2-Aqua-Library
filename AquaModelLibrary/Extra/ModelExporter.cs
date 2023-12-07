@@ -323,7 +323,7 @@ namespace AquaModelLibrary
                 //Material
                 var mat = aqp.mateList[msh.mateIndex];
                 var shaderSet = AquaObjectMethods.GetShaderNames(aqp, msh.shadIndex);
-                var textureSet = AquaObjectMethods.GetTexListNames(aqp, msh.tsetIndex);
+                var textureSet = AquaObjectMethods.GetTexListNamesUnicode(aqp, msh.tsetIndex);
                 Assimp.Material mate = new Assimp.Material();
 
                 mate.ColorDiffuse = new Assimp.Color4D(mat.diffuseRGBA.X, mat.diffuseRGBA.Y, mat.diffuseRGBA.Z, mat.diffuseRGBA.W);

@@ -1250,7 +1250,7 @@ namespace AquaModelLibrary.Extra
             for (int i = 0; i < aqp.meshList.Count; i++)
             {
                 int pso2MatId = aqp.meshList[i].mateIndex;
-                var texList = AquaObjectMethods.GetTexListNames(aqp, aqp.meshList[i].tsetIndex);
+                var texList = AquaObjectMethods.GetTexListNamesUnicode(aqp, aqp.meshList[i].tsetIndex);
                 var pso2Mat = aqp.mateList[pso2MatId];
                 string rawName;
                 if (aqp.matUnicodeNames.Count > pso2MatId)

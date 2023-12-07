@@ -335,6 +335,7 @@ namespace AquaModelLibrary
                 for (int texfIndex = 0; texfIndex < model.objc.texfCount; texfIndex++)
                 {
                     model.texfList.Add(streamReader.Read<AquaObject.TEXF>());
+                    model.texFUnicodeNames.Add(model.texfList[model.texfList.Count - 1].texName.GetString());
                 }
             }
 
@@ -677,6 +678,7 @@ namespace AquaModelLibrary
                 for (int texfIndex = 0; texfIndex < model.objc.texfCount; texfIndex++)
                 {
                     model.texfList.Add(streamReader.Read<AquaObject.TEXF>());
+                    model.texFUnicodeNames.Add(model.texfList[model.texfList.Count - 1].texName.GetString());
                 }
             }
 

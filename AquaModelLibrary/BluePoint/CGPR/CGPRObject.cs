@@ -193,12 +193,13 @@ namespace AquaModelLibrary.BluePoint.CAWS
         public byte vecFlag1;
 
         public cgprCommonHeader vec3_0Header;
-        public Vector3 vec3_0;
+        public Vector3 vec3_0_0;
 
-        public cgprCommonHeader vec4SetHeader;
-        public Vector4 vec4_0;
-        public Vector4 vec4_1;
-        public Vector4 vec4_2;
+        public cgprCommonHeader vec3_1SetHeader;
+        public Vector3 vec3_0;
+        public Vector3 vec3_1;
+        public Vector3 vec3_2;
+        public Vector3 vec3_3;
 
         public cgprCommonHeader stringHeader;
         public byte dataStringLength;
@@ -233,10 +234,12 @@ namespace AquaModelLibrary.BluePoint.CAWS
                     throw new Exception($"Unexpected vecFlag0 value {vecFlag0}");
             }
 
-            vec4SetHeader = sr.Read<cgprCommonHeader>();
-            vec4_0 = sr.Read<Vector4>();
-            vec4_1 = sr.Read<Vector4>();
-            vec4_2 = sr.Read<Vector4>();
+            //Should be a 4x3 Matrix, 4 rows, 3 across
+            vec3_1SetHeader = sr.Read<cgprCommonHeader>();
+            vec3_0 = sr.Read<Vector3>();
+            vec3_1 = sr.Read<Vector3>();
+            vec3_2 = sr.Read<Vector3>();
+            vec3_3 = sr.Read<Vector3>();
 
             switch (type0Flag)
             {
