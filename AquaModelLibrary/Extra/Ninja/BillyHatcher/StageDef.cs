@@ -1,6 +1,7 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using System.Text;
 
@@ -18,7 +19,33 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         /// Due to the nature of these, it's more efficient to store with the offset as the key 
         /// </summary>
         public Dictionary<int, StageCommonData> commonDataDict = new Dictionary<int, StageCommonData>();
+
+        public StageDef() { }
+
+        public StageDef(string filePath)
+        {
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                Read(streamReader);
+            }
+        }
+
+        public StageDef(byte[] file)
+        {
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                Read(streamReader);
+            }
+        }
+
         public StageDef(BufferedStreamReader sr)
+        {
+            Read(sr);
+        }
+
+        public void Read(BufferedStreamReader sr)
         {
             var encoding = Encoding.GetEncoding("shift-jis");
             BigEndianHelper._active = true;

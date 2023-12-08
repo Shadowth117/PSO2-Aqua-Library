@@ -18,7 +18,30 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public PRD() { }
 
+        public PRD(string filePath)
+        {
+            using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var sr = new BufferedStreamReader(stream, 8192))
+            {
+                Read(sr);
+            }
+        }
+
+        public PRD(byte[] bytes)
+        {
+            using (var stream = new MemoryStream(bytes))
+            using (var sr = new BufferedStreamReader(stream, 8192))
+            {
+                Read(sr);
+            }
+        }
+
         public PRD(BufferedStreamReader initialSR)
+        {
+            Read(initialSR);
+        }
+
+        public void Read(BufferedStreamReader initialSR)
         {
             header = new PRDHeader();
             BigEndianHelper._active = initialSR.Peek<int>() > 0;

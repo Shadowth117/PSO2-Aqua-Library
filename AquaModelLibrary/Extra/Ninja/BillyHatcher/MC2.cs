@@ -1,7 +1,9 @@
 ﻿using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Numerics;
 using System.Windows.Documents;
 using System.Windows.Documents.DocumentStructures;
@@ -34,7 +36,30 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         //Offsets are off by 8 due tot eh ninja header
         public MC2() { }
 
+        public MC2(string filePath)
+        {
+            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                Read(streamReader);
+            }
+        }
+
+        public MC2(byte[] file)
+        {
+            using (Stream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            {
+                Read(streamReader);
+            }
+        }
+
         public MC2(BufferedStreamReader sr)
+        {
+            Read(sr);
+        }
+
+        public void Read(BufferedStreamReader sr)
         {
             njHeader = sr.Read<NinjaHeader>();
             BigEndianHelper._active = sr.Peek<int>() > sr.PeekBigEndianPrimitiveInt32();
@@ -64,7 +89,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 var vert = sr.ReadBEV3();
                 vertPositions.Add(vert);
 
-                if(i == 0)
+                if (i == 0)
                 {
                     rootBoxMaxExtents = vert;
                     rootBoxMinExtents = vert;
@@ -134,7 +159,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             foreach (var sector in sectors)
             {
-                if(sector.childId0 != 0)
+                if (sector.childId0 != 0)
                 {
                     sector.childSector0 = sectors[sector.childId0];
                 }
