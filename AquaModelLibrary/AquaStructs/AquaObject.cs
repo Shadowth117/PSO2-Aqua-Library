@@ -53,6 +53,7 @@ namespace AquaModelLibrary
         //Extra
         public List<string> meshNames = new List<string>();
         public List<string> matUnicodeNames = new List<string>();
+        public List<string> texFUnicodeNames = new List<string>();
 
         //Credit to MiscellaneousModder for this list:
         public enum baseWearIds : int
@@ -2079,7 +2080,11 @@ namespace AquaModelLibrary
 
         public void changeTexExtension(string ext)
         {
-            for(int i = 0; i < texfList.Count; i++)
+            for (int i = 0; i < texfList.Count; i++)
+            {
+                texFUnicodeNames[i] = Path.ChangeExtension(texFUnicodeNames[i], ext);
+            }
+            for (int i = 0; i < texfList.Count; i++)
             {
                 texfList[i].texName.SetString(Path.ChangeExtension(texfList[i].texName.GetString(), ext));
             }
@@ -2231,7 +2236,7 @@ namespace AquaModelLibrary
                     var curMate = mateList[curMesh.mateIndex];
                     var curRend = rendList[curMesh.rendIndex];
                     var shadNames = AquaObjectMethods.GetShaderNames(this, curMesh.shadIndex);
-                    var texNames = AquaObjectMethods.GetTexListNames(this, curMesh.tsetIndex);
+                    var texNames = AquaObjectMethods.GetTexListNamesUnicode(this, curMesh.tsetIndex);
                     var texUvSets = AquaObjectMethods.GetTexListUVChannels(this, curMesh.tsetIndex);
                     GenericMaterial mat = new GenericMaterial();
                     mat.texNames = texNames;

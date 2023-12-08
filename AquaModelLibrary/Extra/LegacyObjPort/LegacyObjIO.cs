@@ -521,7 +521,7 @@ namespace LegacyObj
                 foreach (var mesh in aqo.meshList)
                 {
                     var mate = aqo.mateList[mesh.mateIndex];
-                    var texNames = AquaObjectMethods.GetTexListNames(aqo, mesh.tsetIndex);
+                    var texNames = AquaObjectMethods.GetTexListNamesUnicode(aqo, mesh.tsetIndex);
 
                     var mtlname = mate.matName.GetString() + string.Format("_mtl_{0}_{1}", mesh.mateIndex, mesh.tsetIndex); //Added the actual name because that's useful
                     mtlNames.Add(mtlname);

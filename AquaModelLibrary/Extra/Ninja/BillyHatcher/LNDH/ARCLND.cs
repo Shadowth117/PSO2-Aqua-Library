@@ -469,6 +469,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         /// <summary>
         /// Normals seem like they might be laid out in some kind of crazy normal, tangent, binormal order or something, like a normal specific tristripping, 
         /// but most models also don't use them at all, and are probably using some kind of face normal averaging. Custom models should experiment with that. 
+        /// Note that normals and vert colors cannot coexist!
         /// </summary>
         public List<Vector3> NormalData = new List<Vector3>();
         /// <summary>

@@ -2843,13 +2843,15 @@ namespace AquaModelLibrary
                             tsta = TSTATypePresets.defaultPreset;
                         }
                     }
+                    string texName;
                     if (mat.texNames?.Count > i)
                     {
                         tsta.texName.SetString(mat.texNames[i]);
                         texf.texName.SetString(mat.texNames[i]);
+                        texName = mat.texNames[i];
                     } else
                     {
-                        string texName = firstTexName + "_" + tex + ".dds";
+                        texName = firstTexName + "_" + tex + ".dds";
                         tsta.texName.SetString(texName);
                         texf.texName.SetString(texName);
                     }
@@ -2868,6 +2870,7 @@ namespace AquaModelLibrary
                     if(isUniqueTexname)
                     {
                         model.texfList.Add(texf);
+                        model.texFUnicodeNames.Add(texName);
                     }
 
                     //Cull full duplicates of tsta
@@ -2950,6 +2953,7 @@ namespace AquaModelLibrary
                         tsta.texName = texf.texName;
 
                         model.texfList.Add(texf);
+                        model.texFUnicodeNames.Add(mat.texNames[i]);
                         model.tstaList.Add(tsta);
                         tempTexIds.Add(model.texfList.Count - 1);
                     }
@@ -3099,6 +3103,46 @@ namespace AquaModelLibrary
                     TSTA tsta = model.tstaList[texIndex];
 
                     textureList.Add(tsta.texName.GetString());
+                }
+            }
+
+            return textureList;
+        }
+
+        public static List<string> GetTexListNamesUnicode(AquaObject model, int tsetIndex)
+        {
+            List<string> textureList = new List<string>();
+
+            //Don't try to read what's not there
+            if (model.tstaList.Count == 0 || model.tstaList == null)
+            {
+                return textureList;
+            }
+            TSET tset = model.tsetList[tsetIndex];
+
+            for (int index = 0; index < tset.tstaTexIDs.Count; index++)
+            {
+                int texIndex = tset.tstaTexIDs[index];
+                if (texIndex != -1)
+                {
+                    TSTA tsta = model.tstaList[texIndex];
+                    var name = tsta.texName.GetString();
+
+                    bool skip = false;
+                    foreach(var str in model.texFUnicodeNames)
+                    {
+                        if(str.StartsWith(name))
+                        {
+                            textureList.Add(str);
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if(skip == true)
+                    {
+                        continue;
+                    }
+                    textureList.Add(name);
                 }
             }
 
