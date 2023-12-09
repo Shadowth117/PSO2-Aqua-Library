@@ -27,7 +27,7 @@ namespace AquaModelLibrary.Extra
         public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
 
-        //Takes in pso2_bin directory and outputDirectory. From there, it will read to memory various files in order to determine namings. 
+        //Takes in pso2_bin directory and outputDirectory. From there, it will read to memory various files in order to determine namings.
         //As win32_na is a patching folder, if it exists in the pso2_bin it will be prioritized for text related items.
         public unsafe static void OutputFileLists(string pso2_binDir, string outputDirectory)
         {
@@ -482,7 +482,7 @@ namespace AquaModelLibrary.Extra
 
 
             WriteCSV(objectOutDir, $"ClassicObjects.csv", classicObjectsList);
-            
+
             //Reboot Objects
             string rbScriptsPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootScripts)));
             var rbScripts = new PSO2CompressedScripts(rbScriptsPath);
@@ -494,7 +494,7 @@ namespace AquaModelLibrary.Extra
 
             //Get seasonal data
             Dictionary<string, string> seasonalListing = new Dictionary<string, string>();
-            byte[] bytes = null; 
+            byte[] bytes = null;
             using (MemoryStream memStream = new MemoryStream())
             {
                 using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
@@ -1528,7 +1528,7 @@ namespace AquaModelLibrary.Extra
                         string objExHash = GetFileHash(objEx);
                         string objFile = Path.Combine(pso2_binDir, dataDir, objHash);
                         string objFileEx = Path.Combine(pso2_binDir, dataDir, objExHash);
-                        
+
                         if(File.Exists(objFile))
                         {
                             string goodsName = roomGoodsNames.ContainsKey(obj) ? roomGoodsNames[obj] : "";
@@ -1598,7 +1598,7 @@ namespace AquaModelLibrary.Extra
             WriteCSV(roomOutDir, "Rooms.csv", roomsOut);
             WriteCSV(roomOutDir, "Room Goods.csv", roomGoodsOut);
 
-            //MySpace 
+            //MySpace
             var rebootfilename = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(mySpaceObjectSettingsIce)));
 
             if(File.Exists(rebootfilename))
@@ -1812,7 +1812,7 @@ namespace AquaModelLibrary.Extra
 
         private static void GenerateMotionChangeLists(string pso2_binDir, string playerRAnimDirOut, PSO2Text commonTextReboot, Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat)
         {
-            //---------------------------Get Substitute Motion files -- 
+            //---------------------------Get Substitute Motion files --
             if (commonTextReboot != null)
             {
                 List<string> subCatList = new List<string>() { subSwim, subGlide, subJump, subLanding, subMove, subSprint, subIdle };
@@ -1955,7 +1955,7 @@ namespace AquaModelLibrary.Extra
 
                     string output = "";
                     List<string> names = new List<string>()
-                    { 
+                    {
                         $"[Unnamed {lac.dataBlocks[i].commonReference1}]",
                         ""
                     };
@@ -2023,7 +2023,7 @@ namespace AquaModelLibrary.Extra
                     {
                         gender = "Female";
                     }
-                    
+
                     output = $"{Escape(names[0])},{Escape(names[1])},{Escape(lac.dataBlocks[i].chatCommand)},{classic},{classicHash},{rebootHuman},{rebootHumanHash},{rebootCastMale},{rebootCastMaleHash},{rebootCastFemale},{rebootCastFemaleHash},{rebootF},{rebootFigHash},{vfx},{vfxHash},{rebootVfx},{rebootVfxHash},{gender}\n";
 
                     lobbyActions.Append(output);
@@ -2136,11 +2136,11 @@ namespace AquaModelLibrary.Extra
             }
         }
 
-        private static void GenerateVoiceLists(string pso2_binDir, string playerDirOut, string npcDirOut, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, 
-            List<int> masterIdList, List<Dictionary<int, string>> nameDicts, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts, 
+        private static void GenerateVoiceLists(string pso2_binDir, string playerDirOut, string npcDirOut, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat,
+            List<int> masterIdList, List<Dictionary<int, string>> nameDicts, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts,
             Dictionary<string, List<List<PSO2Text.textPair>>> actorNameText, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameTextReboot, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameTextNPCReboot)
         {
-            //---------------------------Parse out voices 
+            //---------------------------Parse out voices
             StringBuilder outputMaleVoices = new StringBuilder();
             StringBuilder outputFemaleVoices = new StringBuilder();
             StringBuilder outputCastVoices = new StringBuilder();
@@ -2311,7 +2311,7 @@ namespace AquaModelLibrary.Extra
                     var voiceStr = GetRebootHash(GetFileHash(voiceStrRaw));
                     if (File.Exists(Path.Combine(pso2_binDir, dataReboot, voiceStr)))
                     {
-                        output += languageVoices + voiceStrRaw + "," + voiceStr + "\n"; 
+                        output += languageVoices + voiceStrRaw + "," + voiceStr + "\n";
                     }
                     if (File.Exists(Path.Combine(pso2_binDir, dataRebootNA, voiceStr)))
                     {
@@ -2400,7 +2400,6 @@ namespace AquaModelLibrary.Extra
             outputCasealBody.AppendLine(partColumns);
             outputOuterMale.AppendLine(partColumns);
             outputOuterFemale.AppendLine(partColumns);
-            outputCostumeMale.AppendLine(partColumns);
             outputNGSOuterMale.AppendLine(partColumns);
             outputNGSOuterFemale.AppendLine(partColumns);
             outputNGSCastBody.AppendLine(partColumns);
@@ -3073,7 +3072,7 @@ namespace AquaModelLibrary.Extra
                 partData.id = id;
 
                 //Double check these ids and use an adjustedId if needed
-                int adjustedId = id; 
+                int adjustedId = id;
                 int linkedInnerId = -1;
                 int soundId = -1;
                 int headId = -1;
@@ -3856,7 +3855,7 @@ namespace AquaModelLibrary.Extra
                     if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
                     {
                         named = true;
-                        output += str + ",";
+                        output += Escape(str) + ",";
                     }
                     else
                     {
@@ -4503,7 +4502,7 @@ namespace AquaModelLibrary.Extra
                 WriteCSV(playerRebootDirOut, "EarsNGS.csv", outputNGSEars);
             }
 
-            //---------------------------Parse out NGS teeth 
+            //---------------------------Parse out NGS teeth
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
@@ -4582,7 +4581,7 @@ namespace AquaModelLibrary.Extra
                 WriteCSV(playerRebootDirOut, "TeethNGS.csv", outputNGSTeeth);
             }
 
-            //---------------------------Parse out NGS horns 
+            //---------------------------Parse out NGS horns
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
@@ -5131,7 +5130,7 @@ namespace AquaModelLibrary.Extra
                 File.WriteAllLines(outputDirectory + "\\Weapons\\NGS\\" + "WeaponDefaultsNGS.csv", wepDefNGSOutput, Encoding.UTF8);
             }
 
-            //---------------------------Generate Weapon list 
+            //---------------------------Generate Weapon list
             List<string> swordOutput = new List<string>();
             List<string> wiredLanceOutput = new List<string>();
             List<string> partizanOutput = new List<string>();
@@ -6351,7 +6350,7 @@ namespace AquaModelLibrary.Extra
         }
 
         public static void ReadExtraText(string pso2_binDir, out PSO2Text actorNameText, out PSO2Text actorNameTextReboot, out PSO2Text actorNameTextReboot_NPC, out PSO2Text uiMyRoomText, out PSO2Text objectCommonText)
-        {            
+        {
             //Load actor name text
             string actorNameTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicActorName));
             string actorNameTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicActorName));
@@ -6474,7 +6473,7 @@ namespace AquaModelLibrary.Extra
                 {
                     return GetLineHash();
                 }
-                
+
                 return GetLineUnhashed();
 
             }
@@ -6582,7 +6581,7 @@ namespace AquaModelLibrary.Extra
                     }
                 }
             }
-            
+
             return GenerateCharacterPartFileStrings(pso2_binDir, aquaCMX, faceIds, textByCat, out totalCount);
         }
 
@@ -8498,7 +8497,7 @@ namespace AquaModelLibrary.Extra
                 totalCount++;
             }
 
-            //---------------------------Parse out NGS teeth 
+            //---------------------------Parse out NGS teeth
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
@@ -8572,7 +8571,7 @@ namespace AquaModelLibrary.Extra
                 totalCount++;
             }
 
-            //---------------------------Parse out NGS horns 
+            //---------------------------Parse out NGS horns
             masterIdList.Clear();
             nameDicts.Clear();
             GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
