@@ -23,22 +23,41 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
             using (var sr = new BufferedStreamReader(stream, 8192))
             {
-                Read(sr);
+                if(Path.GetExtension(filePath) == ".nrc")
+                {
+                    ReadNRC(sr);
+                } else
+                {
+                    Read(sr);
+                }
             }
         }
 
-        public PRD(byte[] bytes)
+        public PRD(byte[] bytes, bool isNRC = false)
         {
             using (var stream = new MemoryStream(bytes))
             using (var sr = new BufferedStreamReader(stream, 8192))
             {
-                Read(sr);
+                if(isNRC)
+                {
+                    ReadNRC(sr);
+                } else
+                {
+                    Read(sr);
+                }
             }
         }
 
-        public PRD(BufferedStreamReader initialSR)
+        public PRD(BufferedStreamReader initialSR, bool isNRC = false)
         {
-            Read(initialSR);
+            if (isNRC)
+            {
+                ReadNRC(initialSR);
+            }
+            else
+            {
+                Read(initialSR);
+            }
         }
 
         public void Read(BufferedStreamReader initialSR)

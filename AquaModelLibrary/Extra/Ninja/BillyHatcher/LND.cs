@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
 
@@ -130,7 +131,29 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public List<List<LNDMotionData>> motionDataList = new List<List<LNDMotionData>>();
         public LND() { }
 
+        public LND(string filePath) {
+            using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var sr = new BufferedStreamReader(stream, 8192))
+            {
+                Read(sr);
+            }
+        }
+
+        public LND(byte[] fileBytes)
+        {
+            using (var stream = new MemoryStream(fileBytes))
+            using (var sr = new BufferedStreamReader(stream, 8192))
+            {
+                Read(sr);
+            }
+        }
+
         public LND(BufferedStreamReader sr)
+        {
+            Read(sr);
+        }
+
+        public void Read(BufferedStreamReader sr)
         {
             BigEndianHelper._active = true;
             var magicTest = sr.ReadBytes(0, 3);

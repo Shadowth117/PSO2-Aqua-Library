@@ -14,6 +14,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public ushort unkSht;
         public int defOffset;
         public List<StageDefinition> defs = new List<StageDefinition>();
+        public Dictionary<string, StageDefinition> defsDict = new Dictionary<string, StageDefinition>();
         public StageCommonData definition = null;
         /// <summary>
         /// Due to the nature of these, it's more efficient to store with the offset as the key 
@@ -60,7 +61,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sr.Seek(8 + defOffset, System.IO.SeekOrigin.Begin);
             for (int i = 0; i < defCount; i++)
             {
-                defs.Add(new StageDefinition()
+                var def = new StageDefinition()
                 {
                     missionNameOffset = sr.ReadBE<int>(),
                     commonDataOffset = sr.ReadBE<int>(),
@@ -105,8 +106,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     scoreThreshold2 = sr.ReadBE<int>(),
                     scoreThreshold3 = sr.ReadBE<int>(),
                     scoreThreshold4 = sr.ReadBE<int>()
-                });
-                
+                };
+                defs.Add(def);
             }
             definition = ReadCommonData(sr, encoding);
 
@@ -194,6 +195,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     sr.Seek(8 + def.eventFilenameOffset, System.IO.SeekOrigin.Begin);
                     def.eventFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
                 }
+
+                defsDict.Add(def.missionName, def);
             }
 
         }
