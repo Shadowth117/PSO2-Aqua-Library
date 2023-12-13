@@ -341,7 +341,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 vertId += ((int)ArcLndVertType.Normal).ToString() + faceIds[i++];
             } else
             {
-                vtxl.vertNormals.Add(faceData.faceNormalDict[faceIds[0]]);
+                vtxl.vertNormals.Add(mdl.arcVertDataSetList[0].faceNormalDict[faceIds[0]]);
             }
             if ((flags & ArcLndVertType.VertColor) > 0)
             {

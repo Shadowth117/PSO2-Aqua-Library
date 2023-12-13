@@ -472,27 +472,27 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     for(int j = 0; j < faceDataHead.triIndicesList0[i].Count - 2; j++)
                     {
-                        int id0 = faceDataHead.triIndicesList0[i][j][0];
+                        int id0 = (j & 1) > 0 ? faceDataHead.triIndicesList0[i][j + 2][0] : faceDataHead.triIndicesList0[i][j][0];
                         int id1 = faceDataHead.triIndicesList0[i][j + 1][0];
-                        int id2 = faceDataHead.triIndicesList0[i][j + 2][0];
+                        int id2 = (j & 1) > 0 ? faceDataHead.triIndicesList0[i][j][0] : faceDataHead.triIndicesList0[i][j + 2][0];
                         Vector3 n = Vector3.Normalize(Vector3.Cross(arcModel.arcVertDataSetList[0].PositionData[id2] - arcModel.arcVertDataSetList[0].PositionData[id0],
                             arcModel.arcVertDataSetList[0].PositionData[id1] - arcModel.arcVertDataSetList[0].PositionData[id0]));
-                        faceDataHead.SetFaceNormals(id0, id1, id2, n);
+                        arcModel.arcVertDataSetList[0].SetFaceNormals(id0, id1, id2, n);
                     }
                 }
                 for (int i = 0; i < faceDataHead.triIndicesList1.Count; i++)
                 {
                     for (int j = 0; j < faceDataHead.triIndicesList1[i].Count - 2; j++)
                     {
-                        int id0 = faceDataHead.triIndicesList1[i][j + 2][0];
+                        int id0 = ((j + 1) & 1) > 0 ? faceDataHead.triIndicesList1[i][j + 2][0] : faceDataHead.triIndicesList1[i][j][0];
                         int id1 = faceDataHead.triIndicesList1[i][j + 1][0];
-                        int id2 = faceDataHead.triIndicesList1[i][j][0];
+                        int id2 = ((j + 1) & 1) > 0 ? faceDataHead.triIndicesList1[i][j][0] : faceDataHead.triIndicesList1[i][j + 2][0];
                         Vector3 n = Vector3.Normalize(Vector3.Cross(arcModel.arcVertDataSetList[0].PositionData[id2] - arcModel.arcVertDataSetList[0].PositionData[id0],
                             arcModel.arcVertDataSetList[0].PositionData[id1] - arcModel.arcVertDataSetList[0].PositionData[id0]));
-                        faceDataHead.SetFaceNormals(id0, id1, id2, n);
+                        arcModel.arcVertDataSetList[0].SetFaceNormals(id0, id1, id2, n);
                     }
                 }
-                faceDataHead.NoramlizeFaceNormals();
+                arcModel.arcVertDataSetList[0].NoramlizeFaceNormals();
             }
 
             //Node bounding
