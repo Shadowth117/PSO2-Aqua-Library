@@ -631,6 +631,36 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         public List<List<List<int>>> triIndicesList1 = new List<List<List<int>>>();
         public List<List<List<int>>> triIndicesListStarts1 = new List<List<List<int>>>();
+
+        //Helper data - Auto created
+        public Dictionary<int, Vector3> faceNormalDict = new Dictionary<int, Vector3>();
+
+        public void SetFaceNormals(int id0, int id1, int id2, Vector3 nrm)
+        {
+            SetFaceNormal(id0, nrm);
+            SetFaceNormal(id1, nrm);
+            SetFaceNormal(id2, nrm);
+        }
+
+        private void SetFaceNormal(int id, Vector3 nrm)
+        {
+            if (faceNormalDict.ContainsKey(id))
+            {
+                faceNormalDict[id] += nrm;
+            }
+            else
+            {
+                faceNormalDict[id] = nrm;
+            }
+        }
+
+        public void NoramlizeFaceNormals()
+        {
+            foreach (var key in faceNormalDict.Keys)
+            {
+                faceNormalDict[key] = Vector3.Normalize(faceNormalDict[key]);
+            }
+        }
     }
 
     public class ARCLNDNodeBounding

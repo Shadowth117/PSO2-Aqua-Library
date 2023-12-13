@@ -254,15 +254,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             int f = 0;
             if (faceData.triIndicesList0.Count > 0)
             {
-                AddFromARCPolyData(mdl, genMesh, faceData.triIndicesList0, faceData.triIndicesListStarts0, vertTracker, faceData.flags, texId, ref f, 0);
+                AddFromARCPolyData(mdl, genMesh, faceData, faceData.triIndicesList0, faceData.triIndicesListStarts0, vertTracker, faceData.flags, texId, ref f, 0);
             }
             if (faceData.triIndicesList1.Count > 0)
             {
-                AddFromARCPolyData(mdl, genMesh, faceData.triIndicesList1, faceData.triIndicesListStarts1, vertTracker, faceData.flags, texId, ref f, 1);
+                AddFromARCPolyData(mdl, genMesh, faceData, faceData.triIndicesList1, faceData.triIndicesListStarts1, vertTracker, faceData.flags, texId, ref f, 1);
             }
         }
 
-        private static void AddFromARCPolyData(ARCLNDModel mdl, AquaObject.GenericTriangles genMesh, List<List<List<int>>> triIndicesList, List<List<List<int>>> triIndicesListStarts, Dictionary<string, int> vertTracker, ArcLndVertType flags, int texId, ref int f, int listFlip)
+        private static void AddFromARCPolyData(ARCLNDModel mdl, AquaObject.GenericTriangles genMesh, ARCLNDFaceDataHead faceData, List<List<List<int>>> triIndicesList, List<List<List<int>>> triIndicesListStarts, Dictionary<string, int> vertTracker, ArcLndVertType flags, int texId, ref int f, int listFlip)
         {
             for (int s = 0; s < triIndicesList.Count; s++)
             {
@@ -280,15 +280,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         int x, y, z;
                         if (((i + listFlip) & 1) > 0)
                         {
-                            x = AddARCVert(mdl, faceVtxl, strip[i], flags, genMesh, vertTracker);
-                            y = AddARCVert(mdl, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
-                            z = AddARCVert(mdl, faceVtxl, strip[i + 2], flags, genMesh, vertTracker);
+                            x = AddARCVert(mdl, faceData, faceVtxl, strip[i], flags, genMesh, vertTracker);
+                            y = AddARCVert(mdl, faceData, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
+                            z = AddARCVert(mdl, faceData, faceVtxl, strip[i + 2], flags, genMesh, vertTracker);
                         }
                         else
                         {
-                            x = AddARCVert(mdl, faceVtxl, strip[i + 2], flags, genMesh, vertTracker);
-                            y = AddARCVert(mdl, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
-                            z = AddARCVert(mdl, faceVtxl, strip[i], flags, genMesh, vertTracker);
+                            x = AddARCVert(mdl, faceData, faceVtxl, strip[i + 2], flags, genMesh, vertTracker);
+                            y = AddARCVert(mdl, faceData, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
+                            z = AddARCVert(mdl, faceData, faceVtxl, strip[i], flags, genMesh, vertTracker);
                         }
                         genMesh.matIdList.Add(texId);
                         genMesh.triList.Add(new Vector3(x, y, z));
@@ -308,9 +308,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         faceVtxl.rawFaceId.Add(f);
                         faceVtxl.rawFaceId.Add(f++);
 
-                        var x = AddARCVert(mdl, faceVtxl, strip[i + 2], flags, genMesh, vertTracker);
-                        var y = AddARCVert(mdl, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
-                        var z = AddARCVert(mdl, faceVtxl, strip[i], flags, genMesh, vertTracker);
+                        var x = AddARCVert(mdl, faceData, faceVtxl, strip[i + 2], flags, genMesh, vertTracker);
+                        var y = AddARCVert(mdl, faceData, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
+                        var z = AddARCVert(mdl, faceData, faceVtxl, strip[i], flags, genMesh, vertTracker);
                         genMesh.triList.Add(new Vector3(x, y, z));
                         faceVtxl.rawVertId.Add(x);
                         faceVtxl.rawVertId.Add(y);
@@ -326,7 +326,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
         }
-        public static int AddARCVert(ARCLNDModel mdl, AquaObject.VTXL vtxl, List<int> faceIds, ArcLndVertType flags, AquaObject.GenericTriangles genMesh, Dictionary<string, int> vertTracker)
+        public static int AddARCVert(ARCLNDModel mdl, ARCLNDFaceDataHead faceData, AquaObject.VTXL vtxl, List<int> faceIds, ArcLndVertType flags, AquaObject.GenericTriangles genMesh, Dictionary<string, int> vertTracker)
         {
             string vertId = "";
             int i = 0;
@@ -339,6 +339,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 vtxl.vertNormals.Add(mdl.arcVertDataSetList[0].NormalData[faceIds[i]]);
                 vertId += ((int)ArcLndVertType.Normal).ToString() + faceIds[i++];
+            } else
+            {
+                vtxl.vertNormals.Add(faceData.faceNormalDict[faceIds[0]]);
             }
             if ((flags & ArcLndVertType.VertColor) > 0)
             {

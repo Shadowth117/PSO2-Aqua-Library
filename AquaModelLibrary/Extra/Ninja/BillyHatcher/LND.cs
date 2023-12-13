@@ -2,6 +2,7 @@
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using System.Text;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
 
@@ -465,6 +466,33 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 ReadArcLndTris(sr, faceDataHead.flags, faceDataHead.faceDataOffset0, faceDataHead.bufferSize0, out faceDataHead.triIndicesList0, out faceDataHead.triIndicesListStarts0);
                 ReadArcLndTris(sr, faceDataHead.flags, faceDataHead.faceDataOffset1, faceDataHead.bufferSize1, out faceDataHead.triIndicesList1, out faceDataHead.triIndicesListStarts1);
+
+                //Generate averaged face normals - The game seemingly does this at runtime so we need these to be able to replicate how the game handles normals;
+                for(int i = 0; i < faceDataHead.triIndicesList0.Count; i++)
+                {
+                    for(int j = 0; j < faceDataHead.triIndicesList0[i].Count - 2; j++)
+                    {
+                        int id0 = faceDataHead.triIndicesList0[i][j][0];
+                        int id1 = faceDataHead.triIndicesList0[i][j + 1][0];
+                        int id2 = faceDataHead.triIndicesList0[i][j + 2][0];
+                        Vector3 n = Vector3.Normalize(Vector3.Cross(arcModel.arcVertDataSetList[0].PositionData[id2] - arcModel.arcVertDataSetList[0].PositionData[id0],
+                            arcModel.arcVertDataSetList[0].PositionData[id1] - arcModel.arcVertDataSetList[0].PositionData[id0]));
+                        faceDataHead.SetFaceNormals(id0, id1, id2, n);
+                    }
+                }
+                for (int i = 0; i < faceDataHead.triIndicesList1.Count; i++)
+                {
+                    for (int j = 0; j < faceDataHead.triIndicesList1[i].Count - 2; j++)
+                    {
+                        int id0 = faceDataHead.triIndicesList1[i][j + 2][0];
+                        int id1 = faceDataHead.triIndicesList1[i][j + 1][0];
+                        int id2 = faceDataHead.triIndicesList1[i][j][0];
+                        Vector3 n = Vector3.Normalize(Vector3.Cross(arcModel.arcVertDataSetList[0].PositionData[id2] - arcModel.arcVertDataSetList[0].PositionData[id0],
+                            arcModel.arcVertDataSetList[0].PositionData[id1] - arcModel.arcVertDataSetList[0].PositionData[id0]));
+                        faceDataHead.SetFaceNormals(id0, id1, id2, n);
+                    }
+                }
+                faceDataHead.NoramlizeFaceNormals();
             }
 
             //Node bounding
