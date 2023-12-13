@@ -249,6 +249,10 @@ namespace AquaModelLibrary.Extra
                 */
                 //drb.Write(filePath);
             }
+            else if (filePath.EndsWith(".grass"))
+            {
+                var grass = GRASS.Read(raw);
+            }
         }
 
         public static void NullUnkIndices(string filePath)
