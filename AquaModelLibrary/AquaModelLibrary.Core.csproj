@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
+    <PackageReference Include="csharp-prs" Version="2.1.3" />
+    <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
+    <PackageReference Include="YellowDogMan.Pfim" Version="0.11.2-ydm-0.1.0" />
+    <PackageReference Include="ZstdNet" Version="1.4.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SAToolsShared\ArchiveLib\ArchiveLib.csproj" />
+    <ProjectReference Include="..\SAToolsShared\VrSharp\VrSharp.csproj" />
+    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
+    <ProjectReference Include="..\UnluacNET\UnluacNET.csproj" />
+    <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NvTriStripDotNet">
+      <HintPath>Libraries\NvTriStripDotNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\Shadi\.nuget\packages\zstdnet\1.4.5\build\x64\libzstd.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\Shadi\.nuget\packages\zstdnet\1.4.5\build\x86\libzstd.dll" />
+  </ItemGroup>
+
+</Project>

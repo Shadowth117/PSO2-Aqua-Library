@@ -17,6 +17,34 @@ namespace AquaModelLibrary
 {
     public unsafe static class CharacterMakingIndexMethods
     {
+        public static bool pcDirectory = true;
+
+        public static string dataDir
+        {
+            get { return pcDirectory ? dataDirPC : dataDirConsole; }
+        }
+        public static string dataNADir
+        {
+            get { return pcDirectory ? dataNADirPC : dataNADirConsole; }
+        }
+        public static string dataReboot
+        {
+            get { return pcDirectory ? dataRebootPC : dataRebootConsole; }
+        }
+        public static string dataRebootNA
+        {
+            get { return pcDirectory ? dataRebootNAPC : dataRebootNAConsole; }
+        }
+
+        public static string dataDirPC = $"data\\win32\\";
+        public static string dataDirConsole = $"data\\";
+        public static string dataNADirPC = $"data\\win32_na\\";
+        public static string dataNADirConsole = $"data_na\\";
+        public static string dataRebootPC = $"data\\win32reboot\\";
+        public static string dataRebootConsole = $"datareboot\\";
+        public static string dataRebootNAPC = $"data\\win32reboot_na\\";
+        public static string dataRebootNAConsole = $"datareboot_na\\";
+
         public static CharacterMakingIndex ReadCMX(string fileName, CharacterMakingIndex cmx = null)
         {
             using (Stream stream = (Stream)new MemoryStream(File.ReadAllBytes(fileName)))

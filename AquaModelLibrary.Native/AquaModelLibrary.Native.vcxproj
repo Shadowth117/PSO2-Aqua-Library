@@ -43,7 +43,6 @@
   <ItemGroup>
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -51,8 +50,9 @@
     <ProjectGuid>{2c3b66bb-f1a9-4513-ab63-570d7687c6a7}</ProjectGuid>
     <RootNamespace>AquaModelLibraryNative</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <CLRSupport>true</CLRSupport>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <CLRSupport>NetCore</CLRSupport>
+    <WindowsTargetPlatformMinVersion>7.0</WindowsTargetPlatformMinVersion>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -73,7 +73,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <CLRSupport>true</CLRSupport>
+    <CLRSupport>NetCore</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -81,7 +81,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <CLRSupport>true</CLRSupport>
+    <CLRSupport>NetCore</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -143,6 +143,10 @@
       <AdditionalLibraryDirectories>$(ProjectDir)Dependencies\FBX\lib\vs2017\x86\debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"
+copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -167,6 +171,10 @@
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x86.dll"
+copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x86.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -185,8 +193,8 @@
       <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\Debug\$(ProjectName).x64.dll"
-copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\Debug\$(ProjectName).x64.dll"</Command>
+      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"
+copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -212,14 +220,11 @@ copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\D
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\Release\$(ProjectName).x64.dll"
-copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\Release\$(ProjectName).x64.dll"</Command>
+      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"
+copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <Target Name="AfterBuild">
-    <MSBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Projects="$(MSBuildProjectFile)" Properties="Platform=x86;PlatformTarget=x86" RunEachTargetSeparately="true" />
-  </Target>
 </Project>

@@ -15,10 +15,10 @@ using static AquaModelLibrary.AquaObjectParsingMethods;
 using static AquaModelLibrary.CharacterMakingIndexMethods;
 using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.VTBFMethods;
-using AquaModelLibrary.Extra;
 using AquaModelLibrary.OtherStructs;
 using AquaModelLibrary.AquaMethods;
-using Newtonsoft.Json;
+using System.Text.Json;
+using AquaModelLibrary.Core.Utility;
 
 namespace AquaModelLibrary
 {
@@ -59,11 +59,13 @@ namespace AquaModelLibrary
 
                 return false;
             }
+            /*
             if (checkIce && 0x454349 == magic)
             {
                 isIce = true;
                 file = IceArchiveSelector.ShowDialog(inFilename, ".aqp");
             }
+            */
             bool validModel = BeginReadModel(file);
             file = null;
 
@@ -4498,7 +4500,7 @@ namespace AquaModelLibrary
         public void ConvertToJson(string filePath)
         {
             var ext = Path.GetExtension(filePath);
-            JsonSerializerSettings jss = new JsonSerializerSettings() { Formatting = Formatting.Indented,  };
+            JsonSerializerOptions jss = new JsonSerializerOptions() { WriteIndented = true };
             string jsonData = "";
             switch (ext)
             {
@@ -4507,7 +4509,7 @@ namespace AquaModelLibrary
                 case ".aqp":
                 case ".trp":
                     ReadModel(filePath);
-                    jsonData = JsonConvert.SerializeObject(aquaModels[0], jss);
+                    jsonData = JsonSerializer.Serialize(aquaModels[0], jss);
                     if (aquaModels[0].models[0].objc.type > 0xC32)
                     {
                         filePath = filePath.Replace(ext, $".ngs{ext}");
@@ -4521,33 +4523,33 @@ namespace AquaModelLibrary
                 case ".aqn":
                 case ".trn":
                     ReadBones(filePath);
-                    jsonData = JsonConvert.SerializeObject(aquaBones[0], jss);
+                    jsonData = JsonSerializer.Serialize(aquaBones[0], jss);
                     aquaBones.Clear();
                     break;
                 case ".aqm":
                 case ".trm":
                     ReadMotion(filePath);
-                    jsonData = JsonConvert.SerializeObject(aquaMotions[0], jss);
+                    jsonData = JsonSerializer.Serialize(aquaMotions[0], jss);
                     aquaMotions.Clear();
                     break;
                 case ".bti":
                     ReadBTI(filePath);
-                    jsonData = JsonConvert.SerializeObject(aquaMotionConfigs[0], jss);
+                    jsonData = JsonSerializer.Serialize(aquaMotionConfigs[0], jss);
                     aquaMotionConfigs.Clear();
                     break;
                 case ".cmx":
                     var cmx = ReadCMX(filePath);
-                    jsonData = JsonConvert.SerializeObject(cmx, jss);
+                    jsonData = JsonSerializer.Serialize(cmx, jss);
                     cmx = null;
                     break;
                 case ".text":
                     var text = ReadPSO2Text(filePath);
-                    jsonData = JsonConvert.SerializeObject(text, jss);
+                    jsonData = JsonSerializer.Serialize(text, jss);
                     text = null;
                     break;
                 case ".aqe": //(Classic for now)
                     ReadEffect(filePath);
-                    jsonData = JsonConvert.SerializeObject(aquaEffect[0], jss);
+                    jsonData = JsonSerializer.Serialize(aquaEffect[0], jss);
                     aquaEffect.Clear();
                     break;
             }
@@ -4569,41 +4571,41 @@ namespace AquaModelLibrary
                     ModelSet aqp;
                     if(filePath.Contains(".ngs."))
                     {
-                        aqp = JsonConvert.DeserializeObject<NGSModelSet>(jsonData).GetModelSet();
+                        aqp = JsonSerializer.Deserialize<NGSModelSet>(jsonData).GetModelSet();
                         aquaModels.Add(aqp);
                         WriteNGSNIFLModel(ogName, ogName);
                     } else if(filePath.Contains(".classic."))
                     {
-                        aqp = JsonConvert.DeserializeObject<ClassicModelSet>(jsonData).GetModelSet();
+                        aqp = JsonSerializer.Deserialize<ClassicModelSet>(jsonData).GetModelSet();
                         aquaModels.Add(aqp);
                         WriteClassicNIFLModel(ogName, ogName);
                     }
                     break;
                 case ".aqn":
                 case ".trn":
-                    var aqn = JsonConvert.DeserializeObject<AquaNode>(jsonData);
+                    var aqn = JsonSerializer.Deserialize<AquaNode>(jsonData);
                     WriteBones(ogName, aqn);
                     break;
                 case ".aqm":
                 case ".trm":
-                    var aqm = JsonConvert.DeserializeObject<AnimSet>(jsonData);
+                    var aqm = JsonSerializer.Deserialize<AnimSet>(jsonData);
                     aquaMotions.Add(aqm);
                     WriteNIFLMotion(ogName);
                     break;
                 case ".bti":
-                    var bti = JsonConvert.DeserializeObject<AquaBTI_MotionConfig>(jsonData);
+                    var bti = JsonSerializer.Deserialize<AquaBTI_MotionConfig>(jsonData);
                     WriteBTI(bti, ogName);
                     break;
                 case ".cmx":
-                    var cmx = JsonConvert.DeserializeObject<CharacterMakingIndex>(jsonData);
+                    var cmx = JsonSerializer.Deserialize<CharacterMakingIndex>(jsonData);
                     WriteCMX(ogName, cmx, 1);
                     break;
                 case ".text":
-                    var text = JsonConvert.DeserializeObject<PSO2Text>(jsonData);
+                    var text = JsonSerializer.Deserialize<PSO2Text>(jsonData);
                     WritePSO2TextNIFL(ogName, text);
                     break;
                 case ".aqe": //(Classic for now)
-                    var aqe = JsonConvert.DeserializeObject<AquaEffect>(jsonData);
+                    var aqe = JsonSerializer.Deserialize<AquaEffect>(jsonData);
                     aquaEffect.Add(aqe);
                     WriteClassicNIFLEffect(ogName);
                     aquaEffect.Clear();

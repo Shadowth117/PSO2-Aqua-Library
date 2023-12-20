@@ -185,15 +185,6 @@ namespace AquaModelLibrary.AquaMethods
             return -1;
         }
 
-        public static void AlignReader(BufferedStreamReader streamReader, int align)
-        {
-            //Align to int align
-            while (streamReader.Position() % align > 0)
-            {
-                streamReader.Read<byte>();
-            }
-        }
-
         public static int AlignWriter(List<byte> outBytes, int align)
         {
             //Align to int align
@@ -226,70 +217,6 @@ namespace AquaModelLibrary.AquaMethods
             }
         }
 
-        public static int[] Read4BytesToIntArray(BufferedStreamReader streamReader)
-        {
-            var bytes = Read4Bytes(streamReader);
-            return new int[] { bytes[0], bytes[1], bytes[2], bytes[3] };
-        }
-
-        public static byte[] Read4Bytes(BufferedStreamReader streamReader)
-        {
-            byte[] bytes = new byte[4];
-            for (int byteIndex = 0; byteIndex < 4; byteIndex++) { bytes[byteIndex] = streamReader.Read<byte>(); }
-
-            return bytes;
-        }
-
-        public static ushort[] Read4UShorts(BufferedStreamReader streamReader)
-        {
-            ushort[] ushorts = new ushort[4];
-            for (int ushortIndex = 0; ushortIndex < 4; ushortIndex++) { ushorts[ushortIndex] = streamReader.Read<ushort>(); }
-
-            return ushorts;
-        }
-
-        public static short[] Read4Shorts(BufferedStreamReader streamReader)
-        {
-            short[] shorts = new short[4];
-            for (int shortIndex = 0; shortIndex < 4; shortIndex++) { shorts[shortIndex] = streamReader.Read<short>(); }
-
-            return shorts;
-        }
-
-        public static short[] Read2Shorts(BufferedStreamReader streamReader)
-        {
-            short[] shorts = new short[2];
-            for (int shortIndex = 0; shortIndex < 2; shortIndex++) { shorts[shortIndex] = streamReader.Read<short>(); }
-
-            return shorts;
-        }
-
-        public static ushort[] Read2Ushorts(BufferedStreamReader streamReader)
-        {
-            ushort[] shorts = new ushort[2];
-            for (int shortIndex = 0; shortIndex < 2; shortIndex++) { shorts[shortIndex] = streamReader.Read<ushort>(); }
-
-            return shorts;
-        }
-
-        public static Vector2 UshortsToVector2(ushort[] ushorts)
-        {
-            return new Vector2((float)((double)ushorts[0] / ushort.MaxValue), (float)((double)ushorts[1] / ushort.MaxValue));
-        }
-
-        public static float[] VectorAsArray(Vector3 vec3)
-        {
-            return new float[] { vec3.X, vec3.Y, vec3.Z };
-        }
-
-        public static Matrix4x4 ReadMatrix4(BufferedStreamReader streamReader)
-        {
-            return new Matrix4x4(streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(),
-                streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(),
-                streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(),
-                streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>());
-        }
-
         //This shouldn't be necessary, but library binding issues in maxscript necessitated it over the Reloaded.Memory implementation. System.Runtime.CompilerServices.Unsafe causes errors otherwise.
         //Borrowed from: https://stackoverflow.com/questions/42154908/cannot-take-the-address-of-get-the-size-of-or-declare-a-pointer-to-a-managed-t
         private static byte[] ConvertStruct<T>(ref T str) where T : struct
@@ -308,111 +235,6 @@ namespace AquaModelLibrary.AquaMethods
             return ConvertStruct(ref str);
         }
 
-        public static string ReadCStringPSZ(BufferedStreamReader streamReader)
-        {
-            var blockSize = 0x60;
-            var pos = streamReader.Position();
-            var strLen = streamReader.BaseStream().Length;
-            if (strLen <= pos + blockSize)
-            {
-                blockSize = (int)(strLen - pos);
-            }
-            //Past end of file
-            if (blockSize <= 0)
-            {
-                return null;
-            }
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
-            if(str.IndexOf(char.MinValue) == -1)
-            {
-                return str.Remove(str.IndexOf((char)0xA));
-            } 
-            return str.Remove(str.IndexOf(char.MinValue));
-        }
-
-        public static string ReadCString(BufferedStreamReader streamReader, int blockSize = 0x100)
-        {
-            var pos = streamReader.Position();
-            var strLen = streamReader.BaseStream().Length;
-            if (strLen <= pos + blockSize)
-            {
-                blockSize = (int)(strLen - pos);
-            }
-            //Past end of file
-            if(blockSize <= 0)
-            {
-                return null;
-            }
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(pos, blockSize)); //Shouldn't ever be more than 0x60... in theory
-            return str.Remove(str.IndexOf(char.MinValue));
-        }
-
-        public static string ReadCStringSeek(BufferedStreamReader streamReader, int blockSize = 0x100)
-        {
-            var pos = streamReader.Position();
-            var strLen = streamReader.BaseStream().Length;
-            if (strLen <= pos + blockSize)
-            {
-                blockSize = (int)(strLen - pos);
-            }
-            //Past end of file
-            if (blockSize <= 0)
-            {
-                return null;
-            }
-            string str = Encoding.ASCII.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
-            var minVal = str.IndexOf(char.MinValue);
-            streamReader.Seek(minVal + 1, SeekOrigin.Current);
-            return str.Remove(minVal);
-        }
-
-        public static string ReadUTF8String(BufferedStreamReader streamReader, int blockSize = 0x100)
-        {
-            var pos = streamReader.Position();
-            var strLen = streamReader.BaseStream().Length;
-            if (strLen <= pos + blockSize)
-            {
-                blockSize = (int)(strLen - pos);
-            }
-            //Past end of file
-            if (blockSize <= 0)
-            {
-                return null;
-            }
-            string str = Encoding.UTF8.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize)); //Shouldn't ever be more than 0x60... in theory
-            return str.Remove(str.IndexOf(char.MinValue));
-        }
-
-        public static string ReadUTF16String(BufferedStreamReader streamReader, long end, bool quickMode = true, int blockSize = 0x60)
-        {
-            var pos = streamReader.Position();
-            var strLen = streamReader.BaseStream().Length;
-            if (strLen <= pos + blockSize)
-            {
-                blockSize = (int)(strLen - pos);
-            }
-            //Past end of file
-            if (blockSize <= 0)
-            {
-                return null;
-            }
-            string str;
-            // There's really no string limit, but it takes a long time to read these accurately. To avoid this attempt reading a short amount first. Then, go to failsafe if needed.
-            if (quickMode == true)
-            {
-                str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), blockSize));
-                int strEnd = str.IndexOf(char.MinValue);
-
-                //Return the string if the buffer is valid
-                if (strEnd != -1)
-                {
-                    return str.Remove(strEnd);
-                }
-            }
-            str = Encoding.Unicode.GetString(streamReader.ReadBytes(streamReader.Position(), (int)(end - streamReader.Position()))); //Come up with a better way handling sometime because I hate this.
-            return str.Remove(str.IndexOf(char.MinValue));
-        }
-
         public static byte[] RemoveIceEnvelope(byte[] inData)
         {
             byte[] outData;
@@ -423,7 +245,7 @@ namespace AquaModelLibrary.AquaMethods
             return outData;
         }
 
-        //Toggle to hopefully enable console version support?
+        //Toggle to enable console version support
         public static bool useFileNameHash = true;
 
         public static string GetFileHash(string str)

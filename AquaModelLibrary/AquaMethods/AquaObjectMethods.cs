@@ -1,17 +1,13 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AquaModelLibrary.AquaStructs.AquaObjectExtras;
+using AquaModelLibrary.AquaStructs.NGSShaderPresets;
+using AquaModelLibrary.Helpers.Math;
+using Reloaded.Memory.Streams;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows;
-using SystemHalf;
-using AquaModelLibrary.AquaStructs.NGSShaderPresets;
-using AquaModelLibrary.AquaStructs.AquaObjectExtras;
-using static AquaModelLibrary.AquaObject;
 using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
-using System.Diagnostics;
+using static AquaModelLibrary.AquaObject;
+using Half = SystemHalf.Half;
 
 namespace AquaModelLibrary
 {
@@ -23,7 +19,7 @@ namespace AquaModelLibrary
         {
             model.vtxlList = new List<VTXL>();
 
-            for(int mesh = 0; mesh < model.tempTris.Count; mesh++)
+            for (int mesh = 0; mesh < model.tempTris.Count; mesh++)
             {
                 //Set up a new VTXL based on an existing sample in order to figure optimize a bit for later.
                 //For the sake of simplicity, we assume that vertex IDs for this start from 0 and end at the vertex count - 1. 
@@ -31,23 +27,23 @@ namespace AquaModelLibrary
                 List<bool> vtxlCheck = new List<bool>(new bool[model.tempTris[mesh].vertCount]);
 
                 //Set up classic bone palette
-                for(int b = 0; b < model.tempTris[mesh].bonePalette.Count; b++)
+                for (int b = 0; b < model.tempTris[mesh].bonePalette.Count; b++)
                 {
                     vtxl.bonePalette.Add((ushort)model.tempTris[mesh].bonePalette[b]);
                 }
 
                 //Go through the faces, set vertices in at their index unless they're a duplicate index with different data. 
-                for (int face = 0;  face < model.tempTris[mesh].triList.Count; face++)
+                for (int face = 0; face < model.tempTris[mesh].triList.Count; face++)
                 {
-                    for(int faceVert = 0; faceVert < 3; faceVert++)
+                    for (int faceVert = 0; faceVert < 3; faceVert++)
                     {
                         int vertIndex = model.tempTris[mesh].faceVerts[face].rawVertId[faceVert];
 
                         //Handle if for whatever reason we have more vertices than expected
-                        if(vertIndex > (vtxlCheck.Count - 1))
+                        if (vertIndex > (vtxlCheck.Count - 1))
                         {
                             vtxlCheck.AddRange(new bool[vertIndex - (vtxlCheck.Count - 1)]);
-                        } 
+                        }
 
                         if (vertIndex > (vtxl.vertPositions.Count - 1))
                         {
@@ -84,7 +80,7 @@ namespace AquaModelLibrary
                 }
 
                 //Loop through and check for missing vertices/isolated vertices. Proceed to dummy these out as a failsafe for later access.
-                for(int i = 0; i < vtxl.vertPositions.Count; i++)
+                for (int i = 0; i < vtxl.vertPositions.Count; i++)
                 {
                     if (vtxl.vertNormals.Count > 0 && vtxl.vertNormals[i] == null)
                     {
@@ -166,14 +162,15 @@ namespace AquaModelLibrary
 
         public static bool IsEqualByteArray(byte[] bArr0, byte[] bArr1)
         {
-            if(bArr0.Length != bArr1.Length)
+            if (bArr0.Length != bArr1.Length)
             {
                 return false;
-            } else
+            }
+            else
             {
-                for(int i = 0; i < bArr0.Length; i++)
+                for (int i = 0; i < bArr0.Length; i++)
                 {
-                    if(bArr0[i] != bArr1[i])
+                    if (bArr0[i] != bArr1[i])
                     {
                         return false;
                     }
@@ -438,7 +435,7 @@ namespace AquaModelLibrary
             {
                 destinationVTXL.trueVertWeightIndices.Add((int[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone());
             }
-            if(sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
+            if (sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
             {
                 destinationVTXL.edgeVerts.Add((ushort)(destinationVTXL.vertPositions.Count - 1));
             }
@@ -523,16 +520,17 @@ namespace AquaModelLibrary
             int curLength = 0;
             VTXE vtxe = new VTXE();
 
-            if(vtxl.vertPositions.Count > 0)
+            if (vtxl.vertPositions.Count > 0)
             {
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x0, 0x3, curLength));
                 curLength += 0xC;
             }
-            if(vtxl.vertWeightsNGS.Count > 0)
+            if (vtxl.vertWeightsNGS.Count > 0)
             {
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x1, 0x11, curLength));
                 curLength += 0x8;
-            } else if (vtxl.vertWeights.Count > 0)
+            }
+            else if (vtxl.vertWeights.Count > 0)
             {
                 vtxe.vertDataTypes.Add(vtxeElementGenerator(0x1, 0x4, curLength));
                 curLength += 0x10;
@@ -648,7 +646,7 @@ namespace AquaModelLibrary
                             }
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertWeight:
-                            switch(vtxeSet.vertDataTypes[vtxeIndex].structVariation)
+                            switch (vtxeSet.vertDataTypes[vtxeIndex].structVariation)
                             {
                                 case 0x4:
                                     vtxl.vertWeights.Add(streamReader.Read<Vector4>());
@@ -815,14 +813,14 @@ namespace AquaModelLibrary
                 }
 
                 //Ensure for 0xC33 variants that we seek to the end of each entry
-                if(sizeToFill > 0)
+                if (sizeToFill > 0)
                 {
                     streamReader.Seek(startPosition + sizeToFill, System.IO.SeekOrigin.Begin);
                 }
             }
 
             //Process 0xC33 variants for later use
-            if(sizeToFill > 0)
+            if (sizeToFill > 0)
             {
                 vtxl.convertToLegacyTypes();
             }
@@ -898,7 +896,7 @@ namespace AquaModelLibrary
             {
                 for (int vert = 0; vert < vertData[vset].vertPositions.Count; vert++)
                 {
-                    float distance = Extra.MathExtras.Distance(center, vertData[vset].vertPositions[vert]);
+                    float distance = MathExtras.Distance(center, vertData[vset].vertPositions[vert]);
                     if (distance > radius)
                     {
                         radius = distance;
@@ -913,7 +911,7 @@ namespace AquaModelLibrary
 
             return bounds;
         }
-        
+
         //Adapted from this: https://forums.cgsociety.org/t/finding-bi-normals-tangents/975005/8 
         //Binormals and tangents for each face are calculated and each face's values for a particular vertex are summed and averaged for the result before being normalized
         //Though vertex position is used, due to the nature of the normalization applied during the process, resizing is unneeded.
@@ -926,7 +924,7 @@ namespace AquaModelLibrary
             Vector3[][] vertTangentArrays = new Vector3[model.vtxlList.Count][];
             Vector3[][] vertFaceNormalArrays = new Vector3[model.vtxlList.Count][];
             int uvSign = 1;
-            if(flipUv == true)
+            if (flipUv == true)
             {
                 uvSign = -1;
             }
@@ -934,11 +932,12 @@ namespace AquaModelLibrary
             //Get faces depending on model state
             if (model.strips.Count > 0)
             {
-                foreach(var tris in model.strips)
+                foreach (var tris in model.strips)
                 {
                     faces.Add(tris.GetTriangles(true));
                 }
-            } else
+            }
+            else
             {
                 foreach (var tris in model.tempTris)
                 {
@@ -947,7 +946,7 @@ namespace AquaModelLibrary
             }
 
             //Clear before calcing
-            for(int i = 0; i <  model.vtxlList.Count; i++)
+            for (int i = 0; i < model.vtxlList.Count; i++)
             {
                 model.vtxlList[i].vertTangentList.Clear();
                 model.vtxlList[i].vertTangentListNGS.Clear();
@@ -956,23 +955,24 @@ namespace AquaModelLibrary
             }
 
             //Loop through faces and sum the calculated data for each vertice's faces
-            for(int meshIndex = 0; meshIndex < faces.Count; meshIndex++)
+            for (int meshIndex = 0; meshIndex < faces.Count; meshIndex++)
             {
                 int vsetIndex;
                 int psetIndex;
                 //Unlike older aqo variants, NGS models can have a different vsetIndex than their
-                if((model.objc.type >= 0xc31) && model.meshList.Count > 0)
+                if ((model.objc.type >= 0xc31) && model.meshList.Count > 0)
                 {
                     vsetIndex = model.meshList[meshIndex].vsetIndex;
                     psetIndex = model.meshList[meshIndex].psetIndex;
-                } else
+                }
+                else
                 {
                     vsetIndex = meshIndex;
                     psetIndex = meshIndex;
                 }
 
                 //Check if it's null or not since we don't want to overwrite what's there. NGS meshes can share vertex sets
-                if(vertBinormalArrays[vsetIndex] == null)
+                if (vertBinormalArrays[vsetIndex] == null)
                 {
                     vertBinormalArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
                     vertTangentArrays[vsetIndex] = new Vector3[model.vtxlList[vsetIndex].vertPositions.Count];
@@ -1067,7 +1067,7 @@ namespace AquaModelLibrary
                 vertNormalsCheck[i] = true;
             }
 
-            for(int vsetIndex = 0; vsetIndex < vertBinormalArrays.Length; vsetIndex++)
+            for (int vsetIndex = 0; vsetIndex < vertBinormalArrays.Length; vsetIndex++)
             {
                 int vertCount = model.vtxlList[vsetIndex].vertPositions.Count;
 
@@ -1082,12 +1082,12 @@ namespace AquaModelLibrary
                     vertNormalsCheck[vsetIndex] = false;
                     model.vtxlList[vsetIndex].vertNormals = new List<Vector3>(new Vector3[vertCount]);
                 }
-                for(int vert = 0; vert < vertBinormalArrays[vsetIndex].Length; vert++)
+                for (int vert = 0; vert < vertBinormalArrays[vsetIndex].Length; vert++)
                 {
                     model.vtxlList[vsetIndex].vertBinormalList[vert] = Vector3.Normalize(vertBinormalArrays[vsetIndex][vert]);
                     model.vtxlList[vsetIndex].vertTangentList[vert] = Vector3.Normalize(vertTangentArrays[vsetIndex][vert]);
 
-                    if(vertNormalsCheck[vsetIndex] == false || useFaceNormals == true)
+                    if (vertNormalsCheck[vsetIndex] == false || useFaceNormals == true)
                     {
                         model.vtxlList[vsetIndex].vertNormals[vert] = Vector3.Normalize(vertFaceNormalArrays[vsetIndex][vert]);
                     }
@@ -1103,7 +1103,8 @@ namespace AquaModelLibrary
                 if (model.objc.type >= 0xC32)
                 {
                     model.vtxeList[model.vsetList[i].vtxeCount] = ConstructClassicVTXE(model.vtxlList[i], out vertSize);
-                } else
+                }
+                else
                 {
                     model.vtxeList[i] = ConstructClassicVTXE(model.vtxlList[i], out vertSize);
                     vset.vtxeCount = model.vtxeList[i].vertDataTypes.Count;
@@ -1196,7 +1197,7 @@ namespace AquaModelLibrary
                 }
 
                 //Normalize and assign values
-                for(int i = 0; i < vertBinormalArray.Length; i++)
+                for (int i = 0; i < vertBinormalArray.Length; i++)
                 {
                     vertBinormalArray[i] = Vector3.Normalize(vertBinormalArray[i]);
                     vertTangentArray[i] = Vector3.Normalize(vertTangentArray[i]);
@@ -1204,7 +1205,7 @@ namespace AquaModelLibrary
                     model.vtxlList[mesh].vertBinormalList.Add(vertBinormalArray[i]);
                     model.vtxlList[mesh].vertTangentList.Add(vertTangentArray[i]);
 
-                    if(useFaceNormals)
+                    if (useFaceNormals)
                     {
                         vertFaceNormalArray[i] = Vector3.Normalize(vertFaceNormalArray[i]);
 
@@ -1267,7 +1268,8 @@ namespace AquaModelLibrary
                         if (area < 0)
                         {
                             sign = -1;
-                        } else
+                        }
+                        else
                         {
                             sign = 1;
                         }
@@ -1293,7 +1295,8 @@ namespace AquaModelLibrary
                                 vertBinormalArray[faceIndices[i]] = binormal;
                                 vertTangentArray[faceIndices[i]] = tangent;
                                 vertFaceNormalArray[faceIndices[i]] = normal;
-                            } else
+                            }
+                            else
                             {
                                 vertBinormalArray[faceIndices[i]] += binormal;
                                 vertTangentArray[faceIndices[i]] += tangent;
@@ -1407,14 +1410,15 @@ namespace AquaModelLibrary
 
                         //Assign new stripdata
                         stripData newTris;
-                        if(model.objc.type >= 0xC31)
+                        if (model.objc.type >= 0xC31)
                         {
                             newTris = new stripData();
                             newTris.triStrips = tempFaces;
                             newTris.format0xC33 = true;
                             newTris.triIdCount = tempFaces.Count;
                             newTris.faceGroups.Add(tempFaces.Count);
-                        } else
+                        }
+                        else
                         {
                             newTris = new stripData(tempFaces.ToArray());
                             newTris.format0xC33 = false;
@@ -1457,9 +1461,9 @@ namespace AquaModelLibrary
                 }
 
                 //Assign first split back to original slot, assign subsequent splits to end of the list
-                for(int i = 0; i < faceList.Count; i++)
+                for (int i = 0; i < faceList.Count; i++)
                 {
-                    if(i == 0)
+                    if (i == 0)
                     {
                         model.strips[mesh.psetIndex] = faceList[i];
                         continue;
@@ -1483,9 +1487,9 @@ namespace AquaModelLibrary
                     model.vsetList[mesh.vsetIndex] = vset0;
                     model.vtxlList[mesh.vsetIndex] = vtxlList[0];
 
-                    for(int i = 0; i < vtxlList.Count; i++)
+                    for (int i = 0; i < vtxlList.Count; i++)
                     {
-                        if(i == 0)
+                        if (i == 0)
                         {
                             continue;
                         }
@@ -1497,7 +1501,7 @@ namespace AquaModelLibrary
 
                 //Update stripStartCounts for psets
                 var totalStripsShorts = 0;
-                for(int i = 0; i < model.psetList.Count; i++)
+                for (int i = 0; i < model.psetList.Count; i++)
                 {
                     var pset = model.psetList[i];
                     pset.stripStartCount = totalStripsShorts;
@@ -1535,7 +1539,7 @@ namespace AquaModelLibrary
                                 faceVertDict.Add(face.X, vertIndex++);
                                 faceVertIds.Add((int)face.X);
 
-                                if(referenceVTXL.vertWeightIndices.Count > 0)
+                                if (referenceVTXL.vertWeightIndices.Count > 0)
                                 {
                                     for (int bi = 0; bi < referenceVTXL.vertWeightIndices[(int)face.X].Length; bi++)
                                     {
@@ -1607,7 +1611,7 @@ namespace AquaModelLibrary
                             vtxl.bonePalette.AddRange(referenceVTXL.bonePalette);
                         }
                         boneIdList.Add(boneIds);
-                        if(model.meshNames.Count > modelId)
+                        if (model.meshNames.Count > modelId)
                         {
                             outModel.meshNames.Add(model.meshNames[modelId]);
                         }
@@ -1770,7 +1774,7 @@ namespace AquaModelLibrary
                 List<int> usedVerts = new List<int>();
                 for (int f = startFace; f < usedFaceIds.Length; f++)
                 {
-                    if(usedFaceIds[f] != true)
+                    if (usedFaceIds[f] != true)
                     {
                         //Used to watch how many bones are being used so it can be understood where to split the meshes.
                         //These also help to track the bones being used so the edge verts list can be generated. Not sure how important that is, but the game stores it.
@@ -1870,7 +1874,7 @@ namespace AquaModelLibrary
 
         public static void RemoveAllUnusedBones(AquaObject model)
         {
-            for(int i = 0; i < model.vtxlList.Count; i++)
+            for (int i = 0; i < model.vtxlList.Count; i++)
             {
                 RemoveUnusedBones(model.vtxlList[i]);
             }
@@ -1919,7 +1923,8 @@ namespace AquaModelLibrary
                 if (model.vtxlList[i].bonePalette.Count > boneLimit)
                 {
                     SplitByBoneCountTempData(model, outModel, i, boneLimit);
-                } else
+                }
+                else
                 {
                     CloneUnprocessedMesh(model, outModel, i);
                 }
@@ -1944,19 +1949,20 @@ namespace AquaModelLibrary
         {
             List<List<int>> matGroups = new List<List<int>>();
             int matCount = 0;
-            if(model.tempMats.Count > 0)
+            if (model.tempMats.Count > 0)
             {
                 matCount = model.tempMats.Count;
-            } else
+            }
+            else
             {
                 matCount = model.mateList.Count;
             }
-            for(int i = 0; i < matCount; i++)
+            for (int i = 0; i < matCount; i++)
             {
                 matGroups.Add(new List<int>());
             }
 
-            for(int i = 0; i < model.tempTris[meshId].matIdList.Count; i++)
+            for (int i = 0; i < model.tempTris[meshId].matIdList.Count; i++)
             {
                 //create list of face groups based on material data. Assume material ids are preprocessed to fit what will be used for the final AquaObject.
                 matGroups[model.tempTris[meshId].matIdList[i]].Add(i);
@@ -1967,11 +1973,11 @@ namespace AquaModelLibrary
 
         public static void splitOptimizedFaceGroups(AquaObject model, int faceLimit)
         {
-            for(int i = 0; i < model.strips.Count; i++)
+            for (int i = 0; i < model.strips.Count; i++)
             {
                 List<Vector3> tris = model.strips[i].GetTriangles(true);
 
-                if(tris.Count > faceLimit)
+                if (tris.Count > faceLimit)
                 {
 
                 }
@@ -2003,7 +2009,7 @@ namespace AquaModelLibrary
                 {
                     for (int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
                     {
-                        for(int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
+                        for (int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
                         {
                             if (!newBonePalette.Contains((uint)model.vtxlList[i].vertWeightIndices[j][k]))
                             {
@@ -2015,7 +2021,7 @@ namespace AquaModelLibrary
             }
 
             newBonePalette.Sort();
-            if(newBonePalette.Count == 0)
+            if (newBonePalette.Count == 0)
             {
 #if DEBUG
                 Console.WriteLine("No bones to set up");
@@ -2025,15 +2031,16 @@ namespace AquaModelLibrary
             //Reassign indices
             for (int i = 0; i < model.vtxlList.Count; i++)
             {
-                for(int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
+                for (int j = 0; j < model.vtxlList[i].vertWeightIndices.Count; j++)
                 {
                     List<int> usedIds = new List<int>();
                     for (int k = 0; k < model.vtxlList[i].vertWeightIndices[j].Length; k++)
                     {
-                        if(usedIds.Contains(model.vtxlList[i].vertWeightIndices[j][k]))
+                        if (usedIds.Contains(model.vtxlList[i].vertWeightIndices[j][k]))
                         {
                             model.vtxlList[i].vertWeightIndices[j][k] = 0;
-                        } else
+                        }
+                        else
                         {
                             usedIds.Add(model.vtxlList[i].vertWeightIndices[j][k]);
                             model.vtxlList[i].vertWeightIndices[j][k] = newBonePalette.IndexOf(model.bonePalette[model.vtxlList[i].vertWeightIndices[j][k]]);
@@ -2112,15 +2119,15 @@ namespace AquaModelLibrary
 
         public static void CloneUnprocessedMesh(AquaObject model, AquaObject outModel, int meshId)
         {
-            if(model.meshNames.Count > meshId)
+            if (model.meshNames.Count > meshId)
             {
                 outModel.meshNames.Add(model.meshNames[meshId]);
             }
-            if(model.vtxlList.Count > meshId)
+            if (model.vtxlList.Count > meshId)
             {
                 outModel.vtxlList.Add(model.vtxlList[meshId]);
             }
-            if(model.tempTris.Count > meshId)
+            if (model.tempTris.Count > meshId)
             {
                 outModel.tempTris.Add(model.tempTris[meshId]);
             }
@@ -2148,7 +2155,7 @@ namespace AquaModelLibrary
                 for (int v = 0; v < model.vtxlList[m].vertPositions.Count; v++)
                 {
                     Vector3 normals = new Vector3();
-                    if(model.vtxlList[m].vertNormals.Count > 0)
+                    if (model.vtxlList[m].vertNormals.Count > 0)
                     {
                         normals = model.vtxlList[m].vertNormals[v];
                     }
@@ -2176,24 +2183,24 @@ namespace AquaModelLibrary
                     meshCheckArr[m][v] = true;
 
                     //UNRM groups are only valid if there's more than 1, ie more than one vertex linked by position.
-                    if(meshNum.Count > 1)
+                    if (meshNum.Count > 1)
                     {
                         unrm.vertGroupCountCount++;
                         unrm.vertCount += meshNum.Count;
                         unrm.unrmVertGroups.Add(meshNum.Count);
                         unrm.unrmMeshIds.Add(meshNum);
                         unrm.unrmVertIds.Add(vertId);
-                        if(applyNormalAveraging)
+                        if (applyNormalAveraging)
                         {
                             normals = Vector3.Normalize(normals);
-                            for(int i = 0; i < meshNum.Count; i++)
+                            for (int i = 0; i < meshNum.Count; i++)
                             {
                                 model.vtxlList[meshNum[i]].vertNormals[vertId[i]] = normals;
                             }
                         }
                     }
                 }
-                
+
 
             }
 
@@ -2211,16 +2218,17 @@ namespace AquaModelLibrary
             List<ushort> newBonePalette = new List<ushort>();
 
             //Loop through weight indices and gather them as they're stored
-            for(int v = 0; v < vtxl.vertWeightIndices.Count; v++)
+            for (int v = 0; v < vtxl.vertWeightIndices.Count; v++)
             {
                 List<int> usedIds = new List<int>();
-                for(int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
+                for (int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
                 {
                     //Repeat ids shouldn't exist and should be 0ed. Usually a duplicate implies that the original was 0 anyways.
                     if (usedIds.Contains(vtxl.vertWeightIndices[v][vi]))
                     {
                         vtxl.vertWeightIndices[v][vi] = 0;
-                    } else
+                    }
+                    else
                     {
                         usedIds.Add(vtxl.vertWeightIndices[v][vi]);
                         if (!newBonePaletteCheck.Contains(vtxl.vertWeightIndices[v][vi]))
@@ -2243,10 +2251,11 @@ namespace AquaModelLibrary
         public static void WriteVTXL(VTXE vtxe, VTXL vtxl, List<byte> outBytes2, int sizeToFill = -1)
         {
             int padding = 0;
-            if(sizeToFill != -1)
+            if (sizeToFill != -1)
             {
                 padding = sizeToFill - GetVTXESize(vtxe);
-            } else
+            }
+            else
             {
                 padding = 0;
             }
@@ -2261,7 +2270,7 @@ namespace AquaModelLibrary
                             outBytes2.AddRange(ConvertStruct(vtxl.vertPositions[i]));
                             break;
                         case (int)ClassicAquaObject.VertFlags.VertWeight:
-                            switch(vtxe.vertDataTypes[j].structVariation)
+                            switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x4:
                                     outBytes2.AddRange(ConvertStruct(vtxl.vertWeights[i]));
@@ -2567,7 +2576,7 @@ namespace AquaModelLibrary
         public static void GenerateSpecialMaterialParameters(GenericMaterial mat)
         {
             List<string> texNames = new List<string>();
-            switch(mat.specialType)
+            switch (mat.specialType)
             {
                 case "ey":
                 case "eye":
@@ -2607,7 +2616,7 @@ namespace AquaModelLibrary
                 case "bd":
                 case "ba":
                 case "ou":
-                    if(mat.shaderNames == null)
+                    if (mat.shaderNames == null)
                     {
                         mat.shaderNames = new List<string>() { "0100p", "0100" };
                     }
@@ -2743,7 +2752,7 @@ namespace AquaModelLibrary
                     case "pl_body_skin_diffuse.dds":
                         return "rbd_sk";
                     case "pl_body_outer_diffuse.dds":
-                        switch(names[names.Count - 1])
+                        switch (names[names.Count - 1])
                         {
                             case "pl_body_decal.dds":
                                 return "rbd_ou_d";
@@ -2764,7 +2773,7 @@ namespace AquaModelLibrary
         //Used to generate standard materials in which the texture names are used. 
         public static void GenerateMaterial(AquaObject model, GenericMaterial mat, bool ngsMat = false)
         {
-            if(mat.specialType != null)
+            if (mat.specialType != null)
             {
                 GenerateSpecialMaterialParameters(mat);
             }
@@ -2782,47 +2791,50 @@ namespace AquaModelLibrary
 
             //Set up textures
             var shaderKey = $"{mat.shaderNames[0]} {mat.shaderNames[1]}";
-            if(PSO2ShaderTexSetPresets.shaderTexSet.ContainsKey(shaderKey))
+            if (PSO2ShaderTexSetPresets.shaderTexSet.ContainsKey(shaderKey))
             {
                 Dictionary<string, int> setTracker = new Dictionary<string, int>();
                 var set = PSO2ShaderTexSetPresets.shaderTexSet[shaderKey];
                 var info = PSO2ShaderTexInfoPresets.tstaTexSet[shaderKey];
                 string firstTexName; //Base tex string in the case we need to generate the others
-                if(mat.texNames?.Count > 0)
+                if (mat.texNames?.Count > 0)
                 {
                     firstTexName = mat.texNames[0];
-                    if(firstTexName.Contains("_"))
+                    if (firstTexName.Contains("_"))
                     {
                         int _index = -1;
-                        for(int i = firstTexName.Length - 1; i > 0; i--)
+                        for (int i = firstTexName.Length - 1; i > 0; i--)
                         {
-                            if(firstTexName[i] == '_')
+                            if (firstTexName[i] == '_')
                             {
                                 _index = i;
                                 break;
                             }
                         }
-                        if(_index == 0)
+                        if (_index == 0)
                         {
                             firstTexName = "";
-                        } else if(_index != -1)
+                        }
+                        else if (_index != -1)
                         {
                             firstTexName = firstTexName.Substring(0, _index);
                         }
                     }
-                } else
+                }
+                else
                 {
                     firstTexName = "tex";
                 }
-                for(int i = 0; i < set.Count; i++)
+                for (int i = 0; i < set.Count; i++)
                 {
                     var tex = set[i];
                     string curTexStr = "";
-                    if(setTracker.ContainsKey(tex))
+                    if (setTracker.ContainsKey(tex))
                     {
                         int curNum = setTracker[tex] = setTracker[tex] + 1;
                         curTexStr = tex + curNum.ToString();
-                    } else
+                    }
+                    else
                     {
                         curTexStr = tex + "0";
                         setTracker.Add(tex, 0);
@@ -2830,15 +2842,17 @@ namespace AquaModelLibrary
 
                     TEXF texf = new TEXF();
                     TSTA tsta = new TSTA();
-                    if(info.ContainsKey(curTexStr))
+                    if (info.ContainsKey(curTexStr))
                     {
                         tsta = info[curTexStr];
-                    } else
+                    }
+                    else
                     {
-                        if(TSTATypePresets.tstaTypeDict.ContainsKey(curTexStr))
+                        if (TSTATypePresets.tstaTypeDict.ContainsKey(curTexStr))
                         {
                             tsta = TSTATypePresets.tstaTypeDict[curTexStr];
-                        } else
+                        }
+                        else
                         {
                             tsta = TSTATypePresets.defaultPreset;
                         }
@@ -2849,7 +2863,8 @@ namespace AquaModelLibrary
                         tsta.texName.SetString(mat.texNames[i]);
                         texf.texName.SetString(mat.texNames[i]);
                         texName = mat.texNames[i];
-                    } else
+                    }
+                    else
                     {
                         texName = firstTexName + "_" + tex + ".dds";
                         tsta.texName.SetString(texName);
@@ -2859,15 +2874,15 @@ namespace AquaModelLibrary
                     //Make sure the texf list only has unique entries
                     int texId = -1;
                     bool isUniqueTexname = true;
-                    for(int t = 0; t < model.texfList.Count; t++)
+                    for (int t = 0; t < model.texfList.Count; t++)
                     {
                         var tempTex = model.texfList[t];
-                        if(tempTex.texName == texf.texName)
+                        if (tempTex.texName == texf.texName)
                         {
                             isUniqueTexname = false;
                         }
                     }
-                    if(isUniqueTexname)
+                    if (isUniqueTexname)
                     {
                         model.texfList.Add(texf);
                         model.texFUnicodeNames.Add(texName);
@@ -2890,7 +2905,8 @@ namespace AquaModelLibrary
                     }
                     tempTexIds.Add(texId == -1 ? model.texfList.Count - 1 : texId);
                 }
-            } else
+            }
+            else
             {
                 if (mat.texNames != null)
                 {
@@ -2974,7 +2990,7 @@ namespace AquaModelLibrary
             mate.unkFloat1 = mat.unkFloat1;
             mate.unkInt0 = mat.unkInt0;
             mate.unkInt1 = mat.unkInt1;
-            if(mat.blendType == null || mat.blendType == "")
+            if (mat.blendType == null || mat.blendType == "")
             {
                 mat.blendType = "blendalpha";
             }
@@ -2987,18 +3003,18 @@ namespace AquaModelLibrary
             shad.vertexShader.SetString(mat.shaderNames[1]);
 
             //Only in NGS shaders, but in theory could come up in others. Otherwise 0. No idea what this is.
-            if(NGSShaderUnk0ValuesPresets.ShaderUnk0Values.TryGetValue(key, out var unk0Val))
+            if (NGSShaderUnk0ValuesPresets.ShaderUnk0Values.TryGetValue(key, out var unk0Val))
             {
                 shad.unk0 = unk0Val;
             }
 
-            if(ngsMat)
+            if (ngsMat)
             {
                 var ngsShad = shad;
-                if(NGSShaderDetailPresets.NGSShaderDetail.TryGetValue(key, out var detailVal))
+                if (NGSShaderDetailPresets.NGSShaderDetail.TryGetValue(key, out var detailVal))
                 {
                     ngsShad.shadDetail = detailVal;
-                    ngsShad.shadDetailOffset = 1; 
+                    ngsShad.shadDetailOffset = 1;
                 }
                 if (NGSShaderExtraPresets.NGSShaderExtra.TryGetValue(key, out var extraVal))
                 {
@@ -3087,15 +3103,15 @@ namespace AquaModelLibrary
         public static List<string> GetTexListNames(AquaObject model, int tsetIndex)
         {
             List<string> textureList = new List<string>();
-            
+
             //Don't try to read what's not there
-            if(model.tstaList.Count == 0 || model.tstaList == null)
+            if (model.tstaList.Count == 0 || model.tstaList == null)
             {
                 return textureList;
             }
             TSET tset = model.tsetList[tsetIndex];
 
-            for (int index = 0; index < tset.tstaTexIDs.Count; index++) 
+            for (int index = 0; index < tset.tstaTexIDs.Count; index++)
             {
                 int texIndex = tset.tstaTexIDs[index];
                 if (texIndex != -1)
@@ -3129,16 +3145,16 @@ namespace AquaModelLibrary
                     var name = tsta.texName.GetString();
 
                     bool skip = false;
-                    foreach(var str in model.texFUnicodeNames)
+                    foreach (var str in model.texFUnicodeNames)
                     {
-                        if(str.StartsWith(name))
+                        if (str.StartsWith(name))
                         {
                             textureList.Add(str);
                             skip = true;
                             break;
                         }
                     }
-                    if(skip == true)
+                    if (skip == true)
                     {
                         continue;
                     }
@@ -3176,22 +3192,22 @@ namespace AquaModelLibrary
 
         public static string RemoveBlendersShitDuplicateDenoterAndAssimpDuplicate(string name)
         {
-            if(name.Length < 5)
+            if (name.Length < 5)
             {
                 return name;
             }
-            if(name[name.Length - 4] == '.')
+            if (name[name.Length - 4] == '.')
             {
                 return name.Substring(0, name.Length - 4);
             }
-            if(name[name.Length - 1] == ')')
+            if (name[name.Length - 1] == ')')
             {
-                if(name.Contains('('))
+                if (name.Contains('('))
                 {
                     int index = name.Length - 1;
-                    for(int i = name.Length - 1; i > 0; i--)
+                    for (int i = name.Length - 1; i > 0; i--)
                     {
-                        if(name[i] == '(')
+                        if (name[i] == '(')
                         {
                             index = i;
                             break;
@@ -3218,21 +3234,21 @@ namespace AquaModelLibrary
 
             //Get shader names
             string[] nameArr = name.Split(')');
-            if(nameArr.Length > 1)
+            if (nameArr.Length > 1)
             {
                 string shaderText = nameArr[0].Split('(')[1];
                 var shaderSet = shaderText.Split(',');
-                if(shaderSet.Length >= 2)
+                if (shaderSet.Length >= 2)
                 {
                     shaderNames.Add(shaderSet[0]);
                     shaderNames.Add(shaderSet[1]);
                     name = nameArr[1];
                 }
             }
-            
+
             //Get alpha type
             nameArr = name.Split('}');
-            if(nameArr.Length > 1)
+            if (nameArr.Length > 1)
             {
                 alphaType = nameArr[0].Split('{')[1];
                 name = nameArr[1];
@@ -3249,11 +3265,11 @@ namespace AquaModelLibrary
             //Get two-sided and alphaCutoff
             nameArr = name.Split('@');
             name = nameArr[0];
-            if(nameArr.Length > 1)
+            if (nameArr.Length > 1)
             {
-                for(int i = 1; i < nameArr.Length; i++)
+                for (int i = 1; i < nameArr.Length; i++)
                 {
-                    switch(i)
+                    switch (i)
                     {
                         case 1:
                             twoSided = Int32.Parse(nameArr[i]);
