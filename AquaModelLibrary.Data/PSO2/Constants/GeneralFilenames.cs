@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AquaModelLibrary.Data.PSO2.Constants
+﻿namespace AquaModelLibrary.Data.PSO2.Constants
 {
     public static class GeneralFilenames
     {

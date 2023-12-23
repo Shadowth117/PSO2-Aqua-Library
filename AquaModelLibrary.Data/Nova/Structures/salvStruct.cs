@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AquaModelLibrary.Nova.Structures
+﻿namespace AquaModelLibrary.Nova.Structures
 {
     public class salvStruct
     {
@@ -22,7 +16,7 @@ namespace AquaModelLibrary.Nova.Structures
         public byte vertDef5;
         public byte vertDef6;
         public byte vertDef7;
-        
+
         public int vertLen;
         public int int_1C;
 

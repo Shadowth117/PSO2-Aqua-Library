@@ -1,8 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Text;
 
 namespace AquaModelLibrary.NNStructs.Structures
@@ -22,29 +18,33 @@ namespace AquaModelLibrary.NNStructs.Structures
 
         public static List<string> ReadNNT(string filePath)
         {
-            return ReadFile(filePath);
+            return ReadFile(File.ReadAllBytes(filePath));
+        }
+        public static List<string> ReadNNT(byte[] file)
+        {
+            return ReadFile(file);
         }
 
-        private static List<string> ReadFile(string filePath)
+        private static List<string> ReadFile(byte[] file)
         {
             List<NNTextureListEntry> entries = new List<NNTextureListEntry>();
             List<int> nameOffsetList = new List<int>();
             var nameList = new List<string>();
-            BufferedStreamReader sr = new BufferedStreamReader(new MemoryStream(File.ReadAllBytes(filePath)), 8192);
+            BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(new MemoryStream(file));
             int offset = 0;
             offset = ReadBytes(entries, nameOffsetList, nameList, sr, offset);
 
             return nameList;
         }
 
-        private static int ReadBytes(List<NNTextureListEntry> entries, List<int> nameOffsetList, List<string> nameList, BufferedStreamReader sr, int offset)
+        private static int ReadBytes(List<NNTextureListEntry> entries, List<int> nameOffsetList, List<string> nameList, BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
             var magic = Encoding.ASCII.GetString(sr.ReadBytes(0, 4));
             sr.Seek(4, SeekOrigin.Begin);
             var len = sr.Read<int>();
             offset = len;
             sr.Seek(len, SeekOrigin.Begin);
-            
+
             sr.Seek(8, SeekOrigin.Current);
             //Find out if we're reading a big endian file. Before this is consistently little endian
             bool isBE = sr.Peek<int>() > 0xFFFF;
@@ -78,7 +78,7 @@ namespace AquaModelLibrary.NNStructs.Structures
             foreach (var nameOffset in nameOffsetList)
             {
                 sr.Seek(offset + nameOffset, SeekOrigin.Begin);
-                nameList.Add(AquaGeneralMethods.ReadCString(sr));
+                nameList.Add(sr.ReadCString());
             }
 
             return offset;

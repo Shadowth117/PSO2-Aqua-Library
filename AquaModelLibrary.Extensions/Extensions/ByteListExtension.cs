@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Core.Extensions
+﻿using System.ComponentModel.Design;
+
+namespace AquaModelLibrary.Core.Extensions
 {
     public static class ByteListExtension
     {
@@ -225,7 +227,7 @@
             outBytes.AddRange(newBytes);
         }
 
-        public static int AlignWrite(this List<byte> outBytes, int alignmentValue, byte fillValue = 0)
+        public static int AlignWriter(this List<byte> outBytes, int alignmentValue, byte fillValue = 0)
         {
             //Align to int align
             int currentCount = outBytes.Count % alignmentValue;
@@ -248,6 +250,56 @@
             }
 
             return 0;
+        }
+
+        public static int AlignFileEndWriter(this List<byte> outBytes, int alignmentValue, byte fillValue = 0)
+        {
+            //Align to int align
+            int currentCount = outBytes.Count % alignmentValue;
+            if (currentCount > 0)
+            {
+                int additions = alignmentValue - currentCount;
+                var bytes = new byte[additions];
+
+                //Fill with whatever is in fillValue that's not 0
+                if (fillValue != 0)
+                {
+                    for (int i = 0; i < bytes.Length; i++)
+                    {
+                        bytes[i] = fillValue;
+                    }
+                }
+                outBytes.AddRange(bytes);
+
+                return additions;
+            } else
+            {
+                for (int i = 0; i < 0x10; i++)
+                {
+                    outBytes.Add(0);
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Mainly for handling pointer offsets. Better handled by Reserve and Fill extensions in most cases. 
+        /// </summary>
+        public static int SetByteListInt(this List<byte> outBytes, int offset, int value)
+        {
+            if (offset != -1)
+            {
+                var newBytes = BitConverter.GetBytes(value);
+                for (int i = 0; i < 4; i++)
+                {
+                    outBytes[offset + i] = newBytes[i];
+                }
+
+                return value;
+            }
+
+            return -1;
         }
     }
 }

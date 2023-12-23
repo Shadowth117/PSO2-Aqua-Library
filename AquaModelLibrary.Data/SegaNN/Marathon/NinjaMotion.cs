@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary;
+using AquaModelLibrary.Extensions.Readers;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace Marathon.Formats.Mesh.Ninja
         public void Read(byte[] bytes)
         {
             using (MemoryStream ms = new MemoryStream(bytes))
-            using (BufferedStreamReader reader = new BufferedStreamReader(ms, 8192))
+            using (BufferedStreamReaderBE<MemoryStream> reader = new(ms))
             {
                 int magic = reader.Read<int>();
                 int fileSize = reader.Read<int>();

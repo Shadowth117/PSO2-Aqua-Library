@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UnluacNET</name>
+    </assembly>
+    <members>
+        <member name="F:UnluacNET.OpArgMask.OpArgN">
+            <summary>
+            Argument is not used.
+            </summary>
+        </member>
+        <member name="F:UnluacNET.OpArgMask.OpArgU">
+            <summary>
+            Argument is used.
+            </summary>
+        </member>
+        <member name="F:UnluacNET.OpArgMask.OpArgR">
+            <summary>
+            Argument is a register or a jump offset.
+            </summary>
+        </member>
+        <member name="F:UnluacNET.OpArgMask.OpArgK">
+            <summary>
+            Argument is a constant or register/constant.
+            </summary>
+        </member>
+    </members>
+</doc>

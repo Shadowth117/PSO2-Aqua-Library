@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AquaModelLibrary.Data.PSO2.Aqua.Presets
+﻿namespace AquaModelLibrary.Data.PSO2.Aqua.Presets
 {
     public class ShaderPresetDefaults
     {

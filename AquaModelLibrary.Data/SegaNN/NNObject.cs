@@ -1,10 +1,12 @@
-﻿using AquaModelLibrary.NNStructs.Structures;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers;
+using AquaModelLibrary.NNStructs.Structures;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 using System.Text;
 using static Vector3Integer.Vector3Int;
@@ -21,8 +23,8 @@ namespace AquaModelLibrary
         public bool usesMysterObject = false;
         public List<string> texList = new List<string>();
         public AquaNode nodes = null; //Technically not the same, but it's close enough we can store everything PSU really has here
-        public List<NN_NODE> NNNodes = new List<NN_NODE>(); 
-        public List<AquaObject.VTXL> vtxlList = new List<AquaObject.VTXL>();
+        public List<NN_NODE> NNNodes = new List<NN_NODE>();
+        public List<VTXL> vtxlList = new List<VTXL>();
         public List<NNS_MeshSetInfo> meshInfoList = new List<NNS_MeshSetInfo>();
         public List<List<NNS_MeshSet>> meshListList = new List<List<NNS_MeshSet>>();
         public List<XNJMaterial> materials = new List<XNJMaterial>();
@@ -37,7 +39,7 @@ namespace AquaModelLibrary
         public const string NXNN = "NXNN"; //NX Node Names
         public const string NXOB = "NXOB"; //NX Object
 
-        public BufferedStreamReader streamReader = null;
+        public BufferedStreamReaderBE<MemoryStream> streamReader = null;
         public int offset = 0;
 
         //XNJ is incredibly similar to XNO, but not quite the same
@@ -45,7 +47,7 @@ namespace AquaModelLibrary
         {
             var fileData = File.ReadAllBytes(filePath);
             fileData = GetNXOB(fileData);
-            streamReader = new BufferedStreamReader(new MemoryStream(fileData), 8192);
+            streamReader = new BufferedStreamReaderBE<MemoryStream>(new MemoryStream(fileData));
 
             var magic = Encoding.ASCII.GetString(streamReader.ReadBytes(0, 4));
             offset = GetNNOffset();
@@ -58,7 +60,7 @@ namespace AquaModelLibrary
 
             streamReader.Seek(offset + headerOffset, SeekOrigin.Begin);
             header = streamReader.Read<XNJHeader>();
-            if (streamReader.Position() < vertDataOffset && streamReader.Position() + 3 < fileData.Length)
+            if (streamReader.Position < vertDataOffset && streamReader.Position + 3 < fileData.Length)
             {
                 usesMysterObject = true;
                 mysteryObject = streamReader.Read<MysteryObject>();
@@ -84,7 +86,7 @@ namespace AquaModelLibrary
             {
                 return bytes;
             }
-            while(magic != "NXOB" && magic != "NYOB" && magic != "NXR\0" && magic != "NYR\0")
+            while (magic != "NXOB" && magic != "NYOB" && magic != "NXR\0" && magic != "NYR\0")
             {
                 switch (magic)
                 {
@@ -122,7 +124,7 @@ namespace AquaModelLibrary
             for (int i = 0; i < materials.Count; i++)
             {
                 var curMat = materials[i];
-                AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
+                GenericMaterial genMat = new GenericMaterial();
                 genMat.diffuseRGBA = new Vector4(1, 1, 1, 1);
                 genMat.matName = $"PSUMaterial_{i}";
                 genMat.texNames = new List<string>();
@@ -146,7 +148,7 @@ namespace AquaModelLibrary
                     aqp.meshNames.Add($"meshgroup_{i}_{j}");
                     var group = meshListList[i][j].vtxlId;
                     var matId = meshListList[i][j].materialId;
-                    AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                    GenericTriangles genMesh = new GenericTriangles();
                     genMesh.vertCount = vtxlList[group].vertPositions.Count;
 
                     //Generate strips
@@ -183,15 +185,15 @@ namespace AquaModelLibrary
                                     continue;
                                 }
 
-                                AquaObject.VTXL vtxl = new AquaObject.VTXL();
+                                VTXL vtxl = new VTXL();
                                 var prevListCount = vtxlList[group].vertPositions.Count;
-                                if(prevListCount < face.X || prevListCount < face.Y || prevListCount < face.Z)
+                                if (prevListCount < face.X || prevListCount < face.Y || prevListCount < face.Z)
                                 {
                                     throw new Exception();
                                 }
-                                AquaObjectMethods.appendVertex(vtxlList[group], vtxl, (int)face.X);
-                                AquaObjectMethods.appendVertex(vtxlList[group], vtxl, (int)face.Y);
-                                AquaObjectMethods.appendVertex(vtxlList[group], vtxl, (int)face.Z);
+                                VTXL.appendVertex(vtxlList[group], vtxl, (int)face.X);
+                                VTXL.appendVertex(vtxlList[group], vtxl, (int)face.Y);
+                                VTXL.appendVertex(vtxlList[group], vtxl, (int)face.Z);
                                 vtxl.rawVertId.Add((int)face.X);
                                 vtxl.rawVertId.Add((int)face.Y);
                                 vtxl.rawVertId.Add((int)face.Z);
@@ -252,7 +254,7 @@ namespace AquaModelLibrary
 
                 var stripLenList = new List<ushort>();
                 streamReader.Seek(offset + indexList.lengthOffset, SeekOrigin.Begin);
-                for(int lenEntry = 0; lenEntry < indexList.stripCount; lenEntry++)
+                for (int lenEntry = 0; lenEntry < indexList.stripCount; lenEntry++)
                 {
                     stripLenList.Add(streamReader.Read<ushort>());
                 }
@@ -293,28 +295,28 @@ namespace AquaModelLibrary
                     //NXR or NXOB
                     case 0x52584E:
                         keepChecking = false;
-                        nxOffset -= (int)streamReader.Position() - nxOffset - 0x4;
+                        nxOffset -= (int)streamReader.Position - nxOffset - 0x4;
                         modelFound = true;
                         break;
                     case 0x424F584E:
                         keepChecking = false;
-                        nxOffset -= (int)streamReader.Position() - nxOffset - 0x4;
+                        nxOffset -= (int)streamReader.Position - nxOffset - 0x4;
                         modelFound = true;
                         break;
                     //NXTL
                     case 0x4C54584E:
                         keepChecking = false;
-                        nxOffset -= (int)streamReader.Position() - nxOffset - 0x4;
+                        nxOffset -= (int)streamReader.Position - nxOffset - 0x4;
                         break;
                     //NXNN
                     case 0x4E4E584E:
                         keepChecking = false;
-                        nxOffset -= (int)streamReader.Position() - nxOffset - 0x4;
+                        nxOffset -= (int)streamReader.Position - nxOffset - 0x4;
                         break;
                     //NXEF
                     case 0x4645584E:
                         keepChecking = false;
-                        nxOffset -= (int)streamReader.Position() - nxOffset - 0x4;
+                        nxOffset -= (int)streamReader.Position - nxOffset - 0x4;
                         break;
                 }
             } while (keepChecking == true);
@@ -402,7 +404,7 @@ namespace AquaModelLibrary
                 if (secondSubAddrUncalculated + offset != 0)
                 {
                     streamReader.Seek(offset + secondSubAddr, SeekOrigin.Begin);
-                    mat.materialD3DRenderFlagsUnparsed = streamReader.ReadBytes(streamReader.Position(), 0x40);
+                    mat.materialD3DRenderFlagsUnparsed = streamReader.ReadBytes(streamReader.Position, 0x40);
                     mat.renderData = new RenderValues(mat.materialD3DRenderFlagsUnparsed);
                 }
 
@@ -450,15 +452,15 @@ namespace AquaModelLibrary
                 var vset = streamReader.Read<NNVertexSet>();
                 vsets.Add(vset);
 
-                AquaObject.VTXL vtxl = ReadXNJVTXL(vset);
+                VTXL vtxl = ReadXNJVTXL(vset);
 
                 vtxlList.Add(vtxl);
             }
         }
 
-        public AquaObject.VTXL ReadXNJVTXL(NNVertexSet vset)
+        public VTXL ReadXNJVTXL(NNVertexSet vset)
         {
-            AquaObject.VTXL vtxl = new AquaObject.VTXL();
+            VTXL vtxl = new VTXL();
 
             //Get BonePalette
             streamReader.Seek(offset + vset.bonePaletteOffset, SeekOrigin.Begin);
@@ -501,13 +503,13 @@ namespace AquaModelLibrary
                 if ((vset.vertFormat & (int)XNJVertexFlags.HasColors) > 0)
                 {
                     calcedSize += 0x4;
-                    vtxl.vertColors.Add(streamReader.ReadBytes(streamReader.Position(), 4));
+                    vtxl.vertColors.Add(streamReader.ReadBytes(streamReader.Position, 4));
                     streamReader.Seek(4, SeekOrigin.Current);
                 }
                 if ((vset.vertFormat & (int)XNJVertexFlags.HasAlpha) > 0)
                 {
                     calcedSize += 0x4;
-                    vtxl.vertColor2s.Add(streamReader.ReadBytes(streamReader.Position(), 4));
+                    vtxl.vertColor2s.Add(streamReader.ReadBytes(streamReader.Position, 4));
                     streamReader.Seek(4, SeekOrigin.Current);
                 }
                 for (int uv = 0; uv < uvCount; uv++)
@@ -553,7 +555,7 @@ namespace AquaModelLibrary
                 }
             }
             nodes = new AquaNode();
-            Dictionary<int, AquaNode.NODE> nodeDict = new Dictionary<int, AquaNode.NODE>();
+            Dictionary<int, NODE> nodeDict = new Dictionary<int, NODE>();
             Dictionary<int, int> nodeIntDict = new Dictionary<int, int>();
             NNNodes = new List<NN_NODE>();
 
@@ -561,7 +563,7 @@ namespace AquaModelLibrary
             for (int i = 0; i < header.boneCount; i++)
             {
                 var nnNode = streamReader.Read<NN_NODE>();
-                AquaNode.NODE node = new AquaNode.NODE();
+                NODE node = new NODE();
                 if (boneNames?.Count > i)
                 {
                     node.boneName.SetString(boneNames[i]);
@@ -591,7 +593,7 @@ namespace AquaModelLibrary
                 node.m4 = nnNode.m4;
 
                 List<byte> nodeBytes = new List<byte>();
-                nodeBytes.AddRange(Reloaded.Memory.Struct.GetBytes(nnNode.NODE_CENTER));
+                nodeBytes.AddRange(MiscHelpers.ConvertStruct(nnNode.NODE_CENTER));
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_RADIUS));
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_BBXSIZE));
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_BBYSIZE));

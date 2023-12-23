@@ -1,6 +1,4 @@
 ﻿//THANK YOU HYPER: https://github.com/Big-Endian-32/Marathon/blob/d1f08c25507a9396a8ae716400c5a133658eeff3/Marathon/Formats/Mesh/Ninja/NinjaFlags.cs
-using System;
-
 namespace Marathon.Formats.Mesh.Ninja
 {
     /* Taken from a mixture of Rad's research and the Sonic 4 decompilation.

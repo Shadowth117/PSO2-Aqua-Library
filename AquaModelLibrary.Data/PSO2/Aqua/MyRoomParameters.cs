@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AquaModelLibrary.AquaStructs
+﻿namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class MyRoomParameters : AquaCommon
     {
@@ -14,12 +8,12 @@ namespace AquaModelLibrary.AquaStructs
         public class RoomGoodsObject
         {
             public RoomGoods goods;
-            public string categoryString;
-            public string allString;
-            public string categoryString2;
-            public string functionString;
-            public string motionType;
-            public string unknownString;
+            public string categoryString = null;
+            public string allString = null;
+            public string categoryString2 = null;
+            public string functionString = null;
+            public string motionType = null;
+            public string unknownString = null;
         }
 
         public struct RoomGoods
@@ -45,9 +39,9 @@ namespace AquaModelLibrary.AquaStructs
         public class ChipObject
         {
             public Chip chip;
-            public string objectString;
-            public string unknownString;
-            public string collisionTypeString;
+            public string objectString = null;
+            public string unknownString = null;
+            public string collisionTypeString = null;
         }
 
         public struct Chip

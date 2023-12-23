@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using static AquaModelLibrary.AquaObject;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 
-namespace AquaModelLibrary.AquaStructs.AquaObjectExtras
+namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectExtras
 {
     //All of these should be considered a last resort in the case that the shader ones can't be found
     public class TSTATypePresets

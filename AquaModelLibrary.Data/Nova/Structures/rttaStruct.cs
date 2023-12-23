@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
 
 namespace AquaModelLibrary.Nova.Structures
 {
@@ -14,7 +9,7 @@ namespace AquaModelLibrary.Nova.Structures
         public int len;
         public int int_08;
         public int trueLen;
-        
+
         public PSO2String nodeName;
         public int int_30; //Child node?
         public int meshNodePtr; //Pointer to a mesh group for some nodes

@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 
 namespace AquaModelLibrary.Nova.Structures
 {
     public class MeshDefinitions
     {
         public long oaPos = 0; //Position of the mesh group's __oa struct. A bone correlating to this mesh group's data transforms the mesh data before usage ingame. PSO2 and Nova rarely do anything significant with this.
-        public ydbmStruct ydbmStr; //Container header
-        public ipnbStruct lpnbStr; //Mesh set bone list
-        public ipnbStruct ipnbStr; //Mesh bone list
-        public lxdiStruct lxdiStr; //Face definitions
-        public salvStruct salvStr; //Vert definitions
-        public stamData stam; //Material data
-        public AquaObject.VTXE vtxe = new AquaObject.VTXE();
+        public ydbmStruct ydbmStr = null; //Container header
+        public ipnbStruct lpnbStr = null; //Mesh set bone list
+        public ipnbStruct ipnbStr = null; //Mesh bone list
+        public lxdiStruct lxdiStr = null; //Face definitions
+        public salvStruct salvStr = null; //Vert definitions
+        public stamData stam = null; //Material data
+        public VTXE vtxe = new VTXE();
     }
 }

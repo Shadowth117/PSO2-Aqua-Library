@@ -1,8 +1,5 @@
 ﻿//THANK YOU HYPER AND KNUX https://github.com/Big-Endian-32/Marathon/blob/03a2812cc903241ab65fd21d2270c0680044bc09/Marathon/Formats/Mesh/Ninja/NinjaSubMotion.cs
-using AquaModelLibrary;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+using AquaModelLibrary.Extensions.Readers;
 
 namespace Marathon.Formats.Mesh.Ninja
 {
@@ -31,7 +28,7 @@ namespace Marathon.Formats.Mesh.Ninja
         /// Reads a Ninja Sub Motion entry from a file.
         /// </summary>
         /// <param name="reader">The binary reader for this SegaNN file.</param>
-        public void Read(BufferedStreamReader reader, bool be)
+        public void Read(BufferedStreamReaderBE<MemoryStream> reader, bool be)
         {
             // Read the main data for this Sub Motion.
             Type = (SubMotionType)reader.ReadBE<uint>(be);
@@ -46,7 +43,7 @@ namespace Marathon.Formats.Mesh.Ninja
             uint KeyFrameOffset = reader.ReadBE<uint>(be);
 
             // Save our current position so we can jump back afterwards.
-            long pos = reader.Position();
+            long pos = reader.Position;
 
             // Jump to the list of Keyframes for this sub motion.
             reader.Seek(KeyFrameOffset, System.IO.SeekOrigin.Begin);

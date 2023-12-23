@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class PSO2Text : AquaCommon
     {
@@ -17,7 +12,7 @@ namespace AquaModelLibrary
             public string name;
             public string str;
         }
-        
+
         //For helping with writing
         public struct textPairLocation
         {

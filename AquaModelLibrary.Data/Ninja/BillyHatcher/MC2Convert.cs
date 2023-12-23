@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
+using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;

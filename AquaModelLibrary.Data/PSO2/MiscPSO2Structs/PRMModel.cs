@@ -1,10 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace AquaModelLibrary
 {
@@ -58,7 +52,7 @@ namespace AquaModelLibrary
         public class PRMVert
         {
             public Vector3 pos;
-            public Vector3 normal; 
+            public Vector3 normal;
             public byte[] color;
             public Vector2 uv1;
             public Vector2 uv2;
@@ -83,7 +77,7 @@ namespace AquaModelLibrary
             {
                 pos = vert.pos;
                 color = new byte[4];
-                for(int i = 0; i < 4; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     color[i] = vert.color[i];
                 }
@@ -158,13 +152,14 @@ namespace AquaModelLibrary
                 PRMType04Vert vert = new PRMType04Vert();
                 vert.pos = pos;
                 vert.normal = normal;
-                if(color != null)
+                if (color != null)
                 {
                     for (int i = 0; i < 4; i++)
                     {
                         vert.color[i] = color[i];
                     }
-                } else
+                }
+                else
                 {
                     for (int i = 0; i < 4; i++)
                     {

@@ -1,28 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using static AquaModelLibrary.AquaPackage;
+﻿using AquaModelLibrary.Core.Extensions;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Helpers;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
     public unsafe class TPNTexturePattern
     {
         public AFPBase tpnAFPBase = new AFPBase();
-        public tpnHeader header = new tpnHeader();
-        public List<texSet> texSets = new List<texSet>();
+        public TpnHeader header = new TpnHeader();
+        public List<TexSet> texSets = new List<TexSet>();
         //Header
-        public struct tpnHeader
+        public struct TpnHeader
         {
             public int magic; //tpn
             public int count; //Amount of texture sets in the file
         }
         //Texture Set
-        public struct texSet
+        public struct TexSet
         {
-            public fixed byte setName[0x20]; //Reference for this texture set
-            public fixed byte tex0Name[0x20]; //Tex0
-            public fixed byte tex1Name[0x20]; //Tex1
-            public fixed byte tex2Name[0x20]; //Tex2
-            public fixed byte tex3Name[0x20]; //Tex3
+            public PSO2String setName; //Reference for this texture set
+            public PSO2String tex0Name; //Tex0
+            public PSO2String tex1Name; //Tex1
+            public PSO2String tex2Name; //Tex2
+            public PSO2String tex3Name; //Tex3
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddRange(new byte[] { 0x74, 0x70, 0x6E, 0 });
+            outBytes.AddRange(BitConverter.GetBytes(texSets.Count));
+            foreach(var texSet in texSets)
+            {
+                outBytes.AddRange(MiscHelpers.ConvertStruct(texSet));
+            }
+            outBytes.AlignFileEndWriter(0x10);
+
+            return outBytes.ToArray();
         }
     }
 }

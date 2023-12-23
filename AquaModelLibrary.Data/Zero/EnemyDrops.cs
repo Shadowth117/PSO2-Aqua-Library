@@ -1,4 +1,6 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+using Reloaded.Memory.Streams;
 
 namespace AquaModelLibrary.Zero
 {
@@ -46,7 +48,7 @@ namespace AquaModelLibrary.Zero
             Read(file);
         }
 
-        private void Read(byte[] file)
+        public void Read(byte[] file)
         {
             using (MemoryStream stream = new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader<MemoryStream>(stream))
@@ -55,7 +57,7 @@ namespace AquaModelLibrary.Zero
             }
         }
 
-        private void Read(BufferedStreamReader<MemoryStream> streamReader)
+        public void Read(BufferedStreamReader<MemoryStream> streamReader)
         {
             int offset = 0x20;
             nifl = streamReader.Read<NIFL>();

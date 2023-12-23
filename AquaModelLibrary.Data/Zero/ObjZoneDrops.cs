@@ -20,6 +20,11 @@ namespace AquaModelLibrary.Zero
 
         public ObjZoneDrops(byte[] file)
         {
+            Read(file);
+        }
+
+        public void Read(byte[] file)
+        {
             using (MemoryStream stream = new MemoryStream(file))
             using (var streamReader = new BufferedStreamReader<MemoryStream>(stream))
             {

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AquaModelLibrary.AquaStructs
+﻿namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     //TXL files for pso2 aren't used the same as NN or Ninja due to models always having stringe references to textures
     public class AquaTextureList

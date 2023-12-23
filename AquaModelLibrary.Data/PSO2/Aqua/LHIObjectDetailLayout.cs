@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class LHIObjectDetailLayout : AquaCommon
     {
@@ -35,7 +30,7 @@ namespace AquaModelLibrary
         {
             public float idFloat_0;  //Odd float, seems to reference area ids, but not the area of the file?
             public float idFloat_4;  //Same as above?
-            public float unkFloat_8; 
+            public float unkFloat_8;
             public float field_C;
         }
 

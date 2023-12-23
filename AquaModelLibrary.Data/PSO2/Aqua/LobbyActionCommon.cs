@@ -1,12 +1,6 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AquaModelLibrary.Extensions.Readers;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class LobbyActionCommon : AquaCommon
     {
@@ -64,12 +58,12 @@ namespace AquaModelLibrary
             public int internalName1Offset;
 
             public int lobbyActionIdOffset;
-            public int commonReferenceOffset0; 
+            public int commonReferenceOffset0;
             public int commonReferenceOffset1;
-            public int iceNameOffset;     
+            public int iceNameOffset;
 
-            public int humanAqmOffset;         
-            public int castAqm1Offset;         
+            public int humanAqmOffset;
+            public int castAqm1Offset;
             public int castAqm2Offset;
             public int kmnAqmOffset;
 
@@ -81,24 +75,24 @@ namespace AquaModelLibrary
             public dataBlock rawBlock;
 
             public int unkInt0;
-            public string internalName0;
-            public string chatCommand;
-            public string internalName1;
+            public string internalName0 = null;
+            public string chatCommand = null;
+            public string internalName1 = null;
 
-            public string lobbyActionId;
-            public string commonReference0;
-            public string commonReference1;
+            public string lobbyActionId = null;
+            public string commonReference0 = null;
+            public string commonReference1 = null;
             public int unkOffsetInt0;
 
             public int unkOffsetInt1;
             public int unkOffsetInt2;
-            public string iceName;
-            public string humanAqm;
+            public string iceName = null;
+            public string humanAqm = null;
 
-            public string castAqm1;
-            public string castAqm2;
-            public string kmnAqm;
-            public string vfxIce;
+            public string castAqm1 = null;
+            public string castAqm2 = null;
+            public string kmnAqm = null;
+            public string vfxIce = null;
         }
 
         public class dataBlockFingersData
@@ -106,42 +100,42 @@ namespace AquaModelLibrary
             public dataBlockReboot rawBlock;
 
             public int unkInt0;
-            public string internalName0;
-            public string chatCommand;
-            public string internalName1;
+            public string internalName0 = null;
+            public string chatCommand = null;
+            public string internalName1 = null;
 
-            public string lobbyActionId;
-            public string commonReference0;
-            public string commonReference1;
-            public string iceName;
+            public string lobbyActionId = null;
+            public string commonReference0 = null;
+            public string commonReference1 = null;
+            public string iceName = null;
 
-            public string humanAqm;
-            public string castAqm1;
-            public string castAqm2;
-            public string kmnAqm;
+            public string humanAqm = null;
+            public string castAqm1 = null;
+            public string castAqm2 = null;
+            public string kmnAqm = null;
 
-            public string vfxIce;
+            public string vfxIce = null;
         }
 
-        public static dataBlockData ReadDataBlock(BufferedStreamReader streamReader, int offset, dataBlock offsetBlock)
+        public static dataBlockData ReadDataBlock(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, dataBlock offsetBlock)
         {
             dataBlockData data = new dataBlockData();
 
             data.rawBlock = offsetBlock;
             data.unkInt0 = offsetBlock.unkInt0;
             streamReader.Seek(offsetBlock.internalName0Offset + offset, System.IO.SeekOrigin.Begin);
-            data.internalName0 = AquaGeneralMethods.ReadCString(streamReader);
+            data.internalName0 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.chatCommandOffset + offset, System.IO.SeekOrigin.Begin);
-            data.chatCommand = AquaGeneralMethods.ReadCString(streamReader);
+            data.chatCommand = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.internalName1Offset + offset, System.IO.SeekOrigin.Begin);
-            data.internalName1 = AquaGeneralMethods.ReadCString(streamReader);
+            data.internalName1 = streamReader.ReadCString();
 
             streamReader.Seek(offsetBlock.lobbyActionIdOffset + offset, System.IO.SeekOrigin.Begin);
-            data.lobbyActionId = AquaGeneralMethods.ReadCString(streamReader);
+            data.lobbyActionId = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.commonReferenceOffset0 + offset, System.IO.SeekOrigin.Begin);
-            data.commonReference0 = AquaGeneralMethods.ReadCString(streamReader);
+            data.commonReference0 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.commonReferenceOffset1 + offset, System.IO.SeekOrigin.Begin);
-            data.commonReference1 = AquaGeneralMethods.ReadCString(streamReader);
+            data.commonReference1 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.unkIntOffset0 + offset, System.IO.SeekOrigin.Begin);
             data.unkOffsetInt0 = streamReader.Read<int>();
 
@@ -150,59 +144,57 @@ namespace AquaModelLibrary
             streamReader.Seek(offsetBlock.unkIntOffset2 + offset, System.IO.SeekOrigin.Begin);
             data.unkOffsetInt2 = streamReader.Read<int>();
             streamReader.Seek(offsetBlock.iceNameOffset + offset, System.IO.SeekOrigin.Begin);
-            data.iceName = AquaGeneralMethods.ReadCString(streamReader);
+            data.iceName = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.humanAqmOffset + offset, System.IO.SeekOrigin.Begin);
-            data.humanAqm = AquaGeneralMethods.ReadCString(streamReader);
+            data.humanAqm = streamReader.ReadCString();
 
             streamReader.Seek(offsetBlock.castAqmOffset1 + offset, System.IO.SeekOrigin.Begin);
-            data.castAqm1 = AquaGeneralMethods.ReadCString(streamReader);
+            data.castAqm1 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.castAqmOffset2 + offset, System.IO.SeekOrigin.Begin);
-            data.castAqm2 = AquaGeneralMethods.ReadCString(streamReader);
+            data.castAqm2 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.kmnAqmOffset + offset, System.IO.SeekOrigin.Begin);
-            data.kmnAqm = AquaGeneralMethods.ReadCString(streamReader);
+            data.kmnAqm = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.vfxOffset + offset, System.IO.SeekOrigin.Begin);
-            data.vfxIce = AquaGeneralMethods.ReadCString(streamReader);
+            data.vfxIce = streamReader.ReadCString();
 
             return data;
         }
 
-        public static dataBlockFingersData ReadDataBlockReboot(BufferedStreamReader streamReader, int offset, dataBlockReboot offsetBlock)
+        public static dataBlockFingersData ReadDataBlockReboot(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, dataBlockReboot offsetBlock)
         {
             dataBlockFingersData data = new dataBlockFingersData();
 
             data.rawBlock = offsetBlock;
             data.unkInt0 = offsetBlock.unkInt0;
             streamReader.Seek(offsetBlock.internalName0Offset + offset, System.IO.SeekOrigin.Begin);
-            data.internalName0 = AquaGeneralMethods.ReadCString(streamReader);
+            data.internalName0 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.chatCommandOffset + offset, System.IO.SeekOrigin.Begin);
-            data.chatCommand = AquaGeneralMethods.ReadCString(streamReader);
+            data.chatCommand = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.internalName1Offset + offset, System.IO.SeekOrigin.Begin);
-            data.internalName1 = AquaGeneralMethods.ReadCString(streamReader);
+            data.internalName1 = streamReader.ReadCString();
 
             streamReader.Seek(offsetBlock.lobbyActionIdOffset + offset, System.IO.SeekOrigin.Begin);
-            data.lobbyActionId = AquaGeneralMethods.ReadCString(streamReader);
+            data.lobbyActionId = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.commonReferenceOffset0 + offset, System.IO.SeekOrigin.Begin);
-            data.commonReference0 = AquaGeneralMethods.ReadCString(streamReader);
+            data.commonReference0 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.commonReferenceOffset1 + offset, System.IO.SeekOrigin.Begin);
-            data.commonReference1 = AquaGeneralMethods.ReadCString(streamReader);
+            data.commonReference1 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.iceNameOffset + offset, System.IO.SeekOrigin.Begin);
-            data.iceName = AquaGeneralMethods.ReadCString(streamReader);
+            data.iceName = streamReader.ReadCString();
 
             streamReader.Seek(offsetBlock.humanAqmOffset + offset, System.IO.SeekOrigin.Begin);
-            data.humanAqm = AquaGeneralMethods.ReadCString(streamReader);
+            data.humanAqm = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.castAqm1Offset + offset, System.IO.SeekOrigin.Begin);
-            data.castAqm1 = AquaGeneralMethods.ReadCString(streamReader);
+            data.castAqm1 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.castAqm2Offset + offset, System.IO.SeekOrigin.Begin);
-            data.castAqm2 = AquaGeneralMethods.ReadCString(streamReader);
+            data.castAqm2 = streamReader.ReadCString();
             streamReader.Seek(offsetBlock.kmnAqmOffset + offset, System.IO.SeekOrigin.Begin);
-            data.kmnAqm = AquaGeneralMethods.ReadCString(streamReader);
+            data.kmnAqm = streamReader.ReadCString();
 
             streamReader.Seek(offsetBlock.vfxStrOffset + offset, System.IO.SeekOrigin.Begin);
-            data.vfxIce = AquaGeneralMethods.ReadCString(streamReader);
+            data.vfxIce = streamReader.ReadCString();
 
             return data;
         }
-
-
     }
 }

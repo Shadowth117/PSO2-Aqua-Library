@@ -1,6 +1,5 @@
 ﻿//THANK YOU KNUX https://github.com/Big-Endian-32/Marathon/blob/03a2812cc903241ab65fd21d2270c0680044bc09/Marathon/Formats/Mesh/Ninja/NinjaKeyframe.cs
-using AquaModelLibrary;
-using Reloaded.Memory.Streams;
+using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 
 namespace Marathon.Formats.Mesh.Ninja
@@ -19,7 +18,7 @@ namespace Marathon.Formats.Mesh.Ninja
 
             public float Value { get; set; }
 
-            public void Read(BufferedStreamReader reader, bool be)
+            public void Read(BufferedStreamReaderBE<MemoryStream> reader, bool be)
             {
                 Frame = reader.ReadBE<float>(be);
                 Value = reader.ReadBE<float>(be);
@@ -35,7 +34,7 @@ namespace Marathon.Formats.Mesh.Ninja
 
             public short Value { get; set; }
 
-            public void Read(BufferedStreamReader reader, bool be)
+            public void Read(BufferedStreamReaderBE<MemoryStream> reader, bool be)
             {
                 Frame = reader.ReadBE<short>(be);
                 Value = reader.ReadBE<short>(be);
@@ -51,7 +50,7 @@ namespace Marathon.Formats.Mesh.Ninja
 
             public Vector3 Value { get; set; }
 
-            public void Read(BufferedStreamReader reader, bool be)
+            public void Read(BufferedStreamReaderBE<MemoryStream> reader, bool be)
             {
                 Frame = reader.ReadBE<float>(be);
                 Value = reader.ReadBEV3(be);
@@ -71,7 +70,7 @@ namespace Marathon.Formats.Mesh.Ninja
 
             public ushort Value3 { get; set; }
 
-            public void Read(BufferedStreamReader reader, bool be)
+            public void Read(BufferedStreamReaderBE<MemoryStream> reader, bool be)
             {
                 Frame = reader.ReadBE<short>(be);
                 Value1 = reader.ReadBE<ushort>(be);

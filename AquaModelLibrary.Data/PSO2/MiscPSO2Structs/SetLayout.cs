@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
     public class SetLayout
     {
-        public string fileName;
+        public string fileName = null;
         public SetHeader header;
         public List<EntityString> entityStrings = new List<EntityString>();
         public List<SetEntity> setEntities = new List<SetEntity>();
@@ -37,8 +32,8 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             public int size;
             public PSO2String entity_variant_string0; //PSO2String
             public int int_str1Sum; //Sum of next string length + its size variable
-            public string entity_variant_string1; //utf8 with size
-            public string entity_variant_stringJP; //utf16 with size
+            public string entity_variant_string1 = null; //utf8 with size
+            public string entity_variant_stringJP = null; //utf16 with size
             public int subObjectCount; //Number of objects within this entity. Note objects can contain other objects, namely "edit".
 
             //Variables in .set are super arbitrary. While entities tend to be defined pretty rigidly, nothing says they have to be.

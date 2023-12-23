@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AquaModelLibrary.Nova.Structures
+﻿namespace AquaModelLibrary.Nova.Structures
 {
     public class XgmiStruct
     {
-        public string stamCombinedId; //Id of the fuller texture this mip belongs to
-        public string stamUniqueId; //Unique id of the texture without mip relation
+        public string stamCombinedId = null; //Id of the fuller texture this mip belongs to
+        public string stamUniqueId = null; //Unique id of the texture without mip relation
 
         public int magic;
         public int len;

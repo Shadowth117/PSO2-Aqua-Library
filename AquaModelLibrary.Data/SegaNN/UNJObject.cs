@@ -1,16 +1,17 @@
-﻿using AquaModelLibrary.AquaMethods;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.NNStructs.Structures;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 using System.Text;
 
 namespace AquaModelLibrary.NNStructs
 {
     //UNJ file, found in Phantasy Star Portable, Phantasy Star Portable 2, and Phantasy Star Portable 2 Infinity
+    //Shoudl always be LE because this should only be on the PSP.
     //Credit to Kion and Agrajag for playing around with this format
     public class UNJObject
     {
@@ -20,14 +21,14 @@ namespace AquaModelLibrary.NNStructs
         public const int INT16 = 2;
         public const int FLOAT = 3;
 
-        public BufferedStreamReader streamReader = null;
+        public BufferedStreamReaderBE<MemoryStream> streamReader = null;
         public int offset = 0;
         public UNJHeader header;
         public AquaNode nodes; //Technically not the same, but it's close enough we can store everything PSU really has here
         public Dictionary<int, int> animNodeMap = null;
         public List<byte[]> nodeMetaData = new List<byte[]>();
 
-        public List<AquaObject.VTXL> vtxlList = new List<AquaObject.VTXL>();
+        public List<VTXL> vtxlList = new List<VTXL>();
         public List<UNJMaterial> materials = new List<UNJMaterial>();
         public List<string> texList = new List<string>();
         public List<UNJDrawGroup> drawGroups = new List<UNJDrawGroup>();
@@ -35,10 +36,27 @@ namespace AquaModelLibrary.NNStructs
 
         public void ReadUNJ(string filePath)
         {
-            streamReader = new BufferedStreamReader(new MemoryStream(File.ReadAllBytes(filePath)), 8192);
+            byte[] rawModel = File.ReadAllBytes(filePath);
+            byte[] rawBones = null;
+            byte[] rawTexList = null;
+
+            var bonePath = Path.ChangeExtension(filePath, ".una"); ;
+            if (File.Exists(bonePath))
+            {
+                rawBones = File.ReadAllBytes(bonePath);
+            }
+            var texPath = Path.ChangeExtension(filePath, ".unt");
+            if (File.Exists(texPath))
+            {
+                rawTexList = File.ReadAllBytes(filePath);
+            }
+
+            ReadBones(rawBones);
+            texList = NNTextureList.ReadNNT(rawTexList);
+            streamReader = new BufferedStreamReaderBE<MemoryStream>(new MemoryStream(rawModel));
 
             var magic = Encoding.ASCII.GetString(streamReader.ReadBytes(0, 4));
-            if(magic == "UNJ\0")
+            if (magic == "UNJ\0")
             {
                 streamReader.Seek(4, SeekOrigin.Begin);
                 var len = streamReader.Read<int>();
@@ -53,12 +71,6 @@ namespace AquaModelLibrary.NNStructs
             streamReader.Seek(offset + headerOffset, SeekOrigin.Begin);
             header = streamReader.Read<UNJHeader>();
 
-            var texPath = Path.ChangeExtension(filePath, ".unt");
-            if (File.Exists(texPath))
-            {
-                texList = NNTextureList.ReadNNT(texPath);
-            }
-            ReadBones(Path.ChangeExtension(filePath, ".una"));
             ReadVerts();
             ReadMaterials();
             ReadDrawGroups();
@@ -68,11 +80,11 @@ namespace AquaModelLibrary.NNStructs
         public AquaObject ConvertToBasicAquaobject(out AquaNode aqn)
         {
             List<List<int>> globalVtxlMapping = new List<List<int>>();
-            List<AquaObject.VTXL> newVtxlList = new List<AquaObject.VTXL>();
+            List<VTXL> newVtxlList = new List<VTXL>();
             aqn = nodes;
             AquaObject aqp = new NGSAquaObject();
             aqp.bonePalette = new List<uint>();
-            for(int i = 0; i < aqn.nodeList.Count; i++)
+            for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 aqp.bonePalette.Add((uint)i);
             }
@@ -80,18 +92,18 @@ namespace AquaModelLibrary.NNStructs
             //Optimize vert data
             //Loop through vertices and check if their data matches. If it does, set map to the existing dat in the new vertex list. If not, append and set new mapping accordingly
             //This is done due to massive redundancy from UNJ vertices being listed in tristrip draw order already. 
-            for(int i = 0; i < vtxlList.Count; i++)
+            for (int i = 0; i < vtxlList.Count; i++)
             {
                 var curVtxl = vtxlList[i];
-                AquaObject.VTXL newVtxl = new AquaObject.VTXL();
+                VTXL newVtxl = new VTXL();
                 List<int> vtxlMapping = new List<int>();
 
-                for(int v = 0; v < curVtxl.vertPositions.Count; v++)
+                for (int v = 0; v < curVtxl.vertPositions.Count; v++)
                 {
                     int map = -1;
                     for (int j = 0; j < newVtxl.vertPositions.Count; j++)
                     {
-                        if (AquaObjectMethods.IsSameVertex(curVtxl, v, newVtxl, j))
+                        if (VTXL.IsSameVertex(curVtxl, v, newVtxl, j))
                         {
                             map = j;
                             break;
@@ -101,7 +113,7 @@ namespace AquaModelLibrary.NNStructs
                     if (map == -1)
                     {
                         map = newVtxl.vertPositions.Count;
-                        AquaObjectMethods.appendVertex(curVtxl, newVtxl, v);
+                        VTXL.appendVertex(curVtxl, newVtxl, v);
                     }
 
                     vtxlMapping.Add(map);
@@ -112,17 +124,17 @@ namespace AquaModelLibrary.NNStructs
             }
 
             //Convert material data
-            for(int i = 0; i < materials.Count; i++)
+            for (int i = 0; i < materials.Count; i++)
             {
                 var curMat = materials[i];
-                AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
+                GenericMaterial genMat = new GenericMaterial();
                 genMat.diffuseRGBA = curMat.diffuseColor;
                 genMat.matName = $"PSPMaterial_{i}";
                 genMat.texNames = new List<string>();
-                for(int t = 0; t < curMat.diffuseTexIds.Count; t++)
+                for (int t = 0; t < curMat.diffuseTexIds.Count; t++)
                 {
                     string name = $"tex_{t}";
-                    if(texList.Count - 1 > t)
+                    if (texList.Count - 1 > t)
                     {
                         name = texList[curMat.diffuseTexIds[t]];
                     }
@@ -132,29 +144,30 @@ namespace AquaModelLibrary.NNStructs
             }
 
             //Create mesh data
-            for(int i = 0; i < drawGroups.Count; i++)
+            for (int i = 0; i < drawGroups.Count; i++)
             {
-                for(int j = 0; j < drawMeshes[i].Count; j++)
+                for (int j = 0; j < drawMeshes[i].Count; j++)
                 {
                     var group = drawMeshes[i][j].groupId;
                     var matId = drawMeshes[i][j].matId;
-                    AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                    GenericTriangles genMesh = new GenericTriangles();
                     genMesh.vertCount = newVtxlList[group].vertPositions.Count;
 
                     //Generate strips
                     //UNJ vertices are stored in strip order as far as I know. Therefore, we generate the strips here
                     bool flip = true;
-                    for(int v = 0; v < vtxlList[group].vertPositions.Count - 2; v++)
+                    for (int v = 0; v < vtxlList[group].vertPositions.Count - 2; v++)
                     {
                         flip = !flip;
 
                         int a, b, c;
-                        if(!flip)
+                        if (!flip)
                         {
                             a = globalVtxlMapping[group][v];
                             b = globalVtxlMapping[group][v + 1];
                             c = globalVtxlMapping[group][v + 2];
-                        } else
+                        }
+                        else
                         {
                             b = globalVtxlMapping[group][v];
                             a = globalVtxlMapping[group][v + 1];
@@ -162,7 +175,7 @@ namespace AquaModelLibrary.NNStructs
                         }
 
                         //Avoid degenerate faces
-                        if(a == b || b == c || a == c)
+                        if (a == b || b == c || a == c)
                         {
                             continue;
                         }
@@ -184,7 +197,7 @@ namespace AquaModelLibrary.NNStructs
             for (int i = 0; i < header.drawCount; i++)
             {
                 drawGroups.Add(streamReader.Read<UNJDrawGroup>());
-                var bookmark = streamReader.Position();
+                var bookmark = streamReader.Position;
 
                 drawMeshes.Add(new List<UNJDirectDrawMesh>());
                 streamReader.Seek(offset + drawGroups[i].directDrawOffset, SeekOrigin.Begin);
@@ -219,26 +232,27 @@ namespace AquaModelLibrary.NNStructs
             mat.int_04 = streamReader.Read<int>();
             mat.int_08 = streamReader.Read<int>();
 
-            for(int i = 0; i < matHeader.diffuseTexCount; i++)
+            for (int i = 0; i < matHeader.diffuseTexCount; i++)
             {
-                byte[] rawMapSettings = streamReader.ReadBytes(streamReader.Position(), 4);
+                byte[] rawMapSettings = streamReader.ReadBytes(streamReader.Position, 4);
                 streamReader.Seek(4, SeekOrigin.Current);
                 mat.diffuseMapBytesRaw.Add(rawMapSettings);
-                if(rawMapSettings[1] == 1)
+                if (rawMapSettings[1] == 1)
                 {
                     mat.diffuseMapTypes.Add("env");
-                } else
+                }
+                else
                 {
                     mat.diffuseMapTypes.Add("uv");
                 }
             }
 
-            for(int i = 0; i < 6; i++)
+            for (int i = 0; i < 6; i++)
             {
-                byte[] colorProp = streamReader.ReadBytes(streamReader.Position(), 4);
+                byte[] colorProp = streamReader.ReadBytes(streamReader.Position, 4);
                 streamReader.Seek(4, SeekOrigin.Current);
 
-                switch(colorProp[3])
+                switch (colorProp[3])
                 {
                     case 0x54:
                         mat.emissiveColor.X = (float)colorProp[0] / 255;
@@ -271,16 +285,16 @@ namespace AquaModelLibrary.NNStructs
                 }
             }
 
-            mat.unknRange = streamReader.ReadBytes(streamReader.Position(), 0x18);
+            mat.unknRange = streamReader.ReadBytes(streamReader.Position, 0x18);
             streamReader.Seek(0x18, SeekOrigin.Current);
 
             for (int i = 0; i < matHeader.diffuseTexCount; i++)
             {
                 UNJTextureProperties props = new UNJTextureProperties();
-                byte[] rawProp = streamReader.ReadBytes(streamReader.Position(), 4);
+                byte[] rawProp = streamReader.ReadBytes(streamReader.Position, 4);
                 streamReader.Seek(4, SeekOrigin.Current);
 
-                while(rawProp[3] != 0x0B)
+                while (rawProp[3] != 0x0B)
                 {
                     switch (rawProp[3])
                     {
@@ -361,14 +375,14 @@ namespace AquaModelLibrary.NNStructs
                             Trace.WriteLine($"Unknown material property {rawProp[3]}");
                             break;
                     }
-                    rawProp = streamReader.ReadBytes(streamReader.Position(), 4);
+                    rawProp = streamReader.ReadBytes(streamReader.Position, 4);
                     streamReader.Seek(4, SeekOrigin.Current);
                 }
 
                 mat.propertyList.Add(props);
             }
 
-            for(int i = 0; i < matHeader.diffuseTexCount; i++)
+            for (int i = 0; i < matHeader.diffuseTexCount; i++)
             {
                 mat.diffuseTexIds.Add(streamReader.Read<int>());
             }
@@ -384,11 +398,11 @@ namespace AquaModelLibrary.NNStructs
             var vertGroupCounts = new List<int>();
             var bonePalettes = new List<List<int>>();
 
-            for(int i = 0; i < header.vertGroupCount; i++)
+            for (int i = 0; i < header.vertGroupCount; i++)
             {
                 var vertGroupHead = streamReader.Read<UNJVertGroupHeader>();
                 vertGroupHeads.Add(vertGroupHead);
-                var bookmark = streamReader.Position();
+                var bookmark = streamReader.Position;
 
                 streamReader.Seek(offset + vertGroupHead.vtxlOffset, SeekOrigin.Begin);
                 var info = streamReader.Read<UNJVertGroupInfo>();
@@ -403,7 +417,7 @@ namespace AquaModelLibrary.NNStructs
 
                 streamReader.Seek(offset + info.bonePaletteOffset, SeekOrigin.Begin);
                 bonePalettes.Add(new List<int>());
-                for(int j = 0; j < info.bonePaletteCount; j++)
+                for (int j = 0; j < info.bonePaletteCount; j++)
                 {
                     bonePalettes[i].Add(streamReader.Read<int>());
                 }
@@ -415,9 +429,9 @@ namespace AquaModelLibrary.NNStructs
 
         }
 
-        public AquaObject.VTXL ReadUNJVTXL(List<int> bonePalette, UNJVertGroupInfo info, UNJVertGroupHeader vertHeader, int vertCount)
+        public VTXL ReadUNJVTXL(List<int> bonePalette, UNJVertGroupInfo info, UNJVertGroupHeader vertHeader, int vertCount)
         {
-            AquaObject.VTXL vtxl = new AquaObject.VTXL();
+            VTXL vtxl = new VTXL();
             int boneCount = bonePalette.Count;
             int uvFormat = (info.vertFormat & 0x3);
             int colorFormat = (info.vertFormat >> 2) & 0x7;
@@ -426,7 +440,7 @@ namespace AquaModelLibrary.NNStructs
             int weightFormat = (info.vertFormat >> 9) & 0x3;
 
             streamReader.Seek(offset + info.vertListOffset, SeekOrigin.Begin);
-            var startPos = streamReader.Position();
+            var startPos = streamReader.Position;
             for (int i = 0; i < vertCount; i++)
             {
                 //Weight reading
@@ -497,10 +511,10 @@ namespace AquaModelLibrary.NNStructs
                 vtxl.vertWeightIndices.Add(weightIndices);
 
                 //UVs
-                for(int j = 0; j < vertHeader.uvCount; j++)
+                for (int j = 0; j < vertHeader.uvCount; j++)
                 {
                     List<Vector2> uvList;
-                    switch(j)
+                    switch (j)
                     {
                         case 0:
                             uvList = vtxl.uv1List;
@@ -523,28 +537,28 @@ namespace AquaModelLibrary.NNStructs
                             uvList.Add(new Vector2(((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F));
                             break;
                         case INT16:
-                            AquaGeneralMethods.AlignReader(streamReader, 0x2);
+                            streamReader.AlignReader(0x2);
                             uvList.Add(new Vector2(((float)streamReader.Read<short>()) / 0x7FFF, ((float)streamReader.Read<short>()) / 0x7FFF));
                             break;
                         case FLOAT:
-                            AquaGeneralMethods.AlignReader(streamReader, 0x4);
+                            streamReader.AlignReader(0x4);
                             uvList.Add(new Vector2(streamReader.Read<float>(), streamReader.Read<float>()));
                             break;
                     }
                 }
 
                 //Vert Colors
-                if(colorFormat != 0)
+                if (colorFormat != 0)
                 {
                     byte[] color = new byte[4];
-                    AquaGeneralMethods.AlignReader(streamReader, 0x2);
+                    streamReader.AlignReader(0x2);
                     byte byte1 = streamReader.Read<byte>();
                     byte byte2 = streamReader.Read<byte>();
                     color[2] = (byte)(((byte1 >> 0) & 0xf) / 0x0f);
                     color[1] = (byte)(((byte1 >> 4) & 0xf) / 0x0f);
                     color[0] = (byte)(((byte2 >> 0) & 0xf) / 0x0f);
                     color[3] = (byte)(((byte2 >> 4) & 0xf) / 0x0f);
-                    
+
                     vtxl.vertColors.Add(color);
                 }
 
@@ -555,11 +569,11 @@ namespace AquaModelLibrary.NNStructs
                         vtxl.vertNormals.Add(new Vector3(((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F));
                         break;
                     case INT16:
-                        AquaGeneralMethods.AlignReader(streamReader, 0x2);
+                        streamReader.AlignReader(0x2);
                         vtxl.vertNormals.Add(new Vector3(((float)streamReader.Read<short>()) / 0x7FFF, ((float)streamReader.Read<short>()) / 0x7FFF, ((float)streamReader.Read<short>()) / 0x7FFF));
                         break;
                     case FLOAT:
-                        AquaGeneralMethods.AlignReader(streamReader, 0x4);
+                        streamReader.AlignReader(0x4);
                         vtxl.vertNormals.Add(new Vector3(streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>()));
                         break;
                     default:
@@ -573,68 +587,66 @@ namespace AquaModelLibrary.NNStructs
                         vtxl.vertPositions.Add(new Vector3(((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F, ((float)streamReader.Read<sbyte>()) / 0x7F) * info.vertScale);
                         break;
                     case INT16:
-                        AquaGeneralMethods.AlignReader(streamReader, 0x2);
+                        streamReader.AlignReader(0x2);
                         vtxl.vertPositions.Add(new Vector3(((float)streamReader.Read<short>()) / 0x7FFF, ((float)streamReader.Read<short>()) / 0x7FFF, ((float)streamReader.Read<short>()) / 0x7FFF) * info.vertScale);
                         break;
                     case FLOAT:
-                        AquaGeneralMethods.AlignReader(streamReader, 0x4);
+                        streamReader.AlignReader(0x4);
                         vtxl.vertPositions.Add(new Vector3(streamReader.Read<float>(), streamReader.Read<float>(), streamReader.Read<float>()) * info.vertScale);
                         break;
                 }
 
                 //Stride check
-                if(i == 0 && streamReader.Position() - (offset + info.vertListOffset) != info.vertSize)
+                if (i == 0 && streamReader.Position - (offset + info.vertListOffset) != info.vertSize)
                 {
-                    throw new System.Exception($"Phission Mailed, better luck next time\n Start Position: {startPos.ToString("X")} End Position: {streamReader.Position().ToString("X")} ");
+                    throw new System.Exception($"Phission Mailed, better luck next time\n Start Position: {startPos.ToString("X")} End Position: {streamReader.Position.ToString("X")} ");
                 }
             }
 
             return vtxl;
         }
 
-        public void ReadBones(string filePath = null)
+        public void ReadBones(byte[] rawBytes)
         {
             List<string> boneNames = null;
-            if(filePath != null)
+            if (rawBytes != null)
             {
-                if(File.Exists(filePath))
-                {
-                    boneNames = NNNodeNames.ReadNNA(filePath);
-                }
+                boneNames = NNNodeNames.ReadNNA(rawBytes);
             }
             nodes = new AquaNode();
-            Dictionary<int, AquaNode.NODE> nodeDict = new Dictionary<int, AquaNode.NODE>();
+            Dictionary<int, NODE> nodeDict = new Dictionary<int, NODE>();
             Dictionary<int, int> nodeIntDict = new Dictionary<int, int>();
 
             streamReader.Seek(offset + header.boneOffset, SeekOrigin.Begin);
-            for(int i = 0; i < header.boneCount; i++)
+            for (int i = 0; i < header.boneCount; i++)
             {
-                var node = new AquaNode.NODE();
-                if(boneNames.Count > i)
+                var node = new NODE();
+                if (boneNames.Count > i)
                 {
                     node.boneName.SetString(boneNames[i]);
-                } else
+                }
+                else
                 {
                     node.boneName.SetString($"({i}) Node_{i}");
                 }
-                node.boneShort1 = streamReader.Read<ushort>();
-                node.boneShort2 = streamReader.Read<ushort>();
-                var mapId = streamReader.Read<short>();
-                node.parentId = streamReader.Read<short>();
-                node.firstChild = streamReader.Read<short>();
-                node.nextSibling = streamReader.Read<short>();
-                node.pos = streamReader.Read<Vector3>();
+                node.boneShort1 = streamReader.ReadBE<ushort>();
+                node.boneShort2 = streamReader.ReadBE<ushort>();
+                var mapId = streamReader.ReadBE<short>();
+                node.parentId = streamReader.ReadBE<short>();
+                node.firstChild = streamReader.ReadBE<short>();
+                node.nextSibling = streamReader.ReadBE<short>();
+                node.pos = streamReader.ReadBE<Vector3>();
                 Vector3 eulRot = new Vector3();
-                eulRot.X = streamReader.Read<int>() / 0x8000 * 180;
-                eulRot.Y = streamReader.Read<int>() / 0x8000 * 180;
-                eulRot.Z = streamReader.Read<int>() / 0x8000 * 180;
+                eulRot.X = streamReader.ReadBE<int>() / 0x8000 * 180;
+                eulRot.Y = streamReader.ReadBE<int>() / 0x8000 * 180;
+                eulRot.Z = streamReader.ReadBE<int>() / 0x8000 * 180;
                 node.eulRot = eulRot;
-                node.scale = streamReader.Read<Vector3>();
-                node.m1 = streamReader.Read<Vector4>();
-                node.m2 = streamReader.Read<Vector4>();
-                node.m3 = streamReader.Read<Vector4>();
-                node.m4 = streamReader.Read<Vector4>();
-                nodeMetaData.Add(streamReader.ReadBytes(streamReader.Position(), 0x20));
+                node.scale = streamReader.ReadBE<Vector3>();
+                node.m1 = streamReader.ReadBE<Vector4>();
+                node.m2 = streamReader.ReadBE<Vector4>();
+                node.m3 = streamReader.ReadBE<Vector4>();
+                node.m4 = streamReader.ReadBE<Vector4>();
+                nodeMetaData.Add(streamReader.ReadBytes(streamReader.Position, 0x20));
                 streamReader.Seek(0x20, SeekOrigin.Current);
 
                 if (mapId >= 0)

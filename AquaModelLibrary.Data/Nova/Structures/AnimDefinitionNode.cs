@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.AquaCommon;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 
 namespace AquaModelLibrary.Nova.Structures
 {

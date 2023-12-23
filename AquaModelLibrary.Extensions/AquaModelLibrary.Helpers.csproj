@@ -4,14 +4,26 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<NullableContextOptions>enable</NullableContextOptions>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS8600;CS8602</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS8600;CS8602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
+    <Compile Remove="Writers\**" />
+    <EmbeddedResource Remove="Writers\**" />
+    <None Remove="Writers\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Writers\" />
+    <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
   </ItemGroup>
 
 </Project>

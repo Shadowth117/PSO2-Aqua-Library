@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using static AquaModelLibrary.AquaCommon;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 
-namespace AquaModelLibrary.AquaStructs
+namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class AddOnIndex
     {
@@ -27,6 +26,5 @@ namespace AquaModelLibrary.AquaStructs
             public byte E0;
             public PSO2String extraAttach;
         }
-
     }
 }

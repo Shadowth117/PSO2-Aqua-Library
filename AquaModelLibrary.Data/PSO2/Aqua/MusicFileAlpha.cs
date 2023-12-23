@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AquaModelLibrary.AquaStructs
+﻿namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     //These are the .mus files used by the Sympathy system. The format seems to match what SEGA described overall:
     //https://www.bumped.org/psublog/phantasy-star-online-2s-dynamic-music-system-sympathy/

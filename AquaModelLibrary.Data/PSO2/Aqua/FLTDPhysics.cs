@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class FLTDPhysics : AquaCommon
     {
@@ -85,7 +84,7 @@ namespace AquaModelLibrary
             public int nodePtr;
             public int ptr_48;
             public int ptr_4C;
-            
+
             public int unkNodePtrPtr;
             public byte bt_54;
             public byte bt_55;
@@ -165,7 +164,7 @@ namespace AquaModelLibrary
 
             //
             public List<unkStruct4> unkStr4List = new List<unkStruct4>();
-            
+
             public List<unkStruct4> unkStr4_2List = new List<unkStruct4>();
             public List<float> floatList = new List<float>(); //Seems to be at least 8 and count downwards. Might be pairs of 8? 2 * unkStruct4_2 count of floats?
 

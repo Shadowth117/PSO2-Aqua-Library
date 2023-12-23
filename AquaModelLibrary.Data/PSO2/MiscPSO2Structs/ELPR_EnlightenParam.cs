@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
@@ -13,7 +8,7 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 
         public class ElprPiece
         {
-            public string name0x18; //Read as C string from 0x18 byte array, stripping from the null character at the end
+            public string name0x18 = null; //Read as C string from 0x18 byte array, stripping from the null character at the end
             public ushort usht_18;
             public ushort usht_1A;
             public int int_1C;

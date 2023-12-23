@@ -1,12 +1,15 @@
-﻿using AquaModelLibrary.Data.DataTypes;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.Nova.Structures;
-using Reloaded.Memory.Streams;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.AquaNode;
-using static AquaModelLibrary.Extra.MathExtras;
 using static AquaModelLibrary.Nova.AXSConstants;
+using static AquaModelLibrary.Helpers.MathHelpers.MathExtras;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 
 namespace AquaModelLibrary.Nova
 {
@@ -19,8 +22,8 @@ namespace AquaModelLibrary.Nova
             AquaObject aqp = new NGSAquaObject();
             aqn = new AquaNode();
 
-            using (Stream stream = (Stream)new FileStream(filePath, FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Debug.WriteLine(Path.GetFileName(filePath));
                 long last__oaPos = 0;
@@ -46,16 +49,16 @@ namespace AquaModelLibrary.Nova
                 var fsaLen = streamReader.Read<int>();
                 streamReader.Seek(0x8, SeekOrigin.Current);
                 //Go to Vert definition, node, material, and misc data
-                while (streamReader.Position() < fsaLen)
+                while (streamReader.Position < fsaLen)
                 {
                     var tag = streamReader.Peek<int>();
                     var test = Encoding.UTF8.GetString(BitConverter.GetBytes(tag));
-                    Debug.WriteLine(streamReader.Position().ToString("X"));
+                    Debug.WriteLine(streamReader.Position.ToString("X"));
                     Debug.WriteLine(test);
                     switch (tag)
                     {
                         case __oa:
-                            last__oaPos = streamReader.Position();
+                            last__oaPos = streamReader.Position;
                             streamReader.Seek(0xD0, SeekOrigin.Current);
                             break;
                         case FIA:
@@ -166,7 +169,7 @@ namespace AquaModelLibrary.Nova
 
                 //Go to mesh buffers
                 streamReader.Seek(fsaLen, SeekOrigin.Begin);
-                if (streamReader.Position() >= stream.Length)
+                if (streamReader.Position >= stream.Length)
                 {
                     return null;
                 }
@@ -185,8 +188,8 @@ namespace AquaModelLibrary.Nova
 
                 //Read ffub and rdda
                 //Count mesh count here for now and store starts and ends of data
-                long meshSettingStart = streamReader.Position();
-                while (streamReader.Position() < meshSettingStart + meshSettingLen)
+                long meshSettingStart = streamReader.Position;
+                while (streamReader.Position < meshSettingStart + meshSettingLen)
                 {
                     streamReader.ReadFFUBorRDDA(ffubList, rddaList, imgRddaList, vertRddaList, faceRddaList, ref imgFfub, ref vertFfub, ref faceFfub);
                 }
@@ -255,10 +258,10 @@ namespace AquaModelLibrary.Nova
 
                     //Vert data
                     var vertCount = vertBufferInfo.dataSize / mesh.salvStr.vertLen;
-                    AquaObject.VTXL vtxl = new AquaObject.VTXL();
+                    VTXL vtxl = new VTXL();
 
                     streamReader.Seek((meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset), SeekOrigin.Begin);
-                    Debug.WriteLine(streamReader.Position().ToString("X"));
+                    Debug.WriteLine(streamReader.Position.ToString("X"));
                     AquaObjectMethods.ReadVTXL(streamReader, mesh.vtxe, vtxl, vertCount, mesh.vtxe.vertDataTypes.Count);
 
                     //Account for indices without weights
@@ -300,7 +303,7 @@ namespace AquaModelLibrary.Nova
                     aqp.vtxlList.Add(vtxl);
 
                     //Face data
-                    AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                    GenericTriangles genMesh = new GenericTriangles();
 
                     int faceIndexCount = faceBufferInfo.dataSize / 2;
                     List<int> faceList = new List<int>();
@@ -317,7 +320,7 @@ namespace AquaModelLibrary.Nova
                     {
                         return (ushort)num;
                     });
-                    var tempFaceData = new AquaObject.stripData() { triStrips = triList, format0xC33 = true, triIdCount = triList.Count };
+                    var tempFaceData = new StripData() { triStrips = triList, format0xC33 = true, triIdCount = triList.Count };
                     genMesh.triList = tempFaceData.GetTriangles();
 
                     //Extra
@@ -330,7 +333,7 @@ namespace AquaModelLibrary.Nova
                     aqp.tempTris.Add(genMesh);
 
                     //Material
-                    var mat = new AquaObject.GenericMaterial();
+                    var mat = new GenericMaterial();
                     mat.matName = $"NovaMaterial_{i}";
                     mat.texNames = GetTexNames(mesh, xgmiIdByCombined, xgmiIdByUnique, texNames);
                     aqp.tempMats.Add(mat);
@@ -366,9 +369,9 @@ namespace AquaModelLibrary.Nova
             return texNames;
         }
 
-        public static AquaObject.VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, byte vertData4, byte vertData5, byte vertData6, byte vertData7, int trueLength)
+        public static VTXE GenerateGenericPSO2VTXE(byte vertData0, byte vertData1, byte vertData2, byte vertData3, byte vertData4, byte vertData5, byte vertData6, byte vertData7, int trueLength)
         {
-            AquaObject.VTXE vtxe = new AquaObject.VTXE();
+            VTXE vtxe = new VTXE();
             int curLength = 0;
 
             //Vert positions
@@ -515,10 +518,10 @@ namespace AquaModelLibrary.Nova
             return vtxe;
         }
 
-        public static eertStruct ReadEert(this BufferedStreamReader streamReader)
+        public static eertStruct ReadEert(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             eertStruct boneList = new eertStruct();
-            long bookmark = streamReader.Position();
+            long bookmark = streamReader.Position;
 
             streamReader.Seek(0x4, SeekOrigin.Current);
             var len = streamReader.Read<int>();
@@ -531,13 +534,13 @@ namespace AquaModelLibrary.Nova
             for (int i = 0; i < boneList.boneCount; i++)
             {
                 rttaStruct bone = new rttaStruct();
-                bookmark = streamReader.Position();
+                bookmark = streamReader.Position;
                 bone.magic = streamReader.Read<int>();
                 bone.len = streamReader.Read<int>();
                 bone.int_08 = streamReader.Read<int>();
                 bone.trueLen = streamReader.Read<int>();
 
-                bone.nodeName = streamReader.Read<AquaCommon.PSO2String>();
+                bone.nodeName = streamReader.Read<PSO2String>();
                 bone.int_30 = streamReader.Read<int>();
                 bone.meshNodePtr = streamReader.Read<int>();
                 bone.int_38 = streamReader.Read<int>();
@@ -557,7 +560,7 @@ namespace AquaModelLibrary.Nova
         }
 
         //Returns DAEH's length for the section - its own length
-        public static int ReadDAEH(this BufferedStreamReader streamReader)
+        public static int ReadDAEH(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             streamReader.Seek(0x4, SeekOrigin.Current);
             var len = streamReader.Read<int>();
@@ -568,9 +571,9 @@ namespace AquaModelLibrary.Nova
             return meshSettingLen - len;
         }
 
-        public static void SkipBasicAXSStruct(this BufferedStreamReader streamReader)
+        public static void SkipBasicAXSStruct(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
-            long bookmark = streamReader.Position();
+            long bookmark = streamReader.Position;
 
             streamReader.Read<int>();
             var trueLen = streamReader.Read<int>(); //Doesn't include padding so shouldn't be used
@@ -585,15 +588,15 @@ namespace AquaModelLibrary.Nova
             streamReader.Seek(len, SeekOrigin.Current);
         }
 
-        public static List<stamData> ReadLM(this BufferedStreamReader streamReader)
+        public static List<stamData> ReadLM(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             var stamList = new List<stamData>();
-            var lmStart = streamReader.Position();
+            var lmStart = streamReader.Position;
             streamReader.Read<int>();
             var lmEnd = streamReader.Read<int>() + lmStart;
 
             streamReader.Seek(0x8, SeekOrigin.Current);
-            while (streamReader.Position() < lmEnd)
+            while (streamReader.Position < lmEnd)
             {
                 var tag = streamReader.Peek<int>();
                 switch (tag)
@@ -618,10 +621,10 @@ namespace AquaModelLibrary.Nova
             return stamList;
         }
 
-        public static stamData ReadStam(this BufferedStreamReader streamReader)
+        public static stamData ReadStam(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             var stamDataObj = new stamData();
-            var stamStart = streamReader.Position();
+            var stamStart = streamReader.Position;
             streamReader.Read<int>();
             streamReader.Seek(0x8, SeekOrigin.Current);
             var stamSize = streamReader.Read<int>();
@@ -649,16 +652,16 @@ namespace AquaModelLibrary.Nova
             return stamDataObj;
         }
 
-        public static void ReadBM(this BufferedStreamReader streamReader, List<MeshDefinitions> defs, ipnbStruct tempLpnbList, List<stamData> stamList, long last__oaPos)
+        public static void ReadBM(this BufferedStreamReaderBE<MemoryStream> streamReader, List<MeshDefinitions> defs, ipnbStruct tempLpnbList, List<stamData> stamList, long last__oaPos)
         {
             int counter = 0;
             MeshDefinitions mesh = null;
-            var bmStart = streamReader.Position();
+            var bmStart = streamReader.Position;
             streamReader.Read<int>();
             var bmEnd = streamReader.Read<int>() + bmStart;
 
             streamReader.Seek(0x8, SeekOrigin.Current);
-            while (streamReader.Position() < bmEnd)
+            while (streamReader.Position < bmEnd)
             {
                 var tag = streamReader.Peek<int>();
                 switch (tag)
@@ -710,7 +713,7 @@ namespace AquaModelLibrary.Nova
             }
         }
 
-        public static ydbmStruct ReadYdbm(this BufferedStreamReader streamReader)
+        public static ydbmStruct ReadYdbm(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             ydbmStruct ydbmStr = new ydbmStruct();
 
@@ -727,7 +730,7 @@ namespace AquaModelLibrary.Nova
             return ydbmStr;
         }
 
-        public static lxdiStruct ReadLxdi(this BufferedStreamReader streamReader)
+        public static lxdiStruct ReadLxdi(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             lxdiStruct lxdiStr = new lxdiStruct();
 
@@ -750,7 +753,7 @@ namespace AquaModelLibrary.Nova
             return lxdiStr;
         }
 
-        public static salvStruct ReadSalv(this BufferedStreamReader streamReader)
+        public static salvStruct ReadSalv(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             salvStruct salvStr = new salvStruct();
 
@@ -879,9 +882,9 @@ namespace AquaModelLibrary.Nova
             return salvStr;
         }
 
-        public static ipnbStruct ReadIpnb(this BufferedStreamReader streamReader)
+        public static ipnbStruct ReadIpnb(this BufferedStreamReaderBE<MemoryStream> streamReader)
         {
-            long bookmark = streamReader.Position();
+            long bookmark = streamReader.Position;
             ipnbStruct ipbnStr = new ipnbStruct();
 
             ipbnStr.magic = streamReader.Read<int>();
@@ -899,10 +902,10 @@ namespace AquaModelLibrary.Nova
             return ipbnStr;
         }
 
-        public static void ReadFFUBorRDDA(this BufferedStreamReader streamReader, List<ffubStruct> ffubStructs, Dictionary<string, rddaStruct> rddaStructs,
+        public static void ReadFFUBorRDDA(this BufferedStreamReaderBE<MemoryStream> streamReader, List<ffubStruct> ffubStructs, Dictionary<string, rddaStruct> rddaStructs,
             Dictionary<string, rddaStruct> imgRddaStructs, Dictionary<string, rddaStruct> vertRddaStructs, Dictionary<string, rddaStruct> faceRddaStructs, ref ffubStruct imgFfub, ref ffubStruct vertFfub, ref ffubStruct faceFfub)
         {
-            long bookmark = streamReader.Position();
+            long bookmark = streamReader.Position;
 
             int magic = streamReader.Read<int>();
             int len;
@@ -954,7 +957,7 @@ namespace AquaModelLibrary.Nova
             streamReader.Seek(len, SeekOrigin.Current);
         }
 
-        public static ffubStruct ReadFFUB(this BufferedStreamReader streamReader, int magic, out int len)
+        public static ffubStruct ReadFFUB(this BufferedStreamReaderBE<MemoryStream> streamReader, int magic, out int len)
         {
             ffubStruct ffubStr = new ffubStruct();
             ffubStr.magic = magic;
@@ -977,7 +980,7 @@ namespace AquaModelLibrary.Nova
             return ffubStr;
         }
 
-        public static rddaStruct ReadRDDA(this BufferedStreamReader streamReader, int magic, out int len)
+        public static rddaStruct ReadRDDA(this BufferedStreamReaderBE<MemoryStream> streamReader, int magic, out int len)
         {
             rddaStruct rddaStr = new rddaStruct();
             rddaStr.magic = magic;
@@ -1084,63 +1087,6 @@ namespace AquaModelLibrary.Nova
 
 
             return out_inds;
-        }
-
-        public static void boxTest()
-        {
-            List<System.Numerics.Vector3> verts = new List<System.Numerics.Vector3>();
-            List<int> stripIndices = new List<int>();
-            using (Stream stream = (Stream)new FileStream(@"C:\boxVertData", FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    var half0 = HalfHelper.HalfToSingle(streamReader.Read<Data.DataTypes.Half>());
-                    var half1 = HalfHelper.HalfToSingle(streamReader.Read<Data.DataTypes.Half>());
-                    var half2 = HalfHelper.HalfToSingle(streamReader.Read<Data.DataTypes.Half>());
-                    streamReader.Read<Data.DataTypes.Half>();
-
-                    verts.Add(new System.Numerics.Vector3(half0, half1, half2));
-                }
-            }
-            int maxStep;
-            using (Stream stream = (Stream)new FileStream(@"C:\boxFaces", FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                maxStep = streamReader.Read<ushort>();
-                for (int i = 0; i < 26; i++)
-                {
-                    stripIndices.Add(streamReader.Read<ushort>());
-                }
-            }
-            List<int> indices = inverseWatermarkTransform(stripIndices, maxStep);
-            List<int> indicesTest = unpackInds(indices);
-            List<byte> indicesOut = new List<byte>();
-            List<byte> indicesOut2 = new List<byte>();
-            foreach (var id in indices)
-            {
-                indicesOut.AddRange(BitConverter.GetBytes((ushort)id));
-            }
-            foreach (var id in indicesTest)
-            {
-                indicesOut2.AddRange(BitConverter.GetBytes((ushort)id));
-            }
-
-            File.WriteAllBytes(@"C:\boxFacesDecrypted", indicesOut.ToArray());
-            File.WriteAllBytes(@"C:\boxFacesDecryptedTest", indicesOut2.ToArray());
-
-            StringBuilder outStr = new StringBuilder();
-            foreach (var vert in verts)
-            {
-                outStr.AppendLine($"v {vert.X} {vert.Y} {vert.Z}");
-            }
-            outStr.AppendLine();
-            for (int i = 0; i < indicesTest.Count - 2; i += 3)
-            {
-                outStr.AppendLine($"f {indicesTest[i] + 1} {indicesTest[i + 1] + 1} {indicesTest[i + 2] + 1}");
-            }
-
-            File.WriteAllText(@"C:\boxbad.obj", outStr.ToString());
         }
     }
 }

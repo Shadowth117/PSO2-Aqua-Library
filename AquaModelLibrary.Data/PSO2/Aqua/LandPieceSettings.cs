@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AquaModelLibrary.AquaStructs
+﻿namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public class LandPieceSettings : AquaCommon
     {
@@ -46,11 +44,11 @@ namespace AquaModelLibrary.AquaStructs
             public PieceSet pieceSet;
 
             public long offset;
-            public string name;
-            public string fullName;
+            public string name = null;
+            public string fullName = null;
 
-            public byte[] data1;
-            public byte[] data2;
+            public byte[] data1 = null;
+            public byte[] data2 = null;
         }
 
         public struct PieceSet

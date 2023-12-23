@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using static AquaModelLibrary.AquaNode;
-using static AquaModelLibrary.AquaObject;
+using static AquaModelLibrary.Data.PSO2.Aqua.AquaObject.AquaObject;
 using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
 using static AquaModelLibrary.PSOXVMConvert;
 
