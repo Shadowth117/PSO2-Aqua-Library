@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CMDL
 {
@@ -14,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
 
         public CMDL_CMSHReference() { }
 
-        public CMDL_CMSHReference(BufferedStreamReader sr)
+        public CMDL_CMSHReference(BufferedStreamReaderBE<MemoryStream> sr)
         {
             usht0 = sr.Read<ushort>();
             int0 = sr.Read<int>();

@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -39,7 +39,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
 
         }
 
-        public CSKLHeader(BufferedStreamReader sr)
+        public CSKLHeader(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Read<int>();
             crc = sr.Read<int>();

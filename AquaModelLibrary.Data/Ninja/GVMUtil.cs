@@ -1,11 +1,5 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static SoulsFormats.MQB;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.Extra.Ninja
 {
@@ -39,31 +33,32 @@ namespace AquaModelLibrary.Extra.Ninja
         /// GVM unfortunately does not give a full filesize and so when it's embedded within other files, we need to seek through it to get everything.
         /// GVR is a bit of an involved format as well so it's best to extract and leave the rest to puyo tools, frankly.
         /// </summary>
-        public static byte[] ReadGVMBytes(BufferedStreamReader sr, bool isArcGVM = false)
+        public static byte[] ReadGVMBytes(BufferedStreamReaderBE<MemoryStream> sr, bool isArcGVM = false)
         {
             List<byte> gvmBytes = new List<byte>();
             var magic = sr.Read<int>();
             var gvmFirstEntryOffset = sr.Read<int>();
             var flags = sr.ReadBE<ushort>();
             var entryCount = sr.ReadBE<ushort>();
-            gvmBytes.AddRange(sr.ReadBytes(sr.Position() - 0xC, gvmFirstEntryOffset + 0x8));
-            var gvrt0Offset = sr.Position() + gvmFirstEntryOffset - 4;
+            gvmBytes.AddRange(sr.ReadBytes(sr.Position - 0xC, gvmFirstEntryOffset + 0x8));
+            var gvrt0Offset = sr.Position + gvmFirstEntryOffset - 4;
             sr.Seek(gvrt0Offset, System.IO.SeekOrigin.Begin);
 
             for (int i = 0; i < entryCount; i++)
             {
-                var currentFileOffset = sr.Position();
+                var currentFileOffset = sr.Position;
                 sr.Seek(4, System.IO.SeekOrigin.Current);
                 var fileSize = sr.Read<int>(); //little endian
-                if (isArcGVM == false && i == entryCount - 1 && sr.BaseStream().Length > fileSize + sr.Position() + 9)
+                if (isArcGVM == false && i == entryCount - 1 && sr.BaseStream.Length > fileSize + sr.Position + 9)
                 {
                     fileSize += 0x10;
-                } else if(isArcGVM && i == entryCount - 1)
+                }
+                else if (isArcGVM && i == entryCount - 1)
                 {
                     fileSize -= 0x10;
                 }
                 gvmBytes.AddRange(sr.ReadBytes(currentFileOffset, 8 + fileSize));
-                AquaGeneralMethods.AlignWriter(gvmBytes, 0x10);
+                gvmBytes.AlignWriter(0x10);
                 sr.Seek(fileSize, System.IO.SeekOrigin.Current);
             }
 
@@ -71,9 +66,9 @@ namespace AquaModelLibrary.Extra.Ninja
         }
 
 
-        public static List<string> ReadGVMFileNames(BufferedStreamReader sr)
+        public static List<string> ReadGVMFileNames(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             var magic = sr.Read<int>();
             var gvmFirstEntryOffset = sr.Read<int>();
             GvmFlags properties = (GvmFlags)sr.ReadBE<ushort>();
@@ -108,33 +103,34 @@ namespace AquaModelLibrary.Extra.Ninja
             // Loop through all of the entries.
             for (int i = 0; i < entryCount; i++)
             {
-                var pos = sr.Position();
+                var pos = sr.Position;
                 var id = sr.ReadBE<ushort>();
-                if(_hasFilenames)
+                if (_hasFilenames)
                 {
-                    gvmNames.Add(AquaGeneralMethods.ReadCString(sr, 0x1C));
+                    gvmNames.Add(sr.ReadCString(0x1C));
                     sr.Seek(0x1C, System.IO.SeekOrigin.Current);
-                } else
+                }
+                else
                 {
                     gvmNames.Add($"tex_{i}");
                 }
-                if(_hasFormats)
+                if (_hasFormats)
                 {
                     var format0 = sr.Read<byte>();
                     var format1 = sr.Read<byte>();
                 }
-                if(_hasDimensions)
+                if (_hasDimensions)
                 {
                     var dim0 = sr.Read<byte>();
                     var dim1 = sr.Read<byte>();
                 }
-                if(_hasGlobalIndexes)
+                if (_hasGlobalIndexes)
                 {
                     var globalIndex = sr.ReadBE<int>();
                 }
             }
 
-            BigEndianHelper._active = false;
+            sr._BEReadActive = false;
             return gvmNames;
         }
     }

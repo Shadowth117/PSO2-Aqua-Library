@@ -1,14 +1,8 @@
-﻿using AquaModelLibrary.Nova.Structures;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Nova.Structures;
 using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using static AquaModelLibrary.AquaCommon;
 using static AquaModelLibrary.Nova.AXSConstants;
 
 namespace AquaModelLibrary.Nova
@@ -18,8 +12,8 @@ namespace AquaModelLibrary.Nova
         public static AquaMotion ReadAAI(string filePath)
         {
 
-            using (Stream stream = (Stream)new FileStream(filePath, FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReader<MemoryStream>(stream, 8192))
             {
                 int fType = streamReader.Read<int>();
                 if (fType != FAA)
@@ -64,7 +58,7 @@ namespace AquaModelLibrary.Nova
                 int ct30 = 0;
                 int ct34 = 0;
                 int ct44 = 0;
-                for(int i = 0; i < nodeCount; i++)
+                for (int i = 0; i < nodeCount; i++)
                 {
                     AnimDefinitionNode node = new AnimDefinitionNode();
                     node.header0 = streamReader.Read<ushort>();
@@ -72,13 +66,13 @@ namespace AquaModelLibrary.Nova
                     node.len = streamReader.Read<int>();
                     node.nameData = streamReader.Read<PSO2String>();
                     node.name = node.nameData.GetString();
-                    for(int j = 0; j < node.dataCount; j++)
+                    for (int j = 0; j < node.dataCount; j++)
                     {
                         clumpCount++;
-                        var test = streamReader.Position().ToString("X");
+                        var test = streamReader.Position.ToString("X");
                         DataClump dc = new DataClump();
                         dc.dcStart = streamReader.Read<DataClumpStart>();
-                        switch(dc.dcStart.dcType)
+                        switch (dc.dcStart.dcType)
                         {
                             case 0x14:
                                 ct14++;
@@ -103,7 +97,7 @@ namespace AquaModelLibrary.Nova
                                 dc.dcString = ((DataClump44)dc.dc).clumpName.GetString();
                                 break;
                             default:
-                                Debug.WriteLine($"clumpSize {dc.dcStart.dcType.ToString("X")} at {streamReader.Position().ToString("X")} is unexpected!");
+                                Debug.WriteLine($"clumpSize {dc.dcStart.dcType.ToString("X")} at {streamReader.Position.ToString("X")} is unexpected!");
                                 break;
                         }
                         node.data.Add(dc);
@@ -113,20 +107,20 @@ namespace AquaModelLibrary.Nova
 
                 //return null;
 
-                var offsetTimesStart = streamReader.Position();
+                var offsetTimesStart = streamReader.Position;
                 var offsetTimes = streamReader.ReadOffsetTimeSets(timeCount);
                 List<List<NodeOffsetSet>> setsList = new List<List<NodeOffsetSet>>();
                 List<Dictionary<int, RotationKey>> framesDictList = new List<Dictionary<int, RotationKey>>();
-                
+
                 for (int i = 0; i < offsetTimes.Count; i++)
                 {
                     streamReader.Seek(offsetTimes[i].offset + offsetTimesStart + i * 8, SeekOrigin.Begin);
-                    var position = streamReader.Position();
+                    var position = streamReader.Position;
                     Debug.WriteLine($"OffsetTime {i} start: {position:X}");
                     int keyNodeCount = streamReader.Read<int>();
-                    
+
                     //Sometimes, they just put the keydata right here? Read the keydata when this is figured out
-                    if(keyNodeCount > 0xFF)
+                    if (keyNodeCount > 0xFF)
                     {
                         throw new Exception();
                     }
@@ -134,11 +128,12 @@ namespace AquaModelLibrary.Nova
                     List<NodeOffsetSet> sets = new List<NodeOffsetSet>();
                     for (int j = 0; j < keyNodeCount; j++)
                     {
-                        NodeOffsetSet set = new NodeOffsetSet() { nodeId = streamReader.Read<ushort>(), offset = streamReader.Read<ushort>()};
+                        NodeOffsetSet set = new NodeOffsetSet() { nodeId = streamReader.Read<ushort>(), offset = streamReader.Read<ushort>() };
                         if (j < nodes.Count)
                         {
                             set.nodeName = nodes[j].name;
-                        } else
+                        }
+                        else
                         {
                             set.nodeName = $"node_{j}";
                         }
@@ -146,22 +141,22 @@ namespace AquaModelLibrary.Nova
                     }
                     setsList.Add(sets);
 
-                    for(int j = 0; j < sets.Count; j++)
+                    for (int j = 0; j < sets.Count; j++)
                     {
-                        
+
                     }
                 }
             }
             return null;
         }
 
-        public static List<OffsetTimeSet> ReadOffsetTimeSets(this BufferedStreamReader streamReader, int timeCount)
+        public static List<OffsetTimeSet> ReadOffsetTimeSets(this BufferedStreamReader<MemoryStream> streamReader, int timeCount)
         {
             List<OffsetTimeSet> sets = new List<OffsetTimeSet>();
             OffsetTimeSet set0 = new OffsetTimeSet() { offset = streamReader.Read<int>(), time = streamReader.Read<float>() };
 
             //Note a potentially unintended read
-            if(timeCount == 0)
+            if (timeCount == 0)
             {
                 Debug.WriteLine($"Warning, timeCount is {timeCount}, set0 values are offset:{set0.offset:X} time:{set0.time}");
             }

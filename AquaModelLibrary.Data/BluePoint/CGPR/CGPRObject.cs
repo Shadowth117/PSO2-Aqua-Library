@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 using System.Text;
 
@@ -24,7 +23,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
 
         }
 
-        public CGPRObject(BufferedStreamReader sr)
+        public CGPRObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Read<uint>();
         }
@@ -118,7 +117,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
 
         }
 
-        public _FAE88582_Object(BufferedStreamReader sr)
+        public _FAE88582_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Peek<uint>();
             mainHeader = sr.Read<cgprCommonHeader>();
@@ -157,7 +156,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
             }
             stringLengthPlus1 = sr.Read<byte>();
             stringLength = sr.Read<byte>();
-            cmdlPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), stringLength));
+            cmdlPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, stringLength));
             sr.Seek(stringLength, System.IO.SeekOrigin.Current);
 
             postStrInt_00 = sr.Read<int>();
@@ -210,7 +209,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
 
         }
 
-        public _C1A69458_Object(BufferedStreamReader sr)
+        public _C1A69458_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Peek<uint>();
             mainHeader = sr.Read<cgprCommonHeader>();
@@ -247,7 +246,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
                     break;
                 case 2:
                     stringHeader = sr.Read<cgprCommonHeader>();
-                    dataString = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), dataStringLength));
+                    dataString = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, dataStringLength));
                     sr.Seek(dataStringLength, System.IO.SeekOrigin.Current);
                     break;
                 default:

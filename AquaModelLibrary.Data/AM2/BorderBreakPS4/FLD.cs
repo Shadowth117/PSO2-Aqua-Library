@@ -1,10 +1,6 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 {
@@ -19,10 +15,10 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public FLD(BufferedStreamReader sr)
+        public FLD(BufferedStreamReaderBE<MemoryStream> sr)
         {
             //Shouldn't be too many lines, but fallback just in case
-            while (sr.Position() < sr.BaseStream().Length && sr.Peek<long>() != 0)
+            while (sr.Position < sr.BaseStream.Length && sr.Peek<long>() != 0)
             {
                 modelOffsets.Add(sr.Read<long>());
             }
@@ -36,7 +32,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         public class FLDModel
         {
-            public AquaCommon.PSO2String modelName;
+            public PSO2String modelName;
             public FLDModelOffsets dataOffsets;
             public FLDModelHeader0 modelHeader0;
             public FLDModelHeader1 modelHeader1;
@@ -49,7 +45,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
             public FLDModel() { }
 
-            public FLDModel(BufferedStreamReader sr)
+            public FLDModel(BufferedStreamReaderBE<MemoryStream> sr)
             {
                 dataOffsets = sr.Read<FLDModelOffsets>();
 
@@ -60,7 +56,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                 modelHeader1 = sr.Read<FLDModelHeader1>();
 
                 sr.Seek(modelHeader1.modelNameOffset, SeekOrigin.Begin);
-                modelName = sr.Read<AquaCommon.PSO2String>();
+                modelName = sr.Read<PSO2String>();
 
                 if (dataOffsets.shortListsOffsetsOffset != 0)
                 {
@@ -76,7 +72,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                 {
                     var list = new List<short>();
                     sr.Seek(offset, SeekOrigin.Begin);
-                    while (sr.Position() < sr.BaseStream().Length && sr.Peek<short>() != -1)
+                    while (sr.Position < sr.BaseStream.Length && sr.Peek<short>() != -1)
                     {
                         list.Add(sr.Read<short>());
                     }

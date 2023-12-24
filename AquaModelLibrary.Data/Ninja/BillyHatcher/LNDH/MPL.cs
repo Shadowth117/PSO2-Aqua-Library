@@ -1,9 +1,7 @@
-﻿using Marathon.Formats.Mesh.Ninja;
-using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH.MPL;
-using static AquaModelLibrary.Extra.Ninja.BillyHatcher.Motion;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
@@ -34,12 +32,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
         }
 
         public MPL() { }
-        public MPL(BufferedStreamReader sr)
+        public MPL(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
 
-        public void Read(BufferedStreamReader sr)
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new MPLHeader();
             header.int_00 = sr.ReadBE<int>();
@@ -90,7 +88,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 info0.motionInfo1.bt_0D = sr.ReadBE<byte>();
                 info0.motionInfo1.bt_0E = sr.ReadBE<byte>();
                 info0.motionInfo1.motionDataCount0 = sr.ReadBE<byte>();
-                if(info0.motionInfo1.motionDataCount0 == 0)
+                if (info0.motionInfo1.motionDataCount0 == 0)
                 {
                     info0.motionInfo1.motionDataCount1 = sr.ReadBE<int>();
                 }
@@ -101,11 +99,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 for (int i = 0; i < info0.motionInfo1.motCount; i++)
                 {
                     MPLMotionData motionData = new MPLMotionData();
-                    switch(info0.motionLayout)
+                    switch (info0.motionLayout)
                     {
                         case MPLMotionLayout.ShortBAMSEuler:
                             motionData.frame = sr.ReadBE<ushort>();
-                            motionData.shortsFrame = new short[] {sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()};
+                            motionData.shortsFrame = new short[] { sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>() };
                             break;
                         case MPLMotionLayout.Quaternion:
                             motionData.frame = sr.ReadBE<int>();
@@ -119,7 +117,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                         case MPLMotionLayout.IntBAMSEuler:
                         case MPLMotionLayout.IntBAMSEuler2:
                             motionData.frame = sr.ReadBE<int>();
-                            motionData.intsFrame = new int[] { sr.ReadBE<int>(), sr.ReadBE<int>(), sr.ReadBE<int>()};
+                            motionData.intsFrame = new int[] { sr.ReadBE<int>(), sr.ReadBE<int>(), sr.ReadBE<int>() };
                             break;
                         default:
                             throw new System.Exception();
@@ -129,9 +127,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             }
 
             //Create a dictionary for quick reference
-            foreach(var map in motionMappingList)
+            foreach (var map in motionMappingList)
             {
-                if(map.mplMotionKey != -1)
+                if (map.mplMotionKey != -1)
                 {
                     motionDict.Add(map.mplMotionKey, motionList[map.mplMotionId]);
                 }
@@ -200,7 +198,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.Add(info1.bt_0D);
                 outBytes.Add(info1.bt_0E);
                 outBytes.Add(info1.motionDataCount0);
-                if(info1.motionDataCount1 > 0)
+                if (info1.motionDataCount1 > 0)
                 {
                     outBytes.AddValue(info1.motionDataCount1);
                 }
@@ -209,7 +207,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 foreach (var motionData in info1.motionData)
                 {
                     outBytes.AddValue(motionData.frame);
-                    switch(info0.motionLayout)
+                    switch (info0.motionLayout)
                     {
                         case MPLMotionLayout.ShortBAMSEuler:
                             outBytes.AddValue(motionData.shortsFrame[0]);

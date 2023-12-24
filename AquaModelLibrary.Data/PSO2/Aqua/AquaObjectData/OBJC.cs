@@ -6,7 +6,7 @@ using static AquaModelLibrary.Helpers.PSO2.VTBFMethods;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
-    public class OBJC
+    public struct OBJC
     {
         public int type;           //0x10, Type 0x8
         public int size;           //0x11, Type 0x8
@@ -73,19 +73,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public int unkPointArray2Offset;
         public int unkCount3;
 
-        #region Constructors
-        public OBJC() { }
-
-        public OBJC(BufferedStreamReaderBE<MemoryStream> streamReader)
-        {
-            Read(streamReader);
-        }
-
-        public OBJC(List<Dictionary<int, object>> objcRaw)
-        {
-            ReadVTBF(objcRaw);
-        }
-
+        #region Readers
         public void ReadVTBF(List<Dictionary<int, object>> objcRaw)
         {
             type = (int)(objcRaw[0][0x10]);
@@ -247,10 +235,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             AddBytes(outBytes, 0x1B, 0x8, BitConverter.GetBytes(tstaCount));
             AddBytes(outBytes, 0x1C, 0x8, BitConverter.GetBytes(tsetCount));
             AddBytes(outBytes, 0x1D, 0x8, BitConverter.GetBytes(texfCount));
-            AddBytes(outBytes, 0x1E, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.modelCenter));
+            AddBytes(outBytes, 0x1E, 0x4A, 0x1, DataHelpers.ConvertStruct(bounds.modelCenter));
             AddBytes(outBytes, 0x1F, 0xA, BitConverter.GetBytes(bounds.boundingRadius));
-            AddBytes(outBytes, 0x20, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.modelCenter2));
-            AddBytes(outBytes, 0x21, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.halfExtents));
+            AddBytes(outBytes, 0x20, 0x4A, 0x1, DataHelpers.ConvertStruct(bounds.modelCenter2));
+            AddBytes(outBytes, 0x21, 0x4A, 0x1, DataHelpers.ConvertStruct(bounds.halfExtents));
 
             return outBytes.ToArray();
         }

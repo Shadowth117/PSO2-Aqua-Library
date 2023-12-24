@@ -1,7 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
 using System.Numerics;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
@@ -51,7 +48,7 @@ namespace AquaModelLibrary.BluePoint.CANI
 
         }
 
-        public CANIFrameData(BufferedStreamReader sr, int baseOffset)
+        public CANIFrameData(BufferedStreamReaderBE<MemoryStream> sr, int baseOffset)
         {
             _baseOffset = baseOffset;
             variant = sr.Read<ushort>();
@@ -68,13 +65,13 @@ namespace AquaModelLibrary.BluePoint.CANI
                 case (ushort)CANIFrameType.Scale:
                 case (ushort)CANIFrameType.Rotation:
                 case (ushort)CANIFrameType.x318:
-                    bookmark = sr.Position();
+                    bookmark = sr.Position;
                     break;
                 case (ushort)CANIFrameType.vertMorphData0:
                     userData0 = sr.Read<ushort>();
                     userData1 = sr.Read<ushort>();
                     userData2 = sr.Read<ushort>();
-                    bookmark = sr.Position();
+                    bookmark = sr.Position;
                     break;
                 case (ushort)CANIFrameType.vertMorphData1:
                 case (ushort)CANIFrameType.x41C:
@@ -83,7 +80,7 @@ namespace AquaModelLibrary.BluePoint.CANI
                 case (ushort)CANIFrameType.x40F:
                 case (ushort)CANIFrameType.x410:
                     userData0 = sr.Read<ushort>();
-                    bookmark = sr.Position();
+                    bookmark = sr.Position;
                     break;
                 default:
                     Debug.WriteLine($"new Variant detected: {variant:X}");
@@ -107,7 +104,7 @@ namespace AquaModelLibrary.BluePoint.CANI
                     //The odd thing is that these buffers have clear separations. The first half is almost always all 003C, 1 as a half. Near the middle, there are USUALLY padding esque values of 0000 for less than 0x10 of data.
                     //Lastly is another set of values which it is not readily apparent if these are even Half values or simply 16 bit integers. Either way, there is clear confusion here.
                     //In some files, such as very small ones for static or nearly static entities, the first type of data is all that can be found.
-                    bookmark2 = sr.Position();
+                    bookmark2 = sr.Position;
                     for (int i = 0; i < entryCount; i++)
                     {
                         frameDataVec3s.Add(new Vector3(sr.Read<Half>(), sr.Read<Half>(), sr.Read<Half>()));
@@ -132,7 +129,7 @@ namespace AquaModelLibrary.BluePoint.CANI
                     ReadCommonUshorts(sr);
 
                     //Similar confusion
-                    bookmark2 = sr.Position();
+                    bookmark2 = sr.Position;
                     for (int i = 0; i < entryCount; i++)
                     {
                         frameDataVec3s.Add(new Vector3(sr.Read<Half>(), sr.Read<Half>(), sr.Read<Half>()));
@@ -164,13 +161,13 @@ namespace AquaModelLibrary.BluePoint.CANI
             sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
         }
 
-        private void ReadCommonUshorts(BufferedStreamReader sr)
+        private void ReadCommonUshorts(BufferedStreamReaderBE<MemoryStream> sr)
         {
             for (int i = 0; i < entryCount; i++)
             {
                 frameDataUshorts.Add(sr.Read<ushort>());
             }
-            AquaGeneralMethods.AlignReader(sr, 0x10);
+            sr.AlignReader(0x10);
         }
     }
 }

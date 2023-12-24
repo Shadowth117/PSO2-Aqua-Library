@@ -1,21 +1,12 @@
 ﻿using AquaModelLibrary.Nova.Structures;
 using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Nova
 {
     //Same format as .axs, but uses exclusively the texture data
     public static class AIFMethods
     {
-        public static XgmiStruct ReadXgmi(this BufferedStreamReader streamReader)
+        public static XgmiStruct ReadXgmi(this BufferedStreamReader<MemoryStream> streamReader)
         {
             XgmiStruct xgmiStr = new XgmiStruct();
 
@@ -64,7 +55,7 @@ namespace AquaModelLibrary.Nova
 
             //Processed data
             int mipByteIdBit = 0;
-            if((xgmiStr.mipIdByte & 0x80) > 0)
+            if ((xgmiStr.mipIdByte & 0x80) > 0)
             {
                 mipByteIdBit = 0x80;
             }
@@ -77,7 +68,7 @@ namespace AquaModelLibrary.Nova
         public static byte[] GetImage(XgmiStruct xgmiStr, byte[] buffer)
         {
             int sourceBytesPerPixel;
-            switch(xgmiStr.dxtType)
+            switch (xgmiStr.dxtType)
             {
                 case 0x10:
                     sourceBytesPerPixel = 0x8;
@@ -95,21 +86,6 @@ namespace AquaModelLibrary.Nova
             var processedBuffer = Unswizzle(buffer, xgmiStr.width >> 2, xgmiStr.height >> 2, sourceBytesPerPixel);
             var dds = AssembleDDS(processedBuffer, xgmiStr.height, xgmiStr.width, xgmiStr.alphaTesting, xgmiStr.dxtType);
             return dds;
-            /*using (var image = Pfim.Pfim.FromStream(new MemoryStream(dds)))
-            {
-                // Pin pfim's data array so that it doesn't get reaped by GC, unnecessary
-                // in this snippet but useful technique if the data was going to be used in
-                // control like a picture box
-                var bytes = (new MemoryStream(image.Data)).ToArray();
-                Bitmap bmp = new Bitmap(xgmiStr.width, xgmiStr.height, PixelFormat.Format32bppArgb);
-                BitmapData currMip = bmp.LockBits(new Rectangle(0, 0, xgmiStr.width, xgmiStr.height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-
-                Marshal.Copy(bytes, 0, currMip.Scan0, bytes.Length);
-                bytes = null;
-                bmp.UnlockBits(currMip);
-
-                return bmp;
-            }*/
         }
 
         //Massive credit to Agrajag for the deswizzling here
@@ -141,7 +117,7 @@ namespace AquaModelLibrary.Nova
                 {
                     Array.Copy(swizzledData, j * sourceBytesPerPixel, unswizzledData, (v * width + u) * sourceBytesPerPixel, sourceBytesPerPixel);
                 }
-                
+
             }
             return unswizzledData;
         }
@@ -220,17 +196,19 @@ namespace AquaModelLibrary.Nova
                 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x20, 0x00, 0x00, 0x00,
                 0x04, 0x00, 0x00, 0x00,  });
-            outBytes.AddRange(new byte[] { 0x44, 0x58, 0x54}); 
-            if(alphaTesting == 0x8)
+            outBytes.AddRange(new byte[] { 0x44, 0x58, 0x54 });
+            if (alphaTesting == 0x8)
             {
-                if(pixelFormat == 0x12)
+                if (pixelFormat == 0x12)
                 {
                     outBytes.Add(0x33); //DXT3
-                } else
+                }
+                else
                 {
                     outBytes.Add(0x35); //DXT5
                 }
-            } else
+            }
+            else
             {
                 outBytes.Add(0x31); //DXT1
             }

@@ -1,7 +1,6 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Extensions.Readers;
 using System.Text;
-using System.Windows;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -17,9 +16,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public List<string> strings = new List<string>();
         public bool isShiftJIS = false;
         public MesBin() { }
-        public MesBin(string fileName, BufferedStreamReader sr)
+        public MesBin(string fileName, BufferedStreamReaderBE<MemoryStream> sr)
         {
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             Encoding encoding = Encoding.GetEncoding("Windows-1252");
             if (!fileName.EndsWith("_e.bin") && !fileName.EndsWith("_f.bin") && !fileName.EndsWith("_g.bin") && !fileName.EndsWith("_i.bin") && !fileName.EndsWith("_s.bin"))
             {
@@ -43,7 +42,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 sr.Seek(fullOffsetBuffer + 0x8 + nameRelativeOffsets[i], System.IO.SeekOrigin.Begin);
                 List<byte> str = new List<byte>();
                 string text = "";
-                while (sr.Position() < sr.BaseStream().Length)
+                while (sr.Position < sr.BaseStream.Length)
                 {
                     var bt = sr.Read<byte>();
                     if (bt == 0)
@@ -65,7 +64,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 break;
                             case 0x63:
                                 var variant = sr.Read<byte>();
-                                switch(variant)
+                                switch (variant)
                                 {
                                     case 0x37:
                                         text += "|WhiteText|";
@@ -151,18 +150,18 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     inTag = true;
                 }
-                for(int j = 0; j < splitString.Length; j++)
+                for (int j = 0; j < splitString.Length; j++)
                 {
-                    if(inTag)
+                    if (inTag)
                     {
                         if (splitString[j] == "")
                         {
                             j++;
                         }
-                        
+
                         strBytes.Add(0x9);
                         var testStr = splitString[j].Split('#');
-                        switch(testStr[0].ToLower())
+                        switch (testStr[0].ToLower())
                         {
                             case "whitetext":
                                 strBytes.Add(0x63);
@@ -234,7 +233,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 break;
                         }
                         inTag = false;
-                    } else
+                    }
+                    else
                     {
                         strBytes.AddRange(encoding.GetBytes(splitString[j]));
                         inTag = true;
@@ -243,7 +243,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 strBytes.Add(0);
             }
             var endCount = strBytes.Count;
-            strBytes.AlignWrite(0x4);
+            strBytes.AlignWriter(0x4);
             refs.AddValue(strBytes.Count + 0x8);
             refs.AddValue(endCount);
             outBytes.AddValue(refs.Count);

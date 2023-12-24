@@ -1,10 +1,5 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -13,7 +8,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
     /// </summary>
 
     [Flags]
-	public enum AnimFlags : ushort
+    public enum AnimFlags : ushort
     {
         Position = 0x1,
         Rotation = 0x2,
@@ -80,7 +75,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public Motion() { }
 
-        public Motion(BufferedStreamReader sr, int offset = 0)
+        public Motion(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0)
         {
             motStart = new MotionStart();
             motStart.int_00 = sr.ReadBE<int>();
@@ -162,7 +157,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.AddValue(motHeader.usht_2A);
             outBytes.AddValue(motHeader.int_2C);
 
-            for(int i = 0; i < colorAnimations[0].Count; i++)
+            for (int i = 0; i < colorAnimations[0].Count; i++)
             {
                 outBytes.AddRange(colorAnimations[0][i]);
             }

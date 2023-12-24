@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CMDL
 {
@@ -12,7 +12,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
         public BPString cmatPath = null;
         public CMDL_CMATMaterialMap() { }
 
-        public CMDL_CMATMaterialMap(BufferedStreamReader sr)
+        public CMDL_CMATMaterialMap(BufferedStreamReaderBE<MemoryStream> sr)
         {
             usht0 = sr.Read<ushort>();
             int0 = sr.Read<int>();

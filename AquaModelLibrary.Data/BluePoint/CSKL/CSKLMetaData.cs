@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -22,9 +21,9 @@ namespace AquaModelLibrary.BluePoint.CSKL
 
         }
 
-        public CSKLMetaData(BufferedStreamReader sr)
+        public CSKLMetaData(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            var start = sr.Position();
+            var start = sr.Position;
 
             usht_00 = sr.Read<ushort>();
             usht_02 = sr.Read<ushort>();

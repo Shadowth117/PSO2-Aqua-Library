@@ -113,7 +113,7 @@ namespace AquaModelLibrary
         public AquaObject ConvertToBasicAquaobject(out AquaNode aqn)
         {
             aqn = nodes;
-            AquaObject aqp = new NGSAquaObject();
+            AquaObject aqp = new AquaObject();
             aqp.bonePalette = new List<uint>();
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
@@ -593,7 +593,7 @@ namespace AquaModelLibrary
                 node.m4 = nnNode.m4;
 
                 List<byte> nodeBytes = new List<byte>();
-                nodeBytes.AddRange(MiscHelpers.ConvertStruct(nnNode.NODE_CENTER));
+                nodeBytes.AddRange(DataHelpers.ConvertStruct(nnNode.NODE_CENTER));
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_RADIUS));
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_BBXSIZE));
                 nodeBytes.AddRange(BitConverter.GetBytes(nnNode.NODE_BBYSIZE));

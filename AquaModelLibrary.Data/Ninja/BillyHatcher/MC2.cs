@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
@@ -31,8 +32,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public MC2(string filePath)
         {
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Read(streamReader);
             }
@@ -40,22 +41,22 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public MC2(byte[] file)
         {
-            using (Stream stream = new MemoryStream(file))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Read(streamReader);
             }
         }
 
-        public MC2(BufferedStreamReader sr)
+        public MC2(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
 
-        public void Read(BufferedStreamReader sr)
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             njHeader = sr.Read<NinjaHeader>();
-            BigEndianHelper._active = sr.Peek<int>() > sr.PeekBigEndianPrimitiveInt32();
+            sr._BEReadActive = sr.Peek<int>() > sr.PeekBigEndianInt32();
 
             MC2Header header = new MC2Header();
             header.vertPositionsOffset = sr.ReadBE<int>();
@@ -672,7 +673,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             public MC2Sector() { }
 
-            public MC2Sector(BufferedStreamReader sr)
+            public MC2Sector(BufferedStreamReaderBE<MemoryStream> sr)
             {
                 usesOffset = sr.ReadBE<ushort>();
                 indexCount = sr.ReadBE<ushort>();
@@ -686,7 +687,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 if (usesOffset != 0)
                 {
-                    var bookmark = sr.Position();
+                    var bookmark = sr.Position;
                     sr.Seek(indexOffset + 8, System.IO.SeekOrigin.Begin);
                     for (int i = 0; i < indexCount; i++)
                     {

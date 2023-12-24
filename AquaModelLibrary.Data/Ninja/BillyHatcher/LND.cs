@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
+using AquaModelLibrary.Helpers.Extensions;
 using ArchiveLib;
-using Reloaded.Memory.Streams;
 using System.Numerics;
 using System.Text;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
@@ -156,7 +156,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public void Read(BufferedStreamReader sr)
         {
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             var magicTest = sr.ReadBytes(0, 3);
 
             if (magicTest[0] == 0x4C && magicTest[1] == 0x4E && magicTest[2] == 0x44)

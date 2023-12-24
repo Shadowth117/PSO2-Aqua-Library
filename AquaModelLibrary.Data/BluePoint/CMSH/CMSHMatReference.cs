@@ -4,7 +4,7 @@
     {
         public byte[] texNameHash = new byte[0x18]; //Hash for material name? 
         public byte matNameLength;
-        public string matName;
+        public string matName = null;
         public int startingFaceIndex = -1;
         public int endingFaceIndex = -1; //start of next mesh? Idk
 

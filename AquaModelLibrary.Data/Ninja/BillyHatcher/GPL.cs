@@ -82,7 +82,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public GPL(BufferedStreamReader sr)
         {
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             header.size = sr.ReadBE<int>();
             header.texCount = sr.ReadBE<int>();
             header.unkInt = sr.ReadBE<int>();

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
 using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
@@ -152,7 +150,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.ReserveInt($"FaceDataOffset1{i}");
                 outBytes.ReserveInt($"FaceDataBufferSize1{i}");
             }
-            outBytes.AlignWrite(0x20);
+            outBytes.AlignWriter(0x20);
 
             for (int i = 0; i < arcFaceDataList.Count; i++)
             {
@@ -175,7 +173,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                             }
                         }
                     }
-                    outBytes.AlignWrite(0x20);
+                    outBytes.AlignWriter(0x20);
                     size = outBytes.Count - size;
                     outBytes.FillInt($"FaceDataBufferSize0{i}", size);
                 }
@@ -197,7 +195,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                             }
                         }
                     }
-                    outBytes.AlignWrite(0x20);
+                    outBytes.AlignWriter(0x20);
                     size = outBytes.Count - size;
                     outBytes.FillInt($"FaceDataBufferSize1{i}", size);
                 }
@@ -249,7 +247,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.AddValue(meshData.faceDataId);
                 }
             }
-            outBytes.AlignWrite(0x20);
+            outBytes.AlignWriter(0x20);
 
             //Alt Vert data
             if (arcAltVertColorList.Count > 0)
@@ -286,7 +284,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.ReserveInt($"AnimatedMotion{i}");
                     outBytes.AddValue(arcLndAnimatedMeshDataList[i].MPLAnimId);
                 }
-                outBytes.AlignWrite(0x20);
+                outBytes.AlignWriter(0x20);
                 for (int i = 0; i < arcLndAnimatedMeshDataList.Count; i++)
                 {
                     outBytes.FillInt($"AnimatedModel{i}", outBytes.Count + offset);
@@ -295,7 +293,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                     outBytes.FillInt($"AnimatedMotion{i}", outBytes.Count + offset);
                     outBytes.AddRange(arcLndAnimatedMeshDataList[i].motion.GetBytes(outBytes.Count + offset, out var animOffsets));
                     offsets.AddRange(animOffsets);
-                    outBytes.AlignWrite(0x20);
+                    outBytes.AlignWriter(0x20);
                 }
             }
 

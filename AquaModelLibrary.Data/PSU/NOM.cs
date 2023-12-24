@@ -6,7 +6,7 @@ using AquaModelLibrary.Helpers.MathHelpers;
 using Marathon.Formats.Mesh.Ninja;
 using System.Diagnostics;
 using System.Numerics;
-using static AquaModelLibrary.Core.Extensions.ByteListExtension;
+using static AquaModelLibrary.Helpers.Extensions.ByteListExtension;
 using static Marathon.Formats.Mesh.Ninja.NinjaKeyframe;
 
 namespace AquaModelLibrary.PSU

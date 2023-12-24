@@ -1,6 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -19,17 +17,17 @@ namespace AquaModelLibrary.BluePoint.CSKL
             {
 
             }
-            public CSKLNameList(BufferedStreamReader sr)
+            public CSKLNameList(BufferedStreamReaderBE<MemoryStream> sr)
             {
                 int count = sr.Read<int>();
                 for (int i = 0; i < count; i++)
                 {
                     int relativeOffset = sr.Read<int>();
-                    long absoluteOffset = relativeOffset + sr.Position();
+                    long absoluteOffset = relativeOffset + sr.Position;
 
-                    var bookmark = sr.Position();
+                    var bookmark = sr.Position;
                     sr.Seek(absoluteOffset, System.IO.SeekOrigin.Begin);
-                    string name = AquaGeneralMethods.ReadCString(sr, 0x500);
+                    string name = sr.ReadCString(0x500);
                     sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
 
                     relativeOffsets.Add(relativeOffset);
@@ -62,14 +60,14 @@ namespace AquaModelLibrary.BluePoint.CSKL
         {
 
         }
-        public CSKLNames(BufferedStreamReader sr)
+        public CSKLNames(BufferedStreamReaderBE<MemoryStream> sr)
         {
             crc = sr.Read<int>();
             unk0 = sr.Read<int>();
             secondaryNameCount = sr.Read<int>();
             primaryNameOffsetListOffset = sr.Read<int>();
 
-            var secondaryNameOffsetListOffsetPosition = sr.Position();
+            var secondaryNameOffsetListOffsetPosition = sr.Position;
             var secondaryParamOffsetListOffsetPosition = secondaryNameOffsetListOffsetPosition + 4;
             secondaryNameOffsetListOffset = sr.Read<int>();
             secondaryParamOffsetListOffset = sr.Read<int>();
@@ -99,7 +97,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
             {
                 sr.Seek(primaryNames.absoluteOffsets[primaryNames.absoluteOffsets.Count - 1], System.IO.SeekOrigin.Begin);
             }
-            AquaGeneralMethods.ReadCStringSeek(sr, 0x500);
+            sr.ReadCStringSeek(0x500);
         }
     }
 

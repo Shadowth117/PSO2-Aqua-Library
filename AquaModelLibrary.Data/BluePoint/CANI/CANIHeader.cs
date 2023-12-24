@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CANI
 {
@@ -15,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CANI
 
         }
 
-        public CANIHeader(BufferedStreamReader sr)
+        public CANIHeader(BufferedStreamReaderBE<MemoryStream> sr)
         {
             caniHeader = sr.Read<CANIMainHeader>();
             info = new List<CANIFrameDataSetInfo>();

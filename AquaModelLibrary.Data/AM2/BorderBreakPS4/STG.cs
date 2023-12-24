@@ -1,6 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
@@ -16,7 +14,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public STG(BufferedStreamReader sr)
+        public STG(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = sr.Read<STGHeader>();
 
@@ -79,10 +77,10 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
             }
 
-            public STGObjectClass(BufferedStreamReader sr)
+            public STGObjectClass(BufferedStreamReaderBE<MemoryStream> sr)
             {
                 stgObj = sr.Read<STGObject>();
-                var bookmark = sr.Position();
+                var bookmark = sr.Position;
 
                 if (stgObj.objectTransformSetOffset != 0)
                 {
@@ -99,11 +97,11 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                 if (stgObj.objectPropertyOffset != 0)
                 {
                     sr.Seek(stgObj.objectPropertyOffset, SeekOrigin.Begin);
-                    modelName = AquaGeneralMethods.ReadCString(sr);
+                    modelName = sr.ReadCString();
                 }
 
                 sr.Seek(stgObj.objectNameOffset, SeekOrigin.Begin);
-                objName = AquaGeneralMethods.ReadCString(sr);
+                objName = sr.ReadCString();
 
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }

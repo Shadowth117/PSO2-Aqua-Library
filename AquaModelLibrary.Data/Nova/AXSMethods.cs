@@ -19,7 +19,8 @@ namespace AquaModelLibrary.Nova
         //Returns an aqp ready for the ConvertToNGSPSO2Mesh method
         public static AquaObject ReadAXS(string filePath, bool writeTextures, out AquaNode aqn)
         {
-            AquaObject aqp = new NGSAquaObject();
+            AquaObject aqp = new AquaObject();
+            aqp.objc.type = 0xC33;
             aqn = new AquaNode();
 
             using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
@@ -258,11 +259,10 @@ namespace AquaModelLibrary.Nova
 
                     //Vert data
                     var vertCount = vertBufferInfo.dataSize / mesh.salvStr.vertLen;
-                    VTXL vtxl = new VTXL();
 
                     streamReader.Seek((meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset), SeekOrigin.Begin);
                     Debug.WriteLine(streamReader.Position.ToString("X"));
-                    AquaObjectMethods.ReadVTXL(streamReader, mesh.vtxe, vtxl, vertCount, mesh.vtxe.vertDataTypes.Count);
+                    VTXL vtxl = new VTXL(streamReader, mesh.vtxe, vertCount);
 
                     //Account for indices without weights
                     /*if(vtxl.vertWeightIndices.Count > 0 && vtxl.vertWeights.Count == 0)
@@ -377,12 +377,12 @@ namespace AquaModelLibrary.Nova
             //Vert positions
             if ((vertData0 & 0x1) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x0, 0x3, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x0, 0x3, curLength));
                 curLength += 0xC;
             }
             else if ((vertData0 & 0x8) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x0, 0x99, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x0, 0x99, curLength));
                 curLength += 0x8;
             }
 
@@ -391,12 +391,12 @@ namespace AquaModelLibrary.Nova
             {
                 if ((vertData0 & 0x80) > 0)
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x2, 0xF, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x2, 0xF, curLength));
                     curLength += 0x8;
                 }
                 else
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x2, 0x3, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x2, 0x3, curLength));
                     curLength += 0xC;
                 }
             }
@@ -404,14 +404,14 @@ namespace AquaModelLibrary.Nova
             //Vert colors
             if ((vertData3 & 0x10) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x3, 0x5, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x3, 0x5, curLength));
                 curLength += 0x4;
             }
 
             //Yet another UV thing?
             if ((vertData4 & 0x40) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x25, 0xC, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x25, 0xC, curLength));
                 curLength += 0x4;
             }
 
@@ -421,12 +421,12 @@ namespace AquaModelLibrary.Nova
             {
                 if ((vertData1 & 0x8) > 0)
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10, 0x99, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x10, 0x99, curLength));
                     curLength += 0x4;
                 }
                 else
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10, 0x2, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x10, 0x2, curLength));
                     curLength += 0x8;
                 }
                 addition++;
@@ -441,16 +441,16 @@ namespace AquaModelLibrary.Nova
                 }
                 if ((vertData1 & 0x8) > 0)
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x99, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x10 + addition, 0x99, curLength));
                     curLength += 0x4;
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0x99, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x11 + addition, 0x99, curLength));
                     curLength += 0x4;
                 }
                 else
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x2, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x10 + addition, 0x2, curLength));
                     curLength += 0x8;
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0x2, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x11 + addition, 0x2, curLength));
                     curLength += 0x8;
                 }
 
@@ -460,9 +460,9 @@ namespace AquaModelLibrary.Nova
             //MOAR UV
             if ((vertData1 & 0x10) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x2, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x10 + addition, 0x2, curLength));
                 curLength += 0x8;
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0x2, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x11 + addition, 0x2, curLength));
                 curLength += 0x8;
 
                 addition += 2;
@@ -471,7 +471,7 @@ namespace AquaModelLibrary.Nova
             //Some kind of uv info? Idefk
             if ((vertData1 & 0x20) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x2, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x10 + addition, 0x2, curLength));
                 curLength += 0x8;
 
                 addition += 1;
@@ -480,9 +480,9 @@ namespace AquaModelLibrary.Nova
             //Some other kind of uv info? Idefk
             if ((vertData1 & 0x40) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x10 + addition, 0x99, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x10 + addition, 0x99, curLength));
                 curLength += 0x4;
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x11 + addition, 0x99, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x11 + addition, 0x99, curLength));
                 curLength += 0x4;
 
                 addition += 2;
@@ -493,19 +493,19 @@ namespace AquaModelLibrary.Nova
             {
                 if ((vertData5 & 0x1) > 0)
                 {
-                    vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x1, 0x11, curLength));
+                    vtxe.vertDataTypes.Add(new VTXEElement(0x1, 0x11, curLength));
                     curLength += 0x8;
                 }
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0xb, 0x7, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0xb, 0x7, curLength));
                 curLength += 0x4;
             }
 
             //More uv stuff??
             if ((vertData2 & 0x40) > 0)
             {
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x22, 0xC, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x22, 0xC, curLength));
                 curLength += 0x4;
-                vtxe.vertDataTypes.Add(AquaObjectMethods.vtxeElementGenerator(0x23, 0xC, curLength));
+                vtxe.vertDataTypes.Add(new VTXEElement(0x23, 0xC, curLength));
                 curLength += 0x4;
             }
 

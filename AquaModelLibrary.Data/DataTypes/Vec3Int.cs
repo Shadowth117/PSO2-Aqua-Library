@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Vector3Integer
+﻿namespace Vector3Integer
 {
     public class Vector3Int
     {

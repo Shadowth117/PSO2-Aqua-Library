@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.BluePoint.CSKL
@@ -14,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
 
         }
 
-        public CSKLTransform(BufferedStreamReader sr)
+        public CSKLTransform(BufferedStreamReaderBE<MemoryStream> sr)
         {
             scale = sr.Read<Vector3>();
             sr.Seek(4, System.IO.SeekOrigin.Current);

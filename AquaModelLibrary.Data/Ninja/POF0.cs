@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
 namespace AquaModelLibrary.Extra.Ninja
 {
@@ -59,15 +56,15 @@ namespace AquaModelLibrary.Extra.Ninja
         {
             List<byte> pofBytes = new List<byte>();
             uint lastPof = 0;
-            foreach(var offset in offsets)
+            foreach (var offset in offsets)
             {
                 pofBytes.AddRange(CalcPOF0Pointer(lastPof, offset));
                 lastPof = offset;
             }
 
-            if(align == true)
+            if (align == true)
             {
-                while(pofBytes.Count % 4 != 0)
+                while (pofBytes.Count % 4 != 0)
                 {
                     pofBytes.Add(0);
                 }

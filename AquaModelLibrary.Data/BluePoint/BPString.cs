@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.IO;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Text;
 
 namespace AquaModelLibrary.BluePoint
@@ -19,7 +18,7 @@ namespace AquaModelLibrary.BluePoint
         public string str;
 
         public BPString() { }
-        public BPString(BufferedStreamReader sr)
+        public BPString(BufferedStreamReaderBE<MemoryStream> sr)
         {
             lengthLength = sr.Read<byte>();
             if (lengthLength >= 0x80)
@@ -31,7 +30,7 @@ namespace AquaModelLibrary.BluePoint
             {
                 unkByte1_0 = sr.Read<byte>();
             }
-            str = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), length));
+            str = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, length));
             sr.Seek(length, SeekOrigin.Current);
         }
     }

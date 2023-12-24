@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
 using System.Text;
 
@@ -30,7 +29,7 @@ namespace AquaModelLibrary.BluePoint.CMAT
         {
 
         }
-        public CMAT(BufferedStreamReader sr)
+        public CMAT(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Read<int>();
             unk0 = sr.Read<int>();
@@ -43,7 +42,7 @@ namespace AquaModelLibrary.BluePoint.CMAT
             int_1C = sr.Read<int>();
 
             byte shaderLen = sr.Read<byte>();
-            shaderName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), shaderLen));
+            shaderName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, shaderLen));
             sr.Seek(shaderLen, System.IO.SeekOrigin.Current);
 
             var texCount = sr.Read<int>();
@@ -56,7 +55,7 @@ namespace AquaModelLibrary.BluePoint.CMAT
             {
                 byte texLen = sr.Read<byte>();
                 Debug.WriteLine($"{texLen}");
-                texNames.Add(Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), texLen)));
+                texNames.Add(Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, texLen)));
                 sr.Seek(texLen, System.IO.SeekOrigin.Current);
             }
 

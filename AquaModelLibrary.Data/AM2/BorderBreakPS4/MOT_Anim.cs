@@ -1,12 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.Data.AM2.BorderBreakPS4.MOT_BONE;
+﻿using AquaModelLibrary.Extensions.Readers;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
@@ -61,7 +53,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public MOT_Anim(BufferedStreamReader streamReader)
+        public MOT_Anim(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             header = streamReader.Read<motionHeader>();
 
@@ -75,7 +67,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
             foreach (var nameOffset in motionNameOffsets)
             {
                 streamReader.Seek(nameOffset, SeekOrigin.Begin);
-                motionNames.Add(AquaGeneralMethods.ReadCString(streamReader));
+                motionNames.Add(streamReader.ReadCString());
             }
 
             //Read motions

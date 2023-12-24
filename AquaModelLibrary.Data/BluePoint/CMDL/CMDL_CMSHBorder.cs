@@ -1,6 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
 
 namespace AquaModelLibrary.BluePoint.CMDL
@@ -11,7 +9,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
 
         public CMDL_CMSHBorder() { }
 
-        public CMDL_CMSHBorder(BufferedStreamReader sr)
+        public CMDL_CMSHBorder(BufferedStreamReaderBE<MemoryStream> sr)
         {
             while (true)
             {
@@ -28,16 +26,16 @@ namespace AquaModelLibrary.BluePoint.CMDL
         public class BorderClump
         {
             public uint magic;
-            public CVariableTrail trail;
+            public CVariableTrail trail = null;
             public List<byte> extraBytes = new List<byte>();
             public BorderClump() { }
 
-            public BorderClump(BufferedStreamReader sr, uint check)
+            public BorderClump(BufferedStreamReaderBE<MemoryStream> sr, uint check)
             {
                 Read(sr, check);
             }
 
-            protected void Read(BufferedStreamReader sr, uint check)
+            protected void Read(BufferedStreamReaderBE<MemoryStream> sr, uint check)
             {
                 magic = check;
                 int limit = 4;

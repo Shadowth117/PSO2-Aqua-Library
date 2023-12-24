@@ -1,7 +1,6 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
-using static AquaModelLibrary.AquaCommon;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
@@ -232,7 +231,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public E_OBJ(BufferedStreamReader streamReader)
+        public E_OBJ(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             header = streamReader.Read<EOBJHeader>();
 
@@ -246,7 +245,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
             foreach (var nameOffset in nameOffsets)
             {
                 streamReader.Seek(nameOffset, SeekOrigin.Begin);
-                names.Add(AquaGeneralMethods.ReadCString(streamReader));
+                names.Add(streamReader.ReadCString());
             }
 
             //Read models
@@ -328,7 +327,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                         streamReader.Seek(modelOffs + mesh.header.vertBoneIndicesOffset, SeekOrigin.Begin);
                         for (int v = 0; v < mesh.header.vertCount; v++)
                         {
-                            mesh.vertWeightIndices.Add(AquaGeneralMethods.Read4BytesToIntArray(streamReader));
+                            mesh.vertWeightIndices.Add(streamReader.Read4BytesToIntArray());
                             for (int i = 0; i < mesh.vertWeightIndices[v].Length; i++)
                             {
                                 if (mesh.vertWeightIndices[v][i] > model.highestBone)

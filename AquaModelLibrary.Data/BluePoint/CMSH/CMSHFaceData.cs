@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
+using Reloaded.Memory.Streams;
 using System.Collections.Generic;
 using Vector3Integer;
 
@@ -18,7 +19,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHFaceData(BufferedStreamReader sr, CMSHHeader header, int vertCount)
+        public CMSHFaceData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header, int vertCount)
         {
             flags = sr.Read<int>();
             indexCount = sr.Read<int>();

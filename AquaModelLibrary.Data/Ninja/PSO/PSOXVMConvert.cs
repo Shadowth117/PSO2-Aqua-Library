@@ -1,13 +1,7 @@
-﻿using AquaModelLibrary.AquaMethods;
-using DirectXTex;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Helpers;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Runtime.InteropServices;
-using static DirectXTex.DirectXTexUtility;
+using VrSharp.Xvr;
+using static VrSharp.Xvr.DirectXTexUtility;
 
 namespace AquaModelLibrary
 {
@@ -88,27 +82,20 @@ namespace AquaModelLibrary
                     if (dumpRawXvr)
                     {
                         var rawXvr = new byte[fullSize];
-                        //var rawXvrData = new byte[fullSize - 0x40];
+
                         Array.Copy(xvm, offset, rawXvr, 0, fullSize);
-                        //Array.Copy(xvm, offset + 0x40, rawXvrData, 0, fullSize - 0x40);
-                        /*
-                        Bitmap img = new Bitmap(sizeX, sizeY, PixelFormat.Format16bppArgb1555);
-                        BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.WriteOnly, PixelFormat.Format16bppArgb1555);
-                        Marshal.Copy(rawXvrData, 0, bitmapData.Scan0, rawXvrData.Length);
-                        img.UnlockBits(bitmapData);
-                        img.Save($"C:\\test{i}.png", ImageFormat.Png);
-                        */
                         if (texNames != null && i < texNames.Count)
                         {
                             Debug.WriteLine(texNames[i] + ".dds" + " " + flags.ToString("X") + " " + type.ToString("X"));
-                            File.WriteAllBytes(outFolder + ModelImporter.NixIllegalCharacters(texNames[i]) + ".xvr", rawXvr);
+                            File.WriteAllBytes(outFolder + StringHelpers.NixIllegalCharacters(texNames[i]) + ".xvr", rawXvr);
                         }
                         else
                         {
                             Debug.WriteLine($"Texture{i}.dds" + " " + flags.ToString("X") + " " + type.ToString("X"));
                             File.WriteAllBytes(outFolder + $"Texture{i}.xvr", rawXvr);
                         }
-                    } else
+                    }
+                    else
                     {
                         xvr.AddRange(GenerateDDSHeaderNew(sizeX, sizeY, dataSize, flags, type));
                         xvr.AddRange(xvmList.GetRange(offset + 0x40, dataSize));
@@ -120,7 +107,7 @@ namespace AquaModelLibrary
                         if (texNames != null && i < texNames.Count)
                         {
                             //Debug.WriteLine(texNames[i] + ".dds" + " " + flags.ToString("X") + " " + type.ToString("X"));
-                            File.WriteAllBytes(outFolder + ModelImporter.NixIllegalCharacters(texNames[i]) + ".dds", xvr.ToArray());
+                            File.WriteAllBytes(outFolder + StringHelpers.NixIllegalCharacters(texNames[i]) + ".dds", xvr.ToArray());
                         }
                         else
                         {
@@ -164,11 +151,11 @@ namespace AquaModelLibrary
         public static byte[] GenerateDDSHeaderNew(ushort height, ushort width, int size, int flags, int type)
         {
             int mipCount = 0;
-            if((flags & (int)XVRTexFlag.Mips) > 0)
+            if ((flags & (int)XVRTexFlag.Mips) > 0)
             {
                 int heightMip = height;
                 int widthMip = width;
-                while(heightMip > 1 && widthMip > 1)
+                while (heightMip > 1 && widthMip > 1)
                 {
                     heightMip /= 2;
                     widthMip /= 2;
@@ -228,13 +215,13 @@ namespace AquaModelLibrary
                     break;
             }
             var meta = GenerateMataData(width, height, mipCount, fmt, false);
-            if(PMAlpha)
+            if (PMAlpha)
             {
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;
             }
             DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header);
 
-            List<byte> outbytes = new List<byte>(AquaGeneralMethods.ConvertStruct(ddsHeader));
+            List<byte> outbytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
             outbytes.InsertRange(0, new byte[] { 0x44, 0x44, 0x53, 0x20 });
 
             return outbytes.ToArray();

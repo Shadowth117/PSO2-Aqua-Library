@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.BluePoint.CSKL
@@ -18,7 +17,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
 
         }
 
-        public CSKL(BufferedStreamReader sr)
+        public CSKL(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new CSKLHeader(sr);
             sr.Seek(header.transformListOffset, System.IO.SeekOrigin.Begin);

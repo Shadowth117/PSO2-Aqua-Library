@@ -1,6 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
@@ -62,7 +60,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHVertexData(BufferedStreamReader sr, CMSHHeader header, bool hasExtraFlags)
+        public CMSHVertexData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header, bool hasExtraFlags)
         {
             //SOTC doesn't do this
             if (hasExtraFlags)
@@ -72,7 +70,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             int_04 = sr.Read<int>();
             int_08 = sr.Read<int>();
             vertexBufferSize = sr.Read<int>();
-            var vertexDataStart = sr.Position();
+            var vertexDataStart = sr.Position;
 
             vertDefinitionsCount = sr.Read<int>();
             int_14 = sr.Read<int>();
@@ -181,21 +179,21 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     case VertexMagic.COL0:
                         for (int v = 0; v < vertCount; v++)
                         {
-                            colors.Add(sr.ReadBytes(sr.Position(), 4));
+                            colors.Add(sr.ReadBytes(sr.Position, 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
                         break;
                     case VertexMagic.COL1:
                         for (int v = 0; v < vertCount; v++)
                         {
-                            color2s.Add(sr.ReadBytes(sr.Position(), 4));
+                            color2s.Add(sr.ReadBytes(sr.Position, 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
                         break;
                     case VertexMagic.COL2:
                         for (int v = 0; v < vertCount; v++)
                         {
-                            color3s.Add(sr.ReadBytes(sr.Position(), 4));
+                            color3s.Add(sr.ReadBytes(sr.Position, 4));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
                         break;
@@ -228,7 +226,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                         {
                             for (int v = 0; v < vertCount; v++)
                             {
-                                var indices = sr.ReadBytes(sr.Position(), 4);
+                                var indices = sr.ReadBytes(sr.Position, 4);
                                 vertWeightIndices.Add(new int[] { indices[0], indices[1], indices[2], indices[3] });
                                 sr.Seek(4, System.IO.SeekOrigin.Current);
                             }
@@ -237,18 +235,18 @@ namespace AquaModelLibrary.BluePoint.CMSH
                     case VertexMagic.BONW:
                         for (int v = 0; v < vertCount; v++)
                         {
-                            var weights = sr.ReadBytes(sr.Position(), 4);
+                            var weights = sr.ReadBytes(sr.Position, 4);
                             vertWeights.Add(new Vector4((float)((double)weights[0] / 0xFF), (float)((double)weights[1] / 0xFF), (float)((double)weights[2] / 0xFF), (float)((double)weights[3] / 0xFF)));
                             sr.Seek(4, System.IO.SeekOrigin.Current);
                         }
                         break;
                     case VertexMagic.SAT_:
-                        unkDict.Add(vertDefs[i].dataMagic, sr.ReadBytes(sr.Position(), vertDefs[i].dataSize));
+                        unkDict.Add(vertDefs[i].dataMagic, sr.ReadBytes(sr.Position, vertDefs[i].dataSize));
                         sr.Seek(vertexDataStart + vertDefs[i].dataStart + vertDefs[i].dataSize, System.IO.SeekOrigin.Begin);
                         break;
                     default:
                         Debug.WriteLine($"Unknown data type {vertDefs[i].dataMagic.ToString("X")} {vertDefs[i].dataMagic} {UTF8Encoding.UTF8.GetString(BitConverter.GetBytes((int)vertDefs[i].dataMagic))}");
-                        unkDict.Add(vertDefs[i].dataMagic, sr.ReadBytes(sr.Position(), vertDefs[i].dataSize));
+                        unkDict.Add(vertDefs[i].dataMagic, sr.ReadBytes(sr.Position, vertDefs[i].dataSize));
                         sr.Seek(vertexDataStart + vertDefs[i].dataStart + vertDefs[i].dataSize, System.IO.SeekOrigin.Begin);
                         break;
                 }

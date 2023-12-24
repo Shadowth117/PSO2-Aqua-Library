@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CANI
 {
@@ -11,7 +10,7 @@ namespace AquaModelLibrary.BluePoint.CANI
         public CANIFooter caniFooterData = null;
         public CFooter footerData;
 
-        public CANI(BufferedStreamReader sr)
+        public CANI(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new CANIHeader(sr);
 

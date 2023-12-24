@@ -1,14 +1,7 @@
-﻿using AquaModelLibrary.AquaMethods;
-using AquaModelLibrary.BluePoint.CMSH;
-using DirectXTex;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AquaModelLibrary.PSOXVMConvert;
-using static DirectXTex.DirectXTexUtility;
+﻿using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers;
+using VrSharp.Xvr;
+using static VrSharp.Xvr.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 {
@@ -31,7 +24,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
         {
 
         }
-        public TXP(BufferedStreamReader streamReader)
+        public TXP(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             //TXPs start with TXP3, go to TXP4, then TXP2 (No typo, 3, 4, 2)
             //TXP3s reference TXP4s and are essentially texture containers. TXP4s reference mipmaps for a particular texture. TXP2s are the various mip containers.
@@ -52,9 +45,9 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
         {
 
         }
-        public TXP4(BufferedStreamReader streamReader)
+        public TXP4(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
-            var txp4Start = streamReader.Position();
+            var txp4Start = streamReader.Position;
 
             magic = streamReader.Read<int>();
             txp2Count = streamReader.Read<int>();
@@ -165,10 +158,10 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
             }
             DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header);
 
-            List<byte> outbytes = new List<byte>(AquaGeneralMethods.ConvertStruct(ddsHeader));
+            List<byte> outbytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
             if (isDX10)
             {
-                outbytes.AddRange(AquaGeneralMethods.ConvertStruct(dx10Header));
+                outbytes.AddRange(DataHelpers.ConvertStruct(dx10Header));
             }
             outbytes.InsertRange(0, new byte[] { 0x44, 0x44, 0x53, 0x20 });
 
@@ -192,9 +185,9 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public TXP3(BufferedStreamReader streamReader)
+        public TXP3(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
-            var txp3Start = streamReader.Position();
+            var txp3Start = streamReader.Position;
 
             magic = streamReader.Read<int>();
             txp4Count = streamReader.Read<int>();
@@ -226,7 +219,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                 for (int i = 0; i < txp4Count; i++)
                 {
                     streamReader.Seek(texNameOffsets[i] + txp3Start, SeekOrigin.Begin);
-                    txp4Names.Add(AquaGeneralMethods.ReadCString(streamReader)); ;
+                    txp4Names.Add(streamReader.ReadCString()); ;
                 }
             }
         }
@@ -249,7 +242,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public TXP2(BufferedStreamReader streamReader)
+        public TXP2(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             magic = streamReader.Read<int>();
             width = streamReader.Read<int>();
@@ -258,7 +251,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
             int_10 = streamReader.Read<int>();
             bufferSize = streamReader.Read<int>();
-            buffer = streamReader.ReadBytes(streamReader.Position(), bufferSize);
+            buffer = streamReader.ReadBytes(streamReader.Position, bufferSize);
         }
     }
 

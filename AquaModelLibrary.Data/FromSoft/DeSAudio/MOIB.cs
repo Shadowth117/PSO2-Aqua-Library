@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AquaModelLibrary.Extra.FromSoft.DeSAudio
+﻿namespace AquaModelLibrary.Extra.FromSoft.DeSAudio
 {
     public class MOIB
     {

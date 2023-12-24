@@ -1,10 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 {
@@ -41,7 +35,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public FARC(BufferedStreamReader streamReader)
+        public FARC(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             header = streamReader.Read<FARCHeader>();
 
@@ -50,10 +44,10 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                 FARCEntryObject farcEntry = new FARCEntryObject();
                 farcEntry.entryStruct = streamReader.Read<FARCEntry>();
 
-                var pos = streamReader.Position();
+                var pos = streamReader.Position;
 
                 streamReader.Seek(farcEntry.entryStruct.nameOffset, SeekOrigin.Begin);
-                farcEntry.fileName = AquaGeneralMethods.ReadCString(streamReader);
+                farcEntry.fileName = streamReader.ReadCString();
                 farcEntry.fileData = streamReader.ReadBytes(farcEntry.entryStruct.fileOffset, farcEntry.entryStruct.size0);
 
                 streamReader.Seek(pos, SeekOrigin.Begin);

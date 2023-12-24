@@ -1,6 +1,4 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 using System.Text;
 
@@ -27,12 +25,12 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHBoneData(BufferedStreamReader sr, CMSHHeader header)
+        public CMSHBoneData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header)
         {
-            var pos = sr.Position();
+            var pos = sr.Position;
             if (header.variantFlag == 0x1 && header.variantFlag2 == 0xA)
             {
-                byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
+                byte[] test = sr.ReadBytes(sr.Position + 1, 1);
                 if (test[0] == '$')
                 {
                     ReadSkeletonPath(sr);
@@ -52,7 +50,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
             for (int i = 0; i < nameCount; i++)
             {
-                boneNames.Add(AquaGeneralMethods.ReadCStringSeek(sr));
+                boneNames.Add(sr.ReadCStringSeek());
             }
             boneVec4Count = sr.Read<int>(); //Should be the same as before, but in case it's not
             for (int i = 0; i < boneVec4Count; i++)
@@ -61,10 +59,10 @@ namespace AquaModelLibrary.BluePoint.CMSH
             }
         }
 
-        private void ReadSkeletonPath(BufferedStreamReader sr)
+        private void ReadSkeletonPath(BufferedStreamReaderBE<MemoryStream> sr)
         {
             skelPathLength = sr.Read<byte>();
-            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), skelPathLength));
+            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, skelPathLength));
             sr.Seek(skelPathLength, System.IO.SeekOrigin.Current);
         }
     }

@@ -1,4 +1,7 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;
@@ -10,18 +13,18 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
     public class MC2Convert
     {
 
-        public static NGSAquaObject ConvertMC2(byte[] file, out AquaNode aqn)
+        public static AquaObject ConvertMC2(byte[] file, out AquaNode aqn)
         {
-            using (Stream stream = (Stream)new MemoryStream(file))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReader<MemoryStream>(stream))
             {
                 return MC2ToAqua(new MC2(streamReader), out aqn);
             }
         }
 
-        public static NGSAquaObject MC2ToAqua(MC2 mc2, out AquaNode aqn)
+        public static AquaObject MC2ToAqua(MC2 mc2, out AquaNode aqn)
         {
-            NGSAquaObject aqp = new NGSAquaObject();
+            AquaObject aqp = new AquaObject();
             aqn = AquaNode.GenerateBasicAQN();
 
             aqn.ndtr.boneCount = aqn.nodeList.Count;
@@ -73,8 +76,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             foreach (var pair in meshDict)
             {
                 Dictionary<int, int> vertIndexRemap = new Dictionary<int, int>();
-                AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
-                var genMat = new AquaObject.GenericMaterial();
+                GenericTriangles genMesh = new GenericTriangles();
+                var genMat = new GenericMaterial();
                 genMesh.triList = new List<Vector3>();
                 genMat.matName = pair.Key;
                 genMat.diffuseRGBA = new Vector4(1, 1, 1, 1);
@@ -82,7 +85,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 foreach (var tri in pair.Value)
                 {
-                    AquaObject.VTXL faceVtxl = new AquaObject.VTXL();
+                    VTXL faceVtxl = new VTXL();
                     faceVtxl.rawFaceId.Add(f);
                     faceVtxl.rawFaceId.Add(f);
                     faceVtxl.rawFaceId.Add(f++);

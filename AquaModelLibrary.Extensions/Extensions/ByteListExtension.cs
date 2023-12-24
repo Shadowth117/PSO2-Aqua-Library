@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.Design;
-
-namespace AquaModelLibrary.Core.Extensions
+﻿namespace AquaModelLibrary.Helpers.Extensions
 {
     public static class ByteListExtension
     {
@@ -272,7 +270,8 @@ namespace AquaModelLibrary.Core.Extensions
                 outBytes.AddRange(bytes);
 
                 return additions;
-            } else
+            }
+            else
             {
                 for (int i = 0; i < 0x10; i++)
                 {

@@ -8,7 +8,7 @@ namespace AquaModelLibrary.Extensions.Readers
 {
     public class BufferedStreamReaderBE<TStream> : BufferedStreamReader<TStream> where TStream : Stream
     {
-        public static bool _BEReadActive = false;
+        public bool _BEReadActive = false;
 
         public BufferedStreamReaderBE(TStream stream, int bufferSize = 65536) : base(stream, bufferSize) { }
 

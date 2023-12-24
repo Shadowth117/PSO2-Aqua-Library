@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Text;
 
 namespace AquaModelLibrary.BluePoint.CAWS
@@ -25,10 +25,10 @@ namespace AquaModelLibrary.BluePoint.CAWS
         public ushort cawsConst3;
         */
 
-        public CAWS(BufferedStreamReader sr)
+        public CAWS(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var len = sr.Read<byte>();
-            name = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), len));
+            name = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, len));
             sr.Seek(len, System.IO.SeekOrigin.Current);
 
             cawsObjectCount = sr.Read<int>();

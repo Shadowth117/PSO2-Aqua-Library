@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 {
@@ -13,7 +12,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public List<byte[]> files = new List<byte[]>();
         public ARC() { }
 
-        public ARC(BufferedStreamReader sr)
+        public ARC(BufferedStreamReaderBE<MemoryStream> sr)
         {
 
         }

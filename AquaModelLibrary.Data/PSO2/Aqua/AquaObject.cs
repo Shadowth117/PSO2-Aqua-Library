@@ -99,6 +99,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         {
             ReadNIFLInfo(sr);
             objc = new OBJC(sr);
+            objc.Read(sr);
 
             //Read Bone Palette
             if (objc.bonePaletteOffset > 0)
@@ -569,7 +570,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         {
                             throw new System.Exception("More than one OBJC! Weird things are going on!");
                         }
-                        objc = new OBJC(data);
+                        objc = new OBJC();
+                        objc.ReadVTBF(data);
                         break;
                     case "VSET":
                         vsetList = ParseVSET(data, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists);
@@ -872,7 +874,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 VTBFMethods.AddBytes(outBytes, 0x60, 0x9, BitConverter.GetBytes(tstaList[i].tag));
                 VTBFMethods.AddBytes(outBytes, 0x61, 0x9, BitConverter.GetBytes(tstaList[i].texUsageOrder));
                 VTBFMethods.AddBytes(outBytes, 0x62, 0x9, BitConverter.GetBytes(tstaList[i].modelUVSet));
-                VTBFMethods.AddBytes(outBytes, 0x63, 0x4A, 0x1, MiscHelpers.ConvertStruct(tstaList[i].unkVector0));
+                VTBFMethods.AddBytes(outBytes, 0x63, 0x4A, 0x1, DataHelpers.ConvertStruct(tstaList[i].unkVector0));
                 VTBFMethods.AddBytes(outBytes, 0x64, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat2));
                 VTBFMethods.AddBytes(outBytes, 0x65, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat3));
                 VTBFMethods.AddBytes(outBytes, 0x66, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat4));
@@ -1051,10 +1053,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
 
-                VTBFMethods.AddBytes(outBytes, 0x30, 0x4A, 0x2, MiscHelpers.ConvertStruct(mate.diffuseRGBA));
-                VTBFMethods.AddBytes(outBytes, 0x31, 0x4A, 0x2, MiscHelpers.ConvertStruct(mate.unkRGBA0));
-                VTBFMethods.AddBytes(outBytes, 0x32, 0x4A, 0x2, MiscHelpers.ConvertStruct(mate._sRGBA));
-                VTBFMethods.AddBytes(outBytes, 0x33, 0x4A, 0x2, MiscHelpers.ConvertStruct(mate.unkRGBA1));
+                VTBFMethods.AddBytes(outBytes, 0x30, 0x4A, 0x2, DataHelpers.ConvertStruct(mate.diffuseRGBA));
+                VTBFMethods.AddBytes(outBytes, 0x31, 0x4A, 0x2, DataHelpers.ConvertStruct(mate.unkRGBA0));
+                VTBFMethods.AddBytes(outBytes, 0x32, 0x4A, 0x2, DataHelpers.ConvertStruct(mate._sRGBA));
+                VTBFMethods.AddBytes(outBytes, 0x33, 0x4A, 0x2, DataHelpers.ConvertStruct(mate.unkRGBA1));
                 VTBFMethods.AddBytes(outBytes, 0x34, 0x9, BitConverter.GetBytes(mate.reserve0));
                 VTBFMethods.AddBytes(outBytes, 0x35, 0xA, BitConverter.GetBytes(mate.unkFloat0));
                 VTBFMethods.AddBytes(outBytes, 0x36, 0xA, BitConverter.GetBytes(mate.unkFloat1));

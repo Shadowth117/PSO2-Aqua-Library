@@ -1,6 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CAWS
 {
@@ -16,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
 
         }
 
-        public CGPR(BufferedStreamReader sr)
+        public CGPR(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var cgprObjCount = sr.Read<int>(); //Doesn't always line up right. Correlates, but needs more research
 

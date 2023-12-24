@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CSKL
 {
@@ -14,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CSKL
 
         }
 
-        public CSKLFamilyIds(BufferedStreamReader sr)
+        public CSKLFamilyIds(BufferedStreamReaderBE<MemoryStream> sr)
         {
             unkFloat = sr.Read<float>();
             parentId = sr.Read<int>();

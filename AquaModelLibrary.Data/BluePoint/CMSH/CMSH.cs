@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
+using Reloaded.Memory.Streams;
 
 namespace AquaModelLibrary.BluePoint.CMSH
 {
@@ -13,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
         public CMSHBoneData boneData = null;
         public CFooter footerData;
 
-        public CMSH(BufferedStreamReader sr)
+        public CMSH(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new CMSHHeader(sr);
             if (header.variantFlag2 != 0x41)
@@ -28,7 +29,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 }
                 if ((header.variantFlag & 0x1) > 0)
                 {
-                    byte[] test = sr.ReadBytes(sr.Position() + 1, 1);
+                    byte[] test = sr.ReadBytes(sr.Position + 1, 1);
                     if (test[0] != '$' && !(header.variantFlag == 0x1 && header.variantFlag2 == 0xA))
                     {
                         unkdata2 = new CMSHUnkData2(sr);

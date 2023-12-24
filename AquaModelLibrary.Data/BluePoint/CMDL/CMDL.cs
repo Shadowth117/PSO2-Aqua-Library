@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CMDL
 {
@@ -25,7 +24,7 @@ namespace AquaModelLibrary.BluePoint.CMDL
         {
 
         }
-        public CMDL(BufferedStreamReader sr)
+        public CMDL(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Read<int>();
             unkInt0 = sr.Read<int>();

@@ -1,13 +1,10 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using static AquaModelLibrary.AquaNode;
-using static AquaModelLibrary.Data.PSO2.Aqua.AquaObject.AquaObject;
 using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
 using static AquaModelLibrary.PSOXVMConvert;
 
@@ -19,10 +16,10 @@ namespace AquaModelLibrary
     public class PSONRelConvert
     {
         public AquaNode aqn = AquaNode.GenerateBasicAQN();
-        public ClassicAquaObject aqObj = new ClassicAquaObject();
+        public AquaObject aqObj = new AquaObject();
         public List<string> texNames = new List<string>();
         private GenericTriangles currentMesh;
-        private BufferedStreamReader streamReader;
+        private BufferedStreamReaderBE<MemoryStream> streamReader;
         private bool be; //Stores if we're reading big endian or not. Gamecube variants appear to be different as well.
         private float rootScale = 0.1f;
         private long fileSize;
@@ -37,7 +34,7 @@ namespace AquaModelLibrary
             public uint drawOffset;
             public uint nameInfoOffset;
         }
-        public static relHeader ReadRelHeader(BufferedStreamReader streamReader, bool active)
+        public static relHeader ReadRelHeader(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var header = new relHeader();
 
@@ -74,7 +71,7 @@ namespace AquaModelLibrary
             public uint uint_08;
             public uint flags;
         }
-        public static staticMeshOffset ReadStaticMeshOffset(BufferedStreamReader streamReader, bool active)
+        public static staticMeshOffset ReadStaticMeshOffset(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var offset = new staticMeshOffset();
 
@@ -98,7 +95,7 @@ namespace AquaModelLibrary
             public uint uint_18;
             public uint flags;
         }
-        public static animMeshOffset ReadAnimMeshOffset(BufferedStreamReader streamReader, bool active)
+        public static animMeshOffset ReadAnimMeshOffset(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var offset = new animMeshOffset();
 
@@ -157,7 +154,7 @@ namespace AquaModelLibrary
             public float radius;
         }
 
-        public static njMesh ReadNjMesh(BufferedStreamReader streamReader, bool active)
+        public static njMesh ReadNjMesh(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var mesh = new njMesh();
 
@@ -176,7 +173,7 @@ namespace AquaModelLibrary
             return mesh;
         }
 
-        public static njMeshGC ReadNjMeshGC(BufferedStreamReader streamReader, bool active)
+        public static njMeshGC ReadNjMeshGC(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var mesh = new njMeshGC();
 
@@ -203,7 +200,7 @@ namespace AquaModelLibrary
 
             public uint vertexCount;
         }
-        public static njVTXE ReadNjVtxe(BufferedStreamReader streamReader, bool active)
+        public static njVTXE ReadNjVtxe(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var vtxe = new njVTXE();
 
@@ -226,7 +223,7 @@ namespace AquaModelLibrary
 
             public uint uint_10;
         }
-        public static stripInfo ReadStripInfo(BufferedStreamReader streamReader, bool active)
+        public static stripInfo ReadStripInfo(BufferedStreamReaderBE<MemoryStream> streamReader, bool active)
         {
             var sInfo = new stripInfo();
 
@@ -247,13 +244,13 @@ namespace AquaModelLibrary
             fileSize = file.Length;
             rootScale = scale;
             List<dSection> dSections = new List<dSection>();
-            streamReader = new BufferedStreamReader(new MemoryStream(file), 8192);
+            streamReader = new BufferedStreamReaderBE<MemoryStream>(new MemoryStream(file));
 
             //Get header offset
             streamReader.Seek(file.Length - 0x10, SeekOrigin.Begin);
 
             //Check Endianness. No offset should ever come close to half of the int max value.
-            be = streamReader.PeekBigEndianPrimitiveUInt32() < streamReader.Peek<uint>();
+            be = streamReader.PeekBigEndianUInt32() < streamReader.Peek<uint>();
             if (be)
             {
                 Debug.WriteLine("Sorry, Gamecube n.rel files are not supported at this time.");
@@ -309,7 +306,7 @@ namespace AquaModelLibrary
             foreach (uint offset in nameOffsets)
             {
                 streamReader.Seek(offset, SeekOrigin.Begin);
-                texNames.Add(AquaGeneralMethods.ReadCString(streamReader));
+                texNames.Add(streamReader.ReadCString());
             }
 
             //If there's an .xvm, dump that too with texture names from the .rel
@@ -550,7 +547,7 @@ namespace AquaModelLibrary
 
             if (size != 0)
             {
-                Console.WriteLine($"Vert size is not 0 at vtxe {(streamReader.Position() - 0x10).ToString("X")}");
+                Console.WriteLine($"Vert size is not 0 at vtxe {(streamReader.Position - 0x10).ToString("X")}");
             }
             //Read vertices
             for (int i = 0; i < vtxe.vertexCount; i++)
@@ -611,8 +608,7 @@ namespace AquaModelLibrary
 
                 //Read strips
                 streamReader.Seek(strip.indexListOffset, SeekOrigin.Begin);
-                var triStrip = new stripData();
-                triStrip.psoTris = true;
+                var triStrip = new StripData();
                 for (int i = 0; i < strip.indexCount; i++)
                 {
                     var id = streamReader.ReadBE<ushort>(be);
@@ -710,7 +706,7 @@ namespace AquaModelLibrary
 
             if (genMat.texNames.Count == 0)
             {
-                Console.WriteLine("No texture name on mat " + (aqObj.tempMats.Count - 1) + " at: " + streamReader.Position());
+                Console.WriteLine("No texture name on mat " + (aqObj.tempMats.Count - 1) + " at: " + streamReader.Position);
             }
 
             return (aqObj.tempMats.Count - 1);

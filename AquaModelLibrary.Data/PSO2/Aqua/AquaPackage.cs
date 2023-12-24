@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Core.Extensions;
+﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
 using AquaModelLibrary.Extensions.Readers;

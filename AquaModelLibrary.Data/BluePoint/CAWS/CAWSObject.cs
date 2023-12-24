@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CAWS
 {
@@ -14,7 +14,7 @@ namespace AquaModelLibrary.BluePoint.CAWS
 
         }
 
-        public CAWSObject(BufferedStreamReader sr)
+        public CAWSObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Read<uint>();
 

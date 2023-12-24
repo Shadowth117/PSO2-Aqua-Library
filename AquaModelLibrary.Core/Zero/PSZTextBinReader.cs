@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Core.Extensions;
+﻿using AquaModelLibrary.Helpers.Extensions;
 
 namespace AquaModelLibrary.Zero
 {

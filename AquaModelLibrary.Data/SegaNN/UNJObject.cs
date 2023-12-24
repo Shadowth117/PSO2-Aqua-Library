@@ -82,7 +82,7 @@ namespace AquaModelLibrary.NNStructs
             List<List<int>> globalVtxlMapping = new List<List<int>>();
             List<VTXL> newVtxlList = new List<VTXL>();
             aqn = nodes;
-            AquaObject aqp = new NGSAquaObject();
+            AquaObject aqp = new AquaObject();
             aqp.bonePalette = new List<uint>();
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {

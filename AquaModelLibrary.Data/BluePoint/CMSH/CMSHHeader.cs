@@ -1,6 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
 using System.Text;
 
@@ -43,7 +41,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHHeader(BufferedStreamReader sr)
+        public CMSHHeader(BufferedStreamReaderBE<MemoryStream> sr)
         {
             variantFlags = sr.Peek<ushort>();
             variantFlag = sr.Read<byte>();
@@ -109,7 +107,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             }
         }
 
-        private void ReadMaterialList(BufferedStreamReader sr)
+        private void ReadMaterialList(BufferedStreamReaderBE<MemoryStream> sr)
         {
             //For 0x8C types, check the bit which says if there should be material
             if ((variantFlag == 0x8C && !(subVariantFlag == 0x88 || subVariantFlag == 0x89)) || (extraFlags?.Length > 0 && (extraFlags[0] & 8) > 0) || matCount > 0)
@@ -117,10 +115,10 @@ namespace AquaModelLibrary.BluePoint.CMSH
                 for (int i = 0; i < matCount; i++)
                 {
                     CMSHMatReference matRef = new CMSHMatReference();
-                    matRef.texNameHash = sr.ReadBytes(sr.Position(), 0x18);
+                    matRef.texNameHash = sr.ReadBytes(sr.Position, 0x18);
                     sr.Seek(0x18, System.IO.SeekOrigin.Current);
                     matRef.matNameLength = sr.Read<byte>();
-                    matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), matRef.matNameLength));
+                    matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, matRef.matNameLength));
                     sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
                     if (hasExtraFlags && matCount > 1 && (i + 1 != matCount))
                     {
@@ -140,7 +138,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             }
         }
 
-        private void ReadReferenceModelPath(BufferedStreamReader sr)
+        private void ReadReferenceModelPath(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var mdlLen = sr.Read<byte>();
 
@@ -150,10 +148,10 @@ namespace AquaModelLibrary.BluePoint.CMSH
             {
                 sr.Seek(1, System.IO.SeekOrigin.Current);
             }
-            OtherModelName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position(), mdlLen));
+            OtherModelName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, mdlLen));
         }
 
-        private void ReadA8CHeaderExtras(BufferedStreamReader sr)
+        private void ReadA8CHeaderExtras(BufferedStreamReaderBE<MemoryStream> sr)
         {
             unk8C0ASize0Modifier = sr.Read<byte>();
             unk8C0ASize0 = sr.Read<ushort>();
@@ -180,10 +178,10 @@ namespace AquaModelLibrary.BluePoint.CMSH
             //Unknown territory past here, needs research into the tokenization
         }
 
-        private void CheckForExtraFlags(BufferedStreamReader sr)
+        private void CheckForExtraFlags(BufferedStreamReaderBE<MemoryStream> sr)
         {
             //For certain SOTC models
-            var crcCheck = sr.ReadBytes(sr.Position(), 4);
+            var crcCheck = sr.ReadBytes(sr.Position, 4);
             hasExtraFlags = crcCheck[1] > 0 || crcCheck[2] > 0 || crcCheck[3] > 0;
             if (variantFlags == 0x200 && BitConverter.ToUInt64(sr.ReadBytes(0x25, 8), 0) == dummyConstData)
             {
@@ -192,7 +190,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
             if (hasExtraFlags)
             {
-                extraFlags = sr.ReadBytes(sr.Position(), 4);
+                extraFlags = sr.ReadBytes(sr.Position, 4);
                 sr.Seek(4, System.IO.SeekOrigin.Current);
             }
         }

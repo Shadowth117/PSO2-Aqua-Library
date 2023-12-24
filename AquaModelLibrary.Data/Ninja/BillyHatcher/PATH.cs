@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
@@ -19,9 +18,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public PATH() { }
 
-        public PATH(BufferedStreamReader sr)
+        public PATH(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             header = sr.Read<NinjaHeader>();
             pathHeader = new PATHHeader();
             pathHeader.pathInfoCount = sr.ReadBE<int>();
@@ -45,9 +44,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 pathInfo.lengthsOffset = sr.ReadBE<int>();
                 pathInfoList.Add(pathInfo);
 
-                if(pathInfo.definitionOffset != 0)
+                if (pathInfo.definitionOffset != 0)
                 {
-                    var bookmark = sr.Position();
+                    var bookmark = sr.Position;
                     sr.Seek(pathInfo.definitionOffset + 0x8, System.IO.SeekOrigin.Begin);
                     VertDefinition vertDef = new VertDefinition();
                     vertDef.unkByte0 = sr.Read<byte>();
@@ -83,7 +82,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 if (pathInfo.lengthsOffset != 0)
                 {
-                    var bookmark = sr.Position();
+                    var bookmark = sr.Position;
                     sr.Seek(pathInfo.lengthsOffset + 0x8, System.IO.SeekOrigin.Begin);
                     List<float> lengths = new List<float>();
                     for (int j = 0; j < pathInfo.lengthsCount; j++)

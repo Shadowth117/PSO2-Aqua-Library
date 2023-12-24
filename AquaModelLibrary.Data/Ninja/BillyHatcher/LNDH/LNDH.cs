@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 {
@@ -125,9 +124,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
 
         public MaterialInfo? GetMaterialInfoByType(int type)
         {
-            foreach(var info in matInfo)
+            foreach (var info in matInfo)
             {
-                if(info.matInfoType == type)
+                if (info.matInfoType == type)
                 {
                     return info;
                 }

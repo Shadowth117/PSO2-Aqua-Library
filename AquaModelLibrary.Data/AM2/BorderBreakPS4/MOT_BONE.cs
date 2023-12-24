@@ -1,13 +1,5 @@
-﻿using AquaModelLibrary.AquaMethods;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 {
@@ -28,7 +20,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 
         }
 
-        public MOT_BONE(BufferedStreamReader streamReader)
+        public MOT_BONE(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             header = streamReader.Read<boneHeader>();
 
@@ -42,7 +34,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
             foreach (var nameOffset in skeletonNameOffsets)
             {
                 streamReader.Seek(nameOffset, SeekOrigin.Begin);
-                skeletonNames.Add(AquaGeneralMethods.ReadCString(streamReader));
+                skeletonNames.Add(streamReader.ReadCString());
             }
 
             //Read skeletons
@@ -72,7 +64,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
                 foreach (var boneObj in skeleton)
                 {
                     streamReader.Seek(boneObj.boneStruct.boneNameOffset, SeekOrigin.Begin);
-                    boneObj.name = AquaGeneralMethods.ReadCString(streamReader);
+                    boneObj.name = streamReader.ReadCString();
                     streamReader.Seek(boneObj.boneStruct.childBoneIdOffset, SeekOrigin.Begin);
                     for (int i = 0; i < boneObj.boneStruct.childBoneCount; i++)
                     {

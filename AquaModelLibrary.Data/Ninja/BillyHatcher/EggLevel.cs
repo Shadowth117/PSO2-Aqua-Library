@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
@@ -52,7 +51,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             /// Something to do with amount of fruits the egg can consume. Should be at least as high as the final stage's count. All retail eggs match this with final stage count.
             /// Setting this to 1 and the stage count to 1 will allow an egg that can instantly hatch.
             /// </summary>
-            public byte fruitsAllowedThing; 
+            public byte fruitsAllowedThing;
 
             /// <summary>
             /// Still counts its consumed fruits as 0, which makes putting this above 1 awkward.
@@ -62,24 +61,24 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             /// Amount of bytes of stage fruit counts used. Amount to progress to final stage always reliant on final entry.
             /// Maxes out at 9!
             /// </summary>
-            public byte stageCount;  
-            public Fruit fruitPreferences; 
-            public byte stageFruitCount0; 
+            public byte stageCount;
+            public Fruit fruitPreferences;
+            public byte stageFruitCount0;
 
-            public byte stageFruitCount1; 
+            public byte stageFruitCount1;
             public byte stageFruitCount2;
             public byte stageFruitCount3;
             public byte stageFruitCount4;
 
-            public byte stageFruitCount5; 
+            public byte stageFruitCount5;
             public byte stageFruitCount6;
             public byte stageFruitCount7;
             public byte stageFruitCount8;
         }
 
         public EggLevel() { }
-        public EggLevel(BufferedStreamReader sr)
-        {   
+        public EggLevel(BufferedStreamReaderBE<MemoryStream> sr)
+        {
             //Generic ARC header
             arcHeader = new ARCHeader();
             arcHeader.fileSize = sr.ReadBE<int>();
@@ -101,7 +100,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header.data2Offset = sr.ReadBE<int>();
 
             sr.Seek(0x20 + header.data0Offset, System.IO.SeekOrigin.Begin);
-            for(int i = 0; i < header.data0Count; i++)
+            for (int i = 0; i < header.data0Count; i++)
             {
                 EggData0 eggData = new EggData0();
                 eggData.usht0 = sr.Read<ushort>();
@@ -117,7 +116,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 growthData.bt_01 = sr.Read<byte>();
                 growthData.bt_02 = sr.Read<byte>();
                 growthData.fruitsAllowedThing = sr.Read<byte>();
-                
+
                 growthData.startingStage = sr.Read<byte>();
                 growthData.stageCount = sr.Read<byte>();
                 growthData.fruitPreferences = sr.Read<Fruit>();

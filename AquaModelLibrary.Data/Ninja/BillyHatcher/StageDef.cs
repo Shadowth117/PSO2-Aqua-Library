@@ -1,7 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 using System.Text;
 
@@ -25,8 +22,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public StageDef(string filePath)
         {
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(filePath)))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Read(streamReader);
             }
@@ -34,22 +31,22 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         public StageDef(byte[] file)
         {
-            using (Stream stream = new MemoryStream(file))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Read(streamReader);
             }
         }
 
-        public StageDef(BufferedStreamReader sr)
+        public StageDef(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
 
-        public void Read(BufferedStreamReader sr)
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var encoding = Encoding.GetEncoding("shift-jis");
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             njHeader = new NinjaHeader();
             njHeader.magic = sr.Read<int>();
             njHeader.fileSize = sr.Read<int>();
@@ -95,7 +92,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     {
                         playerPosition = sr.ReadBEV3(),
                         rotation = sr.ReadBE<float>()
-,                    },
+,
+                    },
                     player4Start = new PlayerStart()
                     {
                         playerPosition = sr.ReadBEV3(),
@@ -116,10 +114,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 if (def.missionNameOffset > 0)
                 {
                     sr.Seek(8 + def.missionNameOffset, System.IO.SeekOrigin.Begin);
-                    def.missionName = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.missionName = sr.ReadCString();
                 }
-                
-                if(def.commonDataOffset > 0 && !commonDataDict.ContainsKey(def.commonDataOffset))
+
+                if (def.commonDataOffset > 0 && !commonDataDict.ContainsKey(def.commonDataOffset))
                 {
                     sr.Seek(8 + def.commonDataOffset, System.IO.SeekOrigin.Begin);
                     var commonData = ReadCommonData(sr, encoding);
@@ -130,70 +128,70 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 if (def.worldNameOffset > 0)
                 {
                     sr.Seek(8 + def.worldNameOffset, System.IO.SeekOrigin.Begin);
-                    def.worldName = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.worldName = sr.ReadCString();
                 }
                 if (def.missionTypeOffset > 0)
                 {
                     sr.Seek(8 + def.missionTypeOffset, System.IO.SeekOrigin.Begin);
-                    def.missionType = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.missionType = sr.ReadCString();
                 }
 
                 if (def.lndFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.lndFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.lndFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.lndFilename = sr.ReadCString();
                 }
                 if (def.bspFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.bspFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.bspFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.bspFilename = sr.ReadCString();
                 }
                 if (def.mc2FilenameOffset > 0)
                 {
                     sr.Seek(8 + def.mc2FilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.mc2Filename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.mc2Filename = sr.ReadCString();
                 }
                 if (def.setObjFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.setObjFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.setObjFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.setObjFilename = sr.ReadCString();
                 }
 
                 if (def.setEnemyFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.setEnemyFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.setEnemyFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.setEnemyFilename = sr.ReadCString();
                 }
                 if (def.setCameraFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.setCameraFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.setCameraFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.setCameraFilename = sr.ReadCString();
                 }
                 if (def.setDesignFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.setDesignFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.setDesignFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.setDesignFilename = sr.ReadCString();
                 }
                 if (def.pathFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.pathFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.pathFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.pathFilename = sr.ReadCString();
                 }
 
                 if (def.eventCameraFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.eventCameraFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.eventCameraFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.eventCameraFilename = sr.ReadCString();
                 }
                 if (def.messageFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.messageFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.messageFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.messageFilename = sr.ReadCString();
                 }
                 if (def.eventFilenameOffset > 0)
                 {
                     sr.Seek(8 + def.eventFilenameOffset, System.IO.SeekOrigin.Begin);
-                    def.eventFilename = AquaMethods.AquaGeneralMethods.ReadCString(sr);
+                    def.eventFilename = sr.ReadCString();
                 }
 
                 defsDict.Add(def.missionName, def);
@@ -201,7 +199,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         }
 
-        private static StageCommonData ReadCommonData(BufferedStreamReader sr, Encoding encoding)
+        private static StageCommonData ReadCommonData(BufferedStreamReaderBE<MemoryStream> sr, Encoding encoding)
         {
             var commonData = new StageCommonData();
             commonData.SEBank4Offset = sr.ReadBE<int>();
@@ -212,54 +210,54 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             commonData.objectDefinitionOffset = sr.ReadBE<int>();
             commonData.objectDataOffset = sr.ReadBE<int>();
 
-            var bookmark = sr.Position();
+            var bookmark = sr.Position;
 
             if (commonData.SEBank4Offset > 0)
             {
                 sr.Seek(8 + commonData.SEBank4Offset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.SEBank4 = str.Remove(minVal);
             }
             if (commonData.SEBank6Offset > 0)
             {
                 sr.Seek(8 + commonData.SEBank6Offset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.SEBank6 = str.Remove(minVal);
             }
             if (commonData.SEBank7Offset > 0)
             {
                 sr.Seek(8 + commonData.SEBank7Offset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.SEBank7 = str.Remove(minVal);
             }
             if (commonData.particleOffset > 0)
             {
                 sr.Seek(8 + commonData.particleOffset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.particle = str.Remove(minVal);
             }
             if (commonData.effectOffset > 0)
             {
                 sr.Seek(8 + commonData.effectOffset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.effect = str.Remove(minVal);
             }
             if (commonData.objectDefinitionOffset > 0)
             {
                 sr.Seek(8 + commonData.objectDefinitionOffset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.objectDefinition = str.Remove(minVal);
             }
             if (commonData.objectDataOffset > 0)
             {
                 sr.Seek(8 + commonData.objectDataOffset, System.IO.SeekOrigin.Begin);
-                var str = encoding.GetString(sr.ReadBytes(sr.Position(), 0x40));
+                var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.objectData = str.Remove(minVal);
             }
@@ -271,7 +269,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public byte[] GetBytes()
         {
             var outbytes = new List<byte>();
-            for(int i = 0; i < defs.Count; i++)
+            for (int i = 0; i < defs.Count; i++)
             {
 
             }
@@ -386,7 +384,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             /// <summary>
             /// 0-360 degrees
             /// </summary>
-            public float rotation; 
+            public float rotation;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.BluePoint.CANI
@@ -40,7 +40,7 @@ namespace AquaModelLibrary.BluePoint.CANI
         {
         }
 
-        public CANIFooter(BufferedStreamReader sr)
+        public CANIFooter(BufferedStreamReaderBE<MemoryStream> sr)
         {
             footerHead = sr.Read<CANIFooterHead>();
             footerHeadPadding = new int[(footerHead.footerHeadSizeWithPadding - 0xC) / 4];

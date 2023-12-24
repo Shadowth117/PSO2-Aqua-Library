@@ -1,5 +1,4 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Extensions.Readers;
 
 namespace AquaModelLibrary.BluePoint.CMSH
 {
@@ -22,7 +21,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
 
         }
 
-        public CMSHUnkData0(BufferedStreamReader sr)
+        public CMSHUnkData0(BufferedStreamReaderBE<MemoryStream> sr)
         {
             unk0 = sr.Read<int>();
             flags = sr.Read<int>();

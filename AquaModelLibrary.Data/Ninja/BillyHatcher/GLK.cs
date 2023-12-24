@@ -12,7 +12,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         public GLK() { }
         public GLK(BufferedStreamReader sr)
         {
-            BigEndianHelper._active = true;
+            sr._BEReadActive = true;
             NinjaHeader header = sr.Read<NinjaHeader>();
             byte unkByte0 = sr.Read<byte>();
             byte unkByte1 = sr.Read<byte>();

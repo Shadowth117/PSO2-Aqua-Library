@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Core.Extensions;
+﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.Helpers;
@@ -63,7 +63,7 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             outBytes.AddRange(BitConverter.GetBytes(texSets.Count));
             foreach(var texSet in texSets)
             {
-                outBytes.AddRange(MiscHelpers.ConvertStruct(texSet));
+                outBytes.AddRange(DataHelpers.ConvertStruct(texSet));
             }
             outBytes.AlignFileEndWriter(0x10);
 
