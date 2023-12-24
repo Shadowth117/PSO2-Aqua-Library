@@ -1,4 +1,8 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.PSO2;
+using System.Diagnostics;
+using System.IO;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -9,8 +13,65 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public NDTR ndtr = new NDTR();
         public List<NODE> nodeList = new List<NODE>();
         public List<NODO> nodoList = new List<NODO>();
-        public AquaNode()
+        public static readonly string[] fileExtensions = new string[]
         {
+            "aqn\0",
+            "trn\0",
+        };
+
+        public AquaNode() { }
+
+        public AquaNode(byte[] file)
+        {
+            Read(file, fileExtensions);
+        }
+
+        public AquaNode(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr, fileExtensions);
+        }
+
+        public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            ndtr = sr.Read<NDTR>();
+            for (int i = 0; i < ndtr.boneCount; i++)
+            {
+                nodeList.Add(sr.Read<NODE>());
+            }
+            for (int i = 0; i < ndtr.effCount; i++)
+            {
+                nodoList.Add(sr.Read<NODO>());
+            }
+        }
+
+        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {            
+            //Seek past vtbf tag
+            sr.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
+
+            while (sr.Position < sr.BaseStream.Length)
+            {
+                var data = VTBFMethods.ReadVTBFTag(sr, out string tagType, out int ptrCount, out int entryCount);
+                switch (tagType)
+                {
+                    case "ROOT":
+                        //We don't do anything with this right now.
+                        break;
+                    case "NDTR":
+                        ndtr = new NDTR(data);
+                        break;
+                    case "NODE":
+                        nodeList = parseNODE(data);
+                        break;
+                    case "NODO":
+                        nodoList = parseNODO(data);
+                        break;
+                    default:                        
+                        //Should mean it's done.
+                        Debug.WriteLine($"Defaulted tag was: {tagType}");
+                        break;
+                }
+            }
         }
 
         public AquaNode(string name = "Root Node")

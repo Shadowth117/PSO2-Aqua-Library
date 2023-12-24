@@ -15,9 +15,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// <summary>
         /// Checks the objc for if the type is in NGS range. Default to NGS at this point.
         /// </summary>
-        public bool IsNGS { get { return !(objc?.type < 0x32); } }
+        public bool IsNGS { get { return !(objc.type < 0x32); } }
 
-        public OBJC objc = null;
+        public OBJC objc;
         public List<VSET> vsetList = new List<VSET>();
         public List<VTXE> vtxeList = new List<VTXE>();
         public List<VTXL> vtxlList = new List<VTXL>();
@@ -60,45 +60,20 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public AquaObject() { }
 
-        public AquaObject(byte[] bytes, int offset, int endOffset)
+        public AquaObject(byte[] bytes, string _ext)
         {
-            Read(bytes, offset, endOffset);
+            Read(bytes, _ext);
         }
 
-        public AquaObject(BufferedStreamReaderBE<MemoryStream> sr, int offset, int endOffset)
+        public AquaObject(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
         {
-            Read(sr, offset, endOffset);
+            Read(sr, _ext);
         }
 
-        public void Read(byte[] bytes, int offset, int endOffset)
-        {
-            using (MemoryStream stream = new MemoryStream(bytes))
-            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(stream))
-            {
-                Read(sr, offset, endOffset);
-            }
-        }
-
-        public void Read(BufferedStreamReaderBE<MemoryStream> sr, int offset, int endOffset)
-        {
-            var type = Encoding.UTF8.GetString(BitConverter.GetBytes(sr.Peek<int>()));
-            switch (type)
-            {
-                case "NIFL":
-                    ReadNIFL(sr, offset);
-                    break;
-                case "VTBF":
-                    ReadVTBF(sr, offset, endOffset);
-                    break;
-                default:
-                    throw new Exception("Unexpected formatting!");
-            }
-        }
-
-        public void ReadNIFL(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
             ReadNIFLInfo(sr);
-            objc = new OBJC(sr);
+            objc = new OBJC();
             objc.Read(sr);
 
             //Read Bone Palette
@@ -544,13 +519,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         }
 
         #region VTBFReading
-        public void ReadVTBF(BufferedStreamReaderBE<MemoryStream> sr, int offset, int endOffset)
+        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
             int objcCount = 0;
             sr.Seek(0x10, SeekOrigin.Current); //Skip the header and move to the tags
             List<List<ushort>> bp = null;
             List<List<ushort>> ev = null;
-            while (sr.Position < endOffset)
+            while (sr.Position < sr.BaseStream.Length)
             {
                 var data = VTBFMethods.ReadVTBFTag(sr, out string tagType, out int ptrCount, out int entryCount);
 

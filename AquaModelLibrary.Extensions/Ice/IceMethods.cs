@@ -9,17 +9,27 @@ namespace AquaModelLibrary.Helpers.Ice
         {
             foreach (var ext in extensionsToCheck)
             {
-                if (type.Equals(ext))
+                if (SkipIceEnvelope(sr, ext, ref type, ref offset))
                 {
-                    sr.Seek(0xC, SeekOrigin.Begin);
-                    int headJunkSize = sr.Read<int>();
-
-                    sr.Seek(headJunkSize - 0x10, SeekOrigin.Current);
-                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(sr.Peek<int>()));
-                    offset += headJunkSize;
                     break;
                 }
             }
+        }
+
+        public static bool SkipIceEnvelope(BufferedStreamReaderBE<MemoryStream> sr, string extensionToCheck, ref string type, ref int offset)
+        {
+            if (type.Equals(extensionToCheck))
+            {
+                sr.Seek(0xC, SeekOrigin.Begin);
+                int headJunkSize = sr.Read<int>();
+
+                sr.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                type = Encoding.UTF8.GetString(BitConverter.GetBytes(sr.Peek<int>()));
+                offset += headJunkSize;
+                return true;
+            }
+
+            return false;
         }
 
         public static byte[] RemoveIceEnvelope(byte[] inData)

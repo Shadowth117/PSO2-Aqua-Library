@@ -1,4 +1,8 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.PSO2;
+using System.Diagnostics;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -9,6 +13,48 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     {
         public MOHeader moHeader;
         public List<KeyData> motionKeys = new List<KeyData>();
+
+        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            //Seek past vtbf tag
+            sr.Seek(0x10, SeekOrigin.Current); //VTBF + AQGF tags
+
+            while (sr.Position < sr.BaseStream.Length)
+            {
+                var data = VTBFMethods.ReadVTBFTag(sr, out string tagType, out int ptrCount, out int entryCount);
+                switch (tagType)
+                {
+                    case "ROOT":
+                        //We don't do anything with this right now.
+                        break;
+                    case "NDMO":
+                        //Signifies a 3d motion
+                        motion.moHeader = parseNDMO(data);
+                        break;
+                    case "SPMO":
+                        //Signifies a material animation
+                        motion.moHeader = parseSPMO(data);
+                        break;
+                    case "CAMO":
+                        //Signifies a camera motion
+                        motion.moHeader = parseCAMO(data);
+                        break;
+                    case "MSEG":
+                        //Motion segment - Signifies the start a node's animation data
+                        motion.motionKeys.Add(new AquaMotion.KeyData());
+                        motion.motionKeys[motion.motionKeys.Count - 1].mseg = parseMSEG(data);
+                        break;
+                    case "MKEY":
+                        //Motion key - These contain frame data for the various animation types and always follow the MSEG for the node they apply to.
+                        motion.motionKeys[motion.motionKeys.Count - 1].keyData.Add(parseMKEY(data));
+                        break;
+                    default:
+                        //Should mean it's done.
+                        Debug.WriteLine($"Defaulted tag was: {tagType}");
+                        break;
+                }
+            }
+        }
 
         //Converts scale keys to the more typical absolute scaling so they can be edited in a nice way externally.
         public void PrepareScalingForExport(AquaNode aqn)

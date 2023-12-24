@@ -1956,7 +1956,7 @@ namespace AquaModelLibrary
                 int dataEnd = (int)streamReader.Position() + fileSize;
 
                 //Seek past vtbf tag
-                streamReader.Seek(0x10, SeekOrigin.Current);          //VTBF + AQGF tags
+                streamReader.Seek(0x10, SeekOrigin.Current); //VTBF + AQGF tags
 
                 while (streamReader.Position() < dataEnd)
                 {

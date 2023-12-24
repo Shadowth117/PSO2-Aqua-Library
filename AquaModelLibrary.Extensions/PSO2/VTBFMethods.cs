@@ -1,9 +1,7 @@
 ﻿using AquaModelLibrary.Extensions.Readers;
-using Reloaded.Memory.Streams;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.Helpers.MiscHelpers;
 
 namespace AquaModelLibrary.Helpers.PSO2
 {
@@ -25,9 +23,8 @@ namespace AquaModelLibrary.Helpers.PSO2
             uint bodyLength = streamReader.Read<uint>();
             int mainTagType = streamReader.Read<int>();
             tagString = Encoding.UTF8.GetString(BitConverter.GetBytes(mainTagType));
-#if DEBUG
-            //Console.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
-#endif
+            //Debug.WriteLine($"Start { tagString} around { streamReader.Position().ToString("X")}");
+
             ptrCount = streamReader.Read<short>(); //Not important for reading. Game assumedly uses this at runtime to know how many pointer ints to prepare for the block.
             entryCount = streamReader.Read<short>();
 
@@ -342,16 +339,11 @@ namespace AquaModelLibrary.Helpers.PSO2
                 {
                     vtbfDict.Add(dataId, data);
                 }
-#if DEBUG
-                //Console.WriteLine($"Processed { dataType.ToString("X")} around { streamReader.Position().ToString("X")}");
-#endif
+                //Debug.WriteLine($"Processed { dataType.ToString("X")} around { streamReader.Position().ToString("X")}");
             }
             //For non-list type tag data and non FD terminated lists (alpha has these)
             vtbfData.Add(vtbfDict);
-
-#if DEBUG
             //Console.WriteLine($"Processed {tagString} around { streamReader.Position().ToString("X")}");
-#endif
 
             return vtbfData;
         }
@@ -565,30 +557,6 @@ namespace AquaModelLibrary.Helpers.PSO2
                     File.WriteAllText(fileName + ".txt", $"{fileName} was not a VTBF...");
                 }
             }
-        }
-
-        public static NDTR parseNDTR(List<Dictionary<int, object>> ndtrRaw)
-        {
-            NDTR ndtr = new NDTR();
-
-            ndtr.boneCount = (int)ndtrRaw[0][0x01];
-            ndtr.unknownCount = (int)ndtrRaw[0][0x02];
-            ndtr.effCount = (int)ndtrRaw[0][0xFA];
-
-            return ndtr;
-        }
-
-        public static byte[] toNDTR(NDTR ndtr)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            AddBytes(outBytes, 0x1, 0x8, BitConverter.GetBytes(ndtr.boneCount));
-            AddBytes(outBytes, 0x2, 0x8, BitConverter.GetBytes(ndtr.unknownCount));
-            AddBytes(outBytes, 0xFA, 0x8, BitConverter.GetBytes(ndtr.effCount));
-
-            WriteTagHeader(outBytes, "NDTR", 0x2, 0x3);
-
-            return outBytes.ToArray();
         }
 
         public static List<NODE> parseNODE(List<Dictionary<int, object>> nodeRaw)

@@ -6,6 +6,7 @@ using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Ice;
 using System.IO;
 using System.Text;
+using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -24,7 +25,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<AquaObject> models = new List<AquaObject>();
         public List<TPNTexturePattern> tpns = new List<TPNTexturePattern>();
 
-        public List<AquaMotion> anims = new List<AquaMotion>();
+        public List<AquaMotion> motions = new List<AquaMotion>();
 
         public static readonly string[] fileExtensions = new string[]
         {
@@ -91,26 +92,27 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 afp.fileCount = 1;
             }
 
+            long nextFileOffset = -1;
             for(int i = 0; i < afp.fileCount; i++)
             {
                 string currentExt;
+
+                //Seek based on AFP size for consecutive files so we don't get misaligned for VTBF
                 if (i > 0)
                 {
-                    sr.Seek(0x10, SeekOrigin.Current);
+                    sr.Seek(nextFileOffset, SeekOrigin.Begin);
                 }
 
                 //If afp magic isn't 0, we have an AFPBase to read
-                int endOffset;
                 if (afp.magic != 0)
                 {
                     afpEnvelopes.Add(sr.Read<AFPBase>());
                     offset = (int)sr.Position + 0x20;
                     currentExt = Path.GetExtension(afpEnvelopes[i].fileName.GetString());
-                    endOffset = (int)(sr.Position + afpEnvelopes[i].afpBaseSize);
+                    nextFileOffset = sr.Position - 0x30 + afpEnvelopes[i].totalSize;
                 } else //Not an afp archive, so we use the original extension
                 {
                     currentExt = ext;
-                    endOffset = (int)sr.BaseStream.Length;
                 }
                
                 //Handle based on known
@@ -120,7 +122,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     case ".trp":
                     case ".aqo":
                     case ".tro":
-                        models.Add(new AquaObject(sr, offset, endOffset));
+                        models.Add(new AquaObject(sr, _ext));
                         break;
                     case ".aqm":
                     case ".aqv":
@@ -129,15 +131,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     case ".trm":
                     case ".trv":
                     case ".trw":
-                        switch (type)
-                        {
-                            case "NIFL":
-                                anims.Add();
-                                break;
-                            case "VTBF":
-                                anims.Add();
-                                break;
-                        }
+                        motions.Add(new AquaMotion(sr, _ext));
                         break;
                     case ".tpn":
                         tpns.Add(new TPNTexturePattern(sr));
