@@ -23,6 +23,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         {
         }
 
+        public StripData(Dictionary<int, object> psetRaw)
+        {
+            triIdCount = (int)psetRaw[0xB7];
+            triStrips = ((ushort[])psetRaw[0xB8]).ToList();
+        }
+
         public StripData(ushort[] indices)
         {
             toStrips(indices);

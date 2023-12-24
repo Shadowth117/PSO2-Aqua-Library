@@ -20,6 +20,16 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
             }
         }
 
+        public PSO2String(byte[] bytes)
+        {
+            SetBytes(bytes);
+        }
+
+        public PSO2String(string newString)
+        {
+            SetString(newString);
+        }
+
         public override int GetHashCode()
         {
             return base.GetHashCode();

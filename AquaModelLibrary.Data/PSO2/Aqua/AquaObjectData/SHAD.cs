@@ -19,6 +19,15 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public List<SHADExtraEntry> shadExtra = new List<SHADExtraEntry>();
 
         public SHAD() { }
+
+        public SHAD(Dictionary<int, object> shadRaw)
+        {
+            unk0 = (int)shadRaw[0x90];
+            pixelShader = new PSO2String((byte[])shadRaw[0x91]);
+            vertexShader = new PSO2String((byte[])shadRaw[0x92]);
+            shadDetailOffset = (int)shadRaw[0x93];
+        }
+
         public SHAD(BufferedStreamReaderBE<MemoryStream> streamReader, int offset)
         {
             Read(streamReader, offset);

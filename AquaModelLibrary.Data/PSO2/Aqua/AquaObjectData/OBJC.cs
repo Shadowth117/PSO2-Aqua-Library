@@ -231,26 +231,26 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             outBytes.AddRange(BitConverter.GetBytes(pointerCount));
             outBytes.AddRange(BitConverter.GetBytes((short)0x14)); //Subtag count, always 0x14 for OBJC
 
-            addBytes(outBytes, 0x10, 0x8, BitConverter.GetBytes(type)); //Should just always be 0xC2A. Perhaps some kind of header info?
-            addBytes(outBytes, 0x11, 0x8, BitConverter.GetBytes(size)); //Size of the final data struct, always 0xA4. This ends up being the exact size of the NIFL variation of OBJC.
-            addBytes(outBytes, 0x12, 0x9, BitConverter.GetBytes(unkMeshValue));
-            addBytes(outBytes, 0x13, 0x8, BitConverter.GetBytes(largetsVtxl));
-            addBytes(outBytes, 0x14, 0x9, BitConverter.GetBytes(totalStripFaces));
-            addBytes(outBytes, 0x15, 0x8, BitConverter.GetBytes(totalVTXLCount));
-            addBytes(outBytes, 0x16, 0x8, BitConverter.GetBytes(unkStructCount));
-            addBytes(outBytes, 0x24, 0x9, BitConverter.GetBytes(vsetCount));
-            addBytes(outBytes, 0x25, 0x9, BitConverter.GetBytes(psetCount));
-            addBytes(outBytes, 0x17, 0x9, BitConverter.GetBytes(meshCount));
-            addBytes(outBytes, 0x18, 0x8, BitConverter.GetBytes(mateCount));
-            addBytes(outBytes, 0x19, 0x8, BitConverter.GetBytes(rendCount));
-            addBytes(outBytes, 0x1A, 0x8, BitConverter.GetBytes(shadCount));
-            addBytes(outBytes, 0x1B, 0x8, BitConverter.GetBytes(tstaCount));
-            addBytes(outBytes, 0x1C, 0x8, BitConverter.GetBytes(tsetCount));
-            addBytes(outBytes, 0x1D, 0x8, BitConverter.GetBytes(texfCount));
-            addBytes(outBytes, 0x1E, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.modelCenter));
-            addBytes(outBytes, 0x1F, 0xA, BitConverter.GetBytes(bounds.boundingRadius));
-            addBytes(outBytes, 0x20, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.modelCenter2));
-            addBytes(outBytes, 0x21, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.halfExtents));
+            AddBytes(outBytes, 0x10, 0x8, BitConverter.GetBytes(type)); //Should just always be 0xC2A. Perhaps some kind of header info?
+            AddBytes(outBytes, 0x11, 0x8, BitConverter.GetBytes(size)); //Size of the final data struct, always 0xA4. This ends up being the exact size of the NIFL variation of OBJC.
+            AddBytes(outBytes, 0x12, 0x9, BitConverter.GetBytes(unkMeshValue));
+            AddBytes(outBytes, 0x13, 0x8, BitConverter.GetBytes(largetsVtxl));
+            AddBytes(outBytes, 0x14, 0x9, BitConverter.GetBytes(totalStripFaces));
+            AddBytes(outBytes, 0x15, 0x8, BitConverter.GetBytes(totalVTXLCount));
+            AddBytes(outBytes, 0x16, 0x8, BitConverter.GetBytes(unkStructCount));
+            AddBytes(outBytes, 0x24, 0x9, BitConverter.GetBytes(vsetCount));
+            AddBytes(outBytes, 0x25, 0x9, BitConverter.GetBytes(psetCount));
+            AddBytes(outBytes, 0x17, 0x9, BitConverter.GetBytes(meshCount));
+            AddBytes(outBytes, 0x18, 0x8, BitConverter.GetBytes(mateCount));
+            AddBytes(outBytes, 0x19, 0x8, BitConverter.GetBytes(rendCount));
+            AddBytes(outBytes, 0x1A, 0x8, BitConverter.GetBytes(shadCount));
+            AddBytes(outBytes, 0x1B, 0x8, BitConverter.GetBytes(tstaCount));
+            AddBytes(outBytes, 0x1C, 0x8, BitConverter.GetBytes(tsetCount));
+            AddBytes(outBytes, 0x1D, 0x8, BitConverter.GetBytes(texfCount));
+            AddBytes(outBytes, 0x1E, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.modelCenter));
+            AddBytes(outBytes, 0x1F, 0xA, BitConverter.GetBytes(bounds.boundingRadius));
+            AddBytes(outBytes, 0x20, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.modelCenter2));
+            AddBytes(outBytes, 0x21, 0x4A, 0x1, MiscHelpers.ConvertStruct(bounds.halfExtents));
 
             return outBytes.ToArray();
         }

@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Extensions.Readers;
+using Reloaded.Memory.Streams;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
@@ -355,1077 +356,215 @@ namespace AquaModelLibrary.Helpers.PSO2
             return vtbfData;
         }
 
-        public static List<VSET> parseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists)
+        public static void AnalyzeVTBF(string fileName)
         {
-            List<VSET> vsetList = new List<VSET>();
-            bonePalettes = new List<List<ushort>>();
-            edgeVertsLists = new List<List<ushort>>();
-
-            for (int i = 0; i < vsetRaw.Count; i++)
-            {
-                VSET vset = new VSET();
-                vset.vertDataSize = (int)(vsetRaw[i][0xB6]);
-                vset.vtxeCount = (int)(vsetRaw[i][0xBF]);
-                vset.vtxlCount = (int)(vsetRaw[i][0xB9]);
-                vset.vtxlStartVert = (int)(vsetRaw[i][0xC4]);
-
-                //BonePalette
-                vset.bonePaletteCount = (int)(vsetRaw[i][0xBD]);
-                if (vsetRaw[i].ContainsKey(0xBE))
-                {
-                    var rawBP = (vsetRaw[i][0xBE]);
-                    if (rawBP is ushort)
-                    {
-                        bonePalettes.Add(new List<ushort> { (ushort)rawBP });
-                    }
-                    else if (rawBP is ushort[])
-                    {
-                        bonePalettes.Add(((ushort[])rawBP).ToList());
-                    }
-                    else if (rawBP is short)
-                    {
-                        bonePalettes.Add(new List<ushort> { (ushort)((short)rawBP) });
-                    }
-                    else if (rawBP is short[])
-                    {
-                        var rawBPUshort = new List<ushort>();
-                        var BPArr = (short[])rawBP;
-                        for (int s = 0; s < BPArr.Length; s++)
-                        {
-                            rawBPUshort.Add((ushort)BPArr[s]);
-                        }
-                        bonePalettes.Add(rawBPUshort);
-                    }
-                    else
-                    {
-                        bonePalettes.Add(null);
-                    }
-                }
-
-                //Not sure on these, but I don't know that unk0-2 get used normally
-                vset.unk0 = (int)(vsetRaw[i][0xC8]);
-                vset.unk1 = (int)(vsetRaw[i][0xCC]);
-
-                //EdgeVerts
-                vset.edgeVertsCount = (int)(vsetRaw[i][0xC9]);
-                if (vsetRaw[i].ContainsKey(0xCA))
-                {
-                    var rawEV = (vsetRaw[i][0xCA]);
-                    if (rawEV is ushort)
-                    {
-                        edgeVertsLists.Add(new List<ushort> { (ushort)rawEV });
-                    }
-                    else if (rawEV is short[])
-                    {
-                        edgeVertsLists.Add(((ushort[])rawEV).ToList());
-                    }
-                    else if (rawEV is short)
-                    {
-                        edgeVertsLists.Add(new List<ushort> { (ushort)((short)rawEV) });
-                    }
-                    else if (rawEV is short[])
-                    {
-                        var rawEshort = new List<ushort>();
-                        var EArr = (short[])rawEV;
-                        for (int s = 0; s < EArr.Length; s++)
-                        {
-                            rawEshort.Add((ushort)EArr[s]);
-                        }
-                        edgeVertsLists.Add(rawEshort);
-                    }
-                    else
-                    {
-                        edgeVertsLists.Add(null);
-                    }
-                }
-
-                vsetList.Add(vset);
-            }
-
-            return vsetList;
-        }
-
-        public static byte[] toVSETList(List<VSET> vsetList, List<VTXL> vtxlList)
-        {
-            List<byte> outBytes = new List<byte>();
-            int subTagCount = 0;
-
-            for (int i = 0; i < vsetList.Count; i++)
-            {
-                subTagCount += 0x9; //Each vset substruct adds this many sub tags every time.
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-                addBytes(outBytes, 0xB6, 0x9, BitConverter.GetBytes(vsetList[i].vertDataSize));
-                addBytes(outBytes, 0xBF, 0x9, BitConverter.GetBytes(vsetList[i].vtxeCount));
-                addBytes(outBytes, 0xB9, 0x9, BitConverter.GetBytes(vsetList[i].vtxlCount));
-                addBytes(outBytes, 0xC4, 0x9, BitConverter.GetBytes(vsetList[i].vtxlStartVert));
-
-                if (vtxlList[i].bonePalette != null)
-                {
-                    if (vtxlList[i].bonePalette.Count > 0)
-                    {
-                        addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes(vtxlList[i].bonePalette.Count));
-                        subTagCount++;
-
-                        outBytes.Add(0xBE);
-                        outBytes.Add(0x86);
-                        outBytes.Add(0x8);
-                        outBytes.Add((byte)(vtxlList[i].bonePalette.Count - 1));
-                        for (int j = 0; j < vtxlList[i].bonePalette.Count; j++)
-                        {
-                            outBytes.AddRange(BitConverter.GetBytes(vtxlList[i].bonePalette[j]));
-                        }
-                    }
-                    else
-                    {
-                        addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes((int)0));
-                    }
-
-                }
-                else
-                {
-                    addBytes(outBytes, 0xBD, 0x9, BitConverter.GetBytes((int)0));
-                }
-
-                addBytes(outBytes, 0xC8, 0x9, BitConverter.GetBytes(vsetList[i].unk0));
-                addBytes(outBytes, 0xCC, 0x9, BitConverter.GetBytes(vsetList[i].unk1));
-
-                if (vtxlList[i].edgeVerts != null)
-                {
-                    if (vtxlList[i].edgeVerts.Count > 0)
-                    {
-
-                        addBytes(outBytes, 0xC9, 0x9, BitConverter.GetBytes(vtxlList[i].edgeVerts.Count));
-                        subTagCount++;
-
-                        outBytes.Add(0xCA);
-                        outBytes.Add(0x86);
-                        outBytes.Add(0x8);
-                        outBytes.Add((byte)(vtxlList[i].edgeVerts.Count - 1));
-                        for (int j = 0; j < vtxlList[i].edgeVerts.Count; j++)
-                        {
-                            outBytes.AddRange(BitConverter.GetBytes(vtxlList[i].edgeVerts[j]));
-                        }
-                    }
-                    else
-                    {
-                        addBytes(outBytes, 0xC9, 0x9, BitConverter.GetBytes((int)0));
-                    }
-
-                }
-                else
-                {
-                    addBytes(outBytes, 0xC9, 0x9, BitConverter.GetBytes((int)0));
-                }
-
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-            subTagCount++;
-
-            //In VTBF, VSETS are all treated as part of the same struct
-
-            //Pointer count. In this case, 0x2 times the VSET count.
-            //Subtag count
-            WriteTagHeader(outBytes, "VSET", (ushort)(0x2 * vsetList.Count), (ushort)(subTagCount));
-
-            return outBytes.ToArray();
-        }
-
-        public static void parseVTXE_VTXL(List<Dictionary<int, object>> vtxeRaw, List<Dictionary<int, object>> vtxlRaw, out VTXE vtxe, out VTXL vtxl)
-        {
-            int vertSize = 0;
-            vtxe = new VTXE();
-            vtxl = new VTXL();
-            for (int i = 0; i < vtxeRaw.Count; i++)
-            {
-                VTXEElement vtxeEle = new VTXEElement();
-
-                vtxeEle.dataType = (int)vtxeRaw[i][0xD0];
-                vtxeEle.structVariation = (int)vtxeRaw[i][0xD1];
-                vtxeEle.relativeAddress = (int)vtxeRaw[i][0xD2];
-                vtxeEle.reserve0 = (int)vtxeRaw[i][0xD3];
-                switch (vtxeEle.dataType)
-                {
-                    case (int)VertFlags.VertPosition:
-                        vertSize += 0xC;
-                        break;
-                    case (int)VertFlags.VertWeight:
-                        vertSize += 0x10;
-                        break;
-                    case (int)VertFlags.VertNormal:
-                        vertSize += 0xC;
-                        break;
-                    case (int)VertFlags.VertColor:
-                        vertSize += 0x4;
-                        break;
-                    case (int)VertFlags.VertColor2:
-                        vertSize += 0x4;
-                        break;
-                    case (int)VertFlags.VertWeightIndex:
-                        vertSize += 0x4;
-                        break;
-                    case (int)VertFlags.VertUV1:
-                        vertSize += 0x8;
-                        break;
-                    case (int)VertFlags.VertUV2:
-                        vertSize += 0x8;
-                        break;
-                    case (int)VertFlags.VertUV3:
-                        vertSize += 0x8;
-                        break;
-                    case (int)VertFlags.VertTangent:
-                        vertSize += 0xC;
-                        break;
-                    case (int)VertFlags.VertBinormal:
-                        vertSize += 0xC;
-                        break;
-                    default:
-                        vertSize += 0xC;
-                        Debug.WriteLine($"Unknown Vert type {vtxeEle.dataType}! Please report!");
-                        break;
-                }
-
-                vtxe.vertDataTypes.Add(vtxeEle);
-            }
-
-            int vertCount = ((byte[])vtxlRaw[0][0xBA]).Length / vertSize;
-
-            using (MemoryStream stream = new MemoryStream((byte[])vtxlRaw[0][0xBA]))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(fileName)))
             using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
-                vtxl.Read(streamReader, vtxe, vertCount, vtxe.vertDataTypes.Count);
-            }
-        }
+                string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                int offset = 0x20; //Base offset due to NIFL header
 
-        public static byte[] toVTXE_VTXL(VTXE vtxe, VTXL vtxl)
-        {
-            List<byte> outBytes = new List<byte>();
+                //Deal with deicer's extra header nonsense
+                if (!type.Equals("NIFL") && !type.Equals("VTBF"))
+                {
+                    streamReader.Seek(0xC, SeekOrigin.Begin);
+                    //Basically always 0x60, but some deicer files from the Alpha have 0x50... 
+                    int headJunkSize = streamReader.Read<int>();
 
-            //VTXE
-            for (int i = 0; i < vtxe.vertDataTypes.Count; i++)
-            {
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                    streamReader.Seek(headJunkSize - 0x10, SeekOrigin.Current);
+                    type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
+                    offset += headJunkSize;
                 }
 
-                addBytes(outBytes, 0xD0, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].dataType));
-                addBytes(outBytes, 0xD1, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].structVariation));
-                addBytes(outBytes, 0xD2, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].relativeAddress));
-                addBytes(outBytes, 0xD3, 0x9, BitConverter.GetBytes(vtxe.vertDataTypes[i].reserve0));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on VTXE
-            //Subtag count
-            WriteTagHeader(outBytes, "VTXE", 0, (ushort)(vtxe.vertDataTypes.Count * 5 + 1));
-
-            //VTXL
-            List<byte> outBytes2 = new List<byte>
-            {
-                0xBA,
-                0x89
-            };
-            int vtxlSizeArea = outBytes2.Count;
-            vtxl.GetBytes(vtxe, outBytes2);
-
-            //Calc and insert the vert data counts in post due to the way sega does it.
-            int vertDataCount = ((outBytes2.Count - vtxlSizeArea) / 4) - 1;
-            if (vertDataCount > byte.MaxValue)
-            {
-                if (vertDataCount - 1 > ushort.MaxValue)
+                //Proceed based on file variant
+                if (type.Equals("NIFL"))
                 {
-                    outBytes2.Insert(vtxlSizeArea, 0x18);
-                    outBytes2.InsertRange(vtxlSizeArea + 0x1, BitConverter.GetBytes(vertDataCount));
+                    return;
                 }
-                else
+                else if (type.Equals("VTBF"))
                 {
-                    outBytes2.Insert(vtxlSizeArea, 0x10);
-                    outBytes2.InsertRange(vtxlSizeArea + 0x1, BitConverter.GetBytes((short)(vertDataCount)));
-                }
-            }
-            else
-            {
-                outBytes2.Insert(vtxlSizeArea, 0x8);
-                outBytes2.Insert(vtxlSizeArea + 0x1, (byte)vertDataCount);
-            }
+                    int dataEnd = (int)streamReader.BaseStream.Length;
+                    StringBuilder output = new StringBuilder();
+                    Dictionary<string, List<int>> tagTracker = new Dictionary<string, List<int>>();
 
-            //Pointer count. Always 0 on VTXL
-            //Subtag count
-            WriteTagHeader(outBytes2, "VTXL", 0, 0x1);
+                    //Seek past vtbf tag
+                    streamReader.Seek(0x8, SeekOrigin.Current);          //VTBF 
+                    output.AppendLine(Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>())) + ":"); //Type
+                    streamReader.Seek(0x4, SeekOrigin.Current); //0x1 short and 0x4C00 short. Seem to be constants.
 
-            outBytes.AddRange(outBytes2);
-
-            return outBytes.ToArray();
-        }
-
-        public static void parsePSET(List<Dictionary<int, object>> psetRaw, out List<PSET> psets, out List<stripData> strips)
-        {
-            psets = new List<PSET>();
-            strips = new List<stripData>();
-            for (int i = 0; i < psetRaw.Count; i++)
-            {
-                PSET pset = new PSET();
-                stripData strip = new stripData();
-
-                pset.tag = (int)psetRaw[i][0xC6];
-                pset.faceGroupCount = (int)psetRaw[i][0xBB];
-                pset.psetFaceCount = (int)psetRaw[i][0xBC];
-                strip.triIdCount = (int)psetRaw[i][0xB7];
-                strip.triStrips = ((ushort[])psetRaw[i][0xB8]).ToList();
-                pset.stripStartCount = (int)psetRaw[i][0xC5];
-
-                psets.Add(pset);
-                strips.Add(strip);
-            }
-        }
-
-        public static byte[] toPSET(List<PSET> psets, List<stripData> strips)
-        {
-            List<byte> outBytes = new List<byte>();
-            for (int i = 0; i < psets.Count; i++)
-            {
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-                addBytes(outBytes, 0xC6, 0x9, BitConverter.GetBytes(psets[i].tag));
-                addBytes(outBytes, 0xBB, 0x9, BitConverter.GetBytes(psets[i].faceGroupCount));
-                addBytes(outBytes, 0xBC, 0x9, BitConverter.GetBytes(psets[i].psetFaceCount));
-                addBytes(outBytes, 0xB7, 0x9, BitConverter.GetBytes(strips[i].triIdCount));
-
-                outBytes.Add(0xB8);
-                outBytes.Add(0x86);
-                if (strips[i].triIdCount - 1 > byte.MaxValue)
-                {
-                    if (strips[i].triIdCount - 1 > ushort.MaxValue)
+                    while (streamReader.Position < dataEnd)
                     {
-                        outBytes.Add(0x18);
-                        outBytes.AddRange(BitConverter.GetBytes(strips[i].triStrips.Count - 1));
-                    }
-                    else
-                    {
-                        outBytes.Add(0x10);
-                        outBytes.AddRange(BitConverter.GetBytes((short)(strips[i].triStrips.Count - 1)));
-                    }
-                }
-                else
-                {
-                    outBytes.Add(0x8);
-                    outBytes.Add((byte)(strips[i].triStrips.Count - 1));
-                }
-                for (int j = 0; j < strips[i].triStrips.Count; j++)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes(strips[i].triStrips[j]));
-                }
+                        var data = ReadVTBFTag(streamReader, out string tagType, out int ptrCount, out int entryCount);
 
-                addBytes(outBytes, 0xC5, 0x9, BitConverter.GetBytes(psets[i].stripStartCount));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on PSET
-            //Subtag count. 7 for each PSET + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "PSET", 0, (ushort)(psets.Count * 0x7 + 0x1));
-
-            return outBytes.ToArray();
-        }
-
-        public static List<MESH> parseMESH(List<Dictionary<int, object>> meshRaw)
-        {
-            List<MESH> meshList = new List<MESH>();
-
-            for (int i = 0; i < meshRaw.Count; i++)
-            {
-                MESH mesh = new MESH();
-
-                byte[] c7 = BitConverter.GetBytes((int)meshRaw[i][0xC7]);
-
-                mesh.flags = (short)((int)meshRaw[i][0xB0] % 0x10000);
-                mesh.unkShort0 = (short)((int)meshRaw[i][0xB0] / 0x10000);
-                mesh.unkByte0 = c7[0];
-                mesh.unkByte1 = c7[1];
-                mesh.unkShort1 = (short)((int)meshRaw[i][0xC7] / 0x10000);
-                mesh.mateIndex = (int)meshRaw[i][0xB1];
-                mesh.rendIndex = (int)meshRaw[i][0xB2];
-                mesh.shadIndex = (int)meshRaw[i][0xB3];
-                mesh.tsetIndex = (int)meshRaw[i][0xB4];
-                mesh.baseMeshNodeId = (int)meshRaw[i][0xB5];
-                mesh.vsetIndex = (int)meshRaw[i][0xC0];
-                mesh.psetIndex = (int)meshRaw[i][0xC1];
-                if (meshRaw[i].ContainsKey(0xCD))
-                {
-                    mesh.unkInt0 = (int)meshRaw[i][0xCD];
-                }
-                mesh.baseMeshDummyId = (int)meshRaw[i][0xC2];
-
-                meshList.Add(mesh);
-            }
-
-            return meshList;
-        }
-
-        public static byte[] toMESH(List<MESH> meshList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            for (int i = 0; i < meshList.Count; i++)
-            {
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-                int shorts = meshList[i].flags + (meshList[i].unkShort0 * 0x10000);
-                int bytes = meshList[i].unkByte0 + (meshList[i].unkByte1 * 0x100) + (meshList[i].unkShort1 * 0x10000);
-                addBytes(outBytes, 0xB0, 0x9, BitConverter.GetBytes(shorts));
-                addBytes(outBytes, 0xC7, 0x9, BitConverter.GetBytes(bytes));
-                addBytes(outBytes, 0xB1, 0x8, BitConverter.GetBytes(meshList[i].mateIndex));
-                addBytes(outBytes, 0xB2, 0x8, BitConverter.GetBytes(meshList[i].rendIndex));
-                addBytes(outBytes, 0xB3, 0x8, BitConverter.GetBytes(meshList[i].shadIndex));
-                addBytes(outBytes, 0xB4, 0x8, BitConverter.GetBytes(meshList[i].tsetIndex));
-                addBytes(outBytes, 0xB5, 0x8, BitConverter.GetBytes(meshList[i].baseMeshNodeId));
-                addBytes(outBytes, 0xC0, 0x8, BitConverter.GetBytes(meshList[i].vsetIndex));
-                addBytes(outBytes, 0xC1, 0x8, BitConverter.GetBytes(meshList[i].psetIndex));
-                addBytes(outBytes, 0xCD, 0x8, BitConverter.GetBytes(meshList[i].unkInt0));
-                addBytes(outBytes, 0xC2, 0x9, BitConverter.GetBytes(meshList[i].baseMeshDummyId));
-            }
-            //outBytes.AddRange(BitConverter.GetBytes((short)0xFD)); MESH seemingly doesn't use this for some reason
-
-            //Pointer count. Always 0 on MESH
-            //Subtag count. 11 for each MESH + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "MESH", 0, (ushort)(meshList.Count * 0xC));
-
-            return outBytes.ToArray();
-        }
-
-        public static unsafe List<MATE> parseMATE(List<Dictionary<int, object>> mateRaw)
-        {
-            List<MATE> mateList = new List<MATE>();
-
-            for (int i = 0; i < mateRaw.Count; i++)
-            {
-                MATE mate = new MATE();
-                mate.diffuseRGBA = (Vector4)mateRaw[i][0x30];
-                mate.unkRGBA0 = (Vector4)mateRaw[i][0x31];
-                mate._sRGBA = (Vector4)mateRaw[i][0x32];
-                mate.unkRGBA1 = (Vector4)mateRaw[i][0x33];
-                mate.reserve0 = (int)mateRaw[i][0x34];
-                mate.unkFloat0 = (float)mateRaw[i][0x35];
-                mate.unkFloat1 = (float)mateRaw[i][0x36];
-                mate.unkInt0 = (int)mateRaw[i][0x37];
-                mate.unkInt1 = (int)mateRaw[i][0x38];
-                mate.alphaType = new AquaCommon.PSO2String();
-                mate.alphaType.SetBytes((byte[])mateRaw[i][0x3A]);
-                mate.matName = new AquaCommon.PSO2String();
-                mate.matName.SetBytes((byte[])mateRaw[i][0x39]);
-
-                mateList.Add(mate);
-            }
-
-            return mateList;
-        }
-
-        public static unsafe byte[] toMATE(List<MATE> mateList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            for (int i = 0; i < mateList.Count; i++)
-            {
-                //Gotta make a local accessor for fixed arrays
-                MATE mate = mateList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-
-                addBytes(outBytes, 0x30, 0x4A, 0x2, ConvertStruct(mate.diffuseRGBA));
-                addBytes(outBytes, 0x31, 0x4A, 0x2, ConvertStruct(mate.unkRGBA0));
-                addBytes(outBytes, 0x32, 0x4A, 0x2, ConvertStruct(mate._sRGBA));
-                addBytes(outBytes, 0x33, 0x4A, 0x2, ConvertStruct(mate.unkRGBA1));
-                addBytes(outBytes, 0x34, 0x9, BitConverter.GetBytes(mate.reserve0));
-                addBytes(outBytes, 0x35, 0xA, BitConverter.GetBytes(mate.unkFloat0));
-                addBytes(outBytes, 0x36, 0xA, BitConverter.GetBytes(mate.unkFloat1));
-                addBytes(outBytes, 0x37, 0x9, BitConverter.GetBytes(mate.unkInt0));
-                addBytes(outBytes, 0x38, 0x9, BitConverter.GetBytes(mate.unkInt1));
-
-                //Alpha Type String
-                string alphaStr = mate.alphaType.GetString();
-                addBytes(outBytes, 0x3A, 0x02, (byte)alphaStr.Length, Encoding.UTF8.GetBytes(alphaStr));
-
-                //Mat Name String. Do it this way in case of names that would break when encoded to utf8 again
-                int matLen = mate.matName.GetLength();
-                byte[] matBytes = new byte[matLen];
-                byte[] tempMatBytes = mate.matName.GetBytes();
-                for (int strIndex = 0; strIndex < matLen; strIndex++)
-                {
-                    matBytes[strIndex] = tempMatBytes[strIndex];
-                }
-                addBytes(outBytes, 0x39, 0x02, (byte)matLen, matBytes);
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on MATE
-            //Subtag count. 12 for each MATE + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "MATE", 0, (ushort)(mateList.Count * 0xC + 0x1));
-
-            return outBytes.ToArray();
-        }
-
-        public static unsafe List<REND> parseREND(List<Dictionary<int, object>> rendRaw)
-        {
-            List<REND> rendList = new List<REND>();
-
-            for (int i = 0; i < rendRaw.Count; i++)
-            {
-                REND rend = new REND();
-                rend.tag = (int)rendRaw[i][0x40];
-                rend.unk0 = (int)rendRaw[i][0x41];
-                rend.twosided = (int)rendRaw[i][0x42];
-                rend.int_0C = (int)rendRaw[i][0x43];
-
-                rend.sourceAlpha = (int)rendRaw[i][0x44];
-                rend.destinationAlpha = (int)rendRaw[i][0x45];
-                rend.unk3 = (int)rendRaw[i][0x46];
-                rend.unk4 = (int)rendRaw[i][0x47];
-
-                rend.unk5 = (int)rendRaw[i][0x48];
-                rend.unk6 = (int)rendRaw[i][0x49];
-                rend.unk7 = (int)rendRaw[i][0x4A];
-                rend.unk8 = (int)rendRaw[i][0x4B];
-
-                rend.unk9 = (int)rendRaw[i][0x4C];
-                rend.alphaCutoff = (int)rendRaw[i][0x4D];
-                rend.unk11 = (int)rendRaw[i][0x4E];
-                rend.unk12 = (int)rendRaw[i][0x4F];
-
-                rend.unk13 = (int)rendRaw[i][0x50];
-                rendList.Add(rend);
-            }
-
-            return rendList;
-        }
-
-        public static unsafe byte[] toREND(List<REND> rendList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            for (int i = 0; i < rendList.Count; i++)
-            {
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-
-                addBytes(outBytes, 0x40, 0x9, BitConverter.GetBytes(rendList[i].tag));
-                addBytes(outBytes, 0x41, 0x9, BitConverter.GetBytes(rendList[i].unk0));
-                addBytes(outBytes, 0x42, 0x9, BitConverter.GetBytes(rendList[i].twosided));
-                addBytes(outBytes, 0x43, 0x9, BitConverter.GetBytes(rendList[i].int_0C));
-
-                addBytes(outBytes, 0x44, 0x9, BitConverter.GetBytes(rendList[i].sourceAlpha));
-                addBytes(outBytes, 0x45, 0x9, BitConverter.GetBytes(rendList[i].destinationAlpha));
-                addBytes(outBytes, 0x46, 0x9, BitConverter.GetBytes(rendList[i].unk3));
-                addBytes(outBytes, 0x47, 0x9, BitConverter.GetBytes(rendList[i].unk4));
-
-                addBytes(outBytes, 0x48, 0x9, BitConverter.GetBytes(rendList[i].unk5));
-                addBytes(outBytes, 0x49, 0x9, BitConverter.GetBytes(rendList[i].unk6));
-                addBytes(outBytes, 0x4A, 0x9, BitConverter.GetBytes(rendList[i].unk7));
-                addBytes(outBytes, 0x4B, 0x9, BitConverter.GetBytes(rendList[i].unk8));
-
-                addBytes(outBytes, 0x4C, 0x9, BitConverter.GetBytes(rendList[i].unk9));
-                addBytes(outBytes, 0x4D, 0x9, BitConverter.GetBytes(rendList[i].alphaCutoff));
-                addBytes(outBytes, 0x4E, 0x9, BitConverter.GetBytes(rendList[i].unk11));
-                addBytes(outBytes, 0x4F, 0x9, BitConverter.GetBytes(rendList[i].unk12));
-
-                addBytes(outBytes, 0x50, 0x9, BitConverter.GetBytes(rendList[i].unk13));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on REND
-            //Subtag count. 18 for each REND + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "REND", 0, (ushort)(rendList.Count * 0x12 + 0x1));
-
-            return outBytes.ToArray();
-        }
-
-        public static unsafe List<SHAD> parseSHAD(List<Dictionary<int, object>> shadRaw)
-        {
-            List<SHAD> shadList = new List<SHAD>();
-
-            for (int i = 0; i < shadRaw.Count; i++)
-            {
-                SHAD shad = new SHAD();
-
-                shad.unk0 = (int)shadRaw[i][0x90];
-                shad.pixelShader = new AquaCommon.PSO2String();
-                shad.pixelShader.SetBytes((byte[])shadRaw[i][0x91]);
-                shad.vertexShader = new AquaCommon.PSO2String();
-                shad.vertexShader.SetBytes((byte[])shadRaw[i][0x92]);
-                shad.shadDetailOffset = (int)shadRaw[i][0x93];
-
-                shadList.Add(shad);
-            }
-
-            return shadList;
-        }
-
-        public static unsafe byte[] toSHAD(List<SHAD> shadList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-
-            for (int i = 0; i < shadList.Count; i++)
-            {
-                SHAD shad = shadList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-
-                addBytes(outBytes, 0x90, 0x9, BitConverter.GetBytes(shad.unk0));
-
-                //Pixel Shader String
-                string pixelStr = shad.pixelShader.GetString();
-                addBytes(outBytes, 0x91, 0x02, (byte)pixelStr.Length, Encoding.UTF8.GetBytes(pixelStr));
-
-                //Vertex Shader String
-                string vertStr = shad.vertexShader.GetString();
-                addBytes(outBytes, 0x92, 0x02, (byte)vertStr.Length, Encoding.UTF8.GetBytes(vertStr));
-
-                addBytes(outBytes, 0x93, 0x9, BitConverter.GetBytes(shad.shadDetailOffset));
-
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. SHAD struct count on SHAD.
-            //Subtag count. 18 for each SHAD + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "SHAD", (ushort)shadList.Count, (ushort)(shadList.Count * 0x5 + 0x1));
-
-            //There's one of these for each SHAD, but they don't seem to have any meaningful contents in observed files
-            for (int i = 0; i < shadList.Count; i++)
-            {
-                outBytes.AddRange(Encoding.UTF8.GetBytes("vtc0"));
-                outBytes.AddRange(BitConverter.GetBytes(0xC));
-                outBytes.AddRange(Encoding.UTF8.GetBytes("SHAP"));
-                outBytes.AddRange(BitConverter.GetBytes((short)0));
-                outBytes.AddRange(BitConverter.GetBytes((short)2));
-                outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-            }
-
-            return outBytes.ToArray();
-        }
-
-        public static unsafe List<TSTA> parseTSTA(List<Dictionary<int, object>> tstaRaw)
-        {
-            List<TSTA> tstaList = new List<TSTA>();
-
-            //Make sure there are actually textures
-            if (tstaRaw[0].Keys.Count > 1)
-            {
-                for (int i = 0; i < tstaRaw.Count; i++)
-                {
-                    TSTA tsta = new TSTA();
-
-                    tsta.tag = (int)tstaRaw[i][0x60];
-                    tsta.texUsageOrder = (int)tstaRaw[i][0x61];
-                    tsta.modelUVSet = (int)tstaRaw[i][0x62];
-                    tsta.unkVector0 = (Vector3)tstaRaw[i][0x63];
-                    tsta.unkFloat2 = (int)tstaRaw[i][0x64];
-                    tsta.unkFloat3 = (int)tstaRaw[i][0x65];
-                    tsta.unkFloat4 = (int)tstaRaw[i][0x66];
-                    tsta.unkInt3 = (int)tstaRaw[i][0x67];
-                    tsta.unkInt4 = (int)tstaRaw[i][0x68];
-                    tsta.unkInt5 = (int)tstaRaw[i][0x69];
-                    tsta.unkFloat0 = (float)tstaRaw[i][0x6A];
-                    tsta.unkFloat1 = (float)tstaRaw[i][0x6B];
-                    tsta.texName = new AquaCommon.PSO2String();
-                    tsta.texName.SetBytes((byte[])tstaRaw[i][0x6C]);
-
-                    tstaList.Add(tsta);
-                }
-            }
-
-            return tstaList;
-        }
-
-        public static unsafe byte[] toTSTA(List<TSTA> tstaList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            //Normally the FC tag is included in the count of the rest of these, but when there's no tags we account for it here.
-            int emptyArray = 0;
-            if (tstaList.Count == 0)
-            {
-                emptyArray++;
-            }
-
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFC)); //Always there, even if there's nothing in the list
-            for (int i = 0; i < tstaList.Count; i++)
-            {
-                TSTA tsta = tstaList[i];
-                if (i != 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-
-                addBytes(outBytes, 0x60, 0x9, BitConverter.GetBytes(tstaList[i].tag));
-                addBytes(outBytes, 0x61, 0x9, BitConverter.GetBytes(tstaList[i].texUsageOrder));
-                addBytes(outBytes, 0x62, 0x9, BitConverter.GetBytes(tstaList[i].modelUVSet));
-                addBytes(outBytes, 0x63, 0x4A, 0x1, ConvertStruct(tstaList[i].unkVector0));
-                addBytes(outBytes, 0x64, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat2));
-                addBytes(outBytes, 0x65, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat3));
-                addBytes(outBytes, 0x66, 0x9, BitConverter.GetBytes((int)tstaList[i].unkFloat4));
-                addBytes(outBytes, 0x67, 0x9, BitConverter.GetBytes(tstaList[i].unkInt3));
-                addBytes(outBytes, 0x68, 0x9, BitConverter.GetBytes(tstaList[i].unkInt4));
-                addBytes(outBytes, 0x69, 0x9, BitConverter.GetBytes(tstaList[i].unkInt5));
-                addBytes(outBytes, 0x6A, 0xA, BitConverter.GetBytes(tstaList[i].unkFloat0));
-                addBytes(outBytes, 0x6B, 0xA, BitConverter.GetBytes(tstaList[i].unkFloat1));
-
-                //TexName String
-                string texNameStr = tsta.texName.GetString();
-                addBytes(outBytes, 0x6C, 0x02, (byte)texNameStr.Length, Encoding.UTF8.GetBytes(texNameStr));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-            WriteTagHeader(outBytes, "TSTA", 0, (ushort)(tstaList.Count * 0xE + 0x1 + emptyArray));
-
-            return outBytes.ToArray();
-        }
-
-        public static unsafe List<TSET> parseTSET(List<Dictionary<int, object>> tsetRaw)
-        {
-            List<TSET> tsetList = new List<TSET>();
-
-            for (int i = 0; i < tsetRaw.Count; i++)
-            {
-                TSET tset = new TSET();
-
-                tset.unkInt0 = (int)tsetRaw[i][0x70];
-                tset.texCount = (int)tsetRaw[i][0x71];
-                tset.unkInt1 = (int)tsetRaw[i][0x72];
-                tset.unkInt2 = (int)tsetRaw[i][0x73];
-                tset.unkInt3 = (int)tsetRaw[i][0x74];
-
-                //Read tsta texture IDs
-                using (Stream stream = new MemoryStream((byte[])tsetRaw[i][0x75]))
-                using (var streamReader = new BufferedStreamReader(stream, 8192))
-                {
-                    for (int j = 0; j < 4; j++)
-                    {
-                        tset.tstaTexIDs.Add(streamReader.Read<int>());
-                    }
-                }
-
-                tsetList.Add(tset);
-            }
-
-            return tsetList;
-        }
-
-        public static unsafe byte[] toTSET(List<TSET> tsetList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            for (int i = 0; i < tsetList.Count; i++)
-            {
-                TSET tset = tsetList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-
-                addBytes(outBytes, 0x70, 0x9, BitConverter.GetBytes(tset.unkInt0));
-                addBytes(outBytes, 0x71, 0x8, BitConverter.GetBytes(tset.texCount));
-                addBytes(outBytes, 0x72, 0x9, BitConverter.GetBytes(tset.unkInt1));
-                addBytes(outBytes, 0x73, 0x9, BitConverter.GetBytes(tset.unkInt2));
-                addBytes(outBytes, 0x74, 0x9, BitConverter.GetBytes(tset.unkInt3));
-                addBytes(outBytes, 0x75, 0x88, 0x8, 0x3, BitConverter.GetBytes(tset.tstaTexIDs[0]));
-                for (int j = 1; j < 4; j++)
-                {
-                    if (tset.tstaTexIDs.Count > j)
-                    {
-                        outBytes.AddRange(BitConverter.GetBytes(tset.tstaTexIDs[j]));
-                    }
-                    else
-                    {
-                        outBytes.AddRange(BitConverter.GetBytes((int)-1));
-                    }
-                }
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on TSET
-            //Subtag count. 7 for each TSET + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "TSET", 0, (ushort)(tsetList.Count * 0x7 + 0x1));
-
-            return outBytes.ToArray();
-        }
-
-        public static unsafe List<TEXF> parseTEXF(List<Dictionary<int, object>> texfRaw)
-        {
-            List<TEXF> texfList = new List<TEXF>();
-
-            //Make sure there are texture refs to get
-            if (texfRaw[0].Keys.Count > 1)
-            {
-                for (int i = 0; i < texfRaw.Count; i++)
-                {
-                    TEXF texf = new TEXF();
-
-                    texf.texName = new AquaCommon.PSO2String();
-                    texf.texName.SetBytes((byte[])texfRaw[i][0x80]);
-
-                    texfList.Add(texf);
-                }
-            }
-            return texfList;
-        }
-
-        public static unsafe byte[] toTEXF(List<TEXF> texfList)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            //Normally the FC tag is included in the count of the rest of these, but when there's no tags we account for it here.
-            int emptyArray = 0;
-            if (texfList.Count == 0)
-            {
-                emptyArray++;
-            }
-
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-            for (int i = 0; i < texfList.Count; i++)
-            {
-                TEXF texf = texfList[i];
-                if (i != 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-
-                //TexName String
-                string texNameStr = texf.texName.GetString();
-                addBytes(outBytes, 0x80, 0x02, (byte)texNameStr.Length, Encoding.UTF8.GetBytes(texNameStr));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on TEXF
-            //Subtag count. 2 for each TEXF + 1 for the end tag, always.
-            WriteTagHeader(outBytes, "TEXF", 0, (ushort)(texfList.Count * 0x2 + 0x1 + emptyArray));
-
-            return outBytes.ToArray();
-        }
-
-        //Technically, this data is written out as a list, but should only ever have one entry.
-        public static unsafe UNRM parseUNRM(List<Dictionary<int, object>> unrmRaw)
-        {
-            UNRM unrm = new UNRM();
-
-            if (unrmRaw.Count > 1)
-            {
-                throw new Exception("Unexpected UNRM size! Please report the offending file!");
-            }
-
-            for (int i = 0; i < unrmRaw.Count; i++)
-            {
-                unrm.vertGroupCountCount = (int)unrmRaw[i][0xDA];
-                //Read vert group groups
-                using (Stream stream = new MemoryStream((byte[])unrmRaw[i][0xDB]))
-                using (var streamReader = new BufferedStreamReader(stream, 8192))
-                {
-                    for (int j = 0; j < unrm.vertGroupCountCount; j++)
-                    {
-                        unrm.unrmVertGroups.Add(streamReader.Read<int>());
-                    }
-                }
-                unrm.vertCount = (int)unrmRaw[i][0xDC];
-                //Read vert mesh ids
-                using (Stream stream = new MemoryStream((byte[])unrmRaw[i][0xDD]))
-                using (var streamReader = new BufferedStreamReader(stream, 8192))
-                {
-                    for (int j = 0; j < unrm.vertGroupCountCount; j++)
-                    {
-                        List<int> meshIds = new List<int>();
-                        for (int k = 0; k < unrm.unrmVertGroups[j]; k++)
+                        switch (tagType)
                         {
-                            meshIds.Add(streamReader.Read<int>());
+                            default:
+                                //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
+                                if (data == null)
+                                {
+                                    goto FINISH;
+                                }
+                                else
+                                {
+                                    if (!tagTracker.ContainsKey(tagType))
+                                    {
+                                        tagTracker.Add(tagType, new List<int>());
+                                    }
+                                    output.AppendLine("");
+                                    output.AppendLine($"{tagType} Pointers: {ptrCount} # of entries: {entryCount}");
+
+                                    //Loop through data
+                                    for (int dictId = 0; dictId < data.Count; dictId++)
+                                    {
+                                        var dict = data[dictId];
+
+                                        //Many VTBF tags contain arrays of their data, but many don't. If it does we want to count those ids. We store both as a list here either way.
+                                        if (data.Count > 1)
+                                        {
+                                            output.AppendLine("");
+                                            output.AppendLine($"Set {dictId}:");
+                                        }
+
+                                        //Loop through values
+                                        foreach (var pair in dict)
+                                        {
+                                            if (!tagTracker[tagType].Contains(pair.Key))
+                                            {
+                                                tagTracker[tagType].Add(pair.Key);
+                                            }
+
+                                            output.Append(pair.Key.ToString("X") + ": ");
+
+                                            //VTBF data here can be either an array or a value of an arbitrary type. We check here if we have to iterate or not.
+                                            if (pair.Value is System.Collections.ICollection)
+                                            {
+                                                output.Append("");
+                                                string line = "";
+                                                dynamic arr = pair.Value;
+                                                bool first = true;
+                                                foreach (var obj in arr)
+                                                {
+                                                    if (first == true)
+                                                    {
+                                                        first = false;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (line == "")
+                                                        {
+                                                            output.AppendLine(",");
+                                                        }
+                                                        else
+                                                        {
+                                                            line += ", ";
+                                                        }
+                                                    }
+                                                    if (obj is System.Collections.ICollection)
+                                                    {
+                                                        line += "<";
+                                                        for (int num = 0; num < obj.Length; num++)
+                                                        {
+                                                            line += obj[num];
+                                                            if (num + 1 != obj.Length)
+                                                            {
+                                                                line += ", ";
+                                                            }
+                                                        }
+                                                        line += ">";
+                                                    }
+                                                    else
+                                                    {
+                                                        line += obj.ToString();
+                                                    }
+
+                                                    if (line.Length > 80)
+                                                    {
+                                                        output.Append(line);
+                                                        line = "";
+                                                    }
+                                                }
+
+                                                //Flush the rest here if we haven't yet
+                                                if (line.Length < 80 && line != "")
+                                                {
+                                                    output.AppendLine(line);
+                                                }
+                                                else if (line == "")
+                                                {
+                                                    output.AppendLine("");
+                                                }
+
+                                                //Handle for potential strings since we can't easily differentiate them (Sometimes they tried to convert unicode to strings and it gets weird)
+                                                if (pair.Value is byte[] && ((byte[])pair.Value).Length <= 0x30)
+                                                {
+                                                    output.AppendLine(pair.Key.ToString("X") + "(string): " + Encoding.UTF8.GetString(((byte[])pair.Value)));
+                                                }
+                                            }
+                                            else
+                                            {
+                                                output.AppendLine(pair.Value.ToString());
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
                         }
-                        unrm.unrmMeshIds.Add(meshIds);
                     }
-                }
-                //Read vert ids
-                using (Stream stream = new MemoryStream((byte[])unrmRaw[i][0xDE]))
-                using (var streamReader = new BufferedStreamReader(stream, 8192))
-                {
-                    for (int j = 0; j < unrm.vertGroupCountCount; j++)
+
+                FINISH:
+                    output.AppendLine("");
+                    output.AppendLine("*******************************");
+                    output.AppendLine("Sub tag tracking per tag");
+                    output.AppendLine("");
+                    foreach (var pair in tagTracker)
                     {
-                        List<int> vertIds = new List<int>();
-                        for (int k = 0; k < unrm.unrmVertGroups[j]; k++)
+                        output.Append(pair.Key + ": ");
+                        string line = "";
+                        bool first = true;
+                        foreach (var num in pair.Value)
                         {
-                            vertIds.Add(streamReader.Read<int>());
+                            if (first == true)
+                            {
+                                first = false;
+                            }
+                            else
+                            {
+                                if (line == "")
+                                {
+                                    output.AppendLine(",");
+                                }
+                                else
+                                {
+                                    line += ", ";
+                                }
+                            }
+                            line += num.ToString("X");
+
+                            if (line.Length > 80)
+                            {
+                                output.Append(line);
+                                line = "";
+                            }
                         }
-                        unrm.unrmVertIds.Add(vertIds);
+                        //Flush the rest here if we haven't yet
+                        if (line.Length < 80 && line != "")
+                        {
+                            output.AppendLine(line);
+                        }
+                        else if (line == "")
+                        {
+                            output.AppendLine("");
+                        }
+
                     }
-                }
-            }
 
-            return unrm;
-        }
-
-        public static unsafe byte[] toUNRM(UNRM unrm)
-        {
-            List<byte> outBytes = new List<byte>();
-
-            //Technically an array so we put the array start tag
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-
-            addBytes(outBytes, 0xDA, 0x9, BitConverter.GetBytes(unrm.vertGroupCountCount));
-
-            //unrm vert groups
-            outBytes.Add(0xDB); outBytes.Add(0x89);
-            if (unrm.vertGroupCountCount - 1 > byte.MaxValue)
-            {
-                if (unrm.vertGroupCountCount - 1 > ushort.MaxValue)
-                {
-                    outBytes.Add(0x18);
-                    outBytes.AddRange(BitConverter.GetBytes(unrm.vertGroupCountCount - 1));
+                    File.WriteAllText(fileName + ".txt", output.ToString());
                 }
                 else
                 {
-                    outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((ushort)(unrm.vertGroupCountCount - 1)));
+                    File.WriteAllText(fileName + ".txt", $"{fileName} was not a VTBF...");
                 }
             }
-            else
-            {
-                outBytes.Add(0x08);
-                outBytes.Add((byte)(unrm.vertGroupCountCount - 1));
-
-            }
-            for (int i = 0; i < unrm.vertGroupCountCount; i++)
-            {
-                outBytes.AddRange(BitConverter.GetBytes(unrm.unrmVertGroups[i]));
-            }
-
-            addBytes(outBytes, 0xDC, 0x9, BitConverter.GetBytes(unrm.vertCount));
-
-            //unrm mesh ids
-            outBytes.Add(0xDD); outBytes.Add(0x89);
-            int meshIDCount = getListOfListOfIntsIntCount(unrm.unrmMeshIds);
-            if (meshIDCount - 1 > byte.MaxValue)
-            {
-                if (meshIDCount - 1 > ushort.MaxValue)
-                {
-                    outBytes.Add(0x18);
-                    outBytes.AddRange(BitConverter.GetBytes(meshIDCount - 1));
-                }
-                else
-                {
-                    outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((ushort)(meshIDCount - 1)));
-                }
-            }
-            else
-            {
-                outBytes.Add(0x08);
-                outBytes.Add((byte)(meshIDCount - 1));
-            }
-            for (int i = 0; i < unrm.unrmMeshIds.Count; i++)
-            {
-                for (int j = 0; j < unrm.unrmMeshIds[i].Count; j++)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes(unrm.unrmMeshIds[i][j]));
-                }
-            }
-
-            //unrm vert ids
-            outBytes.Add(0xDE); outBytes.Add(0x89);
-            int vertIdCount = getListOfListOfIntsIntCount(unrm.unrmVertIds);
-            if (vertIdCount - 1 > byte.MaxValue)
-            {
-                if (vertIdCount - 1 > ushort.MaxValue)
-                {
-                    outBytes.Add(0x18);
-                    outBytes.AddRange(BitConverter.GetBytes(vertIdCount - 1));
-                }
-                else
-                {
-                    outBytes.Add(0x10);
-                    outBytes.AddRange(BitConverter.GetBytes((ushort)(vertIdCount - 1)));
-                }
-            }
-            else
-            {
-                outBytes.Add(0x08);
-                outBytes.Add((byte)(vertIdCount - 1));
-            }
-            for (int i = 0; i < unrm.unrmVertIds.Count; i++)
-            {
-                for (int j = 0; j < unrm.unrmVertIds[i].Count; j++)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes(unrm.unrmVertIds[i][j]));
-                }
-            }
-
-            //Technically an array so we put the array end tag
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            //Pointer count. Always 0 on UNRM
-            //Subtag count. In theory, always 7 for UNRM
-            WriteTagHeader(outBytes, "UNRM", 0, 7);
-
-            return outBytes.ToArray();
-        }
-
-        public static byte[] toROOT(string rootString = "hnd2aqg ver.1.61 Build: Feb 28 2012 18:46:06")
-        {
-            List<byte> outBytes = new List<byte>();
-
-            addBytes(outBytes, 0x0, 0x2, (byte)rootString.Length, Encoding.UTF8.GetBytes(rootString));
-            WriteTagHeader(outBytes, "ROOT", 1, 1);
-
-            return outBytes.ToArray();
-        }
-
-        public static byte[] toAQGFVTBF()
-        {
-            List<byte> outBytes = new List<byte>();
-
-            outBytes.AddRange(new byte[] { 0x56, 0x54, 0x42, 0x46 }); //VTBF
-            outBytes.AddRange(new byte[] { 0x10, 0, 0, 0 });
-            outBytes.AddRange(new byte[] { 0x41, 0x51, 0x47, 0x46, 0x1, 0, 0, 0x4C }); //AQGF and the constants after
-
-            return outBytes.ToArray();
         }
 
         public static NDTR parseNDTR(List<Dictionary<int, object>> ndtrRaw)
@@ -1443,9 +582,9 @@ namespace AquaModelLibrary.Helpers.PSO2
         {
             List<byte> outBytes = new List<byte>();
 
-            addBytes(outBytes, 0x1, 0x8, BitConverter.GetBytes(ndtr.boneCount));
-            addBytes(outBytes, 0x2, 0x8, BitConverter.GetBytes(ndtr.unknownCount));
-            addBytes(outBytes, 0xFA, 0x8, BitConverter.GetBytes(ndtr.effCount));
+            AddBytes(outBytes, 0x1, 0x8, BitConverter.GetBytes(ndtr.boneCount));
+            AddBytes(outBytes, 0x2, 0x8, BitConverter.GetBytes(ndtr.unknownCount));
+            AddBytes(outBytes, 0xFA, 0x8, BitConverter.GetBytes(ndtr.effCount));
 
             WriteTagHeader(outBytes, "NDTR", 0x2, 0x3);
 
@@ -1500,24 +639,24 @@ namespace AquaModelLibrary.Helpers.PSO2
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
-                addBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(node.boneShort1 * 0x10000 + node.boneShort2));
-                addBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(node.parentId));
-                addBytes(outBytes, 0xF, 0x8, BitConverter.GetBytes(node.unkNode));
-                addBytes(outBytes, 0x5, 0x8, BitConverter.GetBytes(node.firstChild));
-                addBytes(outBytes, 0x6, 0x8, BitConverter.GetBytes(node.nextSibling));
-                addBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(node.pos));
-                addBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(node.eulRot));
-                addBytes(outBytes, 0x9, 0x4A, 0x1, ConvertStruct(node.scale));
-                addBytes(outBytes, 0xA, 0xCA, 0xA, 0x3, ConvertStruct(node.m1));
+                AddBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(node.boneShort1 * 0x10000 + node.boneShort2));
+                AddBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(node.parentId));
+                AddBytes(outBytes, 0xF, 0x8, BitConverter.GetBytes(node.unkNode));
+                AddBytes(outBytes, 0x5, 0x8, BitConverter.GetBytes(node.firstChild));
+                AddBytes(outBytes, 0x6, 0x8, BitConverter.GetBytes(node.nextSibling));
+                AddBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(node.pos));
+                AddBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(node.eulRot));
+                AddBytes(outBytes, 0x9, 0x4A, 0x1, ConvertStruct(node.scale));
+                AddBytes(outBytes, 0xA, 0xCA, 0xA, 0x3, ConvertStruct(node.m1));
                 outBytes.AddRange(ConvertStruct(node.m2));
                 outBytes.AddRange(ConvertStruct(node.m3));
                 outBytes.AddRange(ConvertStruct(node.m4));
-                addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(node.animatedFlag));
-                addBytes(outBytes, 0xC, 0x8, BitConverter.GetBytes(node.const0_2));
+                AddBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(node.animatedFlag));
+                AddBytes(outBytes, 0xC, 0x8, BitConverter.GetBytes(node.const0_2));
 
                 //Bone Name String
                 string boneNameStr = node.boneName.GetString();
-                addBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
+                AddBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
@@ -1568,15 +707,15 @@ namespace AquaModelLibrary.Helpers.PSO2
                 {
                     outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
                 }
-                addBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(nodo.boneShort1 * 0x10000 + nodo.boneShort2));
-                addBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(nodo.parentId));
-                addBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(nodo.pos));
-                addBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(nodo.eulRot));
-                addBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(nodo.animatedFlag));
+                AddBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(nodo.boneShort1 * 0x10000 + nodo.boneShort2));
+                AddBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(nodo.parentId));
+                AddBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(nodo.pos));
+                AddBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(nodo.eulRot));
+                AddBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(nodo.animatedFlag));
 
                 //Bone Name String
                 string boneNameStr = nodo.boneName.GetString();
-                addBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
+                AddBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
             }
             outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
 
@@ -1605,16 +744,16 @@ namespace AquaModelLibrary.Helpers.PSO2
         {
             List<byte> outBytes = new List<byte>();
 
-            addBytes(outBytes, 0xE0, 0x9, BitConverter.GetBytes(moHeader.variant));
-            addBytes(outBytes, 0xE1, 0x9, BitConverter.GetBytes(moHeader.loopPoint));
-            addBytes(outBytes, 0xE2, 0x9, BitConverter.GetBytes(moHeader.endFrame));
-            addBytes(outBytes, 0xE3, 0x9, BitConverter.GetBytes(moHeader.frameSpeed));
-            addBytes(outBytes, 0xE4, 0x9, BitConverter.GetBytes(moHeader.unkInt0));
-            addBytes(outBytes, 0xE5, 0x9, BitConverter.GetBytes(moHeader.nodeCount));
+            AddBytes(outBytes, 0xE0, 0x9, BitConverter.GetBytes(moHeader.variant));
+            AddBytes(outBytes, 0xE1, 0x9, BitConverter.GetBytes(moHeader.loopPoint));
+            AddBytes(outBytes, 0xE2, 0x9, BitConverter.GetBytes(moHeader.endFrame));
+            AddBytes(outBytes, 0xE3, 0x9, BitConverter.GetBytes(moHeader.frameSpeed));
+            AddBytes(outBytes, 0xE4, 0x9, BitConverter.GetBytes(moHeader.unkInt0));
+            AddBytes(outBytes, 0xE5, 0x9, BitConverter.GetBytes(moHeader.nodeCount));
 
             //Test String
             string testStr = moHeader.testString.GetString();
-            addBytes(outBytes, 0xE6, 0x02, (byte)testStr.Length, Encoding.UTF8.GetBytes(testStr));
+            AddBytes(outBytes, 0xE6, 0x02, (byte)testStr.Length, Encoding.UTF8.GetBytes(testStr));
 
             WriteTagHeader(outBytes, motionType, (ushort)moHeader.nodeCount, 0x7);
 
@@ -1667,14 +806,14 @@ namespace AquaModelLibrary.Helpers.PSO2
         {
             List<byte> outBytes = new List<byte>();
 
-            addBytes(outBytes, 0xE7, 0x9, BitConverter.GetBytes(mseg.nodeType));
-            addBytes(outBytes, 0xE8, 0x9, BitConverter.GetBytes(mseg.nodeDataCount));
+            AddBytes(outBytes, 0xE7, 0x9, BitConverter.GetBytes(mseg.nodeType));
+            AddBytes(outBytes, 0xE8, 0x9, BitConverter.GetBytes(mseg.nodeDataCount));
 
             //Node name
             string nodeStr = mseg.nodeName.GetString();
-            addBytes(outBytes, 0xE9, 0x2, (byte)nodeStr.Length, Encoding.UTF8.GetBytes(nodeStr));
+            AddBytes(outBytes, 0xE9, 0x2, (byte)nodeStr.Length, Encoding.UTF8.GetBytes(nodeStr));
 
-            addBytes(outBytes, 0xEA, 0x9, BitConverter.GetBytes(mseg.nodeDataCount));
+            AddBytes(outBytes, 0xEA, 0x9, BitConverter.GetBytes(mseg.nodeDataCount));
 
             WriteTagHeader(outBytes, "MSEG", 0x3, 0x4);
 
@@ -1780,10 +919,10 @@ namespace AquaModelLibrary.Helpers.PSO2
         {
             List<byte> outBytes = new List<byte>();
 
-            addBytes(outBytes, 0xEB, 0x9, BitConverter.GetBytes(mkey.keyType));
-            addBytes(outBytes, 0xEC, 0x9, BitConverter.GetBytes(mkey.dataType));
-            addBytes(outBytes, 0xF0, 0x9, BitConverter.GetBytes(mkey.unkInt0));
-            addBytes(outBytes, 0xED, 0x9, BitConverter.GetBytes(mkey.keyCount));
+            AddBytes(outBytes, 0xEB, 0x9, BitConverter.GetBytes(mkey.keyType));
+            AddBytes(outBytes, 0xEC, 0x9, BitConverter.GetBytes(mkey.dataType));
+            AddBytes(outBytes, 0xF0, 0x9, BitConverter.GetBytes(mkey.unkInt0));
+            AddBytes(outBytes, 0xED, 0x9, BitConverter.GetBytes(mkey.keyCount));
 
             //Set frame timings. The data types stored are different depending on the key count
             handleOptionalArrayHeader(outBytes, 0xEF, mkey.keyCount, 0x06);
@@ -1875,28 +1014,28 @@ namespace AquaModelLibrary.Helpers.PSO2
         {
             List<byte> outBytes = new List<byte>();
 
-            addBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(body.body.id));
+            AddBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(body.body.id));
 
             string dataStr = body.dataString;
-            addBytes(outBytes, 0x00, 0x2, (byte)dataStr.Length, Encoding.UTF8.GetBytes(dataStr));
+            AddBytes(outBytes, 0x00, 0x2, (byte)dataStr.Length, Encoding.UTF8.GetBytes(dataStr));
             string texStr1 = body.texString1;
-            addBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
+            AddBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
             string texStr2 = body.texString2;
-            addBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
+            AddBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
             string texStr3 = body.texString3;
-            addBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
+            AddBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
             string texStr4 = body.texString4;
-            addBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
+            AddBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
             string texStr5 = body.texString5;
-            addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
+            AddBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
 
-            addBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body2.costumeSoundId));
-            addBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body2.float_4C_0xB));
-            addBytes(outBytes, 0xC, 0x9, BitConverter.GetBytes((int)0));
-            addBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
-            addBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
-            addBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body2.legLength));
-            addBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body2.int_24_0x9_0x9));
+            AddBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body2.costumeSoundId));
+            AddBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body2.float_4C_0xB));
+            AddBytes(outBytes, 0xC, 0x9, BitConverter.GetBytes((int)0));
+            AddBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
+            AddBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
+            AddBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body2.legLength));
+            AddBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body2.int_24_0x9_0x9));
 
             WriteTagHeader(outBytes, "BODY", 0x0, 0xE);
 
@@ -1922,18 +1061,18 @@ namespace AquaModelLibrary.Helpers.PSO2
         {
             List<byte> outBytes = new List<byte>();
 
-            addBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(bbly.bbly.id));
+            AddBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(bbly.bbly.id));
 
             string texStr1 = bbly.texString1;
-            addBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
+            AddBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
             string texStr2 = bbly.texString2;
-            addBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
+            AddBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
             string texStr3 = bbly.texString3;
-            addBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
+            AddBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
             string texStr4 = bbly.texString4;
-            addBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
+            AddBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
             string texStr5 = bbly.texString5;
-            addBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
+            AddBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
 
             WriteTagHeader(outBytes, "BBLY", 0x0, 0xE);
 
@@ -2414,7 +1553,7 @@ namespace AquaModelLibrary.Helpers.PSO2
             outBytes.InsertRange(0, Encoding.UTF8.GetBytes("vtc0"));
         }
 
-        public static int getListOfListOfIntsIntCount(List<List<int>> intListlist)
+        public static int GetListOfListOfIntsIntCount(List<List<int>> intListlist)
         {
             int count = 0;
             for (int i = 0; i < intListlist.Count; i++)
@@ -2425,7 +1564,7 @@ namespace AquaModelLibrary.Helpers.PSO2
             return count;
         }
 
-        public static void handleOptionalArrayHeader(List<byte> outBytes, byte subTagID, int vertIdCount, byte baseDataType)
+        public static void HandleOptionalArrayHeader(List<byte> outBytes, byte subTagID, int vertIdCount, byte baseDataType)
         {
             outBytes.Add(subTagID);
             if (vertIdCount > 1)
@@ -2456,14 +1595,14 @@ namespace AquaModelLibrary.Helpers.PSO2
             }
         }
 
-        public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
+        public static void AddBytes(List<byte> outBytes, byte id, byte dataType, byte[] data)
         {
             outBytes.Add(id);
             outBytes.Add(dataType);
             outBytes.AddRange(data);
         }
 
-        public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte vecAmt, byte[] data)
+        public static void AddBytes(List<byte> outBytes, byte id, byte dataType, byte vecAmt, byte[] data)
         {
             outBytes.Add(id);
             outBytes.Add(dataType);
@@ -2471,7 +1610,7 @@ namespace AquaModelLibrary.Helpers.PSO2
             outBytes.AddRange(data);
         }
 
-        public static void addBytes(List<byte> outBytes, byte id, byte dataType, byte subDataType, byte subDataAdditions, byte[] data)
+        public static void AddBytes(List<byte> outBytes, byte id, byte dataType, byte subDataType, byte subDataAdditions, byte[] data)
         {
             outBytes.Add(id);
             outBytes.Add(dataType);

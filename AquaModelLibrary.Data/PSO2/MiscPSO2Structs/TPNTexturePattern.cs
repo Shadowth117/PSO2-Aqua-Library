@@ -1,13 +1,13 @@
 ﻿using AquaModelLibrary.Core.Extensions;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.Helpers;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
     public unsafe class TPNTexturePattern
     {
-        public AFPBase tpnAFPBase = new AFPBase();
         public TpnHeader header = new TpnHeader();
         public List<TexSet> texSets = new List<TexSet>();
         //Header
@@ -24,6 +24,36 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             public PSO2String tex1Name; //Tex1
             public PSO2String tex2Name; //Tex2
             public PSO2String tex3Name; //Tex3
+        }
+
+        public TPNTexturePattern() { }
+
+        public TPNTexturePattern(byte[] bytes)
+        {
+            Read(bytes);
+        }
+
+        public TPNTexturePattern(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
+
+        public void Read(byte[] bytes)
+        {
+            using (MemoryStream stream = new MemoryStream(bytes))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                Read(sr);
+            }
+        }
+
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            header = sr.Read<TpnHeader>();
+            for (int i = 0; i < header.count; i++)
+            {
+                texSets.Add(sr.Read<TexSet>());
+            }
         }
 
         public byte[] GetBytes()

@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 using AquaModelLibrary.Helpers.MathHelpers;
+using System;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
@@ -22,6 +23,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public PSO2String alphaType; //0x3A, type 0x2 //Fixed length string for the alpha type of the mat. "opaque", "hollow", "blendalpha", and "add" are
                                      //all valid. Add is additive, and uses diffuse alpha for glow effects. Others may be used to denote collision types
         public PSO2String matName;   //0x39, type 0x2 
+
+        public MATE(Dictionary<int, object> mateRaw)
+        {
+            diffuseRGBA = (Vector4)mateRaw[0x30];
+            unkRGBA0 = (Vector4)mateRaw[0x31];
+            _sRGBA = (Vector4)mateRaw[0x32];
+            unkRGBA1 = (Vector4)mateRaw[0x33];
+            reserve0 = (int)mateRaw[0x34];
+            unkFloat0 = (float)mateRaw[0x35];
+            unkFloat1 = (float)mateRaw[0x36];
+            unkInt0 = (int)mateRaw[0x37];
+            unkInt1 = (int)mateRaw[0x38];
+            alphaType = new PSO2String((byte[])mateRaw[0x3A]);
+            matName = new PSO2String((byte[])mateRaw[0x39]);
+        }
 
         public override int GetHashCode()
         {

@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
     public struct REND
     {
@@ -24,6 +26,31 @@
         public int unk12 { get; set; }  //0x4F, type 0x9 //4 usually
 
         public int unk13 { get; set; }  //0x50, type 0x9 //1 usually
+
+        public REND(Dictionary<int, object> rendRaw)
+        {
+            tag = (int)rendRaw[0x40];
+            unk0 = (int)rendRaw[0x41];
+            twosided = (int)rendRaw[0x42];
+            int_0C = (int)rendRaw[0x43];
+
+            sourceAlpha = (int)rendRaw[0x44];
+            destinationAlpha = (int)rendRaw[0x45];
+            unk3 = (int)rendRaw[0x46];
+            unk4 = (int)rendRaw[0x47];
+
+            unk5 = (int)rendRaw[0x48];
+            unk6 = (int)rendRaw[0x49];
+            unk7 = (int)rendRaw[0x4A];
+            unk8 = (int)rendRaw[0x4B];
+
+            unk9 = (int)rendRaw[0x4C];
+            alphaCutoff = (int)rendRaw[0x4D];
+            unk11 = (int)rendRaw[0x4E];
+            unk12 = (int)rendRaw[0x4F];
+
+            unk13 = (int)rendRaw[0x50];
+        }
 
         public override int GetHashCode()
         {

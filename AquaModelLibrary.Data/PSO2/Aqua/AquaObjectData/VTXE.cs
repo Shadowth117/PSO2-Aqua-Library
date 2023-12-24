@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using AquaModelLibrary.Helpers.PSO2;
+using System.Diagnostics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
@@ -7,6 +8,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
     public class VTXE
     {
         public List<VTXEElement> vertDataTypes = new List<VTXEElement>();
+
+        public VTXE() { }
+
+        public VTXE(List<Dictionary<int, object>> vtxeRaw)
+        {
+            for (int i = 0; i < vtxeRaw.Count; i++)
+            {
+                VTXEElement vtxeEle = new VTXEElement();
+                vtxeEle.dataType = (int)vtxeRaw[i][0xD0];
+                vtxeEle.structVariation = (int)vtxeRaw[i][0xD1];
+                vtxeEle.relativeAddress = (int)vtxeRaw[i][0xD2];
+                vtxeEle.reserve0 = (int)vtxeRaw[i][0xD3];
+
+                vertDataTypes.Add(vtxeEle);
+            }
+        }
 
         public static VTXE ConstructFromVTXL(VTXL vtxl, out int vertSize)
         {
@@ -228,6 +245,36 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                 }
             }
             return size;
+        }
+
+        public byte[] GetBytesVTBF()
+        {
+            List<byte> outBytes = new List<byte>();
+
+            //VTXE
+            for (int i = 0; i < vertDataTypes.Count; i++)
+            {
+                if (i == 0)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
+                }
+                else
+                {
+                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
+                }
+
+                VTBFMethods.AddBytes(outBytes, 0xD0, 0x9, BitConverter.GetBytes(vertDataTypes[i].dataType));
+                VTBFMethods.AddBytes(outBytes, 0xD1, 0x9, BitConverter.GetBytes(vertDataTypes[i].structVariation));
+                VTBFMethods.AddBytes(outBytes, 0xD2, 0x9, BitConverter.GetBytes(vertDataTypes[i].relativeAddress));
+                VTBFMethods.AddBytes(outBytes, 0xD3, 0x9, BitConverter.GetBytes(vertDataTypes[i].reserve0));
+            }
+            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
+
+            //Pointer count. Always 0 on VTXE
+            //Subtag count
+            VTBFMethods.WriteTagHeader(outBytes, "VTXE", 0, (ushort)(vertDataTypes.Count * 5 + 1));
+
+            return outBytes.ToArray();
         }
 
         public VTXE Clone()

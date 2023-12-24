@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Extensions.Readers;
+using System.Collections.Generic;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
@@ -16,6 +17,25 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
         public TSET()
         {
+        }
+
+        public TSET(Dictionary<int, object> tsetRaw)
+        {
+            unkInt0 = (int)tsetRaw[0x70];
+            texCount = (int)tsetRaw[0x71];
+            unkInt1 = (int)tsetRaw[0x72];
+            unkInt2 = (int)tsetRaw[0x73];
+            unkInt3 = (int)tsetRaw[0x74];
+
+            //Read tsta texture IDs
+            using (MemoryStream stream = new MemoryStream((byte[])tsetRaw[0x75]))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    tstaTexIDs.Add(streamReader.Read<int>());
+                }
+            }
         }
 
         public TSET(BufferedStreamReaderBE<MemoryStream> streamReader)

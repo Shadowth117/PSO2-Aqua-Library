@@ -22,5 +22,32 @@
                                     //ie. basemesh0, basemesh1, etc. This stores that number or is 0 for basewear.
         public int unkInt0; //0xCD, 0x8 //Usually 0;
         public int reserve0; //0
+
+        public MESH(Dictionary<int, object> meshRaw)
+        {
+            byte[] c7 = BitConverter.GetBytes((int)meshRaw[0xC7]);
+
+            flags = (short)((int)meshRaw[0xB0] % 0x10000);
+            unkShort0 = (short)((int)meshRaw[0xB0] / 0x10000);
+            unkByte0 = c7[0];
+            unkByte1 = c7[1];
+            unkShort1 = (short)((int)meshRaw[0xC7] / 0x10000);
+            mateIndex = (int)meshRaw[0xB1];
+            rendIndex = (int)meshRaw[0xB2];
+            shadIndex = (int)meshRaw[0xB3];
+            tsetIndex = (int)meshRaw[0xB4];
+            baseMeshNodeId = (int)meshRaw[0xB5];
+            vsetIndex = (int)meshRaw[0xC0];
+            psetIndex = (int)meshRaw[0xC1];
+            if (meshRaw.ContainsKey(0xCD))
+            {
+                unkInt0 = (int)meshRaw[0xCD];
+            }
+            baseMeshDummyId = (int)meshRaw[0xC2];
+
+            //Unused in VTBF
+            unkInt0 = 0;
+            reserve0 = 0;
+        }
     }
 }

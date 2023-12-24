@@ -22,6 +22,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public float unkFloat1; //0x6B, type 0xA //0
         public PSO2String texName; //0x6C, type 0x2 //Texture filename (includes extension)
 
+        public TSTA(Dictionary<int, object> tstaRaw)
+        {
+            tag = (int)tstaRaw[0x60];
+            texUsageOrder = (int)tstaRaw[0x61];
+            modelUVSet = (int)tstaRaw[0x62];
+            unkVector0 = (Vector3)tstaRaw[0x63];
+            unkFloat2 = (int)tstaRaw[0x64];
+            unkFloat3 = (int)tstaRaw[0x65];
+            unkFloat4 = (int)tstaRaw[0x66];
+            unkInt3 = (int)tstaRaw[0x67];
+            unkInt4 = (int)tstaRaw[0x68];
+            unkInt5 = (int)tstaRaw[0x69];
+            unkFloat0 = (float)tstaRaw[0x6A];
+            unkFloat1 = (float)tstaRaw[0x6B];
+            texName = new PSO2String((byte[])tstaRaw[0x6C]);
+        }
+
         public bool Equals(TSTA c)
         {
 

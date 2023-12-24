@@ -52,6 +52,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return variant;
         }
 
+        public void ReadNIFLInfo(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            var fileStart = sr.Position;
+            nifl = sr.Read<NIFL>();
+            rel0 = sr.Read<REL0>();
+            sr.Seek(fileStart + nifl.NOF0OffsetFull, SeekOrigin.Begin);
+            nof0 = ReadNOF0(sr);
+            nend = sr.Read<NEND>();
+            sr.Seek(fileStart + 0x20 + rel0.REL0DataStart, SeekOrigin.Begin);
+        }
+
         public void ReadIceEnvelope(BufferedStreamReaderBE<MemoryStream> streamReader, ref int offset, ref string type)
         {
             //Deal with ice envelope nonsense

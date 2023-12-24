@@ -12,5 +12,17 @@
 
         public int faceOffset; //This is an offset to the beginning of the strip data. Unknown purpose in 0xC33 variant
         public int stripStartCount; //0xC5, type 0x9 //Unused in classic. Provides starting id in global strip list for 0xC33.
+
+        public PSET(Dictionary<int, object> psetRaw)
+        {
+            tag = (int)psetRaw[0xC6];
+            faceGroupCount = (int)psetRaw[0xBB];
+            psetFaceCount = (int)psetRaw[0xBC];
+            stripStartCount = (int)psetRaw[0xC5];
+
+            //Unused in vtbf
+            faceCountOffset = 0;
+            faceOffset = 0;
+        }
     }
 }

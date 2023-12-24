@@ -29,5 +29,80 @@
         //In VTBF, VSET also contains Edge Verts. 
         //0xCA. Entire entry omitted if count was 0. Type is 06 if single vert, 86 if multiple. Next is usually 0x8 or 0x6 (unknown what this really is), 
         //last is 0 based count as a byte.
+
+        public static VSET ParseVSET(Dictionary<int, object> vsetRaw, out List<ushort> bonePalette, out List<ushort> edgeVertsList)
+        {
+            bonePalette = null;
+            edgeVertsList = null;
+            VSET vset = new VSET();
+            vset.vertDataSize = (int)(vsetRaw[0xB6]);
+            vset.vtxeCount = (int)(vsetRaw[0xBF]);
+            vset.vtxlCount = (int)(vsetRaw[0xB9]);
+            vset.vtxlStartVert = (int)(vsetRaw[0xC4]);
+
+            //BonePalette
+            vset.bonePaletteCount = (int)(vsetRaw[0xBD]);
+            if (vsetRaw.ContainsKey(0xBE))
+            {
+                var rawBP = (vsetRaw[0xBE]);
+                if (rawBP is ushort)
+                {
+                    bonePalette = new List<ushort> { (ushort)rawBP };
+                }
+                else if (rawBP is ushort[])
+                {
+                    bonePalette = ((ushort[])rawBP).ToList();
+                }
+                else if (rawBP is short)
+                {
+                    bonePalette = new List<ushort> { (ushort)((short)rawBP) };
+                }
+                else if (rawBP is short[])
+                {
+                    var rawBPUshort = new List<ushort>();
+                    var BPArr = (short[])rawBP;
+                    for (int s = 0; s < BPArr.Length; s++)
+                    {
+                        rawBPUshort.Add((ushort)BPArr[s]);
+                    }
+                    bonePalette = rawBPUshort;
+                }
+            }
+
+            //Not sure on these, but I don't know that unk0-2 get used normally
+            vset.unk0 = (int)(vsetRaw[0xC8]);
+            vset.unk1 = (int)(vsetRaw[0xCC]);
+
+            //EdgeVerts
+            vset.edgeVertsCount = (int)(vsetRaw[0xC9]);
+            if (vsetRaw.ContainsKey(0xCA))
+            {
+                var rawEV = (vsetRaw[0xCA]);
+                if (rawEV is ushort)
+                {
+                    edgeVertsList = new List<ushort> { (ushort)rawEV };
+                }
+                else if (rawEV is short[])
+                {
+                    edgeVertsList = ((ushort[])rawEV).ToList();
+                }
+                else if (rawEV is short)
+                {
+                    edgeVertsList = new List<ushort> { (ushort)((short)rawEV) };
+                }
+                else if (rawEV is short[])
+                {
+                    var rawEshort = new List<ushort>();
+                    var EArr = (short[])rawEV;
+                    for (int s = 0; s < EArr.Length; s++)
+                    {
+                        rawEshort.Add((ushort)EArr[s]);
+                    }
+                    edgeVertsList = rawEshort;
+                }
+            }
+
+            return vset;
+        }
     }
 }

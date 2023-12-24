@@ -8,7 +8,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     //Cameras, UV, and standard motions are essentially the same format.
     public unsafe class AquaMotion : AquaCommon
     {
-        public AFPBase afp;
         public MOHeader moHeader;
         public List<KeyData> motionKeys = new List<KeyData>();
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 using static AquaModelLibrary.Helpers.MiscHelpers;
+using AquaModelLibrary.Helpers.PSO2;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
@@ -61,6 +62,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
         #region Constructors
         public VTXL() { }
+
+        public VTXL(List<Dictionary<int, object>> vtxlRaw, VTXE vtxe)
+        {
+            int vertCount = ((byte[])vtxlRaw[0][0xBA]).Length / vtxe.GetVTXESize();
+
+            using (MemoryStream stream = new MemoryStream((byte[])vtxlRaw[0][0xBA]))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                Read(streamReader, vtxe, vertCount, vtxe.vertDataTypes.Count);
+            }
+        }
 
         public VTXL(int vertCount, VTXL modelVtxl)
         {
@@ -174,17 +186,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
         }
 
-        public VTXL(BufferedStreamReaderBE<MemoryStream> streamReader, VTXE vtxeSet, int vertCount, int vertTypeCount, int sizeToFill = -1)
+        public VTXL(BufferedStreamReaderBE<MemoryStream> streamReader, VTXE vtxeSet, int vertCount, int sizeToFill = -1)
         {
-            Read(streamReader, vtxeSet, vertCount, vertTypeCount, sizeToFill);
+            Read(streamReader, vtxeSet, vertCount, sizeToFill);
         }
 
-        public void Read(BufferedStreamReaderBE<MemoryStream> streamReader, VTXE vtxeSet, int vertCount, int vertTypeCount, int sizeToFill = -1)
+        public void Read(BufferedStreamReaderBE<MemoryStream> streamReader, VTXE vtxeSet, int vertCount, int sizeToFill = -1)
         {
             for (int vtxlIndex = 0; vtxlIndex < vertCount; vtxlIndex++)
             {
                 long startPosition = streamReader.Position;
-                for (int vtxeIndex = 0; vtxeIndex < vertTypeCount; vtxeIndex++)
+                for (int vtxeIndex = 0; vtxeIndex < vtxeSet.vertDataTypes.Count; vtxeIndex++)
                 {
                     switch (vtxeSet.vertDataTypes[vtxeIndex].dataType)
                     {
@@ -387,9 +399,49 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         #endregion
 
         #region Writing
-        public void GetBytes(VTXE vtxe, List<byte> outBytes, int sizeToFill = -1)
+        public byte[] GetBytesVTBF(VTXE vtxe)
+        {
+            List<byte> outBytes2 = new List<byte>
+            {
+                0xBA,
+                0x89
+            };
+            int vtxlSizeArea = outBytes2.Count;
+            GetBytes(vtxe, outBytes2);
+
+            //Calc and insert the vert data counts in post due to the way sega does it.
+            int vertDataCount = ((outBytes2.Count - vtxlSizeArea) / 4) - 1;
+            if (vertDataCount > byte.MaxValue)
+            {
+                if (vertDataCount - 1 > ushort.MaxValue)
+                {
+                    outBytes2.Insert(vtxlSizeArea, 0x18);
+                    outBytes2.InsertRange(vtxlSizeArea + 0x1, BitConverter.GetBytes(vertDataCount));
+                }
+                else
+                {
+                    outBytes2.Insert(vtxlSizeArea, 0x10);
+                    outBytes2.InsertRange(vtxlSizeArea + 0x1, BitConverter.GetBytes((short)(vertDataCount)));
+                }
+            }
+            else
+            {
+                outBytes2.Insert(vtxlSizeArea, 0x8);
+                outBytes2.Insert(vtxlSizeArea + 0x1, (byte)vertDataCount);
+            }
+
+            //Pointer count. Always 0 on VTXL
+            //Subtag count
+            VTBFMethods.WriteTagHeader(outBytes2, "VTXL", 0, 0x1);
+
+            return outBytes2.ToArray();
+        }
+
+        public byte[] GetBytes(VTXE vtxe, List<byte> outBytes, int sizeToFill = -1)
         {
             outBytes.AddRange(GetBytes(vtxe, sizeToFill));
+
+            return outBytes.ToArray();
         }
 
         public byte[] GetBytes(VTXE vtxe, int sizeToFill)
