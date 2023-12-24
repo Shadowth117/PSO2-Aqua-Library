@@ -1,5 +1,4 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
