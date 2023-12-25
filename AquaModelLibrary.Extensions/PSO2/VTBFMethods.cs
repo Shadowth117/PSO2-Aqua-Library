@@ -7,13 +7,14 @@ namespace AquaModelLibrary.Helpers.PSO2
 {
     public unsafe class VTBFMethods
     {
+        public const uint vtc0Start = 0x30637476;
         public static List<Dictionary<int, object>> ReadVTBFTag(BufferedStreamReaderBE<MemoryStream> streamReader, out string tagString, out int ptrCount, out int entryCount)
         {
             List<Dictionary<int, object>> vtbfData = new List<Dictionary<int, object>>();
             bool listType = false;
 
-            string vtc0 = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Read<int>())); //vtc0
-            if (vtc0 != "vtc0")
+            int vtc0 = streamReader.Read<int>(); //vtc0
+            if (vtc0 != vtc0Start)
             {
                 tagString = null;
                 entryCount = 0;
@@ -559,138 +560,28 @@ namespace AquaModelLibrary.Helpers.PSO2
             }
         }
 
-        public static List<NODE> parseNODE(List<Dictionary<int, object>> nodeRaw)
-        {
-            List<NODE> nodeList = new List<NODE>();
-
-            for (int i = 0; i < nodeRaw.Count; i++)
-            {
-                NODE node = new NODE();
-
-                byte[] shorts = BitConverter.GetBytes((int)nodeRaw[i][0x03]);
-                node.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
-                node.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
-                node.animatedFlag = (int)nodeRaw[i][0x0B];
-                node.parentId = (int)nodeRaw[i][0x04];
-                node.unkNode = (int)nodeRaw[i][0x0F];
-                node.firstChild = (int)nodeRaw[i][0x05];
-                node.nextSibling = (int)nodeRaw[i][0x06];
-                node.const0_2 = (int)nodeRaw[i][0x0C];
-                node.pos = (Vector3)nodeRaw[i][0x07];
-                node.eulRot = (Vector3)nodeRaw[i][0x08];
-                node.scale = (Vector3)nodeRaw[i][0x09];
-                node.m1 = ((Vector4[])nodeRaw[i][0x0A])[0];
-                node.m2 = ((Vector4[])nodeRaw[i][0x0A])[1];
-                node.m3 = ((Vector4[])nodeRaw[i][0x0A])[2];
-                node.m4 = ((Vector4[])nodeRaw[i][0x0A])[3];
-                node.boneName = new AquaCommon.PSO2String();
-                node.boneName.SetBytes((byte[])nodeRaw[i][0x0D]);
-
-                nodeList.Add(node);
-            }
-
-            return nodeList;
-        }
-
-        public static byte[] toNODE(List<NODE> nodeList)
+        public static byte[] ToAQGFVTBF()
         {
             List<byte> outBytes = new List<byte>();
 
-            for (int i = 0; i < nodeList.Count; i++)
-            {
-                NODE node = nodeList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-                AddBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(node.boneShort1 * 0x10000 + node.boneShort2));
-                AddBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(node.parentId));
-                AddBytes(outBytes, 0xF, 0x8, BitConverter.GetBytes(node.unkNode));
-                AddBytes(outBytes, 0x5, 0x8, BitConverter.GetBytes(node.firstChild));
-                AddBytes(outBytes, 0x6, 0x8, BitConverter.GetBytes(node.nextSibling));
-                AddBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(node.pos));
-                AddBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(node.eulRot));
-                AddBytes(outBytes, 0x9, 0x4A, 0x1, ConvertStruct(node.scale));
-                AddBytes(outBytes, 0xA, 0xCA, 0xA, 0x3, ConvertStruct(node.m1));
-                outBytes.AddRange(ConvertStruct(node.m2));
-                outBytes.AddRange(ConvertStruct(node.m3));
-                outBytes.AddRange(ConvertStruct(node.m4));
-                AddBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(node.animatedFlag));
-                AddBytes(outBytes, 0xC, 0x8, BitConverter.GetBytes(node.const0_2));
-
-                //Bone Name String
-                string boneNameStr = node.boneName.GetString();
-                AddBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            WriteTagHeader(outBytes, "NODE", 0, (ushort)(nodeList.Count * 0xC + 1));
+            outBytes.AddRange(new byte[] { 0x56, 0x54, 0x42, 0x46 }); //VTBF
+            outBytes.AddRange(new byte[] { 0x10, 0, 0, 0 });
+            outBytes.AddRange(new byte[] { 0x41, 0x51, 0x47, 0x46, 0x1, 0, 0, 0x4C }); //AQGF and the constants after
 
             return outBytes.ToArray();
         }
 
-        public static List<NODO> parseNODO(List<Dictionary<int, object>> nodoRaw)
-        {
-            List<NODO> nodoList = new List<NODO>();
-
-            if (nodoRaw[0].Keys.Count > 1)
-            {
-                for (int i = 0; i < nodoRaw.Count; i++)
-                {
-                    NODO nodo = new NODO();
-
-                    byte[] shorts = BitConverter.GetBytes((int)nodoRaw[i][0x03]);
-                    nodo.boneShort1 = (ushort)(shorts[0] * 0x100 + shorts[1]);
-                    nodo.boneShort2 = (ushort)(shorts[2] * 0x100 + shorts[3]);
-                    nodo.animatedFlag = (int)nodoRaw[i][0x0B];
-                    nodo.parentId = (int)nodoRaw[i][0x04];
-                    nodo.pos = (Vector3)nodoRaw[i][0x07];
-                    nodo.eulRot = (Vector3)nodoRaw[i][0x08];
-                    nodo.boneName = new AquaCommon.PSO2String();
-                    nodo.boneName.SetBytes((byte[])nodoRaw[i][0x0D]);
-
-                    nodoList.Add(nodo);
-                }
-            }
-
-            return nodoList;
-        }
-
-        public static byte[] toNODO(List<NODO> nodoList)
+        public static byte[] ToROOT(string rootString = "hnd2aqg ver.1.61 Build: Feb 28 2012 18:46:06")
         {
             List<byte> outBytes = new List<byte>();
 
-            for (int i = 0; i < nodoList.Count; i++)
-            {
-                NODO nodo = nodoList[i];
-                if (i == 0)
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFC));
-                }
-                else
-                {
-                    outBytes.AddRange(BitConverter.GetBytes((short)0xFE));
-                }
-                AddBytes(outBytes, 0x3, 0x9, BitConverter.GetBytes(nodo.boneShort1 * 0x10000 + nodo.boneShort2));
-                AddBytes(outBytes, 0x4, 0x8, BitConverter.GetBytes(nodo.parentId));
-                AddBytes(outBytes, 0x7, 0x4A, 0x1, ConvertStruct(nodo.pos));
-                AddBytes(outBytes, 0x8, 0x4A, 0x1, ConvertStruct(nodo.eulRot));
-                AddBytes(outBytes, 0xB, 0x9, BitConverter.GetBytes(nodo.animatedFlag));
-
-                //Bone Name String
-                string boneNameStr = nodo.boneName.GetString();
-                AddBytes(outBytes, 0x80, 0x02, (byte)boneNameStr.Length, Encoding.UTF8.GetBytes(boneNameStr));
-            }
-            outBytes.AddRange(BitConverter.GetBytes((short)0xFD));
-
-            WriteTagHeader(outBytes, "NODO", 0, (ushort)(nodoList.Count * 7 + 1));
+            VTBFMethods.AddBytes(outBytes, 0x0, 0x2, (byte)rootString.Length, Encoding.UTF8.GetBytes(rootString));
+            VTBFMethods.WriteTagHeader(outBytes, "ROOT", 1, 1);
 
             return outBytes.ToArray();
         }
+
+
 
         public static MOHeader parseMOHeader(List<Dictionary<int, object>> moRaw)
         {
@@ -1237,33 +1128,6 @@ namespace AquaModelLibrary.Helpers.PSO2
             return vtbfCol;
         }
 
-        public static ACCEObject parseACCE(List<Dictionary<int, object>> acceRaw)
-        {
-            ACCEObject acce = new ACCEObject();
-
-            acce.acce.id = (int)acceRaw[0][0xFF];
-
-            ACCE_12Object acc12A = new ACCE_12Object();
-            ACCE_12Object acc12B = new ACCE_12Object();
-            ACCE_12Object acc12C = new ACCE_12Object();
-            acc12A.unkShort1 = GetObject<short>(acceRaw[0], 0xC7);
-            acc12B.unkShort1 = GetObject<short>(acceRaw[0], 0xD7);
-            acce.acce12List.Add(acc12A);
-            acce.acce12List.Add(acc12B);
-            acce.acce12List.Add(acc12C);
-
-            acce.dataString = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF0)).GetString();
-            acce.nodeAttach1 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF1)).GetString();
-            acce.nodeAttach2 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF2)).GetString();
-            acce.nodeAttach3 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF3)).GetString();
-            acce.nodeAttach4 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF4)).GetString();
-            acce.nodeAttach5 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF5)).GetString();
-            acce.nodeAttach6 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF6)).GetString();
-            acce.nodeAttach7 = PSO2String.GeneratePSO2String(GetObject<byte[]>(acceRaw[0], 0xF7)).GetString();
-
-            return acce;
-        }
-
         public static EFCT parseEFCT(List<Dictionary<int, object>> efctRaw)
         {
             EFCT efct = new EFCT();
@@ -1471,31 +1335,6 @@ namespace AquaModelLibrary.Helpers.PSO2
             }
 
             return keyList;
-        }
-        
-        public static ADDO parseADDO(List<Dictionary<int, object>> addoRaw)
-        {
-            ADDO addo = new ADDO();
-            addo.id = GetObject<int>(addoRaw[0], 0xFF);
-            addo.leftName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF0));
-            addo.leftBoneAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF1));
-            addo.rightName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF2));
-            addo.rightBoneAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF3));
-            addo.unusedLeftName2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF4));
-            addo.unusedLeftBoneAttach2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF5));
-            addo.unusedRightName2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF6));
-            addo.unusedRightBoneAttach2.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF7));
-            addo.F8 = GetObject<byte>(addoRaw[0], 0xF8);
-            addo.leftEffectName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xF9));
-            addo.rightEffectName.SetBytes(GetObject<byte[]>(addoRaw[0], 0xFA));
-            addo.leftEffectAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xFB));
-            addo.rightEffectAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xFC));
-            addo.FD = GetObject<byte>(addoRaw[0], 0xFD);
-            addo.FE = GetObject<byte>(addoRaw[0], 0xFE);
-            addo.E0 = GetObject<byte>(addoRaw[0], 0xE0);
-            addo.extraAttach.SetBytes(GetObject<byte[]>(addoRaw[0], 0xE1));
-
-            return addo;
         }
 
         //Safely retrieves objects in the case that they don't exist in the given dictionary

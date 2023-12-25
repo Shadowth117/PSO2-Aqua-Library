@@ -279,7 +279,7 @@ namespace AquaModelLibrary.Extensions.Readers
             long bookmark = Position;
 
             Seek(address, SeekOrigin.Begin);
-            var str = ReadUTF16String(0, true, blockSize);
+            var str = ReadUTF16String(true, blockSize);
             Seek(bookmark, SeekOrigin.Begin);
 
             return str;
@@ -358,7 +358,7 @@ namespace AquaModelLibrary.Extensions.Readers
         /// Attempts to read a null terminated terminated UTF16 String from the current stream position.
         /// If quickmode is false, end will have position subtracted to determine the max read length. Intended for files with in an array of files to stop bleedover.
         /// </summary>
-        public string ReadUTF16String(long end, bool quickMode = true, int blockSize = 0x60)
+        public string ReadUTF16String(bool quickMode = true, int blockSize = 0x60)
         {
             var pos = Position;
             var strLen = BaseStream.Length;
@@ -371,7 +371,7 @@ namespace AquaModelLibrary.Extensions.Readers
             {
                 return null;
             }
-            string str;
+            string str = "\0";
             // There's really no string limit, but it takes a long time to read these accurately. To avoid this attempt reading a short amount first. Then, go to failsafe if needed.
             if (quickMode == true)
             {
@@ -384,7 +384,6 @@ namespace AquaModelLibrary.Extensions.Readers
                     return str.Remove(strEnd);
                 }
             }
-            str = Encoding.Unicode.GetString(ReadBytes(Position, (int)(end - Position))); //Come up with a better way handling sometime because I hate this.
             return str.Remove(str.IndexOf(char.MinValue));
         }
     }

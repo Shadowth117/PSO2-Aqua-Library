@@ -1,8 +1,8 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData
-{        
+{
     /*
         * BoneShort1 values:
         * Disable PositionX Inheritance? 0x1

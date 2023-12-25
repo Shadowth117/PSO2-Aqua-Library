@@ -1,6 +1,6 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData.Reboot;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {

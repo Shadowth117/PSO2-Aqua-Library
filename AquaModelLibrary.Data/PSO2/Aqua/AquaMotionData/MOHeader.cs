@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
 {

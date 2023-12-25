@@ -87,77 +87,7 @@ namespace AquaModelLibrary.AquaMethods
             }
         }
 
-        public static int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
-        {
-            if (countToCheck < 1)
-            {
-                return -1;
-            }
-            int newAddress = currentOffset - subtractedOffset;
-            nof0.Add(newAddress);
 
-            return newAddress;
-        }
-
-        //https://stackoverflow.com/questions/8809354/replace-first-occurrence-of-pattern-in-a-string
-        public static string ReplaceFirst(string text, string search, string replace)
-        {
-            int pos = text.IndexOf(search);
-            if (pos < 0)
-            {
-                return text;
-            }
-            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
-        }
-
-        //Mainly for handling pointer offsets
-        public static int SetByteListInt(List<byte> outBytes, int offset, int value)
-        {
-            if (offset != -1)
-            {
-                var newBytes = BitConverter.GetBytes(value);
-                for (int i = 0; i < 4; i++)
-                {
-                    outBytes[offset + i] = newBytes[i];
-                }
-
-                return value;
-            }
-
-            return -1;
-        }
-
-        public static int AlignWriter(List<byte> outBytes, int align)
-        {
-            //Align to int align
-            int additions = 0;
-            while (outBytes.Count % align > 0)
-            {
-                additions++;
-                outBytes.Add(0);
-            }
-
-            return additions;
-        }
-
-        public static void AlignFileEndWrite(List<byte> outBytes, int align)
-        {
-            if (outBytes.Count % align == 0)
-            {
-                for (int i = 0; i < 0x10; i++)
-                {
-                    outBytes.Add(0);
-                }
-            }
-            else
-            {
-                //Align to 0x10
-                while (outBytes.Count % align > 0)
-                {
-                    outBytes.Add(0);
-                }
-            }
-        }
 
 
 

@@ -1,5 +1,5 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.SHADData;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.SHADData;
 using AquaModelLibrary.Extensions.Readers;
 using System.Diagnostics;
 

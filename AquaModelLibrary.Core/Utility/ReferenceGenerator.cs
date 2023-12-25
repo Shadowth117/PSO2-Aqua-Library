@@ -178,14 +178,14 @@ namespace AquaModelLibrary.Core.Utility
             }
 
             //Since we have an idea of what should be there and what we're interested in parsing out, throw these into a dictionary and go
-            Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootNPCByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> objectCommonByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
-            Dictionary<string, List<List<PSO2Text.textPair>>> uiMyRoomByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> commByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> commRebootByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameRebootByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameRebootNPCByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> objectCommonByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> uiMyRoomByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
 
             if (partsText != null)
             {
@@ -296,7 +296,7 @@ namespace AquaModelLibrary.Core.Utility
             return str;
         }
 
-        private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.textPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.textPair>>> uiRoomByCat)
+        private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.TextPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> uiRoomByCat)
         {
             string objectOutDir = Path.Combine(outputDirectory, "Objects");
             Directory.CreateDirectory(objectOutDir);
@@ -1504,7 +1504,7 @@ namespace AquaModelLibrary.Core.Utility
             File.WriteAllLines(Path.Combine(unitOutDir, "Units.csv"), aoxOut);
         }
 
-        private static void GenerateRoomLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.textPair>>> uiRoomByCat)
+        private static void GenerateRoomLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.TextPair>>> uiRoomByCat)
         {
             List<string> masterNameList = new List<string>();
             List<Dictionary<string, string>> textDict = new List<Dictionary<string, string>>();
@@ -1816,7 +1816,7 @@ namespace AquaModelLibrary.Core.Utility
             File.WriteAllLines(Path.Combine(playerRAnimDirOut, $"General Reboot Character Effects.csv"), effRebOut);
         }
 
-        private static void GenerateMotionChangeLists(string pso2_binDir, string playerRAnimDirOut, PSO2Text commonTextReboot, Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat)
+        private static void GenerateMotionChangeLists(string pso2_binDir, string playerRAnimDirOut, PSO2Text commonTextReboot, Dictionary<string, List<List<PSO2Text.TextPair>>> commRebootByCat)
         {
             //---------------------------Get Substitute Motion files --
             if (commonTextReboot != null)
@@ -1938,7 +1938,7 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        private static void GenerateLobbyActionLists(string pso2_binDir, string playerCAnimDirOut, string playerRAnimDirOut, LobbyActionCommon lac, List<LobbyActionCommon> rebootLac, string lacTruePath, string lacTruePathReboot, Dictionary<string, List<List<PSO2Text.textPair>>> commByCat, Dictionary<string, List<List<PSO2Text.textPair>>> commRebootByCat, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts)
+        private static void GenerateLobbyActionLists(string pso2_binDir, string playerCAnimDirOut, string playerRAnimDirOut, LobbyActionCommon lac, List<LobbyActionCommon> rebootLac, string lacTruePath, string lacTruePathReboot, Dictionary<string, List<List<PSO2Text.TextPair>>> commByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> commRebootByCat, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts)
         {
             //---------------------------Parse out Lobby Action files -- in lobby_action_setting.lac within defaa92bd5435c84af0da0302544b811 and common.text in a1d84c3c748cebdb6fc42f66b73d2e57
             if (lacTruePath != null)
@@ -2142,9 +2142,9 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        private static void GenerateVoiceLists(string pso2_binDir, string playerDirOut, string npcDirOut, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat,
+        private static void GenerateVoiceLists(string pso2_binDir, string playerDirOut, string npcDirOut, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat,
             List<int> masterIdList, List<Dictionary<int, string>> nameDicts, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts,
-            Dictionary<string, List<List<PSO2Text.textPair>>> actorNameText, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameTextReboot, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameTextNPCReboot)
+            Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameText, Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameTextReboot, Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameTextNPCReboot)
         {
             //---------------------------Parse out voices
             StringBuilder outputMaleVoices = new StringBuilder();
@@ -2383,7 +2383,7 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        private static void GenerateCharacterPartLists(string pso2_binDir, string playerDirOut, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, out List<int> masterIdList, out List<Dictionary<int, string>> nameDicts, out List<string> masterNameList, out List<Dictionary<string, string>> strNameDicts)
+        private static void GenerateCharacterPartLists(string pso2_binDir, string playerDirOut, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, out List<int> masterIdList, out List<Dictionary<int, string>> nameDicts, out List<string> masterNameList, out List<Dictionary<string, string>> strNameDicts)
         {
             //---------------------------Parse out costume and body (includes outers and cast bodies)
             StringBuilder outputCostumeMale = new StringBuilder();
@@ -4848,7 +4848,7 @@ namespace AquaModelLibrary.Core.Utility
             //Placeholder until NGS pets are released
         }
 
-        public static void GenerateEnemyDataList(string pso2_binDir, string enemyDirOut, Dictionary<string, List<List<PSO2Text.textPair>>> actorNameRebootByCat, out List<string> masterNameList, out List<Dictionary<string, string>> strNameDicts)
+        public static void GenerateEnemyDataList(string pso2_binDir, string enemyDirOut, Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameRebootByCat, out List<string> masterNameList, out List<Dictionary<string, string>> strNameDicts)
         {
             //---------------------------Generate Enemy Base Stats List
             List<string> classicEnemyStatOutput = new List<string>();
@@ -5811,7 +5811,7 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        public static void GatherTextIds(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, string category, bool firstDictSet, int subStart = 0, int subStop = -1)
+        public static void GatherTextIds(Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, string category, bool firstDictSet, int subStart = 0, int subStop = -1)
         {
             if (textByCat.ContainsKey(category))
             {
@@ -5857,7 +5857,7 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        public static void GatherTextIdsStringRef(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, List<string> masterNameList, List<Dictionary<string, string>> nameDicts, string category, bool firstDictSet)
+        public static void GatherTextIdsStringRef(Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<string> masterNameList, List<Dictionary<string, string>> nameDicts, string category, bool firstDictSet)
         {
             for (int sub = 0; sub < textByCat[category].Count; sub++)
             {
@@ -5879,7 +5879,7 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        public static Dictionary<string, Dictionary<int, List<string>>> GatherSubCategories(Dictionary<string, List<List<PSO2Text.textPair>>> textByCat)
+        public static Dictionary<string, Dictionary<int, List<string>>> GatherSubCategories(Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat)
         {
             Dictionary<string, Dictionary<int, List<string>>> subCats = new Dictionary<string, Dictionary<int, List<string>>>();
             subCats.Add(subGlide, new Dictionary<int, List<string>>());
@@ -6565,7 +6565,7 @@ namespace AquaModelLibrary.Core.Utility
 
         public unsafe static Dictionary<string, Dictionary<string, List<PartData>>> OutputCharacterPartFileStringDict(string pso2_binDir, CharacterMakingIndex aquaCMX, out int totalCount)
         {
-            Dictionary<string, List<List<PSO2Text.textPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.textPair>>>();
+            Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat = new Dictionary<string, List<List<PSO2Text.TextPair>>>();
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
             ReadCMXText(pso2_binDir, out var partsText, out var acceText, out var commonText, out var commonTextReboot);
             faceIds = GetFaceVariationLuaNameDict(pso2_binDir, faceIds);
@@ -6598,7 +6598,7 @@ namespace AquaModelLibrary.Core.Utility
 
         //Returns a dictionary of part filenames, the top key string being the category and the next level's key string being the gender, race, and game variant (PSO2 vs NGS)
         //Total count is a count of all partsData entities, not potential filestrings, since this doesn't check for legitimacy here
-        public static Dictionary<string, Dictionary<string, List<PartData>>> GenerateCharacterPartFileStrings(string pso2_binDir, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.textPair>>> textByCat, out int totalCount)
+        public static Dictionary<string, Dictionary<string, List<PartData>>> GenerateCharacterPartFileStrings(string pso2_binDir, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, out int totalCount)
         {
             totalCount = 0;
             Dictionary<string, Dictionary<string, List<PartData>>> partListsDict = new Dictionary<string, Dictionary<string, List<PartData>>>();

@@ -1,4 +1,7 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
+﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
     public class ACCEObject : BaseCMXObject
     {
@@ -42,6 +45,31 @@
         public string nodeAttach18 = null;
 
         public string effectName = null;
+
+        public ACCEObject() { }
+
+        public ACCEObject(List<Dictionary<int, object>> acceRaw)
+        {
+            acce.id = (int)acceRaw[0][0xFF];
+
+            ACCE_12Object acc12A = new ACCE_12Object();
+            ACCE_12Object acc12B = new ACCE_12Object();
+            ACCE_12Object acc12C = new ACCE_12Object();
+            acc12A.unkShort1 = VTBFMethods.GetObject<short>(acceRaw[0], 0xC7);
+            acc12B.unkShort1 = VTBFMethods.GetObject<short>(acceRaw[0], 0xD7);
+            acce12List.Add(acc12A);
+            acce12List.Add(acc12B);
+            acce12List.Add(acc12C);
+
+            dataString = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF0)).GetString();
+            nodeAttach1 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF1)).GetString();
+            nodeAttach2 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF2)).GetString();
+            nodeAttach3 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF3)).GetString();
+            nodeAttach4 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF4)).GetString();
+            nodeAttach5 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF5)).GetString();
+            nodeAttach6 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF6)).GetString();
+            nodeAttach7 = new PSO2String(VTBFMethods.GetObject<byte[]>(acceRaw[0], 0xF7)).GetString();
+        }
     }
 
     public struct ACCE

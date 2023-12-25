@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
-using static AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings.SetLengthHelper;
+using static AquaModelLibrary.Data.DataTypes.SetLengthStrings.SetLengthHelper;
 
-namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
+namespace AquaModelLibrary.Data.DataTypes.SetLengthStrings
 {
 
     public unsafe struct NGSShaderString
@@ -51,13 +51,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
             {
                 string finalText;
 
-                int end = this.GetLength();
+                int end = GetLength();
                 byte[] text = new byte[end];
                 for (int i = 0; i < end; i++)
                 {
                     text[i] = stringArray[i];
                 }
-                finalText = System.Text.Encoding.UTF8.GetString(text);
+                finalText = Encoding.UTF8.GetString(text);
                 return GetPSO2String(arr, GetLength());
             }
         }

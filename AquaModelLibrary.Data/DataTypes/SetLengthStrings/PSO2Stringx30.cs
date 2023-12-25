@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
-using static AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings.SetLengthHelper;
+using static AquaModelLibrary.Data.DataTypes.SetLengthStrings.SetLengthHelper;
 
-namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
+namespace AquaModelLibrary.Data.DataTypes.SetLengthStrings
 {
 
     public unsafe struct PSO2Stringx30
@@ -42,26 +42,26 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
             return str;
         }
 
-        #pragma warning disable CS8765
+#pragma warning disable CS8765
         public override bool Equals(object o)
         {
             return Equals((PSO2Stringx30)o);
         }
-        #pragma warning restore CS8765
+#pragma warning restore CS8765
 
         public bool Equals(PSO2Stringx30 c)
         {
             var cArr = c.GetBytes();
             // Optimization for a common success case.
-            #pragma warning disable CA2013
-            if (Object.ReferenceEquals(this, c))
+#pragma warning disable CA2013
+            if (ReferenceEquals(this, c))
             {
                 return true;
             }
-            #pragma warning restore CA2013
+#pragma warning restore CA2013
 
             // If run-time types are not exactly the same, return false.
-            if (this.GetType() != c.GetType())
+            if (GetType() != c.GetType())
             {
                 return false;
             }
@@ -114,13 +114,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
             {
                 string finalText;
 
-                int end = this.GetLength();
+                int end = GetLength();
                 byte[] text = new byte[end];
                 for (int i = 0; i < end; i++)
                 {
                     text[i] = stringArray[i];
                 }
-                finalText = System.Text.Encoding.UTF8.GetString(text);
+                finalText = Encoding.UTF8.GetString(text);
                 return GetPSO2String(arr, GetLength());
             }
         }

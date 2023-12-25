@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings
+namespace AquaModelLibrary.Data.DataTypes.SetLengthStrings
 {
     public unsafe class SetLengthHelper
     {

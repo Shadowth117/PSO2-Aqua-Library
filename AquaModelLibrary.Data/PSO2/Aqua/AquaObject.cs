@@ -72,7 +72,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
-            ReadNIFLInfo(sr);
             objc = new OBJC();
             objc.Read(sr);
 
@@ -740,8 +739,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public byte[] GetBytesVTBF()
         {
             List<byte> outBytes = new List<byte>();
-            outBytes.AddRange(ToAQGFVTBF());
-            outBytes.AddRange(ToROOT());
+            outBytes.AddRange(VTBFMethods.ToAQGFVTBF());
+            outBytes.AddRange(VTBFMethods.ToROOT());
             outBytes.AddRange(objc.GetBytesVTBF(unrms != null));
             outBytes.AddRange(ToVSETList());
             for (int j = 0; j < meshList.Count; j++)
@@ -766,32 +765,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return outBytes.ToArray();
         }
 
-        public static byte[] ToAQGFVTBF()
-        {
-            List<byte> outBytes = new List<byte>();
-
-            outBytes.AddRange(new byte[] { 0x56, 0x54, 0x42, 0x46 }); //VTBF
-            outBytes.AddRange(new byte[] { 0x10, 0, 0, 0 });
-            outBytes.AddRange(new byte[] { 0x41, 0x51, 0x47, 0x46, 0x1, 0, 0, 0x4C }); //AQGF and the constants after
-
-            return outBytes.ToArray();
-        }
-
-        public static byte[] ToROOT(string rootString = "hnd2aqg ver.1.61 Build: Feb 28 2012 18:46:06")
-        {
-            List<byte> outBytes = new List<byte>();
-
-            VTBFMethods.AddBytes(outBytes, 0x0, 0x2, (byte)rootString.Length, Encoding.UTF8.GetBytes(rootString));
-            VTBFMethods.WriteTagHeader(outBytes, "ROOT", 1, 1);
-
-            return outBytes.ToArray();
-        }
-
         public unsafe byte[] ToUNRM()
         {
             return unrms.GetVTBFBytes();
         }
-
 
         public unsafe byte[] ToTEXF()
         {

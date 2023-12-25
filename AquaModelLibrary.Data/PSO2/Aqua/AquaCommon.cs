@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
-    public unsafe abstract class AquaCommon
+    public unsafe class AquaCommon
     {
         public VTBF vtbf;
         public NIFL nifl;
@@ -55,6 +55,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             //Proceed based on file variant
             if (type.Equals("NIFL"))
             {
+                ReadNIFLInfo(streamReader);
                 ReadNIFLFile(streamReader, offset);
             }
             else if (type.Equals("VTBF"))
@@ -66,6 +67,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public virtual void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset) { throw new NotImplementedException(); }
         public virtual void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset) { throw new NotImplementedException(); }
 
+        /// <summary>
+        /// Reads NIFL, REL0, NOF0, and NEND, then seeks to REL0DataStart
+        /// </summary>
         public void ReadNIFLInfo(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var fileStart = sr.Position;
@@ -109,13 +113,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<uint> GetNOF0PointedValues(BufferedStreamReaderBE<MemoryStream> streamReader, int offset)
         {
             List<uint> addresses = new List<uint>();
-
+            var bookmark = streamReader.Position;
             for (int i = 0; i < nof0.relAddresses.Count; i++)
             {
                 streamReader.Seek(nof0.relAddresses[i] + offset, System.IO.SeekOrigin.Begin);
                 addresses.Add(streamReader.Read<uint>());
             }
-
+            streamReader.Seek(bookmark, SeekOrigin.Begin);
             return addresses;
         }
     }

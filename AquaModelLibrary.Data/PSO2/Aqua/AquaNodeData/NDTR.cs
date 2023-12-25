@@ -31,7 +31,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData
             const0_4 = 0;
         }
 
-        public byte[] GetBytes()
+        public byte[] GetBytesVTBF()
         {
             List<byte> outBytes = new List<byte>();
 

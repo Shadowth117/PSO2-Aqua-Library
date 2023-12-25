@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.SHADData

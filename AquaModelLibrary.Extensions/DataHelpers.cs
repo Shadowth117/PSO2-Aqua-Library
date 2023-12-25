@@ -22,5 +22,31 @@ namespace AquaModelLibrary.Helpers
         {
             return ConvertStruct(ref str);
         }
+
+        public static int NOF0Append(List<int> nof0, int currentOffset, int countToCheck = 1, int subtractedOffset = 0)
+        {
+            if (countToCheck < 1)
+            {
+                return -1;
+            }
+            int newAddress = currentOffset - subtractedOffset;
+            nof0.Add(newAddress);
+
+            return newAddress;
+        }
+
+        public static void AddOntoDict(Dictionary<string, List<int>> dict, List<string> strList, string str, int address)
+        {
+            str = str ?? "";
+            if (dict.ContainsKey(str))
+            {
+                dict[str].Add(address);
+            }
+            else
+            {
+                strList.Add(str);
+                dict.Add(str, new List<int>() { address });
+            }
+        }
     }
 }

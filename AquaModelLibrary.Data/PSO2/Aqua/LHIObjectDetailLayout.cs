@@ -38,7 +38,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         {
             public DetailInfo diStruct;
 
-            public string objName;
+            public string objName = null;
             public List<Matrix4x4> matrices = new List<Matrix4x4>(); //Matrices are world space
         }
 

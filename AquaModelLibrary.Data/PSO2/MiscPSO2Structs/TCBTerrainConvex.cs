@@ -5,10 +5,10 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
     //Props to DeadlyFugu for much of this class
     public unsafe class TCBTerrainConvex
     {
-        public List<Vector3> vertices;
-        public List<TCBFace> faces;
-        public List<TCBMaterial> materials;
-        public NexusMesh nxsMesh;
+        public List<Vector3> vertices = new();
+        public List<TCBFace> faces = new();
+        public List<TCBMaterial> materials = new();
+        public NexusMesh nxsMesh = null;
         public TCB tcbInfo;
 
         public struct TCBFace

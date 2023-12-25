@@ -1814,38 +1814,6 @@ namespace AquaModelLibrary
             File.WriteAllBytes(outFileName, outBytes.ToArray());
         }
 
-        public void ReadBones(string inFilename)
-        {
-            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
-            {
-                BeginReadBones(stream);
-            }
-        }
-        public void ReadBones(byte[] file)
-        {
-            using (Stream stream = new MemoryStream(file))
-            {
-                BeginReadBones(stream);
-            }
-        }
-
-        private void BeginReadBones(Stream stream)
-        {
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                var bones = ReadAquaBones(streamReader);
-
-                if (bones == null)
-                {
-                    Debug.WriteLine("Improper File Format!");
-                    return;
-                }
-
-                aquaBones.Add(bones);
-                return;
-            }
-        }
-
         public void ReadMotion(string inFilename)
         {
             using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
@@ -3665,11 +3633,6 @@ namespace AquaModelLibrary
         public void ReadBTI(string inFilename)
         {
             aquaMotionConfigs.Add(LoadBTI(inFilename));
-        }
-
-        public void ReadFCL(string inFilename)
-        {
-            facials.Add(LoadFCL(inFilename));
         }
 
         public void ReadLAT(string inFilename)
