@@ -19,14 +19,79 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnluacNET;
 using AquaModelLibrary.Extra;
+using AquaModelLibrary.Helpers;
+using AquaModelLibrary.Data.PSO2.Constants;
 
 namespace AquaModelLibrary.Core.Utility
 {
     public unsafe class ReferenceGenerator
     {
+        public static bool pcDirectory = true;
+
+        public static string dataDir
+        {
+            get { return pcDirectory ? dataDirPC : dataDirConsole; }
+        }
+        public static string dataNADir
+        {
+            get { return pcDirectory ? dataNADirPC : dataNADirConsole; }
+        }
+        public static string dataReboot
+        {
+            get { return pcDirectory ? dataRebootPC : dataRebootConsole; }
+        }
+        public static string dataRebootNA
+        {
+            get { return pcDirectory ? dataRebootNAPC : dataRebootNAConsole; }
+        }
+
+        public static string dataDirPC = $"data\\win32\\";
+        public static string dataDirConsole = $"data\\";
+        public static string dataNADirPC = $"data\\win32_na\\";
+        public static string dataNADirConsole = $"data_na\\";
+        public static string dataRebootPC = $"data\\win32reboot\\";
+        public static string dataRebootConsole = $"datareboot\\";
+        public static string dataRebootNAPC = $"data\\win32reboot_na\\";
+        public static string dataRebootNAConsole = $"datareboot_na\\";
+
         public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
+
+        public static CharacterMakingIndex ExtractCMX(string pso2_binDir, CharacterMakingIndex aquaCMX = null)
+        {
+            //Load CMX
+            string cmxPath = Path.Combine(pso2_binDir, dataDir, HashHelpers.GetFileHash(CharacterMakingIce.classicCMX));
+
+            if (File.Exists(cmxPath))
+            {
+                var strm = new MemoryStream(File.ReadAllBytes(cmxPath));
+                var cmxIce = IceFile.LoadIceFile(strm);
+                strm.Dispose();
+
+                List<byte[]> files = (new List<byte[]>(cmxIce.groupOneFiles));
+                files.AddRange(cmxIce.groupTwoFiles);
+
+                //Loop through files to get what we need
+                foreach (byte[] file in files)
+                {
+                    if (IceFile.getFileName(file).ToLower().Contains(".cmx"))
+                    {
+                        if(aquaCMX != null)
+                        {
+                            aquaCMX.ReadVTBFCMX(file);
+                        } else
+                        {
+                            aquaCMX = new CharacterMakingIndex(file, "cmx\0");
+                        }
+                    }
+                }
+
+                cmxIce = null;
+            }
+
+            return aquaCMX;
+        }
 
         //Takes in pso2_bin directory and outputDirectory. From there, it will read to memory various files in order to determine namings.
         //As win32_na is a patching folder, if it exists in the pso2_bin it will be prioritized for text related items.

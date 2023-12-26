@@ -1,4 +1,7 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
     public class EYEObject : BaseCMXObject
     {
@@ -9,6 +12,18 @@
 
         public string texString4 = null;
         public string texString5 = null;
+
+        public EYEObject() { }
+
+        public EYEObject(List<Dictionary<int, object>> eyeRaw)
+        {
+            eye.id = (int)eyeRaw[0][0xFF];
+
+            texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(eyeRaw[0], 0x40)).GetString();
+            texString2 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(eyeRaw[0], 0x42)).GetString();
+            texString3 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(eyeRaw[0], 0x43)).GetString();
+            texString4 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(eyeRaw[0], 0x44)).GetString();
+        }
     }
 
     public struct EYE

@@ -1,5 +1,5 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Nova.Structures;
 using Reloaded.Memory.Streams;
 using System.Diagnostics;

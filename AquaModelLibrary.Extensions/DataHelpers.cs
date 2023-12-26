@@ -48,5 +48,11 @@ namespace AquaModelLibrary.Helpers
                 dict.Add(str, new List<int>() { address });
             }
         }
+
+        public static void AddNIFLText(int address, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList, string str)
+        {
+            NOF0Append(nof0PointerLocations, address, 1);
+            AddOntoDict(textAddressDict, textList, str, address);
+        }
     }
 }

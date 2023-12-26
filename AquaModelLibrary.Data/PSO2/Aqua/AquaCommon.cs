@@ -7,6 +7,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     public unsafe class AquaCommon
     {
+        /// <summary>
+        /// Offset to start of REL0 if the file is NIFL. If VTBF, offsets aren't used.
+        /// </summary>
+        public int offset0 = 0;
         public VTBF vtbf;
         public NIFL nifl;
         public REL0 rel0;
@@ -14,6 +18,26 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public NOF0 nof0;
         public NEND nend;
 
+        public AquaCommon()
+        {
+
+        }
+
+        /// <summary>
+        /// Read the aqua file header. To determine the if the file is ICE enveloped, we need the original file extension.
+        /// </summary>
+        public AquaCommon(byte[] file, string _ext)
+        {
+            Read(file, new string[] { _ext });
+        }
+
+        /// <summary>
+        /// Read the aqua file header. To determine the if the file is ICE enveloped, we need the original file extension.
+        /// </summary>
+        public AquaCommon(BufferedStreamReaderBE<MemoryStream> streamReader, string _ext)
+        {
+            Read(streamReader, new string[] { _ext });
+        }
         /// <summary>
         /// Read the aqua file header. To determine the if the file is ICE enveloped, we need the original file extension.
         /// </summary>
@@ -48,24 +72,25 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public void Read(BufferedStreamReaderBE<MemoryStream> streamReader, string[] _ext)
         {
             string type = Encoding.UTF8.GetString(BitConverter.GetBytes(streamReader.Peek<int>()));
-            int offset = 0x20; //Base offset due to NIFL header
+            offset0 = (int)(0x20 + streamReader.Position); //Base offset due to NIFL header
 
-            IceMethods.SkipIceEnvelope(streamReader, _ext, ref type, ref offset);
+            IceMethods.SkipIceEnvelope(streamReader, _ext, ref type, ref offset0);
 
+            offset0 = (int)(0x20 + streamReader.Position);
             //Proceed based on file variant
             if (type.Equals("NIFL"))
             {
                 ReadNIFLInfo(streamReader);
-                ReadNIFLFile(streamReader, offset);
+                ReadNIFLFile(streamReader, offset0);
             }
             else if (type.Equals("VTBF"))
             {
-                ReadVTBFFile(streamReader, offset);
+                ReadVTBFFile(streamReader);
             }
         }
 
         public virtual void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset) { throw new NotImplementedException(); }
-        public virtual void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset) { throw new NotImplementedException(); }
+        public virtual void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr) { throw new NotImplementedException(); }
 
         /// <summary>
         /// Reads NIFL, REL0, NOF0, and NEND, then seeks to REL0DataStart
@@ -121,6 +146,54 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
             streamReader.Seek(bookmark, SeekOrigin.Begin);
             return addresses;
+        }
+
+        public void DumpNOF0(BufferedStreamReaderBE<MemoryStream> streamReader, string inFilename)
+        {
+            Dictionary<int, List<int>> addresses = new Dictionary<int, List<int>>();
+            List<string> output = new List<string>
+            {
+                Path.GetFileName(inFilename),
+                "",
+                $"REL0 Magic: {Encoding.UTF8.GetString(BitConverter.GetBytes(rel0.magic))} | REL0 Size: {rel0.REL0Size:X} | REL0 Data Start: {rel0.REL0DataStart:X} | REL0 Version: {rel0.version:X}",
+                "",
+                $"NOF0 Magic: {Encoding.UTF8.GetString(BitConverter.GetBytes(nof0.magic))} | NOF0 Size: {nof0.NOF0Size:X} | NOF0 Entry Count: {nof0.NOF0EntryCount:X} | NOF0 Data Size Start: {nof0.NOF0DataSizeStart:X}",
+                "",
+                "NOF0 Ptr Address - Ptr value",
+                "",
+            };
+            foreach (var entry in nof0.relAddresses)
+            {
+                streamReader.Seek(entry + offset0, SeekOrigin.Begin);
+                int ptr = streamReader.Read<int>();
+                output.Add($"{entry:X} - {ptr:X}");
+
+                if (!addresses.ContainsKey(ptr))
+                {
+                    addresses[ptr] = new List<int>() { entry };
+                }
+                else
+                {
+                    addresses[ptr].Add(entry);
+                    addresses[ptr].Sort();
+                }
+            }
+            output.Add("");
+            output.Add("Pointer Value, followed by addresses with said value");
+            output.Add("");
+            var addressKeys = addresses.Keys.ToList();
+            addressKeys.Sort();
+            foreach (var key in addressKeys)
+            {
+                output.Add(key.ToString("X") + ":");
+                var addressList = addresses[key];
+                for (int i = 0; i < addressList.Count; i++)
+                {
+                    output.Add("    " + addressList[i].ToString("X"));
+                }
+            }
+
+            File.WriteAllLines(inFilename + "_nof0.txt", output);
         }
     }
 }

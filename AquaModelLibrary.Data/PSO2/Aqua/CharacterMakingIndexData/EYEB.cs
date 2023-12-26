@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
@@ -14,6 +11,25 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public string texString3 = null;
 
         public string texString4 = null;
+
+        public EYEBObject() { }
+
+        /// <summary>
+        /// EYEB or EYEL
+        /// </summary>
+        public EYEBObject(List<Dictionary<int, object>> eyebRaw)
+        {
+            eyeb.id = (int)eyebRaw[0][0xFF];
+
+            if (eyebRaw[0].ContainsKey(0x50))
+            {
+                texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(eyebRaw[0], 0x50)).GetString();
+            }
+            else if (eyebRaw[0].ContainsKey(0x60))
+            {
+                texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(eyebRaw[0], 0x60)).GetString();
+            }
+        }
     }
 
     //Also for EYEL

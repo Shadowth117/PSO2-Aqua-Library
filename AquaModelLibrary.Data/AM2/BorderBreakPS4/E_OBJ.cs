@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Extensions.Readers;
 using System.Numerics;
 using Half = AquaModelLibrary.Data.DataTypes.Half;

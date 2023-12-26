@@ -1,4 +1,6 @@
-﻿using static AquaModelLibrary.CharacterMakingIndex;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
@@ -20,6 +22,69 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public string nodeString0 = null;
         public string nodeString1 = null;
         public string nodeString2 = null;
+
+        public BODYObject() { }
+
+        public BODYObject(List<Dictionary<int, object>> bodyRaw)
+        {
+            body.id = (int)bodyRaw[0][0xFF];
+
+            dataString = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bodyRaw[0], 0)).GetString();
+            texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bodyRaw[0], 1)).GetString();
+            texString2 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bodyRaw[0], 2)).GetString();
+            texString3 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bodyRaw[0], 3)).GetString();
+            texString4 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bodyRaw[0], 4)).GetString();
+            texString5 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bodyRaw[0], 5)).GetString();
+            //TexString6 seemingly isn't stored in vtbf? Might correct later if that's not really the case.
+
+            body2.int_24_0x9_0x9 = VTBFMethods.GetObject<int>(bodyRaw[0], 0x9);
+            body2.costumeSoundId = VTBFMethods.GetObject<int>(bodyRaw[0], 0xA);
+            body2.headId = VTBFMethods.GetObject<int>(bodyRaw[0], 0xD);
+            body2.legLength = VTBFMethods.GetObject<float>(bodyRaw[0], 0x8);
+            body2.float_4C_0xB = VTBFMethods.GetObject<float>(bodyRaw[0], 0xB);
+        }
+
+        public static BODYObject parseCARM(List<Dictionary<int, object>> carmRaw)
+        {
+            return new BODYObject(carmRaw);
+        }
+
+        public static BODYObject parseCLEG(List<Dictionary<int, object>> clegRaw)
+        {
+            return new BODYObject(clegRaw);
+        }
+
+        public static byte[] toBODY(BODYObject body)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            VTBFMethods.AddBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(body.body.id));
+
+            string dataStr = body.dataString;
+            VTBFMethods.AddBytes(outBytes, 0x00, 0x2, (byte)dataStr.Length, Encoding.UTF8.GetBytes(dataStr));
+            string texStr1 = body.texString1;
+            VTBFMethods.AddBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
+            string texStr2 = body.texString2;
+            VTBFMethods.AddBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
+            string texStr3 = body.texString3;
+            VTBFMethods.AddBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
+            string texStr4 = body.texString4;
+            VTBFMethods.AddBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
+            string texStr5 = body.texString5;
+            VTBFMethods.AddBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
+
+            VTBFMethods.AddBytes(outBytes, 0xA, 0x8, BitConverter.GetBytes(body.body2.costumeSoundId));
+            VTBFMethods.AddBytes(outBytes, 0xB, 0xA, BitConverter.GetBytes(body.body2.float_4C_0xB));
+            VTBFMethods.AddBytes(outBytes, 0xC, 0x9, BitConverter.GetBytes((int)0));
+            VTBFMethods.AddBytes(outBytes, 0x6, 0x6, BitConverter.GetBytes((ushort)0x2));
+            VTBFMethods.AddBytes(outBytes, 0x7, 0x6, BitConverter.GetBytes((ushort)0x0));
+            VTBFMethods.AddBytes(outBytes, 0x8, 0xA, BitConverter.GetBytes(body.body2.legLength));
+            VTBFMethods.AddBytes(outBytes, 0x9, 0x9, BitConverter.GetBytes(body.body2.int_24_0x9_0x9));
+
+            VTBFMethods.WriteTagHeader(outBytes, "BODY", 0x0, 0xE);
+
+            return outBytes.ToArray();
+        }
     }
 
     public struct BODY

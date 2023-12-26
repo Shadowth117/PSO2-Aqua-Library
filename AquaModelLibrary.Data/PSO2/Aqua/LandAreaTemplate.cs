@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using AquaModelLibrary.Extensions.Readers;
+using System.IO;
+using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -7,6 +9,45 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public LATHeader header;
         public List<List<LATGridSmallData>> latGridSmallData = new List<List<LATGridSmallData>>(); //Seems to be laid out as the second grid header value as rows with the first's as column count. Could be transposed. Same layout should apply to the below grid values
         public List<List<LATGridData>> latGridData = new List<List<LATGridData>>();
+
+        public LandAreaTemplate() { }
+
+        public LandAreaTemplate(byte[] file, string _ext)
+        {
+            Read(file, _ext);
+        }
+
+        public LandAreaTemplate(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        {
+            Read(sr, _ext);
+        }
+
+        public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            header = sr.Read<LATHeader>();
+
+            sr.Seek(offset + header.unkGridIndicesOffset, SeekOrigin.Begin);
+            for (int i = 0; i < header.gridHeight; i++)
+            {
+                var latRow = new List<LATGridSmallData>();
+                for (int j = 0; j < header.gridWidth; j++)
+                {
+                    latRow.Add(sr.Read<LATGridSmallData>());
+                }
+                latGridSmallData.Add(latRow);
+            }
+
+            sr.Seek(offset + header.latGridDataOffset, SeekOrigin.Begin);
+            for (int i = 0; i < header.gridHeight; i++)
+            {
+                var latRow = new List<LATGridData>();
+                for (int j = 0; j < header.gridWidth; j++)
+                {
+                    latRow.Add(sr.Read<LATGridData>());
+                }
+                latGridData.Add(latRow);
+            }
+        }
 
         public struct LATGridData
         {

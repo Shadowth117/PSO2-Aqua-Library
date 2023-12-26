@@ -1,4 +1,8 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+using System.Text;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
     //BBLY, BDP1
     public class BBLYObject : BaseCMXObject
@@ -10,6 +14,41 @@
 
         public string texString4 = null;
         public string texString5 = null;
+
+        public BBLYObject() { }
+
+        //NIFL cmx lumps BDP1 with BBLY
+        public BBLYObject(List<Dictionary<int, object>> bblyRaw)
+        {
+            bbly.id = (int)bblyRaw[0][0xFF];
+
+            texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bblyRaw[0], 0x10)).GetString();
+            texString2 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bblyRaw[0], 0x11)).GetString();
+            texString3 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bblyRaw[0], 0x12)).GetString();
+            texString4 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(bblyRaw[0], 0x13)).GetString();
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outBytes = new List<byte>();
+
+            VTBFMethods.AddBytes(outBytes, 0xFF, 0x8, BitConverter.GetBytes(bbly.id));
+
+            string texStr1 = texString1;
+            VTBFMethods.AddBytes(outBytes, 0x01, 0x2, (byte)texStr1.Length, Encoding.UTF8.GetBytes(texStr1));
+            string texStr2 = texString2;
+            VTBFMethods.AddBytes(outBytes, 0x02, 0x2, (byte)texStr2.Length, Encoding.UTF8.GetBytes(texStr2));
+            string texStr3 = texString3;
+            VTBFMethods.AddBytes(outBytes, 0x03, 0x2, (byte)texStr3.Length, Encoding.UTF8.GetBytes(texStr3));
+            string texStr4 = texString4;
+            VTBFMethods.AddBytes(outBytes, 0x04, 0x2, (byte)texStr4.Length, Encoding.UTF8.GetBytes(texStr4));
+            string texStr5 = texString5;
+            VTBFMethods.AddBytes(outBytes, 0x05, 0x2, (byte)texStr5.Length, Encoding.UTF8.GetBytes(texStr5));
+
+            VTBFMethods.WriteTagHeader(outBytes, "BBLY", 0x0, 0xE);
+
+            return outBytes.ToArray();
+        }
     }
 
     public struct BBLY

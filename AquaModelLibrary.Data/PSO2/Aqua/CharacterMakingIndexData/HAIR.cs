@@ -1,4 +1,7 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
     public class HAIRObject : BaseCMXObject
     {
@@ -13,6 +16,21 @@
         public string texString6 = null;
 
         public string texString7 = null;
+
+        public HAIRObject() { }
+
+        public HAIRObject(List<Dictionary<int, object>> hairRaw)
+        {
+            hair.id = (int)hairRaw[0][0xFF];
+
+            dataString = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(hairRaw[0], 0xA0)).GetString();
+            texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(hairRaw[0], 0xA1)).GetString();
+            texString2 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(hairRaw[0], 0xA2)).GetString();
+            texString3 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(hairRaw[0], 0xA3)).GetString();
+            texString4 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(hairRaw[0], 0xA4)).GetString();
+            texString5 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(hairRaw[0], 0xA5)).GetString();
+            //A8, A9, and AA don't seem to be stored in the NIFL 
+        }
     }
 
     public struct HAIR

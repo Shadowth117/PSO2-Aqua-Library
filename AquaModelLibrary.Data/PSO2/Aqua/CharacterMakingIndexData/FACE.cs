@@ -1,4 +1,7 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
     public class FACEObject : BaseCMXObject
     {
@@ -16,6 +19,25 @@
         public string texString4 = null;
         public string texString5 = null;
         public string texString6 = null;
+
+        public FACEObject() { }
+
+        public FACEObject(List<Dictionary<int, object>> faceRaw)
+        {
+            face.id = (int)faceRaw[0][0xFF];
+
+            dataString = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(faceRaw[0], 0x70)).GetString();
+            face2.unkInt3 = VTBFMethods.GetObject<int>(faceRaw[0], 0x71);
+            texString1 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(faceRaw[0], 0x72)).GetString();
+            texString2 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(faceRaw[0], 0x73)).GetString();
+            texString3 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(faceRaw[0], 0x74)).GetString();
+            texString4 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(faceRaw[0], 0x75)).GetString();
+            texString5 = PSO2String.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(faceRaw[0], 0x76)).GetString();
+
+            //0x77 seemingly isn't parsed
+            //0x78 seemingly isn't parsed
+            face2.unkInt5 = VTBFMethods.GetObject<int>(faceRaw[0], 0x79);
+        }
     }
 
     public struct FACE

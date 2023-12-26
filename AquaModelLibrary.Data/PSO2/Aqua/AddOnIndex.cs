@@ -16,7 +16,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             Read(sr, _ext);
         }
 
-        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr)
         {
             //Seek past vtbf tag
             sr.Seek(0x10, SeekOrigin.Current);          //VTBF tags

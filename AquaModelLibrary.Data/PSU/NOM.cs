@@ -1,6 +1,6 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.Helpers.MathHelpers;
 using Marathon.Formats.Mesh.Ninja;

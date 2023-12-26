@@ -518,7 +518,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         }
 
         #region VTBFReading
-        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr)
         {
             int objcCount = 0;
             sr.Seek(0x10, SeekOrigin.Current); //Skip the header and move to the tags

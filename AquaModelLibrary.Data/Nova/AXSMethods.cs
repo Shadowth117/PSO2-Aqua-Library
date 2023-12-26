@@ -1,7 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.Nova.Structures;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using System.Text;
 using static AquaModelLibrary.Nova.AXSConstants;
 using static AquaModelLibrary.Helpers.MathHelpers.MathExtras;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
 namespace AquaModelLibrary.Nova
 {

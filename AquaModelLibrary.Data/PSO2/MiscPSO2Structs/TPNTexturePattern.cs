@@ -1,8 +1,8 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
 using AquaModelLibrary.Extensions.Readers;
 using AquaModelLibrary.Helpers;
 using System.IO;
+using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {

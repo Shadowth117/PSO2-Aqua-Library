@@ -64,5 +64,23 @@
             }
             return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
         }
+
+        public static string ExtToIceEnvExt(string ext)
+        {
+            string newExt = "";
+            if(ext?.Length > 0)
+            {
+                newExt = ext.Substring(1, ext.Length - 1);
+            } else
+            {
+                return "\0\0\0\0";
+            }
+            while(newExt.Length < 4)
+            {
+                newExt += "\0";
+            }
+
+            return newExt;
+        }
     }
 }

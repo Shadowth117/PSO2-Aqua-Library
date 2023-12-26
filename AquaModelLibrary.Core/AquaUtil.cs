@@ -2778,16 +2778,6 @@ namespace AquaModelLibrary
             aquaCMX = ReadCMX(fileName);
         }
 
-        public static AddOnIndex LoadAOX(string fileName)
-        {
-            return ReadAOX(fileName);
-        }
-
-        public static AddOnIndex LoadAOX(byte[] data)
-        {
-            return ReadAOX(data);
-        }
-
         public static LandPieceSettings LoadLPS(string fileName)
         {
             return ReadLPS(fileName);

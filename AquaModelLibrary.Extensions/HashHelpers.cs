@@ -3,7 +3,7 @@ using System.Text;
 
 namespace AquaModelLibrary.Helpers
 {
-    public class HashHelper
+    public class HashHelpers
     {
         //Toggle to enable console version support
         public static bool useFileNameHash = true;
