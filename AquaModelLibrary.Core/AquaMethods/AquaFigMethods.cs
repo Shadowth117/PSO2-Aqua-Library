@@ -10,86 +10,10 @@ namespace AquaModelLibrary.AquaMethods
 {
     public static class AquaFigMethods
     {
-        public static AquaFigure LoadFig(string inFilename)
-        {
-            AquaFigure fig = new AquaFigure();
 
-            string ext = Path.GetExtension(inFilename);
-            int offset;
-            if (ext.Length > 4)
-            {
-                ext = ext.Substring(0, 4);
-            }
 
-            using (Stream stream = (Stream)new FileStream(inFilename, FileMode.Open))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
-            {
-                var variant = ReadAquaHeader(streamReader, ext, out offset);
 
-                if (variant == "NIFL")
-                {
-                    var nifl = streamReader.Read<AquaCommon.NIFL>();
-                    var rel = streamReader.Read<AquaCommon.REL0>();
-                    streamReader.Seek(offset + rel.REL0DataStart, SeekOrigin.Begin);
-                    fig.figHeader = streamReader.Read<AquaFigure.FigHeader>();
 
-                    //Read Attach Transforms
-                    if (fig.figHeader.attachTransformPtr > 0x10)
-                    {
-                        streamReader.Seek(offset + fig.figHeader.attachTransformPtr, SeekOrigin.Begin);
-                        for (int i = 0; i < fig.figHeader.attachTransformCount; i++)
-                        {
-                            int address = streamReader.Read<int>();
-                            long bookmark = streamReader.Position();
-                            streamReader.Seek(offset + address, SeekOrigin.Begin);
-                            fig.attachTransforms.Add(ReadAttachTransform(offset, streamReader));
-
-                            streamReader.Seek(bookmark, SeekOrigin.Begin);
-                        }
-                    }
-
-                    //Read unk structs
-                    if (fig.figHeader.statePtr > 0x10)
-                    {
-                        streamReader.Seek(offset + fig.figHeader.statePtr, SeekOrigin.Begin);
-                        for (int i = 0; i < fig.figHeader.stateCount; i++)
-                        {
-                            int address = streamReader.Read<int>();
-                            long bookmark = streamReader.Position();
-                            streamReader.Seek(offset + address, SeekOrigin.Begin);
-                            fig.stateStructs.Add(ReadStateStruct(offset, streamReader));
-
-                            streamReader.Seek(bookmark, SeekOrigin.Begin);
-                        }
-                    }
-                }
-            }
-
-            return fig;
-        }
-
-        private static AquaFigure.AttachTransformObject ReadAttachTransform(int offset, BufferedStreamReader streamReader)
-        {
-            AquaFigure.AttachTransformObject attach = new AquaFigure.AttachTransformObject();
-            attach.attach = streamReader.Read<AquaFigure.AttachTransform>();
-            attach.name = GetFigString(streamReader, attach.attach.namePtr, offset);
-            attach.unkText = GetFigString(streamReader, attach.attach.unkTextPtr, offset);
-            attach.attachNode = GetFigString(streamReader, attach.attach.attachNodePtr, offset);
-            return attach;
-        }
-
-        private static AquaFigure.StateObjects ReadStateStruct(int offset, BufferedStreamReader streamReader)
-        {
-            AquaFigure.StateObjects fs1 = new AquaFigure.StateObjects();
-            fs1.rawStruct = streamReader.Read<AquaFigure.StateStruct>();
-            fs1.text = GetFigString(streamReader, fs1.rawStruct.textPtr, offset);
-
-            fs1.struct0 = ReadFS1UnkStruct0Object(offset, fs1.rawStruct.FS1UnkStruct0Ptr, streamReader);
-            fs1.collision = ReadCollisionData(offset, fs1.rawStruct.collisionPtr, streamReader);
-            fs1.stateMap = ReadStateMappingObject(offset, fs1.rawStruct.stateMappingPtr, streamReader);
-
-            return fs1;
-        }
 
         private static AquaFigure.FS1UnkStruct0Object ReadFS1UnkStruct0Object(int offset, int address, BufferedStreamReader streamReader)
         {

@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using AquaModelLibrary.Extensions.Readers;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
 {
@@ -8,6 +9,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
         public string name = null;
         public string unkText = null;
         public string attachNode = null;
+
+        public AttachTransformObject(int offset, BufferedStreamReaderBE<MemoryStream> streamReader)
+        {
+            attach = streamReader.Read<AttachTransform>();
+            name = streamReader.ReadCStringValidOffset(attach.namePtr + offset);
+            unkText = streamReader.ReadCStringValidOffset(attach.unkTextPtr + offset);
+            attachNode = streamReader.ReadCStringValidOffset(attach.attachNodePtr + offset);
+        }
     }
 
     public struct AttachTransform

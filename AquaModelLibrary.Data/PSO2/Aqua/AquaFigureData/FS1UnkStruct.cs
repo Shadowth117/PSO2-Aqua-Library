@@ -1,4 +1,7 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
+﻿using AquaModelLibrary.Extensions.Readers;
+using Reloaded.Memory.Streams;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
 {
     public class FS1UnkStruct0Object
     {
@@ -7,6 +10,16 @@
         public string text1 = null;
         public string text2 = null;
         public string text3 = null;
+
+        public FS1UnkStruct0Object(int address, BufferedStreamReaderBE<MemoryStream> streamReader)
+        {
+            streamReader.Seek(address, SeekOrigin.Begin);
+            fs1struct0 = streamReader.Read<FS1UnkStruct0>();
+            text0 = streamReader.ReadCStringValidOffset(fs1struct0.text0Ptr);
+            text1 = streamReader.ReadCStringValidOffset(fs1struct0.text1Ptr);
+            text2 = streamReader.ReadCStringValidOffset(fs1struct0.text2Ptr);
+            text3 = streamReader.ReadCStringValidOffset(fs1struct0.text3Ptr);
+        }
     }
 
     public struct FS1UnkStruct0
