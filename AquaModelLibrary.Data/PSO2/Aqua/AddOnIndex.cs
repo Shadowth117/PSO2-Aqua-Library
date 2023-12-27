@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
 

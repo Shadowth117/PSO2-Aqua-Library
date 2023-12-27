@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.MathHelpers;
 using System.Diagnostics;
 using System.Numerics;
@@ -1415,7 +1415,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
         }
 
-        public static void copyVertex(VTXL sourceVTXL, VTXL destinationVTXL, int sourceIndex, int destinationIndex)
+        public static void CopyVertex(VTXL sourceVTXL, VTXL destinationVTXL, int sourceIndex, int destinationIndex)
         {
             if (sourceVTXL.vertPositions.Count > sourceIndex)
             {
@@ -1535,7 +1535,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             }
         }
 
-        public static void appendVertex(VTXL sourceVTXL, VTXL destinationVTXL, int sourceIndex)
+        public static void AppendVertex(VTXL sourceVTXL, VTXL destinationVTXL, int sourceIndex)
         {
             if (sourceVTXL.vertPositions.Count > sourceIndex)
             {

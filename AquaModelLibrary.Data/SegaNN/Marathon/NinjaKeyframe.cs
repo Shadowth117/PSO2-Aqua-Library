@@ -1,5 +1,5 @@
 ﻿//THANK YOU KNUX https://github.com/Big-Endian-32/Marathon/blob/03a2812cc903241ab65fd21d2270c0680044bc09/Marathon/Formats/Mesh/Ninja/NinjaKeyframe.cs
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
 namespace Marathon.Formats.Mesh.Ninja

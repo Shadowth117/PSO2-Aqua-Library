@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
 using System.IO;

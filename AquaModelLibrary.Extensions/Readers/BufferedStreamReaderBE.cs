@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace AquaModelLibrary.Extensions.Readers
+namespace AquaModelLibrary.Helpers.Readers
 {
     public class BufferedStreamReaderBE<TStream> : BufferedStreamReader<TStream> where TStream : Stream
     {

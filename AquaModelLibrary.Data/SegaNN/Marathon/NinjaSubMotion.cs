@@ -1,5 +1,5 @@
 ﻿//THANK YOU HYPER AND KNUX https://github.com/Big-Endian-32/Marathon/blob/03a2812cc903241ab65fd21d2270c0680044bc09/Marathon/Formats/Mesh/Ninja/NinjaSubMotion.cs
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace Marathon.Formats.Mesh.Ninja
 {

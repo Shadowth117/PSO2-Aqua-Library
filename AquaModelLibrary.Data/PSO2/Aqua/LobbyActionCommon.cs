@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.LobbyActionCommonData;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {

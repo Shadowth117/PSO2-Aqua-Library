@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
 
 namespace AquaModelLibrary.Extra.Ninja.BillyHatcher

@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4

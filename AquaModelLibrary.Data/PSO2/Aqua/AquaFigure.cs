@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua

@@ -1,4 +1,6 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.Readers;
+using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
@@ -8,6 +10,144 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
         public SetHeader header;
         public List<EntityString> entityStrings = new List<EntityString>();
         public List<SetEntity> setEntities = new List<SetEntity>();
+
+        public SetLayout() { }
+
+        public SetLayout(byte[] file)
+        {
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
+
+        public SetLayout(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
+
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            string fileType = Encoding.UTF8.GetString(BitConverter.GetBytes(sr.Peek<int>()));
+
+            if (fileType == "set\0")
+            {
+                sr.Seek(0xC, SeekOrigin.Current);
+                var envelopeSize = sr.Read<int>() - 0x10;
+                sr.Seek(envelopeSize, SeekOrigin.Current);
+            }
+
+            var set = new SetLayout();
+            set.fileName = Path.GetFileNameWithoutExtension(fileName);
+            set.header = sr.Read<SetHeader>();
+
+            //Read strings
+            for (int i = 0; i < set.header.entityStringCount; i++)
+            {
+                var entityStr = new SetLayout.EntityString();
+                entityStr.size = sr.Read<int>();
+                var rawStr = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, entityStr.size - 4));
+                rawStr = rawStr.Remove(rawStr.IndexOf(char.MinValue));
+
+                //Entity strings are comma delimited
+                var rawArray = rawStr.Split(',');
+                for (int sub = 0; sub < rawArray.Length; sub++)
+                {
+                    entityStr.subStrings.Add(rawArray[sub]);
+                }
+
+                set.entityStrings.Add(entityStr);
+                sr.Seek(entityStr.size - 4, SeekOrigin.Current);
+            }
+
+            //Read entities
+            for (int i = 0; i < set.header.entityCount; i++)
+            {
+                var entityStart = sr.Position;
+
+                var entity = new SetEntity();
+                entity.size = sr.Read<int>();
+                entity.entity_variant_string0 = sr.Read<PSO2String>();
+                entity.int_str1Sum = sr.Read<int>();
+
+                var strCount = sr.Read<int>();
+                entity.entity_variant_string1 = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, strCount));
+                sr.Seek(strCount, SeekOrigin.Current);
+
+                strCount = sr.Read<int>();
+                entity.entity_variant_stringJP = Encoding.Unicode.GetString(sr.ReadBytes(sr.Position, strCount));
+                sr.Seek(strCount, SeekOrigin.Current);
+
+                entity.subObjectCount = sr.Read<int>();
+                //Debug.WriteLine($"Position {(streamReader.Position() - offset).ToString("X")}");
+                int trueCount = entity.subObjectCount;
+                //Gather variables
+                for (int obj = 0; obj < trueCount; obj++)
+                {
+                    var type = sr.Read<int>();
+                    int length; //Used for some types
+                    object data;
+                    switch (type)
+                    {
+                        case 0: //Int
+                            data = sr.Read<int>();
+                            break;
+                        case 1: //Float
+                            data = sr.Read<float>();
+                            break;
+                        case 2: //Utf8 String with size
+                            length = sr.Read<int>();
+                            data = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, length));
+                            sr.Seek(length, SeekOrigin.Current);
+                            break;
+                        case 3: //Unicode-16 String with size
+                            length = sr.Read<int>();
+                            data = Encoding.Unicode.GetString(sr.ReadBytes(sr.Position, length));
+                            sr.Seek(length, SeekOrigin.Current);
+                            break;
+                        case 4: //Null terminated, comma delimited string list
+                            string str = sr.ReadCString(sr.BaseStream.Length); //Yeah idk if this has a limit. I tried.
+                            length = str.Length;
+                            data = str.Remove(length);
+                            sr.Seek(length + 1, SeekOrigin.Current);
+                            break;
+                        default:
+                            Console.WriteLine($"Unknown set type: {type} at position {sr.Position.ToString("X")}");
+                            throw new Exception();
+                    }
+
+                    //Name is always a utf8 string right after with a predefined length
+                    int nameLength = sr.Read<int>();
+                    string name = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, nameLength));
+                    sr.Seek(nameLength, SeekOrigin.Current);
+
+                    //Some things can denote further objects
+                    if (name == "edit")
+                    {
+                        trueCount += sr.Read<int>();
+                    }
+
+                    //I don't know if it's possible for there to be a dupe within these, but if it is, we'll check for it and note it
+                    if (entity.variables.ContainsKey(name))
+                    {
+                        Console.WriteLine($"Duplicate key: {name} at position {sr.Position.ToString("X")}");
+                        entity.variables.Add(name + $"({obj})", data);
+                    }
+                    else
+                    {
+                        entity.variables.Add(name, data);
+                    }
+
+                }
+                set.setEntities.Add(entity);
+                //Make sure we move to the end properly
+                if (sr.Position != entityStart + entity.size)
+                {
+                    sr.Seek(entityStart + entity.size, SeekOrigin.Begin);
+                }
+            }
+        }
 
         public struct SetHeader
         {

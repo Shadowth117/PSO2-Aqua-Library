@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Ice;
 using System.IO;

@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
@@ -1288,7 +1288,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                                     ushort id = strips[meshId].triStrips[stripIndex];
                                     if (!usedVerts.ContainsKey(id))
                                     {
-                                        VTXL.appendVertex(vtxlList[meshList[meshId].vsetIndex], newVtxl, id);
+                                        VTXL.AppendVertex(vtxlList[meshList[meshId].vsetIndex], newVtxl, id);
                                         usedVerts.Add(id, counter);
                                         counter++;
                                     }
@@ -1782,6 +1782,197 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 model.unrms = unrm;
             }
+        }
+
+        public void VTXLFromFaceVerts()
+        {
+            vtxlList = new List<VTXL>();
+
+            for (int mesh = 0; mesh < tempTris.Count; mesh++)
+            {
+                //Set up a new VTXL based on an existing sample in order to figure optimize a bit for later.
+                //For the sake of simplicity, we assume that vertex IDs for this start from 0 and end at the vertex count - 1. 
+                VTXL vtxl = new VTXL(tempTris[mesh].vertCount, tempTris[mesh].faceVerts[0]);
+                List<bool> vtxlCheck = new List<bool>(new bool[tempTris[mesh].vertCount]);
+
+                //Set up classic bone palette
+                for (int b = 0; b < tempTris[mesh].bonePalette.Count; b++)
+                {
+                    vtxl.bonePalette.Add((ushort)tempTris[mesh].bonePalette[b]);
+                }
+
+                //Go through the faces, set vertices in at their index unless they're a duplicate index with different data. 
+                for (int face = 0; face < tempTris[mesh].triList.Count; face++)
+                {
+                    for (int faceVert = 0; faceVert < 3; faceVert++)
+                    {
+                        int vertIndex = tempTris[mesh].faceVerts[face].rawVertId[faceVert];
+
+                        //Handle if for whatever reason we have more vertices than expected
+                        if (vertIndex > (vtxlCheck.Count - 1))
+                        {
+                            vtxlCheck.AddRange(new bool[vertIndex - (vtxlCheck.Count - 1)]);
+                        }
+
+                        if (vertIndex > (vtxl.vertPositions.Count - 1))
+                        {
+                            vtxl.AddRange(vertIndex - (vtxl.vertPositions.Count - 1), vtxl);
+                        }
+
+                        if (vtxlCheck[vertIndex] == true && !VTXL.IsSameVertex(vtxl, vertIndex, tempTris[mesh].faceVerts[face], faceVert))
+                        {
+                            //If this really needs to be split to a new vertex, add it to the end of the new VTXL list
+                            VTXL.AppendVertex(tempTris[mesh].faceVerts[face], vtxl, faceVert);
+
+                            var tri = tempTris[mesh].triList[face];
+                            switch (faceVert)
+                            {
+                                case 0:
+                                    tri.X = vtxl.vertPositions.Count - 1;
+                                    break;
+                                case 1:
+                                    tri.Y = vtxl.vertPositions.Count - 1;
+                                    break;
+                                case 2:
+                                    tri.Z = vtxl.vertPositions.Count - 1;
+                                    break;
+                            }
+                            tempTris[mesh].triList[face] = tri;
+                        }
+                        else if (vtxlCheck[vertIndex] == false)
+                        {
+                            VTXL.CopyVertex(tempTris[mesh].faceVerts[face], vtxl, faceVert, vertIndex);
+                            vtxlCheck[vertIndex] = true;
+                        }
+                    }
+
+                }
+
+                //Loop through and check for missing vertices/isolated vertices. Proceed to dummy these out as a failsafe for later access.
+                for (int i = 0; i < vtxl.vertPositions.Count; i++)
+                {
+                    if (vtxl.vertNormals.Count > 0)
+                    {
+                        vtxl.vertNormals[i] = new Vector3();
+                    }
+                    if (vtxl.vertNormalsNGS.Count > 0 && vtxl.vertNormalsNGS[i] == null)
+                    {
+                        vtxl.vertNormalsNGS[i] = new short[4];
+                    }
+                    if (vtxl.vertColors.Count > 0 && vtxl.vertColors[i] == null)
+                    {
+                        vtxl.vertColors[i] = new byte[4];
+                    }
+                    if (vtxl.vertColor2s.Count > 0 && vtxl.vertColor2s[i] == null)
+                    {
+                        vtxl.vertColor2s[i] = new byte[4];
+                    }
+                    if (vtxl.uv1List.Count > 0)
+                    {
+                        vtxl.uv1List[i] = new Vector2();
+                    }
+                    if (vtxl.uv1ListNGS.Count > 0 && vtxl.uv1ListNGS[i] == null)
+                    {
+                        vtxl.uv1ListNGS[i] = new short[2];
+                    }
+                    if (vtxl.uv2ListNGS.Count > 0 && vtxl.uv2ListNGS[i] == null)
+                    {
+                        vtxl.uv2ListNGS[i] = new short[2];
+                    }
+                    if (vtxl.uv3ListNGS.Count > 0 && vtxl.uv3ListNGS[i] == null)
+                    {
+                        vtxl.uv3ListNGS[i] = new short[2];
+                    }
+                    if (vtxl.uv4ListNGS.Count > 0 && vtxl.uv4ListNGS[i] == null)
+                    {
+                        vtxl.uv4ListNGS[i] = new short[2];
+                    }
+                    if (vtxl.uv2List.Count > 0)
+                    {
+                        vtxl.uv2List[i] = new Vector2();
+                    }
+                    if (vtxl.uv3List.Count > 0)
+                    {
+                        vtxl.uv3List[i] = new Vector2();
+                    }
+                    if (vtxl.uv4List.Count > 0)
+                    {
+                        vtxl.uv4List[i] = new Vector2();
+                    }
+                    if (vtxl.vert0x22.Count > 0 && vtxl.vert0x22[i] == null)
+                    {
+                        vtxl.vert0x22[i] = new short[2];
+                    }
+                    if (vtxl.vert0x23.Count > 0 && vtxl.vert0x23[i] == null)
+                    {
+                        vtxl.vert0x23[i] = new short[2];
+                    }
+                    if (vtxl.vert0x24.Count > 0 && vtxl.vert0x24[i] == null)
+                    {
+                        vtxl.vert0x24[i] = new short[2];
+                    }
+                    if (vtxl.vert0x25.Count > 0 && vtxl.vert0x25[i] == null)
+                    {
+                        vtxl.vert0x25[i] = new short[2];
+                    }
+                    if (vtxl.rawVertWeights.Count > 0 && vtxl.rawVertWeights[i] == null)
+                    {
+                        vtxl.rawVertWeights[i] = new List<float>();
+                    }
+                    if (vtxl.rawVertWeightIds.Count > 0 && vtxl.rawVertWeightIds[i] == null)
+                    {
+                        vtxl.rawVertWeightIds[i] = new List<int>();
+                    }
+                }
+
+                vtxlList.Add(vtxl);
+            }
+        }
+
+        //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.
+        //PRM is very simple and can only take in: Vertex positions, vertex normals, vert colors, and 2 UV mappings along with a list of triangles at best. It also expects only one object. 
+        //The main purpose of this function is to fix UV and vert color conflicts upon conversion. While you can just do this logic yourself, this will do it for you as needed.
+        public PRMModel ConvertToPRM()
+        {
+            //Assemble vtxlList
+            if (vtxlList == null || vtxlList.Count == 0)
+            {
+                VTXLFromFaceVerts();
+            }
+
+            PRMModel prmModel = new PRMModel();
+            for (int i = 0; i < vtxlList[0].vertPositions.Count; i++)
+            {
+                PRMModel.PRMVert prmVert = new PRMModel.PRMVert();
+
+                prmVert.pos = vtxlList[0].vertPositions[i];
+
+                if (vtxlList[0].vertNormals.Count > 0)
+                {
+                    prmVert.normal = vtxlList[0].vertNormals[i];
+                }
+                if (vtxlList[0].vertColors.Count > 0)
+                {
+                    prmVert.color = vtxlList[0].vertColors[i];
+                }
+
+                if (vtxlList[0].uv1List.Count > 0)
+                {
+                    prmVert.uv1 = vtxlList[0].uv1List[i];
+                }
+                if (vtxlList[0].uv2List.Count > 0)
+                {
+                    prmVert.uv2 = vtxlList[0].uv2List[i];
+                } else
+                {
+                    prmVert.uv2 = vtxlList[0].uv1List[i];
+                }
+
+                prmModel.vertices.Add(prmVert);
+            }
+            prmModel.faces = tempTris[0].triList;
+
+            return prmModel;
         }
 
         public AquaObject Clone()

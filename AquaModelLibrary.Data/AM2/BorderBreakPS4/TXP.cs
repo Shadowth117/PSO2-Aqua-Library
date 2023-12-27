@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
 using VrSharp.Xvr;
 using static VrSharp.Xvr.DirectXTexUtility;

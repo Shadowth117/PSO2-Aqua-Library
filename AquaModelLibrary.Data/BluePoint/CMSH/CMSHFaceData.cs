@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
 using Vector3Integer;

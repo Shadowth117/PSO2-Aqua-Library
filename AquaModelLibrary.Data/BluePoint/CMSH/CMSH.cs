@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using Reloaded.Memory.Streams;
 
 namespace AquaModelLibrary.BluePoint.CMSH

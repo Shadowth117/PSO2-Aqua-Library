@@ -1,7 +1,7 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
-using AquaModelLibrary.Data.PSO2.Aqua.SetLengthStrings;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;

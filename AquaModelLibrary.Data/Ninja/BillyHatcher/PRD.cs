@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using csharp_prs;
 using System.Text;
 

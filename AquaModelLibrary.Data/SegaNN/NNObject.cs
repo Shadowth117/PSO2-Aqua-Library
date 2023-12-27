@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.NNStructs.Structures;
 using System.ComponentModel;
@@ -191,9 +191,9 @@ namespace AquaModelLibrary
                                 {
                                     throw new Exception();
                                 }
-                                VTXL.appendVertex(vtxlList[group], vtxl, (int)face.X);
-                                VTXL.appendVertex(vtxlList[group], vtxl, (int)face.Y);
-                                VTXL.appendVertex(vtxlList[group], vtxl, (int)face.Z);
+                                VTXL.AppendVertex(vtxlList[group], vtxl, (int)face.X);
+                                VTXL.AppendVertex(vtxlList[group], vtxl, (int)face.Y);
+                                VTXL.AppendVertex(vtxlList[group], vtxl, (int)face.Z);
                                 vtxl.rawVertId.Add((int)face.X);
                                 vtxl.rawVertId.Add((int)face.Y);
                                 vtxl.rawVertId.Add((int)face.Z);

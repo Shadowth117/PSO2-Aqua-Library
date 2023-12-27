@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.NNStructs.Structures;
 using System.Diagnostics;
 using System.Numerics;
@@ -113,7 +113,7 @@ namespace AquaModelLibrary.NNStructs
                     if (map == -1)
                     {
                         map = newVtxl.vertPositions.Count;
-                        VTXL.appendVertex(curVtxl, newVtxl, v);
+                        VTXL.AppendVertex(curVtxl, newVtxl, v);
                     }
 
                     vtxlMapping.Add(map);

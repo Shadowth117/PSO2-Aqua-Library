@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary;
-using AquaModelLibrary.Extensions.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using Reloaded.Memory.Streams;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extensions.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
