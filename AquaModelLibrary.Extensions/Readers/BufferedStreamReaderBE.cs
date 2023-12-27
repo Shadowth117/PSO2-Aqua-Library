@@ -260,14 +260,14 @@ namespace AquaModelLibrary.Extensions.Readers
         /// <summary>
         /// Attempts to read a null terminated terminated CString from the provided stream position.
         /// </summary>
-        public string ReadCStringValidOffset(long address, int blockSize = 0x100, int addressThreshold = 0x10)
+        public string ReadCStringValidOffset(long address, int offset, int blockSize = 0x100, int addressThreshold = 0x10)
         {
             string str = null;
-            if(address > 0x10)
+            if((address + offset) > addressThreshold)
             {
                 long bookmark = Position;
 
-                Seek(address, SeekOrigin.Begin);
+                Seek(address + offset, SeekOrigin.Begin);
                 str = ReadCString(blockSize);
                 Seek(bookmark, SeekOrigin.Begin);
             }

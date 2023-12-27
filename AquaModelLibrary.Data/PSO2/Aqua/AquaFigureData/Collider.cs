@@ -1,10 +1,21 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
+﻿using AquaModelLibrary.Extensions.Readers;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
 {
     public class ColliderObject
     {
         public Collider colStruct;
         public string name = null;
         public string text1 = null;
+        public ColliderObject() { }
+
+        public ColliderObject(BufferedStreamReaderBE<MemoryStream> streamReader, int ptr, int offset)
+        {
+            streamReader.Seek(offset + ptr, SeekOrigin.Begin);
+            colStruct = streamReader.Read<Collider>();
+            name = streamReader.ReadCStringValidOffset(colStruct.namePtr, offset);
+            text1 = streamReader.ReadCStringValidOffset(colStruct.text1Ptr, offset);
+        }
     }
 
     public struct Collider

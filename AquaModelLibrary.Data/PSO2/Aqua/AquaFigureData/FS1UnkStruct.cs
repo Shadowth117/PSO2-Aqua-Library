@@ -11,14 +11,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
         public string text2 = null;
         public string text3 = null;
 
-        public FS1UnkStruct0Object(int address, BufferedStreamReaderBE<MemoryStream> streamReader)
+        public FS1UnkStruct0Object(int offset, int address, BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             streamReader.Seek(address, SeekOrigin.Begin);
             fs1struct0 = streamReader.Read<FS1UnkStruct0>();
-            text0 = streamReader.ReadCStringValidOffset(fs1struct0.text0Ptr);
-            text1 = streamReader.ReadCStringValidOffset(fs1struct0.text1Ptr);
-            text2 = streamReader.ReadCStringValidOffset(fs1struct0.text2Ptr);
-            text3 = streamReader.ReadCStringValidOffset(fs1struct0.text3Ptr);
+            text0 = streamReader.ReadCStringValidOffset(fs1struct0.text0Ptr, offset);
+            text1 = streamReader.ReadCStringValidOffset(fs1struct0.text1Ptr, offset);
+            text2 = streamReader.ReadCStringValidOffset(fs1struct0.text2Ptr, offset);
+            text3 = streamReader.ReadCStringValidOffset(fs1struct0.text3Ptr, offset);
         }
     }
 

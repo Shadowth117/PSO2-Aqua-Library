@@ -13,9 +13,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
         public AttachTransformObject(int offset, BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             attach = streamReader.Read<AttachTransform>();
-            name = streamReader.ReadCStringValidOffset(attach.namePtr + offset);
-            unkText = streamReader.ReadCStringValidOffset(attach.unkTextPtr + offset);
-            attachNode = streamReader.ReadCStringValidOffset(attach.attachNodePtr + offset);
+            name = streamReader.ReadCStringValidOffset(attach.namePtr, offset);
+            unkText = streamReader.ReadCStringValidOffset(attach.unkTextPtr, offset);
+            attachNode = streamReader.ReadCStringValidOffset(attach.attachNodePtr, offset);
         }
     }
 

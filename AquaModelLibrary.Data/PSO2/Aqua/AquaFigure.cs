@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData;
 using AquaModelLibrary.Extensions.Readers;
-using System.IO;
+using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -59,6 +59,37 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     sr.Seek(bookmark, SeekOrigin.Begin);
                 }
             }
+        }
+
+        public static StringBuilder CheckFigEffectMaps(string inFilename, List<int> allTypes)
+        {
+            if (new FileInfo(inFilename).Length < 0x11)
+            {
+                return new StringBuilder();
+            }
+            StringBuilder dump = new StringBuilder();
+            dump.AppendLine(inFilename);
+
+            AquaFigure fig = new AquaFigure(File.ReadAllBytes(inFilename), "fig\0");
+
+            foreach (var stateStruct in fig.stateStructs)
+            {
+                foreach (var eff in stateStruct.stateMap.effects)
+                {
+                    string mapped = "";
+                    if (!FigEffectMapStructs.effectMappings.ContainsKey(eff.type))
+                    {
+                        mapped = "Not yet mapped!";
+                    }
+                    dump.AppendLine(eff.type.ToString() + " " + eff.type.ToString("X") + $" {mapped}");
+                    if (!allTypes.Contains(eff.type))
+                    {
+                        allTypes.Add(eff.type);
+                    }
+                }
+            }
+
+            return dump;
         }
     }
 }

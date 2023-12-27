@@ -52,7 +52,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public int int_10;
 
             //
-            public string name;
+            public string name = null;
             public List<MainSubNode> subNodes = new List<MainSubNode>();
         }
 
@@ -93,11 +93,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public int ptr_58;
 
             //
-            public string nodeName;
-            public string ptr48String;
-            public string ptr4CString;
-            public string nodeName2;
-            public string ptr58String;
+            public string nodeName = null;
+            public string ptr48String = null;
+            public string ptr4CString = null;
+            public string nodeName2 = null;
+            public string ptr58String = null;
         }
 
         //Sub of fltdHeader

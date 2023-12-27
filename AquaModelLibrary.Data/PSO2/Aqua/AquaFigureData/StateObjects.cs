@@ -13,11 +13,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
         public StateObjects(int offset, BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             rawStruct = streamReader.Read<StateStruct>();
-            text = streamReader.ReadCStringValidOffset(rawStruct.textPtr);
+            text = streamReader.ReadCStringValidOffset(rawStruct.textPtr, offset);
 
-            struct0 = rawStruct.FS1UnkStruct0Ptr > 0x10 ? new FS1UnkStruct0Object(rawStruct.FS1UnkStruct0Ptr + offset, streamReader) : null;
-            collision = ReadCollisionData(offset, rawStruct.collisionPtr, streamReader);
-            stateMap = ReadStateMappingObject(offset, rawStruct.stateMappingPtr, streamReader);
+            struct0 = rawStruct.FS1UnkStruct0Ptr > 0x10 ? new FS1UnkStruct0Object(offset, rawStruct.FS1UnkStruct0Ptr, streamReader) : null;
+            collision = rawStruct.collisionPtr > 0x10 ? new CollisionContainerObject(offset, rawStruct.collisionPtr, streamReader) : null;
+            stateMap = rawStruct.stateMappingPtr > 0x10 ? new StateMappingObject(offset, rawStruct.stateMappingPtr, streamReader) : null;
         }
     }
 

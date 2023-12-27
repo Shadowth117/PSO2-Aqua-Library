@@ -4,7 +4,7 @@
     {
         //0 = int, 1 = float, 2 = string pointer, 3 - Color?. The struct starts with the type value of the struct itself, as an int.
         //Since there are numerous with unique type ids, they are stored this way instead of as proper struct definitions
-        public static Dictionary<int, int[]> effectMappings = new Dictionary<int, int[]>()
+        public static readonly Dictionary<int, int[]> effectMappings = new Dictionary<int, int[]>()
         {
             { 0, new [] { 2 } }, //? Might just be a null one. Samples so far seem to always be in the garbage data area after NIFL text storage.
             { 1, new [] { 2, 1, 1, 1, 1} },

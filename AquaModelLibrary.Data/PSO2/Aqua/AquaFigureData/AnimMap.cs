@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
+﻿using AquaModelLibrary.Extensions.Readers;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData
 {
     public class AnimMapObject
     {
@@ -8,6 +10,34 @@
         public string type = null;
         public string anim = null;
         public List<AnimFrameInfo> frameInfoList = new List<AnimFrameInfo>();
+
+        public AnimMapObject() { }
+
+        public AnimMapObject(int offset, long address, BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            sr.Seek(offset + address, SeekOrigin.Begin);
+            animStruct = sr.Read<AnimMapStruct>();
+            name = sr.ReadCStringValidOffset(animStruct.namePtr, offset);
+            followUp = sr.ReadCStringValidOffset(animStruct.followUpPtr, offset);
+            type = sr.ReadCStringValidOffset(animStruct.typePtr, offset);
+            anim = sr.ReadCStringValidOffset(animStruct.animPtr, offset);
+
+            List<int> frameInfoPtrs = new List<int>();
+            if (animStruct.frameInfoPtr > 0x10)
+            {
+                sr.Seek(offset + animStruct.frameInfoPtr, SeekOrigin.Begin);
+                for (int fi = 0; fi < animStruct.frameInfoPtrCount; fi++)
+                {
+                    frameInfoPtrs.Add(sr.Read<int>());
+                }
+
+                for (int fi = 0; fi < animStruct.frameInfoPtrCount; fi++)
+                {
+                    sr.Seek(offset + frameInfoPtrs[fi], SeekOrigin.Begin);
+                    frameInfoList.Add(sr.Read<AnimFrameInfo>());
+                }
+            }
+        }
     }
 
     public struct AnimMapStruct
