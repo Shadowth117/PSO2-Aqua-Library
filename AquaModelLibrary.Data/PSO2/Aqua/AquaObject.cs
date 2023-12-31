@@ -10,7 +10,7 @@ using System.Text;
 namespace AquaModelLibrary.Data.PSO2.Aqua
 
 {    //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
-    public unsafe class AquaObject : AquaCommon
+    public unsafe partial class AquaObject : AquaCommon
     {
         /// <summary>
         /// Checks the objc for if the type is in NGS range. Default to NGS at this point.
@@ -1708,7 +1708,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         //To be honest I don't really know what these actually do, but this seems to generate the structure roughly the way the game's exporter does.
         //Essentially, vertices between different meshes are linked together 
-        public void CalcUNRMs(AquaObject model, bool applyNormalAveraging, bool useUNRMs)
+        public void CalcUNRMs(bool applyNormalAveraging, bool useUNRMs)
         {
             UNRM unrm = new UNRM();
             if (useUNRMs == false && applyNormalAveraging == false)
@@ -1717,38 +1717,38 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
 
             //Set up a boolean array for tracking what we've gone through for this
-            bool[][] meshCheckArr = new bool[model.vtxlList.Count][];
-            for (int m = 0; m < model.vtxlList.Count; m++)
+            bool[][] meshCheckArr = new bool[vtxlList.Count][];
+            for (int m = 0; m < vtxlList.Count; m++)
             {
-                meshCheckArr[m] = new bool[model.vtxlList[m].vertPositions.Count];
+                meshCheckArr[m] = new bool[vtxlList[m].vertPositions.Count];
             }
 
-            for (int m = 0; m < model.vtxlList.Count; m++)
+            for (int m = 0; m < vtxlList.Count; m++)
             {
-                for (int v = 0; v < model.vtxlList[m].vertPositions.Count; v++)
+                for (int v = 0; v < vtxlList[m].vertPositions.Count; v++)
                 {
                     Vector3 normals = new Vector3();
-                    if (model.vtxlList[m].vertNormals.Count > 0)
+                    if (vtxlList[m].vertNormals.Count > 0)
                     {
-                        normals = model.vtxlList[m].vertNormals[v];
+                        normals = vtxlList[m].vertNormals[v];
                     }
 
                     List<int> meshNum = new List<int>() { m };
                     List<int> vertId = new List<int>() { v };
                     //Loop through the other vertices to match them up
-                    for (int n = 0; n < model.vtxlList.Count; n++)
+                    for (int n = 0; n < vtxlList.Count; n++)
                     {
-                        for (int w = 0; w < model.vtxlList[n].vertPositions.Count; w++)
+                        for (int w = 0; w < vtxlList[n].vertPositions.Count; w++)
                         {
                             bool sameVert = (m == n && v == w);
-                            if (!sameVert && model.vtxlList[n].vertPositions[w].Equals(model.vtxlList[m].vertPositions[v]) && !meshCheckArr[n][w])
+                            if (!sameVert && vtxlList[n].vertPositions[w].Equals(vtxlList[m].vertPositions[v]) && !meshCheckArr[n][w])
                             {
                                 meshCheckArr[n][w] = true;
                                 meshNum.Add(n);
                                 vertId.Add(w);
-                                if (applyNormalAveraging && model.vtxlList[n].vertNormals.Count > 0)
+                                if (applyNormalAveraging && vtxlList[n].vertNormals.Count > 0)
                                 {
-                                    normals += model.vtxlList[n].vertNormals[w];
+                                    normals += vtxlList[n].vertNormals[w];
                                 }
                             }
                         }
@@ -1768,7 +1768,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                             normals = Vector3.Normalize(normals);
                             for (int i = 0; i < meshNum.Count; i++)
                             {
-                                model.vtxlList[meshNum[i]].vertNormals[vertId[i]] = normals;
+                                vtxlList[meshNum[i]].vertNormals[vertId[i]] = normals;
                             }
                         }
                     }
@@ -1780,7 +1780,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             //Only actually apply them if we choose to. This function may just be used for averaging normals.
             if (useUNRMs)
             {
-                model.unrms = unrm;
+                unrms = unrm;
             }
         }
 
@@ -1927,52 +1927,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                 vtxlList.Add(vtxl);
             }
-        }
-
-        //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.
-        //PRM is very simple and can only take in: Vertex positions, vertex normals, vert colors, and 2 UV mappings along with a list of triangles at best. It also expects only one object. 
-        //The main purpose of this function is to fix UV and vert color conflicts upon conversion. While you can just do this logic yourself, this will do it for you as needed.
-        public PRMModel ConvertToPRM()
-        {
-            //Assemble vtxlList
-            if (vtxlList == null || vtxlList.Count == 0)
-            {
-                VTXLFromFaceVerts();
-            }
-
-            PRMModel prmModel = new PRMModel();
-            for (int i = 0; i < vtxlList[0].vertPositions.Count; i++)
-            {
-                PRMModel.PRMVert prmVert = new PRMModel.PRMVert();
-
-                prmVert.pos = vtxlList[0].vertPositions[i];
-
-                if (vtxlList[0].vertNormals.Count > 0)
-                {
-                    prmVert.normal = vtxlList[0].vertNormals[i];
-                }
-                if (vtxlList[0].vertColors.Count > 0)
-                {
-                    prmVert.color = vtxlList[0].vertColors[i];
-                }
-
-                if (vtxlList[0].uv1List.Count > 0)
-                {
-                    prmVert.uv1 = vtxlList[0].uv1List[i];
-                }
-                if (vtxlList[0].uv2List.Count > 0)
-                {
-                    prmVert.uv2 = vtxlList[0].uv2List[i];
-                } else
-                {
-                    prmVert.uv2 = vtxlList[0].uv1List[i];
-                }
-
-                prmModel.vertices.Add(prmVert);
-            }
-            prmModel.faces = tempTris[0].triList;
-
-            return prmModel;
         }
 
         public AquaObject Clone()

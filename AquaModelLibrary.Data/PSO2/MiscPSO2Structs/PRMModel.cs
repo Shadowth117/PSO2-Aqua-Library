@@ -110,6 +110,50 @@ namespace AquaModelLibrary
             }
         }
 
+        //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.
+        //PRM is very simple and can only take in: Vertex positions, vertex normals, vert colors, and 2 UV mappings along with a list of triangles at best. It also expects only one object. 
+        //The main purpose of this function is to fix UV and vert color conflicts upon conversion. While you can just do this logic yourself, this will do it for you as needed.
+        public PRMModel(AquaObject aqo)
+        {
+            //Assemble vtxlList
+            if (aqo.vtxlList == null || aqo.vtxlList.Count == 0)
+            {
+                aqo.VTXLFromFaceVerts();
+            }
+
+            for (int i = 0; i < aqo.vtxlList[0].vertPositions.Count; i++)
+            {
+                PRMVert prmVert = new PRMVert();
+
+                prmVert.pos = aqo.vtxlList[0].vertPositions[i];
+
+                if (aqo.vtxlList[0].vertNormals.Count > 0)
+                {
+                    prmVert.normal = aqo.vtxlList[0].vertNormals[i];
+                }
+                if (aqo.vtxlList[0].vertColors.Count > 0)
+                {
+                    prmVert.color = aqo.vtxlList[0].vertColors[i];
+                }
+
+                if (aqo.vtxlList[0].uv1List.Count > 0)
+                {
+                    prmVert.uv1 = aqo.vtxlList[0].uv1List[i];
+                }
+                if (aqo.vtxlList[0].uv2List.Count > 0)
+                {
+                    prmVert.uv2 = aqo.vtxlList[0].uv2List[i];
+                }
+                else
+                {
+                    prmVert.uv2 = aqo.vtxlList[0].uv1List[i];
+                }
+
+                vertices.Add(prmVert);
+            }
+            faces = aqo.tempTris[0].triList;
+        }
+
         public byte[] GetBytes(int version)
         {
             List<byte> finalOutBytes = new List<byte>();
@@ -359,6 +403,7 @@ namespace AquaModelLibrary
                 return vert;
             }
         }
+
         public void ConvertToAquaObject(out AquaObject aqo, out AquaNode aqn)
         {
             aqo = new AquaObject();
@@ -383,7 +428,7 @@ namespace AquaModelLibrary
 
             aqn = AquaNode.GenerateBasicAQN();
 
-            aqo.ConvertToNGSPSO2Mesh(false, true, false, true, false, false, false);
+            aqo.ConvertToPSO2Model(false, true, false, true, false, false, false);
         }
     }
 }
