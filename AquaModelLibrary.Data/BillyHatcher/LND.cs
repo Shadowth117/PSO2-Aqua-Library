@@ -1,11 +1,12 @@
-﻿using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
+﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
+using AquaModelLibrary.Extra.Ninja;
 using AquaModelLibrary.Helpers.Extensions;
 using ArchiveLib;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
+using static AquaModelLibrary.Data.BillyHatcher.ARC;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class LND
     {
@@ -96,8 +97,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     {
                         offsets.Add(outBytes.Count + offset);
                         outBytes.ReserveInt($"TexRef{i}");
-                        outBytes.AddValue((int)0);
-                        outBytes.AddValue((int)0);
+                        outBytes.AddValue(0);
+                        outBytes.AddValue(0);
                     }
                     for (int i = 0; i < texNames.Count; i++)
                     {
@@ -168,7 +169,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     var pof0Header = sr.Read<NinjaHeader>();
                     var pofRaw = sr.ReadBytes(sr.Position() - 0x8, pof0Header.fileSize + 0x8);
                     pof0Offsets = POF0.GetPof0Offsets(pofRaw);
-                    sr.Seek(pof0Header.fileSize, System.IO.SeekOrigin.Current);
+                    sr.Seek(pof0Header.fileSize, SeekOrigin.Current);
                 }
                 if (sr.Peek<int>() == 0x484D5647)
                 {
@@ -199,9 +200,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcHeader.unkInt1 = sr.ReadBE<int>();
 
             //Get model references
-            sr.Seek(0x20 + arcHeader.pof0Offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcHeader.pof0Offset, SeekOrigin.Begin);
             pof0Offsets = POF0.GetRawPOF0Offsets(sr.ReadBytes(sr.Position(), arcHeader.pof0OffsetsSize));
-            sr.Seek(arcHeader.pof0OffsetsSize, System.IO.SeekOrigin.Current);
+            sr.Seek(arcHeader.pof0OffsetsSize, SeekOrigin.Current);
             for (int i = 0; i < arcHeader.fileCount; i++)
             {
                 ARCFileRef modelRef = new ARCFileRef();
@@ -214,13 +215,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             var nameStart = sr.Position();
             foreach (var modelRef in arcLndModelRefs)
             {
-                sr.Seek(nameStart + modelRef.relativeNameOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(nameStart + modelRef.relativeNameOffset, SeekOrigin.Begin);
                 fileNames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
             }
 
             for (int mdl = 0; mdl < arcHeader.fileCount; mdl++)
             {
-                sr.Seek(0x20 + arcLndModelRefs[mdl].modelOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + arcLndModelRefs[mdl].modelOffset, SeekOrigin.Begin);
                 var fileName = fileNames[mdl];
 
                 //In retail, lnds have Block (Always main level data), models named 'Sphere' that sometimes have trailing numbers, land, and mpl here.
@@ -252,7 +253,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
 
-            sr.Seek(0x20 + arcLand.arcLndHeader.GVMOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcLand.arcLndHeader.GVMOffset, SeekOrigin.Begin);
         }
 
         private ARCLNDLand ReadARCLand(BufferedStreamReader sr)
@@ -270,7 +271,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             if (arcLand.arcLndHeader.extraModelOffsetsOffset != 0)
             {
-                sr.Seek(0x20 + arcLand.arcLndHeader.extraModelOffsetsOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + arcLand.arcLndHeader.extraModelOffsetsOffset, SeekOrigin.Begin);
                 for (int i = 0; i < arcLand.arcLndHeader.extraModelCount; i++)
                 {
                     arcLand.arcExtraModeloffsets.Add(sr.ReadBE<int>());
@@ -278,12 +279,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Read texture reference table
-            sr.Seek(0x20 + arcLand.arcLndHeader.texRefTableOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcLand.arcLndHeader.texRefTableOffset, SeekOrigin.Begin);
             arcLand.arcRefTable = new ARCLNDRefTableHead();
             arcLand.arcRefTable.entryOffset = sr.ReadBE<int>();
             arcLand.arcRefTable.entryCount = sr.ReadBE<int>();
 
-            sr.Seek(0x20 + arcLand.arcRefTable.entryOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcLand.arcRefTable.entryOffset, SeekOrigin.Begin);
             for (int i = 0; i < arcLand.arcRefTable.entryCount; i++)
             {
                 ARCLNDRefEntry refEntry = new ARCLNDRefEntry();
@@ -294,7 +295,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             foreach (ARCLNDRefEntry entry in arcLand.arcRefTableEntries)
             {
-                sr.Seek(entry.textOffset + 0x20, System.IO.SeekOrigin.Begin);
+                sr.Seek(entry.textOffset + 0x20, SeekOrigin.Begin);
                 texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
             }
 
@@ -338,7 +339,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             if (arcModel.arcMainDataHeader.animatedModelSetOffset != 0)
             {
-                sr.Seek(0x20 + arcModel.arcMainDataHeader.animatedModelSetOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + arcModel.arcMainDataHeader.animatedModelSetOffset, SeekOrigin.Begin);
                 for (int i = 0; i < arcModel.arcMainDataHeader.animatedModelSetCount; i++)
                 {
                     ARCLNDAnimatedMeshRefSet set = new ARCLNDAnimatedMeshRefSet();
@@ -351,11 +352,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     ARCLNDAnimatedMeshData meshData = new ARCLNDAnimatedMeshData();
                     meshData.MPLAnimId = set.MPLAnimId;
-                    sr.Seek(0x20 + set.modelOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(0x20 + set.modelOffset, SeekOrigin.Begin);
                     meshData.model = ReadArcLndModel(sr, true);
                     if (set.motionOffset != 0)
                     {
-                        sr.Seek(0x20 + set.motionOffset, System.IO.SeekOrigin.Begin);
+                        sr.Seek(0x20 + set.motionOffset, SeekOrigin.Begin);
                         meshData.motion = new Motion(sr, 0x20);
                     }
                     arcLndAnimatedMeshDataList.Add(meshData);
@@ -365,11 +366,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             //Alt Vertex Colors
             if (arcModel.arcMainDataHeader.altVertexColorOffset > 0)
             {
-                sr.Seek(0x20 + arcModel.arcMainDataHeader.altVertexColorOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + arcModel.arcMainDataHeader.altVertexColorOffset, SeekOrigin.Begin);
                 arcModel.arcAltVertRef = new ARCLNDAltVertColorRef();
                 arcModel.arcAltVertRef.count = sr.ReadBE<int>();
                 arcModel.arcAltVertRef.offset = sr.ReadBE<int>();
-                sr.Seek(0x20 + arcModel.arcAltVertRef.offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + arcModel.arcAltVertRef.offset, SeekOrigin.Begin);
                 for (int i = 0; i < arcModel.arcAltVertRef.count; i++)
                 {
                     ARCLNDAltVertColorMainRef altVert = new ARCLNDAltVertColorMainRef();
@@ -378,17 +379,17 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     arcModel.arcAltVertRefs.Add(altVert);
 
                     var bookmark = sr.Position();
-                    sr.Seek(0x20 + altVert.offset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(0x20 + altVert.offset, SeekOrigin.Begin);
                     ARCLNDVertDataSet arcVertDataSet = new ARCLNDVertDataSet();
                     ReadVertDataSet(sr, arcVertDataSet);
                     arcModel.arcAltVertColorList.Add(arcVertDataSet);
 
-                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+                    sr.Seek(bookmark, SeekOrigin.Begin);
                 }
             }
 
             //Land entries
-            sr.Seek(0x20 + arcModel.arcMainOffsetTable.landEntryOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcModel.arcMainOffsetTable.landEntryOffset, SeekOrigin.Begin);
             for (int i = 0; i < arcModel.arcMainOffsetTable.landEntryCount; i++)
             {
                 ARCLNDMaterialEntryRef lndRef = new ARCLNDMaterialEntryRef();
@@ -401,7 +402,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 if (matRef.offset != 0)
                 {
-                    sr.Seek(0x20 + matRef.offset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(0x20 + matRef.offset, SeekOrigin.Begin);
                     ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();
                     matEntry.RenderFlags = (ARCLNDRenderFlags)sr.ReadBE<int>();
                     matEntry.diffuseColor = sr.ReadBE<int>();
@@ -424,7 +425,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Vertex data. Should only be one reference offset, but technically there could be more
-            sr.Seek(0x20 + arcModel.arcMainOffsetTable.vertDataOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcModel.arcMainOffsetTable.vertDataOffset, SeekOrigin.Begin);
             for (int i = 0; i < arcModel.arcMainOffsetTable.vertDataCount; i++)
             {
                 ARCLNDVertDataRef vertRef = new ARCLNDVertDataRef();
@@ -434,14 +435,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             foreach (var vertRef in arcModel.arcVertDataRefList)
             {
-                sr.Seek(0x20 + vertRef.offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + vertRef.offset, SeekOrigin.Begin);
                 ARCLNDVertDataSet arcVertDataSet = new ARCLNDVertDataSet();
                 ReadVertDataSet(sr, arcVertDataSet);
                 arcModel.arcVertDataSetList.Add(arcVertDataSet);
             }
 
             //Read triangle data
-            sr.Seek(0x20 + arcModel.arcMainOffsetTable.faceSetsOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcModel.arcMainOffsetTable.faceSetsOffset, SeekOrigin.Begin);
             for (int i = 0; i < arcModel.arcMainOffsetTable.faceSetsCount; i++)
             {
                 ARCLNDFaceDataRef faceRef = new ARCLNDFaceDataRef();
@@ -451,7 +452,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             foreach (var faceRef in arcModel.arcFaceDataRefList)
             {
-                sr.Seek(0x20 + faceRef.offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + faceRef.offset, SeekOrigin.Begin);
                 ARCLNDFaceDataHead faceDataHead = new ARCLNDFaceDataHead();
                 faceDataHead.flags = sr.ReadBE<ArcLndVertType>();
                 faceDataHead.faceDataOffset0 = sr.ReadBE<int>();
@@ -484,9 +485,9 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 {
                     for (int j = 0; j < faceDataHead.triIndicesList1[i].Count - 2; j++)
                     {
-                        int id0 = ((j + 1) & 1) > 0 ? faceDataHead.triIndicesList1[i][j + 2][0] : faceDataHead.triIndicesList1[i][j][0];
+                        int id0 = (j + 1 & 1) > 0 ? faceDataHead.triIndicesList1[i][j + 2][0] : faceDataHead.triIndicesList1[i][j][0];
                         int id1 = faceDataHead.triIndicesList1[i][j + 1][0];
-                        int id2 = ((j + 1) & 1) > 0 ? faceDataHead.triIndicesList1[i][j][0] : faceDataHead.triIndicesList1[i][j + 2][0];
+                        int id2 = (j + 1 & 1) > 0 ? faceDataHead.triIndicesList1[i][j][0] : faceDataHead.triIndicesList1[i][j + 2][0];
                         Vector3 n = Vector3.Normalize(Vector3.Cross(arcModel.arcVertDataSetList[0].PositionData[id2] - arcModel.arcVertDataSetList[0].PositionData[id0],
                             arcModel.arcVertDataSetList[0].PositionData[id1] - arcModel.arcVertDataSetList[0].PositionData[id0]));
                         arcModel.arcVertDataSetList[0].SetFaceNormals(id0, id1, id2, n);
@@ -496,7 +497,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Node bounding
-            sr.Seek(0x20 + arcModel.arcMainOffsetTable.nodeBoundingOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcModel.arcMainOffsetTable.nodeBoundingOffset, SeekOrigin.Begin);
             for (int i = 0; i < arcModel.arcMainOffsetTable.nodeBoundingCount; i++)
             {
                 ARCLNDNodeBounding bounding = new ARCLNDNodeBounding();
@@ -516,7 +517,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Mesh data
-            sr.Seek(0x20 + arcModel.arcMainOffsetTable.meshDataOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcModel.arcMainOffsetTable.meshDataOffset, SeekOrigin.Begin);
             for (int i = 0; i < arcModel.arcMainOffsetTable.meshDataCount; i++)
             {
                 ARCLNDMeshDataRef meshDataRef = new ARCLNDMeshDataRef();
@@ -527,7 +528,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             foreach (var datMeshaRef in arcModel.arcMeshDataRefList)
             {
-                sr.Seek(0x20 + datMeshaRef.offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(0x20 + datMeshaRef.offset, SeekOrigin.Begin);
                 List<ARCLNDMeshData> meshDataList = new List<ARCLNDMeshData>();
                 for (int i = 0; i < datMeshaRef.count; i++)
                 {
@@ -575,34 +576,34 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         break;
                 }
             }
-            sr.Seek(0x20 + arcVertDataSet.Position.offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcVertDataSet.Position.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.Position.count; j++)
             {
                 arcVertDataSet.PositionData.Add(sr.ReadBEV3());
             }
-            sr.Seek(0x20 + arcVertDataSet.Normal.offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcVertDataSet.Normal.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.Normal.count; j++)
             {
                 arcVertDataSet.NormalData.Add(sr.ReadBEV3());
             }
-            sr.Seek(0x20 + arcVertDataSet.VertColor.offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcVertDataSet.VertColor.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.VertColor.count; j++)
             {
                 arcVertDataSet.VertColorData.Add(sr.ReadBytes(sr.Position(), 4));
-                sr.Seek(4, System.IO.SeekOrigin.Current);
+                sr.Seek(4, SeekOrigin.Current);
             }
-            sr.Seek(0x20 + arcVertDataSet.VertColor2.offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcVertDataSet.VertColor2.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.VertColor2.count; j++)
             {
                 arcVertDataSet.VertColor2Data.Add(sr.ReadBytes(sr.Position(), 4));
-                sr.Seek(4, System.IO.SeekOrigin.Current);
+                sr.Seek(4, SeekOrigin.Current);
             }
-            sr.Seek(0x20 + arcVertDataSet.UV1.offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcVertDataSet.UV1.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.UV1.count; j++)
             {
                 arcVertDataSet.UV1Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
             }
-            sr.Seek(0x20 + arcVertDataSet.UV2.offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + arcVertDataSet.UV2.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.UV2.count; j++)
             {
                 arcVertDataSet.UV2Data.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
@@ -611,7 +612,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
         private static void ReadArcLndTris(BufferedStreamReader sr, ArcLndVertType flags, int offset, int bufferSize, out List<List<List<int>>> triIndicesList, out List<List<List<int>>> triIndicesListStarts)
         {
-            sr.Seek(offset + 0x20, System.IO.SeekOrigin.Begin);
+            sr.Seek(offset + 0x20, SeekOrigin.Begin);
             triIndicesList = new List<List<List<int>>>();
             triIndicesListStarts = new List<List<List<int>>>();
             while (sr.Position() < bufferSize + offset + 20)
@@ -622,7 +623,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 if (type != 0x98 && type != 0x90 && type != 0)
                 {
                     var pos = sr.Position();
-                    throw new System.Exception();
+                    throw new Exception();
                 }
                 if (type == 0)
                 {
@@ -686,14 +687,14 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header.lndTexNameListOffset = sr.ReadBE<int>();
 
             //Motion data
-            sr.Seek(header.motionDataOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header.motionDataOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < header.motionDataCount; i++)
             {
                 motionDataOffsets.Add(sr.ReadBE<int>());
             }
             foreach (var offset in motionDataOffsets)
             {
-                sr.Seek(offset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(offset + 0x8, SeekOrigin.Begin);
                 LNDMotionDataHead head = new LNDMotionDataHead();
                 head.lndMotionDataHead2Offset = sr.ReadBE<int>();
                 head.frameAboveFinalFrame = sr.ReadBE<int>();
@@ -703,7 +704,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             foreach (var motionHead in motionDataHeadList)
             {
-                sr.Seek(motionHead.lndMotionDataHead2Offset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(motionHead.lndMotionDataHead2Offset + 0x8, SeekOrigin.Begin);
                 LNDMotionDataHead2 head = new LNDMotionDataHead2();
                 head.dataOffset = sr.ReadBE<int>();
                 head.unkInt = sr.ReadBE<int>();
@@ -732,13 +733,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             //Tex name list
             if (header.lndTexNameListOffset > 0)
             {
-                sr.Seek(header.lndTexNameListOffset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(header.lndTexNameListOffset + 0x8, SeekOrigin.Begin);
                 texDataEntryHead = new LNDTexDataEntryHead();
                 texDataEntryHead.offset = sr.ReadBE<int>();
                 texDataEntryHead.count = sr.ReadBE<ushort>();
                 texDataEntryHead.texCount = sr.ReadBE<ushort>();
 
-                sr.Seek(texDataEntryHead.offset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(texDataEntryHead.offset + 0x8, SeekOrigin.Begin);
                 for (int i = 0; i < texDataEntryHead.texCount; i++)
                 {
                     LNDTexDataEntry entry = new LNDTexDataEntry();
@@ -749,13 +750,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
                 foreach (LNDTexDataEntry entry in texDataEntries)
                 {
-                    sr.Seek(entry.offset + 0x8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(entry.offset + 0x8, SeekOrigin.Begin);
                     texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
                 }
             }
 
             //Node data
-            sr.Seek(header.lndHeader2Offset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header.lndHeader2Offset + 0x8, SeekOrigin.Begin);
             header2 = new LNDHeader2();
             header2.nodeCount = sr.ReadBE<ushort>();
             header2.usht02 = sr.ReadBE<ushort>();
@@ -765,7 +766,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header2.usht0E = sr.ReadBE<ushort>();
             header2.LNDNodeIdSetOffset = sr.ReadBE<int>();
 
-            sr.Seek(header2.nodesOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header2.nodesOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < header2.nodeCount; i++)
             {
                 var node = new LandEntry();
@@ -783,19 +784,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 nodes.Add(node);
             }
 
-            sr.Seek(header2.LNDNodeIdSetOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header2.LNDNodeIdSetOffset + 0x8, SeekOrigin.Begin);
             nodeIdSet = new LNDNodeIdSet();
             nodeIdSet.nodeCount = sr.ReadBE<ushort>();
             nodeIdSet.usht02 = sr.ReadBE<ushort>();
             nodeIdSet.nodeIdsOffset = sr.ReadBE<int>();
-            sr.Seek(nodeIdSet.nodeIdsOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(nodeIdSet.nodeIdsOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < nodeIdSet.nodeCount; i++)
             {
                 modelNodeIds.Add(sr.ReadBE<ushort>());
             }
 
             //Mesh data
-            sr.Seek(header.lndMeshInfoOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header.lndMeshInfoOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < header.nodeCount; i++)
             {
                 objectOffsets.Add(sr.ReadBE<uint>());
@@ -803,7 +804,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             foreach (var offset in objectOffsets)
             {
-                sr.Seek(offset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(offset + 0x8, SeekOrigin.Begin);
                 LNDMeshInfo lndMeshInfo = new LNDMeshInfo();
                 lndMeshInfo.flags = sr.ReadBE<int>();
                 lndMeshInfo.lndMeshInfo2Offset = sr.ReadBE<int>();
@@ -822,7 +823,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 if (lndMeshInfo.lndMeshInfo2Offset > 0)
                 {
-                    sr.Seek(lndMeshInfo.lndMeshInfo2Offset + 0x8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(lndMeshInfo.lndMeshInfo2Offset + 0x8, SeekOrigin.Begin);
                     LNDMeshInfo2 lndMeshInfo2 = new LNDMeshInfo2();
                     lndMeshInfo2.layoutsOffset = sr.ReadBE<int>();
                     lndMeshInfo2.unkOffset0 = sr.ReadBE<int>();
@@ -835,7 +836,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     lndMeshInfo2.maxBounding = sr.ReadBEV2();
                     lndMeshInfo.lndMeshInfo2 = lndMeshInfo2;
 
-                    sr.Seek(lndMeshInfo2.layoutsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(lndMeshInfo2.layoutsOffset + 0x8, SeekOrigin.Begin);
                     List<LNDVertLayout> layouts = new List<LNDVertLayout>();
                     var vertTypeCount = 0;
                     while (true) //not sure wtf defines the count here
@@ -863,7 +864,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     }
                     foreach (var lyt in layouts)
                     {
-                        sr.Seek(lyt.vertDataOffset + 0x8, System.IO.SeekOrigin.Begin);
+                        sr.Seek(lyt.vertDataOffset + 0x8, SeekOrigin.Begin);
                         for (int i = 0; i < lyt.vertCount; i++)
                         {
                             switch (lyt.vertType)
@@ -881,7 +882,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                     lndMeshInfo2.vertData.vertUVData.Add(new short[] { sr.ReadBE<short>(), sr.ReadBE<short>() });
                                     break;
                                 default:
-                                    throw new System.Exception($"Unk Vert type: {lyt.vertType:X} Data type: {lyt.dataType:X}");
+                                    throw new Exception($"Unk Vert type: {lyt.vertType:X} Data type: {lyt.dataType:X}");
                             }
                         }
                     }
@@ -890,7 +891,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     if (lndMeshInfo2.polyInfo0Offset != 0)
                     {
                         byte[] indexSizes = null;
-                        sr.Seek(lndMeshInfo2.polyInfo0Offset + 0x8, System.IO.SeekOrigin.Begin);
+                        sr.Seek(lndMeshInfo2.polyInfo0Offset + 0x8, SeekOrigin.Begin);
                         for (int i = 0; i < lndMeshInfo2.polyInfo0Count; i++)
                         {
                             lndMeshInfo2.polyInfo0List.Add(ReadPolyInfo(sr, lndMeshInfo2, vertTypeCount, ref indexSizes));
@@ -899,7 +900,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     if (lndMeshInfo2.polyInfo1Offset != 0)
                     {
                         byte[] indexSizes = null;
-                        sr.Seek(lndMeshInfo2.polyInfo1Offset + 0x8, System.IO.SeekOrigin.Begin);
+                        sr.Seek(lndMeshInfo2.polyInfo1Offset + 0x8, SeekOrigin.Begin);
                         for (int i = 0; i < lndMeshInfo2.polyInfo1Count; i++)
                         {
                             lndMeshInfo2.polyInfo1List.Add(ReadPolyInfo(sr, lndMeshInfo2, vertTypeCount, ref indexSizes));
@@ -911,7 +912,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
 
             //Seek for other data
-            sr.Seek(nHeader.fileSize + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(nHeader.fileSize + 0x8, SeekOrigin.Begin);
         }
 
         private static PolyInfo ReadPolyInfo(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, ref byte[] indexSizes)
@@ -924,7 +925,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             polyInfo.polyDataBufferSize = sr.ReadBE<int>();
             var bookmark = sr.Position();
             ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo, ref indexSizes);
-            sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+            sr.Seek(bookmark, SeekOrigin.Begin);
             return polyInfo;
         }
 
@@ -933,7 +934,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             //Material data
             if (polyInfo != null)
             {
-                sr.Seek(polyInfo.materialOffset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(polyInfo.materialOffset + 0x8, SeekOrigin.Begin);
                 List<MaterialInfo> matInfoList = new List<MaterialInfo>();
                 for (int i = 0; i < polyInfo.materialDataCount; i++)
                 {
@@ -997,7 +998,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             //Polygons
             if (polyInfo != null && polyInfo.polyDataOffset != 0)
             {
-                sr.Seek(polyInfo.polyDataOffset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(polyInfo.polyDataOffset + 0x8, SeekOrigin.Begin);
                 List<List<List<int>>> triIndicesList = new List<List<List<int>>>();
                 List<List<List<int>>> triIndicesListStarts = new List<List<List<int>>>();
                 while (sr.Position() < polyInfo.polyDataBufferSize + polyInfo.polyDataOffset + 8)
@@ -1037,7 +1038,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                         triIndex.Add(sr.ReadBE<ushort>());
                                         break;
                                     default:
-                                        throw new System.Exception();
+                                        throw new Exception();
                                 }
                             }
                             else //Fallback for if for some godforsaken reason this doesn't exist
@@ -1169,13 +1170,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             arcHead.AddValue(pof0Size);
             arcHead.AddValue(fileNames.Count);
 
-            arcHead.AddValue((int)0);
+            arcHead.AddValue(0);
             arcHead.Add(0x30);
             arcHead.Add(0x31);
             arcHead.Add(0x30);
             arcHead.Add(0x30);
-            arcHead.AddValue((int)0);
-            arcHead.AddValue((int)0);
+            arcHead.AddValue(0);
+            arcHead.AddValue(0);
             outBytes.InsertRange(0, arcHead);
 
             ByteListExtension.Reset();

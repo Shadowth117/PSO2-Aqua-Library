@@ -11,6 +11,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public LobbyActionCommon() { }
 
+        public LobbyActionCommon(byte[] file, string _ext)
+        {
+            Read(file, _ext);
+        }
+
         public LobbyActionCommon(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
         {
             Read(sr, _ext);

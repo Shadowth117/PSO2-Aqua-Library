@@ -9,7 +9,7 @@
         public const int stdPlayerAnim = 0x10012;
         public const int cameraAnim = 0x10004;
         public const int materialAnim = 0x20;
-        public const int ushortThreshold = 4095; //Threshold to change over to uints for timing. Times are multiplied by 0x10 and so 65535 / 0x10 leaves 4095 as the integer sans remainder
+        public const int UshortThreshold = 4095; //Threshold to change over to uints for timing. Times are multiplied by 0x10 and so 65535 / 0x10 leaves 4095 as the integer sans remainder
 
         public static readonly Dictionary<int, string> keyTypeNames = new Dictionary<int, string>()
         {

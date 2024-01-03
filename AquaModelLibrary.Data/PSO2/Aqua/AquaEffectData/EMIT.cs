@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using AquaModelLibrary.Helpers.PSO2;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
 {
@@ -6,6 +7,40 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
     {
         public EMIT emit;
         public List<PTCLObject> ptcls = new List<PTCLObject>();
+
+        public EMITObject() { }
+
+        public EMITObject(List<Dictionary<int, object>> emitRaw)
+        {
+            emit = new EMIT();
+
+            emit.unkVec3_00 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x10);
+            emit.unkVec3_10 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x11);
+            emit.unkVec3_20 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x13);
+            emit.unkVec3_40 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x12);
+            emit.unkVec3_50 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x14);
+            emit.unkVec3_60 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x15);
+
+            emit.startFrame = VTBFMethods.GetObject<int>(emitRaw[0], 0x1);
+            emit.endFrame = VTBFMethods.GetObject<int>(emitRaw[0], 0x2);
+            emit.int_78 = VTBFMethods.GetObject<int>(emitRaw[0], 0x20);
+            emit.float_7C = VTBFMethods.GetObject<int>(emitRaw[0], 0x21);
+
+            emit.int_80 = VTBFMethods.GetObject<byte>(emitRaw[0], 0x43);
+            emit.int_84 = VTBFMethods.GetObject<int>(emitRaw[0], 0x5);
+            emit.int_88 = VTBFMethods.GetObject<byte>(emitRaw[0], 0x32);
+            emit.float_8C = VTBFMethods.GetObject<float>(emitRaw[0], 0x37);
+
+            emit.float_90 = VTBFMethods.GetObject<float>(emitRaw[0], 0x35);
+            emit.int_94 = VTBFMethods.GetObject<byte>(emitRaw[0], 0x33);
+            emit.float_98 = VTBFMethods.GetObject<float>(emitRaw[0], 0x37);
+
+            emit.int_B8 = -1;
+            emit.int_BC = -1;
+
+            emit.unkVec3_D0 = VTBFMethods.GetObject<Vector3>(emitRaw[0], 0x19);
+            emit.int_E0 = VTBFMethods.GetObject<int>(emitRaw[0], 0x86);
+        }
     }
     //Seems fairly variable, various items missing or not seemingly randomly in VTBF.
     //In VTBF, the pointer int16 is the number of nodes at and below this. Ie, the single EMIT + the PTCL count

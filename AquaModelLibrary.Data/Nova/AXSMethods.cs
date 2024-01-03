@@ -320,7 +320,7 @@ namespace AquaModelLibrary.Nova
                     {
                         return (ushort)num;
                     });
-                    var tempFaceData = new StripData() { triStrips = triList, format0xC33 = true, triIdCount = triList.Count };
+                    var tempFaceData = new StripData() { triStrips = triList, format0xC31 = true, triIdCount = triList.Count };
                     genMesh.triList = tempFaceData.GetTriangles();
 
                     //Extra

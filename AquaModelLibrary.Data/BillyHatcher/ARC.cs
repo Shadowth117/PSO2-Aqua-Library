@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     /// <summary>
     /// ARC is similar to something like PSO2 NIFL where it's more of a wrapper for other formats. .lnd also uses a variant of this at times.

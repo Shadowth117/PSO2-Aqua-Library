@@ -3,7 +3,7 @@ using AquaModelLibrary.Helpers.Readers;
 using csharp_prs;
 using System.Text;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class PRD
     {
@@ -123,15 +123,15 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             ByteListExtension.AddAsBigEndian = true;
             List<byte> outBytes = new List<byte>();
-            outBytes.AddValue((int)1);
+            outBytes.AddValue(1);
             outBytes.ReserveInt("totalBufferSize");
             outBytes.ReserveInt("totalBufferDifferenceFromCompressed");
             outBytes.ReserveInt("uncompressedDataSize");
 
             outBytes.ReserveInt("compressedDataSize");
-            outBytes.AddValue((int)0);
-            outBytes.AddValue((int)0);
-            outBytes.AddValue((int)0);
+            outBytes.AddValue(0);
+            outBytes.AddValue(0);
+            outBytes.AddValue(0);
 
             List<byte> innerBytes = NRCGetBytes();
 
@@ -139,10 +139,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             outBytes.AddRange(prs);
             outBytes.FillInt("uncompressedDataSize", innerBytes.Count);
             outBytes.FillInt("compressedDataSize", prs.Length);
-            var bufferAddition = 0x20 - ((innerBytes.Count - prs.Length) % 0x20);
+            var bufferAddition = 0x20 - (innerBytes.Count - prs.Length) % 0x20;
             //Hack to ensure the buffersize is enough
             bufferAddition += 0x40;
-            var compressionDifference = (innerBytes.Count - prs.Length);
+            var compressionDifference = innerBytes.Count - prs.Length;
             var finalDifference = compressionDifference + bufferAddition;
             var finalTotalBufferSize = finalDifference + prs.Length;
             outBytes.FillInt("totalBufferSize", finalTotalBufferSize);
@@ -171,26 +171,26 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             innerBytes.AddValue(0xCCCCCCCCCCCCCCCC);
             innerBytes.AddValue(0xCCCCCCCCCCCCCCCC);
 
-            innerBytes.Add((byte)0x1);
-            innerBytes.Add((byte)0x0);
-            innerBytes.Add((byte)0x0);
-            innerBytes.Add((byte)0x0);
-            innerBytes.AddValue((int)0);
-            innerBytes.AddValue((int)fileNames.Count + 1);
+            innerBytes.Add(0x1);
+            innerBytes.Add(0x0);
+            innerBytes.Add(0x0);
+            innerBytes.Add(0x0);
+            innerBytes.AddValue(0);
+            innerBytes.AddValue(fileNames.Count + 1);
 
             for (int i = 0; i < fileNames.Count; i++)
             {
                 innerBytes.ReserveInt($"nameOffset{i}");
                 innerBytes.ReserveInt($"fileOffset{i}");
-                innerBytes.AddValue((int)files[i].Length);
+                innerBytes.AddValue(files[i].Length);
             }
             var namesStart = innerBytes.Count;
-            innerBytes.Add((byte)0);
+            innerBytes.Add(0);
             for (int i = 0; i < fileNames.Count; i++)
             {
                 innerBytes.FillInt($"nameOffset{i}", innerBytes.Count - namesStart);
                 innerBytes.AddRange(Encoding.UTF8.GetBytes(fileNames[i]));
-                innerBytes.Add((byte)0);
+                innerBytes.Add(0);
             }
             innerBytes.FillInt("fileEntriesSize", innerBytes.Count - 0x20);
             innerBytes.AlignWriter(0x20);

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public struct PlayerParam
     {
@@ -181,7 +181,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         /// Gravity during bounce jump.
         /// </summary>
         public float bounceJumpGravity;
-        
+
         /// <summary>
         /// 0xE0
         /// Force applied to bounce jump.

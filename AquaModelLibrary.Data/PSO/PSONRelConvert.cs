@@ -6,9 +6,9 @@ using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Numerics;
 using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
-using static AquaModelLibrary.PSOXVMConvert;
+using static AquaModelLibrary.Data.PSO.PSOXVMConvert;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.PSO
 {
     //Written based on: https://gitlab.com/dashgl/ikaruga/-/snippets/2054101
     //And based on the struct notes provided in the Schthack map viewer readme.
@@ -418,7 +418,7 @@ namespace AquaModelLibrary
             aqNode.parentId = parentId;
             aqNode.unkNode = -1;
             aqNode.pos = node.pos;
-            aqNode.eulRot = new Vector3((float)((rotX * FromBAMSvalue) * 180 / Math.PI), (float)((rotY * FromBAMSvalue) * 180 / Math.PI), (float)((rotZ * FromBAMSvalue) * 180 / Math.PI));
+            aqNode.eulRot = new Vector3((float)(rotX * FromBAMSvalue * 180 / Math.PI), (float)(rotY * FromBAMSvalue * 180 / Math.PI), (float)(rotZ * FromBAMSvalue * 180 / Math.PI));
 
             if (Math.Abs(aqNode.eulRot.Y) > 120)
             {
@@ -676,7 +676,7 @@ namespace AquaModelLibrary
                         color[3] = streamReader.Read<byte>();
                         var colorUnk = streamReader.ReadBEV2(be);
 
-                        genMat.diffuseRGBA = new Vector4(((float)color[0]) / 255, ((float)color[1]) / 255, ((float)color[2]) / 255, ((float)color[3]) / 255);
+                        genMat.diffuseRGBA = new Vector4((float)color[0] / 255, (float)color[1] / 255, (float)color[2] / 255, (float)color[3] / 255);
                         break;
                     case 6:
                         //Console.WriteLine($"ambient?");
@@ -709,7 +709,7 @@ namespace AquaModelLibrary
                 Console.WriteLine("No texture name on mat " + (aqObj.tempMats.Count - 1) + " at: " + streamReader.Position);
             }
 
-            return (aqObj.tempMats.Count - 1);
+            return aqObj.tempMats.Count - 1;
         }
     }
 }

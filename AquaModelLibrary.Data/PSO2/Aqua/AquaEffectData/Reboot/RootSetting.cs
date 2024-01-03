@@ -2,6 +2,13 @@
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData.Reboot
 {
+    public class RootSettingsObject : AnimObject
+    {
+        public List<RootSettingsStruct0> rootSettingStruct0s = new List<RootSettingsStruct0>();
+        public List<RootSettingsStruct1> rootSettingStruct1s = new List<RootSettingsStruct1>();
+        public List<RootSettingsStruct2> rootSettingStruct2s = new List<RootSettingsStruct2>();
+        public RootSettings root;
+    }
     public struct RootSettingsStruct0
     {
         public int int_00;

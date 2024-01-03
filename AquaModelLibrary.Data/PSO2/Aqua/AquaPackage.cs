@@ -1,12 +1,10 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
-using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Ice;
-using System.IO;
+using AquaModelLibrary.Helpers.Readers;
 using System.Text;
-using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -93,7 +91,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
 
             long nextFileOffset = -1;
-            for(int i = 0; i < afp.fileCount; i++)
+            for (int i = 0; i < afp.fileCount; i++)
             {
                 string currentExt;
 
@@ -110,13 +108,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     offset = (int)sr.Position + 0x20;
                     currentExt = Path.GetExtension(afpEnvelopes[i].fileName.GetString());
                     nextFileOffset = sr.Position - 0x30 + afpEnvelopes[i].totalSize;
-                } else //Not an afp archive, so we use the original extension
+                }
+                else //Not an afp archive, so we use the original extension
                 {
                     currentExt = ext;
                 }
-               
+
                 //Handle based on known
-                switch(currentExt)
+                switch (currentExt)
                 {
                     case ".aqp":
                     case ".trp":
@@ -140,36 +139,46 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public void WriteVTBFModel(string FileName)
+        public void WriteModelPackage(string FileName, bool writeVTBF)
         {
             bool package = FileName.Contains(".aqp") || FileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
-            int modelCount = models.Count;
+
+            var files = new List<AquaCommon>();
+            files.AddRange(models);
+            files.AddRange(motions);
+            int fileCount = files.Count;
             List<byte> finalOutBytes = new List<byte>();
             if (package)
             {
                 finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
-                finalOutBytes.AddRange(BitConverter.GetBytes(models.Count + tpns.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes(fileCount +  tpns.Count));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
             }
             else
             {
-                modelCount = 1;
+                fileCount = 1;
             }
 
-            for (int i = 0; i < modelCount; i++)
+            for (int i = 0; i < fileCount; i++)
             {
-                int bonusBytes = 0;
-                if (i == 0)
+                int bonusPadding = 0;
+                if (writeVTBF && i == 0)
                 {
-                    bonusBytes = 0x10;
+                    bonusPadding = 0x10;
                 }
 
                 List<byte> outBytes = new List<byte>();
-                outBytes.AddRange(models[i].GetBytesVTBF());
+                if (writeVTBF)
+                {
+                    outBytes.AddRange(files[i].GetBytesVTBF());
+                } else
+                {
+                    outBytes.AddRange(files[i].GetBytesNIFL());
+                }
                 //Header info
                 int size = outBytes.Count;
-                WriteAFPBase(Path.ChangeExtension(FileName.Replace(".", $"_l{i + 1}."), ReturnModelTypeString(FileName)), package, bonusBytes, outBytes, size);
+                WriteAFPBase(Path.ChangeExtension(FileName.Replace(".", $"_l{i + 1}."), ReturnModelTypeString(FileName)), package, bonusPadding, outBytes, size);
 
                 finalOutBytes.AddRange(outBytes);
                 finalOutBytes.AlignFileEndWriter(0x10);
@@ -179,7 +188,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             File.WriteAllBytes(FileName, finalOutBytes.ToArray());
         }
 
-        private void WriteAFPBase(string fileName, bool package, int bonusBytes, List<byte> outBytes, int size)
+        private void WriteAFPBase(string fileName, bool package, int bonusPadding, List<byte> outBytes, int size)
         {
             if (package)
             {
@@ -195,10 +204,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                 //Handle filename text
                 AFPBase afpBase = new AFPBase();
-                afpBase.fileName = new SetLengthStrings.PSO2String(fileName);
+                afpBase.fileName = new PSO2String(fileName);
                 afpBase.paddingOffset = size;
                 afpBase.afpBaseSize = 0x30;
-                afpBase.totalSize = size + difference + 0x30 + bonusBytes;
+                afpBase.totalSize = size + difference + 0x30 + bonusPadding;
                 afpBase.fileTypeCString = ReturnModelType(fileName);
 
                 outBytes.InsertRange(0, afpBase.GetBytes());

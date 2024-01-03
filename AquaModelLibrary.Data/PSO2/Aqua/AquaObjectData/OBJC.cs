@@ -16,7 +16,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public int totalStripFaces;  //0x14, Type 0x9
         public int globalStripOffset; //Unused in classic. Always 0x100 in 0xC33 since it's directly after OBJC in this one.
         public int totalVTXLCount;   //0x15, Type 0x8
-        public int vtxlStartOffset;
+        public int vtxlStartOffset; //Unused in classic.
 
         public int unkStructCount;        //0x16, Type 0x8 //Same value as below in classic.
         public int vsetCount;       //0x24, Type 0x9

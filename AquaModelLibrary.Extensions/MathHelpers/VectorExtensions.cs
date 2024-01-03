@@ -147,6 +147,7 @@ namespace AquaModelLibrary.Helpers.MathHelpers
         {
             return vec3.X.EpsGreaterThanOrEqual(boundingVec3.X, epsilon) && vec3.Y.EpsGreaterThanOrEqual(boundingVec3.Y, epsilon) && vec3.Z.EpsGreaterThanOrEqual(boundingVec3.Z, epsilon);
         }
+
         public static bool LessThanOrEqualToPoint(this Vector3 vec3, Vector3 boundingVec3, float epsilon)
         {
             return vec3.X.EpsLessThanOrEqual(boundingVec3.X, epsilon) && vec3.Y.EpsLessThanOrEqual(boundingVec3.Y, epsilon) && vec3.Z.EpsLessThanOrEqual(boundingVec3.Z, epsilon);
@@ -155,6 +156,11 @@ namespace AquaModelLibrary.Helpers.MathHelpers
         public static bool WithinBounds(this Vector3 point, Vector3 maxBounds, Vector3 minBounds, float epsilon)
         {
             return point.GreaterThanOrEqualToPoint(minBounds, epsilon) && point.LessThanOrEqualToPoint(maxBounds, epsilon);
+        }
+
+        public static float[] AsArray(this Vector3 vec3)
+        {
+            return new float[] { vec3.X, vec3.Y, vec3.Z };
         }
     }
 }

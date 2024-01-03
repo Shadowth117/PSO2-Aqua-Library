@@ -3,7 +3,7 @@ using System.Diagnostics;
 using VrSharp.Xvr;
 using static VrSharp.Xvr.DirectXTexUtility;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.PSO
 {
     public class PSOXVMConvert
     {
@@ -116,7 +116,7 @@ namespace AquaModelLibrary
                         }
                     }
 
-                    offset += fullSize + (fullSize % 0x10);
+                    offset += fullSize + fullSize % 0x10;
                 }
                 xvm = null;
             }

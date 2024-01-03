@@ -5,6 +5,7 @@ using System.Numerics;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 using static AquaModelLibrary.Helpers.MiscHelpers;
 using AquaModelLibrary.Helpers.PSO2;
+using AquaModelLibrary.Helpers;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
@@ -465,13 +466,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                     switch (vtxe.vertDataTypes[j].dataType)
                     {
                         case (int)VertFlags.VertPosition:
-                            outBytes.AddRange(ConvertStruct(vertPositions[i]));
+                            outBytes.AddRange(DataHelpers.ConvertStruct(vertPositions[i]));
                             break;
                         case (int)VertFlags.VertWeight:
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x4:
-                                    outBytes.AddRange(ConvertStruct(vertWeights[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(vertWeights[i]));
                                     break;
                                 case 0x11:
                                     for (int id = 0; id < 4; id++)
@@ -485,7 +486,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x3:
-                                    outBytes.AddRange(ConvertStruct(vertNormals[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(vertNormals[i]));
                                     break;
                                 case 0xF:
                                     for (int id = 0; id < 4; id++)
@@ -517,7 +518,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x2:
-                                    outBytes.AddRange(ConvertStruct(uv1List[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(uv1List[i]));
                                     break;
                                 case 0xE:
                                     for (int id = 0; id < 2; id++)
@@ -531,7 +532,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x2:
-                                    outBytes.AddRange(ConvertStruct(uv2List[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(uv2List[i]));
                                     break;
                                 case 0xE:
                                     for (int id = 0; id < 2; id++)
@@ -545,7 +546,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x2:
-                                    outBytes.AddRange(ConvertStruct(uv3List[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(uv3List[i]));
                                     break;
                                 case 0xE:
                                     for (int id = 0; id < 2; id++)
@@ -559,7 +560,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x2:
-                                    outBytes.AddRange(ConvertStruct(uv4List[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(uv4List[i]));
                                     break;
                                 case 0xE:
                                     for (int id = 0; id < 2; id++)
@@ -573,7 +574,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x3:
-                                    outBytes.AddRange(ConvertStruct(vertTangentList[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(vertTangentList[i]));
                                     break;
                                 case 0xF:
                                     for (int id = 0; id < 4; id++)
@@ -587,7 +588,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                             switch (vtxe.vertDataTypes[j].structVariation)
                             {
                                 case 0x3:
-                                    outBytes.AddRange(ConvertStruct(vertBinormalList[i]));
+                                    outBytes.AddRange(DataHelpers.ConvertStruct(vertBinormalList[i]));
                                     break;
                                 case 0xF:
                                     for (int id = 0; id < 4; id++)
@@ -1301,6 +1302,41 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         #endregion
 
         #region FullVertexListOperations
+
+        public static void AddVertices(VTXL sourceVtxl, Dictionary<int, int> vertIdDict, VTXL destinationVtxl, Vector3 tri, out int x, out int y, out int z)
+        {
+            if (vertIdDict.TryGetValue((int)tri.X, out var value))
+            {
+                x = value;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.X, destinationVtxl.vertPositions.Count);
+                x = destinationVtxl.vertPositions.Count;
+                appendVertex(sourceVtxl, destinationVtxl, (int)tri.X);
+            }
+            if (vertIdDict.TryGetValue((int)tri.Y, out var value2))
+            {
+                y = value2;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.Y, destinationVtxl.vertPositions.Count);
+                y = destinationVtxl.vertPositions.Count;
+                appendVertex(sourceVtxl, destinationVtxl, (int)tri.Y);
+            }
+            if (vertIdDict.TryGetValue((int)tri.Z, out var value3))
+            {
+                z = value3;
+            }
+            else
+            {
+                vertIdDict.Add((int)tri.Z, destinationVtxl.vertPositions.Count);
+                z = destinationVtxl.vertPositions.Count;
+                appendVertex(sourceVtxl, destinationVtxl, (int)tri.Z);
+            }
+        }
+
         public void AddRange(int vertCount, VTXL modelVtxl)
         {
             vertPositions.AddRange(new Vector3[vertCount]); //Any vert should honestly have this if it's a proper vertex.

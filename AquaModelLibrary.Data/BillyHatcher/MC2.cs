@@ -1,8 +1,9 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
+using AquaModelLibrary.Extra.Ninja;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class MC2
     {
@@ -75,7 +76,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header.unkCount = sr.ReadBE<int>();
 
             this.header = header;
-            sr.Seek(header.vertPositionsOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header.vertPositionsOffset + 0x8, SeekOrigin.Begin);
             Vector3 rootBoxMinExtents = new Vector3();
             Vector3 rootBoxMaxExtents = new Vector3();
             for (int i = 0; i < header.vertPositionsCount; i++)
@@ -119,7 +120,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
             }
 
-            sr.Seek(header.faceData + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header.faceData + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < header.faceCount; i++)
             {
                 var mc2FaceData = new MC2FaceData();
@@ -145,7 +146,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 faceData.Add(mc2FaceData);
             }
 
-            sr.Seek(header.sectorDataOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(header.sectorDataOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < header.sectorDataCount; i++)
             {
                 sectors.Add(new MC2Sector(sr));
@@ -182,7 +183,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             bool doUnkData = header.unkCount > 0 && header.unkCount < 0xFFFF;
             if (doUnkData)
             {
-                sr.Seek(header.unkOffset + 0x8, System.IO.SeekOrigin.Begin);
+                sr.Seek(header.unkOffset + 0x8, SeekOrigin.Begin);
                 for (int i = 0; i < header.unkCount; i++)
                 {
                     var unk = new MC2UnkData();
@@ -284,7 +285,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             sector.depth = depth;
 
             List<ushort> newFaceIndices = new List<ushort>();
-            List<MC2.MC2FaceData> newFaces = new List<MC2.MC2FaceData>();
+            List<MC2FaceData> newFaces = new List<MC2FaceData>();
             foreach (var faceId in faceIndices)
             {
                 var face = faceData[faceId];
@@ -298,8 +299,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 //if ((IsInBounds(vertX.X, XRange) || IsInBounds(vertY.X, XRange) || IsInBounds(vertZ.X, XRange)) && (IsInBounds(vertX.Z, ZRange) || IsInBounds(vertY.Z, ZRange) || IsInBounds(vertZ.Z, ZRange)))
                 //if ((IsInBounds(vertX.X, XRange) && IsInBounds(vertX.Z, ZRange)) || (IsInBounds(vertY.X, XRange) && IsInBounds(vertY.Z, ZRange)) || (IsInBounds(vertZ.X, XRange) && IsInBounds(vertZ.Z, ZRange)))
-                if ((bounds.Left <= XRange.Y && XRange.X <= bounds.Right && bounds.Up >= ZRange.X && ZRange.Y >= bounds.Down)
-                    || (bounds.Left >= XRange.Y && XRange.X >= bounds.Right && bounds.Up <= ZRange.X && ZRange.Y <= bounds.Down))
+                if (bounds.Left <= XRange.Y && XRange.X <= bounds.Right && bounds.Up >= ZRange.X && ZRange.Y >= bounds.Down
+                    || bounds.Left >= XRange.Y && XRange.X >= bounds.Right && bounds.Up <= ZRange.X && ZRange.Y <= bounds.Down)
                 {
                     newFaceIndices.Add(faceId);
                     newFaces.Add(face);
@@ -395,8 +396,8 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             }
             else
             {
-                outBytes.AddValue((int)0);
-                outBytes.AddValue((int)0);
+                outBytes.AddValue(0);
+                outBytes.AddValue(0);
             }
 
             //Verts
@@ -688,12 +689,12 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 if (usesOffset != 0)
                 {
                     var bookmark = sr.Position;
-                    sr.Seek(indexOffset + 8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(indexOffset + 8, SeekOrigin.Begin);
                     for (int i = 0; i < indexCount; i++)
                     {
                         stripData.Add(sr.ReadBE<ushort>());
                     }
-                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+                    sr.Seek(bookmark, SeekOrigin.Begin);
                 }
             }
         }

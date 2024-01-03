@@ -1,12 +1,126 @@
-﻿using System.Numerics;
+﻿using AquaModelLibrary.Helpers.Readers;
+using Reloaded.Memory.Streams;
+using System.IO;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
+    //Obsolete as of Ver2. Briefly found in the game files prior to Creative Space release.
     public class ProtoMySpaceObjectsSettings : AquaCommon
     {
         public List<MSOEntryObject> msoEntries = new List<MSOEntryObject>();
         public int entryOffset = -1;
         public int entryCount = -1;
+
+        public ProtoMySpaceObjectsSettings() { }
+
+        public ProtoMySpaceObjectsSettings(byte[] file, string _ext)
+        {
+            Read(file, _ext);
+        }
+
+        public ProtoMySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        {
+            Read(sr, _ext);
+        }
+
+        public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            entryOffset = sr.Read<int>();
+            entryCount = sr.Read<int>();
+
+            //Entries
+            sr.Seek(offset + entryOffset, SeekOrigin.Begin);
+            for (int i = 0; i < entryCount; i++)
+            {
+                MSOEntryObject msoEntry = new MSOEntryObject();
+                msoEntry.msoEntry = sr.Read<MSOEntry>();
+
+                var bookmark = sr.Position;
+                if (msoEntry.msoEntry.asciiNameOffset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.asciiNameOffset, SeekOrigin.Begin);
+                    msoEntry.asciiName = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.asciiName = "";
+                }
+
+                if (msoEntry.msoEntry.utf8DescriptorOffset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.utf8DescriptorOffset, SeekOrigin.Begin);
+                    msoEntry.utf8Descriptor = sr.ReadUTF8String();
+                }
+                else
+                {
+                    msoEntry.utf8Descriptor = "";
+                }
+
+                if (msoEntry.msoEntry.asciiTrait1Offset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.asciiTrait1Offset, SeekOrigin.Begin);
+                    msoEntry.asciiTrait1 = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.asciiTrait1 = "";
+                }
+
+                if (msoEntry.msoEntry.asciiTrait2Offset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.asciiTrait2Offset, SeekOrigin.Begin);
+                    msoEntry.asciiTrait2 = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.asciiTrait2 = "";
+                }
+
+                if (msoEntry.msoEntry.asciiTrait3Offset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.asciiTrait3Offset, SeekOrigin.Begin);
+                    msoEntry.asciiTrait3 = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.asciiTrait3 = "";
+                }
+
+                if (msoEntry.msoEntry.asciiTrait4Offset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.asciiTrait4Offset, SeekOrigin.Begin);
+                    msoEntry.asciiTrait4 = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.asciiTrait4 = "";
+                }
+
+                if (msoEntry.msoEntry.groupNameOffset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.groupNameOffset, SeekOrigin.Begin);
+                    msoEntry.groupName = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.groupName = "";
+                }
+
+                if (msoEntry.msoEntry.asciiTrait5Offset > 0x10)
+                {
+                    sr.Seek(offset + msoEntry.msoEntry.asciiTrait5Offset, SeekOrigin.Begin);
+                    msoEntry.asciiTrait5 = sr.ReadCString();
+                }
+                else
+                {
+                    msoEntry.asciiTrait5 = "";
+                }
+
+                msoEntries.Add(msoEntry);
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
+        }
 
         public class MSOEntryObject
         {

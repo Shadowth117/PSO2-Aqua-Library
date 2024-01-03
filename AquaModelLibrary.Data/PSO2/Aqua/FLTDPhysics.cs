@@ -1,8 +1,5 @@
-﻿using AquaModelLibrary.Data.AM2.BorderBreakPS4;
-using AquaModelLibrary.Helpers.Readers;
-using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -16,7 +13,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public FLTDPhysics() { }
 
-        public FLTDPhysics(BufferedStreamReaderBE<MemoryStream> sr, string ext) 
+        public FLTDPhysics(byte[] file, string ext)
+        {
+            Read(file, ext);
+        }
+
+        public FLTDPhysics(BufferedStreamReaderBE<MemoryStream> sr, string ext)
         {
             Read(sr, ext);
         }
@@ -270,10 +272,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public float flt_10;
         }
 
-        public static FLTDPhysics.unkStruct1 ReadSubStruct1(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        public static unkStruct1 ReadSubStruct1(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
             var start = streamReader.Position;
-            FLTDPhysics.unkStruct1 unkStruct = new FLTDPhysics.unkStruct1();
+            unkStruct1 unkStruct = new unkStruct1();
 
             unkStruct.unkByte0 = streamReader.Read<byte>();
             unkStruct.unkByte1 = streamReader.Read<byte>();
@@ -321,9 +323,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStruct;
         }
 
-        private static FLTDPhysics.unkStruct2 ReadSubStruct2(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        private static unkStruct2 ReadSubStruct2(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.unkStruct2 unkStr2 = new FLTDPhysics.unkStruct2();
+            unkStruct2 unkStr2 = new unkStruct2();
 
             unkStr2.unkFloat0 = streamReader.Read<float>();
             unkStr2.unkFloat1 = streamReader.Read<float>();
@@ -390,9 +392,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr2;
         }
 
-        private static FLTDPhysics.unkStruct4 ReadSubStruct4(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        private static unkStruct4 ReadSubStruct4(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.unkStruct4 unkStr4 = new FLTDPhysics.unkStruct4();
+            unkStruct4 unkStr4 = new unkStruct4();
 
             unkStr4.index = streamReader.Read<byte>();
             unkStr4.unkByte1 = streamReader.Read<byte>();
@@ -408,9 +410,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr4;
         }
 
-        private static FLTDPhysics.unkStruct5 ReadSubStruct5(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        private static unkStruct5 ReadSubStruct5(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.unkStruct5 unkStr5 = new FLTDPhysics.unkStruct5();
+            unkStruct5 unkStr5 = new unkStruct5();
 
             unkStr5.unkByte0 = streamReader.Read<byte>();
             unkStr5.unkByte1 = streamReader.Read<byte>();
@@ -425,9 +427,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr5;
         }
 
-        private static FLTDPhysics.unkStruct1_2 ReadSubStruct1_2(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        private static unkStruct1_2 ReadSubStruct1_2(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.unkStruct1_2 unkStr1_2 = new FLTDPhysics.unkStruct1_2();
+            unkStruct1_2 unkStr1_2 = new unkStruct1_2();
 
             unkStr1_2.int_00 = streamReader.Read<int>();
             unkStr1_2.flt_04 = streamReader.Read<int>();
@@ -436,9 +438,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr1_2;
         }
 
-        private static FLTDPhysics.unkStruct3 ReadSubStruct3(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version, int ptr_00Count, int ptr_04Count)
+        private static unkStruct3 ReadSubStruct3(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version, int ptr_00Count, int ptr_04Count)
         {
-            FLTDPhysics.unkStruct3 unkStr3 = new FLTDPhysics.unkStruct3();
+            unkStruct3 unkStr3 = new unkStruct3();
 
             unkStr3.ptr_00 = streamReader.Read<int>();
             unkStr3.ptr_04 = streamReader.Read<int>();
@@ -469,9 +471,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr3;
         }
 
-        public static FLTDPhysics.unkStruct3_1 ReadUnkStr3_1(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        public static unkStruct3_1 ReadUnkStr3_1(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.unkStruct3_1 unkStr31 = new FLTDPhysics.unkStruct3_1();
+            unkStruct3_1 unkStr31 = new unkStruct3_1();
 
             unkStr31.flt_00 = streamReader.Read<float>();
             unkStr31.flt_04 = streamReader.Read<float>();
@@ -486,9 +488,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr31;
         }
 
-        public static FLTDPhysics.unkStruct3_2 ReadUnkStr3_2(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        public static unkStruct3_2 ReadUnkStr3_2(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.unkStruct3_2 unkStr32 = new FLTDPhysics.unkStruct3_2();
+            unkStruct3_2 unkStr32 = new unkStruct3_2();
 
             unkStr32.flt_00 = streamReader.Read<float>();
             unkStr32.flt_04 = streamReader.Read<float>();
@@ -500,9 +502,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return unkStr32;
         }
 
-        private static FLTDPhysics.FltdHeader ReadFLTDHeader(BufferedStreamReaderBE<MemoryStream> streamReader)
+        private static FltdHeader ReadFLTDHeader(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
-            FLTDPhysics.FltdHeader header = new FLTDPhysics.FltdHeader();
+            FltdHeader header = new FltdHeader();
             header.version = streamReader.Read<byte>();
             header.mainPhysicsNodeCount = streamReader.Read<byte>();
             header.unkStruct1Count = streamReader.Read<byte>();
@@ -517,9 +519,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return header;
         }
 
-        private static FLTDPhysics.MainPhysicsNode ReadMainNode(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        private static MainPhysicsNode ReadMainNode(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.MainPhysicsNode physicsNode = new FLTDPhysics.MainPhysicsNode();
+            MainPhysicsNode physicsNode = new MainPhysicsNode();
 
             physicsNode.bt_00 = streamReader.Read<byte>();
             physicsNode.unkByte1 = streamReader.Read<byte>();
@@ -556,9 +558,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return physicsNode;
         }
 
-        private static FLTDPhysics.MainSubNode ReadMainSubNode(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
+        private static MainSubNode ReadMainSubNode(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int version)
         {
-            FLTDPhysics.MainSubNode node = new FLTDPhysics.MainSubNode();
+            MainSubNode node = new MainSubNode();
 
             node.unkByte0 = streamReader.Read<byte>();
             node.unkByte1 = streamReader.Read<byte>();

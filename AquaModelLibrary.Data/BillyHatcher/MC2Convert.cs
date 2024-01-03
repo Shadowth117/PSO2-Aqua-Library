@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class MC2Convert
     {

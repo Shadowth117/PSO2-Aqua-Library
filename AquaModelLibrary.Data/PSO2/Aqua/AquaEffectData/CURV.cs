@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
+﻿using AquaModelLibrary.Helpers.PSO2;
+
+namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
 {
     public class AnimObject
     {
@@ -12,6 +14,21 @@
         public CURV curv;
         public List<KEYS> keys = new List<KEYS>();
         public List<float> times = new List<float>();
+
+        public CURVObject() { }
+
+        public CURVObject(List<Dictionary<int, object>> curvRaw)
+        {
+            curv = new CURV();
+
+            curv.type = VTBFMethods.GetObject<byte>(curvRaw[0], 0x71);
+            curv.startFrame = VTBFMethods.GetObject<float>(curvRaw[0], 0x74);
+            curv.int_0C = VTBFMethods.GetObject<short>(curvRaw[0], 0x73);
+            curv.float_10 = VTBFMethods.GetObject<float>(curvRaw[0], 0x77);
+
+            curv.int_14 = VTBFMethods.GetObject<int>(curvRaw[0], 0x76);
+            curv.endFrame = VTBFMethods.GetObject<float>(curvRaw[0], 0x75);
+        }
     }
     public struct CURV
     {

@@ -1,7 +1,8 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     /// <summary>
     /// .pth files. Similar idae to .mc2 files with bounding boxes linked to data
@@ -30,7 +31,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             pathHeader.rawPathCount = sr.ReadBE<int>();
             pathHeader.rawPathOffset = sr.ReadBE<int>();
 
-            sr.Seek(pathHeader.pathInfoOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(pathHeader.pathInfoOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < pathHeader.pathInfoCount; i++)
             {
                 PathInfo pathInfo = new PathInfo();
@@ -47,7 +48,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 if (pathInfo.definitionOffset != 0)
                 {
                     var bookmark = sr.Position;
-                    sr.Seek(pathInfo.definitionOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(pathInfo.definitionOffset + 0x8, SeekOrigin.Begin);
                     VertDefinition vertDef = new VertDefinition();
                     vertDef.unkByte0 = sr.Read<byte>();
                     vertDef.unkByte1 = sr.Read<byte>();
@@ -59,7 +60,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     }
                     vertDefinitions.Add(vertDef);
 
-                    sr.Seek(vertDef.vertPositionsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(vertDef.vertPositionsOffset + 0x8, SeekOrigin.Begin);
                     List<Vector3> positions = new List<Vector3>();
                     for (int j = 0; j < vertDef.vertCount; j++)
                     {
@@ -68,7 +69,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     vertDef.vertPositions = positions;
                     if (pathInfo.doesNotUseNormals == 0)
                     {
-                        sr.Seek(vertDef.vertNormalsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                        sr.Seek(vertDef.vertNormalsOffset + 0x8, SeekOrigin.Begin);
                         List<Vector3> normals = new List<Vector3>();
                         for (int j = 0; j < vertDef.vertCount; j++)
                         {
@@ -77,25 +78,25 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         vertDef.vertNormals = normals;
                     }
 
-                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+                    sr.Seek(bookmark, SeekOrigin.Begin);
                 }
 
                 if (pathInfo.lengthsOffset != 0)
                 {
                     var bookmark = sr.Position;
-                    sr.Seek(pathInfo.lengthsOffset + 0x8, System.IO.SeekOrigin.Begin);
+                    sr.Seek(pathInfo.lengthsOffset + 0x8, SeekOrigin.Begin);
                     List<float> lengths = new List<float>();
                     for (int j = 0; j < pathInfo.lengthsCount; j++)
                     {
                         lengths.Add(sr.ReadBE<float>());
                     }
                     lengthsListList.Add(lengths);
-                    sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+                    sr.Seek(bookmark, SeekOrigin.Begin);
                 }
 
             }
 
-            sr.Seek(pathHeader.pathOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(pathHeader.pathOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < pathHeader.pathCount; i++)
             {
                 PathDefinition pathDef = new PathDefinition();
@@ -111,7 +112,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 pathDefinitions.Add(pathDef);
             }
 
-            sr.Seek(pathHeader.rawPathOffset + 0x8, System.IO.SeekOrigin.Begin);
+            sr.Seek(pathHeader.rawPathOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < pathHeader.rawPathCount / 8; i++)
             {
                 RawPathDefinition pathDef = new RawPathDefinition();

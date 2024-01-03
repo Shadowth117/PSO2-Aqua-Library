@@ -1,9 +1,10 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
-using static AquaModelLibrary.Extra.Ninja.BillyHatcher.LND;
+using static AquaModelLibrary.Data.BillyHatcher.LND;
 using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
+namespace AquaModelLibrary.Data.BillyHatcher.LNDH
 {
 
     public class ARCLNDModel
@@ -50,10 +51,10 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 }
                 outBytes.ReserveInt("AnimatedMeshOffsetsOffset");
 
-                outBytes.AddValue((int)0);
-                outBytes.AddValue((int)0);
-                outBytes.AddValue((int)0);
-                outBytes.AddValue((int)0);
+                outBytes.AddValue(0);
+                outBytes.AddValue(0);
+                outBytes.AddValue(0);
+                outBytes.AddValue(0);
             }
 
             //Main Offset Table
@@ -92,19 +93,19 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
                 outBytes.FillInt($"LandEntry{i}", outBytes.Count + offset);
                 var landRef = arcMatEntryList[i];
                 outBytes.AddValue((int)landRef.entry.RenderFlags);
-                outBytes.AddValue((int)landRef.entry.diffuseColor);
-                outBytes.AddValue((int)landRef.entry.specularColor);
-                outBytes.AddValue((int)landRef.entry.unkBool);
+                outBytes.AddValue(landRef.entry.diffuseColor);
+                outBytes.AddValue(landRef.entry.specularColor);
+                outBytes.AddValue(landRef.entry.unkBool);
                 outBytes.AddValue((int)landRef.entry.sourceAlpha);
                 outBytes.AddValue((int)landRef.entry.destinationAlpha);
-                outBytes.AddValue((int)landRef.entry.unkInt6);
-                outBytes.AddValue((int)landRef.entry.unkFlags1);
+                outBytes.AddValue(landRef.entry.unkInt6);
+                outBytes.AddValue(landRef.entry.unkFlags1);
 
                 if (landRef.extraDataEnabled > 0)
                 {
                     outBytes.AddValue((ushort)landRef.entry.textureFlags);
-                    outBytes.AddValue((ushort)landRef.entry.ushort0);
-                    outBytes.AddValue((int)landRef.entry.TextureId);
+                    outBytes.AddValue(landRef.entry.ushort0);
+                    outBytes.AddValue(landRef.entry.TextureId);
                 }
             }
 
@@ -112,7 +113,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             outBytes.FillInt($"VertDataOffset", outBytes.Count + offset);
             for (int i = 0; i < arcVertDataSetList.Count; i++)
             {
-                outBytes.AddValue((int)0); //This is either i or just 0 every time. Probably the latter based on faces. Either way, retail has no example of how this should look.
+                outBytes.AddValue(0); //This is either i or just 0 every time. Probably the latter based on faces. Either way, retail has no example of how this should look.
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"VertData{i}");
             }
@@ -128,7 +129,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
             outBytes.FillInt($"FaceDataoffset", outBytes.Count + offset);
             for (int i = 0; i < arcFaceDataList.Count; i++)
             {
-                outBytes.AddValue((int)0);
+                outBytes.AddValue(0);
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"FaceData{i}");
             }

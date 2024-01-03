@@ -10,11 +10,6 @@ namespace AquaModelLibrary.Helpers
             return new Vector2((float)((double)ushorts[0] / ushort.MaxValue), (float)((double)ushorts[1] / ushort.MaxValue));
         }
 
-        public static float[] VectorAsArray(Vector3 vec3)
-        {
-            return new float[] { vec3.X, vec3.Y, vec3.Z };
-        }
-
         public static bool IsEqualByteArray(byte[] bArr0, byte[] bArr1)
         {
             if (bArr0.Length != bArr1.Length)

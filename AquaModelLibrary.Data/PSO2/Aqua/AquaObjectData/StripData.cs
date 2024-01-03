@@ -5,7 +5,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
     public class StripData
     {
-        public bool format0xC33 = false;
+        public bool format0xC31 = false;
         public int triIdCount; //0xB7, type 0x9 
         public int reserve0;
         public int reserve1;
@@ -69,7 +69,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                 return largeTriSet;
             }
             List<Vector3> tris = new List<Vector3>();
-            if (format0xC33 == false)
+            if (format0xC31 == false)
             {
                 for (int vertIndex = 0; vertIndex < triStrips.Count - 2; vertIndex++)
                 {
@@ -110,7 +110,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public StripData Clone()
         {
             StripData newStrip = new StripData();
-            newStrip.format0xC33 = format0xC33;
+            newStrip.format0xC31 = format0xC31;
             newStrip.triIdCount = triIdCount;
             newStrip.reserve0 = reserve0;
             newStrip.reserve1 = reserve1;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class GPL
     {
@@ -33,7 +33,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
         {
             entries.Clear();
             rawGVRBytesList.Clear();
-            foreach(var gvr in gvrBytesList)
+            foreach (var gvr in gvrBytesList)
             {
                 //Account for Global Index
                 int offset = 0;
@@ -43,7 +43,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
                 GPLEntry entry = new GPLEntry();
                 var temp = new byte[4];
-                Array.Copy(gvr, offset + 8, temp, 0, 4 );
+                Array.Copy(gvr, offset + 8, temp, 0, 4);
                 Array.Reverse(temp);
                 entry.GVRFlags = BitConverter.ToInt32(temp, 0);
                 Array.Copy(gvr, offset + 0xC, temp, 0, 4);
@@ -88,7 +88,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header.unkInt = sr.ReadBE<int>();
             header.dataOffset = sr.ReadBE<int>();
 
-            for(int i = 0; i < header.texCount; i++)
+            for (int i = 0; i < header.texCount; i++)
             {
                 GPLEntry entry = new GPLEntry();
                 entry.GVRFlags = sr.ReadBE<int>();
@@ -100,7 +100,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             for (int i = 0; i < header.texCount; i++)
             {
                 var entry = entries[i];
-                sr.Seek(entry.offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(entry.offset, SeekOrigin.Begin);
                 rawGVRBytesList.Add(sr.ReadBytes(sr.Position(), entry.size));
             }
         }
@@ -139,7 +139,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     outBytes.AddRange(rawGvr);
                 }
             }
-            for(int i = 0; i < entries.Count; i++)
+            for (int i = 0; i < entries.Count; i++)
             {
                 outBytes.FillInt($"gvrOffset{i}", offsetDict[hashList[i]]);
             }

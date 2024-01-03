@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH
+namespace AquaModelLibrary.Data.BillyHatcher.LNDH
 {
     //LND header
     public struct LNDHeader

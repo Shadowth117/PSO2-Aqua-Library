@@ -2,7 +2,7 @@
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class MesBin
     {
@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             for (int i = 0; i < nameCount; i++)
             {
-                sr.Seek(fullOffsetBuffer + 0x8 + nameRelativeOffsets[i], System.IO.SeekOrigin.Begin);
+                sr.Seek(fullOffsetBuffer + 0x8 + nameRelativeOffsets[i], SeekOrigin.Begin);
                 List<byte> str = new List<byte>();
                 string text = "";
                 while (sr.Position < sr.BaseStream.Length)
@@ -93,7 +93,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                     case 0x21:
                                         text += "|EndEffect|";
                                         break;
-                                    default: throw new System.Exception();
+                                    default: throw new Exception();
                                 }
                                 break;
                             case 0x64:
@@ -113,11 +113,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                                 }
                                 else
                                 {
-                                    throw new System.Exception();
+                                    throw new Exception();
                                 }
                                 break;
                             default:
-                                throw new System.Exception();
+                                throw new Exception();
                         }
                     }
                     else

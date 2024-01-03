@@ -23,6 +23,7 @@ namespace AquaModelLibrary
 
         public PRMModel(BufferedStreamReaderBE<MemoryStream> streamReader, out PRMModel prmModel)
         {
+            //PRM files have a magic that matches the Ice envelope typing and so we need to check if it's an ICE envelope or not specially
             int offset = 0x0; //No NIFL header
             prmModel = new PRMModel();
             int type = streamReader.Peek<int>();

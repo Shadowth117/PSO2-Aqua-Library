@@ -1,9 +1,10 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
-using AquaModelLibrary.Extra.Ninja.BillyHatcher.LNDH;
+﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
+using AquaModelLibrary.Extra.Ninja;
 using Reloaded.Memory.Streams;
 using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class LNDConvert
     {
@@ -277,7 +278,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         faceVtxl.rawFaceId.Add(f++);
 
                         int x, y, z;
-                        if (((i + listFlip) & 1) > 0)
+                        if ((i + listFlip & 1) > 0)
                         {
                             x = AddARCVert(mdl, faceData, faceVtxl, strip[i], flags, genMesh, vertTracker);
                             y = AddARCVert(mdl, faceData, faceVtxl, strip[i + 1], flags, genMesh, vertTracker);
@@ -321,7 +322,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 }
                 else
                 {
-                    throw new System.Exception();
+                    throw new Exception();
                 }
             }
         }
@@ -577,13 +578,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                     case 0x3:
                         var color = mesh.vertData.vertColorData[faceIds[vertIndexMapping[i]]];
                         int r = color >> 12;
-                        int g = (color >> 8) & 0xF;
-                        int b = (color >> 4) & 0xF;
+                        int g = color >> 8 & 0xF;
+                        int b = color >> 4 & 0xF;
                         int a = color & 0xF;
-                        a = a | (a << 4);
-                        r = r | (r << 4);
-                        g = g | (g << 4);
-                        b = b | (b << 4);
+                        a = a | a << 4;
+                        r = r | r << 4;
+                        g = g | g << 4;
+                        b = b | b << 4;
 
                         //Apply material coloring since it's per polyinfo. Bit excessive. But also not sure it's worthwhile
                         /*
@@ -602,7 +603,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                         vtxl.uv1List.Add(new Vector2(U, V));
                         break;
                     default:
-                        throw new System.Exception($"Unk Vert type: {lyt.vertType:X} Data type: {lyt.dataType:X}");
+                        throw new Exception($"Unk Vert type: {lyt.vertType:X} Data type: {lyt.dataType:X}");
                 }
             }
 

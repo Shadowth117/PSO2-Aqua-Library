@@ -23,6 +23,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public LandPieceSettings() { }
 
+        public LandPieceSettings(byte[] file, string _ext)
+        {
+            Read(file, _ext);
+        }
+
         public LandPieceSettings(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
         {
             Read(sr, _ext);

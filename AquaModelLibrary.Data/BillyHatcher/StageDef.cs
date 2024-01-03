@@ -1,8 +1,9 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class StageDef
     {
@@ -55,7 +56,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             unkSht = sr.ReadBE<ushort>();
             defOffset = sr.ReadBE<int>();
 
-            sr.Seek(8 + defOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(8 + defOffset, SeekOrigin.Begin);
             for (int i = 0; i < defCount; i++)
             {
                 var def = new StageDefinition()
@@ -113,13 +114,13 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             {
                 if (def.missionNameOffset > 0)
                 {
-                    sr.Seek(8 + def.missionNameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.missionNameOffset, SeekOrigin.Begin);
                     def.missionName = sr.ReadCString();
                 }
 
                 if (def.commonDataOffset > 0 && !commonDataDict.ContainsKey(def.commonDataOffset))
                 {
-                    sr.Seek(8 + def.commonDataOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.commonDataOffset, SeekOrigin.Begin);
                     var commonData = ReadCommonData(sr, encoding);
                     def.commonData = commonData;
                     commonDataDict.Add(def.commonDataOffset, commonData);
@@ -127,70 +128,70 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
                 if (def.worldNameOffset > 0)
                 {
-                    sr.Seek(8 + def.worldNameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.worldNameOffset, SeekOrigin.Begin);
                     def.worldName = sr.ReadCString();
                 }
                 if (def.missionTypeOffset > 0)
                 {
-                    sr.Seek(8 + def.missionTypeOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.missionTypeOffset, SeekOrigin.Begin);
                     def.missionType = sr.ReadCString();
                 }
 
                 if (def.lndFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.lndFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.lndFilenameOffset, SeekOrigin.Begin);
                     def.lndFilename = sr.ReadCString();
                 }
                 if (def.bspFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.bspFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.bspFilenameOffset, SeekOrigin.Begin);
                     def.bspFilename = sr.ReadCString();
                 }
                 if (def.mc2FilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.mc2FilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.mc2FilenameOffset, SeekOrigin.Begin);
                     def.mc2Filename = sr.ReadCString();
                 }
                 if (def.setObjFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.setObjFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.setObjFilenameOffset, SeekOrigin.Begin);
                     def.setObjFilename = sr.ReadCString();
                 }
 
                 if (def.setEnemyFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.setEnemyFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.setEnemyFilenameOffset, SeekOrigin.Begin);
                     def.setEnemyFilename = sr.ReadCString();
                 }
                 if (def.setCameraFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.setCameraFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.setCameraFilenameOffset, SeekOrigin.Begin);
                     def.setCameraFilename = sr.ReadCString();
                 }
                 if (def.setDesignFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.setDesignFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.setDesignFilenameOffset, SeekOrigin.Begin);
                     def.setDesignFilename = sr.ReadCString();
                 }
                 if (def.pathFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.pathFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.pathFilenameOffset, SeekOrigin.Begin);
                     def.pathFilename = sr.ReadCString();
                 }
 
                 if (def.eventCameraFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.eventCameraFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.eventCameraFilenameOffset, SeekOrigin.Begin);
                     def.eventCameraFilename = sr.ReadCString();
                 }
                 if (def.messageFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.messageFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.messageFilenameOffset, SeekOrigin.Begin);
                     def.messageFilename = sr.ReadCString();
                 }
                 if (def.eventFilenameOffset > 0)
                 {
-                    sr.Seek(8 + def.eventFilenameOffset, System.IO.SeekOrigin.Begin);
+                    sr.Seek(8 + def.eventFilenameOffset, SeekOrigin.Begin);
                     def.eventFilename = sr.ReadCString();
                 }
 
@@ -214,55 +215,55 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
 
             if (commonData.SEBank4Offset > 0)
             {
-                sr.Seek(8 + commonData.SEBank4Offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.SEBank4Offset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.SEBank4 = str.Remove(minVal);
             }
             if (commonData.SEBank6Offset > 0)
             {
-                sr.Seek(8 + commonData.SEBank6Offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.SEBank6Offset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.SEBank6 = str.Remove(minVal);
             }
             if (commonData.SEBank7Offset > 0)
             {
-                sr.Seek(8 + commonData.SEBank7Offset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.SEBank7Offset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.SEBank7 = str.Remove(minVal);
             }
             if (commonData.particleOffset > 0)
             {
-                sr.Seek(8 + commonData.particleOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.particleOffset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.particle = str.Remove(minVal);
             }
             if (commonData.effectOffset > 0)
             {
-                sr.Seek(8 + commonData.effectOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.effectOffset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.effect = str.Remove(minVal);
             }
             if (commonData.objectDefinitionOffset > 0)
             {
-                sr.Seek(8 + commonData.objectDefinitionOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.objectDefinitionOffset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.objectDefinition = str.Remove(minVal);
             }
             if (commonData.objectDataOffset > 0)
             {
-                sr.Seek(8 + commonData.objectDataOffset, System.IO.SeekOrigin.Begin);
+                sr.Seek(8 + commonData.objectDataOffset, SeekOrigin.Begin);
                 var str = encoding.GetString(sr.ReadBytes(sr.Position, 0x40));
                 var minVal = str.IndexOf(char.MinValue);
                 commonData.objectData = str.Remove(minVal);
             }
 
-            sr.Seek(bookmark, System.IO.SeekOrigin.Begin);
+            sr.Seek(bookmark, SeekOrigin.Begin);
             return commonData;
         }
 

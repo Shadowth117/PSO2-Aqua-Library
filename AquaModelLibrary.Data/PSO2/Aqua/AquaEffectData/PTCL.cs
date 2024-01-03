@@ -1,12 +1,93 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
 {
-    public class PTCLObject : AnimObject
+    public unsafe class PTCLObject : AnimObject
     {
         public PTCL ptcl;
         public PTCLStrings strings;
+
+        public PTCLObject() { }
+        public PTCLObject(List<Dictionary<int, object>> ptclRaw)
+        {
+            ptcl = new PTCL();
+
+            ptcl.size = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x19);
+            ptcl.sizeRandom = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x1A);
+            ptcl.rotation = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x11);
+            ptcl.rotationRandom = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x12);
+            ptcl.rotationAdd = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x14);
+            ptcl.rotationAddRandom = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x15);
+            ptcl.direction = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x44);
+            ptcl.directionRandom = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x45);
+            ptcl.gravitationalAccel = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x50);
+            ptcl.externalAccel = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x51);
+            ptcl.externalAccelRandom = VTBFMethods.GetObject<Vector3>(ptclRaw[0], 0x5C);
+
+            ptcl.float_B0 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x56);
+            ptcl.float_B4 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x57);
+            ptcl.float_B8 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x52);
+            ptcl.float_BC = VTBFMethods.GetObject<float>(ptclRaw[0], 0x53);
+
+            ptcl.int_C0 = VTBFMethods.GetObject<int>(ptclRaw[0], 0x5);
+            ptcl.float_C4 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x2);
+            ptcl.byte_C8 = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x41);
+            ptcl.byte_C9 = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x98);
+            ptcl.byte_CA = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x43);
+            ptcl.byte_CB = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x4F);
+            ptcl.float_CC = VTBFMethods.GetObject<float>(ptclRaw[0], 0x4E);
+
+            ptcl.speed = VTBFMethods.GetObject<float>(ptclRaw[0], 0x46);
+            ptcl.speedRandom = VTBFMethods.GetObject<float>(ptclRaw[0], 0x47);
+
+            ptcl.float_E0 = 1.0f;
+
+            var color = VTBFMethods.GetObject<byte[]>(ptclRaw[0], 0x42);
+            for (int i = 0; i < 0x4; i++)
+            {
+                if (i < color.Length)
+                {
+                    ptcl.color[i] = color[i];
+                }
+                else
+                {
+                    ptcl.color[i] = 0;
+                }
+            }
+
+            ptcl.int_F0 = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x4B);
+            ptcl.int_F4 = VTBFMethods.GetObject<short>(ptclRaw[0], 0x4C);
+            ptcl.int_F8 = VTBFMethods.GetObject<short>(ptclRaw[0], 0x4D);
+            ptcl.byte_FC = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x61);
+            ptcl.byte_FD = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x62);
+            ptcl.byte_FE = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x67);
+            ptcl.byte_FF = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x5D);
+
+            ptcl.int_100 = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x64);
+            ptcl.int_104 = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x66);
+            ptcl.int_108 = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x68);
+            ptcl.short_10C = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x5E);
+            ptcl.short_10E = VTBFMethods.GetObject<byte>(ptclRaw[0], 0x5F);
+
+            ptcl.field_110 = VTBFMethods.GetObject<int>(ptclRaw[0], 0x6);
+            ptcl.field_114 = VTBFMethods.GetObject<short>(ptclRaw[0], 0x55);
+
+            ptcl.float_120 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x54);
+            ptcl.float_124 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x48);
+            ptcl.float_128 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x49);
+            ptcl.float_12C = VTBFMethods.GetObject<float>(ptclRaw[0], 0x4A);
+
+            ptcl.float_130 = VTBFMethods.GetObject<float>(ptclRaw[0], 0x88);
+
+            strings = new PTCLStrings();
+            strings.assetName.SetBytes(VTBFMethods.GetObject<byte[]>(ptclRaw[0], 0x34));
+            strings.subDirectory.SetBytes(VTBFMethods.GetObject<byte[]>(ptclRaw[0], 0x40));
+            strings.diffuseTex.SetBytes(VTBFMethods.GetObject<byte[]>(ptclRaw[0], 0x63));
+            strings.opacityTex.SetBytes(VTBFMethods.GetObject<byte[]>(ptclRaw[0], 0x65));
+            //strings.unkString //May be unused in vtbf?
+        }
     }
     public unsafe struct PTCL
     {

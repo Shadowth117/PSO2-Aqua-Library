@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using AquaModelLibrary.Helpers.Readers;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -7,6 +8,35 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public LHIHeader header;
         public IDFloats idFloats;
         public List<DetailInfoObject> detailInfoList = new List<DetailInfoObject>();
+
+        public LHIObjectDetailLayout() { }
+
+        public LHIObjectDetailLayout(byte[] file, string _ext)
+        {
+            Read(file, _ext);
+        }
+
+        public LHIObjectDetailLayout(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        {
+            Read(sr, _ext);
+        }
+
+        public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            header = sr.Read<LHIHeader>();
+
+            if (header.idFloatPointer != 0x10 && header.idFloatPointer != 0)
+            {
+                sr.Seek(offset + header.idFloatPointer, SeekOrigin.Begin);
+                idFloats = sr.Read<IDFloats>();
+            }
+
+            sr.Seek(offset + header.detailInfoPointer, SeekOrigin.Begin);
+            for (int i = 0; i < header.objectTypeCount; i++)
+            {
+                detailInfoList.Add(new DetailInfoObject(sr, offset));
+            }
+        }
 
         public struct LHIHeader
         {
@@ -40,6 +70,28 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
             public string objName = null;
             public List<Matrix4x4> matrices = new List<Matrix4x4>(); //Matrices are world space
+
+            public DetailInfoObject() { }
+
+            public DetailInfoObject(BufferedStreamReaderBE<MemoryStream> sr, int offset) 
+            {
+                diStruct = sr.Read<DetailInfo>();
+
+                var bookmark = sr.Position;
+                if (diStruct.objNamePointer != 0x10 && diStruct.objNamePointer != 0)
+                {
+                    sr.Seek(offset + diStruct.objNamePointer, SeekOrigin.Begin);
+                    objName = sr.ReadCString();
+                }
+
+                sr.Seek(offset + diStruct.matrixArrayPointer, SeekOrigin.Begin);
+                for (int i = 0; i < diStruct.matrixArrayCount; i++)
+                {
+                    matrices.Add(sr.ReadBEMatrix4());
+                }
+
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
         }
 
         public struct DetailInfo

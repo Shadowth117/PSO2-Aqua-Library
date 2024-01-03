@@ -56,6 +56,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public CMXTable cmxTable = null;
 
+        /// <summary>
+        /// Mode 1 will be latest. Mode 0 will be the first NGS benchmark's.
+        /// </summary>
+        public int WriteMode = 1;
+
         public CharacterMakingIndex() { }
 
         public CharacterMakingIndex(byte[] file, string _ext)
@@ -1116,10 +1121,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         #endregion
 
         #region WriteMethods
-        /// <summary>
-        /// Mode 1 will be latest. Mode 0 will be the first NGS benchmark's.
-        /// </summary>
-        public static byte[] GetBytes(CharacterMakingIndex cmx, int mode = 0)
+        public override byte[] GetBytesNIFL()
         {
             List<byte> outBytes = new List<byte>();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
@@ -1139,285 +1141,284 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             //BODY
             //Costumes/Cast Bodies
             int bodyAddress = outBytes.Count;
-            var costList = cmx.costumeDict.Keys.ToList();
+            var costList = costumeDict.Keys.ToList();
             costList.Sort();
             foreach (var key in costList)
             {
-                AddBodyBytes(cmx.costumeDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBodyBytes(costumeDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Cast Arms
             int carmAddress = outBytes.Count;
-            var carmList = cmx.carmDict.Keys.ToList();
+            var carmList = carmDict.Keys.ToList();
             carmList.Sort();
             foreach (var key in carmList)
             {
-                AddBodyBytes(cmx.carmDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBodyBytes(carmDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Cast Legs
             int clegAddress = outBytes.Count;
-            var clegList = cmx.clegDict.Keys.ToList();
+            var clegList = clegDict.Keys.ToList();
             clegList.Sort();
             foreach (var key in clegList)
             {
-                AddBodyBytes(cmx.clegDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBodyBytes(clegDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //BDP1
             //Body Paint
             int bodyPaintAddress = outBytes.Count;
-            var bdpList = cmx.bodyPaintDict.Keys.ToList();
+            var bdpList = bodyPaintDict.Keys.ToList();
             bdpList.Sort();
             foreach (var key in bdpList)
             {
-                AddBDPBytes(cmx.bodyPaintDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBDPBytes(bodyPaintDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Stickers
             int stickerAddress = outBytes.Count;
-            var stickerList = cmx.stickerDict.Keys.ToList();
+            var stickerList = stickerDict.Keys.ToList();
             stickerList.Sort();
             foreach (var key in stickerList)
             {
-                AddStickerBytes(cmx.stickerDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddStickerBytes(stickerDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //FACE
             int faceAddress = outBytes.Count;
-            var faceList = cmx.faceDict.Keys.ToList();
+            var faceList = faceDict.Keys.ToList();
             faceList.Sort();
             foreach (var key in faceList)
             {
-                AddFACEBytes(cmx.faceDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddFACEBytes(faceDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //FCMN
             int fcmnAddress = outBytes.Count;
-            var fcmnList = cmx.fcmnDict.Keys.ToList();
+            var fcmnList = fcmnDict.Keys.ToList();
             fcmnList.Sort();
             foreach (var key in fcmnList)
             {
-                AddFCMNBytes(cmx.fcmnDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddFCMNBytes(fcmnDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //FaceTextures
             int ftexAddress = outBytes.Count;
-            var ftexList = cmx.faceTextureDict.Keys.ToList();
+            var ftexList = faceTextureDict.Keys.ToList();
             ftexList.Sort();
             foreach (var key in ftexList)
             {
-                AddFaceTexturesBytes(cmx.faceTextureDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddFaceTexturesBytes(faceTextureDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //FCP
             int fcpAddress = outBytes.Count;
-            var fcpList = cmx.fcpDict.Keys.ToList();
+            var fcpList = fcpDict.Keys.ToList();
             fcpList.Sort();
             foreach (var key in fcpList)
             {
-                AddFCPBytes(cmx.fcpDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddFCPBytes(fcpDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //ACCE
             int acceAddress = outBytes.Count;
-            var acceList = cmx.accessoryDict.Keys.ToList();
+            var acceList = accessoryDict.Keys.ToList();
             acceList.Sort();
             foreach (var key in acceList)
             {
-                AddACCEBytes(cmx.accessoryDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddACCEBytes(accessoryDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //EYE
             int eyeAddress = outBytes.Count;
-            var eyeList = cmx.eyeDict.Keys.ToList();
+            var eyeList = eyeDict.Keys.ToList();
             eyeList.Sort();
             foreach (var key in eyeList)
             {
-                AddEYEBytes(cmx.eyeDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddEYEBytes(eyeDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //EAR
             int earAddress = outBytes.Count;
-            var earList = cmx.ngsEarDict.Keys.ToList();
+            var earList = ngsEarDict.Keys.ToList();
             earList.Sort();
             foreach (var key in earList)
             {
-                AddEARBytes(cmx.ngsEarDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddEARBytes(ngsEarDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Teeth
             int teethAddress = outBytes.Count;
-            var teethList = cmx.ngsTeethDict.Keys.ToList();
+            var teethList = ngsTeethDict.Keys.ToList();
             teethList.Sort();
             foreach (var key in teethList)
             {
-                AddTeethBytes(cmx.ngsTeethDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddTeethBytes(ngsTeethDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Horn
             int hornAddress = outBytes.Count;
-            var hornList = cmx.ngsHornDict.Keys.ToList();
+            var hornList = ngsHornDict.Keys.ToList();
             hornList.Sort();
             foreach (var key in hornList)
             {
-                AddHornBytes(cmx.ngsHornDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddHornBytes(ngsHornDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Skin
             int skinAddress = outBytes.Count;
-            var skinList = cmx.ngsSkinDict.Keys.ToList();
+            var skinList = ngsSkinDict.Keys.ToList();
             skinList.Sort();
             foreach (var key in skinList)
             {
-                AddSkinBytes(cmx.ngsSkinDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddSkinBytes(ngsSkinDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //EYEB
             //Eyebrow
             int eyeBAddress = outBytes.Count;
-            var eyeBList = cmx.eyebrowDict.Keys.ToList();
+            var eyeBList = eyebrowDict.Keys.ToList();
             eyeBList.Sort();
             foreach (var key in eyeBList)
             {
-                AddEYEBBytes(cmx.eyebrowDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddEYEBBytes(eyebrowDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Eyelash
             int eyeLAddress = outBytes.Count;
-            var eyeLList = cmx.eyelashDict.Keys.ToList();
+            var eyeLList = eyelashDict.Keys.ToList();
             eyeLList.Sort();
             foreach (var key in eyeLList)
             {
-                AddEYEBBytes(cmx.eyelashDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddEYEBBytes(eyelashDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Hair
             int hairAddress = outBytes.Count;
-            var hairList = cmx.hairDict.Keys.ToList();
+            var hairList = hairDict.Keys.ToList();
             hairList.Sort();
             foreach (var key in hairList)
             {
-                AddHAIRBytes(cmx.hairDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddHAIRBytes(hairDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //NIFL COL
             int colAddress = outBytes.Count;
-            var colList = cmx.colDict.Keys.ToList();
+            var colList = colDict.Keys.ToList();
             colList.Sort();
             foreach (var key in colList)
             {
-                AddNIFLCOLBytes(cmx.colDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddNIFLCOLBytes(colDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Unk
             int unkAddress = outBytes.Count;
-            var unkList = cmx.unkList;
             foreach (var unkArr in unkList)
             {
                 outBytes.AddRange(unkArr.GetBytes());
             }
             //Outer
             int bodyOuterAddress = outBytes.Count;
-            var outerList = cmx.outerDict.Keys.ToList();
+            var outerList = outerDict.Keys.ToList();
             outerList.Sort();
             foreach (var key in outerList)
             {
-                AddBodyBytes(cmx.outerDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBodyBytes(outerDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Basewear
             int baseWearAddress = outBytes.Count;
-            var baseList = cmx.baseWearDict.Keys.ToList();
+            var baseList = baseWearDict.Keys.ToList();
             baseList.Sort();
             foreach (var key in baseList)
             {
-                AddBodyBytes(cmx.baseWearDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBodyBytes(baseWearDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //BBLY
             //Inner wear 
             int innerWearAddress = outBytes.Count;
-            var innerList = cmx.innerWearDict.Keys.ToList();
+            var innerList = innerWearDict.Keys.ToList();
             innerList.Sort();
             foreach (var key in innerList)
             {
-                AddBDPBytes(cmx.innerWearDict[key], mode, outBytes, nof0PointerLocations, textAddressDict, textList);
+                AddBDPBytes(innerWearDict[key], WriteMode, outBytes, nof0PointerLocations, textAddressDict, textList);
             }
 
             //Index Links
             //Costume/Body
             int bodyLinkAddress = outBytes.Count;
-            var bodyLinkList = cmx.costumeIdLink.Keys.ToList();
+            var bodyLinkList = costumeIdLink.Keys.ToList();
             bodyLinkList.Sort();
             foreach (var key in bodyLinkList)
             {
-                outBytes.AddRange(cmx.costumeIdLink[key].GetBytes(mode));
+                outBytes.AddRange(costumeIdLink[key].GetBytes(WriteMode));
             }
             //Cast Leg
             int clegLinkAddress = outBytes.Count;
-            var clegLinkList = cmx.clegIdLink.Keys.ToList();
+            var clegLinkList = clegIdLink.Keys.ToList();
             clegLinkList.Sort();
             foreach (var key in clegLinkList)
             {
-                outBytes.AddRange(cmx.clegIdLink[key].GetBytes(mode));
+                outBytes.AddRange(clegIdLink[key].GetBytes(WriteMode));
             }
             //Cast Arm
             int carmLinkAddress = outBytes.Count;
-            var carmLinkList = cmx.castArmIdLink.Keys.ToList();
+            var carmLinkList = castArmIdLink.Keys.ToList();
             carmLinkList.Sort();
             foreach (var key in carmLinkList)
             {
-                outBytes.AddRange(cmx.castArmIdLink[key].GetBytes(mode));
+                outBytes.AddRange(castArmIdLink[key].GetBytes(WriteMode));
             }
 
             int castHeadLinkAddress = -1;
-            if (mode >= 1)
+            if (WriteMode >= 1)
             {
                 //Cast Head
                 castHeadLinkAddress = outBytes.Count;
-                var cHeadLinkList = cmx.castHeadIdLink.Keys.ToList();
+                var cHeadLinkList = castHeadIdLink.Keys.ToList();
                 cHeadLinkList.Sort();
                 foreach (var key in cHeadLinkList)
                 {
-                    outBytes.AddRange(cmx.castHeadIdLink[key].GetBytes(mode));
+                    outBytes.AddRange(castHeadIdLink[key].GetBytes(WriteMode));
                 }
             }
             //Outer
             int outerLinkAddress = outBytes.Count;
-            var outerLinkList = cmx.outerWearIdLink.Keys.ToList();
+            var outerLinkList = outerWearIdLink.Keys.ToList();
             outerLinkList.Sort();
             foreach (var key in outerLinkList)
             {
-                outBytes.AddRange(cmx.outerWearIdLink[key].GetBytes(mode));
+                outBytes.AddRange(outerWearIdLink[key].GetBytes(WriteMode));
             }
             //Base
             int baseLinkAddress = outBytes.Count;
-            var baseLinkList = cmx.baseWearIdLink.Keys.ToList();
+            var baseLinkList = baseWearIdLink.Keys.ToList();
             baseLinkList.Sort();
             foreach (var key in baseLinkList)
             {
-                outBytes.AddRange(cmx.baseWearIdLink[key].GetBytes(mode));
+                outBytes.AddRange(baseWearIdLink[key].GetBytes(WriteMode));
             }
             //Inner
             int innerLinkAddress = outBytes.Count;
-            var innerLinkList = cmx.innerWearIdLink.Keys.ToList();
+            var innerLinkList = innerWearIdLink.Keys.ToList();
             innerLinkList.Sort();
             foreach (var key in innerLinkList)
             {
-                outBytes.AddRange(cmx.innerWearIdLink[key].GetBytes(mode));
+                outBytes.AddRange(innerWearIdLink[key].GetBytes(WriteMode));
             }
 
             int accessoryIdLinkAddress = -1;
-            if (mode >= 1)
+            if (WriteMode >= 1)
             {
                 //Accessory
                 accessoryIdLinkAddress = outBytes.Count;
-                var acceLinkList = cmx.accessoryIdLink.Keys.ToList();
+                var acceLinkList = accessoryIdLink.Keys.ToList();
                 acceLinkList.Sort();
                 foreach (var key in acceLinkList)
                 {
-                    outBytes.AddRange(cmx.accessoryIdLink[key].GetBytes(mode));
+                    outBytes.AddRange(accessoryIdLink[key].GetBytes(WriteMode));
                 }
             }
             //Write header data
@@ -1479,7 +1480,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
             outBytes.AddRange(BitConverter.GetBytes(clegLinkAddress));
 
-            if (mode >= 1)
+            if (WriteMode >= 1)
             {
                 DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
                 outBytes.AddRange(BitConverter.GetBytes(castHeadLinkAddress));
@@ -1491,59 +1492,59 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
             outBytes.AddRange(BitConverter.GetBytes(innerLinkAddress));
 
-            if (mode >= 1)
+            if (WriteMode >= 1)
             {
                 DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
                 outBytes.AddRange(BitConverter.GetBytes(accessoryIdLinkAddress));
             }
 
             //Counts
-            outBytes.AddRange(BitConverter.GetBytes(cmx.costumeDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.carmDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.clegDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.outerDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(costumeDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(carmDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(clegDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(outerDict.Count));
 
-            outBytes.AddRange(BitConverter.GetBytes(cmx.baseWearDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.innerWearDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.bodyPaintDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.stickerDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(baseWearDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(innerWearDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(bodyPaintDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(stickerDict.Count));
 
-            outBytes.AddRange(BitConverter.GetBytes(cmx.faceDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.fcmnDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.faceTextureDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.fcpDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(faceDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(fcmnDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(faceTextureDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(fcpDict.Count));
 
-            outBytes.AddRange(BitConverter.GetBytes(cmx.accessoryDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.eyeDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsEarDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsTeethDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(accessoryDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(eyeDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(ngsEarDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(ngsTeethDict.Count));
 
-            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsHornDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.ngsSkinDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.eyebrowDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.eyelashDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(ngsHornDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(ngsSkinDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(eyebrowDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(eyelashDict.Count));
 
-            outBytes.AddRange(BitConverter.GetBytes(cmx.hairDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.colDict.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.unkList.Count));
+            outBytes.AddRange(BitConverter.GetBytes(hairDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(colDict.Count));
+            outBytes.AddRange(BitConverter.GetBytes(unkList.Count));
 
-            outBytes.AddRange(BitConverter.GetBytes(cmx.costumeIdLink.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.castArmIdLink.Count));
-            outBytes.AddRange(BitConverter.GetBytes(cmx.clegIdLink.Count));
+            outBytes.AddRange(BitConverter.GetBytes(costumeIdLink.Count));
+            outBytes.AddRange(BitConverter.GetBytes(castArmIdLink.Count));
+            outBytes.AddRange(BitConverter.GetBytes(clegIdLink.Count));
 
-            if (mode >= 1)
+            if (WriteMode >= 1)
             {
-                outBytes.AddRange(BitConverter.GetBytes(cmx.castHeadIdLink.Count));
-                outBytes.AddRange(BitConverter.GetBytes(cmx.outerWearIdLink.Count));
-                outBytes.AddRange(BitConverter.GetBytes(cmx.baseWearIdLink.Count));
-                outBytes.AddRange(BitConverter.GetBytes(cmx.innerWearIdLink.Count));
-                outBytes.AddRange(BitConverter.GetBytes(cmx.accessoryIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(castHeadIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(outerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(baseWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(innerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(accessoryIdLink.Count));
             }
             else
             {
-                outBytes.AddRange(BitConverter.GetBytes(cmx.outerWearIdLink.Count));
-                outBytes.AddRange(BitConverter.GetBytes(cmx.baseWearIdLink.Count));
-                outBytes.AddRange(BitConverter.GetBytes(cmx.innerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(outerWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(baseWearIdLink.Count));
+                outBytes.AddRange(BitConverter.GetBytes(innerWearIdLink.Count));
             }
 
             //Write text

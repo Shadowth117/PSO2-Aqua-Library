@@ -17,50 +17,52 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public MusicFileReboot() { }
 
-        public MusicFileReboot(BufferedStreamReaderBE<MemoryStream> sr)
+        public MusicFileReboot(byte[] file, string _ext)
         {
-            var variant = ReadAquaHeader(sr, out int offset);
+            Read(file, _ext);
+        }
 
-            if (variant == "NIFL")
+        public MusicFileReboot(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        {
+            Read(sr, _ext);
+        }
+
+        public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            sr.Seek(offset + sr.Read<int>(), SeekOrigin.Begin);
+            header = new MusHeader(sr);
+
+            if (header.mus.string_1COffset != 0x10 && header.mus.string_1COffset != 0)
             {
-                nifl = sr.Read<NIFL>();
-                rel0 = sr.Read<REL0>();
-                sr.Seek(offset + rel0.REL0DataStart, SeekOrigin.Begin);
-                sr.Seek(offset + sr.Read<int>(), SeekOrigin.Begin);
-                header = new MusHeader(sr);
+                sr.Seek(offset + header.mus.string_1COffset, SeekOrigin.Begin);
+                musString1C = sr.ReadCString();
+            }
 
-                if (header.mus.string_1COffset != 0x10 && header.mus.string_1COffset != 0)
-                {
-                    sr.Seek(offset + header.mus.string_1COffset, SeekOrigin.Begin);
-                    musString1C = sr.ReadCString();
-                }
+            if (header.mus.customVariableStringOffset != 0x10 && header.mus.customVariableStringOffset != 0)
+            {
+                sr.Seek(offset + header.mus.customVariableStringOffset, SeekOrigin.Begin);
+                customVariables = sr.ReadCString();
+            }
 
-                if (header.mus.customVariableStringOffset != 0x10 && header.mus.customVariableStringOffset != 0)
-                {
-                    sr.Seek(offset + header.mus.customVariableStringOffset, SeekOrigin.Begin);
-                    customVariables = sr.ReadCString();
-                }
+            //Read compositions
+            sr.Seek(offset + header.mus.compositionOffset, SeekOrigin.Begin);
+            for (int i = 0; i < header.mus.compositionCount; i++)
+            {
+                compositions.Add(new Composition(sr, offset));
+            }
 
-                //Read compositions
-                sr.Seek(offset + header.mus.compositionOffset, SeekOrigin.Begin);
-                for (int i = 0; i < header.mus.compositionCount; i++)
-                {
-                    compositions.Add(new Composition(sr, offset));
-                }
+            //Read transitions
+            sr.Seek(offset + header.mus.transitionDataOffset, SeekOrigin.Begin);
+            for (int i = 0; i < header.mus.transitionDataCount; i++)
+            {
+                transitionData.Add(new TransitionData(sr, offset));
+            }
 
-                //Read transitions
-                sr.Seek(offset + header.mus.transitionDataOffset, SeekOrigin.Begin);
-                for (int i = 0; i < header.mus.transitionDataCount; i++)
-                {
-                    transitionData.Add(new TransitionData(sr, offset));
-                }
-
-                //Read conditions
-                sr.Seek(offset + header.mus.conditionDataOffset, SeekOrigin.Begin);
-                for (int i = 0; i < header.mus.conditionDataCount; i++)
-                {
-                    conditionsData.Add(new Conditions(sr, offset));
-                }
+            //Read conditions
+            sr.Seek(offset + header.mus.conditionDataOffset, SeekOrigin.Begin);
+            for (int i = 0; i < header.mus.conditionDataCount; i++)
+            {
+                conditionsData.Add(new Conditions(sr, offset));
             }
         }
 

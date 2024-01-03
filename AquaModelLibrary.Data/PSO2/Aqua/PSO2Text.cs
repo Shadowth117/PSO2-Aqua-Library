@@ -180,7 +180,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public string str;
         }
 
-        public byte[] GetBytes()
+        public override byte[] GetBytesNIFL()
         {
             int rel0SizeOffset = 0;
             int categoryOffset = 0;

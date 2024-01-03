@@ -85,7 +85,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public byte[] GetBytes()
+        public override byte[] GetBytesNIFL()
         {
             List<byte> outBytes = new List<byte>();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section

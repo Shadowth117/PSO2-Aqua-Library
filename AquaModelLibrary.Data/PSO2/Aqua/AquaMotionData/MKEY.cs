@@ -1,4 +1,6 @@
-﻿using AquaModelLibrary.Helpers.MathHelpers;
+﻿using AquaModelLibrary.Helpers;
+using AquaModelLibrary.Helpers.MathHelpers;
+using AquaModelLibrary.Helpers.PSO2;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
@@ -20,6 +22,160 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
         public List<byte> byteKeys = new List<byte>();   //0xF2. Only observed in Alpha PSO2 animations. Appear to be int arrays rendered in bytes... for some reason.
                                                          //Also uses the designator for int keys in newer iterations. Combine every 4 to convert to an int array.
         public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
+
+        public MKEY() { }
+        public MKEY(List<Dictionary<int, object>> mkeyRaw)
+        {
+            keyType = (int)mkeyRaw[0][0xEB];
+            dataType = (int)mkeyRaw[0][0xEC];
+            unkInt0 = (int)mkeyRaw[0][0xF0];
+            keyCount = (int)mkeyRaw[0][0xED];
+
+            //Get frame timings. Seemingly may not store a frame timing if there's only one frame.
+            if (keyCount > 1)
+            {
+                for (int j = 0; j < keyCount; j++)
+                {
+                    frameTimings.Add(((ushort[])mkeyRaw[0][0xEF])[j]);
+                }
+            }
+            else if (mkeyRaw[0].ContainsKey(0xEF))
+            {
+                frameTimings.Add((ushort)mkeyRaw[0][0xEF]);
+            }
+
+            //Get frames. The data types stored are different depending on the key count.
+            switch (dataType)
+            {
+                //0x1 and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                    if (keyCount > 1)
+                    {
+                        for (int j = 0; j < keyCount; j++)
+                        {
+                            vector4Keys.Add(((Vector4[])mkeyRaw[0][0xEE])[j]);
+                        }
+                    }
+                    else
+                    {
+                        vector4Keys.Add((Vector4)mkeyRaw[0][0xEE]);
+                    }
+                    break;
+                case 0x5:
+                    if (keyCount > 1)
+                    {
+                        if (mkeyRaw[0].ContainsKey(0xF3))
+                        {
+                            for (int j = 0; j < keyCount; j++)
+                            {
+                                intKeys.Add(((int[])mkeyRaw[0][0xF3])[j]);
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < keyCount * 4; j += 4)
+                            {
+                                intKeys.Add(BitConverter.ToInt32(((byte[])mkeyRaw[0][0xF2]), j));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (mkeyRaw[0].ContainsKey(0xF3))
+                        {
+                            intKeys.Add((int)mkeyRaw[0][0xF3]);
+                        }
+                        else
+                        {
+                            for (int j = 0; j < keyCount * 4; j += 4)
+                            {
+                                intKeys.Add(BitConverter.ToInt32(((byte[])mkeyRaw[0][0xF2]), j));
+                            }
+                        }
+                    }
+                    break;
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    if (keyCount > 1)
+                    {
+                        for (int j = 0; j < keyCount; j++)
+                        {
+                            floatKeys.Add(((float[])mkeyRaw[0][0xF1])[j]);
+                        }
+                    }
+                    else
+                    {
+                        floatKeys.Add((float)mkeyRaw[0][0xF1]);
+                    }
+                    break;
+                default:
+                    throw new Exception($"Unexpected data type: {dataType}");
+            }
+        }
+
+        public byte[] GetBytesVTBF()
+        {
+            List<byte> outBytes = new List<byte>();
+
+            VTBFMethods.AddBytes(outBytes, 0xEB, 0x9, BitConverter.GetBytes(keyType));
+            VTBFMethods.AddBytes(outBytes, 0xEC, 0x9, BitConverter.GetBytes(dataType));
+            VTBFMethods.AddBytes(outBytes, 0xF0, 0x9, BitConverter.GetBytes(unkInt0));
+            VTBFMethods.AddBytes(outBytes, 0xED, 0x9, BitConverter.GetBytes(keyCount));
+
+            //Set frame timings. The data types stored are different depending on the key count
+            VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xEF, keyCount, 0x06);
+            //Write the actual timings
+            for (int j = 0; j < frameTimings.Count; j++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes((ushort)frameTimings[j]));
+            }
+
+            //Write frame data. Types will vary.
+            switch (dataType)
+            {
+                //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xEE, keyCount, 0x4A);
+                    for (int j = 0; j < frameTimings.Count; j++)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(vector4Keys[j]));
+                    }
+                    break;
+                case 0x5:
+                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xF3, keyCount, 0x48);
+                    if (intKeys.Count > 0)
+                    {
+                        for (int j = 0; j < frameTimings.Count; j++)
+                        {
+
+                            outBytes.AddRange(BitConverter.GetBytes(intKeys[j]));
+                        }
+                    }
+                    else
+                    {
+                        outBytes.AddRange(byteKeys);
+                    }
+                    break;
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xF1, keyCount, 0xA);
+                    for (int j = 0; j < frameTimings.Count; j++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(floatKeys[j]));
+                    }
+                    break;
+                default:
+                    throw new Exception("Unexpected data type!");
+            }
+
+            return outBytes.ToArray();
+        }
 
         public int GetTimeMultiplier()
         {

@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     /// <summary>
     /// Billy Hatcher specific variation of the Ninja Motions
@@ -80,11 +80,11 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             motStart = new MotionStart();
             motStart.int_00 = sr.ReadBE<int>();
             motStart.offset = sr.ReadBE<int>();
-            sr.Seek(motStart.offset + offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(motStart.offset + offset, SeekOrigin.Begin);
             motRef = new MotionRef();
             motRef.int_00 = sr.ReadBE<int>();
             motRef.offset = sr.ReadBE<int>();
-            sr.Seek(motRef.offset + offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(motRef.offset + offset, SeekOrigin.Begin);
             motHeader = new MotionHeader();
             motHeader.usht_00 = sr.ReadBE<ushort>();
             motHeader.usht_02 = sr.ReadBE<ushort>();
@@ -109,7 +109,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             motHeader.int_2C = sr.ReadBE<int>();
 
             //If this is used outside of LND this needs fixing, but otherwise, this works for now.
-            sr.Seek(motHeader.dataOffset + offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(motHeader.dataOffset + offset, SeekOrigin.Begin);
             List<byte[]> colorAnimation = new List<byte[]>();
             for (int i = 0; i < motHeader.count; i++)
             {

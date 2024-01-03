@@ -92,6 +92,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public virtual void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset) { throw new NotImplementedException(); }
         public virtual void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr) { throw new NotImplementedException(); }
 
+        public virtual byte[] GetBytesNIFL() { throw new NotImplementedException();  }
+        public virtual byte[] GetBytesVTBF() { throw new NotImplementedException();  }
+
         /// <summary>
         /// Reads NIFL, REL0, NOF0, and NEND, then seeks to REL0DataStart
         /// </summary>

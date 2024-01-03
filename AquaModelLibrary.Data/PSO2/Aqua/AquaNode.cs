@@ -234,7 +234,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             aqn.nodeList.Add(node);
         }
 
-        public byte[] GetBytes()
+        public override byte[] GetBytesNIFL()
         {
             List<byte> outBytes = new List<byte>();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
@@ -315,7 +315,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return outBytes.ToArray();
         }
 
-        public byte[] GetBytesVTBF()
+        public override byte[] GetBytesVTBF()
         {
             List<byte> outBytes = new List<byte>();
             outBytes.AddRange(VTBFMethods.ToAQGFVTBF());

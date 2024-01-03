@@ -1,4 +1,6 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
+using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
 {
@@ -16,5 +18,40 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
         public PSO2String testString; //0xE6, type 0x2 //Always a string of just "test". Technically a standard 0x20 length PSO2 string, but always observed as "test"
 
         public int reserve0;
+
+        public MOHeader(List<Dictionary<int, object>> moRaw)
+        {
+            variant = (int)moRaw[0][0xE0];
+            loopPoint = (int)moRaw[0][0xE1];
+            endFrame = (int)moRaw[0][0xE2];
+            frameSpeed = (float)moRaw[0][0xE3];
+            unkInt0 = (int)moRaw[0][0xE4];
+            nodeCount = (int)moRaw[0][0xE5];
+            testString = new PSO2String((byte[])moRaw[0][0xE6]);
+
+            boneTableOffset = 0;
+            reserve0 = 0;
+        }
+
+        public byte[] GetBytesVTBF(string motionType)
+        {
+            List<byte> outBytes = new List<byte>();
+
+            VTBFMethods.AddBytes(outBytes, 0xE0, 0x9, BitConverter.GetBytes(variant));
+            VTBFMethods.AddBytes(outBytes, 0xE1, 0x9, BitConverter.GetBytes(loopPoint));
+            VTBFMethods.AddBytes(outBytes, 0xE2, 0x9, BitConverter.GetBytes(endFrame));
+            VTBFMethods.AddBytes(outBytes, 0xE3, 0x9, BitConverter.GetBytes(frameSpeed));
+            VTBFMethods.AddBytes(outBytes, 0xE4, 0x9, BitConverter.GetBytes(unkInt0));
+            VTBFMethods.AddBytes(outBytes, 0xE5, 0x9, BitConverter.GetBytes(nodeCount));
+
+            //Test String
+            string testStr = testString.GetString();
+            VTBFMethods.AddBytes(outBytes, 0xE6, 0x02, (byte)testStr.Length, Encoding.UTF8.GetBytes(testStr));
+
+            VTBFMethods.WriteTagHeader(outBytes, motionType, (ushort)nodeCount, 0x7);
+
+            return outBytes.ToArray();
+        }
+
     }
 }

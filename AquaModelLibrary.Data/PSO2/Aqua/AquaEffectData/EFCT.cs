@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.PSO2;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
@@ -40,6 +41,41 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
         public PSO2Stringx30 soundName; //0x90, Type 0x2
         public int emitOffset;
         public int emitCount;
+
+        public EFCT(List<Dictionary<int, object>> efctRaw)
+        {
+            unkVec3_0 = VTBFMethods.GetObject<Vector3>(efctRaw[0], 0x10);
+            unkVec3_1 = VTBFMethods.GetObject<Vector3>(efctRaw[0], 0x11);
+            unkVec3_2 = VTBFMethods.GetObject<Vector3>(efctRaw[0], 0x12); //May not ever be used, but we're gonna check for it
+
+            float_30 = 1.0f;
+
+            startFrame = VTBFMethods.GetObject<int>(efctRaw[0], 0x1);
+            endFrame = VTBFMethods.GetObject<int>(efctRaw[0], 0x2);
+            int_48 = VTBFMethods.GetObject<int>(efctRaw[0], 0x3);
+
+            var color = VTBFMethods.GetObject<byte[]>(efctRaw[0], 0x42);
+            for (int i = 0; i < 0x4; i++)
+            {
+                if (i < color.Length)
+                {
+                    color[i] = color[i];
+                }
+                else
+                {
+                    color[i] = 0;
+                }
+            }
+
+            boolInt_54 = VTBFMethods.GetObject<byte>(efctRaw[0], 0x4);
+            boolInt_58 = VTBFMethods.GetObject<byte>(efctRaw[0], 0x0);
+            boolInt_5C = VTBFMethods.GetObject<byte>(efctRaw[0], 0x7);
+
+            float_60 = VTBFMethods.GetObject<int>(efctRaw[0], 0x91);
+            float_64 = VTBFMethods.GetObject<int>(efctRaw[0], 0x92);
+
+            soundName = PSO2Stringx30.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(efctRaw[0], 0x90));
+        }
     }
 
 }

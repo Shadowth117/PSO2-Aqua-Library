@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     public unsafe struct SetLightParam
     {

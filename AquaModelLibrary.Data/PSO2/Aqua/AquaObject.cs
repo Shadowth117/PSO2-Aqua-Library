@@ -6,6 +6,8 @@ using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
+using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 
@@ -59,6 +61,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<string> texFUnicodeNames = new List<string>();
 
         public AquaObject() { }
+        public AquaObject(bool createNGSObj) 
+        {
+            objc.type = createNGSObj ? 0xC33 : 0xC2A;
+        }
 
         public AquaObject(byte[] bytes, string _ext)
         {
@@ -218,8 +224,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
 
                     //Sega is pretty consistent with these, but for 0xC31
-                    stripData.format0xC33 = psetList[psetIndex].tag != 0x2100;
+                    stripData.format0xC31 = psetList[psetIndex].tag != 0x2100;
 
+                    //We want to read 0xC32+ files differently.
+                    //While 0xC31 uses triangle lists over tristrips, it should still be read the same as 0xC2A type models
                     if (IsNGS)
                     {
                         stripData.triIdCount = psetList[psetIndex].psetFaceCount;
@@ -397,7 +405,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
 
                     //Sega is pretty consistent with these, but for 0xC31
-                    stripData.format0xC33 = pset2List[psetIndex].tag != 0x2100;
+                    stripData.format0xC31 = pset2List[psetIndex].tag != 0x2100;
 
                     if (IsNGS)
                     {
@@ -471,7 +479,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 for (int id = 0; id < strips3Lengths.Count; id++)
                 {
                     StripData stripData = new StripData();
-                    stripData.format0xC33 = true;
+                    stripData.format0xC31 = true;
                     stripData.triIdCount = strips3Lengths[id];
 
                     //These can potentially be 0 sometimes
@@ -516,6 +524,712 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
             }
         }
+
+        #region NIFLWriting
+        public override byte[] GetBytesNIFL()
+        {
+            //Pointer data offsets for filling in later
+            int rel0SizeOffset;
+
+            //OBJC Offsets
+            int objcGlobalTriOffset;
+            int objcGlobalVtxlOffset;
+            int objcVsetOffset;
+            int objcPsetOffset;
+            int objcMeshOffset;
+            int objcMateOffset;
+
+            int objcRendOffset;
+            int objcShadOffset;
+            int objcTstaOffset;
+            int objcTsetOffset;
+
+            int objcTexfOffset;
+            int objcUnrmOffset;
+            int objcVtxeOffset;
+            int objcBonePaletteOffset;
+
+            int objcUnkStruct1Offset;
+            int objcPset2Offset;
+            int objcMesh2Offset;
+            int objcGlobalStrip3Offset;
+
+            int objcGlobalStrip3LengthOffset3;
+            int objcUnkPointArray1Offset;
+            int objcUnkPointArray2Offset;
+
+            List<int> vsetEdgeVertOffsets = new List<int>();
+            List<int> psetfirstOffsets = new List<int>();
+            List<int> pset2firstOffsets = new List<int>();
+            List<int> shadDetailOffsets = new List<int>();
+            List<int> shadExtraOffsets = new List<int>();
+
+            List<int> vtxeOffsets = new List<int>();
+
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //OBJC
+
+            //Set up OBJC pointers
+            objcGlobalTriOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x14, strips.Count);
+            objcGlobalVtxlOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, vtxlList.Count);
+            objcVsetOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x28, objc.vsetCount);
+            objcPsetOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, objc.psetCount);
+            objcMeshOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x38, objc.meshCount);
+            objcMateOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x40, objc.mateCount);
+                            
+            objcRendOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x48, objc.rendCount);
+            objcShadOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x50, objc.shadCount);
+            objcTstaOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x58, objc.tstaCount);
+            objcTsetOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x60, objc.tsetCount);
+
+            objcTexfOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x68, objc.texfCount);
+            if (unrms != null)
+            {
+                objcUnrmOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xA0, 1);
+            }
+            else
+            {
+                objcUnrmOffset = -1;
+            }
+            objcVtxeOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xA8, objc.vtxeCount);
+            objcBonePaletteOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xAC, bonePalette.Count);
+
+            objcUnkStruct1Offset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xC4, unkStruct1List.Count);
+            objcPset2Offset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xCC, pset2List.Count);
+            objcMesh2Offset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xD4, mesh2List.Count);
+            objcGlobalStrip3Offset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xD8, strips3.Count);
+
+            objcGlobalStrip3LengthOffset3 = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xE0, strips3Lengths.Count);
+            objcUnkPointArray1Offset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xE4, unkPointArray1.Count);
+            objcUnkPointArray2Offset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xE8, unkPointArray2.Count);
+
+            //Write OBJC block
+            outBytes.AddRange(BitConverter.GetBytes(objc.type));
+            outBytes.AddRange(BitConverter.GetBytes(objc.size));
+            outBytes.AddRange(BitConverter.GetBytes(objc.unkMeshValue));
+            outBytes.AddRange(BitConverter.GetBytes(objc.largetsVtxl));
+
+            outBytes.AddRange(BitConverter.GetBytes(objc.totalStripFaces));
+            outBytes.AddRange(BitConverter.GetBytes(objc.globalStripOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.totalVTXLCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.vtxlStartOffset));
+
+            outBytes.AddRange(BitConverter.GetBytes(objc.unkStructCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.vsetCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.vsetOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.psetCount));
+
+            outBytes.AddRange(BitConverter.GetBytes(objc.psetOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.meshCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.meshOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.mateCount));
+
+            outBytes.AddRange(BitConverter.GetBytes(objc.mateOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.rendCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.rendOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.shadCount));
+
+            outBytes.AddRange(BitConverter.GetBytes(objc.shadOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.tstaCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.tstaOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.tsetCount));
+
+            outBytes.AddRange(BitConverter.GetBytes(objc.tsetOffset));
+            outBytes.AddRange(BitConverter.GetBytes(objc.texfCount));
+            outBytes.AddRange(BitConverter.GetBytes(objc.texfOffset));
+
+            outBytes.AddRange(DataHelpers.ConvertStruct(objc.bounds));
+            outBytes.AddRange(BitConverter.GetBytes(objc.unkCount0));
+            outBytes.AddRange(BitConverter.GetBytes(objc.unrmOffset));
+
+            //NGS sections
+            if(objc.type >= 0xC32)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(objc.vtxeCount));
+                outBytes.AddRange(BitConverter.GetBytes(objc.vtxeOffset));
+                outBytes.AddRange(BitConverter.GetBytes(objc.bonePaletteOffset));
+
+                outBytes.AddRange(BitConverter.GetBytes(objc.fBlock0));
+                outBytes.AddRange(BitConverter.GetBytes(objc.fBlock1));
+                outBytes.AddRange(BitConverter.GetBytes(objc.fBlock2));
+                outBytes.AddRange(BitConverter.GetBytes(objc.fBlock3));
+
+                outBytes.AddRange(BitConverter.GetBytes(objc.unkStruct1Count));
+                outBytes.AddRange(BitConverter.GetBytes(objc.unkStruct1Offset));
+                outBytes.AddRange(BitConverter.GetBytes(objc.pset2Count));
+                outBytes.AddRange(BitConverter.GetBytes(objc.pset2Offset));
+
+                if(objc.type >= 0xC33)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(objc.mesh2Count));
+                    outBytes.AddRange(BitConverter.GetBytes(objc.mesh2Offset));
+                    outBytes.AddRange(BitConverter.GetBytes(objc.globalStrip3Offset));
+                    outBytes.AddRange(BitConverter.GetBytes(objc.globalStrip3LengthCount));   //At least 1
+
+                    outBytes.AddRange(BitConverter.GetBytes(objc.globalStrip3LengthOffset));
+                    outBytes.AddRange(BitConverter.GetBytes(objc.unkPointArray1Offset));
+                    outBytes.AddRange(BitConverter.GetBytes(objc.unkPointArray2Offset));
+                    outBytes.AddRange(BitConverter.GetBytes(objc.unkCount3));   //Default to 1?
+                }
+            }
+
+            outBytes.AlignWriter(0x10);
+
+            if(objc.type >= 0xC32)
+            {
+                //Write triangles. NGS doesn't use tristrips anymore
+                //Assumes the ushorts are already laid out as triangles
+                outBytes.SetByteListInt(objcGlobalTriOffset, outBytes.Count);
+                for (int i = 0; i < strips.Count; i++)
+                {
+                    foreach (var id in strips[i].triStrips)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(id));
+                    }
+                }
+                outBytes.AlignWriter(0x10);
+            }
+
+            if(objc.type >= 0xC32)
+            {
+                //Write NGS VTXL
+                outBytes.SetByteListInt(objcGlobalVtxlOffset, outBytes.Count);
+                for (int i = 0; i < vtxlList.Count; i++)
+                {
+                    vtxlList[i].GetBytes(vtxeList[vsetList[i].vtxeCount], outBytes, objc.largetsVtxl);
+                }
+                outBytes.AlignWriter(0x10);
+
+                //VSET
+                //Write VSET pointer
+                outBytes.SetByteListInt(objcVsetOffset, outBytes.Count);
+
+                //Write VSET
+                for (int vsetId = 0; vsetId < vsetList.Count; vsetId++)
+                {
+                    vsetEdgeVertOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, vsetList[vsetId].edgeVertsCount));
+
+                    outBytes.AddRange(DataHelpers.ConvertStruct(vsetList[vsetId]));
+                }
+                outBytes.AlignWriter(0x10);
+
+                //Write Edge Verts
+                for (int vsetId = 0; vsetId < vsetList.Count; vsetId++)
+                {
+                    if (vtxlList[vsetId].edgeVerts != null && vtxlList[vsetId].edgeVerts.Count > 0)
+                    {
+                        //Write edge verts pointer
+                        outBytes.SetByteListInt(vsetEdgeVertOffsets[vsetId], outBytes.Count);
+                        //Write edge verts
+                        for (int evId = 0; evId < vtxlList[vsetId].edgeVerts.Count; evId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(vtxlList[vsetId].edgeVerts[evId]));
+                        }
+                        outBytes.AlignWriter(0x10);
+                    }
+                }
+            } else
+            {
+                List<int> vsetVtxeOffsets = new List<int>();
+                List<int> vsetVtxlOffsets = new List<int>();
+                List<int> vsetBonePaletteOffsets = new List<int>();
+                //VSET
+                //Write VSET pointer
+                outBytes.SetByteListInt(objcVsetOffset, outBytes.Count);
+
+                //Write VSET
+                for (int vsetId = 0; vsetId < vsetList.Count; vsetId++)
+                {
+                    vsetVtxeOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x8, vsetList[vsetId].vtxeCount));
+                    vsetVtxlOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x10, vsetList[vsetId].vtxlCount));
+                    vsetBonePaletteOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, vsetList[vsetId].bonePaletteCount));
+                    vsetEdgeVertOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, vsetList[vsetId].edgeVertsCount));
+
+                    outBytes.AddRange(DataHelpers.ConvertStruct(vsetList[vsetId]));
+                }
+                outBytes.AlignWriter(0x10);
+
+                //VTXE + VTXL
+                for (int vertListId = 0; vertListId < vtxlList.Count; vertListId++)
+                {
+                    //Write VTXE pointer
+                    outBytes.SetByteListInt(vsetVtxeOffsets[vertListId], outBytes.Count);
+                    //Write current VTXE array
+                    for (int vtxeId = 0; vtxeId < vtxeList[vertListId].vertDataTypes.Count; vtxeId++)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(vtxeList[vertListId].vertDataTypes[vtxeId]));
+                    }
+
+                    //Write VTXL pointer
+                    outBytes.SetByteListInt(vsetVtxlOffsets[vertListId], outBytes.Count);
+                    //Write current VTXL array
+                    vtxlList[vertListId].GetBytes(vtxeList[vertListId], outBytes);
+                    outBytes.AlignWriter(0x10);
+
+                    if (vtxlList[vertListId].bonePalette != null)
+                    {
+                        //Write bone palette pointer
+                        outBytes.SetByteListInt(vsetBonePaletteOffsets[vertListId], outBytes.Count);
+                        //Write bone palette
+                        for (int bpId = 0; bpId < vtxlList[vertListId].bonePalette.Count; bpId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(vtxlList[vertListId].bonePalette[bpId]));
+                        }
+                        outBytes.AlignWriter(0x10);
+                    }
+
+                    if (vtxlList[vertListId].edgeVerts != null)
+                    {
+                        //Write edge verts pointer
+                        outBytes.SetByteListInt(vsetEdgeVertOffsets[vertListId], outBytes.Count);
+                        //Write edge verts
+                        for (int evId = 0; evId < vtxlList[vertListId].edgeVerts.Count; evId++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(vtxlList[vertListId].edgeVerts[evId]));
+                        }
+                        outBytes.AlignWriter(0x10);
+                    }
+                }
+            }
+
+            //PSET
+
+            //Write PSET pointer
+            outBytes.SetByteListInt(objcPsetOffset, outBytes.Count);
+
+            //Write PSET
+            for (int psetId = 0; psetId < psetList.Count; psetId++)
+            {
+                psetfirstOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
+                if(objc.type < 0xC32)
+                {
+                    nof0PointerLocations.Add(outBytes.Count + 0x10);
+                }
+                outBytes.AddRange(DataHelpers.ConvertStruct(psetList[psetId]));
+            }
+            outBytes.AlignWriter(0x10);
+
+            //0xC31 is closer to 0xC2A type models and so should be written like it
+            if(objc.type >= 0xC32)
+            {
+                //Write triangle groups
+                for (int stripId = 0; stripId < strips.Count; stripId++)
+                {
+                    outBytes.SetByteListInt(psetfirstOffsets[stripId], outBytes.Count);
+
+                    for (int id = 0; id < strips[stripId].faceGroups.Count; id++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(strips[stripId].faceGroups[id]));
+                    }
+                    outBytes.AlignWriter(0x10); //These should all align already, but just in case
+                }
+            } else
+            {
+                //Write tristrip data
+                for (int stripId = 0; stripId < strips.Count; stripId++)
+                {
+                    outBytes.SetByteListInt(psetfirstOffsets[stripId], outBytes.Count);
+                    outBytes.SetByteListInt(psetfirstOffsets[stripId] + 0x8, outBytes.Count + 0x10); //Strip indices offset; always a set distance
+
+                    outBytes.AddRange(BitConverter.GetBytes(strips[stripId].triIdCount));
+                    outBytes.AddRange(BitConverter.GetBytes(strips[stripId].reserve0));
+                    outBytes.AddRange(BitConverter.GetBytes(strips[stripId].reserve1));
+                    outBytes.AddRange(BitConverter.GetBytes(strips[stripId].reserve2));
+
+                    for (int faceId = 0; faceId < strips[stripId].triStrips.Count; faceId++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(strips[stripId].triStrips[faceId]));
+                    }
+                    outBytes.AlignWriter(0x10); //Intentionally aligned inside, unlike the basic PSET array's alignment
+                }
+            }
+
+            //MESH
+
+            //Write MESH pointer
+            outBytes.SetByteListInt(objcMeshOffset, outBytes.Count);
+
+            //Write MESH
+            for (int meshId = 0; meshId < meshList.Count; meshId++)
+            {
+                outBytes.AddRange(DataHelpers.ConvertStruct(meshList[meshId]));
+            }
+
+            //MATE
+
+            //Write MATE pointer
+            outBytes.SetByteListInt(objcMateOffset, outBytes.Count);
+
+            //Write MATE
+            for (int mateId = 0; mateId < mateList.Count; mateId++)
+            {
+                outBytes.AddRange(DataHelpers.ConvertStruct(mateList[mateId]));
+            }
+            outBytes.AlignWriter(0x10);
+
+            //REND
+
+            //Write REND pointer
+            outBytes.SetByteListInt(objcRendOffset, outBytes.Count);
+
+            //Write REND
+            for (int rendId = 0; rendId < rendList.Count; rendId++)
+            {
+                outBytes.AddRange(DataHelpers.ConvertStruct(rendList[rendId]));
+            }
+            outBytes.AlignWriter(0x10);
+
+            //SHAD
+
+            //Write SHAD pointer
+            outBytes.SetByteListInt(objcShadOffset, outBytes.Count);
+
+            //Write SHAD
+            for (int shadId = 0; shadId < shadList.Count; shadId++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(shadList[shadId].unk0));
+                outBytes.AddRange(shadList[shadId].pixelShader.GetBytes());
+                outBytes.AddRange(shadList[shadId].vertexShader.GetBytes());
+
+                shadDetailOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, shadList[shadId].shadDetailOffset));
+                shadExtraOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 4, shadList[shadId].shadExtraOffset));
+                outBytes.AddRange(BitConverter.GetBytes(shadList[shadId].shadDetailOffset));
+                outBytes.AddRange(BitConverter.GetBytes(shadList[shadId].shadExtraOffset));
+            }
+            outBytes.AlignWriter(0x10);
+
+            //Write SHAD sub structs
+            for (int shadId = 0; shadId < shadList.Count; shadId++)
+            {
+                var shad = shadList[shadId];
+
+                if (shad.shadDetailOffset != 0)
+                {
+                    outBytes.SetByteListInt(shadDetailOffsets[shadId], outBytes.Count);
+                    outBytes.AddRange(DataHelpers.ConvertStruct(shad.shadDetail));
+                }
+
+                if (shad.shadExtra.Count > 0)
+                {
+                    outBytes.SetByteListInt(shadExtraOffsets[shadId], outBytes.Count);
+                    foreach (var extra in shad.shadExtra)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(extra));
+                    }
+                }
+            }
+
+            //TSTA
+            if (tstaList.Count > 0)
+            {
+                //Write TSTA pointer
+                outBytes.SetByteListInt(objcTstaOffset, outBytes.Count);
+
+                //Write TSTA
+                for (int tstaId = 0; tstaId < tstaList.Count; tstaId++)
+                {
+                    outBytes.AddRange(DataHelpers.ConvertStruct(tstaList[tstaId]));
+                }
+                outBytes.AlignWriter(0x10);
+            }
+
+            //TSET
+
+            //Write TSET pointer
+            outBytes.SetByteListInt(objcTsetOffset, outBytes.Count);
+
+            //Write TSET
+            for (int tsetId = 0; tsetId < tsetList.Count; tsetId++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(tsetList[tsetId].unkInt0));
+                outBytes.AddRange(BitConverter.GetBytes(tsetList[tsetId].texCount));
+                outBytes.AddRange(BitConverter.GetBytes(tsetList[tsetId].unkInt1));
+                outBytes.AddRange(BitConverter.GetBytes(tsetList[tsetId].unkInt2));
+
+                outBytes.AddRange(BitConverter.GetBytes(tsetList[tsetId].unkInt3));
+
+                //Do as bytes for greater than 4, ints if 4 or less. Remainder of the 0x10 area should be 0xFF.
+                if (tsetList[tsetId].texCount > 4)
+                {
+                    for (int i = 0; i < tsetList[tsetId].texCount; i++)
+                    {
+                        outBytes.Add((byte)tsetList[tsetId].tstaTexIDs[i]);
+                    }
+                    for (int i = 0; i < (0x10 - tsetList[tsetId].texCount); i++)
+                    {
+                        outBytes.Add(0xFF);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < tsetList[tsetId].texCount; i++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(tsetList[tsetId].tstaTexIDs[i]));
+                    }
+                    for (int i = 0; i < (0x10 - (tsetList[tsetId].texCount * sizeof(int))); i++)
+                    {
+                        outBytes.Add(0xFF);
+                    }
+                }
+            }
+            outBytes.AlignWriter(0x10);
+
+            //TEXF
+            if (tstaList.Count > 0)
+            {
+                //Write TEXF pointer
+                outBytes.SetByteListInt(objcTexfOffset, outBytes.Count);
+
+                //Write TEXF
+                for (int texfId = 0; texfId < texfList.Count; texfId++)
+                {
+                    outBytes.AddRange(DataHelpers.ConvertStruct(texfList[texfId]));
+                }
+                outBytes.AlignWriter(0x10);
+            }
+
+            //UNRM
+            if (unrms != null)
+            {
+                int meshIDPointerOffset = 0;
+                int vertIDPointerOffset = 0;
+
+                //Write UNRM pointer
+                outBytes.SetByteListInt(objcUnrmOffset, outBytes.Count);
+
+                //Write UNRM
+                outBytes.AddRange(BitConverter.GetBytes(unrms.vertGroupCountCount));
+                DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                outBytes.AddRange(BitConverter.GetBytes(outBytes.Count + 0x1C)); //Should always start a set amount after here
+                outBytes.AddRange(BitConverter.GetBytes(unrms.vertCount));
+                meshIDPointerOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                outBytes.AddRange(BitConverter.GetBytes(unrms.meshIdOffset));
+                vertIDPointerOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count, 1);
+                outBytes.AddRange(BitConverter.GetBytes(unrms.vertIDOffset));
+                outBytes.AddRange(BitConverter.GetBytes(unrms.padding0));
+                outBytes.AddRange(BitConverter.GetBytes(unrms.padding1));
+
+                //Write group counts
+                for (int i = 0; i < unrms.unrmVertGroups.Count; i++)
+                {
+                    outBytes.AddRange(BitConverter.GetBytes(unrms.unrmVertGroups[i]));
+                }
+                outBytes.AlignWriter(0x10);
+
+                //Write Mesh Ids
+                outBytes.SetByteListInt(meshIDPointerOffset, outBytes.Count);
+                for (int i = 0; i < unrms.unrmMeshIds.Count; i++)
+                {
+                    for (int j = 0; j < unrms.unrmMeshIds[i].Count; j++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(unrms.unrmMeshIds[i][j]));
+                    }
+                }
+                outBytes.AlignWriter(0x10);
+
+                //Write Vert Ids
+                outBytes.SetByteListInt(vertIDPointerOffset, outBytes.Count);
+                for (int i = 0; i < unrms.unrmMeshIds.Count; i++)
+                {
+                    for (int j = 0; j < unrms.unrmMeshIds[i].Count; j++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(unrms.unrmVertIds[i][j]));
+                    }
+                }
+                outBytes.AlignWriter(0x10);
+            }
+
+            if(objc.type >= 0xC32)
+            {
+                //VTXE
+                if (vtxeList.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcVtxeOffset, outBytes.Count);
+                    for (int vt = 0; vt < vtxeList.Count; vt++)
+                    {
+                        vtxeOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 4));
+                        outBytes.AddRange(BitConverter.GetBytes(vtxeList[vt].vertDataTypes.Count));
+                        outBytes.AddRange(BitConverter.GetBytes(0));
+                    }
+                    outBytes.AlignWriter(0x10);
+                    for (int vt = 0; vt < vtxeList.Count; vt++)
+                    {
+                        outBytes.SetByteListInt(vtxeOffsets[vt], outBytes.Count);
+                        for (int xe = 0; xe < vtxeList[vt].vertDataTypes.Count; xe++)
+                        {
+                            outBytes.AddRange(DataHelpers.ConvertStruct(vtxeList[vt].vertDataTypes[xe]));
+                        }
+                    }
+                }
+
+                //BonePalette
+                if (bonePalette.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcBonePaletteOffset, outBytes.Count);
+                    DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 4);
+                    outBytes.AddRange(BitConverter.GetBytes(bonePalette.Count));
+                    outBytes.AddRange(BitConverter.GetBytes(outBytes.Count + 4));
+
+                    //Write bones
+                    for (int bn = 0; bn < bonePalette.Count; bn++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(bonePalette[bn]));
+                    }
+                }
+                outBytes.AlignWriter(0x10);
+
+                //UnkStruct1
+                if (unkStruct1List.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcUnkStruct1Offset, outBytes.Count);
+                    for (int unk = 0; unk < unkStruct1List.Count; unk++)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(unkStruct1List[unk]));
+                    }
+                }
+
+                //PSET 2
+                if (pset2List.Count > 0)
+                {
+                    //Write PSET 2 pointer
+                    outBytes.SetByteListInt(objcPset2Offset, outBytes.Count);
+
+                    //Write PSET 2
+                    for (int psetId = 0; psetId < pset2List.Count; psetId++)
+                    {
+                        pset2firstOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x8));
+                        outBytes.AddRange(DataHelpers.ConvertStruct(pset2List[psetId]));
+                    }
+                    outBytes.AlignWriter(0x10);
+
+                    //Write triangle groups
+                    for (int stripId = 0; stripId < strips2.Count; stripId++)
+                    {
+                        outBytes.SetByteListInt(pset2firstOffsets[stripId], outBytes.Count);
+
+                        for (int id = 0; id < strips2[stripId].faceGroups.Count; id++)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(strips2[stripId].faceGroups[id]));
+                        }
+                        outBytes.AlignWriter(0x10); //These should all align already, but just in case
+                    }
+                }
+
+                //MESH 2
+                if (mesh2List.Count > 0)
+                {
+                    //Write MESH 2 pointer
+                    outBytes.SetByteListInt(objcMesh2Offset, outBytes.Count);
+
+                    //Write MESH 2
+                    for (int meshId = 0; meshId < mesh2List.Count; meshId++)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(mesh2List[meshId]));
+                    }
+                    outBytes.AlignWriter(0x10);
+                }
+
+                //Strip data 2, used for strip set 3 (strip set 2 pulls from the main index set)
+                if (strips3.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcGlobalStrip3Offset, outBytes.Count);
+
+                    //Write triangles. NGS doesn't use tristrips anymore
+                    //Assumes the ushorts are already laid out as triangles
+                    for (int i = 0; i < strips3.Count; i++)
+                    {
+                        foreach (var id in strips3[i].triStrips)
+                        {
+                            outBytes.AddRange(BitConverter.GetBytes(id));
+                        }
+                    }
+                    outBytes.AlignWriter(0x10);
+                }
+
+                //Strip lengths (Strip set 3 seemingly uses a simplified method for storing these)
+                if (strips3Lengths.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcGlobalStrip3LengthOffset3, outBytes.Count);
+                    for (int i = 0; i < strips3Lengths.Count; i++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(strips3Lengths[i]));
+                    }
+                    outBytes.AlignWriter(0x10);
+                }
+
+                //Point arrays
+                if (unkPointArray1.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcUnkPointArray1Offset, outBytes.Count);
+                    for (int i = 0; i < unkPointArray1.Count; i++)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(unkPointArray1[i]));
+                    }
+                }
+                if (unkPointArray2.Count > 0)
+                {
+                    outBytes.SetByteListInt(objcUnkPointArray2Offset, outBytes.Count);
+                    for (int i = 0; i < unkPointArray2.Count; i++)
+                    {
+                        outBytes.AddRange(DataHelpers.ConvertStruct(unkPointArray2[i]));
+                    }
+                }
+            }
+
+
+            //Write REL0 Size
+            outBytes.SetByteListInt(rel0SizeOffset, outBytes.Count - 0x8);
+
+            //NOF0
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += outBytes.AlignWriter(0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            NIFL nifl = new NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, DataHelpers.ConvertStruct(nifl));
+            outBytes.AlignFileEndWriter(0x10);
+
+            return outBytes.ToArray();
+        }
+        #endregion
 
         #region VTBFReading
         public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr)
@@ -736,7 +1450,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         #endregion
 
         #region VTBFWriting
-        public byte[] GetBytesVTBF()
+        public override byte[] GetBytesVTBF()
         {
             List<byte> outBytes = new List<byte>();
             outBytes.AddRange(VTBFMethods.ToAQGFVTBF());

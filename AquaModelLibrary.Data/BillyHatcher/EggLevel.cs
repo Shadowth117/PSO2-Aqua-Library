@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using static AquaModelLibrary.Extra.Ninja.BillyHatcher.ARC;
+using static AquaModelLibrary.Data.BillyHatcher.ARC;
 
-namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher
 {
     /// <summary>
     /// Slightly misleading since the POF0 offsets bleed into the actual data if not looking carefully. Last 4 bytes represent the 3 pointers and padding.
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
             header.data2Count = sr.ReadBE<int>();
             header.data2Offset = sr.ReadBE<int>();
 
-            sr.Seek(0x20 + header.data0Offset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + header.data0Offset, SeekOrigin.Begin);
             for (int i = 0; i < header.data0Count; i++)
             {
                 EggData0 eggData = new EggData0();
@@ -108,7 +108,7 @@ namespace AquaModelLibrary.Extra.Ninja.BillyHatcher
                 eggData0List.Add(eggData);
             }
 
-            sr.Seek(0x20 + header.growthDataOffset, System.IO.SeekOrigin.Begin);
+            sr.Seek(0x20 + header.growthDataOffset, SeekOrigin.Begin);
             for (int i = 0; i < header.data0Count; i++)
             {
                 GrowthData growthData = new GrowthData();
