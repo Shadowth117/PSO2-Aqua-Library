@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "AquaModelLibrary.Helpers/1.0.0": {
+        "dependencies": {
+          "Reloaded.Memory": "9.3.2"
+        },
+        "runtime": {
+          "AquaModelLibrary.Helpers.dll": {}
+        }
+      },
+      "Reloaded.Memory/9.3.2": {
+        "runtime": {
+          "lib/net6.0/Reloaded.Memory.dll": {
+            "assemblyVersion": "9.3.2.0",
+            "fileVersion": "9.3.2.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AquaModelLibrary.Helpers/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Reloaded.Memory/9.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WF4AAzzvLqYzIhoWsILfB10A+blkQZ9VyQ/OYYxsUsYxxUj7lzYbcLpMQQ1ONnCdWHlIbFWO4Cq1DmKvWdP23g==",
+      "path": "reloaded.memory/9.3.2",
+      "hashPath": "reloaded.memory.9.3.2.nupkg.sha512"
+    }
+  }
+}

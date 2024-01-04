@@ -18,7 +18,30 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public MOHeader moHeader;
         public List<KeyData> motionKeys = new List<KeyData>();
 
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "aqm\0",
+            "aqv\0",
+            "aqw\0",
+            "aqc\0",
+            "trm\0",
+            "trv\0",
+            "trw\0"
+            };
+        }
+
         public AquaMotion() { }
+
+        public AquaMotion(byte[] file)
+        {
+            Read(file);
+        }
+
+        public AquaMotion(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
 
         public AquaMotion(byte[] file, string _ext)
         {

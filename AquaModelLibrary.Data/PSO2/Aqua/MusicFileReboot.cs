@@ -15,16 +15,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public string musString1C = null;
         public string customVariables = null; //Custom variables are a comma separated list with a variable name, =, and an int value.
 
-        public MusicFileReboot() { }
-
-        public MusicFileReboot(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] {
+            "mus\0"
+            };
         }
 
-        public MusicFileReboot(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public MusicFileReboot() { }
+
+        public MusicFileReboot(byte[] file)
         {
-            Read(sr, _ext);
+            Read(file);
+        }
+
+        public MusicFileReboot(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

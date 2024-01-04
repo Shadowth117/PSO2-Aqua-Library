@@ -11,16 +11,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     {
         public List<string> categoryNames = new List<string>();
         public List<List<List<TextPair>>> text = new List<List<List<TextPair>>>(); //Category, subCategory, id
-
-        public PSO2Text() { }
-        public PSO2Text(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] {
+            "text"
+            };
+        }
+        public PSO2Text() { }
+        public PSO2Text(byte[] file)
+        {
+            Read(file);
         }
 
-        public PSO2Text(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public PSO2Text(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
         public PSO2Text(string filename)
@@ -445,7 +450,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(textFileName))
                     {
-                        partsText = new PSO2Text(file, "text");
+                        partsText = new PSO2Text(file);
                     }
                 }
 

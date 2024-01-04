@@ -9,11 +9,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     {
         public List<ADDO> addonList = new List<ADDO>();
 
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] { "aox\0" };
+        }
+
         public AddOnIndex() { }
 
-        public AddOnIndex(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public AddOnIndex(byte[] file)
         {
-            Read(sr, _ext);
+            Read(file);
+        }
+
+        public AddOnIndex(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr)

@@ -68,7 +68,7 @@
         public static string ExtToIceEnvExt(string ext)
         {
             string newExt = "";
-            if(ext?.Length > 0)
+            if(ext?.Length > 0 && ext[0] == '.')
             {
                 newExt = ext.Substring(1, ext.Length - 1);
             } else
@@ -78,6 +78,10 @@
             while(newExt.Length < 4)
             {
                 newExt += "\0";
+            }
+            if(newExt.Length > 4)
+            {
+                newExt = newExt.Substring(0, 4);
             }
 
             return newExt;

@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
+using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -14,6 +15,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<TCBMaterial> materials = new();
         public NexusMesh nxsMesh = null;
         public TCB tcbInfo;
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "tcb\0"
+            };
+        }
+        public TCBTerrainConvex() { }
+
+        public TCBTerrainConvex(byte[] file)
+        {
+            Read(file);
+        }
+
+        public TCBTerrainConvex(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
@@ -43,6 +61,66 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                 //Read main TCB materials
             }
+        }
+
+        /// <summary>
+        /// Unfinished for various reasons
+        /// </summary>
+        public override byte[] GetBytesNIFL()
+        {
+            //int offset = 0x20; Needed for NXSMesh part
+            List<byte> outBytes = new List<byte>();
+
+            //Initial tcb section setup
+            tcbInfo = new TCBTerrainConvex.TCB();
+            tcbInfo.magic = 0x626374;
+            tcbInfo.flag0 = 0xD;
+            tcbInfo.flag1 = 0x1;
+            tcbInfo.flag2 = 0x4;
+            tcbInfo.flag3 = 0x3;
+            tcbInfo.vertexCount = vertices.Count;
+            tcbInfo.rel0DataStart = 0x10;
+            tcbInfo.faceCount = faces.Count;
+            tcbInfo.materialCount = materials.Count;
+            tcbInfo.unkInt3 = 0x1;
+
+            //Data area starts with 0xFFFFFFFF
+            for (int i = 0; i < 4; i++) { outBytes.Add(0xFF); }
+
+            //Write vertices
+            tcbInfo.vertexDataOffset = outBytes.Count + 0x10;
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                outBytes.AddRange(DataHelpers.ConvertStruct(vertices[i]));
+            }
+
+            //Write faces
+            tcbInfo.faceDataOffset = outBytes.Count + 0x10;
+            for (int i = 0; i < faces.Count; i++)
+            {
+                outBytes.AddRange(DataHelpers.ConvertStruct(faces[i]));
+            }
+
+            //Write materials
+            tcbInfo.materialDataOFfset = outBytes.Count + 0x10;
+            for (int i = 0; i < materials.Count; i++)
+            {
+                outBytes.AddRange(DataHelpers.ConvertStruct(materials[i]));
+            }
+
+            //Write Nexus Mesh
+            tcbInfo.nxsMeshOffset = outBytes.Count + 0x10;
+            List<byte> nxsBytes = new List<byte>();
+            //WriteNXSMesh(nxsBytes);
+            tcbInfo.nxsMeshSize = nxsBytes.Count;
+            outBytes.AddRange(nxsBytes);
+
+            //Write tcb
+            outBytes.AddRange(DataHelpers.ConvertStruct(tcbInfo));
+
+            //Write NIFL, REL0, NOF0, NEND
+
+            return outBytes.ToArray();
         }
 
         public unsafe AquaObject ConvertTCBToAquaObject(out AquaNode aqn)

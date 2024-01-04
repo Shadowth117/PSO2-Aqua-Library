@@ -18,6 +18,7 @@ namespace AquaModelLibrary.Helpers.Ice
 
         public static bool SkipIceEnvelope(BufferedStreamReaderBE<MemoryStream> sr, string extensionToCheck, ref string type, ref int offset)
         {
+            extensionToCheck = StringHelpers.ExtToIceEnvExt(extensionToCheck);
             if (type.Equals(extensionToCheck))
             {
                 sr.Seek(0xC, SeekOrigin.Begin);

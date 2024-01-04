@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Extra
+﻿namespace AquaModelLibrary.Data.PSO2.Constants
 {
     public static class ObjectNames
     {

@@ -2,10 +2,6 @@
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
 {
-    public class AnimObject
-    {
-        public List<CURVObject> curvs = new List<CURVObject>();
-    }
     //Seems to have varying pointer data, but no actual data
     public struct ANIM { }
 

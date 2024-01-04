@@ -9,16 +9,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<int> unkIntList = new List<int>();
         public List<FCLFrameObject> frames = new List<FCLFrameObject>();
 
-        public FacialFCL() { }
-
-        public FacialFCL(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, new string[] { _ext });
+            return new string[] {
+            "fcl\0"
+            };
         }
 
-        public FacialFCL(BufferedStreamReaderBE<MemoryStream> streamReader, string _ext)
+        public FacialFCL() { }
+
+        public FacialFCL(byte[] file)
         {
-            Read(streamReader, new string[] { _ext });
+            Read(file);
+        }
+
+        public FacialFCL(BufferedStreamReaderBE<MemoryStream> streamReader)
+        {
+            Read(streamReader);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

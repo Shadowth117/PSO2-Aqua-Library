@@ -60,20 +60,30 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<string> matUnicodeNames = new List<string>();
         public List<string> texFUnicodeNames = new List<string>();
 
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "aqp\0",
+            "trp\0",
+            "aqo\0",
+            "tro\0"
+            };
+        }
+
         public AquaObject() { }
         public AquaObject(bool createNGSObj) 
         {
             objc.type = createNGSObj ? 0xC33 : 0xC2A;
         }
 
-        public AquaObject(byte[] bytes, string _ext)
+        public AquaObject(byte[] bytes)
         {
-            Read(bytes, _ext);
+            Read(bytes);
         }
 
-        public AquaObject(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public AquaObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

@@ -1,11 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.IO;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.BillyHatcher
@@ -16,7 +12,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public static AquaObject ConvertMC2(byte[] file, out AquaNode aqn)
         {
             using (MemoryStream stream = new MemoryStream(file))
-            using (var streamReader = new BufferedStreamReader<MemoryStream>(stream))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 return MC2ToAqua(new MC2(streamReader), out aqn);
             }

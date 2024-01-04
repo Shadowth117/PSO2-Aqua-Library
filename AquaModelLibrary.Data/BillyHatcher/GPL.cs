@@ -1,7 +1,5 @@
-﻿using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using System.Security.Cryptography;
 
 namespace AquaModelLibrary.Data.BillyHatcher
@@ -80,7 +78,26 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public GPL() { }
 
-        public GPL(BufferedStreamReader sr)
+        public GPL(byte[] file)
+        {
+            Read(file);
+        }
+
+        public GPL(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
+
+        private void Read(byte[] file)
+        {
+            using (MemoryStream stream = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                Read(sr);
+            }
+        }
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             header.size = sr.ReadBE<int>();
@@ -101,7 +118,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 var entry = entries[i];
                 sr.Seek(entry.offset, SeekOrigin.Begin);
-                rawGVRBytesList.Add(sr.ReadBytes(sr.Position(), entry.size));
+                rawGVRBytesList.Add(sr.ReadBytes(sr.Position, entry.size));
             }
         }
 
@@ -121,7 +138,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 outBytes.ReserveInt($"gvrOffset{i}");
                 outBytes.AddValue(entries[i].size);
             }
-            outBytes.AlignWrite(0x20);
+            outBytes.AlignWriter(0x20);
 
             Dictionary<string, int> offsetDict = new Dictionary<string, int>();
             List<string> hashList = new List<string>();

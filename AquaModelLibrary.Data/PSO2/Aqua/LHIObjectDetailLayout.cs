@@ -9,16 +9,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public IDFloats idFloats;
         public List<DetailInfoObject> detailInfoList = new List<DetailInfoObject>();
 
-        public LHIObjectDetailLayout() { }
-
-        public LHIObjectDetailLayout(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] {
+            "lhi\0"
+            };
         }
 
-        public LHIObjectDetailLayout(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public LHIObjectDetailLayout() { }
+
+        public LHIObjectDetailLayout(byte[] file)
         {
-            Read(sr, _ext);
+            Read(file);
+        }
+
+        public LHIObjectDetailLayout(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

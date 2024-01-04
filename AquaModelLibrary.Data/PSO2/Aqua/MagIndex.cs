@@ -4,15 +4,27 @@ using System.Diagnostics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
-    public class AquaMagIndex : AquaCommon
+    public class MagIndex : AquaCommon
     {
         private List<int> mgxIds = new();
 
-        public AquaMagIndex() { }
-
-        public AquaMagIndex(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(sr, _ext);
+            return new string[] {
+            "mgx\0"
+            };
+        }
+
+        public MagIndex() { }
+
+        public MagIndex(byte[] file)
+        {
+            Read(file);
+        }
+
+        public MagIndex(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public List<int> GetMagIdList() => mgxIds;

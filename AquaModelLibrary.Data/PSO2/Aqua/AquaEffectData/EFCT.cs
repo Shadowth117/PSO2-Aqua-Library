@@ -75,6 +75,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
             float_64 = VTBFMethods.GetObject<int>(efctRaw[0], 0x92);
 
             soundName = PSO2Stringx30.GeneratePSO2String(VTBFMethods.GetObject<byte[]>(efctRaw[0], 0x90));
+
+            //unused
+            reserve0 = 0;
+            reserve1 = 0;
+            reserve2 = 0;
+            curvOffset = 0;
+            curvCount = 0;
+            reserve3 = 0;
+            int_50 = 0;
+            emitOffset = 0;
+            emitCount = 0;
         }
     }
 

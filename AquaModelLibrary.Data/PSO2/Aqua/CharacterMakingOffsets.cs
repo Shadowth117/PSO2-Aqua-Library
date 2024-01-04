@@ -11,6 +11,24 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     {
         public List<NodeDataInfo> nodeDataInfo = new List<NodeDataInfo>();
         public List<NodeData> nodeData = new List<NodeData>();
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "cmo\0"
+            };
+        }
+
+        public CharacterMakingOffsets() { }
+
+        public CharacterMakingOffsets(byte[] file)
+        {
+            Read(file);
+        }
+
+        public CharacterMakingOffsets(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

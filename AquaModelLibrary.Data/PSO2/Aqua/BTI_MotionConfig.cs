@@ -7,22 +7,28 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
-    public class AquaBTI_MotionConfig : AquaCommon
+    public class BTI_MotionConfig : AquaCommon
     {
         public BTIHeader header = new BTIHeader();
         public List<BTIEntryObject> btiEntries = new List<BTIEntryObject>();
         public static int btiEntrySize = 0x74;
 
-        public AquaBTI_MotionConfig() { }
-
-        public AquaBTI_MotionConfig(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] {
+            "bti\0"
+            };
+        }
+        public BTI_MotionConfig() { }
+
+        public BTI_MotionConfig(byte[] file)
+        {
+            Read(file);
         }
 
-        public AquaBTI_MotionConfig(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public BTI_MotionConfig(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
@@ -33,7 +39,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 sr.Seek(offset + header.entryPtr + btiEntrySize * i, SeekOrigin.Begin);
 
-                AquaBTI_MotionConfig.BTIEntryObject btiEntry = new BTIEntryObject();
+                BTI_MotionConfig.BTIEntryObject btiEntry = new BTIEntryObject();
                 btiEntry.entry = sr.Read<BTIEntry>();
 
                 //Get strings

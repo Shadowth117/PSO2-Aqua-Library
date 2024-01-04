@@ -1,4 +1,6 @@
-﻿using AquaModelLibrary.Utility;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,7 +69,6 @@ namespace AquaModelLibrary
             var nodeKeys = aiNodes.Keys.ToList();
             nodeKeys.Sort();
             int animatedNodeCount = nodeKeys.Last() + 1;
-            AquaUtil aqua = new AquaUtil();
 
             for (int i = 0; i < aiScene.Animations.Count; i++)
             {
@@ -110,7 +111,7 @@ namespace AquaModelLibrary
                 }
                 aqmNames.Add(nameCleaned);
 
-                aqm.moHeader = new AquaMotion.MOHeader();
+                aqm.moHeader = new MOHeader();
 
                 //Get anim fps
                 if (anim.TicksPerSecond == 0)
@@ -135,7 +136,7 @@ namespace AquaModelLibrary
                 aqm.moHeader.testString.SetString("test");
 
                 //Set this ahead of time in case these are out of order
-                aqm.motionKeys = new List<AquaMotion.KeyData>(new AquaMotion.KeyData[aqm.moHeader.nodeCount]);
+                aqm.motionKeys = new List<KeyData>(new KeyData[aqm.moHeader.nodeCount]);
 
                 //Nodes
                 foreach (var animNode in anim.NodeAnimationChannels)
@@ -151,7 +152,7 @@ namespace AquaModelLibrary
                     {
                         continue;
                     }
-                    var node = aqm.motionKeys[id] = new AquaMotion.KeyData();
+                    var node = aqm.motionKeys[id] = new KeyData();
 
                     node.mseg.nodeName.SetString(finalName);
                     node.mseg.nodeId = id;
@@ -160,7 +161,7 @@ namespace AquaModelLibrary
 
                     if (animNode.HasPositionKeys)
                     {
-                        AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
+                        MKEY posKeys = new MKEY();
                         posKeys.keyType = 1;
                         posKeys.dataType = 1;
                         if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
@@ -194,7 +195,7 @@ namespace AquaModelLibrary
 
                     if (animNode.HasRotationKeys)
                     {
-                        AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
+                        MKEY rotKeys = new MKEY();
                         rotKeys.keyType = 2;
                         rotKeys.dataType = 3;
                         if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
@@ -228,7 +229,7 @@ namespace AquaModelLibrary
 
                     if (animNode.HasScalingKeys)
                     {
-                        AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
+                        MKEY sclKeys = new MKEY();
                         sclKeys.keyType = 3;
                         sclKeys.dataType = 1;
                         if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
@@ -281,14 +282,14 @@ namespace AquaModelLibrary
                 //NodeTreeFlag
                 if (playerExport)
                 {
-                    var node = aqm.motionKeys[aqm.motionKeys.Count - 1] = new AquaMotion.KeyData();
+                    var node = aqm.motionKeys[aqm.motionKeys.Count - 1] = new KeyData();
                     node.mseg.nodeName.SetString("__NodeTreeFlag__");
                     node.mseg.nodeId = 0;
                     node.mseg.nodeType = 0x10;
                     node.mseg.nodeDataCount = useScaleFrames ? 3 : 2;
 
                     //Position
-                    AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
+                    MKEY posKeys = new MKEY();
                     posKeys.keyType = 0x10;
                     posKeys.dataType = 5;
                     if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
@@ -315,7 +316,7 @@ namespace AquaModelLibrary
                     node.keyData.Add(posKeys);
 
                     //Rotation
-                    AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
+                    MKEY rotKeys = new MKEY();
                     rotKeys.keyType = 0x11;
                     rotKeys.dataType = 5;
                     if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
@@ -344,7 +345,7 @@ namespace AquaModelLibrary
                     //Scale
                     if (useScaleFrames)
                     {
-                        AquaMotion.MKEY sclKeys = new AquaMotion.MKEY();
+                        MKEY sclKeys = new MKEY();
                         sclKeys.keyType = 0x12;
                         sclKeys.dataType = 5;
                         if (aqm.moHeader.endFrame > AquaMotion.ushortThreshold)
@@ -389,7 +390,7 @@ namespace AquaModelLibrary
 
                     if (node == null)
                     {
-                        node = aqm.motionKeys[aiPair.Key] = new AquaMotion.KeyData();
+                        node = aqm.motionKeys[aiPair.Key] = new KeyData();
                         node.mseg.nodeName.SetString(finalName);
                         node.mseg.nodeId = id != -1 ? id : aiPair.Key;
                         node.mseg.nodeType = 2;
@@ -505,9 +506,9 @@ namespace AquaModelLibrary
             }
         }
 
-        private static void AddOneRotFrame(AquaMotion.KeyData node, Assimp.Node aiNode, bool add0x80 = false)
+        private static void AddOneRotFrame(KeyData node, Assimp.Node aiNode, bool add0x80 = false)
         {
-            AquaMotion.MKEY rotKeys = new AquaMotion.MKEY();
+            MKEY rotKeys = new MKEY();
             rotKeys.keyType = 2;
             rotKeys.dataType = 3;
             rotKeys.keyCount = 1;

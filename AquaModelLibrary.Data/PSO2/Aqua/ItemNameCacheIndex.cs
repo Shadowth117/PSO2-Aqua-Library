@@ -6,17 +6,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     public class ItemNameCacheIndex : AquaCommon
     {
         StringBuilder output = null;
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "inca"
+            };
+        }
 
         public ItemNameCacheIndex() { }
 
-        public ItemNameCacheIndex(byte[] file, string _ext)
+        public ItemNameCacheIndex(byte[] file)
         {
-            Read(file, _ext);
+            Read(file);
         }
 
-        public ItemNameCacheIndex(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public ItemNameCacheIndex(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

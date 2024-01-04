@@ -10,16 +10,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<List<LATGridSmallData>> latGridSmallData = new List<List<LATGridSmallData>>(); //Seems to be laid out as the second grid header value as rows with the first's as column count. Could be transposed. Same layout should apply to the below grid values
         public List<List<LATGridData>> latGridData = new List<List<LATGridData>>();
 
-        public LandAreaTemplate() { }
-
-        public LandAreaTemplate(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] {
+            "lat\0"
+            };
         }
 
-        public LandAreaTemplate(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public LandAreaTemplate() { }
+
+        public LandAreaTemplate(byte[] file)
         {
-            Read(sr, _ext);
+            Read(file);
+        }
+
+        public LandAreaTemplate(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

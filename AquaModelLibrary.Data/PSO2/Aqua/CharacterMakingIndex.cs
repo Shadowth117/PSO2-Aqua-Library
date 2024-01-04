@@ -60,7 +60,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// Mode 1 will be latest. Mode 0 will be the first NGS benchmark's.
         /// </summary>
         public int WriteMode = 1;
-
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "cmx\0"
+            };
+        }
         public CharacterMakingIndex() { }
 
         public CharacterMakingIndex(byte[] file, string _ext)

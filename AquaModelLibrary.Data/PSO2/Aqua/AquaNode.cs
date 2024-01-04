@@ -17,22 +17,25 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public NDTR ndtr = new NDTR();
         public List<NODE> nodeList = new List<NODE>();
         public List<NODO> nodoList = new List<NODO>();
-        public static readonly string[] fileExtensions = new string[]
+
+        public override string[] GetEnvelopeTypes()
         {
+            return new string[] {
             "aqn\0",
             "trn\0",
-        };
+            };
+        }
 
         public AquaNode() { }
 
         public AquaNode(byte[] file)
         {
-            Read(file, fileExtensions);
+            Read(file);
         }
 
         public AquaNode(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, fileExtensions);
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

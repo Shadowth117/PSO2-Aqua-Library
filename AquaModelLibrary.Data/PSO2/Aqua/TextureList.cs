@@ -3,18 +3,26 @@
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     //TXL files for pso2 aren't used the same as NN or Ninja due to models always having stringe references to textures
-    public class AquaTextureList : AquaCommon
+    public class TextureList : AquaCommon
     {
         public TxlHeader header;
         public List<string> texList = new List<string>();
         public List<string> iceList = new List<string>();
         public List<List<byte[]>> dataList = new List<List<byte[]>>(); //RGBA Colors, and some other data depending on texture type
-
-        public AquaTextureList() { }
-
-        public AquaTextureList(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(sr, _ext);
+            return new string[] {
+            "txl\0"
+            };
+        }
+        public TextureList() { }
+        public TextureList(byte[] file)
+        {
+            Read(file);
+        }
+        public TextureList(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

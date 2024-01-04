@@ -5,7 +5,7 @@ using System.Text;
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
     //Credit to DeathCream for doing a first pass on documenting the format
-    public class AquaFigure : AquaCommon
+    public class Figure : AquaCommon
     {
         public FigHeader figHeader;
         public List<int> attachTransformPtrList = new List<int>();
@@ -14,16 +14,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<AttachTransformObject> attachTransformsExtra = new List<AttachTransformObject>();
         public List<StateObjects> stateStructs = new List<StateObjects>();
 
-        public AquaFigure() { }
-
-        public AquaFigure(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] { "fig\0" };
         }
 
-        public AquaFigure(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public Figure() { }
+
+        public Figure(byte[] file)
         {
-            Read(sr, _ext);
+            Read(file);
+        }
+
+        public Figure(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
@@ -70,7 +75,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             StringBuilder dump = new StringBuilder();
             dump.AppendLine(inFilename);
 
-            AquaFigure fig = new AquaFigure(File.ReadAllBytes(inFilename), "fig\0");
+            Figure fig = new Figure(File.ReadAllBytes(inFilename));
 
             foreach (var stateStruct in fig.stateStructs)
             {

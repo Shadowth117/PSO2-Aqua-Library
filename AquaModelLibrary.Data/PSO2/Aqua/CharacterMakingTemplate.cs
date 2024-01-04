@@ -13,15 +13,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         //Essentially, this whole file is a large table of character part ids for character creation with bitflags that enable and disable various things. 
         public CMTTable cmtTable = null;
         public List<Dictionary<int, int>> cmtData = new List<Dictionary<int, int>>();
-
-        public CharacterMakingTemplate(byte[] bytes, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(bytes, _ext);
+            return new string[] {
+            "cmt\0"
+            };
         }
 
-        public CharacterMakingTemplate(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public CharacterMakingTemplate(byte[] bytes)
         {
-            Read(sr, _ext);
+            Read(bytes);
+        }
+
+        public CharacterMakingTemplate(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Extra.Ninja;
 using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Numerics;
 using System.Text;
@@ -135,7 +136,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public LND(string filePath)
         {
             using (var stream = new MemoryStream(File.ReadAllBytes(filePath)))
-            using (var sr = new BufferedStreamReader(stream, 8192))
+            using (var sr = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Read(sr);
             }
@@ -144,18 +145,18 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public LND(byte[] fileBytes)
         {
             using (var stream = new MemoryStream(fileBytes))
-            using (var sr = new BufferedStreamReader(stream, 8192))
+            using (var sr = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 Read(sr);
             }
         }
 
-        public LND(BufferedStreamReader sr)
+        public LND(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
 
-        public void Read(BufferedStreamReader sr)
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             var magicTest = sr.ReadBytes(0, 3);
@@ -167,7 +168,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 if (sr.Peek<int>() == 0x30464F50)
                 {
                     var pof0Header = sr.Read<NinjaHeader>();
-                    var pofRaw = sr.ReadBytes(sr.Position() - 0x8, pof0Header.fileSize + 0x8);
+                    var pofRaw = sr.ReadBytes(sr.Position - 0x8, pof0Header.fileSize + 0x8);
                     pof0Offsets = POF0.GetPof0Offsets(pofRaw);
                     sr.Seek(pof0Header.fileSize, SeekOrigin.Current);
                 }
@@ -185,7 +186,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
         }
 
-        public void ReadARCLND(BufferedStreamReader sr)
+        public void ReadARCLND(BufferedStreamReaderBE<MemoryStream> sr)
         {
             //Generic ARC header
             arcHeader = new ARCHeader();
@@ -201,7 +202,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             //Get model references
             sr.Seek(0x20 + arcHeader.pof0Offset, SeekOrigin.Begin);
-            pof0Offsets = POF0.GetRawPOF0Offsets(sr.ReadBytes(sr.Position(), arcHeader.pof0OffsetsSize));
+            pof0Offsets = POF0.GetRawPOF0Offsets(sr.ReadBytes(sr.Position, arcHeader.pof0OffsetsSize));
             sr.Seek(arcHeader.pof0OffsetsSize, SeekOrigin.Current);
             for (int i = 0; i < arcHeader.fileCount; i++)
             {
@@ -212,11 +213,11 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
 
             //Get model names
-            var nameStart = sr.Position();
+            var nameStart = sr.Position;
             foreach (var modelRef in arcLndModelRefs)
             {
                 sr.Seek(nameStart + modelRef.relativeNameOffset, SeekOrigin.Begin);
-                fileNames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+                fileNames.Add(sr.ReadCString());
             }
 
             for (int mdl = 0; mdl < arcHeader.fileCount; mdl++)
@@ -256,7 +257,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr.Seek(0x20 + arcLand.arcLndHeader.GVMOffset, SeekOrigin.Begin);
         }
 
-        private ARCLNDLand ReadARCLand(BufferedStreamReader sr)
+        private ARCLNDLand ReadARCLand(BufferedStreamReaderBE<MemoryStream> sr)
         {
             ARCLNDLand arcLand = new ARCLNDLand();
             arcLand.arcLndHeader = new ARCLNDHeader();
@@ -296,13 +297,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
             foreach (ARCLNDRefEntry entry in arcLand.arcRefTableEntries)
             {
                 sr.Seek(entry.textOffset + 0x20, SeekOrigin.Begin);
-                texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+                texnames.Add(sr.ReadCString());
             }
 
             return arcLand;
         }
 
-        private ARCLNDModel ReadArcLndModel(BufferedStreamReader sr, bool isAnimModel = false)
+        private ARCLNDModel ReadArcLndModel(BufferedStreamReaderBE<MemoryStream> sr, bool isAnimModel = false)
         {
             ARCLNDModel arcModel = new ARCLNDModel();
             arcModel.isAnimModel = isAnimModel;
@@ -378,7 +379,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     altVert.offset = sr.ReadBE<int>();
                     arcModel.arcAltVertRefs.Add(altVert);
 
-                    var bookmark = sr.Position();
+                    var bookmark = sr.Position;
                     sr.Seek(0x20 + altVert.offset, SeekOrigin.Begin);
                     ARCLNDVertDataSet arcVertDataSet = new ARCLNDVertDataSet();
                     ReadVertDataSet(sr, arcVertDataSet);
@@ -546,7 +547,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             return arcModel;
         }
 
-        private static void ReadVertDataSet(BufferedStreamReader sr, ARCLNDVertDataSet arcVertDataSet)
+        private static void ReadVertDataSet(BufferedStreamReaderBE<MemoryStream> sr, ARCLNDVertDataSet arcVertDataSet)
         {
             for (int j = 0; j < 6; j++)
             {
@@ -589,13 +590,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr.Seek(0x20 + arcVertDataSet.VertColor.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.VertColor.count; j++)
             {
-                arcVertDataSet.VertColorData.Add(sr.ReadBytes(sr.Position(), 4));
+                arcVertDataSet.VertColorData.Add(sr.ReadBytes(sr.Position, 4));
                 sr.Seek(4, SeekOrigin.Current);
             }
             sr.Seek(0x20 + arcVertDataSet.VertColor2.offset, SeekOrigin.Begin);
             for (int j = 0; j < arcVertDataSet.VertColor2.count; j++)
             {
-                arcVertDataSet.VertColor2Data.Add(sr.ReadBytes(sr.Position(), 4));
+                arcVertDataSet.VertColor2Data.Add(sr.ReadBytes(sr.Position, 4));
                 sr.Seek(4, SeekOrigin.Current);
             }
             sr.Seek(0x20 + arcVertDataSet.UV1.offset, SeekOrigin.Begin);
@@ -610,24 +611,24 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
         }
 
-        private static void ReadArcLndTris(BufferedStreamReader sr, ArcLndVertType flags, int offset, int bufferSize, out List<List<List<int>>> triIndicesList, out List<List<List<int>>> triIndicesListStarts)
+        private static void ReadArcLndTris(BufferedStreamReaderBE<MemoryStream> sr, ArcLndVertType flags, int offset, int bufferSize, out List<List<List<int>>> triIndicesList, out List<List<List<int>>> triIndicesListStarts)
         {
             sr.Seek(offset + 0x20, SeekOrigin.Begin);
             triIndicesList = new List<List<List<int>>>();
             triIndicesListStarts = new List<List<List<int>>>();
-            while (sr.Position() < bufferSize + offset + 20)
+            while (sr.Position < bufferSize + offset + 20)
             {
                 var type = sr.Read<byte>();
                 var count = sr.ReadBE<ushort>();
 
                 if (type != 0x98 && type != 0x90 && type != 0)
                 {
-                    var pos = sr.Position();
+                    var pos = sr.Position;
                     throw new Exception();
                 }
                 if (type == 0)
                 {
-                    var pos = sr.Position();
+                    var pos = sr.Position;
                     break;
                 }
                 List<List<int>> triIndices = new List<List<int>>();
@@ -675,7 +676,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         /// <summary>
         /// This seems to be mainly for older LND archives. They have an actual LND magic unlike the more common type
         /// </summary>
-        public void ReadLND(BufferedStreamReader sr)
+        public void ReadLND(BufferedStreamReaderBE<MemoryStream> sr)
         {
             nHeader = sr.Read<NinjaHeader>();
             header = new LNDHeader();
@@ -751,7 +752,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 foreach (LNDTexDataEntry entry in texDataEntries)
                 {
                     sr.Seek(entry.offset + 0x8, SeekOrigin.Begin);
-                    texnames.Add(AquaMethods.AquaGeneralMethods.ReadCString(sr));
+                    texnames.Add(sr.ReadCString());
                 }
             }
 
@@ -915,7 +916,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr.Seek(nHeader.fileSize + 0x8, SeekOrigin.Begin);
         }
 
-        private static PolyInfo ReadPolyInfo(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, ref byte[] indexSizes)
+        private static PolyInfo ReadPolyInfo(BufferedStreamReaderBE<MemoryStream> sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, ref byte[] indexSizes)
         {
             PolyInfo polyInfo = new PolyInfo();
             polyInfo.materialOffset = sr.ReadBE<int>();
@@ -923,13 +924,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
             polyInfo.materialDataCount = sr.ReadBE<ushort>();
             polyInfo.polyDataOffset = sr.ReadBE<int>();
             polyInfo.polyDataBufferSize = sr.ReadBE<int>();
-            var bookmark = sr.Position();
+            var bookmark = sr.Position;
             ReadPolyData(sr, lndMeshInfo2, vertTypeCount, polyInfo, ref indexSizes);
             sr.Seek(bookmark, SeekOrigin.Begin);
             return polyInfo;
         }
 
-        private static void ReadPolyData(BufferedStreamReader sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, PolyInfo polyInfo, ref byte[] indexSizes)
+        private static void ReadPolyData(BufferedStreamReaderBE<MemoryStream> sr, LNDMeshInfo2 lndMeshInfo2, int vertTypeCount, PolyInfo polyInfo, ref byte[] indexSizes)
         {
             //Material data
             if (polyInfo != null)
@@ -1001,7 +1002,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 sr.Seek(polyInfo.polyDataOffset + 0x8, SeekOrigin.Begin);
                 List<List<List<int>>> triIndicesList = new List<List<List<int>>>();
                 List<List<List<int>>> triIndicesListStarts = new List<List<List<int>>>();
-                while (sr.Position() < polyInfo.polyDataBufferSize + polyInfo.polyDataOffset + 8)
+                while (sr.Position < polyInfo.polyDataBufferSize + polyInfo.polyDataOffset + 8)
                 {
                     var type = sr.Read<byte>();
                     var count = sr.ReadBE<ushort>();
@@ -1096,12 +1097,12 @@ namespace AquaModelLibrary.Data.BillyHatcher
             //Write lnd
             outBytes.AddRange(arcLand.GetBytes(0, arcLndModels.Count - 1, texnames, out var lndOffsets));
             offsets.AddRange(lndOffsets);
-            outBytes.AlignWrite(0x20);
+            outBytes.AlignWriter(0x20);
 
             //Write GVM
             outBytes.FillInt("GVMOffset", outBytes.Count);
             outBytes.AddRange(gvm.GetBytes());
-            outBytes.AlignWrite(0x20);
+            outBytes.AlignWriter(0x20);
 
             //Write models
             for (int i = 0; i < arcLndModels.Count; i++)
@@ -1119,7 +1120,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 }
                 fileOffsets.Add((uint)outBytes.Count);
                 outBytes.AddRange(modelSet.model.GetBytes(outBytes.Count, animData, out var modelOffsets));
-                outBytes.AlignWrite(0x20);
+                outBytes.AlignWriter(0x20);
                 offsets.AddRange(modelOffsets);
             }
 
@@ -1129,7 +1130,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 outBytes.FillInt("MPBOffset", outBytes.Count);
                 mplOffset = (uint)outBytes.Count;
                 outBytes.AddRange(arcMPL.GetBytes(outBytes.Count, out var mplOffsets));
-                outBytes.AlignWrite(0x4);
+                outBytes.AlignWriter(0x4);
                 offsets.AddRange(mplOffsets);
             }
 

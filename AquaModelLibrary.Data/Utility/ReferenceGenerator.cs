@@ -1,26 +1,22 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
-using System;
-using System.Collections.Generic;
+using AquaModelLibrary.Data.PSO2.Constants;
+using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
+using AquaModelLibrary.Helpers;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Zamboni;
-using static AquaExtras.FilenameConstants;
-using static AquaModelLibrary.Extra.MusicFilenameConstants;
-using static AquaModelLibrary.Extra.StageFilenameConstants;
-using static AquaModelLibrary.AquaMethods.AquaGeneralMethods;
-using static AquaModelLibrary.AquaMiscMethods;
-using static AquaModelLibrary.CharacterMakingIndex;
-using static AquaModelLibrary.CharacterMakingIndexMethods;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnluacNET;
-using AquaModelLibrary.Extra;
-using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Data.PSO2.Constants;
+using Zamboni;
+using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingDynamic;
+using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingIce;
+using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingStatic;
+using static AquaModelLibrary.Data.PSO2.Constants.GeneralFilenames;
+using static AquaModelLibrary.Data.PSO2.Constants.MusicFilenames;
+using static AquaModelLibrary.Data.PSO2.Constants.StageFilenames;
+using static AquaModelLibrary.Helpers.HashHelpers;
 
 namespace AquaModelLibrary.Core.Utility
 {
@@ -77,10 +73,11 @@ namespace AquaModelLibrary.Core.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(".cmx"))
                     {
-                        if(aquaCMX != null)
+                        if (aquaCMX != null)
                         {
                             aquaCMX.ReadVTBFCMX(file);
-                        } else
+                        }
+                        else
                         {
                             aquaCMX = new CharacterMakingIndex(file, "cmx\0");
                         }
@@ -131,7 +128,7 @@ namespace AquaModelLibrary.Core.Utility
             PSO2Text objectCommonText = null;
             PSO2Text uiMyRoomText = null;
             LobbyActionCommon lac = null;
-            List<LobbyActionCommon> rebootLac = new List<LobbyActionCommon>();
+            List<LobbyActionCommonReboot> rebootLac = new List<LobbyActionCommonReboot>();
             List<int> magIds = null;
             List<int> magIdsReboot = null;
             Dictionary<int, string> faceIds = new Dictionary<int, string>();
@@ -169,7 +166,7 @@ namespace AquaModelLibrary.Core.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(lacName))
                     {
-                        lac = ReadLAC(file);
+                        lac = new LobbyActionCommon(file);
                     }
                 }
 
@@ -190,11 +187,9 @@ namespace AquaModelLibrary.Core.Utility
                     var name = IceFile.getFileName(file).ToLower();
                     if (name.Contains(".lac") && !name.Contains("_classic")) //In theory, classic ices are covered already
                     {
-                        rebootLac.Add(ReadRebootLAC(file));
+                        rebootLac.Add(new LobbyActionCommonReboot(file));
                     }
                 }
-
-                fVarIce = null;
             }
 
             //Load mag settings file
@@ -213,11 +208,9 @@ namespace AquaModelLibrary.Core.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(mgxName))
                     {
-                        magIds = ReadMGX(file);
+                        magIds = new MagIndex(file).GetMagIdList();
                     }
                 }
-
-                fVarIce = null;
             }
 
             string mgxRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(magSettingIce)));
@@ -235,7 +228,7 @@ namespace AquaModelLibrary.Core.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(mgxName))
                     {
-                        magIdsReboot = ReadMGX(file);
+                        magIdsReboot = new MagIndex(file).GetMagIdList();
                     }
                 }
 
@@ -413,9 +406,9 @@ namespace AquaModelLibrary.Core.Utility
                         classicObjectsList.Add(obj + ",,\n");
                         obj = "";
                     }
-                    if (PSO2ObjectNames.classicObjectNames.ContainsKey(str))
+                    if (ObjectNames.classicObjectNames.ContainsKey(str))
                     {
-                        obj += PSO2ObjectNames.classicObjectNames[str] + ",";
+                        obj += ObjectNames.classicObjectNames[str] + ",";
                     }
                     else
                     {
@@ -503,9 +496,9 @@ namespace AquaModelLibrary.Core.Utility
                         classicObjectsList.Add(obj + ",,\n");
                         obj = "";
                     }
-                    if (PSO2ObjectNames.classicObjectNames.ContainsKey(str))
+                    if (ObjectNames.classicObjectNames.ContainsKey(str))
                     {
-                        obj += PSO2ObjectNames.classicObjectNames[str] + ",";
+                        obj += ObjectNames.classicObjectNames[str] + ",";
                     }
                     else
                     {
@@ -1015,7 +1008,7 @@ namespace AquaModelLibrary.Core.Utility
                     var fname = IceFile.getFileName(file).ToLower();
                     if (fname.Contains(".lps"))
                     {
-                        lpsList.Add(int.Parse(fname.Substring(3, 4)), ReadLPS(file));
+                        lpsList.Add(int.Parse(fname.Substring(3, 4)), new LandPieceSettings(file));
                     }
                 }
 
@@ -1039,7 +1032,7 @@ namespace AquaModelLibrary.Core.Utility
                     if (fname.Contains(".lps"))
                     {
                         id = int.Parse(fname.Substring(3, 4));
-                        var lps = ReadLPS(file);
+                        var lps = new LandPieceSettings(file);
                         if (!lpsRbList.ContainsKey(id))
                         {
                             lpsRbList.Add(id, lps);
@@ -1330,7 +1323,7 @@ namespace AquaModelLibrary.Core.Utility
                                 var name = IceFile.getFileName(file);
                                 if (name.Contains(".elpr"))
                                 {
-                                    var elpr = ReadELPR(file);
+                                    var elpr = new ELPR_EnlightenParam(file);
                                     foreach (var piece in elpr.elprList)
                                     {
                                         if (!enlStrings.Contains(piece.name0x18))
@@ -1546,7 +1539,7 @@ namespace AquaModelLibrary.Core.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(unitIndexFilename))
                     {
-                        aox = ReadAOX(file);
+                        aox = new AddOnIndex(file);
                     }
                 }
 
@@ -1589,7 +1582,7 @@ namespace AquaModelLibrary.Core.Utility
                 var name = IceFile.getFileName(files[i]);
                 if (name == myRoomGoodsFilename)
                 {
-                    var rg = ReadMyRoomParam(files[i], 0);
+                    var rg = new MyRoomParameters(files[i], 0);
                     foreach (var good in rg.roomGoodsList)
                     {
                         string obj = $"object/map_object/ob_1000_{good.goods.id:D4}.ice";
@@ -1613,7 +1606,7 @@ namespace AquaModelLibrary.Core.Utility
                 }
                 else if (name == myRoomChipFilename)
                 {
-                    var chips = ReadMyRoomParam(files[i], 1);
+                    var chips = new MyRoomParameters(files[i], 1);
                     foreach (var chip in chips.chipsList)
                     {
                         for (int id = 0; id < 105; id++)
@@ -1683,7 +1676,7 @@ namespace AquaModelLibrary.Core.Utility
                     var name = IceFile.getFileName(files[i]);
                     if (name == mySpaceObjectSettingsMso)
                     {
-                        var mso = AquaUtil.LoadMSO("mso\0", files[i]);
+                        var mso = new MySpaceObjectsSettings(files[i]);
                         List<string> msoInfo = new List<string>();
                         msoInfo.Add("Name,LOD1,LOD1 Hash,LOD2,LOD2 Hash,LOD3,LOD3 Hash,LOD4,LOD4 Hash,Collision,Common (Animation, if existant),Effect,Trait 1,Trait 2,Trait 3,Trait 4,Trait 5,Trait 6,Trait 7,Trait 8,Null Hashes indicate unfound files");
                         foreach (var entry in mso.msoEntries)
@@ -2003,7 +1996,7 @@ namespace AquaModelLibrary.Core.Utility
             }
         }
 
-        private static void GenerateLobbyActionLists(string pso2_binDir, string playerCAnimDirOut, string playerRAnimDirOut, LobbyActionCommon lac, List<LobbyActionCommon> rebootLac, string lacTruePath, string lacTruePathReboot, Dictionary<string, List<List<PSO2Text.TextPair>>> commByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> commRebootByCat, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts)
+        private static void GenerateLobbyActionLists(string pso2_binDir, string playerCAnimDirOut, string playerRAnimDirOut, LobbyActionCommon lac, List<LobbyActionCommonReboot> rebootLac, string lacTruePath, string lacTruePathReboot, Dictionary<string, List<List<PSO2Text.TextPair>>> commByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> commRebootByCat, List<string> masterNameList, List<Dictionary<string, string>> strNameDicts)
         {
             //---------------------------Parse out Lobby Action files -- in lobby_action_setting.lac within defaa92bd5435c84af0da0302544b811 and common.text in a1d84c3c748cebdb6fc42f66b73d2e57
             if (lacTruePath != null)
@@ -6397,19 +6390,19 @@ namespace AquaModelLibrary.Core.Utility
             string partsTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicPartText));
             string partsTextPathNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicPartText));
 
-            partsText = GetTextConditional(partsTextPath, partsTextPathNA, partsTextName);
+            partsText = PSO2Text.GetTextConditional(partsTextPath, partsTextPathNA, partsTextName);
 
             //Load acceText
             string acceTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicAcceText));
             string acceTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicAcceText));
 
-            acceText = GetTextConditional(acceTextPath, acceTextPathhNA, acceTextName);
+            acceText = PSO2Text.GetTextConditional(acceTextPath, acceTextPathhNA, acceTextName);
 
             //Load commonText
             string commonTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicCommon));
             string commonTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicCommon));
 
-            commonText = GetTextConditional(commonTextPath, commonTextPathhNA, commonTextName);
+            commonText = PSO2Text.GetTextConditional(commonTextPath, commonTextPathhNA, commonTextName);
 
             //Load commonText from reboot
             if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
@@ -6417,7 +6410,7 @@ namespace AquaModelLibrary.Core.Utility
                 string commonTextRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(classicCommon)));
                 string commonTextRebootPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(classicCommon)));
 
-                commonTextReboot = GetTextConditional(commonTextRebootPath, commonTextRebootPathhNA, commonTextName);
+                commonTextReboot = PSO2Text.GetTextConditional(commonTextRebootPath, commonTextRebootPathhNA, commonTextName);
             }
             else
             {
@@ -6431,12 +6424,12 @@ namespace AquaModelLibrary.Core.Utility
             string actorNameTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicActorName));
             string actorNameTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(classicActorName));
 
-            actorNameText = GetTextConditional(actorNameTextPath, actorNameTextPathhNA, actorNameName);
+            actorNameText = PSO2Text.GetTextConditional(actorNameTextPath, actorNameTextPathhNA, actorNameName);
 
             //Load ui my room text
             string uiRoomTextPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(uiRoomIce));
             string uiRoomTextPathhNA = Path.Combine(pso2_binDir, dataNADir, GetFileHash(uiRoomIce));
-            uiMyRoomText = GetTextConditional(uiRoomTextPath, uiRoomTextPathhNA, uiRoomFilename);
+            uiMyRoomText = PSO2Text.GetTextConditional(uiRoomTextPath, uiRoomTextPathhNA, uiRoomFilename);
 
             //Load reboot text
             if (Directory.Exists(Path.Combine(pso2_binDir, dataReboot)))
@@ -6444,16 +6437,16 @@ namespace AquaModelLibrary.Core.Utility
                 //Load reboot actor name text
                 string actorNameTextRebootPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootActorName)));
                 string actorNameTextRebootPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(rebootActorName)));
-                actorNameTextReboot = GetTextConditional(actorNameTextRebootPath, actorNameTextRebootPathhNA, actorNameName);
+                actorNameTextReboot = PSO2Text.GetTextConditional(actorNameTextRebootPath, actorNameTextRebootPathhNA, actorNameName);
 
                 string actorNameTextRebootNPCPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootActorNameNPC)));
                 string actorNameTextRebootNPCPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(rebootActorNameNPC)));
-                actorNameTextReboot_NPC = GetTextConditional(actorNameTextRebootNPCPath, actorNameTextRebootNPCPathhNA, actorNameNPCName);
+                actorNameTextReboot_NPC = PSO2Text.GetTextConditional(actorNameTextRebootNPCPath, actorNameTextRebootNPCPathhNA, actorNameNPCName);
 
                 //Load object common text
                 string objCommonTextPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(objCommonIce)));
                 string objCommonTextPathhNA = Path.Combine(pso2_binDir, dataRebootNA, GetRebootHash(GetFileHash(objCommonIce)));
-                objectCommonText = GetTextConditional(objCommonTextPath, objCommonTextPathhNA, objCommonText);
+                objectCommonText = PSO2Text.GetTextConditional(objCommonTextPath, objCommonTextPathhNA, objCommonText);
             }
             else
             {

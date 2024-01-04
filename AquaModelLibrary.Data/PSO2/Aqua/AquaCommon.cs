@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
-using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.Ice;
+using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -18,26 +18,32 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public NOF0 nof0;
         public NEND nend;
 
+        /// <summary>
+        /// Get the ice envelope extension(s) for this file.
+        /// </summary>
+        public virtual string[] GetEnvelopeTypes() => null;
+
         public AquaCommon()
         {
 
         }
 
         /// <summary>
-        /// Read the aqua file header. To determine the if the file is ICE enveloped, we need the original file extension.
+        /// Read the aqua file header. Ice envelope is not skipped if GetEnvelopeTypes is not properly defined.
         /// </summary>
-        public AquaCommon(byte[] file, string _ext)
+        public void Read(byte[] file)
         {
-            Read(file, new string[] { _ext });
+            Read(file, GetEnvelopeTypes());
         }
 
         /// <summary>
-        /// Read the aqua file header. To determine the if the file is ICE enveloped, we need the original file extension.
+        /// Read the aqua file header. Ice envelope is not skipped if GetEnvelopeTypes is not properly defined.
         /// </summary>
-        public AquaCommon(BufferedStreamReaderBE<MemoryStream> streamReader, string _ext)
+        public void Read(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
-            Read(streamReader, new string[] { _ext });
+            Read(streamReader, GetEnvelopeTypes());
         }
+
         /// <summary>
         /// Read the aqua file header. To determine the if the file is ICE enveloped, we need the original file extension.
         /// </summary>
@@ -92,8 +98,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public virtual void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset) { throw new NotImplementedException(); }
         public virtual void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr) { throw new NotImplementedException(); }
 
-        public virtual byte[] GetBytesNIFL() { throw new NotImplementedException();  }
-        public virtual byte[] GetBytesVTBF() { throw new NotImplementedException();  }
+        public virtual byte[] GetBytesNIFL() { throw new NotImplementedException(); }
+        public virtual byte[] GetBytesVTBF() { throw new NotImplementedException(); }
 
         /// <summary>
         /// Reads NIFL, REL0, NOF0, and NEND, then seeks to REL0DataStart

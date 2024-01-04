@@ -11,7 +11,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<MSOCategoryObject> msoTypes = new List<MSOCategoryObject>();
         public MSOHeader msoHeader;
 
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "mso\0"
+            };
+        }
+
         public MySpaceObjectsSettings() { }
+
+        public MySpaceObjectsSettings(byte[] file)
+        {
+            Read(file);
+        }
+        public MySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

@@ -20,17 +20,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             "ex",
             "pgd",
         };
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "lps\0"
+            };
+        }
 
         public LandPieceSettings() { }
 
-        public LandPieceSettings(byte[] file, string _ext)
+        public LandPieceSettings(byte[] file)
         {
-            Read(file, _ext);
+            Read(file);
         }
 
-        public LandPieceSettings(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public LandPieceSettings(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

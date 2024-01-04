@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
 namespace AquaModelLibrary.Core.Utility
 {
@@ -92,7 +95,7 @@ namespace AquaModelLibrary.Core.Utility
         public void UpdateToNGSPlayerMotion(AquaMotion motion)
         {
             //Add the nodeTreeFlag if it's there
-            AquaMotion.KeyData nodeTree = null;
+            KeyData nodeTree = null;
             if (motion.motionKeys[motion.motionKeys.Count - 1].mseg.nodeName.GetString().Contains("NodeTreeFlag"))
             {
                 nodeTree = motion.motionKeys[motion.motionKeys.Count - 1];
@@ -107,15 +110,15 @@ namespace AquaModelLibrary.Core.Utility
             //Go through and add NGS nodes 
             for (int i = oldRange; i < endRange + 1; i++)
             {
-                var keySet = new AquaMotion.KeyData();
+                var keySet = new KeyData();
                 keySet.mseg.nodeDataCount = 3;
                 keySet.mseg.nodeId = i;
                 keySet.mseg.nodeType = 2;
-                keySet.mseg.nodeName = AquaCommon.PSO2String.GeneratePSO2String(nodeNames[i]);
+                keySet.mseg.nodeName = new PSO2String(nodeNames[i]);
 
-                var pos = new AquaMotion.MKEY();
-                var rot = new AquaMotion.MKEY();
-                var scale = new AquaMotion.MKEY();
+                var pos = new MKEY();
+                var rot = new MKEY();
+                var scale = new MKEY();
 
                 //If the key isn't in there, set to the default. Else set based on the old id
                 if (!remapDict.ContainsKey(i))
@@ -215,15 +218,15 @@ namespace AquaModelLibrary.Core.Utility
             else
             {
                 //Generate NodeTreeFlag
-                nodeTree = new AquaMotion.KeyData();
+                nodeTree = new KeyData();
                 nodeTree.mseg.nodeDataCount = 3;
                 nodeTree.mseg.nodeId = 0;
                 nodeTree.mseg.nodeType = 16;
-                nodeTree.mseg.nodeName = AquaCommon.PSO2String.GeneratePSO2String("__NodeTreeFlag__");
+                nodeTree.mseg.nodeName = new PSO2String("__NodeTreeFlag__");
 
                 for (int set = 0; set < 3; set++)
                 {
-                    var mkey = new AquaMotion.MKEY();
+                    var mkey = new MKEY();
                     mkey.dataType = 5;
                     mkey.keyCount = motion.moHeader.endFrame + 1;
                     mkey.keyType = 16 + set;

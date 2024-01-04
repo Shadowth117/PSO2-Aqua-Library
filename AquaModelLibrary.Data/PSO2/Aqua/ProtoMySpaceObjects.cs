@@ -11,17 +11,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<MSOEntryObject> msoEntries = new List<MSOEntryObject>();
         public int entryOffset = -1;
         public int entryCount = -1;
-
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "mso\0"
+            };
+        }
         public ProtoMySpaceObjectsSettings() { }
 
-        public ProtoMySpaceObjectsSettings(byte[] file, string _ext)
+        public ProtoMySpaceObjectsSettings(byte[] file)
         {
-            Read(file, _ext);
+            Read(file);
         }
 
-        public ProtoMySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public ProtoMySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

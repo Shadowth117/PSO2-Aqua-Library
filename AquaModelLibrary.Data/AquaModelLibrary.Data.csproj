@@ -19,12 +19,14 @@
   <ItemGroup>
     <PackageReference Include="csharp-prs" Version="2.1.3" />
     <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
+    <PackageReference Include="ZstdNet" Version="1.4.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AquaModelLibrary.Extensions\AquaModelLibrary.Helpers.csproj" />
     <ProjectReference Include="..\SAToolsShared\ArchiveLib\ArchiveLib.csproj" />
     <ProjectReference Include="..\SAToolsShared\VrSharp\VrSharp.csproj" />
+    <ProjectReference Include="..\UnluacNET\UnluacNET.csproj" />
     <ProjectReference Include="..\ZamboniLib\ZamboniLib\ZamboniLib.csproj" />
   </ItemGroup>
 

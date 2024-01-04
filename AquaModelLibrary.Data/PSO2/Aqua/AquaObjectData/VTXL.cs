@@ -1313,7 +1313,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 vertIdDict.Add((int)tri.X, destinationVtxl.vertPositions.Count);
                 x = destinationVtxl.vertPositions.Count;
-                appendVertex(sourceVtxl, destinationVtxl, (int)tri.X);
+                VTXL.AppendVertex(sourceVtxl, destinationVtxl, (int)tri.X);
             }
             if (vertIdDict.TryGetValue((int)tri.Y, out var value2))
             {
@@ -1323,7 +1323,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 vertIdDict.Add((int)tri.Y, destinationVtxl.vertPositions.Count);
                 y = destinationVtxl.vertPositions.Count;
-                appendVertex(sourceVtxl, destinationVtxl, (int)tri.Y);
+                VTXL.AppendVertex(sourceVtxl, destinationVtxl, (int)tri.Y);
             }
             if (vertIdDict.TryGetValue((int)tri.Z, out var value3))
             {
@@ -1333,7 +1333,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 vertIdDict.Add((int)tri.Z, destinationVtxl.vertPositions.Count);
                 z = destinationVtxl.vertPositions.Count;
-                appendVertex(sourceVtxl, destinationVtxl, (int)tri.Z);
+                VTXL.AppendVertex(sourceVtxl, destinationVtxl, (int)tri.Z);
             }
         }
 

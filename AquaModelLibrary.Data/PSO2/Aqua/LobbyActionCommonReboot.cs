@@ -9,16 +9,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public DataInfo info;
         public List<DataBlockFingersData> rebootDataBlocks = new List<DataBlockFingersData>();
 
-        public LobbyActionCommonReboot() { }
-
-        public LobbyActionCommonReboot(byte[] file, string _ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, _ext);
+            return new string[] {
+            "lac\0"
+            };
         }
 
-        public LobbyActionCommonReboot(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public LobbyActionCommonReboot() { }
+
+        public LobbyActionCommonReboot(byte[] file)
         {
-            Read(sr, _ext);
+            Read(file);
+        }
+
+        public LobbyActionCommonReboot(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

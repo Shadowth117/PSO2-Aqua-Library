@@ -1,4 +1,6 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+using Reloaded.Memory.Streams;
 
 namespace AquaModelLibrary.Zero
 {

@@ -38,30 +38,31 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             "trm\0",
         };
 
+        public string[] GetEnvelopeTypes() => fileExtensions;
+
         public AquaPackage() { }
 
-        public AquaPackage(byte[] file, string _ext)
+        public AquaPackage(byte[] file)
         {
-            Read(file, _ext);
+            Read(file);
         }
 
-        public AquaPackage(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public AquaPackage(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
-        public void Read(byte[] file, string _ext)
+        public void Read(byte[] file)
         {
             using (MemoryStream stream = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
-                Read(sr, _ext);
+                Read(sr);
             }
         }
 
-        public void Read(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            ext = _ext;
             string type = Encoding.UTF8.GetString(BitConverter.GetBytes(sr.Peek<int>()));
             int offset = 0x20; //Base offset due to NIFL header
 
@@ -121,7 +122,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     case ".trp":
                     case ".aqo":
                     case ".tro":
-                        models.Add(new AquaObject(sr, _ext));
+                        models.Add(new AquaObject(sr));
                         break;
                     case ".aqm":
                     case ".aqv":
@@ -130,7 +131,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     case ".trm":
                     case ".trv":
                     case ".trw":
-                        motions.Add(new AquaMotion(sr, _ext));
+                        motions.Add(new AquaMotion(sr));
                         break;
                     case ".tpn":
                         tpns.Add(new TPNTexturePattern(sr));

@@ -9,16 +9,24 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<RoomGoodsObject> roomGoodsList = new List<RoomGoodsObject>();
         public List<ChipObject> chipsList = new List<ChipObject>();
 
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "mrp\0"
+            };
+        }
+
         public MyRoomParameters() { }
 
-        public MyRoomParameters(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
-        {
-            Read(sr, _ext);
-        }
-        public MyRoomParameters(BufferedStreamReaderBE<MemoryStream> sr, string _ext, int _mrpType)
+        public MyRoomParameters(byte[] file, int _mrpType)
         {
             mrpType = _mrpType;
-            Read(sr, _ext);
+            Read(file);
+        }
+        public MyRoomParameters(BufferedStreamReaderBE<MemoryStream> sr, int _mrpType)
+        {
+            mrpType = _mrpType;
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

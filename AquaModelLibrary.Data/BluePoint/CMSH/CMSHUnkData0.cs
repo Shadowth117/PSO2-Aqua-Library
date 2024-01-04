@@ -27,7 +27,7 @@ namespace AquaModelLibrary.BluePoint.CMSH
             flags = sr.Read<int>();
             unk1 = sr.Read<int>();
             count = sr.Read<int>();
-            var pos = sr.Position();
+            var pos = sr.Position;
             for (int i = 0; i < count; i++)
             {
                 unkList.Add(sr.Read<CMSHUNKData0Data>());

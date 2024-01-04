@@ -3,11 +3,10 @@
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Numerics;
-using namespace AquaModelLibrary::Native::Fbx::Interfaces;
 
 namespace AquaModelLibrary::Objects::Processing::Fbx
 {
-    public ref class FbxExporterCore sealed : public IFbxExporter
+    public class FbxExporterCore
     {
         FbxManager* lManager;
 

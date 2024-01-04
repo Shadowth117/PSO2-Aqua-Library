@@ -1,7 +1,11 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData.Reboot;
+using AquaModelLibrary.Helpers;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.PSO2;
 using AquaModelLibrary.Helpers.Readers;
+using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -15,17 +19,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public EFCTNGSObject efctNGSObj = null;
 
         public bool IsNGS { get { return rel0.version > 0; } }
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] { "aqe\0" };
+        }
 
         public AquaEffect() { }
 
-        public AquaEffect(BufferedStreamReaderBE<MemoryStream> sr, string _ext)
+        public AquaEffect(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            Read(sr, _ext);
+            Read(sr);
         }
 
-        public AquaEffect(byte[] file, string _ext)
+        public AquaEffect(byte[] file)
         {
-            Read(file, _ext);
+            Read(file);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
@@ -212,6 +220,201 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         //Data being null signfies that the last thing read wasn't a proper tag. This should mean the end of the VTBF stream if nothing else.
                         return;
                 }
+            }
+        }
+
+        public override byte[] GetBytesNIFL()
+        {
+            switch (rel0.version)
+            {
+                case 0:
+                    return GetBytesClassicNIFL();
+                case 2:
+                    throw new NotImplementedException();
+                default:
+                    throw new Exception($"Unknown effect version {rel0.version}");
+            }
+        }
+
+        public byte[] GetBytesClassicNIFL()
+        {
+            List<byte> finalOutBytes = new List<byte>();
+
+            int rel0SizeOffset = 0;
+            int efctCurvOffset = 0;
+            int efctEmitOffset = 0;
+
+            List<int> emitCurvOffsets = new List<int>();
+            List<int> emitPtclOffsets = new List<int>();
+
+            List<byte> outBytes = new List<byte>();
+            List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
+
+            //REL0
+            outBytes.AddRange(Encoding.UTF8.GetBytes("REL0"));
+            rel0SizeOffset = outBytes.Count; //We'll fill this later
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0x10));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //EFCT
+            efctCurvOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, efct.efct.curvCount);
+            efctEmitOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x98, efct.efct.emitCount);
+
+            outBytes.AddRange(DataHelpers.ConvertStruct(efct.efct));
+
+            //Write anim
+            if (efct.efct.curvCount > 0)
+            {
+                outBytes.SetByteListInt(efctCurvOffset, outBytes.Count);
+                WriteAQEAnim(outBytes, efct, nof0PointerLocations);
+            }
+
+            //EMIT
+            if (efct.emits.Count > 0)
+            {
+                outBytes.SetByteListInt(efctEmitOffset, outBytes.Count);
+                for (int emit = 0; emit < efct.emits.Count; emit++)
+                {
+                    emitCurvOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x34, efct.emits[emit].curvs.Count));
+                    emitPtclOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0xF0, efct.emits[emit].ptcls.Count));
+                    outBytes.AddRange(DataHelpers.ConvertStruct(efct.emits[emit].emit));
+                }
+
+                //The substructs are written after the set so we follow this here too
+                for (int emit = 0; emit < efct.emits.Count; emit++)
+                {
+                    List<int> ptclCurvOffsets = new List<int>();
+                    List<int> ptclStringOffsets = new List<int>();
+
+                    //Write anim
+                    if (efct.emits[emit].curvs.Count > 0)
+                    {
+                        outBytes.SetByteListInt(emitCurvOffsets[emit], outBytes.Count);
+                        WriteAQEAnim(outBytes, efct.emits[emit], nof0PointerLocations);
+                    }
+
+                    //PTCL
+                    if (efct.emits[emit].ptcls.Count > 0)
+                    {
+                        outBytes.SetByteListInt(emitPtclOffsets[emit], outBytes.Count);
+                        for (int ptcl = 0; ptcl < efct.emits[emit].ptcls.Count; ptcl++)
+                        {
+                            ptclStringOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x140, efct.emits[emit].ptcls[ptcl].ptcl.ptclStringsOffset));
+                            ptclCurvOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x144, efct.emits[emit].ptcls[ptcl].curvs.Count));
+                            outBytes.AddRange(DataHelpers.ConvertStruct(efct.emits[emit].ptcls[ptcl].ptcl));
+                        }
+
+                        //The substructs are written after the set so we follow this here too
+                        for (int ptcl = 0; ptcl < efct.emits[emit].ptcls.Count; ptcl++)
+                        {
+                            //Write strings
+                            if (efct.emits[emit].ptcls[ptcl].ptcl.ptclStringsOffset != 0)
+                            {
+                                outBytes.SetByteListInt(ptclStringOffsets[ptcl], outBytes.Count);
+                                outBytes.AddRange(DataHelpers.ConvertStruct(efct.emits[emit].ptcls[ptcl].strings));
+                            }
+
+                            //Write anim
+                            if (efct.emits[emit].ptcls[ptcl].curvs.Count > 0)
+                            {
+                                outBytes.SetByteListInt(ptclCurvOffsets[ptcl], outBytes.Count);
+                                WriteAQEAnim(outBytes, efct.emits[emit].ptcls[ptcl], nof0PointerLocations);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+
+            //Write REL0 Size
+            outBytes.SetByteListInt(rel0SizeOffset, outBytes.Count - 0x8);
+
+            //NOF0
+            nof0PointerLocations.Sort();
+            int NOF0Offset = outBytes.Count;
+            int NOF0Size = (nof0PointerLocations.Count + 2) * 4;
+            int NOF0FullSize = NOF0Size + 0x8;
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NOF0"));
+            outBytes.AddRange(BitConverter.GetBytes(NOF0Size));
+            outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations.Count));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Write pointer offsets
+            for (int i = 0; i < nof0PointerLocations.Count; i++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(nof0PointerLocations[i]));
+            }
+            NOF0FullSize += outBytes.AlignWriter(0x10);
+
+            //NEND
+            outBytes.AddRange(Encoding.UTF8.GetBytes("NEND"));
+            outBytes.AddRange(BitConverter.GetBytes(0x8));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+            outBytes.AddRange(BitConverter.GetBytes(0));
+
+            //Generate NIFL
+            NIFL nifl = new NIFL();
+            nifl.magic = BitConverter.ToInt32(Encoding.UTF8.GetBytes("NIFL"), 0);
+            nifl.NIFLLength = 0x18;
+            nifl.unkInt0 = 1;
+            nifl.offsetAddition = 0x20;
+
+            nifl.NOF0Offset = NOF0Offset;
+            nifl.NOF0OffsetFull = NOF0Offset + 0x20;
+            nifl.NOF0BlockSize = NOF0FullSize;
+            nifl.padding0 = 0;
+
+            //Write NIFL
+            outBytes.InsertRange(0, DataHelpers.ConvertStruct(nifl));
+
+            finalOutBytes.AddRange(outBytes);
+
+            return finalOutBytes.ToArray();
+        }
+
+        private void WriteAQEAnim(List<byte> outBytes, AnimObject anim, List<int> nof0PointerLocations)
+        {
+            List<int> keysOffsets = new List<int>();
+            List<int> timeOffsets = new List<int>();
+            //CURV
+            for (int i = 0; i < anim.curvs.Count; i++)
+            {
+
+                keysOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x18, anim.curvs[i].curv.keysCount));
+                timeOffsets.Add(DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x20, anim.curvs[i].curv.timeCount));
+                outBytes.AddRange(DataHelpers.ConvertStruct(anim.curvs[i].curv));
+            }
+            outBytes.AlignWriter(0x10);
+
+            //Write substructs
+            for (int i = 0; i < anim.curvs.Count; i++)
+            {
+                List<float> times = new List<float>();
+                //KEYS
+                if (anim.curvs[i].keys.Count > 0)
+                {
+                    outBytes.SetByteListInt(keysOffsets[i], outBytes.Count);
+                    for (int key = 0; key < anim.curvs[i].keys.Count; key++)
+                    {
+                        times.Add(anim.curvs[i].keys[key].time);
+                        outBytes.AddRange(DataHelpers.ConvertStruct(anim.curvs[i].keys[key]));
+                    }
+                }
+                outBytes.AlignWriter(0x10);
+
+                //NIFL Times
+                if (anim.curvs[i].keys.Count > 0)
+                {
+                    times.Sort();
+                    outBytes.SetByteListInt(timeOffsets[i], outBytes.Count);
+                    for (int time = 0; time < times.Count; time++)
+                    {
+                        outBytes.AddRange(BitConverter.GetBytes(times[time]));
+                    }
+                }
+                outBytes.AlignWriter(0x10);
             }
         }
 

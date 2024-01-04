@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-using System.Numerics;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.NGSShaderPresets
 {

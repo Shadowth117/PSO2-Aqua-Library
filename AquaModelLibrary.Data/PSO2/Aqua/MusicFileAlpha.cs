@@ -8,6 +8,13 @@
         public musHeader header;
         public List<sympathyPart> parts = new List<sympathyPart>();
 
+        public override string[] GetEnvelopeTypes()
+        {
+            return new string[] {
+            "mus\0"
+            };
+        }
+
         public struct musHeader
         {
             public int nextFourBytesOffset;

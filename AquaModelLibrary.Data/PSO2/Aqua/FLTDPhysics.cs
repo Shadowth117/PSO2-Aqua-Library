@@ -11,16 +11,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public List<MainPhysicsNode> mainNodes = new List<MainPhysicsNode>();
         public List<unkStruct1> subStructs = new List<unkStruct1>();
 
-        public FLTDPhysics() { }
-
-        public FLTDPhysics(byte[] file, string ext)
+        public override string[] GetEnvelopeTypes()
         {
-            Read(file, ext);
+            return new string[] {
+            "fltd"
+            };
         }
 
-        public FLTDPhysics(BufferedStreamReaderBE<MemoryStream> sr, string ext)
+        public FLTDPhysics() { }
+
+        public FLTDPhysics(byte[] file)
         {
-            Read(sr, ext);
+            Read(file);
+        }
+
+        public FLTDPhysics(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
         }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)

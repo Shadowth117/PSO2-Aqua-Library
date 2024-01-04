@@ -11,7 +11,26 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 
         public ELPR_EnlightenParam() { }
 
+        public ELPR_EnlightenParam(byte[] file) 
+        {
+            Read(file);
+        }
+
         public ELPR_EnlightenParam(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
+
+        private void Read(byte[] file)
+        {
+            using (MemoryStream stream = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                Read(sr);
+            }
+        }
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var type = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, 4));
             sr.Seek(0x6, SeekOrigin.Current);

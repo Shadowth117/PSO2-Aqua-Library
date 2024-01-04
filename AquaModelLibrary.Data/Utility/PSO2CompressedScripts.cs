@@ -1,4 +1,4 @@
-﻿using Reloaded.Memory.Streams;
+﻿using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
@@ -95,8 +95,8 @@ namespace AquaModelLibrary.Core.Utility
             {
                 byte[] zstdDict = new byte[0];
                 ulong zstdDictHash = 0;
-                using (var fileStream = new FileStream(filePath, FileMode.Open))
-                using (var streamReader = new BufferedStreamReader(fileStream, 8192))
+                using (var fileStream = new MemoryStream(File.ReadAllBytes(filePath)))
+                using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(fileStream))
                 {
 
                     streamReader.Seek(0xC, SeekOrigin.Begin);
@@ -112,7 +112,7 @@ namespace AquaModelLibrary.Core.Utility
                         value.uncompressedSize = streamReader.Read<uint>();
                         table.Add(value);
                     }
-                    long tableEnd = streamReader.Position();
+                    long tableEnd = streamReader.Position;
                     int offsetThing = 0;
                     foreach (CFileEntry entry in table)
                     {

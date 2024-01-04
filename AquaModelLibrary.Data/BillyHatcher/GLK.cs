@@ -1,8 +1,5 @@
-﻿using Reloaded.Memory.Streams;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using AquaModelLibrary.Extra.Ninja;
+﻿using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -11,7 +8,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public List<GLKEntry> entries = new List<GLKEntry>();
         public List<byte[]> files = new List<byte[]>();
         public GLK() { }
-        public GLK(BufferedStreamReader sr)
+        public GLK(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             NinjaHeader header = sr.Read<NinjaHeader>();
@@ -23,7 +20,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             for (int i = 0; i < fileCount; i++)
             {
                 GLKEntry entry = new GLKEntry();
-                entry.fileName = AquaMethods.AquaGeneralMethods.ReadCString(sr, 0x1C);
+                entry.fileName = sr.ReadCString(0x1C);
                 sr.Seek(0x1C, SeekOrigin.Current);
                 entry.unk0 = sr.ReadBE<ushort>();
                 entry.unk1 = sr.ReadBE<ushort>();
@@ -57,14 +54,14 @@ namespace AquaModelLibrary.Data.BillyHatcher
                             break;
                     }
                     var bytes = new List<byte>();
-                    bytes.AddRange(sr.ReadBytes(sr.Position() - 0x8, fileHeader.fileSize + 0x8));
+                    bytes.AddRange(sr.ReadBytes(sr.Position - 0x8, fileHeader.fileSize + 0x8));
                     sr.Seek(fileHeader.fileSize, SeekOrigin.Current);
 
                     //Handle POF0
                     if (sr.Peek<int>() == 0x30464F50)
                     {
                         fileHeader = sr.Read<NinjaHeader>();
-                        bytes.AddRange(sr.ReadBytes(sr.Position() - 0x8, fileHeader.fileSize + 0x8));
+                        bytes.AddRange(sr.ReadBytes(sr.Position - 0x8, fileHeader.fileSize + 0x8));
                         sr.Seek(fileHeader.fileSize, SeekOrigin.Current);
                     }
                     files.Add(bytes.ToArray());
