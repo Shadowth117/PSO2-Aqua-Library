@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
-using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Data.Ninja;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {

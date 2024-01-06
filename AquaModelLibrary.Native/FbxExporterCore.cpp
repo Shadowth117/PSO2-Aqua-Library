@@ -6,7 +6,11 @@ using namespace Collections::Generic;
 using namespace IO;
 using namespace Numerics;
 using namespace Runtime::InteropServices;
-using namespace AquaModelLibrary;
+using namespace AquaModelLibrary::Data::PSO2::Aqua;
+using namespace AquaModelLibrary::Data::PSO2::Aqua::AquaMotionData;
+using namespace AquaModelLibrary::Data::PSO2::Aqua::AquaNodeData;
+using namespace AquaModelLibrary::Data::PSO2::Aqua::AquaObjectData;
+using namespace AquaModelLibrary::Data::PSO2::Aqua::AquaObjectData::Intermediary;
 
 namespace AquaModelLibrary::Objects::Processing::Fbx
 {
@@ -39,8 +43,8 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     FbxNode* CreateFbxNodeFromMesh( AquaObject^ aqo, int meshId, FbxScene* lScene, List<IntPtr>^ materials, List<int>^ meshMatMappings, List<IntPtr>^ convertedBones, AquaNode^ aqn, bool includeMetadata)
     {
         List<uint>^ bonePalette;
-        AquaObject::MESH msh = aqo->meshList[meshId];
-        AquaObject::VTXL^ vtxl = aqo->vtxlList[msh.vsetIndex];
+        MESH msh = aqo->meshList[meshId];
+        VTXL^ vtxl = aqo->vtxlList[msh.vsetIndex];
         String^ meshName;
         
         if (aqo->meshNames->Count - 1 >= meshId)
@@ -199,7 +203,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             for ( int j = 0; j < bonePalette->Count; j++ )
             {
                 ushort boneIndex = bonePalette[ j ];
-                AquaNode::NODE node;
+                NODE node;
                 if (aqn->nodeList->Count > boneIndex)
                 {
                     node = aqn->nodeList[boneIndex];
@@ -326,7 +330,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         }
     }
 
-    FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( AquaObject::GenericMaterial^ aqMat, String^ texturesDirectoryPath, FbxScene* lScene, bool includeMetadata)
+    FbxSurfacePhong* CreateFbxSurfacePhongFromMaterial( GenericMaterial^ aqMat, String^ texturesDirectoryPath, FbxScene* lScene, bool includeMetadata)
     {
         const char* name;
         System::String^ specialType = aqMat->specialType->Length > 0 ? "[" + aqMat->specialType + "]": "";
@@ -379,12 +383,12 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         FbxNode* lNodeInstances = instanceTransforms->Count > 0 ? FbxNode::Create(lScene, Utf8String(aqoName + "_instances").ToCStr()) : NULL;
         List<int>^ meshMatMappings;
         List<int>^ nodesToRemove = gcnew List<int>();
-        List<AquaObject::GenericMaterial^>^ aqMats = aqo->GetUniqueMaterials(meshMatMappings);
+        List<GenericMaterial^>^ aqMats = aqo->GetUniqueMaterials(meshMatMappings);
         List<IntPtr>^ materials = gcnew List<IntPtr>( aqMats->Count );
 
         FbxNode* lRootNode = lScene->GetRootNode();
 
-        for each (AquaObject::GenericMaterial^ aqMat in aqMats)
+        for each (GenericMaterial^ aqMat in aqMats)
         {
             materials->Add(IntPtr(CreateFbxSurfacePhongFromMaterial(aqMat, texturesDirectoryPath, lScene, includeMetadata)));
         }
@@ -444,7 +448,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return;
     }
     
-    FbxNode* CreateFbxNodeFromAqnNode(AquaNode::NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex, bool includeMetadata)
+    FbxNode* CreateFbxNodeFromAqnNode(NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex, bool includeMetadata)
     {
         const char* name;
         if (includeMetadata)
@@ -483,7 +487,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lNode;
     }
 
-    FbxNode* CreateFbxNodeFromAqnNodo(AquaNode::NODO nodo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, bool includeMetadata)
+    FbxNode* CreateFbxNodeFromAqnNodo(NODO nodo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, bool includeMetadata)
     {
         const char* name;
         if (includeMetadata)
@@ -528,7 +532,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
     void CreateAnimationTakeFromAquaMotion(FbxScene* lScene, List<IntPtr>^ convertedBones, AquaNode^ aqn, AquaMotion^ aqm, String^ name)
     {
-        AquaMotion::MOHeader header = aqm->moHeader;
+        MOHeader header = aqm->moHeader;
         const char* cStrName = Utf8String(name).ToCStr();
         FbxAnimStack* animStack = FbxAnimStack::Create(lScene, cStrName);
         FbxAnimLayer* animBaseLayer = FbxAnimLayer::Create(lScene, cStrName);
@@ -558,7 +562,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
             for (int keySetId = 0; keySetId < aqm->motionKeys[i]->keyData->Count; keySetId++)
             {
-                AquaMotion::MKEY^ keySet = aqm->motionKeys[i]->keyData[keySetId];
+                MKEY^ keySet = aqm->motionKeys[i]->keyData[keySetId];
 
                 //Mainly to skip NodeTreeFlags for player animations. We don't really understand these well, but they don't appear to do much either so we'll skip for now
                 //Other types haven't been observed either, but we probably want to skip those too
@@ -725,7 +729,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         FbxNode* lRootNode = lScene->GetRootNode();
 
         List<IntPtr>^ convertedBones = gcnew List<IntPtr>();
-        AquaNode::NODE node0 = aqn->nodeList[0];
+        NODE node0 = aqn->nodeList[0];
         const char* name;
         if (includeMetadata)
         {
@@ -750,7 +754,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             {
                 continue;
             }
-            AquaNode::NODE node = aqn->nodeList[i];
+            NODE node = aqn->nodeList[i];
 
             Matrix4x4 parentInvTfm;
             if (node.parentId != -1)
@@ -772,7 +776,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             {
                 continue;
             }
-            AquaNode::NODE node = aqn->nodeList[i];
+            NODE node = aqn->nodeList[i];
             FbxNode* parentFbxNode = nullptr;
             if (node.parentId != -1)
             {
@@ -787,7 +791,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         //Go through 'effect nodes'. These can't have children or be tied to skinning
         for (int i = 0; i < aqn->nodoList->Count; i++) 
         {
-            AquaNode::NODO nodo = aqn->nodoList[i];
+            NODO nodo = aqn->nodoList[i];
             FbxNode* parentNode;
             Matrix4x4 parentInvTfm;
             //Almost all effect nodes need a parent. 
@@ -871,7 +875,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             }
 
             List<IntPtr>^ convertedBones = gcnew List<IntPtr>();
-            AquaNode::NODE node0 = aqn->nodeList[0];
+            NODE node0 = aqn->nodeList[0];
             const char* name;
             if (includeMetadata)
             {
@@ -896,7 +900,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 {
                     continue;
                 }
-                AquaNode::NODE node = aqn->nodeList[i];
+                NODE node = aqn->nodeList[i];
 
                 Matrix4x4 parentInvTfm;
                 FbxNode* parentFbxNode = nullptr;
@@ -920,7 +924,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             //Go through 'effect nodes'. These can't have children or be tied to skinning
             for (int i = 0; i < aqn->nodoList->Count; i++)
             {
-                AquaNode::NODO nodo = aqn->nodoList[i];
+                NODO nodo = aqn->nodoList[i];
                 FbxNode* parentNode;
                 Matrix4x4 parentInvTfm;
                 //Almost all effect nodes need a parent. 

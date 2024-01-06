@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zamboni;
 
-namespace AquaModelLibrary.Core.Utility
+namespace AquaModelLibrary.Data.Utility
 {
     public static class IceArchiveSelector
     {/*

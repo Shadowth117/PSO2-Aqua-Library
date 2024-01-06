@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 
-namespace AquaModelLibrary.Utility
+namespace AquaModelLibrary.Data.Utility
 {
     public static class ColorUtility
     {

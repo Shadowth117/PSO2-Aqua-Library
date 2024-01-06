@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 
-namespace AquaModelLibrary.Nova.Structures
+namespace AquaModelLibrary.Data.Nova.Structures
 {
     public class MeshDefinitions
     {

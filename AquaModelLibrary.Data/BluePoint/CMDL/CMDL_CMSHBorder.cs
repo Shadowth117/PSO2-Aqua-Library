@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 
-namespace AquaModelLibrary.BluePoint.CMDL
+namespace AquaModelLibrary.Data.BluePoint.CMDL
 {
     public class CMDL_CMSHBorder
     {

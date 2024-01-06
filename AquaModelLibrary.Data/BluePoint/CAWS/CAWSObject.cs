@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.BluePoint.CAWS
+namespace AquaModelLibrary.Data.BluePoint.CAWS
 {
     public class CAWSObject
     {

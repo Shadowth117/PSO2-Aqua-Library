@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.BluePoint.CANI
+namespace AquaModelLibrary.Data.BluePoint.CANI
 {
     public class CANI
     {

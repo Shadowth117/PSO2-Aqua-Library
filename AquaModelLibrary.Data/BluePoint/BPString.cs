@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
-namespace AquaModelLibrary.BluePoint
+namespace AquaModelLibrary.Data.BluePoint
 {
     public class BPString
     {

@@ -14,12 +14,17 @@ using static AquaModelLibrary.Utility.AquaUtilData;
 using static AquaModelLibrary.AquaObjectMethods;
 using AquaModelLibrary.Data.AM2.BorderBreakPS4;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
+using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 
 namespace AquaModelLibrary.Extra.AM2
 {
     public class BorderBreakPS4Convert
     {
-        public static List<AquaNode> motBonesToAQN(MOT_BONE bones)
+        public static List<AquaNode> MotBonesToAQN(MOT_BONE bones)
         {
             List<AquaNode> aquaNodes = new List<AquaNode>();
 
@@ -27,13 +32,13 @@ namespace AquaModelLibrary.Extra.AM2
             {
                 var skeleton = bones.skeletonList[i];
                 var aqn = new AquaNode();
-                var nodeArr = new AquaNode.NODE[skeleton.Count]; 
+                var nodeArr = new NODE[skeleton.Count]; 
 
                 for(int b = skeleton.Count - 1; b >= 0; b--)
                 {
                     var bone = skeleton[b];
                     //Debug.WriteLine($"{bone.boneStruct.usht_08} {bone.boneStruct.usht_0A} {bone.name}");
-                    var node = new AquaNode.NODE();
+                    var node = new NODE();
                     node.boneName.SetString(bone.name);
                     node.animatedFlag = 1;
                     node.boneShort1 = 0x1C0;
@@ -120,23 +125,22 @@ namespace AquaModelLibrary.Extra.AM2
             var fullTexFileName = Path.Combine(rootFolder, objFolderName, texFileName);
             var outFolder = stgFileName + "_";
 
-            AquaUtil aqu = new AquaUtil();
             STG stg;
             E_OBJ eobj;
-            List<NGSAquaObject> aqpList;
+            List<AquaObject> aqpList;
             List<AquaNode> exportAqnList = new List<AquaNode>();
             List<AquaObject> exportAqpList = new List<AquaObject>();
             List<string> modelNames = new List<string>();
-            Dictionary<string, NGSAquaObject> aqpDict = new Dictionary<string, NGSAquaObject>();
+            Dictionary<string, AquaObject> aqpDict = new Dictionary<string, AquaObject>();
             List<List<Matrix4x4>> instanceTransformListList = new List<List<Matrix4x4>>();
 
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(stgFileName)))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(stgFileName)))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 stg = new STG(streamReader);
             }
-            using (Stream stream = new MemoryStream(File.ReadAllBytes(fullObjFileName)))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(fullObjFileName)))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 eobj = new E_OBJ(streamReader);
             }
@@ -177,8 +181,8 @@ namespace AquaModelLibrary.Extra.AM2
 
         public static void ExtractTXP(string txpArchive, byte[] txpRaw, string outPath = null)
         {
-            using (Stream stream = new MemoryStream(txpRaw))
-            using (var streamReader = new BufferedStreamReader(stream, 8192))
+            using (MemoryStream stream = new MemoryStream(txpRaw))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 if (Path.GetFileName(txpArchive).StartsWith("spr_"))
                 {
@@ -208,14 +212,14 @@ namespace AquaModelLibrary.Extra.AM2
             }
         }
 
-        public static List<NGSAquaObject> EOBJToAqua(E_OBJ mdl)
+        public static List<AquaObject> EOBJToAqua(E_OBJ mdl)
         {
             int matCounter = 0;
-            List<NGSAquaObject> aqpList = new List<NGSAquaObject>();
+            List<AquaObject> aqpList = new List<AquaObject>();
 
             for(int m = 0; m < mdl.models.Count; m++)
             {
-                NGSAquaObject aqp = new NGSAquaObject();
+                AquaObject aqp = new AquaObject();
                 var model = mdl.models[m];
                 for(int i = 0; i <= model.highestBone; i++)
                 {
@@ -227,7 +231,7 @@ namespace AquaModelLibrary.Extra.AM2
                 {
                     var eObjMesh = model.meshes[vertSet];
 
-                    AquaObject.VTXL vtxl = new AquaObject.VTXL();
+                    VTXL vtxl = new VTXL();
 
                     vtxl.vertPositions.AddRange(eObjMesh.vertPositions);
                     vtxl.vertNormals.AddRange(eObjMesh.vertNormals);
@@ -251,14 +255,14 @@ namespace AquaModelLibrary.Extra.AM2
                     foreach(var faceSet in eObjMesh.faceLists)
                     {
                         //Material
-                        var mat = new AquaObject.GenericMaterial();
+                        var mat = new GenericMaterial();
                         mat.matName = $"Material_{matCounter++}";
                         mat.texNames = new List<string>() { "test_d.dds" };
                         aqp.tempMats.Add(mat);
 
                         Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
-                        AquaObject.VTXL matVtxl = new AquaObject.VTXL();
-                        AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                        VTXL matVtxl = new VTXL();
+                        GenericTriangles genMesh = new GenericTriangles();
                         List<Vector3> triList = new List<Vector3>();
                         for (int vertIndex = 0; vertIndex < faceSet.Count - 2; vertIndex++)
                         {
@@ -273,7 +277,7 @@ namespace AquaModelLibrary.Extra.AM2
                                 tri =new Vector3(faceSet[vertIndex], faceSet[vertIndex + 1], faceSet[vertIndex + 2]);
                             }
 
-                            AddVertices(vtxl, vertIdDict, matVtxl, tri, out int x, out int y, out int z);
+                            VTXL.AddVertices(vtxl, vertIdDict, matVtxl, tri, out int x, out int y, out int z);
 
                             //Avoid degen tris
                             if (x == y || x == z || y == z)
@@ -297,7 +301,7 @@ namespace AquaModelLibrary.Extra.AM2
                         {
                             aqp.tempTris.Add(genMesh);
                             aqp.vtxlList.Add(matVtxl);
-                            aqp.vtxeList.Add(ConstructClassicVTXE(matVtxl, out int vc));
+                            aqp.vtxeList.Add(VTXE.ConstructFromVTXL(matVtxl, out int vc));
                         }
                     }
                 }
@@ -308,32 +312,32 @@ namespace AquaModelLibrary.Extra.AM2
             return aqpList;
         }
 
-        public static List<NGSAquaObject> FLDToAqua(FLD mdl)
+        public static List<AquaObject> FLDToAqua(FLD mdl)
         {
             int matCounter = 0;
-            List<NGSAquaObject> aqpList = new List<NGSAquaObject>();
+            List<AquaObject> aqpList = new List<AquaObject>();
 
             for (int m = 0; m < mdl.fldModels.Count; m++)
             {
-                NGSAquaObject aqp = new NGSAquaObject();
+                AquaObject aqp = new AquaObject();
                 var model = mdl.fldModels[m];
                 aqp.bonePalette.Add(0);
                 aqp.objc.bonePaletteOffset = 1;
 
-                AquaObject.VTXL vtxl = new AquaObject.VTXL();
+                VTXL vtxl = new VTXL();
 
                 vtxl.vertPositions.AddRange(model.vertPositions);
                 //vtxl.vertNormals.AddRange(model.vertNormals);
 
                 //Material
-                var mat = new AquaObject.GenericMaterial();
+                var mat = new GenericMaterial();
                 mat.matName = $"Material_{matCounter++}";
                 mat.texNames = new List<string>() { "test_d.dds" };
                 aqp.tempMats.Add(mat);
 
                 Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
-                AquaObject.VTXL matVtxl = new AquaObject.VTXL();
-                AquaObject.GenericTriangles genMesh = new AquaObject.GenericTriangles();
+                VTXL matVtxl = new VTXL();
+                GenericTriangles genMesh = new GenericTriangles();
                 List<Vector3> triList = new List<Vector3>();
                 foreach (var polygon in model.polygons)
                 {
@@ -361,7 +365,7 @@ namespace AquaModelLibrary.Extra.AM2
                 {
                     aqp.tempTris.Add(genMesh);
                     aqp.vtxlList.Add(matVtxl);
-                    aqp.vtxeList.Add(ConstructClassicVTXE(matVtxl, out int vc));
+                    aqp.vtxeList.Add(VTXE.ConstructFromVTXL(matVtxl, out int vc));
                 }
                 
                 aqpList.Add(aqp);

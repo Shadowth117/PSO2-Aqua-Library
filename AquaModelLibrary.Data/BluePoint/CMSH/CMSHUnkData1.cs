@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.BluePoint.CMSH
+namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHUnkData1
     {

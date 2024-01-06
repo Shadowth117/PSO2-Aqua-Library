@@ -5,7 +5,7 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Numerics;
-using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
+using static AquaModelLibrary.Data.Ninja.NinjaConstants;
 using static AquaModelLibrary.Data.PSO.PSOXVMConvert;
 
 namespace AquaModelLibrary.Data.PSO

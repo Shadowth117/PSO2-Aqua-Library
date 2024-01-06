@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using Reloaded.Memory.Streams;
 
-namespace AquaModelLibrary.BluePoint.CMSH
+namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSH
     {

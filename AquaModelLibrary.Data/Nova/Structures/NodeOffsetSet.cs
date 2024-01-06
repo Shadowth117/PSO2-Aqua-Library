@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Nova.Structures
+﻿namespace AquaModelLibrary.Data.Nova.Structures
 {
     public struct NodeOffsetSet
     {

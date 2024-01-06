@@ -4,14 +4,14 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.NNStructs.Structures;
+using AquaModelLibrary.Data.NNStructs.Structures;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
-using static Vector3Integer.Vector3Int;
+using static AquaModelLibrary.Data.DataTypes.Vector3Int;
 
-namespace AquaModelLibrary
+namespace AquaModelLibrary.Data.NNStructs
 {
     //Massive thanks to Agrajag for this, really would not be as well supported as it is without his work. Some parts were borrowed more directly than others, particularly materials wise
     //Naming based primarily on variable namings in Sonic 06 via an exported text file leftover from development.

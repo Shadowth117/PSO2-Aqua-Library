@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Text;
 
-namespace AquaModelLibrary.BluePoint.CAWS
+namespace AquaModelLibrary.Data.BluePoint.CAWS
 {
     public enum CGPRMagic : uint
     {

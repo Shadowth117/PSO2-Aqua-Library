@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.BluePoint
+﻿namespace AquaModelLibrary.Data.BluePoint
 {
     public struct CFooter
     {

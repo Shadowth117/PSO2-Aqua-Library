@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
-namespace AquaModelLibrary.BluePoint.CAWS
+namespace AquaModelLibrary.Data.BluePoint.CAWS
 {
     public class CAWS
     {

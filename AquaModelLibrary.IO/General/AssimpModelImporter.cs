@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Utility;
 using System;
 using System.Collections.Generic;
@@ -518,9 +519,9 @@ namespace AquaModelLibrary
             node.keyData.Add(rotKeys);
         }
 
-        private static void AddOnePosFrame(AquaMotion.KeyData node, Assimp.Node aiNode, float baseScale, bool add0x80 = false)
+        private static void AddOnePosFrame(KeyData node, Assimp.Node aiNode, float baseScale, bool add0x80 = false)
         {
-            AquaMotion.MKEY posKeys = new AquaMotion.MKEY();
+            MKEY posKeys = new MKEY();
             posKeys.keyType = 1;
             posKeys.dataType = 1;
             posKeys.keyCount = 1;
@@ -623,7 +624,7 @@ namespace AquaModelLibrary
             parentMatrix.M42 *= baseScale;
             parentMatrix.M43 *= baseScale;
             IterateAiNodesPRM(prm, ref totalVerts, aiScene, aiScene.RootNode, parentMatrix, baseScale);
-            AquaUtil.WritePRMToFile(prm, finalFilePath, 4);
+            File.WriteAllBytes(finalFilePath, prm.GetBytes(4));
         }
 
         private static void IterateAiNodesPRM(PRMModel prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, float baseScale)
@@ -713,23 +714,14 @@ namespace AquaModelLibrary
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
         public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true)
         {
-            AquaUtil aquaUtil = new AquaUtil();
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
             float baseScale = SetAssimpScale(aiScene);
 
-            AquaObject aqp;
+            AquaObject aqp = new AquaObject();
             aqn = new AquaNode();
-            if (isNGS)
-            {
-                aqp = new NGSAquaObject();
-            }
-            else
-            {
-                aqp = new ClassicAquaObject();
-            }
 
             //Construct Materials
             Dictionary<string, int> matNameTracker = new Dictionary<string, int>();
@@ -747,9 +739,9 @@ namespace AquaModelLibrary
                     matNameTracker.Add(aiMat.Name, 1);
                 }
 
-                AquaObject.GenericMaterial genMat = new AquaObject.GenericMaterial();
+                GenericMaterial genMat = new GenericMaterial();
                 List<string> shaderList = new List<string>();
-                AquaObjectMethods.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag, out int twoSided, out int alphaCutoff);
+                AquaObject.GetMaterialNameData(ref name, ref shaderList, out string alphaType, out string playerFlag, out int twoSided, out int alphaCutoff);
                 genMat.matName = name;
                 genMat.shaderNames = shaderList;
                 genMat.blendType = alphaType;
@@ -763,7 +755,7 @@ namespace AquaModelLibrary
                 //We'll have the user set these later if needed.
                 if (genMat.specialType != null)
                 {
-                    AquaObjectMethods.GenerateSpecialMaterialParameters(genMat);
+                    AquaObject.GenerateSpecialMaterialParameters(genMat);
                 }
                 else if (aiMat.TextureDiffuse.FilePath != null)
                 {

@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Extra.FromSoft.DeSAudio
+﻿namespace AquaModelLibrary.Data.FromSoft.DeSAudio
 {
     public class MOWV
     {

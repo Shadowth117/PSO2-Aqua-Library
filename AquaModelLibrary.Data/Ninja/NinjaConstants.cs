@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AquaModelLibrary.Extra.Ninja
+﻿namespace AquaModelLibrary.Data.Ninja
 {
     public class NinjaConstants
     {

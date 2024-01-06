@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +13,7 @@ namespace AquaModelLibrary
     {
         public static Assimp.Scene AssimpExport(string filePath, AquaObject aqp, AquaNode aqn)
         {
-            if (aqp is NGSAquaObject)
+            if (aqp.IsNGS)
             {
                 //NGS aqps will give lots of isolated vertices if we don't handle them
                 //Since we're not actually altering the data so much as rearranging references, we can just do this
@@ -65,7 +68,7 @@ namespace AquaModelLibrary
                 boneArray[i] = aiNode;
             }
 
-            foreach (AquaNode.NODO bn in aqn.nodoList)
+            foreach (NODO bn in aqn.nodoList)
             {
                 var parentNodo = boneArray[bn.parentId];
                 var aiNode = new Assimp.Node(bn.boneName.GetString(), parentNodo);
@@ -84,7 +87,7 @@ namespace AquaModelLibrary
             }
 
             //Assign meshes and materials
-            foreach (AquaObject.MESH msh in aqp.meshList)
+            foreach (MESH msh in aqp.meshList)
             {
                 List<uint> bonePalette = new List<uint>();
                 var vtxl = aqp.vtxlList[msh.vsetIndex];
@@ -322,8 +325,8 @@ namespace AquaModelLibrary
 
                 //Material
                 var mat = aqp.mateList[msh.mateIndex];
-                var shaderSet = AquaObjectMethods.GetShaderNames(aqp, msh.shadIndex);
-                var textureSet = AquaObjectMethods.GetTexListNamesUnicode(aqp, msh.tsetIndex);
+                var shaderSet = aqp.GetShaderNames(msh.shadIndex);
+                var textureSet = aqp.GetTexListNamesUnicode(msh.tsetIndex);
                 Assimp.Material mate = new Assimp.Material();
 
                 mate.ColorDiffuse = new Assimp.Color4D(mat.diffuseRGBA.X, mat.diffuseRGBA.Y, mat.diffuseRGBA.Z, mat.diffuseRGBA.W);

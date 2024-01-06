@@ -6,17 +6,18 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
-using static AquaModelLibrary.AquaNode;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Extra.FromSoft;
-using AquaModelLibrary.Native.Fbx;
 using System.Diagnostics;
-using static AquaModelLibrary.Utility.AquaUtilData;
 using Matrix4x4 = System.Numerics.Matrix4x4;
 using SoulsFormats.Formats.Morpheme.NSA;
 using SoulsFormats.Formats.Morpheme;
 using AquaModelLibrary.Extra.Morpheme;
 using UnluacNET;
 using System.Text.Json;
+using AquaModelLibrary.Objects.Processing.Fbx;
+using Microsoft.Toolkit.HighPerformance.Helpers;
+using AquaModelLibrary.IO.General;
 
 namespace AquaModelLibrary.Extra
 {
@@ -364,6 +365,7 @@ namespace AquaModelLibrary.Extra
                             set.models[0].ConvertToLegacyTypes();
                             set.models[0].CreateTrueVertWeights();
 
+                        
                             FbxExporter.ExportToFile(aqu.aquaModels[0].models[0], aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false);
                         }
                     }

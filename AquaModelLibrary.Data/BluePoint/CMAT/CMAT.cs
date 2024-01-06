@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace AquaModelLibrary.BluePoint.CMAT
+namespace AquaModelLibrary.Data.BluePoint.CMAT
 {
     public struct CMTLMeta0
     {

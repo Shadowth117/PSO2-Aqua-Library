@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
-namespace AquaModelLibrary.BluePoint.CANI
+namespace AquaModelLibrary.Data.BluePoint.CANI
 {
     public class CANIFooter
     {

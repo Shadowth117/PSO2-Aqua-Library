@@ -5,7 +5,7 @@ using System.Text;
 using UnluacNET;
 using ZstdNet;
 
-namespace AquaModelLibrary.Core.Utility
+namespace AquaModelLibrary.Data.Utility
 {
     public class PSO2CompressedScripts
     {

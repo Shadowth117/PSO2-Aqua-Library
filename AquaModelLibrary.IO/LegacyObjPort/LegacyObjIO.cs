@@ -9,6 +9,9 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using AquaModelLibrary;
+using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 
 namespace LegacyObj
 {
@@ -28,7 +31,7 @@ namespace LegacyObj
         {
             bool doBitangent = false;
             List<SkinData> skinData = new List<SkinData>();
-            AquaObjectMethods.GenerateGlobalBonePalette(aqo);
+            aqo.OptimizeBonePalettes();
 
             //Add a local version of the global bonepalette. We're reworking things so we need to do this.
             for(int i = 0; i < aqo.vtxlList.Count; i++)
@@ -60,7 +63,7 @@ namespace LegacyObj
                             indices[id] = temp;
                         }
                         skin.indices = indices.ToArray();
-                        skin.weights = AquaObject.VTXL.SumWeightsTo1(vtxl.vertWeights[i]);
+                        skin.weights = VTXL.SumWeightsTo1(vtxl.vertWeights[i]);
                         skinData.Add(skin);
                     }
                 }
@@ -86,7 +89,7 @@ namespace LegacyObj
             var obj = ObjFile.FromFile(fileName);
             var subMeshes = obj.Meshes.SelectMany(i => i.SubMeshes).ToArray();
             var oldMESHList = aqo.meshList;
-            aqo.meshList = new List<AquaObject.MESH>();
+            aqo.meshList = new List<MESH>();
             int totalStripsShorts = 0;
             int totalVerts = 0;
             int boneLimit;
@@ -94,18 +97,18 @@ namespace LegacyObj
 
             if(aqo.objc.type >= 0xC32)
             {
-                tempModel = new NGSAquaObject();
+                tempModel = new AquaObject();
                 boneLimit = 255;
             } else
             {
-                tempModel = new ClassicAquaObject();
+                tempModel = new AquaObject();
                 boneLimit = 16;
             }
 
             //Assemble face and vertex data. Vert data is stored with faces so that it can be split as needed for proper UV mapping etc.
             foreach (var mesh in subMeshes)
             {
-                var tempMesh = new AquaObject.GenericTriangles();
+                var tempMesh = new GenericTriangles();
                 tempMesh.name = mesh.Name;
                 tempMesh.bonePalette = aqo.bonePalette;
                 List<int> vertIds = new List<int>();
@@ -136,7 +139,7 @@ namespace LegacyObj
                     }
                     tempMesh.matIdList.Add(0);
 
-                    var vtxl = new AquaObject.VTXL();
+                    var vtxl = new VTXL();
                     vtxl.rawVertId = new List<int>() { pf.A, pf.B, pf.C };
                     vtxl.rawFaceId = new List<int>() { f, f, f};
 
@@ -231,15 +234,15 @@ namespace LegacyObj
 
                 aqo.tempTris.Add(tempMesh);
             }
-            AquaObjectMethods.VTXLFromFaceVerts(aqo);
+            aqo.VTXLFromFaceVerts();
             if (aqo.objc.type < 0xC32)
             {
-                AquaObjectMethods.BatchSplitByBoneCountTempData(aqo, tempModel, boneLimit);
+                aqo.BatchSplitByBoneCountTempData(boneLimit);
                 aqo.tempTris = tempModel.tempTris;
                 aqo.vtxlList = tempModel.vtxlList;
                 tempModel = null;
 
-                AquaObjectMethods.RemoveAllUnusedBones(aqo);
+                aqo.OptimizeBonePalettes();
             }
 
             //AquaObjectMethods.CalcUNRMs(aqo, aqo.applyNormalAveraging, aqo.objc.unrmOffset != 0);
@@ -248,22 +251,22 @@ namespace LegacyObj
             for (int i = 0; i < aqo.tempTris.Count; i++)
             {
                 //strips
-                AquaObject.stripData strips;
+                StripData strips;
                 if(aqo.objc.type >= 0xC31)
                 {
-                    strips = new AquaObject.stripData();
-                    strips.format0xC33 = true;
+                    strips = new StripData();
+                    strips.format0xC31 = true;
                     strips.triStrips = new List<ushort>(aqo.tempTris[i].toUshortArray());
                     strips.triIdCount = strips.triStrips.Count;
                     strips.faceGroups.Add(strips.triStrips.Count);
                 } else
                 {
-                    strips = new AquaObject.stripData(aqo.tempTris[i].toUshortArray());
+                    strips = new StripData(aqo.tempTris[i].toUshortArray());
                 }
                 aqo.strips.Add(strips);
 
                 //PSET
-                var pset = new AquaObject.PSET();
+                var pset = new PSET();
                 pset.faceGroupCount = 0x1;
                 pset.psetFaceCount = strips.triIdCount;
                 if(aqo.objc.type >= 0xC31)
@@ -308,8 +311,8 @@ namespace LegacyObj
                     idx_TSET = oldMESHList[0].tsetIndex;
                 }
 
-                var mesh = new AquaObject.MESH();
-                AquaObject.MESH oldMesh = new AquaObject.MESH(); 
+                var mesh = new MESH();
+                MESH oldMesh = new MESH(); 
                 bool oldMeshFound = false;
 
                 //Compare
@@ -368,7 +371,7 @@ namespace LegacyObj
             for (int i = 0; i < aqo.vtxlList.Count; i++)
             {
                 totalVerts += aqo.vtxlList[i].vertPositions.Count;
-                AquaObject.VTXE vtxe = AquaObjectMethods.ConstructClassicVTXE(aqo.vtxlList[i], out int size);
+                VTXE vtxe = VTXE.ConstructFromVTXL(aqo.vtxlList[i], out int size);
                 aqo.vtxeList.Add(vtxe);
 
                 //Track this for objc
@@ -377,7 +380,7 @@ namespace LegacyObj
                     largestVertSize = size;
                 }
 
-                AquaObject.VSET vset = new AquaObject.VSET();
+                VSET vset = new VSET();
                 vset.vertDataSize = size;
                 vset.vtxlCount = aqo.vtxlList[i].vertPositions.Count;
                 vset.edgeVertsCount = aqo.vtxlList[i].edgeVerts.Count;
@@ -419,10 +422,10 @@ namespace LegacyObj
             aqo.objc.fBlock3 = -1;
             aqo.objc.globalStrip3LengthCount = 1;
             aqo.objc.unkCount3 = 1;
-            aqo.objc.bounds = AquaObjectMethods.GenerateBounding(aqo.vtxlList);
+            aqo.objc.bounds = new BoundingVolume(aqo.vtxlList);
             if(doBitangent)
             {
-                AquaObjectMethods.ComputeTangentSpace(aqo, false, true);
+                aqo.ComputeTangentSpace(false, true);
             }
 
             return aqo;
@@ -436,7 +439,7 @@ namespace LegacyObj
                 aqo.splitVSETPerMesh();
             }
             //Running this this way ensures we have normals to grab.
-            AquaObjectMethods.ComputeTangentSpace(aqo, false, false); 
+            aqo.ComputeTangentSpace(false, false); 
 
             //Ensure there's UV data, even if it's not actually used.
             for(int i = 0; i < aqo.vtxlList.Count; i++)
@@ -521,7 +524,7 @@ namespace LegacyObj
                 foreach (var mesh in aqo.meshList)
                 {
                     var mate = aqo.mateList[mesh.mateIndex];
-                    var texNames = AquaObjectMethods.GetTexListNamesUnicode(aqo, mesh.tsetIndex);
+                    var texNames = aqo.GetTexListNamesUnicode(mesh.tsetIndex);
 
                     var mtlname = mate.matName.GetString() + string.Format("_mtl_{0}_{1}", mesh.mateIndex, mesh.tsetIndex); //Added the actual name because that's useful
                     mtlNames.Add(mtlname);

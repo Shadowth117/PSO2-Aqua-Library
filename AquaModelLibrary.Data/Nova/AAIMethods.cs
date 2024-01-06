@@ -1,11 +1,11 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Data.PSO2.Aqua;
-using AquaModelLibrary.Nova.Structures;
+using AquaModelLibrary.Data.Nova.Structures;
 using Reloaded.Memory.Streams;
 using System.Diagnostics;
-using static AquaModelLibrary.Nova.AXSConstants;
+using static AquaModelLibrary.Data.Nova.AXSConstants;
 
-namespace AquaModelLibrary.Nova
+namespace AquaModelLibrary.Data.Nova
 {
     public static class AAIMethods
     {

@@ -8,7 +8,7 @@ using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
 using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
-namespace AquaModelLibrary.Core.Utility
+namespace AquaModelLibrary.Data.Utility
 {
     public class NGSAnimUpdater
     {

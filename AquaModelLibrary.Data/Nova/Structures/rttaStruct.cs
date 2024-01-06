@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using System.Numerics;
 
-namespace AquaModelLibrary.Nova.Structures
+namespace AquaModelLibrary.Data.Nova.Structures
 {
     public class rttaStruct
     {

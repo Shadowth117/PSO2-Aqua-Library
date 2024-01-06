@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.NNStructs.Structures
+﻿namespace AquaModelLibrary.Data.NNStructs.Structures
 {
     public enum Direct3DComparisonFunction
     {

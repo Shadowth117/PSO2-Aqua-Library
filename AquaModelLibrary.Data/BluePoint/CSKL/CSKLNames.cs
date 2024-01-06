@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.BluePoint.CSKL
+namespace AquaModelLibrary.Data.BluePoint.CSKL
 {
     //Offsets in this class are relative to the pointer's own offset
     public class CSKLNames

@@ -3,7 +3,7 @@
 using System.Numerics;
 using System.Text;
 
-namespace LegacyObj
+namespace AquaModelLibrary.Data.LegacyObj
 {
     public class ObjFile
     {

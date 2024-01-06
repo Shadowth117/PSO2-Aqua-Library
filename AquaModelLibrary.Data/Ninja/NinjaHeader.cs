@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Extra.Ninja
+﻿namespace AquaModelLibrary.Data.Ninja
 {
 
     //Always little endian

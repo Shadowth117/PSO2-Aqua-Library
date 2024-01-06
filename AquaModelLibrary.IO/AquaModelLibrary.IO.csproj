@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
     <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AquaModelLibrary.Data\AquaModelLibrary.Data.csproj" />
     <ProjectReference Include="..\AquaModelLibrary.Native\AquaModelLibrary.Native.vcxproj" />
+    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
   </ItemGroup>
 
 </Project>

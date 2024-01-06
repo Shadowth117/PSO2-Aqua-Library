@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
-namespace AquaModelLibrary.Nova.Structures
+namespace AquaModelLibrary.Data.Nova.Structures
 {
     public class AnimDefinitionNode
     {

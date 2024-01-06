@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
-namespace AquaModelLibrary.BluePoint.CSKL
+namespace AquaModelLibrary.Data.BluePoint.CSKL
 {
     public class CSKLTransform
     {

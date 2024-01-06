@@ -1,4 +1,4 @@
-﻿namespace Vector3Integer
+﻿namespace AquaModelLibrary.Data.DataTypes
 {
     public class Vector3Int
     {

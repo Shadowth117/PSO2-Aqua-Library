@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 
-namespace AquaModelLibrary.BluePoint.CANI
+namespace AquaModelLibrary.Data.BluePoint.CANI
 {
     public enum CANIFrameType : ushort
     {

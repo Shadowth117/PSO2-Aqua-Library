@@ -9,7 +9,7 @@ using System.Numerics;
 using static AquaModelLibrary.Helpers.Extensions.ByteListExtension;
 using static Marathon.Formats.Mesh.Ninja.NinjaKeyframe;
 
-namespace AquaModelLibrary.PSU
+namespace AquaModelLibrary.Data.PSU
 {
     //Phantasy Star Universe player character animation 
     public class NOM

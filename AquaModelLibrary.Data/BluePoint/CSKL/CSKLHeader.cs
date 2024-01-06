@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.BluePoint.CSKL
+namespace AquaModelLibrary.Data.BluePoint.CSKL
 {
     public class CSKLHeader
     {

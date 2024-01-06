@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObject;
-using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Data.Ninja;
 using Reloaded.Memory.Streams;
 using System.Numerics;
 

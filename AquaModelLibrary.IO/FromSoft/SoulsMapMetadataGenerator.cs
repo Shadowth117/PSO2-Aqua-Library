@@ -1,12 +1,6 @@
-﻿using SoulsFormats;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using AquaModelLibrary.Helpers.MathHelpers;
+using SoulsFormats;
 using System.Numerics;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Extra.FromSoft
 {
@@ -32,7 +26,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             public Vector3 BoundingBoxMin;
             public List<MCG.Node> nodes = new List<MCG.Node>(); //Really should only ever be one, but w/e
             public List<Gate> touchedGates = new List<Gate>();
-            
+
         }
 
         public class MCCombo
@@ -50,10 +44,10 @@ namespace AquaModelLibrary.Extra.FromSoft
         public static void Generate(List<string> directories, out Dictionary<string, MCCombo> mcCombos)
         {
             mcCombos = new Dictionary<string, MCCombo>();
-            
+
             //Gather NVM files and filter by MSB 
-            Dictionary<string, List<NVM>> nvmDict = new Dictionary<string, List<NVM>>(); 
-            foreach(var dir in directories)
+            Dictionary<string, List<NVM>> nvmDict = new Dictionary<string, List<NVM>>();
+            foreach (var dir in directories)
             {
                 //Get the MSB to see what navmeshes are being used
                 var name = Path.GetFileName(dir);
@@ -64,7 +58,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 if (File.Exists(msbPath))
                 {
                     msb = SoulsFile<MSBD>.Read(msbPath);
-                    foreach(var navMesh in msb.Parts.Navmeshes)
+                    foreach (var navMesh in msb.Parts.Navmeshes)
                     {
                         msbNavmeshNames.Add(navMesh.Name.ToLower());
                     }
@@ -73,10 +67,10 @@ namespace AquaModelLibrary.Extra.FromSoft
                 //Get the nvms from the nvmBnd, fall back to loose .nvms if non-existant
                 List<NVM> nvmList = new List<NVM>();
                 var nvmBnd = Directory.EnumerateFiles(dir, "*.nvmbnd").ToArray();
-                if(nvmBnd.Length > 0)
+                if (nvmBnd.Length > 0)
                 {
                     var nvmBndFile = SoulsFile<BND3>.Read(nvmBnd[0]);
-                    foreach(var nvmFile in nvmBndFile.Files)
+                    foreach (var nvmFile in nvmBndFile.Files)
                     {
                         var fname = Path.GetFileNameWithoutExtension(nvmFile.Name).ToLower();
                         if (Path.GetExtension(nvmFile.Name) == ".nvm" && msbNavmeshNames.Contains(fname))
@@ -86,7 +80,8 @@ namespace AquaModelLibrary.Extra.FromSoft
                             nvmList.Add(nvm);
                         }
                     }
-                } else
+                }
+                else
                 {
                     var files = Directory.EnumerateFiles(dir, "*.nvm");
                     foreach (var file in files)
@@ -106,7 +101,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             //Process NVM data into what we need for MCG and MCP stuff
             //We need this calculated before we devise the result, hence the separate loop
             Dictionary<string, List<RoomInfo>> triDicts = new Dictionary<string, List<RoomInfo>>();
-            foreach(var dir in directories)
+            foreach (var dir in directories)
             {
                 var nvmList = nvmDict[dir];
                 List<RoomInfo> nvmTriList = new List<RoomInfo>();
@@ -130,18 +125,18 @@ namespace AquaModelLibrary.Extra.FromSoft
                     roomInfo.mapId = mapId;
                     List<int> usedIndices = new List<int>();
                     //Gather Gate triangles
-                    for(int i = 0; i < nvm.Triangles.Count; i++)
+                    for (int i = 0; i < nvm.Triangles.Count; i++)
                     {
                         var triSet = new List<NVM.Triangle>();
                         CompileGateTriSet(triSet, usedIndices, nvm, i);
-                        if(triSet.Count > 0)
+                        if (triSet.Count > 0)
                         {
                             Gate gate = new Gate();
                             gate.tris = triSet;
                             gate.uniqueVertIds = GetUniqueVertIds(triSet);
                             Vector3 BoundingBoxMax = nvm.Vertices[gate.uniqueVertIds[0]];
                             Vector3 BoundingBoxMin = nvm.Vertices[gate.uniqueVertIds[0]];
-                            foreach(var id in gate.uniqueVertIds)
+                            foreach (var id in gate.uniqueVertIds)
                             {
                                 var vert = nvm.Vertices[id];
                                 //Min extents
@@ -188,7 +183,7 @@ namespace AquaModelLibrary.Extra.FromSoft
 
             //Create nodes
             List<MCG.Node> nodes = new List<MCG.Node>();
-            foreach(var dir in directories)
+            foreach (var dir in directories)
             {
                 var nvmTriList = triDicts[dir];
                 for (int roomInfoId = 0; roomInfoId < nvmTriList.Count; roomInfoId++)
@@ -206,7 +201,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                                 //Proceed if the nvms overlap or touch and this isn't the current nvm
                                 if (roomInfo != roomInfo2 && MathExtras.BoundsIntersect(gate.BoundingBoxMax, gate.BoundingBoxMin, roomInfo2.BoundingBoxMax, roomInfo2.BoundingBoxMin, MCEpsilon))
                                 {
-                                    foreach(var gate2 in roomInfo2.gates)
+                                    foreach (var gate2 in roomInfo2.gates)
                                     {
                                         //Proceed if a gate in the nvm overlaps or touches the original gate
                                         if (!gate.touchedGates.Contains(gate2) && MathExtras.BoundsIntersect(gate.BoundingBoxMax, gate.BoundingBoxMin, gate2.BoundingBoxMax, gate2.BoundingBoxMin, MCEpsilon))
@@ -215,11 +210,11 @@ namespace AquaModelLibrary.Extra.FromSoft
                                             gate2.touchedGates.Add(gate);
 
                                             Vector3 avg = new Vector3();
-                                            foreach(var id in gate.uniqueVertIds)
+                                            foreach (var id in gate.uniqueVertIds)
                                             {
                                                 avg += roomInfo.nvm.Vertices[id];
                                             }
-                                            foreach(var id in gate2.uniqueVertIds)
+                                            foreach (var id in gate2.uniqueVertIds)
                                             {
                                                 avg += roomInfo2.nvm.Vertices[id];
                                             }
@@ -234,7 +229,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                                             //Fill in nodes and 'edge' indices later in process
                                             gate.nodes.Add(node);
                                             gate2.nodes.Add(node);
-                                            if(!roomInfo.adjacentRooms.Contains(roomInfo2))
+                                            if (!roomInfo.adjacentRooms.Contains(roomInfo2))
                                             {
                                                 roomInfo.adjacentRooms.Add(roomInfo2);
                                                 roomInfo2.adjacentRooms.Add(roomInfo);
@@ -250,7 +245,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             }
 
             //Add the node sets to the files
-            foreach(var dir in directories)
+            foreach (var dir in directories)
             {
                 var name = Path.GetFileName(dir);
                 mcCombos[name].mcg.Nodes = GetClonedNodeList(nodes);
@@ -285,7 +280,8 @@ namespace AquaModelLibrary.Extra.FromSoft
                                 {
                                     edge.NodeIndexA = node1Id;
                                     edge.NodeIndexB = node0Id;
-                                } else
+                                }
+                                else
                                 {
                                     edge.NodeIndexA = node0Id;
                                     edge.NodeIndexB = node1Id;
@@ -306,7 +302,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             }
 
             //Set edges to mcg files (alter per order per file)
-            foreach(var dir in directories)
+            foreach (var dir in directories)
             {
                 List<int> usedNodeList = new List<int>();
                 var name = Path.GetFileName(dir);
@@ -314,7 +310,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 int roomCount = triDicts[dir].Count;
                 foreach (var pair in tempEdgeDict)
                 {
-                    if(pair.Key == dir)
+                    if (pair.Key == dir)
                     {
                         continue;
                     }
@@ -340,9 +336,9 @@ namespace AquaModelLibrary.Extra.FromSoft
                 }
 
                 //Go through the other rooms
-                for(int j = 0; j < directories.Count; j++)
+                for (int j = 0; j < directories.Count; j++)
                 {
-                    if(j == i)
+                    if (j == i)
                     {
                         continue;
                     }
@@ -354,7 +350,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 }
 
                 //Process into MCP Rooms
-                foreach(var room in tempRooms)
+                foreach (var room in tempRooms)
                 {
                     var mcpRoom = new MCP.Room();
                     mcpRoom.LocalIndex = room.roomId;
@@ -362,7 +358,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                     mcpRoom.BoundingBoxMin = room.BoundingBoxMin;
                     mcpRoom.MapID = room.mapId;
 
-                    foreach(var adjRoom in room.adjacentRooms)
+                    foreach (var adjRoom in room.adjacentRooms)
                     {
                         mcpRoom.ConnectedRoomIndices.Add(tempRooms.IndexOf(adjRoom));
                     }
@@ -377,9 +373,9 @@ namespace AquaModelLibrary.Extra.FromSoft
 
         private static void ApplyEdgeSet(MCG mcg, List<MCG.Edge> edgeList, List<int> usedIndexList, int roomCounter)
         {
-            foreach(var edge in edgeList)
+            foreach (var edge in edgeList)
             {
-                if(!usedIndexList.Contains(edge.NodeIndexA))
+                if (!usedIndexList.Contains(edge.NodeIndexA))
                 {
                     usedIndexList.Add(edge.NodeIndexA);
                 }
@@ -406,7 +402,7 @@ namespace AquaModelLibrary.Extra.FromSoft
                 newEdge.Unk20 = edge.Unk20;
 
                 //May need editing later if these are implemented, depending on how they work
-                newEdge.UnkIndicesA = edge.UnkIndicesA; 
+                newEdge.UnkIndicesA = edge.UnkIndicesA;
                 newEdge.UnkIndicesB = edge.UnkIndicesB;
 
                 mcg.Edges.Add(newEdge);
@@ -416,7 +412,7 @@ namespace AquaModelLibrary.Extra.FromSoft
         private static List<MCG.Node> GetClonedNodeList(List<MCG.Node> nodes)
         {
             List<MCG.Node> clonedNodes = new List<MCG.Node>();
-            foreach(var node in nodes)
+            foreach (var node in nodes)
             {
                 MCG.Node clonedNode = new MCG.Node();
                 clonedNode.Position = node.Position;
@@ -435,9 +431,9 @@ namespace AquaModelLibrary.Extra.FromSoft
         {
             List<int> uniqueIds = new List<int>();
 
-            foreach(var tri in triSet)
+            foreach (var tri in triSet)
             {
-                if(!uniqueIds.Contains(tri.VertexIndex1))
+                if (!uniqueIds.Contains(tri.VertexIndex1))
                 {
                     uniqueIds.Add(tri.VertexIndex1);
                 }

@@ -36,13 +36,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AquaModelLibrary\AquaModelLibrary.csproj">
-      <Project>{9c7171ca-7379-458f-a9ca-293bbf2c74dc}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AquaModelLibrary.Data\AquaModelLibrary.Data.csproj">
+      <Project>{e7711b0e-e860-48f9-8221-f3ced6b18260}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -193,8 +193,8 @@ copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$
       <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"
-copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -220,8 +220,8 @@ copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)AquaModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"
-copy /Y "$(TargetDir)$(ProjectName).x64.dll" "$(SolutionDir)SoulsModelTool\bin\$(ConfigurationName)\$(TargetFramework)-windows\$(ProjectName).x64.dll"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

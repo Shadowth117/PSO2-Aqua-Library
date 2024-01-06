@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.BluePoint.CMDL
+namespace AquaModelLibrary.Data.BluePoint.CMDL
 {
     public class CMDL_CMSHReference
     {

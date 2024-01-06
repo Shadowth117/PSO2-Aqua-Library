@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace AquaModelLibrary.Extra.Ninja
+namespace AquaModelLibrary.Data.Ninja
 {
     /// <summary>
     /// NOF0 precursor. Compresses offsets via masking. Likely abandoned due to shrinking concerns on size and rising concerns on speed.

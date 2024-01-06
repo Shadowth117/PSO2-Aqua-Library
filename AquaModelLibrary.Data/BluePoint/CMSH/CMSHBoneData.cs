@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Text;
 
-namespace AquaModelLibrary.BluePoint.CMSH
+namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHBoneData
     {

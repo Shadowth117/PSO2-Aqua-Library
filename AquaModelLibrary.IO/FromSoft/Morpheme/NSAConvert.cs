@@ -1,6 +1,9 @@
-﻿using SoulsFormats;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Helpers.MathHelpers;
+using SoulsFormats;
 using SoulsFormats.Formats.Morpheme.NSA;
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace AquaModelLibrary.Extra.Morpheme
@@ -12,7 +15,7 @@ namespace AquaModelLibrary.Extra.Morpheme
             GetNSAKeyframes(nsa, flv, out var translationKeyFrameListList, out var rotationkeyFrameListList);
 
             AquaMotion aqm = new AquaMotion();
-            aqm.moHeader = new AquaMotion.MOHeader();
+            aqm.moHeader = new MOHeader();
             aqm.moHeader.frameSpeed = nsa.header.fps;
             aqm.moHeader.endFrame = (int)(nsa.rootMotionSegment.sampleCount - 1);
             aqm.moHeader.unkInt0 = 2;
@@ -21,13 +24,13 @@ namespace AquaModelLibrary.Extra.Morpheme
 
             for (int i = 0; i < translationKeyFrameListList.Count; i++)
             {
-                var keySet = new AquaMotion.KeyData();
+                var keySet = new KeyData();
                 keySet.mseg.nodeId = i;
                 keySet.mseg.nodeType = 2;
-                keySet.mseg.nodeName = AquaCommon.PSO2String.GeneratePSO2String(flv.Bones[i].Name);
+                keySet.mseg.nodeName = new PSO2String(flv.Bones[i].Name);
 
-                var pos = new AquaMotion.MKEY();
-                var rot = new AquaMotion.MKEY();
+                var pos = new MKEY();
+                var rot = new MKEY();
 
                 //Position
                 var frameSet = translationKeyFrameListList[i];
@@ -67,7 +70,7 @@ namespace AquaModelLibrary.Extra.Morpheme
             return aqm;
         }
 
-        private static int GetFrameTimeFlag(AquaMotion.MKEY rot, int f)
+        private static int GetFrameTimeFlag(MKEY rot, int f)
         {
             int flag = 0;
             if (f == 0)

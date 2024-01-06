@@ -1,9 +1,4 @@
-﻿using AquaModelLibrary;
-using AquaModelLibrary.Helpers.Readers;
-using Reloaded.Memory.Streams;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using AquaModelLibrary.Helpers.Readers;
 
 //THANK YOU HYPER AND KNUX: https://github.com/Big-Endian-32/Marathon/blob/03a2812cc903241ab65fd21d2270c0680044bc09/Marathon/Formats/Mesh/Ninja/NinjaMotion.cs
 namespace Marathon.Formats.Mesh.Ninja

@@ -3,6 +3,7 @@
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Numerics;
+using namespace AquaModelLibrary::Data::PSO2::Aqua;
 
 namespace AquaModelLibrary::Objects::Processing::Fbx
 {

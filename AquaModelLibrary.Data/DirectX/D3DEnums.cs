@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Extra.DirectX
+﻿namespace AquaModelLibrary.Data.DirectX
 {
     public enum D3DBLEND : int
     {

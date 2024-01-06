@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using System.Numerics;
 
-namespace AquaModelLibrary.Core.Utility
+namespace AquaModelLibrary.Data.Utility
 {
     public class TransformUtil
     {

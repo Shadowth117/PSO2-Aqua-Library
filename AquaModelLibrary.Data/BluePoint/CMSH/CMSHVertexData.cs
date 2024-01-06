@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Text;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
 
-namespace AquaModelLibrary.BluePoint.CMSH
+namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public enum VertexMagic : int
     {

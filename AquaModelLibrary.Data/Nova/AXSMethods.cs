@@ -1,17 +1,17 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.Nova.Structures;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Nova.Structures;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.Nova.AXSConstants;
+using static AquaModelLibrary.Data.Nova.AXSConstants;
 using static AquaModelLibrary.Helpers.MathHelpers.MathExtras;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 
-namespace AquaModelLibrary.Nova
+namespace AquaModelLibrary.Data.Nova
 {
     public static class AXSMethods
     {

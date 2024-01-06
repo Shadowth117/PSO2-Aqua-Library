@@ -18,7 +18,7 @@ using static AquaModelLibrary.Data.PSO2.Constants.MusicFilenames;
 using static AquaModelLibrary.Data.PSO2.Constants.StageFilenames;
 using static AquaModelLibrary.Helpers.HashHelpers;
 
-namespace AquaModelLibrary.Core.Utility
+namespace AquaModelLibrary.Data.Utility
 {
     public unsafe class ReferenceGenerator
     {

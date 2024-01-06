@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Nova.Structures
+﻿namespace AquaModelLibrary.Data.Nova.Structures
 {
     //Material data per mesh
     //Variable as hell so really only using this for storage. Could be worked out in order to include much more info.

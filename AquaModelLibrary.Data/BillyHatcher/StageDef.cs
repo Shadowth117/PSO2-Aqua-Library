@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Extra.Ninja;
+﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;

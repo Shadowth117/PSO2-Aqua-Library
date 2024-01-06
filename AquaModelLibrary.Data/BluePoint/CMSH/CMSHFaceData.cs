@@ -1,9 +1,9 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using Reloaded.Memory.Streams;
 using System.Collections.Generic;
-using Vector3Integer;
+using AquaModelLibrary.Data.DataTypes;
 
-namespace AquaModelLibrary.BluePoint.CMSH
+namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHFaceData
     {

@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using Reloaded.Memory.Streams;
 
-namespace AquaModelLibrary.Zero
+namespace AquaModelLibrary.Data.Zero
 {
     public class EnemyZoneDrops : AquaCommon
     {

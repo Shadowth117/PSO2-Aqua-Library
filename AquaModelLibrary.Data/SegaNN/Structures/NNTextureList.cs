@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
-namespace AquaModelLibrary.NNStructs.Structures
+namespace  AquaModelLibrary.Data.NNStructs.Structures
 {
     public class NNTextureList
     {

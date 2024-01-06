@@ -1,10 +1,4 @@
 ﻿using SoulsFormats;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Extra.FromSoft
 {
@@ -16,10 +10,10 @@ namespace AquaModelLibrary.Extra.FromSoft
             Directory.CreateDirectory(folderPath);
 
             var bndRaw = File.ReadAllBytes(filePath);
-            if(SoulsFile<BND>.Is(bndRaw))
+            if (SoulsFile<BND>.Is(bndRaw))
             {
                 var bnd = SoulsFile<BND>.Read(bndRaw);
-                foreach(var file in bnd.Files)
+                foreach (var file in bnd.Files)
                 {
                     File.WriteAllBytes(Path.Combine(folderPath, Path.GetFileName(file.Name)), file.Bytes);
                 }
@@ -35,7 +29,7 @@ namespace AquaModelLibrary.Extra.FromSoft
             bnd.format0 = 0x10;
             bnd.format1 = 0x1;
             bnd.Files = new List<BinderFile>();
-            foreach(var filePath in filePaths)
+            foreach (var filePath in filePaths)
             {
                 BinderFile bndFile = new BinderFile();
                 bndFile.Name = filePath.Replace(folderPath, "");

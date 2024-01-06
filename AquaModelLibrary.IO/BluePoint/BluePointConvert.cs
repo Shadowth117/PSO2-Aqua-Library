@@ -1,8 +1,8 @@
-﻿using AquaModelLibrary.BluePoint.CANI;
-using AquaModelLibrary.BluePoint.CMAT;
-using AquaModelLibrary.BluePoint.CMDL;
-using AquaModelLibrary.BluePoint.CMSH;
-using AquaModelLibrary.BluePoint.CSKL;
+﻿using AquaModelLibrary.Data.BluePoint.CANI;
+using AquaModelLibrary.Data.BluePoint.CMAT;
+using AquaModelLibrary.Data.BluePoint.CMDL;
+using AquaModelLibrary.Data.BluePoint.CMSH;
+using AquaModelLibrary.Data.BluePoint.CSKL;
 using AquaModelLibrary.Native.Fbx;
 using Reloaded.Memory.Streams;
 using System.Numerics;
@@ -346,7 +346,7 @@ namespace AquaModelLibrary.Extra
                 int faceCount = mesh.vertData.positionList.Count;
                 for (int i = 0; i < faceCount; i += 3)
                 {
-                    mesh.faceData.faceList.Add(Vector3Integer.Vector3Int.Vec3Int.CreateVec3Int(i, i + 1, i + 2));
+                    mesh.faceData.faceList.Add(AquaModelLibrary.Data.DataTypes.Vector3Int.Vec3Int.CreateVec3Int(i, i + 1, i + 2));
                 }
 
                 //Assume mat face stuff is bad

@@ -1,4 +1,4 @@
-﻿namespace AquaModelLibrary.Nova
+﻿namespace AquaModelLibrary.Data.Nova
 {
     public static class AXSConstants
     {

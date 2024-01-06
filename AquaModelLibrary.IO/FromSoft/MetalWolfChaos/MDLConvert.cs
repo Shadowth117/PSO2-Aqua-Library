@@ -1,10 +1,7 @@
-﻿using Assimp.Configs;
-using SoulsFormats;
+﻿using SoulsFormats;
 using SoulsFormats.Other;
-using System;
-using System.Collections.Generic;
 using System.Numerics;
-using static Vector3Integer.Vector3Int;
+using static AquaModelLibrary.Data.DataTypes.Vector3Int;
 
 namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
 {
@@ -177,11 +174,11 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                     //Avoid degen tris
                     //Apparently MWC just has some faces made from vertices that are share the same position. We obviously don't want lines.
                     bool nullVert = triIndices.X != 0xFFFF && triIndices.Y != 0xFFFF && triIndices.Z != 0xFFFF;
-                    if (triIndices.X == triIndices.Y || triIndices.X == triIndices.Z || triIndices.Y == triIndices.Z && nullVert || 
+                    if (triIndices.X == triIndices.Y || triIndices.X == triIndices.Z || triIndices.Y == triIndices.Z && nullVert ||
                         MathExtras.EpsEqual(vertA.Position, vertB.Position, MathExtras.basicEpsilon) || MathExtras.EpsEqual(vertA.Position, vertC.Position, MathExtras.basicEpsilon) ||
                         MathExtras.EpsEqual(vertB.Position, vertC.Position, MathExtras.basicEpsilon))
                     {
-                        if(nullVert)
+                        if (nullVert)
                         {
                             flip = false;
                         }
@@ -212,7 +209,7 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                     //faceIndicesListList.Add(triIndices);
                     //faceFlipList.Add(currentFlip);
 
-                    if(!vertMap.ContainsKey(triIndices.X))
+                    if (!vertMap.ContainsKey(triIndices.X))
                     {
                         vertMap[triIndices.X] = vertCounter++;
                     }
@@ -224,9 +221,9 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                     {
                         vertMap[triIndices.Z] = vertCounter++;
                     }
-                    faceVtxl.rawVertId.Add(vertMap[triIndices.X] );
-                    faceVtxl.rawVertId.Add(vertMap[triIndices.Y] );
-                    faceVtxl.rawVertId.Add(vertMap[triIndices.Z] );
+                    faceVtxl.rawVertId.Add(vertMap[triIndices.X]);
+                    faceVtxl.rawVertId.Add(vertMap[triIndices.Y]);
+                    faceVtxl.rawVertId.Add(vertMap[triIndices.Z]);
                     AddVert(faceVtxl, vertA, bone, worldMats, boneId);
                     AddVert(faceVtxl, vertB, bone, worldMats, boneId);
                     AddVert(faceVtxl, vertC, bone, worldMats, boneId);
@@ -269,7 +266,7 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
             faceVtxl.uv3List.Add(vert.UVs[2]);
             faceVtxl.uv4List.Add(vert.UVs[3]);
 
-            if(vert.PrimaryVertexWeight != 0|| vert.SecondaryVertexWeight != 0)
+            if (vert.PrimaryVertexWeight != 0 || vert.SecondaryVertexWeight != 0)
             {
                 //var finalPos = Vector3.Transform(vert.Position / 2000, worldMats[boneId]) * vert.PrimaryVertexWeight + Vector3.Transform(vert.Position / 2000, worldMats[bone.ParentIndex]) * vert.SecondaryVertexWeight;
                 //faceVtxl.vertPositions.Add(finalPos);
@@ -277,7 +274,8 @@ namespace AquaModelLibrary.Extra.FromSoft.MetalWolfChaos
                 //faceVtxl.vertNormals.Add(finalNrm);
                 faceVtxl.vertWeightIndices.Add(new int[] { boneId, bone.ParentIndex, 0, 0 });
                 faceVtxl.vertWeights.Add(new Vector4(vert.PrimaryVertexWeight, vert.SecondaryVertexWeight, 0, 0));
-            } else
+            }
+            else
             {
                 //faceVtxl.vertPositions.Add(Vector3.Transform(vert.Position / 2000, worldMats[boneId]));
                 //faceVtxl.vertNormals.Add(Vector3.TransformNormal(vert.Normal, worldMats[boneId]));

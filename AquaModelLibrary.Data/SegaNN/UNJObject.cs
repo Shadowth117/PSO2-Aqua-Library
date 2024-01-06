@@ -3,12 +3,12 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.NNStructs.Structures;
+using AquaModelLibrary.Data.NNStructs.Structures;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 
-namespace AquaModelLibrary.NNStructs
+namespace AquaModelLibrary.Data.NNStructs
 {
     //UNJ file, found in Phantasy Star Portable, Phantasy Star Portable 2, and Phantasy Star Portable 2 Infinity
     //Shoudl always be LE because this should only be on the PSP.

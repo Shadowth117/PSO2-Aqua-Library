@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.Extra.Ninja
+namespace AquaModelLibrary.Data.Ninja
 {
     public class GVMUtil
     {

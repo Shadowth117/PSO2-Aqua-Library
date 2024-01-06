@@ -1,7 +1,7 @@
-﻿using AquaModelLibrary.Nova.Structures;
+﻿using AquaModelLibrary.Data.Nova.Structures;
 using Reloaded.Memory.Streams;
 
-namespace AquaModelLibrary.Nova
+namespace AquaModelLibrary.Data.Nova
 {
     //Same format as .axs, but uses exclusively the texture data
     public static class AIFMethods

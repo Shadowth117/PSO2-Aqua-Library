@@ -22,8 +22,6 @@
 // ------------------------------------------------------------------------
 // Author: Philip/Scobalula
 // Description: DirectXTex DDS Header Utilities
-using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace DirectXTex

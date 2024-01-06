@@ -1,8 +1,8 @@
-﻿using AquaModelLibrary.Extra.Ninja;
+﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 using static AquaModelLibrary.Data.BillyHatcher.LND;
-using static AquaModelLibrary.Extra.Ninja.NinjaConstants;
+using static AquaModelLibrary.Data.Ninja.NinjaConstants;
 
 namespace AquaModelLibrary.Data.BillyHatcher.LNDH
 {

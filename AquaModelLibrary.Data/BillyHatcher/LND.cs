@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
-using AquaModelLibrary.Extra.Ninja;
+using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;

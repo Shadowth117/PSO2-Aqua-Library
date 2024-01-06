@@ -1,6 +1,6 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.Zero
+namespace AquaModelLibrary.Data.Zero
 {
     public static class PSZTextBinReader
     {
