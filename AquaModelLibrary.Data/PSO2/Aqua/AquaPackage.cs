@@ -41,6 +41,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public string[] GetEnvelopeTypes() => fileExtensions;
 
         public AquaPackage() { }
+        public AquaPackage(AquaObject aqp) { models.Add(aqp); }
+        public AquaPackage(List<AquaObject> aqps) { models.AddRange(aqps); }
+        public AquaPackage(AquaMotion aqm) { motions.Add(aqm); }
+        public AquaPackage(List<AquaMotion> aqms) { motions.AddRange(aqms); }
 
         public AquaPackage(byte[] file)
         {
@@ -140,7 +144,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public void WriteModelPackage(string FileName, bool writeVTBF)
+        public void WritePackage(string FileName, bool writeVTBF)
+        {
+            File.WriteAllBytes(FileName, GetPackageBytes(FileName, writeVTBF));
+        }
+
+        public byte[] GetPackageBytes(string FileName, bool writeVTBF = false)
         {
             bool package = FileName.Contains(".aqp") || FileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
 
@@ -152,7 +161,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             if (package)
             {
                 finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
-                finalOutBytes.AddRange(BitConverter.GetBytes(fileCount +  tpns.Count));
+                finalOutBytes.AddRange(BitConverter.GetBytes(fileCount + tpns.Count));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)0));
                 finalOutBytes.AddRange(BitConverter.GetBytes((int)1));
             }
@@ -173,7 +182,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 if (writeVTBF)
                 {
                     outBytes.AddRange(files[i].GetBytesVTBF());
-                } else
+                }
+                else
                 {
                     outBytes.AddRange(files[i].GetBytesNIFL());
                 }
@@ -185,8 +195,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 finalOutBytes.AlignFileEndWriter(0x10);
             }
             WriteTPN(package, finalOutBytes, Path.ChangeExtension(FileName, ".tpn"));
-
-            File.WriteAllBytes(FileName, finalOutBytes.ToArray());
+            return finalOutBytes.ToArray();
         }
 
         private void WriteAFPBase(string fileName, bool package, int bonusPadding, List<byte> outBytes, int size)

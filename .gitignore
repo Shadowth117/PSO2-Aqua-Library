@@ -384,3 +384,5 @@ build/
 AquaModelLibrary.Extensions/bin/
 
 AquaModelLibrary.Data/bin/
+
+AquaModelLibrary.Core/bin/
