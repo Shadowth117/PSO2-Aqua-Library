@@ -123,7 +123,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return outBytes.ToArray();
         }
 
-        public unsafe AquaObject ConvertTCBToAquaObject(out AquaNode aqn)
+        public unsafe AquaObject ConvertTCBToAquaObject()
         {
             AquaObject aqo = new AquaObject(createNGSObj: true);
 
@@ -150,8 +150,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 var mat = tcbModels[i].materials[m];
                 aqp.tempMats.Add(new AquaObject.GenericMaterial() { matName = $"TCBMat_{m}", diffuseRGBA = new Vector4((float)mat.color[0] / 255, (float)mat.color[1] / 255, (float)mat.color[2] / 255, 1) });
             }*/
-
-            aqn = AquaNode.GenerateBasicAQN();
 
             aqo.ConvertToPSO2Model(true, false, true, false, true, false, false, false);
 

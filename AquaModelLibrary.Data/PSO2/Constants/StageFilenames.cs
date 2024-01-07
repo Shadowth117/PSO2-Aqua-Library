@@ -2,6 +2,13 @@
 {
     public static class StageFilenames
     {
+        public static string effectPath = "stage/effect/"; //Used only for a few late game areas in classic
+        public static string radarPath = "stage/radar/"; //In NGS, only exists for trainia, though unused as of writing
+        public static string skyboxPath = "stage/weather/";
+        public static string stageOut = @"Stage\";
+        public static string lnAreaTemplateCommon = "stage/ln_area_template_common.ice"; //LPS files inside tell the game what layout models exist etc.
+        public static string lnAreaTemplateCommonReboot = "stage/ln_area_template_common_reboot.ice"; //LPS files inside tell the game what layout models exist etc. for NGS. Only applicable for areas like Trainia, open worlds use a different system
+
         public static string charCreatorRoom = "sn_0000_chararea1.ice";
 
         //Some names may differ on areas and objects. Notably, my room rooms.

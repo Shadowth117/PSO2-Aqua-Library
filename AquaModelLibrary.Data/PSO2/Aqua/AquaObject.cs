@@ -70,10 +70,20 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             };
         }
 
-        public AquaObject() { }
+        /// <summary>
+        /// Defaults to 0xC33, base NGS model type
+        /// </summary>
+        public AquaObject() 
+        {
+            objc.type = 0xC33;
+        }
         public AquaObject(bool createNGSObj) 
         {
             objc.type = createNGSObj ? 0xC33 : 0xC2A;
+        }
+        public AquaObject(int objcType)
+        {
+            objc.type = objcType;
         }
 
         public AquaObject(byte[] bytes)

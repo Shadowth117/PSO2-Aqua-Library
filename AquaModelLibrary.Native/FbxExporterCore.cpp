@@ -112,21 +112,6 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
         }
 
-        //Having a second vertex color channel breaks things because Autodesk doesn't even support their own schema :)
-        /*
-        if (vtxl->vertColor2s->Count > 0)
-        {
-            lElementVertexColor2 = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 1)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
-
-            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            //lElementVertexColor2->SetName("VCChannel_1");
-            lElementVertexColor2->SetMappingMode(FbxLayerElement::eByPolygonVertex);
-            lElementVertexColor2->SetReferenceMode(FbxLayerElement::eIndexToDirect);
-
-            for each (array<unsigned char> ^ color in vtxl->vertColor2s)
-                lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
-        }*/
-
         SetUVChannel(lMesh, vtxl->uv1List, vtxl->vertPositions->Count, 1);
         SetUVChannel(lMesh, vtxl->uv2List, vtxl->vertPositions->Count, 2);
         SetUVChannel(lMesh, vtxl->uv3List, vtxl->vertPositions->Count, 3);

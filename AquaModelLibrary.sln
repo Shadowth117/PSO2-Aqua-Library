@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveLib", "SAToolsShared
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VrSharp", "SAToolsShared\VrSharp\VrSharp.csproj", "{25D574CE-DC37-46E7-8EA9-18C493406AC3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.IO", "AquaModelLibrary.IO\AquaModelLibrary.IO.csproj", "{620AFFE5-6DC1-4A4A-A724-79C1D7D96A11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.Core", "AquaModelLibrary.Core\AquaModelLibrary.Core.csproj", "{620AFFE5-6DC1-4A4A-A724-79C1D7D96A11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.Data", "AquaModelLibrary.Data\AquaModelLibrary.Data.csproj", "{E7711B0E-E860-48F9-8221-F3CED6B18260}"
 EndProject

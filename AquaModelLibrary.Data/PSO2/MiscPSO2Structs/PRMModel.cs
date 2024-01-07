@@ -1,15 +1,15 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Ice;
+using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 
 namespace AquaModelLibrary
-{        
+{
     //Version 1 is the most basic and was seen in alpha pso2. Version 3 was used in PSO2 Classic for most of its life. Version 4 was used some in PSO2 and in NGS.
     //Version 1 requires some extra work to convert to since it doesn't have a face array and so is not supported for converting back at this time.
     public unsafe class PRMModel
@@ -21,11 +21,24 @@ namespace AquaModelLibrary
 
         public PRMModel() { }
 
-        public PRMModel(BufferedStreamReaderBE<MemoryStream> streamReader, out PRMModel prmModel)
+        public PRMModel(byte[] bytes)
+        {
+            using (MemoryStream ms = new MemoryStream(bytes))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
+
+        public PRMModel(BufferedStreamReaderBE<MemoryStream> streamReader)
+        {
+            Read(streamReader);
+        }
+
+        public void Read(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             //PRM files have a magic that matches the Ice envelope typing and so we need to check if it's an ICE envelope or not specially
             int offset = 0x0; //No NIFL header
-            prmModel = new PRMModel();
             int type = streamReader.Peek<int>();
             streamReader.Seek(0xC, SeekOrigin.Begin);
             int iceEnvelopeSize = streamReader.Peek<int>();
@@ -38,71 +51,70 @@ namespace AquaModelLibrary
             }
             streamReader.Seek(0x0 + offset, SeekOrigin.Begin);
 
-            prmModel.header = streamReader.Read<PRMModel.PRMHeader>();
+            header = streamReader.Read<PRMHeader>();
 
             int faceCount;
-            switch (prmModel.header.entryVersion)
+            switch (header.entryVersion)
             {
                 case 1:
-                    for (int i = 0; i < prmModel.header.entryCount; i++)
+                    for (int i = 0; i < header.entryCount; i++)
                     {
-                        prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType01Vert>()));
+                        vertices.Add(new PRMVert(streamReader.Read<PRMType01Vert>()));
                     }
 
-                    if (prmModel.header.groupIndexCount > 0)
+                    if (header.groupIndexCount > 0)
                     {
-                        faceCount = prmModel.header.groupIndexCount / 3;
+                        faceCount = header.groupIndexCount / 3;
 
                         for (int i = 0; i < faceCount; i++)
                         {
-
-                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                            faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
                         }
                     }
                     else
                     {
-                        faceCount = PRMGenerateFacesFromVerts();
+                        PRMGenerateFacesFromVerts();
                     }
                     break;
                 case 2:
                     Debug.WriteLine("Unimplemented PRM version! Please report if found!");
                     return;
                 case 3:
-                    for (int i = 0; i < prmModel.header.entryCount; i++)
+                    for (int i = 0; i < header.entryCount; i++)
                     {
-                        prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType03Vert>()));
+                        vertices.Add(new PRMVert(streamReader.Read<PRMType03Vert>()));
                     }
 
-                    if (prmModel.header.groupIndexCount > 0)
+                    if (header.groupIndexCount > 0)
                     {
-                        faceCount = prmModel.header.groupIndexCount / 3;
+                        faceCount = header.groupIndexCount / 3;
                         for (int i = 0; i < faceCount; i++)
                         {
-                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                            faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
                         }
                     }
                     else
                     {
-                        faceCount = PRMGenerateFacesFromVerts();
+                        PRMGenerateFacesFromVerts();
                     }
                     break;
                 case 4:
-                    for (int i = 0; i < prmModel.header.entryCount; i++)
+                    for (int i = 0; i < header.entryCount; i++)
                     {
-                        prmModel.vertices.Add(new PRMModel.PRMVert(streamReader.Read<PRMModel.PRMType04Vert>()));
+                        vertices.Add(new PRMVert(streamReader.Read<PRMType04Vert>()));
                     }
 
-                    if (prmModel.header.groupIndexCount > 0)
+                    if (header.groupIndexCount > 0)
                     {
-                        faceCount = prmModel.header.groupIndexCount / 3;
+                        faceCount = header.groupIndexCount / 3;
                         for (int i = 0; i < faceCount; i++)
                         {
-                            prmModel.faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
+                            faces.Add(new Vector3(streamReader.Read<ushort>(), streamReader.Read<ushort>(), streamReader.Read<ushort>()));
                         }
                     }
                     else
                     {
-                        faceCount = PRMGenerateFacesFromVerts();
+                        PRMGenerateFacesFromVerts();
                     }
                     break;
                 default:
@@ -405,9 +417,9 @@ namespace AquaModelLibrary
             }
         }
 
-        public void ConvertToAquaObject(out AquaObject aqo, out AquaNode aqn)
+        public AquaObject ConvertToAquaObject()
         {
-            aqo = new AquaObject();
+            var aqo = new AquaObject();
             aqo.objc.type = 0xC33;
 
             VTXL vtxl = new VTXL();
@@ -427,9 +439,9 @@ namespace AquaModelLibrary
             aqo.tempTris.Add(tris);
             aqo.tempMats.Add(new GenericMaterial() { matName = "PRMMat" });
 
-            aqn = AquaNode.GenerateBasicAQN();
-
             aqo.ConvertToPSO2Model(false, true, false, true, false, false, false);
+
+            return aqo;
         }
     }
 }

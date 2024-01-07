@@ -10,46 +10,25 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnluacNET;
 using Zamboni;
+using static AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndex;
 using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingDynamic;
 using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingIce;
 using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingStatic;
+using static AquaModelLibrary.Data.PSO2.Constants.EffectFilenames;
 using static AquaModelLibrary.Data.PSO2.Constants.GeneralFilenames;
 using static AquaModelLibrary.Data.PSO2.Constants.MusicFilenames;
+using static AquaModelLibrary.Data.PSO2.Constants.ObjectNames;
+using static AquaModelLibrary.Data.PSO2.Constants.RoomGoodsNames;
 using static AquaModelLibrary.Data.PSO2.Constants.StageFilenames;
+using static AquaModelLibrary.Data.PSO2.Constants.UINames;
+using static AquaModelLibrary.Data.PSO2.Constants.UnitNames;
+using static AquaModelLibrary.Data.PSO2.Constants.WeaponNames;
 using static AquaModelLibrary.Helpers.HashHelpers;
 
 namespace AquaModelLibrary.Data.Utility
 {
     public unsafe class ReferenceGenerator
     {
-        public static bool pcDirectory = true;
-
-        public static string dataDir
-        {
-            get { return pcDirectory ? dataDirPC : dataDirConsole; }
-        }
-        public static string dataNADir
-        {
-            get { return pcDirectory ? dataNADirPC : dataNADirConsole; }
-        }
-        public static string dataReboot
-        {
-            get { return pcDirectory ? dataRebootPC : dataRebootConsole; }
-        }
-        public static string dataRebootNA
-        {
-            get { return pcDirectory ? dataRebootNAPC : dataRebootNAConsole; }
-        }
-
-        public static string dataDirPC = $"data\\win32\\";
-        public static string dataDirConsole = $"data\\";
-        public static string dataNADirPC = $"data\\win32_na\\";
-        public static string dataNADirConsole = $"data_na\\";
-        public static string dataRebootPC = $"data\\win32reboot\\";
-        public static string dataRebootConsole = $"datareboot\\";
-        public static string dataRebootNAPC = $"data\\win32reboot_na\\";
-        public static string dataRebootNAConsole = $"datareboot_na\\";
-
         public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
@@ -4743,9 +4722,9 @@ namespace AquaModelLibrary.Data.Utility
                 foreach (var id in magIds)
                 {
                     string names;
-                    if (magNames.ContainsKey(id))
+                    if (MagNames.magNames.ContainsKey(id))
                     {
-                        names = magNames[id] + ",";
+                        names = MagNames.magNames[id] + ",";
                     }
                     else
                     {
@@ -4774,9 +4753,9 @@ namespace AquaModelLibrary.Data.Utility
                 foreach (var id in magIdsReboot)
                 {
                     string names;
-                    if (magNamesNGS.ContainsKey(id))
+                    if (MagNames.magNames.ContainsKey(id))
                     {
-                        names = magNamesNGS[id] + ",";
+                        names = MagNames.magNames[id] + ",";
                     }
                     else
                     {
@@ -5427,58 +5406,58 @@ namespace AquaModelLibrary.Data.Utility
                         switch (i - 1)
                         {
                             case 0:
-                                name = GetNameFromIdDict(id, swordNGSNames);
+                                name = GetNameFromIdDict(id, swordNames);
                                 break;
                             case 1:
-                                name = GetNameFromIdDict(id, wiredLanceNGSNames);
+                                name = GetNameFromIdDict(id, wiredLanceNames);
                                 break;
                             case 2:
-                                name = GetNameFromIdDict(id, partizanNGSNames);
+                                name = GetNameFromIdDict(id, partizanNames);
                                 break;
                             case 3:
-                                name = GetNameFromIdDict(id, twinDaggerNGSNames);
+                                name = GetNameFromIdDict(id, twinDaggerNames);
                                 break;
                             case 4:
-                                name = GetNameFromIdDict(id, doubleSaberNGSNames);
+                                name = GetNameFromIdDict(id, doubleSaberNames);
                                 break;
                             case 5:
-                                name = GetNameFromIdDict(id, knucklesNGSNames);
+                                name = GetNameFromIdDict(id, knucklesNames);
                                 break;
                             case 6:
-                                name = GetNameFromIdDict(id, gunslashNGSNames);
+                                name = GetNameFromIdDict(id, gunslashNames);
                                 break;
                             case 7:
-                                name = GetNameFromIdDict(id, rifleNGSNames);
+                                name = GetNameFromIdDict(id, rifleNames);
                                 break;
                             case 8:
-                                name = GetNameFromIdDict(id, launcherNGSNames);
+                                name = GetNameFromIdDict(id, launcherNames);
                                 break;
                             case 9:
-                                name = GetNameFromIdDict(id, tmgNGSNames);
+                                name = GetNameFromIdDict(id, tmgNames);
                                 break;
                             case 10:
-                                name = GetNameFromIdDict(id, rodNGSNames);
+                                name = GetNameFromIdDict(id, rodNames);
                                 break;
                             case 11:
-                                name = GetNameFromIdDict(id, talysNGSNames);
+                                name = GetNameFromIdDict(id, talysNames);
                                 break;
                             case 12:
-                                name = GetNameFromIdDict(id, wandNGSNames);
+                                name = GetNameFromIdDict(id, wandNames);
                                 break;
                             case 13:
-                                name = GetNameFromIdDict(id, katanaNGSNames);
+                                name = GetNameFromIdDict(id, katanaNames);
                                 break;
                             case 14:
-                                name = GetNameFromIdDict(id, bowNGSNames);
+                                name = GetNameFromIdDict(id, bowNames);
                                 break;
                             case 15:
-                                name = GetNameFromIdDict(id, jetBootsNGSNames);
+                                name = GetNameFromIdDict(id, jetBootsNames);
                                 break;
                             case 16:
-                                name = GetNameFromIdDict(id, dualBladesNGSNames);
+                                name = GetNameFromIdDict(id, dualBladesNames);
                                 break;
                             case 17:
-                                name = GetNameFromIdDict(id, tactNGSNames);
+                                name = GetNameFromIdDict(id, tactNames);
                                 break;
                             default:
                                 weaponListNGSOutput = new List<string>();
