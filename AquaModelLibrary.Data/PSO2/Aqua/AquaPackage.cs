@@ -144,7 +144,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public void WritePackage(string FileName, bool writeVTBF)
+        public void WritePackage(string FileName, bool writeVTBF = false)
         {
             File.WriteAllBytes(FileName, GetPackageBytes(FileName, writeVTBF));
         }

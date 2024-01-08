@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
-    public class MagIndex : AquaCommon
+    public class MagIndices : AquaCommon
     {
         private List<int> mgxIds = new();
 
@@ -15,14 +15,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             };
         }
 
-        public MagIndex() { }
+        public MagIndices() { }
 
-        public MagIndex(byte[] file)
+        public MagIndices(byte[] file)
         {
             Read(file);
         }
 
-        public MagIndex(BufferedStreamReaderBE<MemoryStream> sr)
+        public MagIndices(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }

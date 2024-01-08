@@ -187,7 +187,7 @@ namespace AquaModelLibrary.Data.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(mgxName))
                     {
-                        magIds = new MagIndex(file).GetMagIdList();
+                        magIds = new MagIndices(file).GetMagIdList();
                     }
                 }
             }
@@ -207,7 +207,7 @@ namespace AquaModelLibrary.Data.Utility
                 {
                     if (IceFile.getFileName(file).ToLower().Contains(mgxName))
                     {
-                        magIdsReboot = new MagIndex(file).GetMagIdList();
+                        magIdsReboot = new MagIndices(file).GetMagIdList();
                     }
                 }
 

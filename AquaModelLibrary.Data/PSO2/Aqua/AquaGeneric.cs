@@ -8,27 +8,19 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     /// </summary>
     public class AquaGeneric : AquaCommon
     {
-        public AquaGeneric(byte[] file, int filler, string fileName)
+        public BufferedStreamReaderBE<MemoryStream> agSR = null;
+        public AquaGeneric(byte[] file, string fileName)
         {
             Read(file, new string[] { StringHelpers.ExtToIceEnvExt(Path.GetExtension(fileName)) });
         }
-        public AquaGeneric(BufferedStreamReaderBE<MemoryStream> streamReader, int filler, string fileName)
+        public AquaGeneric(BufferedStreamReaderBE<MemoryStream> streamReader, string fileName)
         {
             Read(streamReader, new string[] { StringHelpers.ExtToIceEnvExt(Path.GetExtension(fileName)) });
         }
 
-        public AquaGeneric(byte[] file, string _ext)
-        {
-            Read(file, new string[] { _ext });
-        }
-        public AquaGeneric(BufferedStreamReaderBE<MemoryStream> streamReader, string _ext)
-        {
-            Read(streamReader, new string[] { _ext });
-        }
-
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
-            return;
+            agSR = sr;
         }
     }
 }

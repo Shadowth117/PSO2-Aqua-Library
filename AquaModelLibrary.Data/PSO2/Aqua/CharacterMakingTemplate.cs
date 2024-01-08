@@ -20,6 +20,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             };
         }
 
+        public CharacterMakingTemplate() { }
+
         public CharacterMakingTemplate(byte[] bytes)
         {
             Read(bytes);

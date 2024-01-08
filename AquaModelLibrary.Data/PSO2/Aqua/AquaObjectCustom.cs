@@ -1,7 +1,8 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectExtras;
-using AquaModelLibrary.Data.PSO2.Aqua.NGSShaderPresets;
+using AquaModelLibrary.Data.PSO2.Aqua.Presets;
+using AquaModelLibrary.Data.PSO2.Aqua.Presets.Shader;
 using AquaModelLibrary.Helpers.MathHelpers;
 using System.Numerics;
 
