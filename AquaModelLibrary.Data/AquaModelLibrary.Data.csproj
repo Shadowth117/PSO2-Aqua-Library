@@ -37,6 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Extra\PSO2Scripts\ScriptReference.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Libraries\NvTriStripDotNet.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

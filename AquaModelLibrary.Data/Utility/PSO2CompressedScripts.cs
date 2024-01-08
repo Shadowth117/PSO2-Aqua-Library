@@ -1,8 +1,11 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Ice;
+using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using UnluacNET;
+using Zamboni;
+using Zamboni.IceFileFormats;
 using ZstdNet;
 
 namespace AquaModelLibrary.Data.Utility
@@ -93,9 +96,28 @@ namespace AquaModelLibrary.Data.Utility
             List<CFileEntry> table = new List<CFileEntry>();
             if (File.Exists(filePath))
             {
+                var scriptsFile = File.ReadAllBytes(filePath);
+                //Check if ICE
+                if (scriptsFile[0] == 0x49 && scriptsFile[1] == 0x43 && scriptsFile[2] == 0x45)
+                {
+                    var iceScripts = IceFile.LoadIceFile(new MemoryStream(scriptsFile));
+                    var files = new List<byte[]>(); 
+                    files.AddRange(iceScripts.groupOneFiles);
+                    files.AddRange(iceScripts.groupTwoFiles);
+                    foreach (var script in files)
+                    {
+                        var name = IceFile.getFileName(script);
+                        if (Path.GetExtension(name) == ".lua")
+                        {
+                            IdAndAddLua(name, true, IceMethods.RemoveIceEnvelope(script));
+                        }
+                    }
+                    return;
+                }
+
                 byte[] zstdDict = new byte[0];
                 ulong zstdDictHash = 0;
-                using (var fileStream = new MemoryStream(File.ReadAllBytes(filePath)))
+                using (var fileStream = new MemoryStream(scriptsFile))
                 using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(fileStream))
                 {
 
@@ -156,18 +178,7 @@ namespace AquaModelLibrary.Data.Utility
                         {
                             using (MemoryStream memStream = new MemoryStream())
                             {
-                                var luaStream = new MemoryStream(uncompressedFile);
-                                var header = new BHeader(luaStream);
-                                LFunction lfunction = header.Function.Parse(luaStream, header);
-                                var decompiler = new Decompiler(lfunction);
-                                if (foundName)
-                                {
-                                    knownLua.Add(name, decompiler);
-                                }
-                                else
-                                {
-                                    unknownLua.Add(name, decompiler);
-                                }
+                                IdAndAddLua(name, foundName, uncompressedFile);
                                 /*
                                 decompiler.Decompile();
                                 using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
@@ -187,6 +198,22 @@ namespace AquaModelLibrary.Data.Utility
                     }
                     //scriptList.WriteLine(entry.hash.ToString("X") + "  " + name);
                 }
+            }
+        }
+
+        private void IdAndAddLua(string name, bool foundName, byte[] uncompressedFile)
+        {
+            var luaStream = new MemoryStream(uncompressedFile);
+            var header = new BHeader(luaStream);
+            LFunction lfunction = header.Function.Parse(luaStream, header);
+            var decompiler = new Decompiler(lfunction);
+            if (foundName)
+            {
+                knownLua.Add(name, decompiler);
+            }
+            else
+            {
+                unknownLua.Add(name, decompiler);
             }
         }
     }

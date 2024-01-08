@@ -376,7 +376,7 @@ namespace AquaModelLibrary.Helpers.Readers
         /// Attempts to read a null terminated terminated UTF16 String from the current stream position.
         /// If quickmode is false, end will have position subtracted to determine the max read length. Intended for files with in an array of files to stop bleedover.
         /// </summary>
-        public string ReadUTF16String(bool quickMode = true, int blockSize = 0x60)
+        public string ReadUTF16String(bool quickMode = true, int blockSize = 0x1000)
         {
             var pos = Position;
             var strLen = BaseStream.Length;

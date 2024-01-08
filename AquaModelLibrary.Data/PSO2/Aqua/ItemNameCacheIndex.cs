@@ -41,7 +41,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 int strPointer = sr.Read<int>();
                 long bookmark = sr.Position;
                 sr.Seek(strPointer + offset, SeekOrigin.Begin);
-                output.AppendLine($"{category.ToString("X")} {id.ToString("X")} " + sr.ReadUTF16String());
+                output.AppendLine($"{category.ToString("X")} {id.ToString("X")} " + sr.ReadUTF16String(true, (int)sr.BaseStream.Length));
 
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }

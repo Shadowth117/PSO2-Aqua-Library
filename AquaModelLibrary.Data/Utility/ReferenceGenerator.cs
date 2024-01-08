@@ -302,6 +302,7 @@ namespace AquaModelLibrary.Data.Utility
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
+            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateUILists(pso2_binDir, outputDirectory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
@@ -315,7 +316,6 @@ namespace AquaModelLibrary.Data.Utility
             GeneratePetList(petsDirOut);
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
             GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat);
-            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateAreaData(pso2_binDir, stageDirOut);
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateMusicData(pso2_binDir, musicDirOut);
@@ -341,19 +341,32 @@ namespace AquaModelLibrary.Data.Utility
             //Dictionaries
             List<string> masterNameList = new List<string>();
             List<Dictionary<string, string>> roomDict = new List<Dictionary<string, string>>();
-            GatherTextIdsStringRef(uiRoomByCat, masterNameList, roomDict, "Room", true);
+            var roomConst = "Room";
+            if(uiRoomByCat.ContainsKey(roomConst))
+            {
+                GatherTextIdsStringRef(uiRoomByCat, masterNameList, roomDict, roomConst, true);
+            }
 
             masterNameList.Clear();
             List<Dictionary<string, string>> actorDict = new List<Dictionary<string, string>>();
-            GatherTextIdsStringRef(actorNameByCat, masterNameList, actorDict, "Object", true);
+            var objConst = "Object";
+            if(!actorNameByCat.ContainsKey(objConst))
+            {
+                GatherTextIdsStringRef(actorNameByCat, masterNameList, actorDict, objConst, true);
+            }
 
             masterNameList.Clear();
             List<Dictionary<string, string>> commonDict = new List<Dictionary<string, string>>();
-            GatherTextIdsStringRef(objectCommonByCat, masterNameList, commonDict, "ObjectName", true);
+            var objNamesConst = "ObjectName";
+            if (objectCommonByCat.ContainsKey(objNamesConst))
+            {
+                GatherTextIdsStringRef(objectCommonByCat, masterNameList, commonDict, objNamesConst, true);
+            }
 
             //Classic objects
             string scriptsPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicScripts));
             var scripts = new PSO2CompressedScripts(scriptsPath);
+
             var classicObjectsScript = scripts.knownLua["object_behavior_pack.obj.lua"];
             var classicObjectsScript2 = scripts.knownLua["object_dofile_list_server.lua"];
             classicObjectsScript.Decompile();
@@ -524,190 +537,193 @@ namespace AquaModelLibrary.Data.Utility
 
             //Reboot Objects
             string rbScriptsPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(rebootScripts)));
-            var rbScripts = new PSO2CompressedScripts(rbScriptsPath);
-            var rbObjectsScript = rbScripts.knownLua["object_preset_list.lua"];
-            var rbSeasonObjectsScript = rbScripts.knownLua["object_season.lua"];
-            List<string> rbObjectsList = new List<string>();
-            rbObjectsScript.Decompile();
-            rbSeasonObjectsScript.Decompile();
+            if(File.Exists(rbScriptsPath))
+            {
+                var rbScripts = new PSO2CompressedScripts(rbScriptsPath);
+                var rbObjectsScript = rbScripts.knownLua["object_preset_list.lua"];
+                var rbSeasonObjectsScript = rbScripts.knownLua["object_season.lua"];
+                List<string> rbObjectsList = new List<string>();
+                rbObjectsScript.Decompile();
+                rbSeasonObjectsScript.Decompile();
 
-            //Get seasonal data
-            Dictionary<string, string> seasonalListing = new Dictionary<string, string>();
-            byte[] bytes = null;
-            using (MemoryStream memStream = new MemoryStream())
-            {
-                using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
+                //Get seasonal data
+                Dictionary<string, string> seasonalListing = new Dictionary<string, string>();
+                byte[] bytes = null;
+                using (MemoryStream memStream = new MemoryStream())
                 {
-                    rbSeasonObjectsScript.Print(new Output(writer));
-                    writer.Flush();
-                    bytes = memStream.ToArray();
-                }
-            }
-            using (MemoryStream memStream = new MemoryStream(bytes))
-            {
-                using (var reader = new StreamReader(memStream))
-                {
-                    string currentObj = null;
-                    string seasonStrings = "";
-                    bool inSeasonTable = false;
-                    while (!reader.EndOfStream)
+                    using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
                     {
-                        var line = reader.ReadLine();
-                        if (line.Contains("Object.ObjectSeasonTable"))
+                        rbSeasonObjectsScript.Print(new Output(writer));
+                        writer.Flush();
+                        bytes = memStream.ToArray();
+                    }
+                }
+                using (MemoryStream memStream = new MemoryStream(bytes))
+                {
+                    using (var reader = new StreamReader(memStream))
+                    {
+                        string currentObj = null;
+                        string seasonStrings = "";
+                        bool inSeasonTable = false;
+                        while (!reader.EndOfStream)
                         {
-                            inSeasonTable = true;
-                        }
-                        else if (inSeasonTable)
-                        {
-                            if (line.Contains("{"))
+                            var line = reader.ReadLine();
+                            if (line.Contains("Object.ObjectSeasonTable"))
                             {
-                                currentObj = line.Replace(" ", "").Replace("-", "").Replace("{", "").Replace("=", "");
-                                continue;
+                                inSeasonTable = true;
                             }
-                            if (currentObj == null)
+                            else if (inSeasonTable)
+                            {
+                                if (line.Contains("{"))
+                                {
+                                    currentObj = line.Replace(" ", "").Replace("-", "").Replace("{", "").Replace("=", "");
+                                    continue;
+                                }
+                                if (currentObj == null)
+                                {
+                                    if (line.Contains("}"))
+                                    {
+                                        break;
+                                    }
+                                }
+                                if (line.Contains("}"))
+                                {
+                                    seasonalListing.Add(currentObj, seasonStrings.Substring(0, seasonStrings.Length - 1));
+                                    currentObj = null;
+                                    seasonStrings = "";
+                                    continue;
+                                }
+                                seasonStrings += line.Replace(" ", "").Replace(",", "").Replace("\"", "").Replace("=", " ") + "|";
+                            }
+                        }
+                    }
+                }
+
+                List<string> rbObjectList = new List<string>();
+                using (MemoryStream memStream = new MemoryStream())
+                {
+                    using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
+                    {
+                        rbObjectsScript.Print(new Output(writer));
+                        writer.Flush();
+                        bytes = memStream.ToArray();
+                    }
+                }
+                using (MemoryStream memStream = new MemoryStream(bytes))
+                {
+                    using (var reader = new StreamReader(memStream))
+                    {
+                        bool inPresetTable = false;
+                        while (!reader.EndOfStream)
+                        {
+                            var line = reader.ReadLine();
+                            if (line.Contains("Object.ObjectPresetList"))
+                            {
+                                inPresetTable = true;
+                            }
+                            else if (inPresetTable)
                             {
                                 if (line.Contains("}"))
                                 {
                                     break;
                                 }
+                                rbObjectList.Add(line.Replace(" ", "").Replace(",", "").Replace("\"", "").Replace("=", "|"));
                             }
-                            if (line.Contains("}"))
+                        }
+                    }
+                }
+
+                string objStart = "object/map_object/";
+                rbObjectList.Sort();
+                foreach (var rbObj in rbObjectList)
+                {
+                    var split = rbObj.Split('|');
+                    var objName = split[0];
+                    var detail = split[1];
+
+                    var objLOD1 = objStart + objName + "_l1.ice";
+                    var objLOD2 = objStart + objName + "_l2.ice";
+                    var objLOD3 = objStart + objName + "_l3.ice";
+                    var objLOD4 = objStart + objName + "_l4.ice";
+                    var coll = objStart + objName + "_col.ice";
+                    var common = objStart + objName + "_com.ice";
+                    var effect = objStart + objName + "_eff.ice";
+
+                    var objLOD1Hash = GetRebootHash(GetFileHash(objLOD1));
+                    var objLOD2Hash = GetRebootHash(GetFileHash(objLOD2));
+                    var objLOD3Hash = GetRebootHash(GetFileHash(objLOD3));
+                    var objLOD4Hash = GetRebootHash(GetFileHash(objLOD4));
+                    var collHash = GetRebootHash(GetFileHash(coll));
+                    var commonHash = GetRebootHash(GetFileHash(common));
+                    var effHash = GetRebootHash(GetFileHash(effect));
+
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD1Hash)))
+                    {
+                        objLOD1 = "";
+                        objLOD1Hash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD2Hash)))
+                    {
+                        objLOD2 = "";
+                        objLOD2Hash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD3Hash)))
+                    {
+                        objLOD3 = "";
+                        objLOD3Hash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD4Hash)))
+                    {
+                        objLOD4 = "";
+                        objLOD4Hash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, collHash)))
+                    {
+                        coll = "";
+                        collHash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, commonHash)))
+                    {
+                        common = "";
+                        commonHash = "";
+                    }
+                    if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, effHash)))
+                    {
+                        effect = "";
+                        effHash = "";
+                    }
+
+                    string seasonListing = "";
+                    if (seasonalListing.ContainsKey(objName))
+                    {
+                        seasonListing = seasonalListing[objName];
+                    }
+
+                    string jpName = "";
+                    string enName = "";
+
+                    //Check object_common dictionary
+                    if (commonDict?.Count > 0)
+                    {
+                        if (commonDict?[0].ContainsKey(objName) == true)
+                        {
+                            jpName = commonDict[0][objName];
+                        }
+                        if (commonDict?.Count > 1)
+                        {
+                            if (commonDict?[1].ContainsKey(objName) == true)
                             {
-                                seasonalListing.Add(currentObj, seasonStrings.Substring(0, seasonStrings.Length - 1));
-                                currentObj = null;
-                                seasonStrings = "";
-                                continue;
+                                enName = commonDict[1][objName];
                             }
-                            seasonStrings += line.Replace(" ", "").Replace(",", "").Replace("\"", "").Replace("=", " ") + "|";
                         }
                     }
+
+                    rbObjectsList.Add($"{jpName},{enName},{objName},{detail},{objLOD1},{objLOD1Hash},{objLOD2},{objLOD2Hash},{objLOD3},{objLOD3Hash},{objLOD4},{objLOD4Hash},{coll},{collHash},{common},{commonHash},{effect},{effHash},{seasonListing}");
                 }
+
+                rbObjectsList.Insert(0, "Object Name JP,Object Name EN,Object ID,Object Detail,Object LOD1,Object LOD1 Hash,Object LOD2,Object LOD2 Hash,Object LOD3,Object LOD3 Hash,Object LOD4,Object LOD4 Hash,Object Collision,Object Collision Hash,Object Common,Object Common Hash,Object Effect,Object Effect Hash,Seasonal Object Swaps");
+                WriteCSV(objectOutDir, $"NGSObjects.csv", rbObjectsList);
             }
-
-            List<string> rbObjectList = new List<string>();
-            using (MemoryStream memStream = new MemoryStream())
-            {
-                using (var writer = new StreamWriter(memStream, new UTF8Encoding(false)))
-                {
-                    rbObjectsScript.Print(new Output(writer));
-                    writer.Flush();
-                    bytes = memStream.ToArray();
-                }
-            }
-            using (MemoryStream memStream = new MemoryStream(bytes))
-            {
-                using (var reader = new StreamReader(memStream))
-                {
-                    bool inPresetTable = false;
-                    while (!reader.EndOfStream)
-                    {
-                        var line = reader.ReadLine();
-                        if (line.Contains("Object.ObjectPresetList"))
-                        {
-                            inPresetTable = true;
-                        }
-                        else if (inPresetTable)
-                        {
-                            if (line.Contains("}"))
-                            {
-                                break;
-                            }
-                            rbObjectList.Add(line.Replace(" ", "").Replace(",", "").Replace("\"", "").Replace("=", "|"));
-                        }
-                    }
-                }
-            }
-
-            string objStart = "object/map_object/";
-            rbObjectList.Sort();
-            foreach (var rbObj in rbObjectList)
-            {
-                var split = rbObj.Split('|');
-                var objName = split[0];
-                var detail = split[1];
-
-                var objLOD1 = objStart + objName + "_l1.ice";
-                var objLOD2 = objStart + objName + "_l2.ice";
-                var objLOD3 = objStart + objName + "_l3.ice";
-                var objLOD4 = objStart + objName + "_l4.ice";
-                var coll = objStart + objName + "_col.ice";
-                var common = objStart + objName + "_com.ice";
-                var effect = objStart + objName + "_eff.ice";
-
-                var objLOD1Hash = GetRebootHash(GetFileHash(objLOD1));
-                var objLOD2Hash = GetRebootHash(GetFileHash(objLOD2));
-                var objLOD3Hash = GetRebootHash(GetFileHash(objLOD3));
-                var objLOD4Hash = GetRebootHash(GetFileHash(objLOD4));
-                var collHash = GetRebootHash(GetFileHash(coll));
-                var commonHash = GetRebootHash(GetFileHash(common));
-                var effHash = GetRebootHash(GetFileHash(effect));
-
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD1Hash)))
-                {
-                    objLOD1 = "";
-                    objLOD1Hash = "";
-                }
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD2Hash)))
-                {
-                    objLOD2 = "";
-                    objLOD2Hash = "";
-                }
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD3Hash)))
-                {
-                    objLOD3 = "";
-                    objLOD3Hash = "";
-                }
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objLOD4Hash)))
-                {
-                    objLOD4 = "";
-                    objLOD4Hash = "";
-                }
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, collHash)))
-                {
-                    coll = "";
-                    collHash = "";
-                }
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, commonHash)))
-                {
-                    common = "";
-                    commonHash = "";
-                }
-                if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, effHash)))
-                {
-                    effect = "";
-                    effHash = "";
-                }
-
-                string seasonListing = "";
-                if (seasonalListing.ContainsKey(objName))
-                {
-                    seasonListing = seasonalListing[objName];
-                }
-
-                string jpName = "";
-                string enName = "";
-
-                //Check object_common dictionary
-                if (commonDict?.Count > 0)
-                {
-                    if (commonDict?[0].ContainsKey(objName) == true)
-                    {
-                        jpName = commonDict[0][objName];
-                    }
-                    if (commonDict?.Count > 1)
-                    {
-                        if (commonDict?[1].ContainsKey(objName) == true)
-                        {
-                            enName = commonDict[1][objName];
-                        }
-                    }
-                }
-
-                rbObjectsList.Add($"{jpName},{enName},{objName},{detail},{objLOD1},{objLOD1Hash},{objLOD2},{objLOD2Hash},{objLOD3},{objLOD3Hash},{objLOD4},{objLOD4Hash},{coll},{collHash},{common},{commonHash},{effect},{effHash},{seasonListing}");
-            }
-
-            rbObjectsList.Insert(0, "Object Name JP,Object Name EN,Object ID,Object Detail,Object LOD1,Object LOD1 Hash,Object LOD2,Object LOD2 Hash,Object LOD3,Object LOD3 Hash,Object LOD4,Object LOD4 Hash,Object Collision,Object Collision Hash,Object Common,Object Common Hash,Object Effect,Object Effect Hash,Seasonal Object Swaps");
-            WriteCSV(objectOutDir, $"NGSObjects.csv", rbObjectsList);
         }
 
         private static void GenerateUILists(string pso2_binDir, string outputDirectory)
@@ -2423,6 +2439,2161 @@ namespace AquaModelLibrary.Data.Utility
         private static void GenerateCharacterPartLists(string pso2_binDir, string playerDirOut, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, out List<int> masterIdList, out List<Dictionary<int, string>> nameDicts, out List<string> masterNameList, out List<Dictionary<string, string>> strNameDicts)
         {
             //---------------------------Parse out costume and body (includes outers and cast bodies)
+            CostumeBodyParse(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, out masterIdList, out nameDicts);
+
+            //---------------------------Parse out basewear
+            BasewearParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out innerwear
+            InnerWearParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out cast arms
+            CastArmParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out cast legs
+            CastLegParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out body paint
+            BodyPaintParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out stickers
+            StickerParse(pso2_binDir, playerDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out hair
+            HairParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out Eye
+            EyeParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out EYEB
+            EyeBrowParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out EYEL
+            EyelashParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out ACCE //Stored under decoy in a99be286e3a7e1b45d88a3ea4d6c18c4
+            AcceParse(pso2_binDir, playerDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out skin
+            SkinParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out FCP1, Face Textures
+            FaceTexturesParse(pso2_binDir, playerClassicDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out FCP2
+            FacePaintParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out FACE //face_variation.cmp.lua in 75b1632526cd6a1039625349df6ee8dd used to map file face ids to .text ids
+            FaceVariationParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, masterIdList, nameDicts, out masterNameList, out strNameDicts);
+
+            //---------------------------Parse out Face motions
+            FaceMotionParse(pso2_binDir, playerClassicDirOut, playerRebootDirOut, aquaCMX, masterIdList, nameDicts);
+
+            //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
+            NGSEarParse(pso2_binDir, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out NGS teeth
+            NGSTeethParse(pso2_binDir, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+
+            //---------------------------Parse out NGS horns
+            NGSHornParse(pso2_binDir, playerRebootDirOut, aquaCMX, textByCat, masterIdList, nameDicts);
+            //---------------------------------------------------------------------------------------//End CMX related ids
+        }
+
+        private static void NGSHornParse(string pso2_binDir, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
+
+            if (aquaCMX.ngsHornDict.Count > 0 || masterIdList.Count > 0)
+            {
+                StringBuilder outputNGSHorns = new StringBuilder();
+                outputNGSHorns.AppendLine(partColumns);
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsHornDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    //Skip the なし horn entry. I'm not even sure why that's in there.
+                    if (id == 0)
+                    {
+                        continue;
+                    }
+                    PartData partData = new PartData();
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            partData.namesByLanguage.Add(str);
+                        }
+                    }
+                    partData.id = id;
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    if (id >= 100000)
+                    {
+                        string reb = $"{rebootStart}hn_{id}.ice";
+                        string rebEx = $"{rebootExStart}hn_{id}_ex.ice";
+                        string rebHash = GetFileHash(reb);
+                        string rebExHash = GetFileHash(rebEx);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            partData.partHash = rebHash;
+                            partData.partName = reb;
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + hornIcon + id + ".ice");
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetHornIconStringUnhashed(id.ToString());
+                        }
+                    }
+                    else
+                    {
+                        string finalId = $"{id:D5}";
+                        string classic = $"{classicStart}hn_{finalId}.ice";
+                        var classicHash = GetFileHash(classic);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            partData.partHash = classicHash;
+                            partData.partName = classic;
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + hornIcon + finalId + ".ice");
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetHornIconStringUnhashed(id.ToString());
+                        }
+
+                    }
+                    string output = partData.GetLine();
+                    partData = null;
+
+                    outputNGSHorns.Append(output);
+
+                }
+                WriteCSV(playerRebootDirOut, "HornsNGS.csv", outputNGSHorns);
+            }
+        }
+
+        private static void NGSTeethParse(string pso2_binDir, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
+
+            if (aquaCMX.ngsTeethDict.Count > 0 || masterIdList.Count > 0)
+            {
+                StringBuilder outputNGSTeeth = new StringBuilder();
+                outputNGSTeeth.AppendLine(partColumns);
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    PartData partData = new PartData();
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            partData.namesByLanguage.Add(str);
+                        }
+                    }
+                    partData.id = id;
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    if (id >= 100000)
+                    {
+                        string reb = $"{rebootStart}de_{id}.ice";
+                        string rebEx = $"{rebootExStart}de_{id}_ex.ice";
+                        string rebHash = GetFileHash(reb);
+                        string rebExHash = GetFileHash(rebEx);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            partData.partHash = rebHash;
+                            partData.partName = reb;
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + teethIcon + id + ".ice");
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetTeethIconStringUnhashed(id.ToString());
+                        }
+                    }
+                    else
+                    {
+                        string finalId = $"{id:D5}";
+                        string classic = $"{classicStart}de_{finalId}.ice";
+
+                        var classicHash = GetFileHash(classic);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            partData.partHash = classicHash;
+                            partData.partName = classic;
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + teethIcon + finalId + ".ice");
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetTeethIconStringUnhashed(id.ToString());
+                        }
+
+                    }
+                    string output = partData.GetLine();
+                    partData = null;
+
+                    outputNGSTeeth.Append(output);
+
+                }
+                WriteCSV(playerRebootDirOut, "TeethNGS.csv", outputNGSTeeth);
+            }
+        }
+
+        private static void NGSEarParse(string pso2_binDir, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "ears", true);
+
+            if (aquaCMX.ngsEarDict.Count > 0 || masterIdList.Count > 0)
+            {
+                StringBuilder outputNGSEars = new StringBuilder();
+                outputNGSEars.AppendLine(partColumns);
+
+                //Add potential cmx ids that wouldn't be stored in
+                GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
+
+                masterIdList.Sort();
+
+                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+                foreach (int id in masterIdList)
+                {
+                    PartData partData = new PartData();
+                    foreach (var dict in nameDicts)
+                    {
+                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                        {
+                            partData.namesByLanguage.Add(str);
+                        }
+                    }
+                    partData.id = id;
+
+                    //Decide if it needs to be handled as a reboot file or not
+                    if (id >= 100000)
+                    {
+                        string reb = $"{rebootStart}ea_{id}.ice";
+                        string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
+                        string rebHash = GetFileHash(reb);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                        {
+                            partData.partHash = rebHash;
+                            partData.partName = reb;
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + earIcon + id + ".ice");
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetEarIconStringUnhashed(id.ToString());
+                        }
+
+                    }
+                    else
+                    {
+                        string finalId = $"{id:D5}";
+                        string classic = $"{classicStart}ea_{finalId}.ice";
+
+                        var classicHash = GetFileHash(classic);
+
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                        {
+                            partData.partHash = classicHash;
+                            partData.partName = classic;
+                        }
+                        //Set icon string
+                        var iconStr = GetFileHash(icon + earIcon + finalId + ".ice");
+                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                        {
+                            partData.iconHash = iconStr;
+                            partData.iconName = GetEarIconStringUnhashed(id.ToString());
+                        }
+
+                    }
+                    string output = partData.GetLine();
+                    partData = null;
+
+                    outputNGSEars.Append(output);
+
+                }
+                WriteCSV(playerRebootDirOut, "EarsNGS.csv", outputNGSEars);
+            }
+        }
+
+        private static void FaceMotionParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputFcmn = new StringBuilder();
+            StringBuilder outputFcmnNGS = new StringBuilder();
+            outputFcmn.AppendLine(partColumns);
+            outputFcmnNGS.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcmnDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                string typeString = "fm_";
+                if (id >= 100000)
+                {
+                    var partName = $"{rebootStart}{typeString}{id}.ice";
+                    var partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
+                    var partHash = GetFileHash(partName);
+                    var partExHash = GetFileHash(partExName);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
+                    {
+                        partData.partHash = partHash;
+                        partData.partName = partName;
+                    }
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    var partName = $"{classicStart}{typeString}{finalId}.ice";
+                    var partHash = GetFileHash(partName);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
+                    {
+                        partData.partHash = partHash;
+                        partData.partName = partName;
+                    }
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id < 100000)
+                {
+                    outputFcmn.AppendLine(output);
+                }
+                else
+                {
+                    outputFcmnNGS.AppendLine(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "FaceMotions.csv", outputFcmn);
+            WriteCSV(playerRebootDirOut, "FaceMotionsNGS.csv", outputFcmnNGS);
+        }
+
+        private static void FaceVariationParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<int, string> faceIds, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts, out List<string> masterNameList, out List<Dictionary<string, string>> strNameDicts)
+        {
+            //This targets facevariations specifically. face seems to be redundant and not actually particularly useful at a glance.
+            StringBuilder outputHumanMaleFace = new StringBuilder();
+            StringBuilder outputHumanFemaleFace = new StringBuilder();
+            StringBuilder outputNewmanMaleFace = new StringBuilder();
+            StringBuilder outputNewmanFemaleFace = new StringBuilder();
+            StringBuilder outputCastMaleFace = new StringBuilder();
+            StringBuilder outputCastFemaleFace = new StringBuilder();
+            StringBuilder outputDewmanMaleFace = new StringBuilder();
+            StringBuilder outputDewmanFemaleFace = new StringBuilder();
+            StringBuilder outputNGSFace = new StringBuilder();
+
+            outputHumanMaleFace.AppendLine(partColumns);
+            outputHumanFemaleFace.AppendLine(partColumns);
+            outputNewmanMaleFace.AppendLine(partColumns);
+            outputNewmanFemaleFace.AppendLine(partColumns);
+            outputCastMaleFace.AppendLine(partColumns);
+            outputCastFemaleFace.AppendLine(partColumns);
+            outputDewmanMaleFace.AppendLine(partColumns);
+            outputDewmanFemaleFace.AppendLine(partColumns);
+            outputNGSFace.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+
+            masterNameList = new List<string>();
+            strNameDicts = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "facevariation", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.faceDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+
+                string realId = "";
+                if (!faceIds.TryGetValue(id, out realId))
+                {
+                    realId = "No" + id;
+                }
+
+
+                foreach (var dict in strNameDicts)
+                {
+                    if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}fc_{id}.ice";
+                    string rebEx = $"{rebootExStart}fc_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}fc_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id < 10000)
+                {
+                    outputHumanMaleFace.Append(output);
+                }
+                else if (id < 20000)
+                {
+                    outputHumanFemaleFace.Append(output);
+                }
+                else if (id < 30000)
+                {
+                    outputNewmanMaleFace.Append(output);
+                }
+                else if (id < 40000)
+                {
+                    outputNewmanFemaleFace.Append(output);
+                }
+                else if (id < 50000)
+                {
+                    outputCastMaleFace.Append(output);
+                }
+                else if (id < 60000)
+                {
+                    outputCastFemaleFace.Append(output);
+                }
+                else if (id < 70000)
+                {
+                    outputDewmanMaleFace.Append(output);
+                }
+                else if (id < 100000)
+                {
+                    outputDewmanFemaleFace.Append(output);
+                }
+                else
+                {
+                    outputNGSFace.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "MaleHumanFaces.csv", outputHumanMaleFace);
+            WriteCSV(playerClassicDirOut, "FemaleHumanFaces.csv", outputHumanFemaleFace);
+            WriteCSV(playerClassicDirOut, "MaleNewmanFaces.csv", outputNewmanMaleFace);
+            WriteCSV(playerClassicDirOut, "FemaleNewmanFaces.csv", outputNewmanFemaleFace);
+            WriteCSV(playerClassicDirOut, "CastFaces_Heads.csv", outputCastMaleFace);
+            WriteCSV(playerClassicDirOut, "CasealFaces_Heads.csv", outputCastFemaleFace);
+            WriteCSV(playerClassicDirOut, "MaleDeumanFaces.csv", outputDewmanMaleFace);
+            WriteCSV(playerClassicDirOut, "FemaleDeumanFaces.csv", outputDewmanFemaleFace);
+            WriteCSV(playerRebootDirOut, "AllFacesNGS.csv", outputNGSFace);
+        }
+
+        private static void FacePaintParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputFCP2 = new StringBuilder();
+            StringBuilder outputNGSFCP2 = new StringBuilder();
+            outputFCP2.AppendLine(partColumns);
+            outputNGSFCP2.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint2", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}f2_{id}.ice";
+                    string rebEx = $"{rebootExStart}f2_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + facePaintIcon + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}f2_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + facePaintIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id <= 100000)
+                {
+                    outputFCP2.Append(output);
+                }
+                else
+                {
+                    outputNGSFCP2.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "FacePaint.csv", outputFCP2);
+            if (outputNGSFCP2.Length > 0)
+            {
+                WriteCSV(playerRebootDirOut, "FacePaintNGS.csv", outputNGSFCP2);
+            }
+        }
+
+        private static void FaceTexturesParse(string pso2_binDir, string playerClassicDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputFCP1 = new StringBuilder();
+            StringBuilder outputNGSFCP1 = new StringBuilder();
+            outputFCP1.AppendLine(partColumns);
+            outputNGSFCP1.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint1", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}f1_{id}.ice";
+                    string rebEx = $"{rebootExStart}f1_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + faceIcon + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}f1_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + faceIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id <= 100000)
+                {
+                    outputFCP1.Append(output);
+                }
+                else
+                {
+                    outputNGSFCP1.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "FaceTextures.csv", outputFCP1);
+            //Textures should just be with the model for these; no f1 ices in making_reboot
+            /*
+            if (outputNGSFCP1.Length > 0)
+            {
+                WriteCSV(outputDirectory, "FaceTexturesNGS.csv", outputNGSFCP1);
+            }*/
+        }
+
+        private static void SkinParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputSkin = new StringBuilder();
+            StringBuilder outputNGSSkin = new StringBuilder();
+            outputSkin.AppendLine(partColumns);
+            outputNGSSkin.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "skin", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.ngsSkinDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}sk_{id}.ice";
+                    string rebEx = $"{rebootExStart}sk_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+
+                    //Set icon string
+                    string iconStrTest = icon + skinIcon + GetIconGender(id) + id + ".ice";
+                    var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetSkinIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}sk_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetSkinIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id < 100000)
+                {
+                    outputSkin.Append(output);
+                }
+                else
+                {
+                    outputNGSSkin.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "Skins.csv", outputSkin);
+            WriteCSV(playerRebootDirOut, "SkinsNGS.csv", outputNGSSkin);
+        }
+
+        private static void AcceParse(string pso2_binDir, string playerDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputAccessories = new StringBuilder();
+            outputAccessories.AppendLine(acceColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "decoy", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.accessoryDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                string output = "";
+                bool named = false;
+                for (int i = 0; i < nameDicts.Count && i < 2; i++)
+                {
+                    var dict = nameDicts[i];
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        named = true;
+                        output += Escape(str) + ",";
+                    }
+                    else
+                    {
+                        output += ",";
+                    }
+                }
+                output += $"{id},";
+
+                //Account for lack of a name on an outfit
+                if (named == false)
+                {
+                    output = $"[Unnamed {id}]" + output;
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.accessoryIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.accessoryIdLink[id].bcln.fileId;
+                }
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}ac_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}ac_{adjustedId}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + accessoryIcon + id + ".ice");
+                    output += iconStr + ",";
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        output += rebHash;
+                    }
+                    output += ",";
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}ac_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + accessoryIcon + finalId + ".ice");
+                    output += iconStr + ",";
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        output += $"{classicHash}";
+                    }
+                    output += ",";
+                }
+
+                //Add linked character nodes
+                if (aquaCMX.accessoryDict.ContainsKey(id))
+                {
+                    var acce = aquaCMX.accessoryDict[id];
+
+                    output += $",{acce.nodeAttach1},{acce.nodeAttach2},{acce.nodeAttach3},{acce.nodeAttach4},{acce.nodeAttach5}," +
+                        $"{acce.nodeAttach6},{acce.nodeAttach7},{acce.nodeAttach8},{acce.nodeAttach9},{acce.nodeAttach10}," +
+                        $"{acce.nodeAttach11},{acce.nodeAttach12},{acce.nodeAttach13},{acce.nodeAttach14},{acce.nodeAttach15},{acce.nodeAttach16}" +
+                        $",{acce.effectName}";
+                }
+
+                output += "\n";
+
+                outputAccessories.Append(output);
+            }
+            WriteCSV(playerDirOut, "Accessories.csv", outputAccessories);
+        }
+
+        private static void EyelashParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputEyelashes = new StringBuilder();
+            StringBuilder outputNGSEyelashes = new StringBuilder();
+
+            outputEyelashes.AppendLine(partColumns);
+            outputNGSEyelashes.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "eyelashes", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}el_{id}.ice";
+                    string rebEx = $"{rebootExStart}el_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyelashesIcon + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyelashesIconStringUnhashed(id.ToString());
+                    }
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}el_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyelashesIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyelashesIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id <= 100000)
+                {
+                    outputEyelashes.Append(output);
+                }
+                else
+                {
+                    outputNGSEyelashes.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "Eyelashes.csv", outputEyelashes);
+            WriteCSV(playerRebootDirOut, "EyelashesNGS.csv", outputNGSEyelashes);
+        }
+
+        private static void EyeBrowParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputEyebrows = new StringBuilder();
+            StringBuilder outputNGSEyebrows = new StringBuilder();
+
+            outputEyebrows.AppendLine(partColumns);
+            outputNGSEyebrows.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "eyebrows", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}eb_{id}.ice";
+                    string rebEx = $"{rebootExStart}eb_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyeBrowsIcon + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyebrowsIconStringUnhashed(id.ToString());
+                    }
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}eb_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyeBrowsIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyebrowsIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id <= 100000)
+                {
+                    outputEyebrows.Append(output);
+                }
+                else
+                {
+                    outputNGSEyebrows.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "Eyebrows.csv", outputEyebrows);
+            WriteCSV(playerRebootDirOut, "EyebrowsNGS.csv", outputNGSEyebrows);
+        }
+
+        private static void EyeParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputEyes = new StringBuilder();
+            StringBuilder outputNGSEyes = new StringBuilder();
+
+            outputEyes.AppendLine(partColumns);
+            outputNGSEyes.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "eye", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.eyeDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}ey_{id}.ice";
+                    string rebEx = $"{rebootExStart}ey_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyeIcon + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyeIconStringUnhashed(id.ToString());
+                    }
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}ey_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + eyeIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetEyeIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                if (id < 100000)
+                {
+                    outputEyes.Append(output);
+                }
+                else
+                {
+                    outputNGSEyes.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "Eyes.csv", outputEyes);
+            WriteCSV(playerRebootDirOut, "EyesNGS.csv", outputNGSEyes);
+        }
+
+        private static void HairParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputMaleHair = new StringBuilder();
+            StringBuilder outputFemaleHair = new StringBuilder();
+            StringBuilder outputCasealHair = new StringBuilder();
+            StringBuilder outputNGSHair = new StringBuilder();
+
+            outputMaleHair.AppendLine(hairColumns);
+            outputFemaleHair.AppendLine(hairColumns);
+            outputCasealHair.AppendLine(hairColumns);
+            outputNGSHair.AppendLine(hairColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "hair", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.hairDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}hr_{id}.ice";
+                    string rebEx = $"{rebootExStart}hr_{id}_ex.ice";
+
+                    //Cast heads
+                    if (id >= 300000 && id < 500000)
+                    {
+                        reb = reb.Replace("hr", "fc");
+                        rebEx = rebEx.Replace("hr", "fc");
+                    }
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                    //Set icon string
+                    string maleIconStr;
+                    string femaleIconStr;
+                    string castIconStr;
+
+                    //Cast heads
+                    if (id >= 300000 && id < 500000)
+                    {
+                        maleIconStr = "_";
+                        femaleIconStr = "_";
+                        castIconStr = icon + faceIcon + id + ".ice";
+                    }
+                    else
+                    {
+                        maleIconStr = icon + hairIcon + iconMale + id + ".ice";
+                        femaleIconStr = icon + hairIcon + iconFemale + id + ".ice";
+                        castIconStr = icon + hairIcon + iconCast + id + ".ice";
+                    }
+                    var maleIconStrHash = GetFileHash(maleIconStr);
+                    var femaleIconStrHash = GetFileHash(femaleIconStr);
+                    var castIconStrHash = GetFileHash(castIconStr);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStrHash)))
+                    {
+                        partData.iconHash = maleIconStrHash;
+                        partData.iconName = maleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStrHash)))
+                    {
+                        partData.iconOuterHash = femaleIconStrHash;
+                        partData.iconOuterName = femaleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStrHash)))
+                    {
+                        partData.iconCastHash = castIconStrHash;
+                        partData.iconCastName = castIconStr;
+                    }
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}hr_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var maleIconStr = icon + hairIcon + iconMale + id + ".ice";
+                    var femaleIconStr = icon + hairIcon + iconFemale + id + ".ice";
+                    var castIconStr = icon + hairIcon + iconCast + id + ".ice";
+                    var maleIconStrHash = GetFileHash(maleIconStr);
+                    var femaleIconStrHash = GetFileHash(femaleIconStr);
+                    var castIconStrHash = GetFileHash(castIconStr);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStrHash)))
+                    {
+                        partData.iconHash = maleIconStrHash;
+                        partData.iconName = maleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStrHash)))
+                    {
+                        partData.iconOuterHash = femaleIconStrHash;
+                        partData.iconOuterName = femaleIconStr;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStrHash)))
+                    {
+                        partData.iconCastHash = castIconStrHash;
+                        partData.iconCastName = castIconStr;
+
+                    }
+                }
+                string output = partData.GetLineAllIcons();
+                partData = null;
+
+                //Decide which type this is
+                if (id < 10000)
+                {
+                    outputMaleHair.Append(output);
+                }
+                else if (id < 20000)
+                {
+                    outputFemaleHair.Append(output);
+                }
+                else if (id < 60000)
+                {
+                    outputCasealHair.Append(output);
+                }
+                else
+                {
+                    outputNGSHair.Append(output);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "MaleHair.csv", outputMaleHair);
+            WriteCSV(playerClassicDirOut, "FemaleHair.csv", outputFemaleHair);
+            WriteCSV(playerClassicDirOut, "CasealHair.csv", outputCasealHair);
+            WriteCSV(playerRebootDirOut, "AllHairNGS.csv", outputNGSHair);
+        }
+
+        private static void StickerParse(string pso2_binDir, string playerDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputStickers = new StringBuilder();
+
+            outputStickers.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint2", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}b2_{id}.ice";
+                    string rebEx = $"{rebootExStart}b2_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + stickerIcon + id + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetStickerIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}b2_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetFileHash(icon + stickerIcon + finalId + ".ice");
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetStickerIconStringUnhashed(id.ToString());
+                    }
+
+                }
+
+                string output = partData.GetLine();
+                partData = null;
+                outputStickers.Append(output);
+            }
+            WriteCSV(playerDirOut, "Stickers.csv", outputStickers);
+        }
+
+        private static void BodyPaintParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputMaleBodyPaint = new StringBuilder();
+            StringBuilder outputFemaleBodyPaint = new StringBuilder();
+            StringBuilder outputMaleLayeredBodyPaint = new StringBuilder();
+            StringBuilder outputFemaleLayeredBodyPaint = new StringBuilder();
+            StringBuilder outputNGSMaleBodyPaint = new StringBuilder();
+            StringBuilder outputNGSFemaleBodyPaint = new StringBuilder();
+            StringBuilder outputNGSCastMaleBodyPaint = new StringBuilder();
+            StringBuilder outputNGSCastFemaleBodyPaint = new StringBuilder();
+            StringBuilder outputNGSGenderlessBodyPaint = new StringBuilder();
+
+            outputMaleBodyPaint.AppendLine(partColumns);
+            outputFemaleBodyPaint.AppendLine(partColumns);
+            outputMaleLayeredBodyPaint.AppendLine(partColumns);
+            outputFemaleLayeredBodyPaint.AppendLine(partColumns);
+            outputNGSMaleBodyPaint.AppendLine(partColumns);
+            outputNGSFemaleBodyPaint.AppendLine(partColumns);
+            outputNGSCastMaleBodyPaint.AppendLine(partColumns);
+            outputNGSCastFemaleBodyPaint.AppendLine(partColumns);
+            outputNGSGenderlessBodyPaint.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint1", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.bodyPaintDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}b1_{id}.ice";
+                    string rebEx = $"{rebootExStart}b1_{id}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    //Set icon string
+                    var iconStr = GetBodyPaintIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBodyPaintIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{id:D5}";
+                    string classic = $"{classicStart}b1_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetBodyPaintIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBodyPaintIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                //Decide which type this is
+                if (id < 10000)
+                {
+                    outputMaleBodyPaint.Append(output);
+                }
+                else if (id < 20000)
+                {
+                    outputFemaleBodyPaint.Append(output);
+                }
+                else if (id < 30000)
+                {
+                    outputMaleLayeredBodyPaint.Append(output);
+                }
+                else if (id < 100000)
+                {
+                    outputFemaleLayeredBodyPaint.Append(output);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSMaleBodyPaint.Append(output);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSFemaleBodyPaint.Append(output);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastMaleBodyPaint.Append(output);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCastFemaleBodyPaint.Append(output);
+                }
+                else if (id < 600000)
+                {
+                    outputNGSGenderlessBodyPaint.Append(output);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown b1 with id: " + id);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "MaleBodyPaint.csv", outputMaleBodyPaint);
+            WriteCSV(playerClassicDirOut, "FemaleBodyPaint.csv", outputFemaleBodyPaint);
+            WriteCSV(playerClassicDirOut, "MaleLayeredBodyPaint.csv", outputMaleLayeredBodyPaint);
+            WriteCSV(playerClassicDirOut, "FemaleLayeredBodyPaint.csv", outputFemaleLayeredBodyPaint);
+            WriteCSV(playerRebootDirOut, "MaleNGSBodyPaint.csv", outputNGSMaleBodyPaint);
+            WriteCSV(playerRebootDirOut, "FemaleNGSBodyPaint.csv", outputNGSFemaleBodyPaint);
+            WriteCSV(playerRebootDirOut, "CastNGSBodyPaint.csv", outputNGSCastMaleBodyPaint);
+            WriteCSV(playerRebootDirOut, "CasealNGSBodyPaint.csv", outputNGSCastFemaleBodyPaint);
+            WriteCSV(playerRebootDirOut, "GenderlessNGSBodyPaint.csv", outputNGSGenderlessBodyPaint);
+        }
+
+        private static void CastLegParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputCastLegMale = new StringBuilder();
+            StringBuilder outputCastLegFemale = new StringBuilder();
+            StringBuilder outputNGSCastLegMale = new StringBuilder();
+            StringBuilder outputNGSCastLegFemale = new StringBuilder();
+
+            outputCastLegMale.AppendLine(partColumns);
+            outputCastLegFemale.AppendLine(partColumns);
+            outputNGSCastLegMale.AppendLine(partColumns);
+            outputNGSCastLegFemale.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "Leg", true); //Yeah for some reason this string starts capitalized while none of the others do... don't ask me.
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.clegDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                int linkedInnerId = -1;
+                int soundId = -1;
+                int headId = -1;
+                if (aquaCMX.clegDict.ContainsKey(id))
+                {
+                    linkedInnerId = aquaCMX.clegDict[id].body2.linkedInnerId;
+                    soundId = aquaCMX.clegDict[id].body2.costumeSoundId;
+                    headId = aquaCMX.clegDict[id].body2.headId;
+                }
+                if (aquaCMX.clegIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.clegIdLink[id].bcln.fileId;
+                }
+                partData.adjustedId = adjustedId;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}lg_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}lg_{adjustedId}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    string iconStr = GetCastLegIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    string classic = $"{classicStart}lg_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetCastLegIconString(finalIdIcon);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
+                    }
+                }
+                AddOutfitSound(partData, pso2_binDir, soundId);
+                AddHeadPart(partData, pso2_binDir, headId);
+
+                string output = partData.GetLine();
+                partData = null;
+
+                //Decide which type this is
+                if (id < 50000)
+                {
+                    outputCastLegMale.Append(output);
+                }
+                else if (id < 60000)
+                {
+                    outputCastLegFemale.Append(output);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastLegMale.Append(output);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCastLegFemale.Append(output);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown lg with id: " + id);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "CastLegs.csv", outputCastLegMale);
+            WriteCSV(playerClassicDirOut, "CasealLegs.csv", outputCastLegFemale);
+            WriteCSV(playerRebootDirOut, "CastLegsNGS.csv", outputNGSCastLegMale);
+            WriteCSV(playerRebootDirOut, "CasealLegsNGS.csv", outputNGSCastLegFemale);
+        }
+
+        private static void CastArmParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputCastArmMale = new StringBuilder();
+            StringBuilder outputCastArmFemale = new StringBuilder();
+            StringBuilder outputNGSCastArmMale = new StringBuilder();
+            StringBuilder outputNGSCastArmFemale = new StringBuilder();
+
+            outputCastArmMale.AppendLine(partColumns);
+            outputCastArmFemale.AppendLine(partColumns);
+            outputNGSCastArmMale.AppendLine(partColumns);
+            outputNGSCastArmFemale.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "arm", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.carmDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                int linkedInnerId = -1;
+                int headId = -1;
+                if (aquaCMX.carmDict.ContainsKey(id))
+                {
+                    linkedInnerId = aquaCMX.carmDict[id].body2.linkedInnerId;
+                    headId = aquaCMX.carmDict[id].body2.headId;
+                }
+                if (aquaCMX.castArmIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.castArmIdLink[id].bcln.fileId;
+                }
+                partData.adjustedId = adjustedId;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}am_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}am_{adjustedId}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+                    string iconStr = GetCastArmIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastArmIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    string classic = $"{classicStart}am_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+                    //Set icon string
+                    var iconStr = GetCastArmIconString(finalIdIcon);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetCastArmIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                AddHeadPart(partData, pso2_binDir, headId);
+                string output = partData.GetLine();
+                partData = null;
+
+                //Decide which type this is
+                if (id < 50000)
+                {
+                    outputCastArmMale.Append(output);
+                }
+                else if (id < 60000)
+                {
+                    outputCastArmFemale.Append(output);
+                }
+                else if (id < 400000)
+                {
+                    outputNGSCastArmMale.Append(output);
+                }
+                else if (id < 500000)
+                {
+                    outputNGSCastArmFemale.Append(output);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown am with id: " + id);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "CastArms.csv", outputCastArmMale);
+            WriteCSV(playerClassicDirOut, "CasealArms.csv", outputCastArmFemale);
+            WriteCSV(playerRebootDirOut, "CastArmsNGS.csv", outputNGSCastArmMale);
+            WriteCSV(playerRebootDirOut, "CasealArmsNGS.csv", outputNGSCastArmFemale);
+        }
+
+        private static void InnerWearParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputInnerwearMale = new StringBuilder();
+            StringBuilder outputInnerwearFemale = new StringBuilder();
+            StringBuilder outputNGSInnerwearMale = new StringBuilder();
+            StringBuilder outputNGSInnerwearFemale = new StringBuilder();
+
+            outputInnerwearMale.AppendLine(partColumns);
+            outputInnerwearFemale.AppendLine(partColumns);
+            outputNGSInnerwearMale.AppendLine(partColumns);
+            outputNGSInnerwearFemale.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "innerwear", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.innerWearDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.innerWearIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.innerWearIdLink[id].bcln.fileId;
+                }
+                partData.adjustedId = adjustedId;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}iw_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}iw_{adjustedId}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+
+                    string iconStr = GetInnerwearIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetInnerwearIconStringUnhashed(id.ToString());
+                    }
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    string classic = $"{classicStart}iw_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+
+                    //Set icon string
+                    var iconStr = GetInnerwearIconString(finalIdIcon);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetInnerwearIconStringUnhashed(id.ToString());
+                    }
+
+                }
+                string output = partData.GetLine();
+                partData = null;
+
+                //Decide which type this is
+                if (id < 30000)
+                {
+                    outputInnerwearMale.Append(output);
+                }
+                else if (id < 40000)
+                {
+                    outputInnerwearFemale.Append(output);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSInnerwearMale.Append(output);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSInnerwearFemale.Append(output);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown iw with id: " + id);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "MaleInnerwear.csv", outputInnerwearMale);
+            WriteCSV(playerClassicDirOut, "FemaleInnerwear.csv", outputInnerwearFemale);
+            WriteCSV(playerRebootDirOut, "MaleNGSInnerwear.csv", outputNGSInnerwearMale);
+            WriteCSV(playerRebootDirOut, "FemaleNGSInnerwear.csv", outputNGSInnerwearFemale);
+        }
+
+        private static void BasewearParse(string pso2_binDir, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<int> masterIdList, List<Dictionary<int, string>> nameDicts)
+        {
+            StringBuilder outputBasewearMale = new StringBuilder();
+            StringBuilder outputBasewearFemale = new StringBuilder();
+            StringBuilder outputNGSBasewearMale = new StringBuilder();
+            StringBuilder outputNGSBasewearFemale = new StringBuilder();
+            StringBuilder outputNGSGenderlessBasewear = new StringBuilder();
+
+            outputBasewearMale.AppendLine(partColumns);
+            outputBasewearFemale.AppendLine(partColumns);
+            outputNGSBasewearMale.AppendLine(partColumns);
+            outputNGSBasewearFemale.AppendLine(partColumns);
+            outputNGSGenderlessBasewear.AppendLine(partColumns);
+
+            masterIdList.Clear();
+            nameDicts.Clear();
+            GatherTextIds(textByCat, masterIdList, nameDicts, "basewear", true);
+
+            //Add potential cmx ids that wouldn't be stored in
+            GatherDictKeys(masterIdList, aquaCMX.baseWearDict.Keys);
+
+            masterIdList.Sort();
+
+            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
+            //Check as well in pso2_bin directory if _rp version of outfit exists and note as well if there's a bm file for said bd file. (Hairs similar have hm files to complement hr files)
+            //There may also be hn files for these while basewear would have ho files for hand textures
+            foreach (int id in masterIdList)
+            {
+                PartData partData = new PartData();
+                foreach (var dict in nameDicts)
+                {
+                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                }
+                partData.id = id;
+
+                //Get SoundID
+                int soundId = -1;
+                int linkedInnerId = -1;
+                int headId = -1;
+                if (aquaCMX.baseWearDict.ContainsKey(id))
+                {
+                    soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
+                    linkedInnerId = aquaCMX.baseWearDict[id].body2.linkedInnerId;
+                    headId = aquaCMX.baseWearDict[id].body2.headId;
+                }
+
+                //Double check these ids and use an adjustedId if needed
+                int adjustedId = id;
+                if (aquaCMX.baseWearIdLink.ContainsKey(id))
+                {
+                    adjustedId = aquaCMX.baseWearIdLink[id].bcln.fileId;
+                }
+                partData.adjustedId = adjustedId;
+
+                //Decide if it needs to be handled as a reboot file or not
+                if (id >= 100000)
+                {
+                    string reb = $"{rebootStart}bw_{adjustedId}.ice";
+                    string rebEx = $"{rebootExStart}bw_{adjustedId}_ex.ice";
+                    string rebHash = GetFileHash(reb);
+                    string rebExHash = GetFileHash(rebEx);
+                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
+                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
+                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
+                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
+                    {
+                        partData.partHash = rebHash;
+                        partData.partName = reb;
+                    }
+
+                    //Set icon string
+                    var iconStr = GetBasewearIconString(id.ToString());
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBasewearIconStringUnhashed(id.ToString());
+                    }
+
+                    AddBasewearExtraFiles(partData, reb, pso2_binDir, false);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
+                    {
+                        partData.partExHash = rebExHash;
+                        partData.partExName = rebEx;
+                    }
+
+                    AddHQBasewearExtraFiles(partData, rebEx, pso2_binDir, false);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
+                    {
+                        partData.linkedInnerHash = rebLinkedInnerHash;
+                        partData.linkedInnerName = rebLinkedInner;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
+                    {
+                        partData.linkedInnerExHash = rebLinkedInnerExHash;
+                        partData.linkedInnerName = rebLinkedInnerEx;
+                    }
+                }
+                else
+                {
+                    string finalId = $"{adjustedId:D5}";
+                    string finalIdIcon = $"{id:D5}";
+                    string classic = $"{classicStart}bw_{finalId}.ice";
+
+                    var classicHash = GetFileHash(classic);
+
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
+                    {
+                        partData.partHash = classicHash;
+                        partData.partName = classic;
+                    }
+
+                    //Set icon string
+                    var iconStr = GetBasewearIconString(finalIdIcon);
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
+                    {
+                        partData.iconHash = iconStr;
+                        partData.iconName = GetBasewearIconStringUnhashed(id.ToString());
+                    }
+
+                    AddBasewearExtraFiles(partData, classic, pso2_binDir, true);
+                }
+                AddOutfitSound(partData, pso2_binDir, soundId);
+                AddHeadPart(partData, pso2_binDir, headId);
+
+                string output = partData.GetLine();
+                partData = null;
+
+                //Decide which type this is
+                if (id < 30000)
+                {
+                    outputBasewearMale.Append(output);
+                }
+                else if (id < 40000)
+                {
+                    outputBasewearFemale.Append(output);
+                }
+                else if (id < 200000)
+                {
+                    outputNGSBasewearMale.Append(output);
+                }
+                else if (id < 300000)
+                {
+                    outputNGSBasewearFemale.Append(output);
+                }
+                else if (id < 600000)
+                {
+                    outputNGSGenderlessBasewear.Append(output);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown bw with id: " + id);
+                }
+            }
+            WriteCSV(playerClassicDirOut, "MaleBasewear.csv", outputBasewearMale);
+            WriteCSV(playerClassicDirOut, "FemaleBasewear.csv", outputBasewearFemale);
+            WriteCSV(playerRebootDirOut, "MaleNGSBasewear.csv", outputNGSBasewearMale);
+            WriteCSV(playerRebootDirOut, "FemaleNGSBasewear.csv", outputNGSBasewearFemale);
+            WriteCSV(playerRebootDirOut, "GenderlessNGSBasewear.csv", outputNGSGenderlessBasewear);
+        }
+
+        private static void CostumeBodyParse(string pso2_binDir, string playerDirOut, string playerClassicDirOut, string playerRebootDirOut, CharacterMakingIndex aquaCMX, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, out List<int> masterIdList, out List<Dictionary<int, string>> nameDicts)
+        {
             StringBuilder outputCostumeMale = new StringBuilder();
             StringBuilder outputCostumeFemale = new StringBuilder();
             StringBuilder outputCastBody = new StringBuilder();
@@ -2653,2061 +4824,6 @@ namespace AquaModelLibrary.Data.Utility
             //WriteCSV(playerRebootDirOut, "MaleNGSCostumes.csv", outputNGSCostumeMale);
             //WriteCSV(playerRebootDirOut, "FemaleNGSCostumes.csv", outputNGSCostumeFemale);
             WriteCSV(playerDirOut, "UnknownOutfits.csv", outputUnknownWearables);
-
-            //---------------------------Parse out basewear
-            StringBuilder outputBasewearMale = new StringBuilder();
-            StringBuilder outputBasewearFemale = new StringBuilder();
-            StringBuilder outputNGSBasewearMale = new StringBuilder();
-            StringBuilder outputNGSBasewearFemale = new StringBuilder();
-            StringBuilder outputNGSGenderlessBasewear = new StringBuilder();
-
-            outputBasewearMale.AppendLine(partColumns);
-            outputBasewearFemale.AppendLine(partColumns);
-            outputNGSBasewearMale.AppendLine(partColumns);
-            outputNGSBasewearFemale.AppendLine(partColumns);
-            outputNGSGenderlessBasewear.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "basewear", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.baseWearDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            //Check as well in pso2_bin directory if _rp version of outfit exists and note as well if there's a bm file for said bd file. (Hairs similar have hm files to complement hr files)
-            //There may also be hn files for these while basewear would have ho files for hand textures
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Get SoundID
-                int soundId = -1;
-                int linkedInnerId = -1;
-                int headId = -1;
-                if (aquaCMX.baseWearDict.ContainsKey(id))
-                {
-                    soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
-                    linkedInnerId = aquaCMX.baseWearDict[id].body2.linkedInnerId;
-                    headId = aquaCMX.baseWearDict[id].body2.headId;
-                }
-
-                //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
-                if (aquaCMX.baseWearIdLink.ContainsKey(id))
-                {
-                    adjustedId = aquaCMX.baseWearIdLink[id].bcln.fileId;
-                }
-                partData.adjustedId = adjustedId;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}bw_{adjustedId}.ice";
-                    string rebEx = $"{rebootExStart}bw_{adjustedId}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
-                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
-                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
-                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-
-                    //Set icon string
-                    var iconStr = GetBasewearIconString(id.ToString());
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetBasewearIconStringUnhashed(id.ToString());
-                    }
-
-                    AddBasewearExtraFiles(partData, reb, pso2_binDir, false);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                    AddHQBasewearExtraFiles(partData, rebEx, pso2_binDir, false);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
-                    {
-                        partData.linkedInnerHash = rebLinkedInnerHash;
-                        partData.linkedInnerName = rebLinkedInner;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
-                    {
-                        partData.linkedInnerExHash = rebLinkedInnerExHash;
-                        partData.linkedInnerName = rebLinkedInnerEx;
-                    }
-                }
-                else
-                {
-                    string finalId = $"{adjustedId:D5}";
-                    string finalIdIcon = $"{id:D5}";
-                    string classic = $"{classicStart}bw_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-
-                    //Set icon string
-                    var iconStr = GetBasewearIconString(finalIdIcon);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetBasewearIconStringUnhashed(id.ToString());
-                    }
-
-                    AddBasewearExtraFiles(partData, classic, pso2_binDir, true);
-                }
-                AddOutfitSound(partData, pso2_binDir, soundId);
-                AddHeadPart(partData, pso2_binDir, headId);
-
-                string output = partData.GetLine();
-                partData = null;
-
-                //Decide which type this is
-                if (id < 30000)
-                {
-                    outputBasewearMale.Append(output);
-                }
-                else if (id < 40000)
-                {
-                    outputBasewearFemale.Append(output);
-                }
-                else if (id < 200000)
-                {
-                    outputNGSBasewearMale.Append(output);
-                }
-                else if (id < 300000)
-                {
-                    outputNGSBasewearFemale.Append(output);
-                }
-                else if (id < 600000)
-                {
-                    outputNGSGenderlessBasewear.Append(output);
-                }
-                else
-                {
-                    Console.WriteLine("Unknown bw with id: " + id);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "MaleBasewear.csv", outputBasewearMale);
-            WriteCSV(playerClassicDirOut, "FemaleBasewear.csv", outputBasewearFemale);
-            WriteCSV(playerRebootDirOut, "MaleNGSBasewear.csv", outputNGSBasewearMale);
-            WriteCSV(playerRebootDirOut, "FemaleNGSBasewear.csv", outputNGSBasewearFemale);
-            WriteCSV(playerRebootDirOut, "GenderlessNGSBasewear.csv", outputNGSGenderlessBasewear);
-
-            //---------------------------Parse out innerwear
-            StringBuilder outputInnerwearMale = new StringBuilder();
-            StringBuilder outputInnerwearFemale = new StringBuilder();
-            StringBuilder outputNGSInnerwearMale = new StringBuilder();
-            StringBuilder outputNGSInnerwearFemale = new StringBuilder();
-
-            outputInnerwearMale.AppendLine(partColumns);
-            outputInnerwearFemale.AppendLine(partColumns);
-            outputNGSInnerwearMale.AppendLine(partColumns);
-            outputNGSInnerwearFemale.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "innerwear", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.innerWearDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
-                if (aquaCMX.innerWearIdLink.ContainsKey(id))
-                {
-                    adjustedId = aquaCMX.innerWearIdLink[id].bcln.fileId;
-                }
-                partData.adjustedId = adjustedId;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}iw_{adjustedId}.ice";
-                    string rebEx = $"{rebootExStart}iw_{adjustedId}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-
-                    string iconStr = GetInnerwearIconString(id.ToString());
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetInnerwearIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{adjustedId:D5}";
-                    string finalIdIcon = $"{id:D5}";
-                    string classic = $"{classicStart}iw_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-
-                    //Set icon string
-                    var iconStr = GetInnerwearIconString(finalIdIcon);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetInnerwearIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                //Decide which type this is
-                if (id < 30000)
-                {
-                    outputInnerwearMale.Append(output);
-                }
-                else if (id < 40000)
-                {
-                    outputInnerwearFemale.Append(output);
-                }
-                else if (id < 200000)
-                {
-                    outputNGSInnerwearMale.Append(output);
-                }
-                else if (id < 300000)
-                {
-                    outputNGSInnerwearFemale.Append(output);
-                }
-                else
-                {
-                    Console.WriteLine("Unknown iw with id: " + id);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "MaleInnerwear.csv", outputInnerwearMale);
-            WriteCSV(playerClassicDirOut, "FemaleInnerwear.csv", outputInnerwearFemale);
-            WriteCSV(playerRebootDirOut, "MaleNGSInnerwear.csv", outputNGSInnerwearMale);
-            WriteCSV(playerRebootDirOut, "FemaleNGSInnerwear.csv", outputNGSInnerwearFemale);
-
-            //---------------------------Parse out cast arms
-            StringBuilder outputCastArmMale = new StringBuilder();
-            StringBuilder outputCastArmFemale = new StringBuilder();
-            StringBuilder outputNGSCastArmMale = new StringBuilder();
-            StringBuilder outputNGSCastArmFemale = new StringBuilder();
-
-            outputCastArmMale.AppendLine(partColumns);
-            outputCastArmFemale.AppendLine(partColumns);
-            outputNGSCastArmMale.AppendLine(partColumns);
-            outputNGSCastArmFemale.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "arm", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.carmDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
-                int linkedInnerId = -1;
-                int headId = -1;
-                if (aquaCMX.carmDict.ContainsKey(id))
-                {
-                    linkedInnerId = aquaCMX.carmDict[id].body2.linkedInnerId;
-                    headId = aquaCMX.carmDict[id].body2.headId;
-                }
-                if (aquaCMX.castArmIdLink.ContainsKey(id))
-                {
-                    adjustedId = aquaCMX.castArmIdLink[id].bcln.fileId;
-                }
-                partData.adjustedId = adjustedId;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}am_{adjustedId}.ice";
-                    string rebEx = $"{rebootExStart}am_{adjustedId}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
-                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
-                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
-                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    string iconStr = GetCastArmIconString(id.ToString());
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetCastArmIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
-                    {
-                        partData.linkedInnerHash = rebLinkedInnerHash;
-                        partData.linkedInnerName = rebLinkedInner;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
-                    {
-                        partData.linkedInnerExHash = rebLinkedInnerExHash;
-                        partData.linkedInnerName = rebLinkedInnerEx;
-                    }
-                }
-                else
-                {
-                    string finalId = $"{adjustedId:D5}";
-                    string finalIdIcon = $"{id:D5}";
-                    string classic = $"{classicStart}am_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetCastArmIconString(finalIdIcon);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetCastArmIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                AddHeadPart(partData, pso2_binDir, headId);
-                string output = partData.GetLine();
-                partData = null;
-
-                //Decide which type this is
-                if (id < 50000)
-                {
-                    outputCastArmMale.Append(output);
-                }
-                else if (id < 60000)
-                {
-                    outputCastArmFemale.Append(output);
-                }
-                else if (id < 400000)
-                {
-                    outputNGSCastArmMale.Append(output);
-                }
-                else if (id < 500000)
-                {
-                    outputNGSCastArmFemale.Append(output);
-                }
-                else
-                {
-                    Console.WriteLine("Unknown am with id: " + id);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "CastArms.csv", outputCastArmMale);
-            WriteCSV(playerClassicDirOut, "CasealArms.csv", outputCastArmFemale);
-            WriteCSV(playerRebootDirOut, "CastArmsNGS.csv", outputNGSCastArmMale);
-            WriteCSV(playerRebootDirOut, "CasealArmsNGS.csv", outputNGSCastArmFemale);
-
-            //---------------------------Parse out cast legs
-            StringBuilder outputCastLegMale = new StringBuilder();
-            StringBuilder outputCastLegFemale = new StringBuilder();
-            StringBuilder outputNGSCastLegMale = new StringBuilder();
-            StringBuilder outputNGSCastLegFemale = new StringBuilder();
-
-            outputCastLegMale.AppendLine(partColumns);
-            outputCastLegFemale.AppendLine(partColumns);
-            outputNGSCastLegMale.AppendLine(partColumns);
-            outputNGSCastLegFemale.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "Leg", true); //Yeah for some reason this string starts capitalized while none of the others do... don't ask me.
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.clegDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
-                int linkedInnerId = -1;
-                int soundId = -1;
-                int headId = -1;
-                if (aquaCMX.clegDict.ContainsKey(id))
-                {
-                    linkedInnerId = aquaCMX.clegDict[id].body2.linkedInnerId;
-                    soundId = aquaCMX.clegDict[id].body2.costumeSoundId;
-                    headId = aquaCMX.clegDict[id].body2.headId;
-                }
-                if (aquaCMX.clegIdLink.ContainsKey(id))
-                {
-                    adjustedId = aquaCMX.clegIdLink[id].bcln.fileId;
-                }
-                partData.adjustedId = adjustedId;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}lg_{adjustedId}.ice";
-                    string rebEx = $"{rebootExStart}lg_{adjustedId}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-                    string rebLinkedInner = $"{rebootStart}b1_{linkedInnerId}.ice";
-                    string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
-                    string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
-                    string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    string iconStr = GetCastLegIconString(id.ToString());
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerHash)))
-                    {
-                        partData.linkedInnerHash = rebLinkedInnerHash;
-                        partData.linkedInnerName = rebLinkedInner;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
-                    {
-                        partData.linkedInnerExHash = rebLinkedInnerExHash;
-                        partData.linkedInnerName = rebLinkedInnerEx;
-                    }
-                }
-                else
-                {
-                    string finalId = $"{adjustedId:D5}";
-                    string finalIdIcon = $"{id:D5}";
-                    string classic = $"{classicStart}lg_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetCastLegIconString(finalIdIcon);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetCastLegIconStringUnhashed(id.ToString());
-                    }
-                }
-                AddOutfitSound(partData, pso2_binDir, soundId);
-                AddHeadPart(partData, pso2_binDir, headId);
-
-                string output = partData.GetLine();
-                partData = null;
-
-                //Decide which type this is
-                if (id < 50000)
-                {
-                    outputCastLegMale.Append(output);
-                }
-                else if (id < 60000)
-                {
-                    outputCastLegFemale.Append(output);
-                }
-                else if (id < 400000)
-                {
-                    outputNGSCastLegMale.Append(output);
-                }
-                else if (id < 500000)
-                {
-                    outputNGSCastLegFemale.Append(output);
-                }
-                else
-                {
-                    Console.WriteLine("Unknown lg with id: " + id);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "CastLegs.csv", outputCastLegMale);
-            WriteCSV(playerClassicDirOut, "CasealLegs.csv", outputCastLegFemale);
-            WriteCSV(playerRebootDirOut, "CastLegsNGS.csv", outputNGSCastLegMale);
-            WriteCSV(playerRebootDirOut, "CasealLegsNGS.csv", outputNGSCastLegFemale);
-
-            //---------------------------Parse out body paint
-            StringBuilder outputMaleBodyPaint = new StringBuilder();
-            StringBuilder outputFemaleBodyPaint = new StringBuilder();
-            StringBuilder outputMaleLayeredBodyPaint = new StringBuilder();
-            StringBuilder outputFemaleLayeredBodyPaint = new StringBuilder();
-            StringBuilder outputNGSMaleBodyPaint = new StringBuilder();
-            StringBuilder outputNGSFemaleBodyPaint = new StringBuilder();
-            StringBuilder outputNGSCastMaleBodyPaint = new StringBuilder();
-            StringBuilder outputNGSCastFemaleBodyPaint = new StringBuilder();
-            StringBuilder outputNGSGenderlessBodyPaint = new StringBuilder();
-
-            outputMaleBodyPaint.AppendLine(partColumns);
-            outputFemaleBodyPaint.AppendLine(partColumns);
-            outputMaleLayeredBodyPaint.AppendLine(partColumns);
-            outputFemaleLayeredBodyPaint.AppendLine(partColumns);
-            outputNGSMaleBodyPaint.AppendLine(partColumns);
-            outputNGSFemaleBodyPaint.AppendLine(partColumns);
-            outputNGSCastMaleBodyPaint.AppendLine(partColumns);
-            outputNGSCastFemaleBodyPaint.AppendLine(partColumns);
-            outputNGSGenderlessBodyPaint.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint1", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.bodyPaintDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}b1_{id}.ice";
-                    string rebEx = $"{rebootExStart}b1_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    //Set icon string
-                    var iconStr = GetBodyPaintIconString(id.ToString());
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetBodyPaintIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}b1_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetBodyPaintIconString(id.ToString());
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetBodyPaintIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                //Decide which type this is
-                if (id < 10000)
-                {
-                    outputMaleBodyPaint.Append(output);
-                }
-                else if (id < 20000)
-                {
-                    outputFemaleBodyPaint.Append(output);
-                }
-                else if (id < 30000)
-                {
-                    outputMaleLayeredBodyPaint.Append(output);
-                }
-                else if (id < 100000)
-                {
-                    outputFemaleLayeredBodyPaint.Append(output);
-                }
-                else if (id < 200000)
-                {
-                    outputNGSMaleBodyPaint.Append(output);
-                }
-                else if (id < 300000)
-                {
-                    outputNGSFemaleBodyPaint.Append(output);
-                }
-                else if (id < 400000)
-                {
-                    outputNGSCastMaleBodyPaint.Append(output);
-                }
-                else if (id < 500000)
-                {
-                    outputNGSCastFemaleBodyPaint.Append(output);
-                }
-                else if (id < 600000)
-                {
-                    outputNGSGenderlessBodyPaint.Append(output);
-                }
-                else
-                {
-                    Console.WriteLine("Unknown b1 with id: " + id);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "MaleBodyPaint.csv", outputMaleBodyPaint);
-            WriteCSV(playerClassicDirOut, "FemaleBodyPaint.csv", outputFemaleBodyPaint);
-            WriteCSV(playerClassicDirOut, "MaleLayeredBodyPaint.csv", outputMaleLayeredBodyPaint);
-            WriteCSV(playerClassicDirOut, "FemaleLayeredBodyPaint.csv", outputFemaleLayeredBodyPaint);
-            WriteCSV(playerRebootDirOut, "MaleNGSBodyPaint.csv", outputNGSMaleBodyPaint);
-            WriteCSV(playerRebootDirOut, "FemaleNGSBodyPaint.csv", outputNGSFemaleBodyPaint);
-            WriteCSV(playerRebootDirOut, "CastNGSBodyPaint.csv", outputNGSCastMaleBodyPaint);
-            WriteCSV(playerRebootDirOut, "CasealNGSBodyPaint.csv", outputNGSCastFemaleBodyPaint);
-            WriteCSV(playerRebootDirOut, "GenderlessNGSBodyPaint.csv", outputNGSGenderlessBodyPaint);
-
-            //---------------------------Parse out stickers
-            StringBuilder outputStickers = new StringBuilder();
-
-            outputStickers.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "bodypaint2", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}b2_{id}.ice";
-                    string rebEx = $"{rebootExStart}b2_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + stickerIcon + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetStickerIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}b2_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + stickerIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetStickerIconStringUnhashed(id.ToString());
-                    }
-
-                }
-
-                string output = partData.GetLine();
-                partData = null;
-                outputStickers.Append(output);
-            }
-            WriteCSV(playerDirOut, "Stickers.csv", outputStickers);
-
-            //---------------------------Parse out hair
-            StringBuilder outputMaleHair = new StringBuilder();
-            StringBuilder outputFemaleHair = new StringBuilder();
-            StringBuilder outputCasealHair = new StringBuilder();
-            StringBuilder outputNGSHair = new StringBuilder();
-
-            outputMaleHair.AppendLine(hairColumns);
-            outputFemaleHair.AppendLine(hairColumns);
-            outputCasealHair.AppendLine(hairColumns);
-            outputNGSHair.AppendLine(hairColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "hair", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.hairDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}hr_{id}.ice";
-                    string rebEx = $"{rebootExStart}hr_{id}_ex.ice";
-
-                    //Cast heads
-                    if (id >= 300000 && id < 500000)
-                    {
-                        reb = reb.Replace("hr", "fc");
-                        rebEx = rebEx.Replace("hr", "fc");
-                    }
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                    //Set icon string
-                    string maleIconStr;
-                    string femaleIconStr;
-                    string castIconStr;
-
-                    //Cast heads
-                    if (id >= 300000 && id < 500000)
-                    {
-                        maleIconStr = "_";
-                        femaleIconStr = "_";
-                        castIconStr = icon + faceIcon + id + ".ice";
-                    }
-                    else
-                    {
-                        maleIconStr = icon + hairIcon + iconMale + id + ".ice";
-                        femaleIconStr = icon + hairIcon + iconFemale + id + ".ice";
-                        castIconStr = icon + hairIcon + iconCast + id + ".ice";
-                    }
-                    var maleIconStrHash = GetFileHash(maleIconStr);
-                    var femaleIconStrHash = GetFileHash(femaleIconStr);
-                    var castIconStrHash = GetFileHash(castIconStr);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStrHash)))
-                    {
-                        partData.iconHash = maleIconStrHash;
-                        partData.iconName = maleIconStr;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStrHash)))
-                    {
-                        partData.iconOuterHash = femaleIconStrHash;
-                        partData.iconOuterName = femaleIconStr;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStrHash)))
-                    {
-                        partData.iconCastHash = castIconStrHash;
-                        partData.iconCastName = castIconStr;
-                    }
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}hr_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var maleIconStr = icon + hairIcon + iconMale + id + ".ice";
-                    var femaleIconStr = icon + hairIcon + iconFemale + id + ".ice";
-                    var castIconStr = icon + hairIcon + iconCast + id + ".ice";
-                    var maleIconStrHash = GetFileHash(maleIconStr);
-                    var femaleIconStrHash = GetFileHash(femaleIconStr);
-                    var castIconStrHash = GetFileHash(castIconStr);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, maleIconStrHash)))
-                    {
-                        partData.iconHash = maleIconStrHash;
-                        partData.iconName = maleIconStr;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, femaleIconStrHash)))
-                    {
-                        partData.iconOuterHash = femaleIconStrHash;
-                        partData.iconOuterName = femaleIconStr;
-                    }
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, castIconStrHash)))
-                    {
-                        partData.iconCastHash = castIconStrHash;
-                        partData.iconCastName = castIconStr;
-
-                    }
-                }
-                string output = partData.GetLineAllIcons();
-                partData = null;
-
-                //Decide which type this is
-                if (id < 10000)
-                {
-                    outputMaleHair.Append(output);
-                }
-                else if (id < 20000)
-                {
-                    outputFemaleHair.Append(output);
-                }
-                else if (id < 60000)
-                {
-                    outputCasealHair.Append(output);
-                }
-                else
-                {
-                    outputNGSHair.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "MaleHair.csv", outputMaleHair);
-            WriteCSV(playerClassicDirOut, "FemaleHair.csv", outputFemaleHair);
-            WriteCSV(playerClassicDirOut, "CasealHair.csv", outputCasealHair);
-            WriteCSV(playerRebootDirOut, "AllHairNGS.csv", outputNGSHair);
-
-            //---------------------------Parse out Eye
-            StringBuilder outputEyes = new StringBuilder();
-            StringBuilder outputNGSEyes = new StringBuilder();
-
-            outputEyes.AppendLine(partColumns);
-            outputNGSEyes.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "eye", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.eyeDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}ey_{id}.ice";
-                    string rebEx = $"{rebootExStart}ey_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + eyeIcon + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetEyeIconStringUnhashed(id.ToString());
-                    }
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}ey_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + eyeIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetEyeIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id < 100000)
-                {
-                    outputEyes.Append(output);
-                }
-                else
-                {
-                    outputNGSEyes.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "Eyes.csv", outputEyes);
-            WriteCSV(playerRebootDirOut, "EyesNGS.csv", outputNGSEyes);
-
-            //---------------------------Parse out EYEB
-            StringBuilder outputEyebrows = new StringBuilder();
-            StringBuilder outputNGSEyebrows = new StringBuilder();
-
-            outputEyebrows.AppendLine(partColumns);
-            outputNGSEyebrows.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "eyebrows", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}eb_{id}.ice";
-                    string rebEx = $"{rebootExStart}eb_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + eyeBrowsIcon + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetEyebrowsIconStringUnhashed(id.ToString());
-                    }
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}eb_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + eyeBrowsIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetEyebrowsIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id <= 100000)
-                {
-                    outputEyebrows.Append(output);
-                }
-                else
-                {
-                    outputNGSEyebrows.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "Eyebrows.csv", outputEyebrows);
-            WriteCSV(playerRebootDirOut, "EyebrowsNGS.csv", outputNGSEyebrows);
-
-            //---------------------------Parse out EYEL
-            StringBuilder outputEyelashes = new StringBuilder();
-            StringBuilder outputNGSEyelashes = new StringBuilder();
-
-            outputEyelashes.AppendLine(partColumns);
-            outputNGSEyelashes.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "eyelashes", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.stickerDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}el_{id}.ice";
-                    string rebEx = $"{rebootExStart}el_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + eyelashesIcon + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetEyelashesIconStringUnhashed(id.ToString());
-                    }
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}el_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + eyelashesIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetEyelashesIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id <= 100000)
-                {
-                    outputEyelashes.Append(output);
-                }
-                else
-                {
-                    outputNGSEyelashes.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "Eyelashes.csv", outputEyelashes);
-            WriteCSV(playerRebootDirOut, "EyelashesNGS.csv", outputNGSEyelashes);
-
-            //---------------------------Parse out ACCE //Stored under decoy in a99be286e3a7e1b45d88a3ea4d6c18c4
-            StringBuilder outputAccessories = new StringBuilder();
-            outputAccessories.AppendLine(acceColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "decoy", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.accessoryDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                string output = "";
-                bool named = false;
-                for (int i = 0; i < nameDicts.Count && i < 2; i++)
-                {
-                    var dict = nameDicts[i];
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        named = true;
-                        output += Escape(str) + ",";
-                    }
-                    else
-                    {
-                        output += ",";
-                    }
-                }
-                output += $"{id},";
-
-                //Account for lack of a name on an outfit
-                if (named == false)
-                {
-                    output = $"[Unnamed {id}]" + output;
-                }
-
-                //Double check these ids and use an adjustedId if needed
-                int adjustedId = id;
-                if (aquaCMX.accessoryIdLink.ContainsKey(id))
-                {
-                    adjustedId = aquaCMX.accessoryIdLink[id].bcln.fileId;
-                }
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}ac_{adjustedId}.ice";
-                    string rebEx = $"{rebootExStart}ac_{adjustedId}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + accessoryIcon + id + ".ice");
-                    output += iconStr + ",";
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        output += rebHash;
-                    }
-                    output += ",";
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}ac_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + accessoryIcon + finalId + ".ice");
-                    output += iconStr + ",";
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        output += $"{classicHash}";
-                    }
-                    output += ",";
-                }
-
-                //Add linked character nodes
-                if (aquaCMX.accessoryDict.ContainsKey(id))
-                {
-                    var acce = aquaCMX.accessoryDict[id];
-
-                    output += $",{acce.nodeAttach1},{acce.nodeAttach2},{acce.nodeAttach3},{acce.nodeAttach4},{acce.nodeAttach5}," +
-                        $"{acce.nodeAttach6},{acce.nodeAttach7},{acce.nodeAttach8},{acce.nodeAttach9},{acce.nodeAttach10}," +
-                        $"{acce.nodeAttach11},{acce.nodeAttach12},{acce.nodeAttach13},{acce.nodeAttach14},{acce.nodeAttach15},{acce.nodeAttach16}" +
-                        $",{acce.effectName}";
-                }
-
-                output += "\n";
-
-                outputAccessories.Append(output);
-            }
-            WriteCSV(playerDirOut, "Accessories.csv", outputAccessories);
-
-            //---------------------------Parse out skin
-            StringBuilder outputSkin = new StringBuilder();
-            StringBuilder outputNGSSkin = new StringBuilder();
-            outputSkin.AppendLine(partColumns);
-            outputNGSSkin.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "skin", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.ngsSkinDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}sk_{id}.ice";
-                    string rebEx = $"{rebootExStart}sk_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-
-                    //Set icon string
-                    string iconStrTest = icon + skinIcon + GetIconGender(id) + id + ".ice";
-                    var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetSkinIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}sk_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + skinIcon + GetIconGender(id) + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetSkinIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id < 100000)
-                {
-                    outputSkin.Append(output);
-                }
-                else
-                {
-                    outputNGSSkin.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "Skins.csv", outputSkin);
-            WriteCSV(playerRebootDirOut, "SkinsNGS.csv", outputNGSSkin);
-
-            //---------------------------Parse out FCP1, Face Textures
-            StringBuilder outputFCP1 = new StringBuilder();
-            StringBuilder outputNGSFCP1 = new StringBuilder();
-            outputFCP1.AppendLine(partColumns);
-            outputNGSFCP1.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint1", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}f1_{id}.ice";
-                    string rebEx = $"{rebootExStart}f1_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + faceIcon + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}f1_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + faceIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id <= 100000)
-                {
-                    outputFCP1.Append(output);
-                }
-                else
-                {
-                    outputNGSFCP1.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "FaceTextures.csv", outputFCP1);
-            //Textures should just be with the model for these; no f1 ices in making_reboot
-            /*
-            if (outputNGSFCP1.Length > 0)
-            {
-                WriteCSV(outputDirectory, "FaceTexturesNGS.csv", outputNGSFCP1);
-            }*/
-
-            //---------------------------Parse out FCP2
-            StringBuilder outputFCP2 = new StringBuilder();
-            StringBuilder outputNGSFCP2 = new StringBuilder();
-            outputFCP2.AppendLine(partColumns);
-            outputNGSFCP2.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "facepaint2", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.fcpDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}f2_{id}.ice";
-                    string rebEx = $"{rebootExStart}f2_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + facePaintIcon + id + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}f2_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-                    //Set icon string
-                    var iconStr = GetFileHash(icon + facePaintIcon + finalId + ".ice");
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                    {
-                        partData.iconHash = iconStr;
-                        partData.iconName = GetFacePaintIconStringUnhashed(id.ToString());
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id <= 100000)
-                {
-                    outputFCP2.Append(output);
-                }
-                else
-                {
-                    outputNGSFCP2.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "FacePaint.csv", outputFCP2);
-            if (outputNGSFCP2.Length > 0)
-            {
-                WriteCSV(playerRebootDirOut, "FacePaintNGS.csv", outputNGSFCP2);
-            }
-
-            //---------------------------Parse out FACE //face_variation.cmp.lua in 75b1632526cd6a1039625349df6ee8dd used to map file face ids to .text ids
-            //This targets facevariations specifically. face seems to be redundant and not actually particularly useful at a glance.
-            StringBuilder outputHumanMaleFace = new StringBuilder();
-            StringBuilder outputHumanFemaleFace = new StringBuilder();
-            StringBuilder outputNewmanMaleFace = new StringBuilder();
-            StringBuilder outputNewmanFemaleFace = new StringBuilder();
-            StringBuilder outputCastMaleFace = new StringBuilder();
-            StringBuilder outputCastFemaleFace = new StringBuilder();
-            StringBuilder outputDewmanMaleFace = new StringBuilder();
-            StringBuilder outputDewmanFemaleFace = new StringBuilder();
-            StringBuilder outputNGSFace = new StringBuilder();
-
-            outputHumanMaleFace.AppendLine(partColumns);
-            outputHumanFemaleFace.AppendLine(partColumns);
-            outputNewmanMaleFace.AppendLine(partColumns);
-            outputNewmanFemaleFace.AppendLine(partColumns);
-            outputCastMaleFace.AppendLine(partColumns);
-            outputCastFemaleFace.AppendLine(partColumns);
-            outputDewmanMaleFace.AppendLine(partColumns);
-            outputDewmanFemaleFace.AppendLine(partColumns);
-            outputNGSFace.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-
-            masterNameList = new List<string>();
-            strNameDicts = new List<Dictionary<string, string>>();
-            GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "facevariation", true);
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.faceDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-
-                string realId = "";
-                if (!faceIds.TryGetValue(id, out realId))
-                {
-                    realId = "No" + id;
-                }
-
-
-                foreach (var dict in strNameDicts)
-                {
-                    if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                if (id >= 100000)
-                {
-                    string reb = $"{rebootStart}fc_{id}.ice";
-                    string rebEx = $"{rebootExStart}fc_{id}_ex.ice";
-                    string rebHash = GetFileHash(reb);
-                    string rebExHash = GetFileHash(rebEx);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                    {
-                        partData.partHash = rebHash;
-                        partData.partName = reb;
-                    }
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebExHash)))
-                    {
-                        partData.partExHash = rebExHash;
-                        partData.partExName = rebEx;
-                    }
-
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    string classic = $"{classicStart}fc_{finalId}.ice";
-
-                    var classicHash = GetFileHash(classic);
-
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                    {
-                        partData.partHash = classicHash;
-                        partData.partName = classic;
-                    }
-
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id < 10000)
-                {
-                    outputHumanMaleFace.Append(output);
-                }
-                else if (id < 20000)
-                {
-                    outputHumanFemaleFace.Append(output);
-                }
-                else if (id < 30000)
-                {
-                    outputNewmanMaleFace.Append(output);
-                }
-                else if (id < 40000)
-                {
-                    outputNewmanFemaleFace.Append(output);
-                }
-                else if (id < 50000)
-                {
-                    outputCastMaleFace.Append(output);
-                }
-                else if (id < 60000)
-                {
-                    outputCastFemaleFace.Append(output);
-                }
-                else if (id < 70000)
-                {
-                    outputDewmanMaleFace.Append(output);
-                }
-                else if (id < 100000)
-                {
-                    outputDewmanFemaleFace.Append(output);
-                }
-                else
-                {
-                    outputNGSFace.Append(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "MaleHumanFaces.csv", outputHumanMaleFace);
-            WriteCSV(playerClassicDirOut, "FemaleHumanFaces.csv", outputHumanFemaleFace);
-            WriteCSV(playerClassicDirOut, "MaleNewmanFaces.csv", outputNewmanMaleFace);
-            WriteCSV(playerClassicDirOut, "FemaleNewmanFaces.csv", outputNewmanFemaleFace);
-            WriteCSV(playerClassicDirOut, "CastFaces_Heads.csv", outputCastMaleFace);
-            WriteCSV(playerClassicDirOut, "CasealFaces_Heads.csv", outputCastFemaleFace);
-            WriteCSV(playerClassicDirOut, "MaleDeumanFaces.csv", outputDewmanMaleFace);
-            WriteCSV(playerClassicDirOut, "FemaleDeumanFaces.csv", outputDewmanFemaleFace);
-            WriteCSV(playerRebootDirOut, "AllFacesNGS.csv", outputNGSFace);
-
-            //---------------------------Parse out Face motions
-            StringBuilder outputFcmn = new StringBuilder();
-            StringBuilder outputFcmnNGS = new StringBuilder();
-            outputFcmn.AppendLine(partColumns);
-            outputFcmnNGS.AppendLine(partColumns);
-
-            masterIdList.Clear();
-            nameDicts.Clear();
-
-            //Add potential cmx ids that wouldn't be stored in
-            GatherDictKeys(masterIdList, aquaCMX.fcmnDict.Keys);
-
-            masterIdList.Sort();
-
-            //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-            foreach (int id in masterIdList)
-            {
-                PartData partData = new PartData();
-                foreach (var dict in nameDicts)
-                {
-                    if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                    {
-                        partData.namesByLanguage.Add(str);
-                    }
-                }
-                partData.id = id;
-
-                //Decide if it needs to be handled as a reboot file or not
-                string typeString = "fm_";
-                if (id >= 100000)
-                {
-                    var partName = $"{rebootStart}{typeString}{id}.ice";
-                    var partExName = $"{rebootExStart}{typeString}{id}_ex.ice";
-                    var partHash = GetFileHash(partName);
-                    var partExHash = GetFileHash(partExName);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
-                    {
-                        partData.partHash = partHash;
-                        partData.partName = partName;
-                    }
-                }
-                else
-                {
-                    string finalId = $"{id:D5}";
-                    var partName = $"{classicStart}{typeString}{finalId}.ice";
-                    var partHash = GetFileHash(partName);
-                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, partHash)))
-                    {
-                        partData.partHash = partHash;
-                        partData.partName = partName;
-                    }
-                }
-                string output = partData.GetLine();
-                partData = null;
-
-                if (id < 100000)
-                {
-                    outputFcmn.AppendLine(output);
-                }
-                else
-                {
-                    outputFcmnNGS.AppendLine(output);
-                }
-            }
-            WriteCSV(playerClassicDirOut, "FaceMotions.csv", outputFcmn);
-            WriteCSV(playerRebootDirOut, "FaceMotionsNGS.csv", outputFcmnNGS);
-
-            //---------------------------Parse out NGS ears //The cmx has ear data, but no ids. Maybe it's done by order? Same for teeth and horns
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "ears", true);
-
-            if (aquaCMX.ngsEarDict.Count > 0 || masterIdList.Count > 0)
-            {
-                StringBuilder outputNGSEars = new StringBuilder();
-                outputNGSEars.AppendLine(partColumns);
-
-                //Add potential cmx ids that wouldn't be stored in
-                GatherDictKeys(masterIdList, aquaCMX.ngsEarDict.Keys);
-
-                masterIdList.Sort();
-
-                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-                foreach (int id in masterIdList)
-                {
-                    PartData partData = new PartData();
-                    foreach (var dict in nameDicts)
-                    {
-                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                        {
-                            partData.namesByLanguage.Add(str);
-                        }
-                    }
-                    partData.id = id;
-
-                    //Decide if it needs to be handled as a reboot file or not
-                    if (id >= 100000)
-                    {
-                        string reb = $"{rebootStart}ea_{id}.ice";
-                        string rebEx = $"{rebootExStart}ea_{id}_ex.ice";
-                        string rebHash = GetFileHash(reb);
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                        {
-                            partData.partHash = rebHash;
-                            partData.partName = reb;
-                        }
-                        //Set icon string
-                        var iconStr = GetFileHash(icon + earIcon + id + ".ice");
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                        {
-                            partData.iconHash = iconStr;
-                            partData.iconName = GetEarIconStringUnhashed(id.ToString());
-                        }
-
-                    }
-                    else
-                    {
-                        string finalId = $"{id:D5}";
-                        string classic = $"{classicStart}ea_{finalId}.ice";
-
-                        var classicHash = GetFileHash(classic);
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                        {
-                            partData.partHash = classicHash;
-                            partData.partName = classic;
-                        }
-                        //Set icon string
-                        var iconStr = GetFileHash(icon + earIcon + finalId + ".ice");
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                        {
-                            partData.iconHash = iconStr;
-                            partData.iconName = GetEarIconStringUnhashed(id.ToString());
-                        }
-
-                    }
-                    string output = partData.GetLine();
-                    partData = null;
-
-                    outputNGSEars.Append(output);
-
-                }
-                WriteCSV(playerRebootDirOut, "EarsNGS.csv", outputNGSEars);
-            }
-
-            //---------------------------Parse out NGS teeth
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "dental", true);
-
-            if (aquaCMX.ngsTeethDict.Count > 0 || masterIdList.Count > 0)
-            {
-                StringBuilder outputNGSTeeth = new StringBuilder();
-                outputNGSTeeth.AppendLine(partColumns);
-
-                //Add potential cmx ids that wouldn't be stored in
-                GatherDictKeys(masterIdList, aquaCMX.ngsTeethDict.Keys);
-
-                masterIdList.Sort();
-
-                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-                foreach (int id in masterIdList)
-                {
-                    PartData partData = new PartData();
-                    foreach (var dict in nameDicts)
-                    {
-                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                        {
-                            partData.namesByLanguage.Add(str);
-                        }
-                    }
-                    partData.id = id;
-
-                    //Decide if it needs to be handled as a reboot file or not
-                    if (id >= 100000)
-                    {
-                        string reb = $"{rebootStart}de_{id}.ice";
-                        string rebEx = $"{rebootExStart}de_{id}_ex.ice";
-                        string rebHash = GetFileHash(reb);
-                        string rebExHash = GetFileHash(rebEx);
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                        {
-                            partData.partHash = rebHash;
-                            partData.partName = reb;
-                        }
-                        //Set icon string
-                        var iconStr = GetFileHash(icon + teethIcon + id + ".ice");
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                        {
-                            partData.iconHash = iconStr;
-                            partData.iconName = GetTeethIconStringUnhashed(id.ToString());
-                        }
-                    }
-                    else
-                    {
-                        string finalId = $"{id:D5}";
-                        string classic = $"{classicStart}de_{finalId}.ice";
-
-                        var classicHash = GetFileHash(classic);
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                        {
-                            partData.partHash = classicHash;
-                            partData.partName = classic;
-                        }
-                        //Set icon string
-                        var iconStr = GetFileHash(icon + teethIcon + finalId + ".ice");
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                        {
-                            partData.iconHash = iconStr;
-                            partData.iconName = GetTeethIconStringUnhashed(id.ToString());
-                        }
-
-                    }
-                    string output = partData.GetLine();
-                    partData = null;
-
-                    outputNGSTeeth.Append(output);
-
-                }
-                WriteCSV(playerRebootDirOut, "TeethNGS.csv", outputNGSTeeth);
-            }
-
-            //---------------------------Parse out NGS horns
-            masterIdList.Clear();
-            nameDicts.Clear();
-            GatherTextIds(textByCat, masterIdList, nameDicts, "horn", true);
-
-            if (aquaCMX.ngsHornDict.Count > 0 || masterIdList.Count > 0)
-            {
-                StringBuilder outputNGSHorns = new StringBuilder();
-                outputNGSHorns.AppendLine(partColumns);
-
-                //Add potential cmx ids that wouldn't be stored in
-                GatherDictKeys(masterIdList, aquaCMX.ngsHornDict.Keys);
-
-                masterIdList.Sort();
-
-                //Loop through master id list, generate filenames, and link name strings if applicable. Use IDLink dicts in cmx to get proper filenames for colored outfits
-                foreach (int id in masterIdList)
-                {
-                    //Skip the なし horn entry. I'm not even sure why that's in there.
-                    if (id == 0)
-                    {
-                        continue;
-                    }
-                    PartData partData = new PartData();
-                    foreach (var dict in nameDicts)
-                    {
-                        if (dict.TryGetValue(id, out string str) && str != null && str != "" && str.Length > 0)
-                        {
-                            partData.namesByLanguage.Add(str);
-                        }
-                    }
-                    partData.id = id;
-
-                    //Decide if it needs to be handled as a reboot file or not
-                    if (id >= 100000)
-                    {
-                        string reb = $"{rebootStart}hn_{id}.ice";
-                        string rebEx = $"{rebootExStart}hn_{id}_ex.ice";
-                        string rebHash = GetFileHash(reb);
-                        string rebExHash = GetFileHash(rebEx);
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
-                        {
-                            partData.partHash = rebHash;
-                            partData.partName = reb;
-                        }
-                        //Set icon string
-                        var iconStr = GetFileHash(icon + hornIcon + id + ".ice");
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                        {
-                            partData.iconHash = iconStr;
-                            partData.iconName = GetHornIconStringUnhashed(id.ToString());
-                        }
-                    }
-                    else
-                    {
-                        string finalId = $"{id:D5}";
-                        string classic = $"{classicStart}hn_{finalId}.ice";
-                        var classicHash = GetFileHash(classic);
-
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, classicHash)))
-                        {
-                            partData.partHash = classicHash;
-                            partData.partName = classic;
-                        }
-                        //Set icon string
-                        var iconStr = GetFileHash(icon + hornIcon + finalId + ".ice");
-                        if (File.Exists(Path.Combine(pso2_binDir, dataDir, iconStr)))
-                        {
-                            partData.iconHash = iconStr;
-                            partData.iconName = GetHornIconStringUnhashed(id.ToString());
-                        }
-
-                    }
-                    string output = partData.GetLine();
-                    partData = null;
-
-                    outputNGSHorns.Append(output);
-
-                }
-                WriteCSV(playerRebootDirOut, "HornsNGS.csv", outputNGSHorns);
-            }
-            //---------------------------------------------------------------------------------------//End CMX related ids
         }
 
         public static void GenerateMagList(string pso2_binDir, string playerDirOut, List<int> magIds, List<int> magIdsReboot)
@@ -5896,6 +6012,11 @@ namespace AquaModelLibrary.Data.Utility
 
         public static void GatherTextIdsStringRef(Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat, List<string> masterNameList, List<Dictionary<string, string>> nameDicts, string category, bool firstDictSet)
         {
+            if(!textByCat.ContainsKey(category))
+            {
+                Debug.WriteLine($"Did not contain key {category}");
+                return;
+            }
             for (int sub = 0; sub < textByCat[category].Count; sub++)
             {
                 if (firstDictSet == true)
