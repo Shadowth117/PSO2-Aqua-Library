@@ -1,6 +1,5 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectExtras;
 using AquaModelLibrary.Data.PSO2.Aqua.Presets;
 using AquaModelLibrary.Data.PSO2.Aqua.Presets.Shader;
 using AquaModelLibrary.Helpers.MathHelpers;
@@ -599,7 +598,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     vtxlList[mesh.vsetIndex].bonePalette = bonePalette;
                 }
-                if(!IsNGS)
+                if (!IsNGS)
                 {
                     OptimizeBonePalette(vtxlList[mesh.vsetIndex], new List<uint>(), IsNGS);
                 }
@@ -867,7 +866,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     {
                         vertBinormalArrays[vsetIndex][faceIndices[i]] += binormal;
                         vertTangentArrays[vsetIndex][faceIndices[i]] += tangent;
-                        vertFaceNormalArrays[vsetIndex][faceIndices[i]] += normal;   
+                        vertFaceNormalArrays[vsetIndex][faceIndices[i]] += normal;
                     }
                 }
             }
@@ -996,7 +995,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     {
                         vertBinormalArray[faceIndices[i]] += binormal;
                         vertTangentArray[faceIndices[i]] += tangent;
-                        vertFaceNormalArray[faceIndices[i]] += normal;                      
+                        vertFaceNormalArray[faceIndices[i]] += normal;
                     }
                 }
 
@@ -1666,7 +1665,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
             }
         }
-#endregion
+        #endregion
 
         #region ModelBuilding
         /// <summary>
@@ -1733,7 +1732,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
             if (useRigid == false)
             {
-                if(!rebootModel)
+                if (!rebootModel)
                 {
                     BatchSplitByBoneCount(16);
                 }
@@ -1789,7 +1788,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 //strips
                 var newStrips = new StripData();
                 newStrips.format0xC31 = IsNGS;
-                if(newStrips.format0xC31)
+                if (newStrips.format0xC31)
                 {
                     newStrips.triStrips = tempTris[i].toUshortArray().ToList();
                     //Hack for specific situations. Should be removed if PSO2 ever clearly and officially adds support for this
@@ -1799,7 +1798,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     }
                     newStrips.triIdCount = newStrips.triStrips.Count;
                     newStrips.faceGroups.Add(newStrips.triStrips.Count);
-                } else
+                }
+                else
                 {
                     newStrips.toStrips(tempTris[i].toUshortArray());
                 }
@@ -1810,7 +1810,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 pset.tag = 0x1000;
                 pset.faceGroupCount = 0x1;
                 pset.psetFaceCount = newStrips.triIdCount;
-                if(newStrips.format0xC31)
+                if (newStrips.format0xC31)
                 {
                     pset.stripStartCount = totalStripsShorts;
                 }
@@ -1874,12 +1874,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 VSET vset = new VSET();
                 vset.vtxlCount = vtxlList[i].vertPositions.Count;
 
-                if(IsNGS)
+                if (IsNGS)
                 {
                     vset.vtxeCount = vtxeList.Count - 1;
                     vset.vtxlStartVert = vertCounter;
                     vertCounter += vset.vtxlCount;
-                } else
+                }
+                else
                 {
                     vset.vertDataSize = size;
                     vset.vtxeCount = vtxe.vertDataTypes.Count;
@@ -1890,7 +1891,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
                 else
                 {
-                    if(IsNGS)
+                    if (IsNGS)
                     {
                         vset.bonePaletteCount = -1; //Needs more research. This maybe works as a catch all for now?
                                                     //This value seems similar to the largest index in the used indices + 1 and then made negative for NGS models
@@ -1905,7 +1906,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
 
             //Set sizes based on VTXE results
-            if(IsNGS)
+            if (IsNGS)
             {
                 for (int i = 0; i < vsetList.Count; i++)
                 {
@@ -1931,7 +1932,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             objc.texfCount = texfList.Count;
             objc.vtxeCount = vtxeList.Count;
 
-            if(IsNGS)
+            if (IsNGS)
             {
                 objc.unkMeshValue = 0x30053; //Taken from pl_rbd_100000
                 objc.size = 0xF0;
@@ -1942,7 +1943,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 objc.globalStrip3LengthCount = 1;
                 objc.unkCount3 = 1;
                 objc.bonePaletteOffset = 1;
-            } else {
+            }
+            else
+            {
                 objc.size = 0xA4;
                 objc.unkMeshValue = 0x17;
             }
