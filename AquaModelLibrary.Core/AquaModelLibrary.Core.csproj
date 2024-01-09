@@ -15,7 +15,7 @@
     <ProjectReference Include="..\AquaModelLibrary.Data\AquaModelLibrary.Data.csproj" />
     <ProjectReference Include="..\AquaModelLibrary.Native\AquaModelLibrary.Native.vcxproj" />
     <ProjectReference Include="..\SAToolsShared\ArchiveLib\ArchiveLib.csproj" />
-    <ProjectReference Include="..\SoulsFormats\SoulsFormats\AQSoulsFormats.csproj" />
+    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj" />
   </ItemGroup>
 
 </Project>

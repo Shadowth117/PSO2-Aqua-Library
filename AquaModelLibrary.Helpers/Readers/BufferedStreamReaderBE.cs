@@ -149,7 +149,7 @@ namespace AquaModelLibrary.Helpers.Readers
         /// </summary>
         public byte[] ReadBytes(long offset, int blockSize)
         {
-            Span<byte> bytes = stackalloc byte[blockSize];
+            Span<byte> bytes = new byte[blockSize];
             ReadBytesUnbuffered(offset, bytes);
             return bytes.ToArray();
         }
