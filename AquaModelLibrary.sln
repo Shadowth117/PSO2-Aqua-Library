@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.Core", "Aq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.Data", "AquaModelLibrary.Data\AquaModelLibrary.Data.csproj", "{E7711B0E-E860-48F9-8221-F3CED6B18260}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.Helpers", "AquaModelLibrary.Extensions\AquaModelLibrary.Helpers.csproj", "{34E45122-20AC-4240-9243-E124AF65C0C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AquaModelLibrary.Helpers", "AquaModelLibrary.Helpers\AquaModelLibrary.Helpers.csproj", "{34E45122-20AC-4240-9243-E124AF65C0C0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AquaModelLibrary.Native", "AquaModelLibrary.Native\AquaModelLibrary.Native.vcxproj", "{2C3B66BB-F1A9-4513-AB63-570D7687C6A7}"
 EndProject
