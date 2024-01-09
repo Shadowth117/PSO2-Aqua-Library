@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AquaModelLibrary.Extensions\AquaModelLibrary.Helpers.csproj" />
+    <ProjectReference Include="..\AquaModelLibrary.Helpers\AquaModelLibrary.Helpers.csproj" />
     <ProjectReference Include="..\SAToolsShared\ArchiveLib\ArchiveLib.csproj" />
     <ProjectReference Include="..\SAToolsShared\VrSharp\VrSharp.csproj" />
     <ProjectReference Include="..\UnluacNET\UnluacNET.csproj" />
