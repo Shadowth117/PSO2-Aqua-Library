@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -29,15 +30,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public LandPieceSettings() { }
 
-        public LandPieceSettings(byte[] file)
-        {
-            Read(file);
-        }
+        public LandPieceSettings(byte[] file) : base(file) { }
 
-        public LandPieceSettings(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public LandPieceSettings(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

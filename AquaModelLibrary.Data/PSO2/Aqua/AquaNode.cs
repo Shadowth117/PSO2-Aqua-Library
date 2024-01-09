@@ -28,15 +28,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public AquaNode() { }
 
-        public AquaNode(byte[] file)
-        {
-            Read(file);
-        }
+        public AquaNode(byte[] file) : base(file) { }
 
-        public AquaNode(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public AquaNode(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

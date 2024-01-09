@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.LobbyActionCommonData;
 using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -18,15 +19,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public LobbyActionCommon() { }
 
-        public LobbyActionCommon(byte[] file)
-        {
-            Read(file);
-        }
+        public LobbyActionCommon(byte[] file) : base(file) { }
 
-        public LobbyActionCommon(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public LobbyActionCommon(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

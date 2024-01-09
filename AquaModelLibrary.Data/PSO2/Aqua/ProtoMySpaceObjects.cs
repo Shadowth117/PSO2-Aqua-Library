@@ -19,15 +19,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         }
         public ProtoMySpaceObjectsSettings() { }
 
-        public ProtoMySpaceObjectsSettings(byte[] file)
-        {
-            Read(file);
-        }
+        public ProtoMySpaceObjectsSettings(byte[] file) : base(file) { }
 
-        public ProtoMySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public ProtoMySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

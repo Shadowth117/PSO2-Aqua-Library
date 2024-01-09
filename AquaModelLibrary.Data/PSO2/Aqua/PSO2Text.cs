@@ -4,6 +4,7 @@ using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Extensions;
 using System.Text;
 using Zamboni;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -18,15 +19,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             };
         }
         public PSO2Text() { }
-        public PSO2Text(byte[] file)
-        {
-            Read(file);
-        }
+        public PSO2Text(byte[] file) : base(file) { }
 
-        public PSO2Text(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public PSO2Text(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public PSO2Text(string filename)
         {

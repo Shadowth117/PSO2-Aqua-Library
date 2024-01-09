@@ -21,15 +21,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         }
         public BTI_MotionConfig() { }
 
-        public BTI_MotionConfig(byte[] file)
-        {
-            Read(file);
-        }
+        public BTI_MotionConfig(byte[] file) : base(file) { }
 
-        public BTI_MotionConfig(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public BTI_MotionConfig(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

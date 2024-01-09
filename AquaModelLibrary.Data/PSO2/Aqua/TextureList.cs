@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -16,14 +17,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             };
         }
         public TextureList() { }
-        public TextureList(byte[] file)
-        {
-            Read(file);
-        }
-        public TextureList(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public TextureList(byte[] file) : base(file) { }
+        public TextureList(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

@@ -23,10 +23,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// </summary>
         public virtual string[] GetEnvelopeTypes() => null;
 
-        public AquaCommon()
-        {
+        public AquaCommon() { }
 
-        }
+        public AquaCommon(byte[] file) { Read(file); }
+
+        public AquaCommon(BufferedStreamReaderBE<MemoryStream> streamReader) { Read(streamReader); }
 
         /// <summary>
         /// Read the aqua file header. Ice envelope is not skipped if GetEnvelopeTypes is not properly defined.

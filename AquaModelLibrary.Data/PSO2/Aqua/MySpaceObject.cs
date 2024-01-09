@@ -20,14 +20,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public MySpaceObjectsSettings() { }
 
-        public MySpaceObjectsSettings(byte[] file)
-        {
-            Read(file);
-        }
-        public MySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public MySpaceObjectsSettings(byte[] file) : base(file) { }
+
+        public MySpaceObjectsSettings(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

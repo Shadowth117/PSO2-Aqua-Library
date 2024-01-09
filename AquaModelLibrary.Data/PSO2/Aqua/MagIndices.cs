@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -17,15 +18,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public MagIndices() { }
 
-        public MagIndices(byte[] file)
-        {
-            Read(file);
-        }
+        public MagIndices(byte[] file) : base(file) { }
 
-        public MagIndices(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public MagIndices(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public List<int> GetMagIdList() => mgxIds;
 

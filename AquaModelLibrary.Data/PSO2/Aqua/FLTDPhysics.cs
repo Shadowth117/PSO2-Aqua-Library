@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
+using System.IO;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -20,15 +21,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public FLTDPhysics() { }
 
-        public FLTDPhysics(byte[] file)
-        {
-            Read(file);
-        }
+        public FLTDPhysics(byte[] file) : base(file) { }
 
-        public FLTDPhysics(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public FLTDPhysics(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

@@ -33,15 +33,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public AquaMotion() { }
 
-        public AquaMotion(byte[] file)
-        {
-            Read(file);
-        }
+        public AquaMotion(byte[] file) : base(file) { }
 
-        public AquaMotion(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public AquaMotion(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public AquaMotion(byte[] file, string _ext)
         {

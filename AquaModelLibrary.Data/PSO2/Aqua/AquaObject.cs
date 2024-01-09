@@ -86,15 +86,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             objc.type = objcType;
         }
 
-        public AquaObject(byte[] bytes)
-        {
-            Read(bytes);
-        }
+        public AquaObject(byte[] bytes) : base(bytes) { }
 
-        public AquaObject(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public AquaObject(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -18,15 +19,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public LHIObjectDetailLayout() { }
 
-        public LHIObjectDetailLayout(byte[] file)
-        {
-            Read(file);
-        }
+        public LHIObjectDetailLayout(byte[] file) : base(file) { }
 
-        public LHIObjectDetailLayout(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public LHIObjectDetailLayout(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

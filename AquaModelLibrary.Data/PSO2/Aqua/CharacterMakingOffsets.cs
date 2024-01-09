@@ -4,6 +4,7 @@ using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 using System.Text;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -20,15 +21,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public CharacterMakingOffsets() { }
 
-        public CharacterMakingOffsets(byte[] file)
-        {
-            Read(file);
-        }
+        public CharacterMakingOffsets(byte[] file) : base(file) { }
 
-        public CharacterMakingOffsets(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public CharacterMakingOffsets(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

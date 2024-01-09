@@ -5,6 +5,7 @@ using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Text;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -106,21 +107,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             Read(streamReader, _ext);
         }
 
-        /// <summary>
-        /// VTBF only constructor
-        /// </summary>
-        public CharacterMakingIndex(byte[] file)
-        {
-            ReadVTBFCMX(file);
-        }
+        public CharacterMakingIndex(byte[] file) : base(file) { }
 
-        /// <summary>
-        /// VTBF only constructor
-        /// </summary>
-        public CharacterMakingIndex(BufferedStreamReaderBE<MemoryStream> streamReader)
-        {
-            ReadVTBFFile(streamReader);
-        }
+        public CharacterMakingIndex(BufferedStreamReaderBE<MemoryStream> streamReader) : base(streamReader) { }
 
         #region ReadNIFL
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> streamReader, int offset)

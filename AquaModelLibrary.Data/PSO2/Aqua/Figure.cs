@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaFigureData;
 using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -21,15 +22,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public Figure() { }
 
-        public Figure(byte[] file)
-        {
-            Read(file);
-        }
+        public Figure(byte[] file) : base(file) { }
 
-        public Figure(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public Figure(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

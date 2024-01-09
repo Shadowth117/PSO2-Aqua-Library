@@ -26,15 +26,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public AquaEffect() { }
 
-        public AquaEffect(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public AquaEffect(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
-        public AquaEffect(byte[] file)
-        {
-            Read(file);
-        }
+        public AquaEffect(byte[] file) : base(file) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

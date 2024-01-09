@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.MusFileRebootData;
 using AquaModelLibrary.Data.PSO2.Aqua.MusFileRebootData.Composition;
 using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -24,15 +25,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public MusicFileReboot() { }
 
-        public MusicFileReboot(byte[] file)
-        {
-            Read(file);
-        }
+        public MusicFileReboot(byte[] file) : base(file) { }
 
-        public MusicFileReboot(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public MusicFileReboot(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

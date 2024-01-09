@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.FCLData;
 using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -18,15 +19,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public FacialFCL() { }
 
-        public FacialFCL(byte[] file)
-        {
-            Read(file);
-        }
+        public FacialFCL(byte[] file) : base(file) { }
 
-        public FacialFCL(BufferedStreamReaderBE<MemoryStream> streamReader)
-        {
-            Read(streamReader);
-        }
+        public FacialFCL(BufferedStreamReaderBE<MemoryStream> streamReader) : base(streamReader) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

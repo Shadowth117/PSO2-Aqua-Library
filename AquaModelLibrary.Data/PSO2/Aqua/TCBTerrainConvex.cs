@@ -3,6 +3,7 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
+using System.IO;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -23,15 +24,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         }
         public TCBTerrainConvex() { }
 
-        public TCBTerrainConvex(byte[] file)
-        {
-            Read(file);
-        }
+        public TCBTerrainConvex(byte[] file) : base(file) { }
 
-        public TCBTerrainConvex(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public TCBTerrainConvex(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadNIFLFile(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {

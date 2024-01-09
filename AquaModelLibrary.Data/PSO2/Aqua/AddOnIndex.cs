@@ -16,15 +16,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public AddOnIndex() { }
 
-        public AddOnIndex(byte[] file)
-        {
-            Read(file);
-        }
+        public AddOnIndex(byte[] file) : base(file) { }
 
-        public AddOnIndex(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            Read(sr);
-        }
+        public AddOnIndex(BufferedStreamReaderBE<MemoryStream> sr) : base(sr) { }
 
         public override void ReadVTBFFile(BufferedStreamReaderBE<MemoryStream> sr)
         {
