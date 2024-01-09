@@ -23,7 +23,7 @@ namespace AquaModelLibrary.Core.Billy
         public static TPF LoosePuyoTexture2TPF(string fileName, VrTexture tex)
         {
             TPF tpf = new TPF();
-            tpf.Textures.Add(new TPF.Texture(Path.GetFileName(fileName), 0, 0, TextureEncoding.EncodeDDS(tex.ToBitmap())));
+            tpf.Textures.Add(new TPF.Texture(Path.GetFileNameWithoutExtension(fileName), 0, 0, TextureEncoding.EncodeDDS(tex.ToBitmap())));
             
             return tpf;
         }
