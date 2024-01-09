@@ -55,7 +55,7 @@ namespace ArchiveLib
         }
     }
 
-    class PvrTextureInfo : TextureInfo
+    public class PvrTextureInfo : TextureInfo
     {
         public PvrDataFormat DataFormat { get; set; }
         public PvrPixelFormat PixelFormat { get; set; }
@@ -150,7 +150,7 @@ namespace ArchiveLib
 		}
     }
 
-    class GvrTextureInfo : TextureInfo
+    public class GvrTextureInfo : TextureInfo
     {
         public GvrDataFormat DataFormat { get; set; }
         public GvrPixelFormat PixelFormat { get; set; }
@@ -265,7 +265,7 @@ namespace ArchiveLib
         }
     }
 
-    enum NinjaSurfaceFlags : uint
+    public enum NinjaSurfaceFlags : uint
     {
         Mipmapped = 0x80000000,
         VQ = 0x40000000,
@@ -275,7 +275,7 @@ namespace ArchiveLib
         Palettized = 0x00008000
     }
 
-    class PAKInfEntry
+    public class PAKInfEntry
     {
         public byte[] filename; // 28
         public uint globalindex;
@@ -331,7 +331,7 @@ namespace ArchiveLib
         }
     };
 
-    class PakTextureInfo : TextureInfo
+    public class PakTextureInfo : TextureInfo
     {
         public GvrDataFormat DataFormat { get; set; }
         public NinjaSurfaceFlags SurfaceFlags { get; set; }
@@ -390,7 +390,7 @@ namespace ArchiveLib
         }
     }
 
-	class XvrTextureInfo : TextureInfo
+    public class XvrTextureInfo : TextureInfo
 	{
 		public DXGIFormat DataFormat { get; set; }
 		public DXGIFormat PixelFormat { get; set; }

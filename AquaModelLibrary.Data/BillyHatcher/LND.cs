@@ -18,6 +18,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         /// Essentially, order here doesn't need to match the GVM order. Howevever all models must go off the order in this list.
         /// </summary>
         public List<string> texnames = new List<string>();
+
         /// <summary>
         /// The names of 'files' within the lnd. These will always be the main model followed by non animated supplemental models and finally the land definition and the mpl, if it exists.
         /// </summary>
