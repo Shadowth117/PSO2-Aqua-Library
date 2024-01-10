@@ -234,7 +234,8 @@ namespace AquaModelLibrary.Core.BillyHatcher
                         var genMat = new GenericMaterial();
                         genMat.matName = matName;
                         genMat.diffuseRGBA = new Vector4(1, 1, 1, 1);
-                        genMat.texNames = new List<string>() { $"{tex}.png" };
+                        var texName = Path.GetFileNameWithoutExtension(tex);
+                        genMat.texNames = new List<string>() { $"{texName}.png" };
                         materialDict.Add(matName + $"#{tex}", aqp.tempMats.Count);
                         matId = aqp.tempMats.Count;
                         aqp.tempMats.Add(genMat);
