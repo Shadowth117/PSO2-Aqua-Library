@@ -690,7 +690,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// <summary>
         /// Reconstructs globalBonePalette and optimizes local VTXL bonePalette. StoreInVTXL should be true for classic models, objc.type < 0xC32, only
         /// </summary>>
-        public static void OptimizeBonePalette(VTXL vtxl, List<uint> globalBonePalette, bool storeInVtxl)
+        public static void OptimizeBonePalette(VTXL vtxl, List<uint> globalBonePalette, bool newStyleBonePalette)
         {
             List<int> newBonePalette = new List<int>();
 
@@ -711,7 +711,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         if (!globalBonePalette.Contains((uint)vtxl.vertWeightIndices[v][vi]))
                         {
                             globalBonePalette.Add((uint)vtxl.vertWeightIndices[v][vi]);
-                            if (storeInVtxl)
+                            if (!newStyleBonePalette)
                             {
                                 newBonePalette.Add(vtxl.bonePalette[vtxl.vertWeightIndices[v][vi]]);
                             }
@@ -725,7 +725,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
             }
 
-            if (storeInVtxl)
+            if (newStyleBonePalette)
             {
                 vtxl.bonePalette = newBonePalette.ConvertAll(x => (ushort)x);
             }
