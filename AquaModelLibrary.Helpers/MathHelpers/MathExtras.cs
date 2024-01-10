@@ -19,7 +19,7 @@ namespace AquaModelLibrary.Helpers.MathHelpers
 
         public static Vector3 GetMaximumBounding(Vector3 maxPoint, Vector3 newPoint)
         {
-            GetMaximumBounding(maxPoint, newPoint);
+            GetMaximumBounding(ref maxPoint, newPoint);
             return maxPoint;
         }
 
@@ -41,7 +41,7 @@ namespace AquaModelLibrary.Helpers.MathHelpers
 
         public static Vector3 GetMinimumBounding(Vector3 minPoint, Vector3 newPoint)
         {
-            GetMinimumBounding(minPoint, newPoint);
+            GetMinimumBounding(ref minPoint, newPoint);
             return minPoint;
         }
         public static void GetMinimumBounding(ref Vector3 minPoint, Vector3 newPoint)
