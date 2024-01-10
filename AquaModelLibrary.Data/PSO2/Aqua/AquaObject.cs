@@ -2579,10 +2579,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 //Loop through and check for missing vertices/isolated vertices. Proceed to dummy these out as a failsafe for later access.
                 for (int i = 0; i < vtxl.vertPositions.Count; i++)
                 {
+                    /*
                     if (vtxl.vertNormals.Count > 0)
                     {
                         vtxl.vertNormals[i] = new Vector3();
                     }
+                    */
                     if (vtxl.vertNormalsNGS.Count > 0 && vtxl.vertNormalsNGS[i] == null)
                     {
                         vtxl.vertNormalsNGS[i] = new short[4];
@@ -2595,10 +2597,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     {
                         vtxl.vertColor2s[i] = new byte[4];
                     }
+                    /*
                     if (vtxl.uv1List.Count > 0)
                     {
                         vtxl.uv1List[i] = new Vector2();
-                    }
+                    }*/
                     if (vtxl.uv1ListNGS.Count > 0 && vtxl.uv1ListNGS[i] == null)
                     {
                         vtxl.uv1ListNGS[i] = new short[2];
@@ -2615,6 +2618,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     {
                         vtxl.uv4ListNGS[i] = new short[2];
                     }
+                    /*
                     if (vtxl.uv2List.Count > 0)
                     {
                         vtxl.uv2List[i] = new Vector2();
@@ -2627,6 +2631,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     {
                         vtxl.uv4List[i] = new Vector2();
                     }
+                    */
                     if (vtxl.vert0x22.Count > 0 && vtxl.vert0x22[i] == null)
                     {
                         vtxl.vert0x22[i] = new short[2];
