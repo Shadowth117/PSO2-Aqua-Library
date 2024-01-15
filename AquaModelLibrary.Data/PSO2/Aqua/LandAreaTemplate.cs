@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using System.IO;
+using AquaModelLibrary.Helpers.Extensions;
 using System.Text;
+using AquaModelLibrary.Helpers;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -48,6 +49,27 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
                 latGridData.Add(latRow);
             }
+        }
+
+        public override byte[] GetBytesNIFL()
+        {
+            List<byte> outBytes = new List<byte>();
+            foreach(var row in latGridSmallData)
+            {
+                foreach(var data in row)
+                {
+                    outBytes.AddRange(DataHelpers.ConvertStruct(data));
+                }
+            }
+            foreach (var row in latGridData)
+            {
+                foreach (var data in row)
+                {
+                    outBytes.AddRange(DataHelpers.ConvertStruct(data));
+                }
+            }
+
+            return outBytes.ToArray();
         }
 
         public struct LATGridData
