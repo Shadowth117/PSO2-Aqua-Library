@@ -168,6 +168,11 @@ namespace SoulsFormats
                             for (int i = 0; i < 4; i++)
                                 BoneIndices[i] = br.ReadUInt16();
                         }
+                        else if (member.Type == LayoutType.Short2toFloat2)
+                        {
+                            for (int i = 0; i < 4; i++)
+                                BoneIndices[i] = br.ReadByte(); // Short2toFloat2 Byte Type Read Guess
+                        }
                         else if (member.Type == LayoutType.Byte4E)
                         {
                             for (int i = 0; i < 4; i++)
