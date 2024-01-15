@@ -103,6 +103,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public int gridWidth;
             public int unk_08;
             public int unkGridIndicesOffset;
+
             public int latGridDataOffset;
             public int reserve0;
         }
