@@ -65,7 +65,6 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             {
                 outBytes.AddRange(DataHelpers.ConvertStruct(texSet));
             }
-            outBytes.AlignFileEndWriter(0x10);
 
             return outBytes.ToArray();
         }

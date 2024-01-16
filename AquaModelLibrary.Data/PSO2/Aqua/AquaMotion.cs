@@ -348,7 +348,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
             //Write NIFL
             outBytes.InsertRange(0, DataHelpers.ConvertStruct(nifl));
-            outBytes.AlignFileEndWriter(0x10);
 
             return outBytes.ToArray();
         }

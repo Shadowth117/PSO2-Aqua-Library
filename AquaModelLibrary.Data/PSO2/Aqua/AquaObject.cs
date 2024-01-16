@@ -17,7 +17,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// <summary>
         /// Checks the objc for if the type is in NGS range. Default to NGS at this point.
         /// </summary>
-        public bool IsNGS { get { return !(objc.type < 0x32); } }
+        public bool IsNGS { get { return !(objc.type < 0xC32); } }
 
         public OBJC objc;
         public List<VSET> vsetList = new List<VSET>();
@@ -1239,7 +1239,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
             //Write NIFL
             outBytes.InsertRange(0, DataHelpers.ConvertStruct(nifl));
-            outBytes.AlignFileEndWriter(0x10);
 
             return outBytes.ToArray();
         }

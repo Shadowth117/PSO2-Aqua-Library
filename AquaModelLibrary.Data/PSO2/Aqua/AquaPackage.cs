@@ -151,6 +151,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public byte[] GetPackageBytes(string FileName, bool writeVTBF = false)
         {
+            FileName = Path.GetFileName(FileName);
             bool package = FileName.Contains(".aqp") || FileName.Contains(".trp"); //If we're doing .aqo/.tro instead, we write only the first model and no aqp header
 
             var files = new List<AquaCommon>();
@@ -170,32 +171,53 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 fileCount = 1;
             }
 
-            for (int i = 0; i < fileCount; i++)
+            if(fileCount == 1 && models.Count == 0)
             {
-                int bonusPadding = 0;
-                if (writeVTBF && i == 0)
-                {
-                    bonusPadding = 0x10;
-                }
-
                 List<byte> outBytes = new List<byte>();
                 if (writeVTBF)
                 {
-                    outBytes.AddRange(files[i].GetBytesVTBF());
+                    outBytes.AddRange(files[0].GetBytesVTBF());
                 }
                 else
                 {
-                    outBytes.AddRange(files[i].GetBytesNIFL());
+                    outBytes.AddRange(files[0].GetBytesNIFL());
                 }
-                //Header info
-                int size = outBytes.Count;
-                WriteAFPBase(Path.ChangeExtension(FileName.Replace(".", $"_l{i + 1}."), ReturnModelTypeString(FileName)), package, bonusPadding, outBytes, size);
-
-                finalOutBytes.AddRange(outBytes);
-                finalOutBytes.AlignFileEndWriter(0x10);
+                return outBytes.ToArray();
             }
-            WriteTPN(package, finalOutBytes, Path.ChangeExtension(FileName, ".tpn"));
-            return finalOutBytes.ToArray();
+            else
+            {
+                for (int i = 0; i < fileCount; i++)
+                {
+                    int bonusPadding = 0;
+                    if (writeVTBF && i == 0)
+                    {
+                        bonusPadding = 0x10;
+                    }
+
+                    List<byte> outBytes = new List<byte>();
+                    if (writeVTBF)
+                    {
+                        outBytes.AddRange(files[i].GetBytesVTBF());
+                    }
+                    else
+                    {
+                        outBytes.AddRange(files[i].GetBytesNIFL());
+                    }
+                    //Header info
+                    int size = outBytes.Count;
+
+                    if (FileName.Length > 0x20)
+                    {
+                        FileName = FileName.Substring(0, 0x19) + Path.GetExtension(FileName);
+                    }
+                    WriteAFPBase(Path.ChangeExtension(FileName.Replace(".", $"_l{i + 1}."), ReturnModelTypeString(FileName)), package, bonusPadding, outBytes, size);
+
+                    finalOutBytes.AddRange(outBytes);
+                    finalOutBytes.AlignFileEndWriter(0x10);
+                }
+                WriteTPN(package, finalOutBytes, Path.ChangeExtension(FileName, ".tpn"));
+                return finalOutBytes.ToArray();
+            }
         }
 
         private void WriteAFPBase(string fileName, bool package, int bonusPadding, List<byte> outBytes, int size)
