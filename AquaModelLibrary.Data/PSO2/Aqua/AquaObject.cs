@@ -1978,6 +1978,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         //0xC33 variations of the format can recycle vtxl lists for multiple meshes. Neat, but not helpful for conversion purposes.
         public int splitVSETPerMesh()
         {
+            if(meshList.Count < 2 || objc.type < 0xC32)
+            {
+                return vsetList.Count;
+            }
             bool continueSplitting = false;
             Dictionary<int, List<int>> vsetTracker = new Dictionary<int, List<int>>(); //Key int is a VSET, value is a list of indices for each mesh that uses said VSET
             for (int meshId = 0; meshId < meshList.Count; meshId++)
