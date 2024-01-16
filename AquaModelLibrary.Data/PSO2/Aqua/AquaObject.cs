@@ -546,8 +546,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             int rel0SizeOffset;
 
             //OBJC Offsets
-            int objcGlobalTriOffset;
-            int objcGlobalVtxlOffset;
+            int objcGlobalTriOffset = 0;
+            int objcGlobalVtxlOffset = 0;
             int objcVsetOffset;
             int objcPsetOffset;
             int objcMeshOffset;
@@ -593,8 +593,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             //OBJC
 
             //Set up OBJC pointers
-            objcGlobalTriOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x14, strips.Count);
-            objcGlobalVtxlOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, vtxlList.Count);
+            if (IsNGS)
+            {
+                objcGlobalTriOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x14, strips.Count);
+                objcGlobalVtxlOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x1C, vtxlList.Count);
+            }
             objcVsetOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x28, objc.vsetCount);
             objcPsetOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x30, objc.psetCount);
             objcMeshOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x38, objc.meshCount);
