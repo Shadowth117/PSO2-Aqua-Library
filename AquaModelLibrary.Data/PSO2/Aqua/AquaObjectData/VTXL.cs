@@ -6,6 +6,7 @@ using Half = AquaModelLibrary.Data.DataTypes.Half;
 using static AquaModelLibrary.Helpers.MiscHelpers;
 using AquaModelLibrary.Helpers.PSO2;
 using AquaModelLibrary.Helpers;
+using static AquaModelLibrary.Helpers.MathHelpers.VectorExtensions;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 {
@@ -911,18 +912,18 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                     List<int> trueIds = new List<int>();
                     if (vertWeightIndices[i][0] != 0 || vertWeights[i].X != 0)
                     {
-                        trueWeight.Set(trueIds.Count, vertWeights[i].X);
+                        trueWeight = Set(trueWeight, trueIds.Count, vertWeights[i].X);
                         trueIds.Add(vertWeightIndices[i][0]);
                     }
                     if (vertWeightIndices[i][1] != 0 || vertWeights[i].Y != 0)
                     {
                         if (trueIds.Contains(vertWeightIndices[i][1]))
                         {
-                            trueWeight.AddToId(vertWeights[i].Y, trueIds.IndexOf(vertWeightIndices[i][1]));
+                            trueWeight = AddToId(trueWeight, vertWeights[i].Y, trueIds.IndexOf(vertWeightIndices[i][1]));
                         }
                         else
                         {
-                            trueWeight.Set(trueIds.Count, vertWeights[i].Y);
+                            trueWeight = Set(trueWeight, trueIds.Count, vertWeights[i].Y);
                             trueIds.Add(vertWeightIndices[i][1]);
                         }
                     }
@@ -930,11 +931,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                     {
                         if (trueIds.Contains(vertWeightIndices[i][2]))
                         {
-                            trueWeight.AddToId(vertWeights[i].Z, trueIds.IndexOf(vertWeightIndices[i][2]));
+                            trueWeight = AddToId(trueWeight, vertWeights[i].Z, trueIds.IndexOf(vertWeightIndices[i][2]));
                         }
                         else
                         {
-                            trueWeight.Set(trueIds.Count, vertWeights[i].Z);
+                            trueWeight = Set(trueWeight, trueIds.Count, vertWeights[i].Z);
                             trueIds.Add(vertWeightIndices[i][2]);
                         }
                     }
@@ -942,11 +943,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                     {
                         if (trueIds.Contains(vertWeightIndices[i][3]))
                         {
-                            trueWeight.AddToId(vertWeights[i].W, trueIds.IndexOf(vertWeightIndices[i][3]));
+                            trueWeight = AddToId(trueWeight, vertWeights[i].W, trueIds.IndexOf(vertWeightIndices[i][3]));
                         }
                         else
                         {
-                            trueWeight.Set(trueIds.Count, vertWeights[i].W);
+                            trueWeight = Set(trueWeight, trueIds.Count, vertWeights[i].W);
                             trueIds.Add(vertWeightIndices[i][3]);
                         }
                     }
@@ -1004,8 +1005,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
                     foreach (var id in idList)
                     {
-                        vertWeights[i].Set(bone0Id, vertWeights[i].Get(id) + vertWeights[i].Get(bone0Id));
-                        vertWeights[i].Set(id, 0);
+                        vertWeights[i] = Set(vertWeights[i], bone0Id, vertWeights[i].Get(id) + vertWeights[i].Get(bone0Id));
+                        vertWeights[i] = Set(vertWeights[i], id, 0);
                     }
                 }
             }
@@ -1104,8 +1105,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
                     foreach (var id in idList)
                     {
-                        trueVertWeights[i].Set(bone0Id, trueVertWeights[i].Get(id) + trueVertWeights[i].Get(bone0Id));
-                        trueVertWeights[i].Set(id, 0);
+                        trueVertWeights[i] = Set(trueVertWeights[i], bone0Id, trueVertWeights[i].Get(id) + trueVertWeights[i].Get(bone0Id));
+                        trueVertWeights[i] = Set(trueVertWeights[i], id, 0);
                     }
                     if (idList.Count > 0)
                     {

@@ -19,7 +19,7 @@ namespace AquaModelLibrary.Helpers.MathHelpers
             }
         }
 
-        public static void Set(this Vector3 vec3, int id, float value)
+        public static Vector3 Set(Vector3 vec3, int id, float value)
         {
             switch (id)
             {
@@ -33,6 +33,8 @@ namespace AquaModelLibrary.Helpers.MathHelpers
                     vec3.Z = value;
                     break;
             }
+
+            return vec3;
         }
 
         public static float Get(this Vector4 vec4, int id)
@@ -52,7 +54,7 @@ namespace AquaModelLibrary.Helpers.MathHelpers
             }
         }
 
-        public static void Set(this Vector4 vec4, int id, float value)
+        public static Vector4 Set(Vector4 vec4, int id, float value)
         {
             switch (id)
             {
@@ -69,9 +71,11 @@ namespace AquaModelLibrary.Helpers.MathHelpers
                     vec4.W = value;
                     break;
             }
+
+            return vec4;
         }
 
-        public static void AddToId(this Vector4 vec4, float value, int id)
+        public static Vector4 AddToId(Vector4 vec4, float value, int id)
         {
             switch (id)
             {
@@ -85,27 +89,35 @@ namespace AquaModelLibrary.Helpers.MathHelpers
                     vec4.Z += value;
                     break;
                 case 3:
-                    break;
                     vec4.W += value;
+                    break;
             }
+
+            return vec4;
         }
 
-        public static void MirrorX(this Quaternion quat)
+        public static Quaternion MirrorX(Quaternion quat)
         {
             quat.Y = -quat.Y;
             quat.Z = -quat.Z;
+
+            return quat;
         }
 
-        public static void MirrorY(this Quaternion quat)
+        public static Quaternion MirrorY(Quaternion quat)
         {
             quat.X = -quat.X;
             quat.Z = -quat.Z;
+
+            return quat;
         }
 
-        public static void MirrorZ(this Quaternion quat)
+        public static Quaternion MirrorZ(Quaternion quat)
         {
             quat.X = -quat.X;
             quat.Y = -quat.Y;
+
+            return quat;
         }
 
         public static Quaternion ToQuat(this Vector4 vec4)
