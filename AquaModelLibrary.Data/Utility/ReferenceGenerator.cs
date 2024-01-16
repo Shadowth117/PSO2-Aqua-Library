@@ -1571,7 +1571,7 @@ namespace AquaModelLibrary.Data.Utility
             files.AddRange(iceFile.groupOneFiles);
             files.AddRange(iceFile.groupTwoFiles);
 
-            roomGoodsOut.Add("Data is laid out as follows:\nObject Name (if known), Object Function, Animation type, category 1, category 2, object unhashed name, object hashed name, object _ex textures hashed name\n\n");
+            roomGoodsOut.Add("Data is laid out as follows:\nObject Name JP (if known),Object Name EN (if known),Object Function,Animation type,category 1,category 2,object unhashed name,object hashed name,object _ex textures hashed name\n\n");
             for (int i = 0; i < files.Count; i++)
             {
                 var name = IceFile.getFileName(files[i]);
@@ -1580,16 +1580,17 @@ namespace AquaModelLibrary.Data.Utility
                     var rg = new MyRoomParameters(files[i], 0);
                     foreach (var good in rg.roomGoodsList)
                     {
-                        string obj = $"object/map_object/ob_1000_{good.goods.id:D4}.ice";
+                        //Id appears to be 1 less than what it actually should reference
+                        string obj = $"object/map_object/ob_1000_{good.goods.id + 1:D4}.ice";
                         string objHash = GetFileHash(obj);
-                        string objEx = $"object/map_object/ob_1000_{good.goods.id:D4}_ex.ice";
+                        string objEx = $"object/map_object/ob_1000_{good.goods.id + 1:D4}_ex.ice";
                         string objExHash = GetFileHash(objEx);
                         string objFile = Path.Combine(pso2_binDir, dataDir, objHash);
                         string objFileEx = Path.Combine(pso2_binDir, dataDir, objExHash);
 
                         if (File.Exists(objFile))
                         {
-                            string goodsName = roomGoodsNames.ContainsKey(obj) ? roomGoodsNames[obj] : "";
+                            string goodsName = roomGoodsNames.ContainsKey(obj) ? roomGoodsNames[obj] : ",";
                             string output = goodsName + $",{good.functionString},{good.motionType},{good.categoryString},{good.categoryString2}," + obj + "," + objHash;
                             if (File.Exists(objFileEx))
                             {

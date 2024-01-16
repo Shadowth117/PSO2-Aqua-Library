@@ -93,6 +93,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public struct RoomGoods
         {
+            /// <summary>
+            /// Id might be 1 less than actual object id
+            /// </summary>
             public int id;
             public int categoryPtr;
             public int int_08;
