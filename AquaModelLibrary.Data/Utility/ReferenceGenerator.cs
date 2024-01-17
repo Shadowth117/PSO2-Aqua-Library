@@ -73,6 +73,9 @@ namespace AquaModelLibrary.Data.Utility
         //As win32_na is a patching folder, if it exists in the pso2_bin it will be prioritized for text related items.
         public unsafe static void OutputFileLists(string pso2_binDir, string outputDirectory)
         {
+            var rootDumpDirectory = (string)outputDirectory.Clone();
+            var imageDiretory = Path.Combine(rootDumpDirectory, "Images");
+            outputDirectory = Path.Combine(rootDumpDirectory, "Sheets");
             string playerDirOut = Path.Combine(outputDirectory, playerOut);
             string playerClassicDirOut = Path.Combine(playerDirOut, classicOut);
             string playerCAnimDirOut = Path.Combine(playerClassicDirOut, animsEffectsOut);
@@ -304,7 +307,7 @@ namespace AquaModelLibrary.Data.Utility
 
             GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
-            GenerateUILists(pso2_binDir, outputDirectory);
+            GenerateUILists(pso2_binDir, outputDirectory, imageDiretory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
@@ -726,12 +729,17 @@ namespace AquaModelLibrary.Data.Utility
             }
         }
 
-        private static void GenerateUILists(string pso2_binDir, string outputDirectory)
+        private static void GenerateUILists(string pso2_binDir, string outputDirectory, string imageDirectory)
         {
             string outputStampDirectory = Path.Combine(outputDirectory, "UI", "Stamps");
             string outputVGDirectory = Path.Combine(outputDirectory, "UI", "Vital Gauge");
             Directory.CreateDirectory(outputStampDirectory);
             Directory.CreateDirectory(outputVGDirectory);
+
+            string outputImageStampDirectory = Path.Combine(imageDirectory, "UI", "Stamps");
+            string outputImageVGDirectory = Path.Combine(imageDirectory, "UI", "Vital Gauge");
+            Directory.CreateDirectory(outputImageStampDirectory);
+            Directory.CreateDirectory(outputImageVGDirectory);
 
             //---------------------------Generate Load Tunnel Lists
             List<string> loadTunnelsOut = new List<string>();
@@ -755,7 +763,7 @@ namespace AquaModelLibrary.Data.Utility
                     var image = GetFirstImageFromIce(path);
                     if (image != null)
                     {
-                        var imagePath = Path.Combine(outputStampDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        var imagePath = Path.Combine(outputImageStampDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
                         image.Save(imagePath);
                     }
                 }
@@ -765,7 +773,7 @@ namespace AquaModelLibrary.Data.Utility
                     var image = GetFirstImageFromIce(pathNA);
                     if (image != null)
                     {
-                        var imagePath = Path.Combine(outputStampDirectory, Path.ChangeExtension(Path.GetFileName(name), "NA.png"));
+                        var imagePath = Path.Combine(outputImageStampDirectory, Path.ChangeExtension(Path.GetFileName(name), "NA.png"));
                         image.Save(imagePath);
                     }
                 }
@@ -792,7 +800,7 @@ namespace AquaModelLibrary.Data.Utility
                     var image = GetFirstImageFromIce(path);
                     if (image != null)
                     {
-                        var imagePath = Path.Combine(outputVGDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        var imagePath = Path.Combine(outputImageVGDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
                         image.Save(imagePath);
                     }
                 }
@@ -802,7 +810,7 @@ namespace AquaModelLibrary.Data.Utility
                     var image = GetFirstImageFromIce(pathNA);
                     if (image != null)
                     {
-                        var imagePath = Path.Combine(outputVGDirectory, Path.ChangeExtension(Path.GetFileName(name), "NA.png"));
+                        var imagePath = Path.Combine(outputImageVGDirectory, Path.ChangeExtension(Path.GetFileName(name), "NA.png"));
                         image.Save(imagePath);
                     }
                 }
