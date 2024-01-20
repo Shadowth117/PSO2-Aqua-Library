@@ -147,6 +147,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     }
                 }
 
+                if(localMeshNames.Count > 0 && meshNames.Count == meshList.Count)
+                {
+                    localMeshNames.RemoveAt(0);
+                    meshNames.AddRange(localMeshNames);
+                }
+
                 //Assign first split back to original slot, assign subsequent splits to end of the list
                 for (int i = 0; i < localFaceList.Count; i++)
                 {
@@ -215,18 +221,18 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public void SplitMeshTempData(int modelId, List<List<int>> facesToClone)
+        public void SplitMeshTempData(int meshId, List<List<int>> facesToClone)
         {
             if (facesToClone.Count > 0)
             {
                 List<List<int>> boneIdList = new List<List<int>>();
-                List<string> splitMeshNames = new List<string>();
-                List<VTXL> splitVtxlList = new List<VTXL>();
-                List<GenericTriangles> splitTrisList = new List<GenericTriangles>();
+                List<string> localMeshNames = new List<string>();
+                List<VTXL> localVtxlList = new List<VTXL>();
+                List<GenericTriangles> localTrisList = new List<GenericTriangles>();
 
                 for (int f = 0; f < facesToClone.Count; f++)
                 {
-                    var referenceVTXL = vtxlList[modelId];
+                    var referenceVTXL = vtxlList[meshId];
                     Dictionary<float, int> faceVertDict = new Dictionary<float, int>();
                     List<int> faceVertIds = new List<int>();
                     List<int> tempFaceMatIds = new List<int>();
@@ -239,7 +245,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         //Get vert ids
                         for (int i = 0; i < facesToClone[f].Count; i++)
                         {
-                            Vector3 face = tempTris[modelId].triList[facesToClone[f][i]];
+                            Vector3 face = tempTris[meshId].triList[facesToClone[f][i]];
                             if (!faceVertIds.Contains((int)face.X))
                             {
                                 faceVertDict.Add(face.X, vertIndex++);
@@ -287,7 +293,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                                 }
                             }
 
-                            tempFaceMatIds.Add(tempTris[modelId].matIdList[facesToClone[f][i]]);
+                            tempFaceMatIds.Add(tempTris[meshId].matIdList[facesToClone[f][i]]);
                             tempFaces.Add(face);
                         }
 
@@ -299,10 +305,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                         //Assign new tempTris
                         var newTris = new GenericTriangles(tempFaces, tempFaceMatIds);
-                        newTris.baseMeshDummyId = tempTris[modelId].baseMeshDummyId;
-                        newTris.baseMeshNodeId = tempTris[modelId].baseMeshNodeId;
-                        newTris.name = tempTris[modelId].name;
-                        splitTrisList.Add(newTris);
+                        newTris.baseMeshDummyId = tempTris[meshId].baseMeshDummyId;
+                        newTris.baseMeshNodeId = tempTris[meshId].baseMeshNodeId;
+                        newTris.name = tempTris[meshId].name;
+                        localTrisList.Add(newTris);
 
                         //Copy vertex data based on faceVertIds ordering
                         VTXL vtxl = new VTXL();
@@ -317,16 +323,43 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                             vtxl.bonePalette.AddRange(referenceVTXL.bonePalette);
                         }
                         boneIdList.Add(boneIds);
-                        if (meshNames.Count > modelId)
+                        if (meshNames.Count > meshId)
                         {
-                            splitMeshNames.Add(meshNames[modelId]);
+                            localMeshNames.Add(meshNames[meshId]);
                         }
-                        splitVtxlList.Add(vtxl);
+                        localVtxlList.Add(vtxl);
                     }
                 }
-                meshNames = splitMeshNames;
-                vtxlList = splitVtxlList;
-                tempTris = splitTrisList;
+
+                if (localMeshNames.Count > 0 && meshNames.Count == tempTris.Count)
+                {
+                    localMeshNames.RemoveAt(0);
+                    meshNames.AddRange(localMeshNames);
+                }
+
+                //Assign first split back to original slot, assign subsequent splits to end of the list
+                for (int i = 0; i < localTrisList.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        tempTris[meshId] = localTrisList[i];
+                        continue;
+                    }
+                    tempTris.Add(localTrisList[i]);
+                }
+
+                //If we're doing an NGS model, we can leave the vertices alone since we can recycle vertices for strips
+
+                for (int i = 0; i < localVtxlList.Count; i++)
+                {
+                    //We don't reassign the original set of vertices in case another mesh is using it, even if it's unlikely.
+                    if (i == 0)
+                    {
+                        vtxlList[meshId] = (localVtxlList[i]);
+                        continue;
+                    }
+                    vtxlList.Add(localVtxlList[i]);
+                }
             }
         }
 

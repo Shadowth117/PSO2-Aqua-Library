@@ -42,10 +42,13 @@ namespace  AquaModelLibrary.Data.NNStructs.Structures
             var magic = Encoding.ASCII.GetString(sr.ReadBytes(0, 4));
             sr.Seek(4, SeekOrigin.Begin);
             var len = sr.Read<int>();
-            offset = len;
-            sr.Seek(len, SeekOrigin.Begin);
+            if(magic != "NXTL")
+            {
+                offset = len;
+                sr.Seek(len, SeekOrigin.Begin);
+                sr.Seek(8, SeekOrigin.Current);
+            }
 
-            sr.Seek(8, SeekOrigin.Current);
             //Find out if we're reading a big endian file. Before this is consistently little endian
             bool isBE = sr.Peek<int>() > 0xFFFF;
 
