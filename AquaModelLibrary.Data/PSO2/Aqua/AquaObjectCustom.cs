@@ -705,7 +705,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         #region BoneMethods
         /// <summary>
-        /// Reconstructs globalBonePalette and optimizes local VTXL bonePalettes.
+        /// Reconstructs globalBonePalette and optimizes local VTXL bonePalettes. Only intended for use during custom model creation!
         /// </summary>>
         public void OptimizeBonePalettes()
         {
@@ -718,10 +718,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
                 OptimizeBonePalette(vtxlList[i], globalBonePalette, IsNGS);
             }
+            if(bonePalette.Count > 0)
+            {
+                bonePalette = globalBonePalette;
+            }
         }
 
         /// <summary>
-        /// Reconstructs globalBonePalette and optimizes local VTXL bonePalette. StoreInVTXL should be true for classic models, objc.type < 0xC32, only
+        /// Reconstructs globalBonePalette and optimizes local VTXL bonePalette. newStyleBonePalette should be false for classic models, objc.type < 0xC32, only
         /// </summary>>
         public static void OptimizeBonePalette(VTXL vtxl, List<uint> globalBonePalette, bool newStyleBonePalette)
         {
@@ -758,7 +762,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
             }
 
-            if (newStyleBonePalette)
+            if (!newStyleBonePalette)
             {
                 vtxl.bonePalette = newBonePalette.ConvertAll(x => (ushort)x);
             }

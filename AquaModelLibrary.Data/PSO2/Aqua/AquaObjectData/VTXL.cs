@@ -903,6 +903,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         //This allows one to condense the weight data
         public void createTrueVertWeights()
         {
+            trueVertWeightIndices.Clear();
+            trueVertWeights.Clear();
             if (vertWeights.Count > 0 && vertWeightIndices.Count > 0)
             {
                 //Account for bone palette 0 being ordered weird

@@ -114,6 +114,7 @@ namespace AquaModelLibrary.Data.NNStructs
         {
             aqn = nodes;
             AquaObject aqp = new AquaObject();
+
             aqp.bonePalette = new List<uint>();
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
@@ -194,6 +195,7 @@ namespace AquaModelLibrary.Data.NNStructs
                                 VTXL.AppendVertex(vtxlList[group], vtxl, (int)face.X);
                                 VTXL.AppendVertex(vtxlList[group], vtxl, (int)face.Y);
                                 VTXL.AppendVertex(vtxlList[group], vtxl, (int)face.Z);
+                                
                                 vtxl.rawVertId.Add((int)face.X);
                                 vtxl.rawVertId.Add((int)face.Y);
                                 vtxl.rawVertId.Add((int)face.Z);
