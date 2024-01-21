@@ -13,16 +13,43 @@ namespace AquaModelLibrary.Data.BillyHatcher
         //0x70 - Starts the following text in a follow up dialogue box.
         //0x77 - Always followed by 0x30? Unknown, seems to preceed many areas, but may not do anything.
 
+        public enum BillyLanguage
+        {
+            Default = 0,
+            Japanese = 1,
+            Cyrillic = 2,
+        }
+
         public List<string> strings = new List<string>();
-        public bool isShiftJIS = false;
+        public BillyLanguage language = 0;
         public MesBin() { }
+
+        public MesBin(string fileName, BufferedStreamReaderBE<MemoryStream> sr, bool useCyrillic)
+        {
+            if(useCyrillic)
+            {
+                language = BillyLanguage.Cyrillic;
+            }
+            Read(fileName, sr);
+        }
+
         public MesBin(string fileName, BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(fileName, sr);
+        }
+
+        private void Read(string fileName, BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             Encoding encoding = Encoding.GetEncoding("Windows-1252");
-            if (!fileName.EndsWith("_e.bin") && !fileName.EndsWith("_f.bin") && !fileName.EndsWith("_g.bin") && !fileName.EndsWith("_i.bin") && !fileName.EndsWith("_s.bin"))
+
+            if (language == BillyLanguage.Cyrillic)
             {
-                isShiftJIS = true;
+                encoding = Encoding.GetEncoding("Windows-1251");
+            }
+            else if (!fileName.EndsWith("_e.bin") && !fileName.EndsWith("_f.bin") && !fileName.EndsWith("_g.bin") && !fileName.EndsWith("_i.bin") && !fileName.EndsWith("_s.bin"))
+            {
+                language = BillyLanguage.Japanese;
                 encoding = Encoding.GetEncoding("shift-jis");
             }
             int fullOffsetBuffer = sr.ReadBE<int>();
@@ -129,6 +156,15 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
         }
 
+        public byte[] GetBytesCyrillic(bool useCyrillic)
+        {
+            if (useCyrillic)
+            {
+                language = BillyLanguage.Cyrillic;
+            }
+            return GetBytes();
+        }
+
         public byte[] GetBytes()
         {
             ByteListExtension.AddAsBigEndian = true;
@@ -136,7 +172,11 @@ namespace AquaModelLibrary.Data.BillyHatcher
             List<byte> refs = new List<byte>();
             List<byte> strBytes = new List<byte>();
             Encoding encoding = Encoding.GetEncoding("Windows-1252");
-            if (isShiftJIS)
+            if (language == BillyLanguage.Cyrillic)
+            {
+                encoding = Encoding.GetEncoding("Windows-1251");
+            }
+            else if (language == BillyLanguage.Japanese)
             {
                 encoding = Encoding.GetEncoding("shift-jis");
             }
