@@ -31,7 +31,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                 invTransforms.Add(sr.Read<Matrix4x4>());
             }
             sr.Seek(header.boneMetadataOffset, System.IO.SeekOrigin.Begin);
-            metadata = new CSKLMetaData(sr);
+            metadata = new CSKLMetaData(sr, header.boneCount);
             names = new CSKLNames(sr);
             footerData = sr.Read<CFooter>();
         }

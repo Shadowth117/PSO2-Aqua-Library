@@ -21,7 +21,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 
         }
 
-        public CSKLMetaData(BufferedStreamReaderBE<MemoryStream> sr)
+        public CSKLMetaData(BufferedStreamReaderBE<MemoryStream> sr, int boneCount)
         {
             var start = sr.Position;
 
@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
             var absoluteCsklNamesOffset = csklNamesOffset + start;
 
             sr.Seek(absoluteFamilyIdListOffset, System.IO.SeekOrigin.Begin);
-            for (int i = 0; i < absoluteFamilyIdListOffset; i++)
+            for (int i = 0; i < boneCount; i++)
             {
                 familyIds.Add(new CSKLFamilyIds(sr));
             }

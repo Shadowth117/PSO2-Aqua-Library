@@ -4,7 +4,8 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 {
     public class CSKLFamilyIds
     {
-        public float unkFloat; //Seemingly always 0 or -0??
+        public ushort boneFlag0; //Sometiems 0x100 for unknown reasons
+        public ushort boneFlag1; //Sometimes 0x8000 for unknown reasons
         public int parentId;
         public int firstChildId;
         public int nextSiblingId;
@@ -16,7 +17,8 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 
         public CSKLFamilyIds(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            unkFloat = sr.Read<float>();
+            boneFlag0 = sr.Read<ushort>();
+            boneFlag1 = sr.Read<ushort>();
             parentId = sr.Read<int>();
             firstChildId = sr.Read<int>();
             nextSiblingId = sr.Read<int>();
