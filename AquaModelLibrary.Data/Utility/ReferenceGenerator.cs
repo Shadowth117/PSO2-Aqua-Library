@@ -54,7 +54,7 @@ namespace AquaModelLibrary.Data.Utility
                     {
                         if (aquaCMX != null)
                         {
-                            aquaCMX.ReadVTBFCMX(file);
+                            aquaCMX.Read(file);
                         }
                         else
                         {
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Data.Utility
             Directory.CreateDirectory(stageDirOut);
             Directory.CreateDirectory(uiDirOut);
 
-            var aquaCMX = new CharacterMakingIndex();
+            CharacterMakingIndex aquaCMX = null;
             PSO2Text partsText = null;
             PSO2Text acceText = null;
             PSO2Text commonText = null;
