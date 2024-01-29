@@ -12,16 +12,19 @@ namespace AquaModelLibrary
 {
     //Version 1 is the most basic and was seen in alpha pso2. Version 3 was used in PSO2 Classic for most of its life. Version 4 was used some in PSO2 and in NGS.
     //Version 1 requires some extra work to convert to since it doesn't have a face array and so is not supported for converting back at this time.
-    public unsafe class PRMModel
+    /// <summary>
+    /// .prm Simple model, used for effects and other places where full blown aqp isn't needed.
+    /// </summary>
+    public unsafe class PRM
     {
         //Seems to somehow link the PRM entries together when the count isn't 0
         public PRMHeader header = new PRMHeader();
         public List<Vector3> faces = new List<Vector3>(); //These are stored as ushorts, but we'll read them in to Vector3s;
         public List<PRMVert> vertices = new List<PRMVert>();
 
-        public PRMModel() { }
+        public PRM() { }
 
-        public PRMModel(byte[] bytes)
+        public PRM(byte[] bytes)
         {
             using (MemoryStream ms = new MemoryStream(bytes))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
@@ -30,7 +33,7 @@ namespace AquaModelLibrary
             }
         }
 
-        public PRMModel(BufferedStreamReaderBE<MemoryStream> streamReader)
+        public PRM(BufferedStreamReaderBE<MemoryStream> streamReader)
         {
             Read(streamReader);
         }
@@ -126,7 +129,7 @@ namespace AquaModelLibrary
         //vtxlList data or tempTri vertex data, and temptris are expected to be populated in an AquaObject prior to this process. This should ALWAYS be run before any write attempts.
         //PRM is very simple and can only take in: Vertex positions, vertex normals, vert colors, and 2 UV mappings along with a list of triangles at best. It also expects only one object. 
         //The main purpose of this function is to fix UV and vert color conflicts upon conversion. While you can just do this logic yourself, this will do it for you as needed.
-        public PRMModel(AquaObject aqo)
+        public PRM(AquaObject aqo)
         {
             //Assemble vtxlList
             if (aqo.vtxlList == null || aqo.vtxlList.Count == 0)

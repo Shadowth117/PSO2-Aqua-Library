@@ -418,7 +418,7 @@ namespace AquaModelLibrary.Core.General
             return aiScene;
         }
 
-        public static Assimp.Scene AssimpPRMExport(string filePath, PRMModel prm)
+        public static Assimp.Scene AssimpPRMExport(string filePath, PRM prm)
         {
             Assimp.Scene aiScene = new Assimp.Scene();
 

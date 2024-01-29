@@ -1,12 +1,13 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
-using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Helpers;
-using System.IO;
-using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
-    public unsafe class TPNTexturePattern
+    /// <summary>
+    /// .tpn TexturePattern
+    /// </summary>
+    public unsafe class TPN
     {
         public TpnHeader header = new TpnHeader();
         public List<TexSet> texSets = new List<TexSet>();
@@ -26,14 +27,14 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             public PSO2String tex3Name; //Tex3
         }
 
-        public TPNTexturePattern() { }
+        public TPN() { }
 
-        public TPNTexturePattern(byte[] bytes)
+        public TPN(byte[] bytes)
         {
             Read(bytes);
         }
 
-        public TPNTexturePattern(BufferedStreamReaderBE<MemoryStream> sr)
+        public TPN(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
@@ -61,7 +62,7 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             List<byte> outBytes = new List<byte>();
             outBytes.AddRange(new byte[] { 0x74, 0x70, 0x6E, 0 });
             outBytes.AddRange(BitConverter.GetBytes(texSets.Count));
-            foreach(var texSet in texSets)
+            foreach (var texSet in texSets)
             {
                 outBytes.AddRange(DataHelpers.ConvertStruct(texSet));
             }

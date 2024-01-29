@@ -21,7 +21,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public AFPMain afp = new AFPMain();
         public List<AFPBase> afpEnvelopes = new List<AFPBase>();
         public List<AquaObject> models = new List<AquaObject>();
-        public List<TPNTexturePattern> tpns = new List<TPNTexturePattern>();
+        public List<TPN> tpns = new List<TPN>();
 
         public List<AquaMotion> motions = new List<AquaMotion>();
 
@@ -138,7 +138,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         motions.Add(new AquaMotion(sr));
                         break;
                     case ".tpn":
-                        tpns.Add(new TPNTexturePattern(sr));
+                        tpns.Add(new TPN(sr));
                         break;
                 }
             }

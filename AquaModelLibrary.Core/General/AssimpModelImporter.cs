@@ -605,7 +605,7 @@ namespace AquaModelLibrary.Core.General
 
             float baseScale = SetAssimpScale(aiScene);
 
-            PRMModel prm = new PRMModel();
+            PRM prm = new PRM();
 
             int totalVerts = 0;
 
@@ -618,7 +618,7 @@ namespace AquaModelLibrary.Core.General
             File.WriteAllBytes(finalFilePath, prm.GetBytes(4));
         }
 
-        private static void IterateAiNodesPRM(PRMModel prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, float baseScale)
+        private static void IterateAiNodesPRM(PRM prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, float baseScale)
         {
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(node.Transform));
             nodeMat.M41 *= baseScale;
@@ -638,12 +638,12 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void AddAiMeshToPRM(PRMModel prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat, float baseScale)
+        private static void AddAiMeshToPRM(PRM prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat, float baseScale)
         {
             //Convert vertices
             for (int vertId = 0; vertId < aiMesh.VertexCount; vertId++)
             {
-                PRMModel.PRMVert vert = new PRMModel.PRMVert();
+                PRM.PRMVert vert = new PRM.PRMVert();
                 var aiPos = aiMesh.Vertices[vertId];
                 var newPos = new Vector3(aiPos.X, aiPos.Y, aiPos.Z) * baseScale;
                 vert.pos = (Vector3.Transform(newPos, nodeMat));

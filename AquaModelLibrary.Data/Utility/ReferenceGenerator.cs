@@ -1326,7 +1326,7 @@ namespace AquaModelLibrary.Data.Utility
                                 var name = IceFile.getFileName(file);
                                 if (name.Contains(".elpr"))
                                 {
-                                    var elpr = new ELPR_EnlightenParam(file);
+                                    var elpr = new ELPR(file);
                                     foreach (var piece in elpr.elprList)
                                     {
                                         if (!enlStrings.Contains(piece.name0x18))

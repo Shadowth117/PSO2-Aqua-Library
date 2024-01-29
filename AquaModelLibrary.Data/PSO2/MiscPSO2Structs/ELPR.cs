@@ -5,18 +5,21 @@ using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
-    public class ELPR_EnlightenParam
+    /// <summary>
+    /// .elpr - Enlighten Param
+    /// </summary>
+    public class ELPR
     {
         public List<ElprPiece> elprList = new List<ElprPiece>();
 
-        public ELPR_EnlightenParam() { }
+        public ELPR() { }
 
-        public ELPR_EnlightenParam(byte[] file) 
+        public ELPR(byte[] file) 
         {
             Read(file);
         }
 
-        public ELPR_EnlightenParam(BufferedStreamReaderBE<MemoryStream> sr)
+        public ELPR(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }

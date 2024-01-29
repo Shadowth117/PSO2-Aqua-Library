@@ -2,7 +2,10 @@
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
-    public class DNAVNavmesh
+    /// <summary>
+    /// DNAV Navmesh
+    /// </summary>
+    public class DNAV
     {
         public struct navHeader
         {

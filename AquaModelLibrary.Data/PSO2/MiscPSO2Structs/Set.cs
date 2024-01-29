@@ -4,16 +4,19 @@ using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
 {
-    public class SetLayout
+    /// <summary>
+    /// .set object layout
+    /// </summary>
+    public class Set
     {
         public string fileName = null;
         public SetHeader header;
         public List<EntityString> entityStrings = new List<EntityString>();
         public List<SetEntity> setEntities = new List<SetEntity>();
 
-        public SetLayout() { }
+        public Set() { }
 
-        public SetLayout(byte[] file)
+        public Set(byte[] file)
         {
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
@@ -22,7 +25,7 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
             }
         }
 
-        public SetLayout(BufferedStreamReaderBE<MemoryStream> sr)
+        public Set(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
@@ -38,14 +41,14 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs
                 sr.Seek(envelopeSize, SeekOrigin.Current);
             }
 
-            var set = new SetLayout();
+            var set = new Set();
             set.fileName = Path.GetFileNameWithoutExtension(fileName);
             set.header = sr.Read<SetHeader>();
 
             //Read strings
             for (int i = 0; i < set.header.entityStringCount; i++)
             {
-                var entityStr = new SetLayout.EntityString();
+                var entityStr = new Set.EntityString();
                 entityStr.size = sr.Read<int>();
                 var rawStr = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, entityStr.size - 4));
                 rawStr = rawStr.Remove(rawStr.IndexOf(char.MinValue));

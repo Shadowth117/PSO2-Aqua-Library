@@ -322,11 +322,11 @@ namespace AquaModelLibrary.Core.PSO2
                             {
                                 break;
                             }
-                            SetLayout set;
+                            Set set;
                             using (MemoryStream stream = new MemoryStream(IceMethods.RemoveIceEnvelope(data)))
                             using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
                             {
-                                set = new SetLayout(streamReader);
+                                set = new Set(streamReader);
                             }
                             for (int st = 0; st < set.setEntities.Count; st++)
                             {
@@ -390,7 +390,7 @@ namespace AquaModelLibrary.Core.PSO2
                             }
                             break;
                         case ".prm":
-                            var prm = new PRMModel(data);
+                            var prm = new PRM(data);
                             models.Add(Path.GetFileNameWithoutExtension(fname) + "_prm", prm.ConvertToAquaObject());
                             break;
                         case ".tcb":
