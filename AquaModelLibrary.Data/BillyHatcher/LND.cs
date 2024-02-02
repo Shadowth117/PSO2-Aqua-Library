@@ -1,11 +1,11 @@
-﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
+﻿using AquaModelLibrary.Data.BillyHatcher.ARCData;
+using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.Data.BillyHatcher.ARC;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -58,8 +58,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
         {
             public ARCLNDHeader arcLndHeader;
             public List<int> arcExtraModeloffsets = new List<int>();
-            public ARCLNDRefTableHead arcRefTable;
-            public List<ARCLNDRefEntry> arcRefTableEntries = new List<ARCLNDRefEntry>();
 
             public byte[] GetBytes(int offset, int extraModelCount, List<string> texNames, out List<int> offsets)
             {
@@ -194,9 +192,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
             arcHeader.fileSize = sr.ReadBE<int>();
             arcHeader.pof0Offset = sr.ReadBE<int>();
             arcHeader.pof0OffsetsSize = sr.ReadBE<int>();
-            arcHeader.fileCount = sr.ReadBE<int>();
+            arcHeader.group1FileCount = sr.ReadBE<int>();
 
-            arcHeader.unkCount = sr.ReadBE<int>();
+            arcHeader.group2FileCount = sr.ReadBE<int>();
             arcHeader.magic = sr.ReadBE<int>();
             arcHeader.unkInt0 = sr.ReadBE<int>();
             arcHeader.unkInt1 = sr.ReadBE<int>();
@@ -205,10 +203,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr.Seek(0x20 + arcHeader.pof0Offset, SeekOrigin.Begin);
             pof0Offsets = POF0.GetRawPOF0Offsets(sr.ReadBytes(sr.Position, arcHeader.pof0OffsetsSize));
             sr.Seek(arcHeader.pof0OffsetsSize, SeekOrigin.Current);
-            for (int i = 0; i < arcHeader.fileCount; i++)
+            for (int i = 0; i < arcHeader.group1FileCount; i++)
             {
                 ARCFileRef modelRef = new ARCFileRef();
-                modelRef.modelOffset = sr.ReadBE<int>();
+                modelRef.fileOffset = sr.ReadBE<int>();
                 modelRef.relativeNameOffset = sr.ReadBE<int>();
                 arcLndModelRefs.Add(modelRef);
             }
@@ -221,9 +219,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 fileNames.Add(sr.ReadCString());
             }
 
-            for (int mdl = 0; mdl < arcHeader.fileCount; mdl++)
+            for (int mdl = 0; mdl < arcHeader.group1FileCount; mdl++)
             {
-                sr.Seek(0x20 + arcLndModelRefs[mdl].modelOffset, SeekOrigin.Begin);
+                sr.Seek(0x20 + arcLndModelRefs[mdl].fileOffset, SeekOrigin.Begin);
                 var fileName = fileNames[mdl];
 
                 //In retail, lnds have Block (Always main level data), models named 'Sphere' that sometimes have trailing numbers, land, and mpl here.
@@ -282,24 +280,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             //Read texture reference table
             sr.Seek(0x20 + arcLand.arcLndHeader.texRefTableOffset, SeekOrigin.Begin);
-            arcLand.arcRefTable = new ARCLNDRefTableHead();
-            arcLand.arcRefTable.entryOffset = sr.ReadBE<int>();
-            arcLand.arcRefTable.entryCount = sr.ReadBE<int>();
-
-            sr.Seek(0x20 + arcLand.arcRefTable.entryOffset, SeekOrigin.Begin);
-            for (int i = 0; i < arcLand.arcRefTable.entryCount; i++)
-            {
-                ARCLNDRefEntry refEntry = new ARCLNDRefEntry();
-                refEntry.textOffset = sr.ReadBE<int>();
-                refEntry.unkInt0 = sr.ReadBE<int>();
-                refEntry.unkInt1 = sr.ReadBE<int>();
-                arcLand.arcRefTableEntries.Add(refEntry);
-            }
-            foreach (ARCLNDRefEntry entry in arcLand.arcRefTableEntries)
-            {
-                sr.Seek(entry.textOffset + 0x20, SeekOrigin.Begin);
-                texnames.Add(sr.ReadCString());
-            }
+            texnames = ARC.ReadTexNames(sr);
 
             return arcLand;
         }

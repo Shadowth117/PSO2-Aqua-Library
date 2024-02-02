@@ -314,19 +314,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
         public int GVMOffset;
     }
 
-    public struct ARCLNDRefTableHead
-    {
-        public int entryOffset;
-        public int entryCount;
-    }
-
-    public struct ARCLNDRefEntry
-    {
-        public int textOffset;
-        public int unkInt0;
-        public int unkInt1;
-    }
-
     public struct ARCLNDMainDataHeader
     {
         public int mainOffsetTableOffset;

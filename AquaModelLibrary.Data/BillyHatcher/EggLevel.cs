@@ -1,5 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
-using static AquaModelLibrary.Data.BillyHatcher.ARC;
+﻿using AquaModelLibrary.Data.BillyHatcher.ARCData;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -84,9 +84,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
             arcHeader.fileSize = sr.ReadBE<int>();
             arcHeader.pof0Offset = sr.ReadBE<int>();
             arcHeader.pof0OffsetsSize = sr.ReadBE<int>();
-            arcHeader.fileCount = sr.ReadBE<int>();
+            arcHeader.group1FileCount = sr.ReadBE<int>();
 
-            arcHeader.unkCount = sr.ReadBE<int>();
+            arcHeader.group2FileCount = sr.ReadBE<int>();
             arcHeader.magic = sr.ReadBE<int>();
             arcHeader.unkInt0 = sr.ReadBE<int>();
             arcHeader.unkInt1 = sr.ReadBE<int>();
