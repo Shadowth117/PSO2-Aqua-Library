@@ -4,6 +4,7 @@ using AquaModelLibrary.Helpers.Readers;
 namespace AquaModelLibrary.Data.BillyHatcher
 {
     /// <summary>
+    /// egglevel.bin
     /// Slightly misleading since the POF0 offsets bleed into the actual data if not looking carefully. Last 4 bytes represent the 3 pointers and padding.
     /// </summary>
     public class EggLevel
