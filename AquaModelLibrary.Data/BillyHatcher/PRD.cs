@@ -1,6 +1,6 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
-using csharp_prs;
 using System.Text;
 
 namespace AquaModelLibrary.Data.BillyHatcher
@@ -74,7 +74,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             header.reserve1 = initialSR.ReadBE<int>();
             header.reserve2 = initialSR.ReadBE<int>();
 
-            var archiveData = Prs.Decompress(initialSR.ReadBytes(0x20, header.compressedDataSize));
+            var archiveData = PRSHelpers.PRSDecompress(initialSR.ReadBytes(0x20, header.compressedDataSize));
             using (var stream = new MemoryStream(archiveData))
             using (var sr = new BufferedStreamReaderBE<MemoryStream>(stream, 8192))
             {
@@ -119,7 +119,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
         }
 
-        public byte[] GetBytes()
+        public unsafe byte[] GetBytes()
         {
             ByteListExtension.AddAsBigEndian = true;
             List<byte> outBytes = new List<byte>();
@@ -134,17 +134,16 @@ namespace AquaModelLibrary.Data.BillyHatcher
             outBytes.AddValue(0);
 
             List<byte> innerBytes = NRCGetBytes();
-
-            var prs = Prs.Compress(innerBytes.ToArray(), 0x1FFF);
-            outBytes.AddRange(prs);
+            var compressedBytes = PRSHelpers.PRSCompress(innerBytes.ToArray());
+            outBytes.AddRange(compressedBytes);
             outBytes.FillInt("uncompressedDataSize", innerBytes.Count);
-            outBytes.FillInt("compressedDataSize", prs.Length);
-            var bufferAddition = 0x20 - (innerBytes.Count - prs.Length) % 0x20;
+            outBytes.FillInt("compressedDataSize", compressedBytes.Length);
+            var bufferAddition = 0x20 - (innerBytes.Count - compressedBytes.Length) % 0x20;
             //Hack to ensure the buffersize is enough
             bufferAddition += 0x40;
-            var compressionDifference = innerBytes.Count - prs.Length;
+            var compressionDifference = innerBytes.Count - compressedBytes.Length;
             var finalDifference = compressionDifference + bufferAddition;
-            var finalTotalBufferSize = finalDifference + prs.Length;
+            var finalTotalBufferSize = finalDifference + compressedBytes.Length;
             outBytes.FillInt("totalBufferSize", finalTotalBufferSize);
             outBytes.FillInt("totalBufferDifferenceFromCompressed", finalDifference);
 
