@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
 
-namespace AquaModelLibrary.Data.BillyHatcher.BillyNinja
+namespace AquaModelLibrary.Data.Ninja.Model
 {
-    public struct BillyNJSBoundingVolume
+    public struct NinjaBoundingVolume
     {
         public Vector3 center;
         public float radius;
