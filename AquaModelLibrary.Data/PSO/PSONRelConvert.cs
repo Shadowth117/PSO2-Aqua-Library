@@ -395,22 +395,13 @@ namespace AquaModelLibrary.Data.PSO
             node.siblingOffset = streamReader.ReadBE<uint>(be);
 
             Matrix4x4 mat = Matrix4x4.Identity;
-
             mat *= Matrix4x4.CreateScale(node.scl);
-
             var rotation = Matrix4x4.CreateRotationX(node.rot.X) *
                 Matrix4x4.CreateRotationY(node.rot.Y) *
                 Matrix4x4.CreateRotationZ(node.rot.Z);
-
             mat *= rotation;
-
             mat *= Matrix4x4.CreateTranslation(node.pos * rootScale);
-
-            //If there's a parent, multiply by it
-            if (parentMatrix != null)
-            {
-                mat = mat * parentMatrix;
-            }
+            mat = mat * parentMatrix;
 
             //Create AQN node
             NODE aqNode = new NODE();
