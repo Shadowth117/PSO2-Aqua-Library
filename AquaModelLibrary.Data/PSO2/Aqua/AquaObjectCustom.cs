@@ -1735,7 +1735,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 foreach (var vtxl in vtxlList)
                 {
-                    vtxl.processToPSO2Weights(true);
+                    vtxl.ProcessToPSO2Weights(true);
                 }
             }
             else
@@ -1989,6 +1989,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             if (!zeroBounds)
             {
                 objc.bounds = new BoundingVolume(vtxlList);
+            }
+
+            foreach(var vtxl in vtxlList)
+            {
+                for(int n = 0; n < vtxl.vertNormals.Count; n++)
+                {
+                    vtxl.vertNormals[n] = Vector3.Normalize(vtxl.vertNormals[n]);
+                }
             }
 
             if (useBiTangent)
