@@ -2550,7 +2550,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                         if (vertIndex > (vtxl.vertPositions.Count - 1))
                         {
-                            vtxl.AddRange(vertIndex - (vtxl.vertPositions.Count - 1), vtxl);
+                            vtxl.InsertBlankVerts(vertIndex - (vtxl.vertPositions.Count - 1), vtxl);
                         }
 
                         if (vtxlCheck[vertIndex] == true && !VTXL.IsSameVertex(vtxl, vertIndex, tempTris[mesh].faceVerts[face], faceVert))
@@ -2665,6 +2665,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
 
                 vtxlList.Add(vtxl);
+            }
+        }
+
+        public void ProcessToPSO2Weights()
+        {
+            foreach(var vtxl in vtxlList)
+            {
+                vtxl.ProcessToPSO2Weights();
             }
         }
 
