@@ -1132,7 +1132,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             return trueWeight;
         }
 
-        public void processToPSO2Weights(bool useNGSWeights = false)
+        public void ProcessToPSO2Weights(bool useNGSWeights = false)
         {
             //Should be the same count for both lists, go through and populate as needed to cull weight counts that are too large
             for (int wt = 0; wt < rawVertWeights.Count; wt++)
@@ -1340,9 +1340,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             }
         }
 
-        public void AddRange(int vertCount, VTXL modelVtxl)
+        public void InsertBlankVerts(int vertCount, VTXL modelVtxl)
         {
-            vertPositions.AddRange(new Vector3[vertCount]); //Any vert should honestly have this if it's a proper vertex.
+            if (modelVtxl.vertPositions.Count > 0)
+            {
+                vertPositions.AddRange(new Vector3[vertCount]); //Any vert should honestly have this if it's a proper vertex.
+            }
             if (modelVtxl.vertNormals.Count > 0)
             {
                 vertNormals.AddRange(new Vector3[vertCount]);
@@ -1451,7 +1454,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
                     vertWeightsNGS[i] = new ushort[4];
                 }
             }
-
         }
 
         public static void CopyVertex(VTXL sourceVTXL, VTXL destinationVTXL, int sourceIndex, int destinationIndex)
@@ -1567,10 +1569,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             if (sourceVTXL.trueVertWeightIndices.Count > sourceIndex)
             {
                 destinationVTXL.trueVertWeightIndices[destinationIndex] = (int[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone();
-            }
-            if (sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
-            {
-                destinationVTXL.edgeVerts.Add((ushort)destinationIndex);
             }
         }
 
@@ -1688,10 +1686,43 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 destinationVTXL.trueVertWeightIndices.Add((int[])sourceVTXL.trueVertWeightIndices[sourceIndex].Clone());
             }
-            if (sourceVTXL.edgeVerts.Contains((ushort)sourceIndex))
+        }
+
+        public static void AppendAllVertices(VTXL sourceVTXL, VTXL destinationVTXL)
+        {
+            if(sourceVTXL == null || destinationVTXL == null)
             {
-                destinationVTXL.edgeVerts.Add((ushort)(destinationVTXL.vertPositions.Count - 1));
+                return;
             }
+            destinationVTXL.vertPositions.AddRange(sourceVTXL.vertPositions);
+            destinationVTXL.vertWeightsNGS.AddRange(sourceVTXL.vertWeightsNGS.ConvertAll(wt => (ushort[])wt.Clone()));
+            destinationVTXL.vertWeights.AddRange(sourceVTXL.vertWeights);
+            destinationVTXL.vertNormalsNGS.AddRange(sourceVTXL.vertNormalsNGS.ConvertAll(nrm => (short[])nrm.Clone()));
+            destinationVTXL.vertNormals.AddRange(sourceVTXL.vertNormals);
+            destinationVTXL.vertColors.AddRange(sourceVTXL.vertColors.ConvertAll(clr => (byte[])clr.Clone()));
+            destinationVTXL.vertColor2s.AddRange(sourceVTXL.vertColor2s.ConvertAll(clr => (byte[])clr.Clone()));
+            destinationVTXL.vertWeightIndices.AddRange(sourceVTXL.vertWeightIndices.ConvertAll(wt => (int[])wt.Clone()));
+            destinationVTXL.uv1ListNGS.AddRange(sourceVTXL.uv1ListNGS.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.uv2ListNGS.AddRange(sourceVTXL.uv2ListNGS.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.uv3ListNGS.AddRange(sourceVTXL.uv3ListNGS.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.uv4ListNGS.AddRange(sourceVTXL.uv4ListNGS.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.uv1List.AddRange(sourceVTXL.uv1List);
+            destinationVTXL.uv2List.AddRange(sourceVTXL.uv2List);
+            destinationVTXL.uv3List.AddRange(sourceVTXL.uv3List);
+            destinationVTXL.uv4List.AddRange(sourceVTXL.uv4List);
+            destinationVTXL.vert0x22.AddRange(sourceVTXL.vert0x22.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.vert0x23.AddRange(sourceVTXL.vert0x23.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.vert0x24.AddRange(sourceVTXL.vert0x24.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.vert0x25.AddRange(sourceVTXL.vert0x25.ConvertAll(uv => (short[])uv.Clone()));
+            destinationVTXL.vertTangentListNGS.AddRange(sourceVTXL.vertTangentListNGS.ConvertAll(nrm => (short[])nrm.Clone()));
+            destinationVTXL.vertTangentList.AddRange(sourceVTXL.vertTangentList);
+            destinationVTXL.vertBinormalListNGS.AddRange(sourceVTXL.vertBinormalListNGS.ConvertAll(nrm => (short[])nrm.Clone()));
+            destinationVTXL.vertBinormalList.AddRange(sourceVTXL.vertBinormalList);
+            destinationVTXL.rawVertWeights.AddRange(sourceVTXL.rawVertWeights.ConvertAll(wt => new List<float>((float[])wt.ToArray().Clone())));
+            destinationVTXL.rawVertWeightIds.AddRange(sourceVTXL.rawVertWeightIds.ConvertAll(wt => new List<int>((int[])wt.ToArray().Clone())));
+            destinationVTXL.trueVertWeights.AddRange(sourceVTXL.trueVertWeights);
+            destinationVTXL.trueVertWeightIndices.AddRange(sourceVTXL.trueVertWeightIndices.ConvertAll(wt => (int[])wt.Clone()));
+            destinationVTXL.edgeVerts.AddRange(sourceVTXL.edgeVerts.ConvertAll(ev => (ushort)(destinationVTXL.vertPositions.Count - 1 + ev)));
         }
 
         public static bool IsSameVertex(VTXL vtxl, int vertIndex, VTXL vtxl2, int vertIndex2)
