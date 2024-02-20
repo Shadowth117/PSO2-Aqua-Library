@@ -104,6 +104,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
         public static void GatherModelDataRecursive(NJSObject njObj, VTXL fullVertList, ref int nodeId, AquaObject aqo, AquaNode aqn, Matrix4x4 parentMatrix, int parentId)
         {
+            aqo.bonePalette.Add((uint)nodeId);
             int currentNodeId = nodeId;
             Matrix4x4 mat = Matrix4x4.Identity;
             mat *= Matrix4x4.CreateScale(njObj.scale);
@@ -116,9 +117,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
             //Create AQN node
             NODE aqNode = new NODE();
+            aqNode.boneShort1 = 0x1C0;
             aqNode.animatedFlag = 1;
             aqNode.parentId = parentId;
             aqNode.nextSibling = -1;
+            aqNode.firstChild = -1;
             aqNode.unkNode = -1;
             aqNode.pos = njObj.pos;
             aqNode.eulRot = new Vector3((float)(njObj.rot.X * 180 / Math.PI), 
@@ -129,7 +132,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
             aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
             aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
             aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
-            aqNode.boneName.SetString("Node " + aqn.nodeList.Count);
+            aqNode.boneName.SetString(aqn.nodeList.Count.ToString());
             aqn.nodeList.Add(aqNode);
 
             VTXL tempVTXL;
@@ -147,12 +150,12 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
             if (njObj.childObject != null)
             {
-                aqNode.firstChild = nodeId++;
-                GatherModelDataRecursive(njObj.childObject, fullVertList, ref nodeId, aqo, aqn, mat, nodeId);
+                aqNode.firstChild = ++nodeId;
+                GatherModelDataRecursive(njObj.childObject, fullVertList, ref nodeId, aqo, aqn, mat, currentNodeId);
             }
             if (njObj.siblingObject != null)
             {
-                aqNode.nextSibling = nodeId++;
+                aqNode.nextSibling = ++nodeId;
                 GatherModelDataRecursive(njObj.siblingObject, fullVertList, ref nodeId, aqo, aqn, parentMatrix, parentId);
             }
             aqn.nodeList[currentNodeId] = aqNode;
