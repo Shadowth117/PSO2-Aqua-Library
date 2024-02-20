@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.Ninja.Model.Ginja;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -104,6 +105,50 @@ namespace AquaModelLibrary.Data.Ninja.Model
             if(variant == NinjaVariant.Ginja)
             {
                 unkInt = sr.ReadBE<int>();
+            }
+        }
+
+        public void Write(List<byte> outBytes, List<int> POF0Offsets, bool ginjaWrite)
+        {
+            string njsObjAddress = outBytes.Count.ToString();
+            outBytes.AddValue(flags);
+            outBytes.ReserveInt($"{njsObjAddress}_attach");
+            outBytes.AddValue(pos.X);
+            outBytes.AddValue(pos.Y);
+            outBytes.AddValue(pos.Z);
+            outBytes.AddValue((int)(rot.X * NinjaConstants.ToBAMSValue));
+            outBytes.AddValue((int)(rot.Y * NinjaConstants.ToBAMSValue));
+            outBytes.AddValue((int)(rot.Z * NinjaConstants.ToBAMSValue));
+            outBytes.AddValue(scale.X);
+            outBytes.AddValue(scale.Y);
+            outBytes.AddValue(scale.Z);
+            outBytes.ReserveInt($"{njsObjAddress}_child");
+            outBytes.ReserveInt($"{njsObjAddress}_sibling");
+
+            if (ginjaWrite)
+            {
+                outBytes.AddValue(unkInt);
+            }
+
+            if (mesh != null)
+            {
+                outBytes.FillInt($"{njsObjAddress}_attach", outBytes.Count);
+                POF0Offsets.Add(outBytes.Count);
+                mesh.Write(outBytes, POF0Offsets);
+            }
+
+            if (childObject != null)
+            {
+                outBytes.FillInt($"{njsObjAddress}_child", outBytes.Count);
+                POF0Offsets.Add(outBytes.Count);
+                childObject.Write(outBytes, POF0Offsets, ginjaWrite);
+            }
+
+            if (siblingObject != null)
+            {
+                outBytes.FillInt($"{njsObjAddress}_sibling", outBytes.Count);
+                POF0Offsets.Add(outBytes.Count);
+                siblingObject.Write(outBytes, POF0Offsets, ginjaWrite);
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -322,6 +323,42 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
                     transparentFaceData.Add(mesh);
                 }
+            }
+        }
+
+        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        {
+            string attachAddress = outBytes.Count.ToString();
+            outBytes.ReserveInt($"{attachAddress}_vertex");
+            outBytes.ReserveInt($"{attachAddress}_skinVertex");
+            outBytes.ReserveInt($"{attachAddress}_opaque");
+            outBytes.ReserveInt($"{attachAddress}_transparent");
+
+            outBytes.AddValue(opaqueFaceData.Count);
+            outBytes.AddValue(transparentFaceData.Count);
+            outBytes.AddValue(bounding.center.X);
+            outBytes.AddValue(bounding.center.Y);
+            outBytes.AddValue(bounding.center.Z);
+            outBytes.AddValue(bounding.radius);
+
+            if(vertData != null)
+            {
+
+            }
+
+            if (skinVertData != null)
+            {
+
+            }
+
+            if (opaqueFaceData?.Count != null)
+            {
+
+            }
+
+            if (transparentFaceData?.Count != null)
+            {
+
             }
         }
     }
