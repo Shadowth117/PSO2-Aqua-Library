@@ -329,13 +329,29 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         public void Write(List<byte> outBytes, List<int> POF0Offsets)
         {
             string attachAddress = outBytes.Count.ToString();
+            if (vertData != null)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_vertex");
+            if (skinVertData != null)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_skinVertex");
+            if (opaqueFaceData != null)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_opaque");
+            if (transparentFaceData != null)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_transparent");
 
-            outBytes.AddValue(opaqueFaceData.Count);
-            outBytes.AddValue(transparentFaceData.Count);
+            outBytes.AddValue(opaqueFaceData == null ? 0 : opaqueFaceData.Count);
+            outBytes.AddValue(transparentFaceData == null ? 0 : transparentFaceData.Count);
             outBytes.AddValue(bounding.center.X);
             outBytes.AddValue(bounding.center.Y);
             outBytes.AddValue(bounding.center.Z);
@@ -343,22 +359,79 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
             if(vertData != null)
             {
-
+                vertData.Write(outBytes, POF0Offsets);
             }
 
             if (skinVertData != null)
             {
-
+                skinVertData.Write(outBytes, POF0Offsets);
             }
 
             if (opaqueFaceData?.Count != null)
             {
-
+                WriteMeshData(outBytes, POF0Offsets, opaqueFaceData);
             }
 
             if (transparentFaceData?.Count != null)
             {
+                WriteMeshData(outBytes, POF0Offsets, transparentFaceData);
+            }
+        }
 
+        public void WriteMeshData(List<byte> outBytes, List<int> POF0Offsets, List<GinjaMesh> meshList)
+        {
+            GCIndexAttributeFlags indexFlags = GCIndexAttributeFlags.Position16BitIndex;
+            List<byte[]> primitivesList = new List<byte[]>();
+            for (int i = 0; i < meshList.Count; i++)
+            {
+                var mesh = meshList[i];
+                var meshFlags = mesh.IndexFlags;
+                if (meshFlags != null)
+                {
+                    indexFlags = (GCIndexAttributeFlags)meshFlags;
+                }
+                if(mesh.parameters.Count > 0)
+                {
+                    POF0Offsets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt($"meshParameter_{i}");
+                outBytes.AddValue(mesh.parameters.Count);
+
+                List<byte> primitives = new List<byte>();
+                if (mesh.primitives.Count > 0)
+                {
+                    primitives = new List<byte>();
+                    POF0Offsets.Add(outBytes.Count);
+                    foreach(var prim in mesh.primitives)
+                    {
+                        primitives.AddRange(prim.GetBytes(indexFlags));
+                    }
+                }
+                primitivesList.Add(primitives.ToArray());
+                outBytes.ReserveInt($"meshPrimitive_{i}");
+                outBytes.AddValue(primitives.Count);
+            }
+
+            //Parameters
+            for (int i = 0; i < meshList.Count; i++)
+            {
+                if (meshList[i].parameters?.Count > 0)
+                {
+                    outBytes.FillInt($"meshParameter_{i}", outBytes.Count);
+                    foreach(var prm in meshList[i].parameters)
+                    {
+                        outBytes.AddRange(prm.GetBytes());
+                    }
+                }
+            }
+            //Primitives
+            for (int i = 0; i < meshList.Count; i++)
+            {
+                if (primitivesList[i]?.Length > 0)
+                {
+                    outBytes.FillInt($"meshPrimitive_{i}", outBytes.Count);
+                    outBytes.AddRange(primitivesList[i]);
+                }
             }
         }
     }

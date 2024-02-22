@@ -1,7 +1,8 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
-//Sourced from SA Tools
+//Adapted from SA Tools
 namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 {
     public class GinjaVertexData
@@ -25,6 +26,123 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 elements.Add(element);
                 sr.Seek(bookmark, SeekOrigin.Begin);
                 element = new GinjaVertexDataElement(sr, be, offset);
+            }
+        }
+
+        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        {
+            for(int i = 0; i < elements.Count; i++)
+            {
+                int dataSize = 0;
+                var element = elements[i];
+                outBytes.Add((byte)element.dataCategoryAttribute);
+                outBytes.Add((byte)element.structSize);
+                switch(element.dataCategoryAttribute)
+                {
+                    case GCVertexAttribute.PositionMatrixIdx:
+                    case GCVertexAttribute.Position:
+                        outBytes.AddValue((ushort)posList.Count);
+                        dataSize = (int)(posList.Count * element.structSize);
+                        break;
+                    case GCVertexAttribute.Normal:
+                        outBytes.AddValue((ushort)nrmList.Count);
+                        dataSize = (int)(nrmList.Count * element.structSize);
+                        break;
+                    case GCVertexAttribute.Color0:
+                    case GCVertexAttribute.Color1:
+                        outBytes.AddValue((ushort)colorsArray[element.dataCategoryAttribute - GCVertexAttribute.Color0].Count);
+                        dataSize = (int)(colorsArray[element.dataCategoryAttribute - GCVertexAttribute.Color0].Count * element.structSize);
+                        break;
+                    case GCVertexAttribute.Tex0:
+                    case GCVertexAttribute.Tex1:
+                    case GCVertexAttribute.Tex2:
+                    case GCVertexAttribute.Tex3:
+                    case GCVertexAttribute.Tex4:
+                    case GCVertexAttribute.Tex5:
+                    case GCVertexAttribute.Tex6:
+                    case GCVertexAttribute.Tex7:
+                        outBytes.AddValue((ushort)uvsArray[element.dataCategoryAttribute - GCVertexAttribute.Tex0].Count);
+                        dataSize = (int)(uvsArray[element.dataCategoryAttribute - GCVertexAttribute.Tex0].Count * element.structSize);
+                        break;
+                    case GCVertexAttribute.Null:
+                        outBytes.AddValue((ushort)0);
+                        break;
+                }
+                outBytes.AddValue(element.structure);
+                if(element.dataCategoryAttribute != GCVertexAttribute.Null)
+                {
+                    POF0Offsets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt($"element{i}_data");
+                outBytes.AddValue(dataSize);
+            }
+
+            for(int i = 0; i < elements.Count; i++)
+            {
+                var element = elements[i];
+                if(element.dataCategoryAttribute == GCVertexAttribute.Null)
+                {
+                    break;
+                }
+                outBytes.FillInt($"element{i}_data", outBytes.Count);
+                switch (element.dataCategoryAttribute)
+                {
+                    case GCVertexAttribute.PositionMatrixIdx:
+                    case GCVertexAttribute.Position:
+                        foreach(var pos in posList)
+                        {
+                            outBytes.AddValue(pos.X);
+                            outBytes.AddValue(pos.Y);
+                            outBytes.AddValue(pos.Z);
+                        }
+                        break;
+                    case GCVertexAttribute.Normal:
+                        foreach (var nrm in nrmList)
+                        {
+                            outBytes.AddValue(nrm.X);
+                            outBytes.AddValue(nrm.Y);
+                            outBytes.AddValue(nrm.Z);
+                        }
+                        break;
+                    case GCVertexAttribute.Color0:
+                    case GCVertexAttribute.Color1:
+                        foreach(var color in colorsArray[element.dataCategoryAttribute - GCVertexAttribute.Color0])
+                        {
+                            switch(element.dataType)
+                            {
+                                case GCDataType.RGB8:
+                                    outBytes.Add(color[2]);
+                                    outBytes.Add(color[1]);
+                                    outBytes.Add(color[0]);
+                                    outBytes.Add(0xFF);
+                                    break;
+                                case GCDataType.RGBA8:
+                                    outBytes.Add(color[2]);
+                                    outBytes.Add(color[1]);
+                                    outBytes.Add(color[0]);
+                                    outBytes.Add(color[3]);
+                                    break;
+                                default:
+                                    throw new NotImplementedException();
+                            }
+                        }
+                        break;
+                    case GCVertexAttribute.Tex0:
+                    case GCVertexAttribute.Tex1:
+                    case GCVertexAttribute.Tex2:
+                    case GCVertexAttribute.Tex3:
+                    case GCVertexAttribute.Tex4:
+                    case GCVertexAttribute.Tex5:
+                    case GCVertexAttribute.Tex6:
+                    case GCVertexAttribute.Tex7:
+                        foreach (var uv in uvsArray[element.dataCategoryAttribute - GCVertexAttribute.Tex0])
+                        {
+                            outBytes.AddValue((short)(uv.X * 255.0));
+                            outBytes.AddValue((short)(uv.Y * 255.0));
+                        }
+                        break;
+                }
+                outBytes.AlignWriter(0x4);
             }
         }
 

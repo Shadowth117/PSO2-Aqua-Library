@@ -67,6 +67,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
         public void Read(BufferedStreamReaderBE<MemoryStream> sr, NinjaVariant ninjaVariant, bool be = true, int offset = 0)
         {
+            variant = ninjaVariant;
             sr._BEReadActive = be;
             flags = sr.ReadBE<int>();
             int attachOffset = sr.ReadBE<int>();
@@ -78,6 +79,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
             scale = sr.ReadBEV3();
             int childOffset = sr.ReadBE<int>();
             int siblingOffset = sr.ReadBE<int>();
+
+            if (variant == NinjaVariant.Ginja)
+            {
+                unkInt = sr.ReadBE<int>();
+            }
 
             sr.Seek(offset + attachOffset, SeekOrigin.Begin);
             switch (ninjaVariant)
@@ -101,11 +107,6 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
             sr.Seek(offset + siblingOffset, SeekOrigin.Begin);
             siblingObject = siblingOffset > 0 ? new NJSObject(sr, ninjaVariant, be, offset) : null;
-
-            if(variant == NinjaVariant.Ginja)
-            {
-                unkInt = sr.ReadBE<int>();
-            }
         }
 
         public void Write(List<byte> outBytes, List<int> POF0Offsets, bool ginjaWrite)

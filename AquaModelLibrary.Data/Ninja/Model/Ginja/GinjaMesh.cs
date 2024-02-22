@@ -101,7 +101,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             {
                 // if the primitive isnt valid
                 if (sr.Peek<byte>() == 0) break;
-                primitives.Add(new GinjaPrimitive(sr, indexFlags, be, offset));
+                primitives.Add(new GinjaPrimitive(sr, indexFlags));
             }
             primitiveSize = primitives_size;
 

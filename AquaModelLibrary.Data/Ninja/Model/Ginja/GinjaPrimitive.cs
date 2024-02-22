@@ -67,7 +67,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         /// <param name="file">The files contents as a byte array</param>
         /// <param name="address">The starting address of the primitive</param>
         /// <param name="indexFlags">How the indices of the loops are structured</param>
-        public GinjaPrimitive(BufferedStreamReaderBE<MemoryStream> sr, GCIndexAttributeFlags indexFlags, bool be = true, int offset = 0)
+        public GinjaPrimitive(BufferedStreamReaderBE<MemoryStream> sr, GCIndexAttributeFlags indexFlags)
         {
             primitiveType = sr.ReadBE<GCPrimitiveType>();
 
