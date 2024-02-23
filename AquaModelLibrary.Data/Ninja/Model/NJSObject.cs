@@ -75,7 +75,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
             int rotX = sr.ReadBE<int>();
             int rotY = sr.ReadBE<int>();
             int rotZ = sr.ReadBE<int>();
-            rot = new Vector3((float)(rotX * NinjaConstants.FromBAMSvalue), (float)(rotY * NinjaConstants.FromBAMSvalue), (float)(rotZ * NinjaConstants.FromBAMSvalue));
+            rot = new Vector3((float)(rotX * NinjaConstants.FromBAMSvalueToRadians), (float)(rotY * NinjaConstants.FromBAMSvalueToRadians), (float)(rotZ * NinjaConstants.FromBAMSvalueToRadians));
             scale = sr.ReadBEV3();
             int childOffset = sr.ReadBE<int>();
             int siblingOffset = sr.ReadBE<int>();
@@ -117,9 +117,9 @@ namespace AquaModelLibrary.Data.Ninja.Model
             outBytes.AddValue(pos.X);
             outBytes.AddValue(pos.Y);
             outBytes.AddValue(pos.Z);
-            outBytes.AddValue((int)(rot.X * NinjaConstants.ToBAMSValue));
-            outBytes.AddValue((int)(rot.Y * NinjaConstants.ToBAMSValue));
-            outBytes.AddValue((int)(rot.Z * NinjaConstants.ToBAMSValue));
+            outBytes.AddValue((int)(rot.X * NinjaConstants.ToBAMSValueFromRadians));
+            outBytes.AddValue((int)(rot.Y * NinjaConstants.ToBAMSValueFromRadians));
+            outBytes.AddValue((int)(rot.Z * NinjaConstants.ToBAMSValueFromRadians));
             outBytes.AddValue(scale.X);
             outBytes.AddValue(scale.Y);
             outBytes.AddValue(scale.Z);

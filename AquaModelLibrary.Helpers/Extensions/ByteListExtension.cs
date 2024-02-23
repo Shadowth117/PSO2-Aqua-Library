@@ -28,6 +28,7 @@
             {
                 outBytes[reserveIntDict[key] + i] = newBytes[i];
             }
+            reserveIntDict.Remove(key);
         }
         private static Dictionary<string, uint> reserveUintDict = new Dictionary<string, uint>();
         public static void ReserveUint(this List<byte> outBytes, string key)

@@ -701,14 +701,14 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
 
         public Vector3 GetRotation()
         {
-            return new Vector3((float)(BAMSX * FromBAMSvalue), (float)(BAMSY * FromBAMSvalue), (float)(BAMSZ * FromBAMSvalue));
+            return new Vector3((float)(BAMSX * FromBAMSvalueToRadians), (float)(BAMSY * FromBAMSvalueToRadians), (float)(BAMSZ * FromBAMSvalueToRadians));
         }
 
         public void SetRotation(Vector3 radianEulerRot)
         {
-            BAMSX = (short)(radianEulerRot.X * ToBAMSValue);
-            BAMSY = (short)(radianEulerRot.Y * ToBAMSValue);
-            BAMSZ = (short)(radianEulerRot.Z * ToBAMSValue);
+            BAMSX = (short)(radianEulerRot.X * ToBAMSValueFromRadians);
+            BAMSY = (short)(radianEulerRot.Y * ToBAMSValueFromRadians);
+            BAMSZ = (short)(radianEulerRot.Z * ToBAMSValueFromRadians);
         }
     }
 

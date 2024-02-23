@@ -350,38 +350,62 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             }
             outBytes.ReserveInt($"{attachAddress}_transparent");
 
-            outBytes.AddValue(opaqueFaceData == null ? 0 : opaqueFaceData.Count);
-            outBytes.AddValue(transparentFaceData == null ? 0 : transparentFaceData.Count);
+            outBytes.AddValue((ushort)(opaqueFaceData == null ? 0 : opaqueFaceData.Count));
+            outBytes.AddValue((ushort)(transparentFaceData == null ? 0 : transparentFaceData.Count));
             outBytes.AddValue(bounding.center.X);
             outBytes.AddValue(bounding.center.Y);
             outBytes.AddValue(bounding.center.Z);
             outBytes.AddValue(bounding.radius);
 
-            if(vertData != null)
+            if(vertData?.elements?.Count > 0)
             {
+                outBytes.FillInt($"{attachAddress}_vertex", outBytes.Count);
                 vertData.Write(outBytes, POF0Offsets);
             }
 
-            if (skinVertData != null)
+            if (skinVertData?.elements?.Count > 0)
             {
+                outBytes.FillInt($"{attachAddress}_skinVertex", outBytes.Count);
                 skinVertData.Write(outBytes, POF0Offsets);
+            }
+
+            if (opaqueFaceData?.Count > 0)
+            {
+                outBytes.FillInt($"{attachAddress}_opaque", outBytes.Count);
+                WriteMesh(outBytes, POF0Offsets, opaqueFaceData, "o");
+            }
+
+            if (transparentFaceData?.Count > 0)
+            {
+                outBytes.FillInt($"{attachAddress}_transparent", outBytes.Count);
+                WriteMesh(outBytes, POF0Offsets, transparentFaceData, "a");
             }
 
             if (opaqueFaceData?.Count != null)
             {
-                WriteMeshData(outBytes, POF0Offsets, opaqueFaceData);
+                WriteMeshDataParameters(outBytes, POF0Offsets, opaqueFaceData, "o");
             }
 
             if (transparentFaceData?.Count != null)
             {
-                WriteMeshData(outBytes, POF0Offsets, transparentFaceData);
+                WriteMeshDataParameters(outBytes, POF0Offsets, transparentFaceData, "a");
+            }
+            outBytes.AlignWriter(0x20);
+
+            if (opaqueFaceData?.Count != null)
+            {
+                WriteMeshDataPrimitives(outBytes, POF0Offsets, opaqueFaceData, "o");
+            }
+
+            if (transparentFaceData?.Count != null)
+            {
+                WriteMeshDataPrimitives(outBytes, POF0Offsets, transparentFaceData, "a");
             }
         }
 
-        public void WriteMeshData(List<byte> outBytes, List<int> POF0Offsets, List<GinjaMesh> meshList)
+        public void WriteMesh(List<byte> outBytes, List<int> POF0Offsets, List<GinjaMesh> meshList, string type)
         {
             GCIndexAttributeFlags indexFlags = GCIndexAttributeFlags.Position16BitIndex;
-            List<byte[]> primitivesList = new List<byte[]>();
             for (int i = 0; i < meshList.Count; i++)
             {
                 var mesh = meshList[i];
@@ -394,7 +418,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 {
                     POF0Offsets.Add(outBytes.Count);
                 }
-                outBytes.ReserveInt($"meshParameter_{i}");
+                outBytes.ReserveInt($"meshParameter{type}_{i}");
                 outBytes.AddValue(mesh.parameters.Count);
 
                 List<byte> primitives = new List<byte>();
@@ -407,30 +431,50 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                         primitives.AddRange(prim.GetBytes(indexFlags));
                     }
                 }
-                primitivesList.Add(primitives.ToArray());
-                outBytes.ReserveInt($"meshPrimitive_{i}");
-                outBytes.AddValue(primitives.Count);
+                outBytes.ReserveInt($"meshPrimitive{type}_{i}");
+                outBytes.ReserveInt($"meshPrimitiveSize{type}_{i}");
             }
+        }
 
+        public void WriteMeshDataParameters(List<byte> outBytes, List<int> POF0Offsets, List<GinjaMesh> meshList, string type)
+        {
             //Parameters
             for (int i = 0; i < meshList.Count; i++)
             {
                 if (meshList[i].parameters?.Count > 0)
                 {
-                    outBytes.FillInt($"meshParameter_{i}", outBytes.Count);
-                    foreach(var prm in meshList[i].parameters)
+                    outBytes.FillInt($"meshParameter{type}_{i}", outBytes.Count);
+                    foreach (var prm in meshList[i].parameters)
                     {
                         outBytes.AddRange(prm.GetBytes());
                     }
                 }
             }
+        }
+        public void WriteMeshDataPrimitives(List<byte> outBytes, List<int> POF0Offsets, List<GinjaMesh> meshList, string type)
+        {
+            GCIndexAttributeFlags indexFlags = GCIndexAttributeFlags.Position16BitIndex;
             //Primitives
             for (int i = 0; i < meshList.Count; i++)
             {
-                if (primitivesList[i]?.Length > 0)
+                var mesh = meshList[i];
+
+                var meshFlags = mesh.IndexFlags;
+                if (meshFlags != null)
                 {
-                    outBytes.FillInt($"meshPrimitive_{i}", outBytes.Count);
-                    outBytes.AddRange(primitivesList[i]);
+                    indexFlags = (GCIndexAttributeFlags)meshFlags;
+                }
+                if (mesh.primitives.Count > 0)
+                {
+                    List<byte> primitives = new List<byte>();
+                    foreach (var prim in mesh.primitives)
+                    {
+                        primitives.AddRange(prim.GetBytes(indexFlags));
+                    }
+                    outBytes.FillInt($"meshPrimitive{type}_{i}", outBytes.Count);
+                    outBytes.AddRange(primitives.ToArray());
+                    var addition = outBytes.AlignWriter(0x20);
+                    outBytes.FillInt($"meshPrimitiveSize{type}_{i}", primitives.Count + addition);
                 }
             }
         }

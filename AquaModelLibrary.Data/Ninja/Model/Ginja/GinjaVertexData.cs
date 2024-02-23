@@ -77,6 +77,14 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 outBytes.AddValue(dataSize);
             }
 
+            //Add Null vert data
+            outBytes.Add(0xFF);
+            outBytes.Add(0);
+            outBytes.AddValue((short)0);
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+
             for(int i = 0; i < elements.Count; i++)
             {
                 var element = elements[i];

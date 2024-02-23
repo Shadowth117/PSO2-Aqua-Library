@@ -422,14 +422,6 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         {
             data = uint.MaxValue;
         }
-
-        public override byte[] GetBytes()
-        {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> bytes = new List<byte>();
-            bytes.AddValue(data);
-            return bytes.ToArray();
-        }
     }
 
     /// <summary>

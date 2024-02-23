@@ -2,8 +2,8 @@
 {
     public class NinjaConstants
     {
-        public const double FromBAMSvalue = ((2 * Math.PI) / 65536.0);
-        public const double ToBAMSValue = (65536.0 / (2 * Math.PI));
+        public const double FromBAMSvalueToRadians = ((2 * Math.PI) / 65536.0);
+        public const double ToBAMSValueFromRadians = (65536.0 / (2 * Math.PI));
     }
 
     public enum AlphaInstruction : int

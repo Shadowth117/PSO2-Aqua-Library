@@ -271,7 +271,7 @@ namespace AquaModelLibrary.Data.PSO
                 var rotX = streamReader.ReadBE<int>(be);
                 var rotY = streamReader.ReadBE<int>(be);
                 var rotZ = streamReader.ReadBE<int>(be);
-                section.rot = new Vector3((float)(rotX * FromBAMSvalue), (float)(rotY * FromBAMSvalue), (float)(rotZ * FromBAMSvalue));
+                section.rot = new Vector3((float)(rotX * FromBAMSvalueToRadians), (float)(rotY * FromBAMSvalueToRadians), (float)(rotZ * FromBAMSvalueToRadians));
                 section.radius = streamReader.ReadBE<float>(be);
                 section.staticOffset = streamReader.ReadBE<uint>(be);
                 section.animatedOffset = streamReader.ReadBE<uint>(be);
@@ -389,7 +389,7 @@ namespace AquaModelLibrary.Data.PSO
             var rotX = streamReader.ReadBE<int>(be);
             var rotY = streamReader.ReadBE<int>(be);
             var rotZ = streamReader.ReadBE<int>(be);
-            node.rot = new Vector3((float)(rotX * FromBAMSvalue), (float)(rotY * FromBAMSvalue), (float)(rotZ * FromBAMSvalue));
+            node.rot = new Vector3((float)(rotX * FromBAMSvalueToRadians), (float)(rotY * FromBAMSvalueToRadians), (float)(rotZ * FromBAMSvalueToRadians));
             node.scl = streamReader.ReadBEV3(be);
             node.childOffset = streamReader.ReadBE<uint>(be);
             node.siblingOffset = streamReader.ReadBE<uint>(be);
@@ -409,7 +409,7 @@ namespace AquaModelLibrary.Data.PSO
             aqNode.parentId = parentId;
             aqNode.unkNode = -1;
             aqNode.pos = node.pos;
-            aqNode.eulRot = new Vector3((float)(rotX * FromBAMSvalue * 180 / Math.PI), (float)(rotY * FromBAMSvalue * 180 / Math.PI), (float)(rotZ * FromBAMSvalue * 180 / Math.PI));
+            aqNode.eulRot = new Vector3((float)(rotX * FromBAMSvalueToRadians * 180 / Math.PI), (float)(rotY * FromBAMSvalueToRadians * 180 / Math.PI), (float)(rotZ * FromBAMSvalueToRadians * 180 / Math.PI));
 
             if (Math.Abs(aqNode.eulRot.Y) > 120)
             {
