@@ -111,7 +111,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
         public void Write(List<byte> outBytes, List<int> POF0Offsets, bool ginjaWrite)
         {
-            string njsObjAddress = outBytes.Count.ToString();
+            int njsObjAddress = outBytes.Count;
             outBytes.AddValue(flags);
             outBytes.ReserveInt($"{njsObjAddress}_attach");
             outBytes.AddValue(pos.X);
@@ -131,24 +131,24 @@ namespace AquaModelLibrary.Data.Ninja.Model
                 outBytes.AddValue(unkInt);
             }
 
+            POF0Offsets.Add(njsObjAddress + 0x4);
+            POF0Offsets.Add(njsObjAddress + 0x2C);
+            POF0Offsets.Add(njsObjAddress + 0x30);
             if (mesh != null)
             {
                 outBytes.FillInt($"{njsObjAddress}_attach", outBytes.Count);
-                POF0Offsets.Add(outBytes.Count);
                 mesh.Write(outBytes, POF0Offsets);
             }
 
             if (childObject != null)
             {
                 outBytes.FillInt($"{njsObjAddress}_child", outBytes.Count);
-                POF0Offsets.Add(outBytes.Count);
                 childObject.Write(outBytes, POF0Offsets, ginjaWrite);
             }
 
             if (siblingObject != null)
             {
                 outBytes.FillInt($"{njsObjAddress}_sibling", outBytes.Count);
-                POF0Offsets.Add(outBytes.Count);
                 siblingObject.Write(outBytes, POF0Offsets, ginjaWrite);
             }
         }

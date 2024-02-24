@@ -38,15 +38,9 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 }
                 outBytes.AddValue((ushort)element.startingIndex);
                 outBytes.AddValue((ushort)element.posNrms.Count);
-                if (element.posNrms.Count > 0)
-                {
-                    POF0Offsets.Add(outBytes.Count);
-                }
+                POF0Offsets.Add(outBytes.Count);
                 outBytes.ReserveInt($"posNrms{i}Offset");
-                if (element.weightData.Count > 0)
-                {
-                    POF0Offsets.Add(outBytes.Count);
-                }
+                POF0Offsets.Add(outBytes.Count);
                 outBytes.ReserveInt($"weights{i}Offset");
             }
             outBytes.AddValue((ushort)3);
