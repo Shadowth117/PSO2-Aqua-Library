@@ -51,14 +51,6 @@ namespace AquaModelLibrary.Data.Ninja.Model
             var beAddress = sr.PeekBigEndianInt32();
 
             var root = new NJSObject(sr, variant, leAddress > beAddress, offset);
-            /*
-            List<byte> outBytes = new List<byte>();
-            ByteListExtension.AddAsBigEndian = true;
-            List<int> POF0Offsets = new List<int>();
-            root.Write(outBytes, POF0Offsets, true);
-            File.WriteAllBytes(@"C:/out.gjthing", outBytes.ToArray());
-            ByteListExtension.AddAsBigEndian = false;
-            */
             return NinjaToAqua(root, out aqn);
         }
 

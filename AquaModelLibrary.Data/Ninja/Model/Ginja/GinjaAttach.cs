@@ -329,25 +329,13 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         public void Write(List<byte> outBytes, List<int> POF0Offsets)
         {
             string attachAddress = outBytes.Count.ToString();
-            if (vertData != null)
-            {
-                POF0Offsets.Add(outBytes.Count);
-            }
+            POF0Offsets.Add(outBytes.Count);
             outBytes.ReserveInt($"{attachAddress}_vertex");
-            if (skinVertData != null)
-            {
-                POF0Offsets.Add(outBytes.Count);
-            }
+            POF0Offsets.Add(outBytes.Count);
             outBytes.ReserveInt($"{attachAddress}_skinVertex");
-            if (opaqueFaceData != null)
-            {
-                POF0Offsets.Add(outBytes.Count);
-            }
+            POF0Offsets.Add(outBytes.Count);
             outBytes.ReserveInt($"{attachAddress}_opaque");
-            if (transparentFaceData != null)
-            {
-                POF0Offsets.Add(outBytes.Count);
-            }
+            POF0Offsets.Add(outBytes.Count);
             outBytes.ReserveInt($"{attachAddress}_transparent");
 
             outBytes.AddValue((ushort)(opaqueFaceData == null ? 0 : opaqueFaceData.Count));
