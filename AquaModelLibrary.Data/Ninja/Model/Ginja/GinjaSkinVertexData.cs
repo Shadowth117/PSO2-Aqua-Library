@@ -49,6 +49,12 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 }
                 outBytes.ReserveInt($"weights{i}Offset");
             }
+            outBytes.AddValue((ushort)3);
+            outBytes.AddValue((ushort)0);
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+            outBytes.AlignWriter(0x20);
 
             for (int i = 0; i < elements.Count; i++)
             {
@@ -76,6 +82,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                         outBytes.AddValue(wt.weight);
                     }
                 }
+                outBytes.AlignWriter(0x20);
             }
         }
     }
