@@ -326,8 +326,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 }
 
 #if !DEBUG
-                try
-                {
+            try
+            {
 #endif
                 if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(bndFile.Bytes) || SoulsFormats.SoulsFile<SoulsFormats.FLVER2>.Is(bndFile.Bytes) || SoulsFormats.SoulsFile<SoulsFormats.Other.MDL4>.Is(bndFile.Bytes))
                 {
@@ -341,7 +341,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     var outName = Path.ChangeExtension(fileName, ".aqp");
                     if (aqp != null && aqp.vtxlList.Count > 0)
                     {
-                        aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true, false);
+                        aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true, false, aqp.bonePalette.Count == 0);
                         aqp.ConvertToLegacyTypes();
                         aqp.CreateTrueVertWeights();
 

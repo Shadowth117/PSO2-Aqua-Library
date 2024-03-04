@@ -712,11 +712,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             List<uint> globalBonePalette = new List<uint>();
             for (int i = 0; i < vtxlList.Count; i++)
             {
-                if (objc.type < 0xC32)
+                if (vtxlList[i].bonePalette?.Count > 0)
                 {
                     globalBonePalette = new List<uint>();
                 }
-                OptimizeBonePalette(vtxlList[i], globalBonePalette, IsNGS);
+                OptimizeBonePalette(vtxlList[i], globalBonePalette, !(vtxlList[i].bonePalette?.Count > 0));
             }
             if(bonePalette.Count > 0)
             {
@@ -1718,7 +1718,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// <param name="splitVerts">Whether to allow the program to split meshes as needed or to leave and possibly break them.</param>
         /// <param name="useHighCountFaces">Mainly for using this as an intermediary for other games. This allows more than 65536 faces in a mesh</param>
         /// <param name="condenseMaterials">Whether to optimize material data or not.</param>
-        public void ConvertToPSO2Model(bool rebootModel, bool useUnrms, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true, bool useHighCountFaces = false, bool condenseMaterials = true)
+        /// <param name="forceClassicBonePalette">Force the model to use the classic bone palette</param>
+        public void ConvertToPSO2Model(bool rebootModel, bool useUnrms, bool baHack, bool useBiTangent, bool zeroBounds, bool useRigid, bool splitVerts = true, bool useHighCountFaces = false, bool condenseMaterials = true, bool forceClassicBonePalette = false)
         {
             objc = new OBJC();
             objc.type = rebootModel ? 0xC33 : 0xC2A;
@@ -1735,7 +1736,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 foreach (var vtxl in vtxlList)
                 {
-                    vtxl.ProcessToPSO2Weights(true);
+                    vtxl.ProcessToPSO2Weights(rebootModel && !forceClassicBonePalette);
                 }
             }
             else
@@ -1979,7 +1980,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 objc.fBlock3 = -1;
                 objc.globalStrip3LengthCount = 1;
                 objc.unkCount3 = 1;
-                objc.bonePaletteOffset = 1;
+                objc.bonePaletteOffset = forceClassicBonePalette ? 0 : 1;
             }
             else
             {
