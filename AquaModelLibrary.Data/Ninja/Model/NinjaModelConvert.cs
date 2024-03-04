@@ -1,8 +1,8 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.Ninja.Motion;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model
@@ -50,6 +50,9 @@ namespace AquaModelLibrary.Data.Ninja.Model
             var leAddress = sr.Peek<int>();
             var beAddress = sr.PeekBigEndianInt32();
 
+            //sr.Seek(0x22F8, SeekOrigin.Begin);
+            //sr._BEReadActive = true;
+            //var rootMotion = new NJSMotion(sr, offset: 0x20, false);
             var root = new NJSObject(sr, variant, leAddress > beAddress, offset);
             return NinjaToAqua(root, out aqn);
         }

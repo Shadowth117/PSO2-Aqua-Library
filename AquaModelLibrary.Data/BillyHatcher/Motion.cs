@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BillyHatcher
@@ -6,25 +7,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// <summary>
     /// Billy Hatcher specific variation of the Ninja Motions
     /// </summary>
-
-    [Flags]
-    public enum AnimFlags : ushort
-    {
-        Position = 0x1,
-        Rotation = 0x2,
-        Scale = 0x4,
-        Vector = 0x8,
-        Vertex = 0x10,
-        Normal = 0x20,
-        Target = 0x40,
-        Roll = 0x80,
-        Angle = 0x100,
-        Color = 0x200,
-        Intensity = 0x400,
-        Spot = 0x800,
-        Point = 0x1000,
-        Quaternion = 0x2000
-    }
 
     public class Motion
     {
