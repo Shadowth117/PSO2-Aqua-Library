@@ -153,7 +153,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         FbxSkin* lSkin = nullptr;
         Dictionary<int, IntPtr>^ clusterMap = nullptr;
 
-        if ( vtxl->vertWeights->Count > 0 )
+        if ( vtxl->trueVertWeights->Count > 0 )
         {
             lSkin = FbxSkin::Create( lScene, Utf8String(meshName + "_skin" ).ToCStr() );
             clusterMap = gcnew Dictionary<int, IntPtr>( bonePalette->Count );
