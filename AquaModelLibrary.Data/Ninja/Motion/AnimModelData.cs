@@ -8,7 +8,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         public Dictionary<int, Rotation> RotationData = new Dictionary<int, Rotation>();
         public Dictionary<int, Vector3> Scale = new Dictionary<int, Vector3>();
         public Dictionary<int, Vector3> Vector = new Dictionary<int, Vector3>();
-        public Dictionary<int, Vector3[]> Vector3 = new Dictionary<int, Vector3[]>();
+        public Dictionary<int, Vector3[]> Vertex = new Dictionary<int, Vector3[]>();
         public Dictionary<int, Vector3[]> Normal = new Dictionary<int, Vector3[]>();
         public Dictionary<int, Vector3> Target = new Dictionary<int, Vector3>();
         public Dictionary<int, int> Roll = new Dictionary<int, int>();
@@ -143,34 +143,34 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             return val;
         }
 
-        public Vector3[] GetVector3(float frame)
+        public Vector3[] GetVertex(float frame)
         {
-            if (Math.Floor(frame) == frame && Vector3.ContainsKey((int)Math.Floor(frame)))
-                return Vector3[(int)Math.Floor(frame)];
+            if (Math.Floor(frame) == frame && Vertex.ContainsKey((int)Math.Floor(frame)))
+                return Vertex[(int)Math.Floor(frame)];
             int f1 = 0;
             int f2 = 0;
             List<int> keys = new List<int>();
-            foreach (int k in Vector3.Keys)
+            foreach (int k in Vertex.Keys)
                 keys.Add(k);
-            for (int i = 0; i < Vector3.Count; i++)
+            for (int i = 0; i < Vertex.Count; i++)
             {
                 if (keys[i] < frame)
                     f1 = keys[i];
             }
-            for (int i = Vector3.Count - 1; i >= 0; i--)
+            for (int i = Vertex.Count - 1; i >= 0; i--)
             {
                 if (keys[i] > frame)
                     f2 = keys[i];
             }
             int diff = f2 != 0 ? (f2 - f1) : NbKeyframesCount - f1 + keys[0];
             int f2z = f2 != 0 ? f2 : keys[0];
-            Vector3[] result = new Vector3[Vector3[f1].Length];
-            for (int i = 0; i < Vector3[f1].Length; i++)
+            Vector3[] result = new Vector3[Vertex[f1].Length];
+            for (int i = 0; i < Vertex[f1].Length; i++)
                 result[i] = new Vector3()
                 {
-                    X = ((Vector3[f2z][i].X - Vector3[f1][i].X) / diff * (frame - f1)) + Vector3[f1][i].X,
-                    Y = ((Vector3[f2z][i].Y - Vector3[f1][i].Y) / diff * (frame - f1)) + Vector3[f1][i].Y,
-                    Z = ((Vector3[f2z][i].Z - Vector3[f1][i].Z) / diff * (frame - f1)) + Vector3[f1][i].Z
+                    X = ((Vertex[f2z][i].X - Vertex[f1][i].X) / diff * (frame - f1)) + Vertex[f1][i].X,
+                    Y = ((Vertex[f2z][i].Y - Vertex[f1][i].Y) / diff * (frame - f1)) + Vertex[f1][i].Y,
+                    Z = ((Vertex[f2z][i].Z - Vertex[f1][i].Z) / diff * (frame - f1)) + Vertex[f1][i].Z
                 };
             return result;
         }

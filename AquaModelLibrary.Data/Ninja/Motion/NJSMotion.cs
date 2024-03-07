@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
+using System.Numerics;
 
 //Addapted from SA Tools
 namespace AquaModelLibrary.Data.Ninja.Motion
@@ -92,9 +93,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     int frames = sr.ReadBE<int>();
                     if (posoff != 0 && frames > 0)
                     {
+                        data = data ?? new AnimModelData();
                         var bookmark = sr.Position;
                         sr.Seek(posoff + offset, SeekOrigin.Begin);
-                        data = data ?? new AnimModelData();
                         for (int j = 0; j < frames; j++)
                         {
                             data.Position.Add(sr.ReadBE<int>(), sr.ReadBEV3());
@@ -107,6 +108,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     int frames = sr.ReadBE<int>();
                     if (rotoff != 0 && frames > 0)
                     {
+                        data = data ?? new AnimModelData();
                         var bookmark = sr.Position;
                         sr.Seek(rotoff + offset, SeekOrigin.Begin);
                         if (shortRot == false && shortRotCheck == true)
@@ -148,42 +150,35 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                         sr.Seek(bookmark, SeekOrigin.Begin);
                     }
                 }
-                /*
                 if (animType.HasFlag(AnimFlags.Scale))
                 {
                     int frames = sr.ReadBE<int>();
                     if (scloff != 0 && frames > 0)
                     {
-                        hasdata = true;
-                        tmpaddr = (int)scloff;
-                        if (labels != null && labels.ContainsKey(tmpaddr))
-                            data.ScaleName = labels[tmpaddr];
-                        else data.ScaleName = Name + "_mkey_" + i.ToString() + "_scl_" + tmpaddr.ToString("X8");
+                        data = data ?? new AnimModelData();
+                        var bookmark = sr.Position;
+                        sr.Seek(scloff + offset, SeekOrigin.Begin);
                         for (int j = 0; j < frames; j++)
                         {
-                            data.Scale.Add(ByteConverter.ToInt32(file, tmpaddr), new Vertex(file, tmpaddr + 4));
-                            tmpaddr += 16;
+                            data.Scale.Add(sr.ReadBE<int>(), sr.ReadBEV3());
                         }
+                        sr.Seek(bookmark, SeekOrigin.Begin);
                     }
-                    address += 4;
                 }
                 if (animType.HasFlag(AnimFlags.Vector))
                 {
                     int frames = sr.ReadBE<int>();
                     if (vecoff != 0 && frames > 0)
                     {
-                        hasdata = true;
-                        tmpaddr = (int)vecoff;
-                        if (labels != null && labels.ContainsKey(tmpaddr))
-                            data.VectorName = labels[tmpaddr];
-                        else data.VectorName = Name + "_mkey_" + i.ToString() + "_vec_" + tmpaddr.ToString("X8");
+                        data = data ?? new AnimModelData();
+                        var bookmark = sr.Position;
+                        sr.Seek(vecoff + offset, SeekOrigin.Begin);
                         for (int j = 0; j < frames; j++)
                         {
-                            data.Vector.Add(ByteConverter.ToInt32(file, tmpaddr), new Vertex(file, tmpaddr + 4));
-                            tmpaddr += 16;
+                            data.Vector.Add(sr.ReadBE<int>(), sr.ReadBEV3());
                         }
+                        sr.Seek(bookmark, SeekOrigin.Begin);
                     }
-                    address += 4;
                 }
                 int vtxcount = -1;
                 if (animType.HasFlag(AnimFlags.Vertex))
@@ -191,51 +186,57 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     int frames = sr.ReadBE<int>();
                     if (vertoff != 0 && frames > 0)
                     {
-                        hasdata = true;
-                        tmpaddr = (int)vertoff;
-                        if (labels != null && labels.ContainsKey(tmpaddr))
-                            data.VertexName = labels[tmpaddr];
-                        else data.VertexName = Name + "_mkey_" + i.ToString() + "_vert_" + tmpaddr.ToString("X8");
+                        data = data ?? new AnimModelData();
+                        var bookmark = sr.Position;
+                        sr.Seek(vertoff + offset, SeekOrigin.Begin);
+
+                        //Gather pointer data to dynamically determine vert count. Normally you should have the model's data here to do this, but we're going without.
                         List<int> ptrs = new List<int>();
-                        data.VertexItemName = new string[frames];
                         for (int j = 0; j < frames; j++)
                         {
-                            ptrs.AddUnique((int)(ByteConverter.ToUInt32(file, tmpaddr + 4) - imageBase));
-                            int itemaddr = (int)(ByteConverter.ToUInt32(file, tmpaddr + 4) - imageBase);
-                            if (labels != null && labels.ContainsKey(itemaddr))
-                                data.VertexItemName[j] = labels[itemaddr];
-                            else data.VertexItemName[j] = Name + "_" + i.ToString() + "_vtx_" + j.ToString() + "_" + itemaddr.ToString("X8");
-                            tmpaddr += 8;
+                            var frame = sr.ReadBE<int>();
+                            var ptr = sr.ReadBE<int>();
+                            if(!ptrs.Contains(ptr))
+                            {
+                                ptrs.Add(ptr);
+                            }
                         }
-                        // Use vertex counts specified in split if available
-                        if (numverts != null && numverts.Length > 0)
-                            vtxcount = numverts[i];
+
+                        //Determine vert count
+                        if (ptrs.Count > 1)
+                        {
+                            ptrs.Sort();
+                            vtxcount = (ptrs[1] - ptrs[0]) / 0xC;
+                        }
                         else
                         {
-                            if (ptrs.Count > 1)
-                            {
-                                ptrs.Sort();
-                                vtxcount = (ptrs[1] - ptrs[0]) / Vertex.Size;
-                            }
-                            else
-                                vtxcount = ((int)vertoff - ptrs[0]) / Vertex.Size;
+                            vtxcount = ((int)vertoff - ptrs[0]) / 0xC;
                         }
-                        tmpaddr = (int)vertoff;
+
+                        sr.Seek(vertoff + offset, SeekOrigin.Begin);
                         for (int j = 0; j < frames; j++)
                         {
-                            Vertex[] verts = new Vertex[vtxcount];
-                            int newaddr = (int)(ByteConverter.ToUInt32(file, tmpaddr + 4) - imageBase);
+                            Vector3[] verts = new Vector3[vtxcount];
+                            int frame = sr.ReadBE<int>();
+                            int vertSetOffset = sr.ReadBE<int>();
+
+                            var vertSetBookmark = sr.Position;
+                            sr.Seek(vertSetOffset + offset, SeekOrigin.Begin);
                             for (int k = 0; k < verts.Length; k++)
                             {
-                                verts[k] = new Vertex(file, newaddr);
-                                newaddr += Vertex.Size;
+                                verts[k] = sr.ReadBEV3();
                             }
-                            if (!data.Vertex.ContainsKey(ByteConverter.ToInt32(file, tmpaddr))) data.Vertex.Add(ByteConverter.ToInt32(file, tmpaddr), verts);
-                            tmpaddr += 8;
+
+                            if (!data.Vertex.ContainsKey(frame))
+                            {
+                                data.Vertex.Add(frame, verts);
+                            }
+                            sr.Seek(vertSetBookmark, SeekOrigin.Begin);
                         }
+                        sr.Seek(bookmark, SeekOrigin.Begin);
                     }
-                    address += 4;
                 }
+                /*
                 if (animType.HasFlag(AnimFlags.Normal))
                 {
                     int frames = sr.ReadBE<int>();
