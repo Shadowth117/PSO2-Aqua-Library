@@ -50,11 +50,9 @@ namespace AquaModelLibrary.Data.Ninja.Model
             var leAddress = sr.Peek<int>();
             var beAddress = sr.PeekBigEndianInt32();
 
-            //sr.Seek(0x22F8, SeekOrigin.Begin);
-            //sr._BEReadActive = true;
-            //var rootMotion = new NJSMotion(sr, offset: 0x20, false);
             var root = new NJSObject(sr, variant, leAddress > beAddress, offset);
-            return NinjaToAqua(root, out aqn);
+            var model = NinjaToAqua(root, out aqn);
+            return model;
         }
 
         public static AquaObject NinjaToAqua(NJSObject NinjaModelRoot, out AquaNode aqn)

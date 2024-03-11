@@ -16,7 +16,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         public Dictionary<int, uint> Color = new Dictionary<int, uint>();
         public Dictionary<int, float> Intensity = new Dictionary<int, float>();
         public Dictionary<int, Spotlight> Spot = new Dictionary<int, Spotlight>();
-        public Dictionary<int, float[]> Point = new Dictionary<int, float[]>();
+        public Dictionary<int, Vector2> Point = new Dictionary<int, Vector2>();
         public Dictionary<int, float[]> Quaternion = new Dictionary<int, float[]>();
         public int NbKeyframesCount;
         public AnimModelData()

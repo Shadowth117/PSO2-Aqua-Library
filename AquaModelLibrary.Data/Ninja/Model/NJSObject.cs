@@ -5,12 +5,13 @@ using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
+//Adapted from SA Tools
 namespace AquaModelLibrary.Data.Ninja.Model
 {
     public class NJSObject
     {
         public NinjaVariant variant;
-        public int flags;
+        public ObjectFlags flags;
         public Attach mesh = null;
         public Vector3 pos;
         public Vector3 rot;
@@ -18,6 +19,18 @@ namespace AquaModelLibrary.Data.Ninja.Model
         public NJSObject childObject = null;
         public NJSObject siblingObject = null;
         public int unkInt;
+
+        public bool Animate 
+        { 
+            get 
+            {
+                return ((flags & ObjectFlags.NoAnimate) == 0);
+            }
+            set 
+            {
+                flags = value ? flags & ~ObjectFlags.NoAnimate : flags | ObjectFlags.NoAnimate;
+            }
+        }
 
         public NJSObject() { variant = NinjaVariant.Basic; }
 
@@ -29,6 +42,19 @@ namespace AquaModelLibrary.Data.Ninja.Model
         public NJSObject(BufferedStreamReaderBE<MemoryStream> sr, NinjaVariant ninjaVariant, bool be = true, int offset = 0)
         {
             Read(sr, ninjaVariant, be, offset);
+        }
+
+        public void CountAnimated(ref int result)
+        {
+            result += Animate ? 1 : 0;
+            if(childObject != null)
+            {
+                childObject.CountAnimated(ref result);
+            }
+            if(siblingObject != null)
+            {
+                siblingObject.CountAnimated(ref result);
+            }
         }
 
         public bool HasWeights()
@@ -69,7 +95,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
         {
             variant = ninjaVariant;
             sr._BEReadActive = be;
-            flags = sr.ReadBE<int>();
+            flags = sr.ReadBE<ObjectFlags>();
             int attachOffset = sr.ReadBE<int>();
             pos = sr.ReadBEV3();
             int rotX = sr.ReadBE<int>();
@@ -112,7 +138,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
         public void Write(List<byte> outBytes, List<int> POF0Offsets, bool ginjaWrite)
         {
             int njsObjAddress = outBytes.Count;
-            outBytes.AddValue(flags);
+            outBytes.AddValue((int)flags);
             outBytes.ReserveInt($"{njsObjAddress}_attach");
             outBytes.AddValue(pos.X);
             outBytes.AddValue(pos.Y);
