@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using System.Drawing.Drawing2D;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 
 //Addapted from SA Tools
 namespace AquaModelLibrary.Data.Ninja.Motion
@@ -53,6 +54,82 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             var initialPointer = sr.ReadBE<int>();
             frameCount = sr.ReadBE<int>();
             animType = sr.ReadBE<AnimFlags>();
+
+            List<AnimFlags> animFlagList = new List<AnimFlags>();
+            if(BillyMode)
+            {
+                if((animType & AnimFlags.Position) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Position);
+                }
+                if ((animType & AnimFlags.Rotation) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Rotation);
+                }
+                //Normal is the shortrot rotation type in Billy
+                if ((animType & AnimFlags.Normal) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Rotation);
+                    shortRot = true;
+                    shortRotCheck = false;
+                }
+                if ((animType & AnimFlags.Quaternion) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Quaternion);
+                }
+                if ((animType & AnimFlags.Scale) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Scale);
+                }
+                if ((animType & AnimFlags.Vector) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Vector);
+                }
+                if ((animType & AnimFlags.Vertex) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Vertex);
+                }
+                if ((animType & AnimFlags.Target) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Target);
+                }
+                if ((animType & AnimFlags.Roll) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Roll);
+                }
+                if ((animType & AnimFlags.Angle) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Angle);
+                }
+                if ((animType & AnimFlags.Color) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Color);
+                }
+                if ((animType & AnimFlags.Intensity) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Intensity);
+                }
+                if ((animType & AnimFlags.Spot) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Spot);
+                }
+                if ((animType & AnimFlags.Point) > 0)
+                {
+                    animFlagList.Add(AnimFlags.Point);
+                }
+            } else
+            {
+                //Default just has these in order, seemingly
+                foreach(var flag in Enum.GetValues(typeof(AnimFlags)))
+                {
+                    var enFlag = (AnimFlags)flag;
+                    if ((animType & enFlag) > 0)
+                    {
+                        animFlagList.Add(enFlag);
+                    }
+                }
+            }
+
             var interpolationFrameSizeCombo = sr.ReadBE<ushort>();
             switch ((NJD_MTYPE_FN)interpolationFrameSizeCombo & NJD_MTYPE_FN.NJD_MTYPE_MASK)
             {
@@ -70,11 +147,11 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
             sr.Seek(initialPointer + offset, SeekOrigin.Begin);
             var dataStart = sr.Position;
-            if(ReadAnimData(sr, offset, nodeCount, shortRot, shortRotCheck) == false)
+            if(ReadAnimData(sr, offset, animFlagList, nodeCount, shortRot, shortRotCheck) == false)
             {
                 KeyDataList.Clear();
                 sr.Seek(dataStart, SeekOrigin.Begin);
-                ReadAnimData(sr, offset, nodeCount, true, false);
+                ReadAnimData(sr, offset, animFlagList, nodeCount, true, false);
             }
         }
 
@@ -82,312 +159,189 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         /// Reads anim frame data. Returns false if rotation anim data seems to be out of range. 
         /// Ninja motions do not provide a natural way of finding this and can feature both types of rotation within the same game so this brute forcing is needed.
         /// </summary>
-        private bool ReadAnimData(BufferedStreamReaderBE<MemoryStream> sr, int offset, int nodeCount, bool shortRot, bool shortRotCheck)
+        private bool ReadAnimData(BufferedStreamReaderBE<MemoryStream> sr, int offset, List<AnimFlags> animFlagList, int nodeCount, bool shortRot, bool shortRotCheck)
         {
             for (int i = 0; i < nodeCount; i++)
             {
                 AnimModelData data = null;
-                uint posoff = animType.HasFlag(AnimFlags.Position) ? sr.ReadBE<uint>() : 0;
-                uint rotoff = animType.HasFlag(AnimFlags.Rotation) ? sr.ReadBE<uint>() : 0;
-                uint scloff = animType.HasFlag(AnimFlags.Scale) ? sr.ReadBE<uint>() : 0;
-                uint vecoff = animType.HasFlag(AnimFlags.Vector) ? sr.ReadBE<uint>() : 0;
-                uint vertoff = animType.HasFlag(AnimFlags.Vertex) ? sr.ReadBE<uint>() : 0;
-                uint normoff = animType.HasFlag(AnimFlags.Normal) ? sr.ReadBE<uint>() : 0;
-                uint targoff = animType.HasFlag(AnimFlags.Target) ? sr.ReadBE<uint>() : 0;
-                uint rolloff = animType.HasFlag(AnimFlags.Roll) ? sr.ReadBE<uint>() : 0;
-                uint angoff = animType.HasFlag(AnimFlags.Angle) ? sr.ReadBE<uint>() : 0;
-                uint coloff = animType.HasFlag(AnimFlags.Color) ? sr.ReadBE<uint>() : 0;
-                uint intoff = animType.HasFlag(AnimFlags.Intensity) ? sr.ReadBE<uint>() : 0;
-                uint spotoff = animType.HasFlag(AnimFlags.Spot) ? sr.ReadBE<uint>() : 0;
-                uint pntoff = animType.HasFlag(AnimFlags.Point) ? sr.ReadBE<uint>() : 0;
-                uint quatoff = animType.HasFlag(AnimFlags.Quaternion) ? sr.ReadBE<uint>() : 0;
 
-                if (animType.HasFlag(AnimFlags.Position))
+                //Read frameData offsets and counts
+                List<uint> offsets = new List<uint>();
+                List<int> counts = new List<int>();
+                foreach (var flag in animFlagList)
                 {
-                    int frames = sr.ReadBE<int>();
-                    if (posoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(posoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Position.Add(sr.ReadBE<int>(), sr.ReadBEV3());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
+                    offsets.Add(sr.ReadBE<uint>());
                 }
-                if (animType.HasFlag(AnimFlags.Rotation))
+                foreach (var flag in animFlagList)
                 {
-                    int frames = sr.ReadBE<int>();
-                    if (rotoff != 0 && frames > 0)
+                    counts.Add(sr.ReadBE<int>());
+                }
+
+                //Handle based on anim flag order
+                for(int f = 0; f < animFlagList.Count; f++)
+                {
+                    var framesOffset = offsets[f];
+                    if(framesOffset != 0)
                     {
+                        int vtxcount = -1;
                         data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(rotoff + offset, SeekOrigin.Begin);
-                        if (shortRot == false && shortRotCheck == true)
+                        sr.Seek(framesOffset + offset, SeekOrigin.Begin);
+                        switch (animFlagList[f])
                         {
-                            // Check if the animation uses short rotation or not
-                            for (int j = 0; j < frames; j++)
-                            {
-                                // If any of the rotation frames go outside the file, assume it uses shorts
-                                if (sr.Position + 4 + 12 > sr.BaseStream.Length)
+                            case AnimFlags.Position:
+                                for (int j = 0; j < counts[f]; j++)
                                 {
-                                    return false;
+                                    data.Position.Add(sr.ReadBE<int>(), sr.ReadBEV3());
                                 }
-                                // If any of the rotation frames isn't in the range from -65535 to 65535, assume it uses shorts
-                                Rotation rot = new Rotation(sr);
-                                if (rot.X > 65535 || rot.X < -65535 ||
-                                    rot.Y > 65535 || rot.Y < -65535 ||
-                                    rot.Z > 65535 || rot.Z < -65535)
+                                break;
+                            case AnimFlags.Rotation:
+                                if (shortRot == false && shortRotCheck == true)
                                 {
-                                    return false;
+                                    // Check if the animation uses short rotation or not
+                                    for (int j = 0; j < counts[f]; j++)
+                                    {
+                                        // If any of the rotation frames go outside the file, assume it uses shorts
+                                        if (sr.Position + 4 + 12 > sr.BaseStream.Length)
+                                        {
+                                            return false;
+                                        }
+                                        // If any of the rotation frames isn't in the range from -65535 to 65535, assume it uses shorts
+                                        Rotation rot = new Rotation(sr);
+                                        if (rot.X > 65535 || rot.X < -65535 ||
+                                            rot.Y > 65535 || rot.Y < -65535 ||
+                                            rot.Z > 65535 || rot.Z < -65535)
+                                        {
+                                            return false;
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                        // Read rotation values
-                        for (int j = 0; j < frames; j++)
-                        {
-                            if (shortRot)
-                            {
-                                var frame = sr.ReadBE<short>();
-                                if (!data.RotationData.ContainsKey(frame))
-                                    data.RotationData.Add(frame, new Rotation(sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()));
-                            }
-                            else
-                            {
-                                var frame = sr.ReadBE<int>();
-                                if (!data.RotationData.ContainsKey(frame))
-                                    data.RotationData.Add(frame, new Rotation(sr));
-                            }
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Scale))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (scloff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(scloff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            if(BillyMode)
-                            {
-                                data.Scale.Add(sr.ReadBE<short>(), new Vector3(sr.ReadBE<ushort>(), sr.ReadBE<ushort>(), sr.ReadBE<ushort>()));
-                            } else
-                            {
-                                data.Scale.Add(sr.ReadBE<int>(), sr.ReadBEV3());
-                            }
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Vector))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (vecoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(vecoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Vector.Add(sr.ReadBE<int>(), sr.ReadBEV3());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                int vtxcount = -1;
-                if (animType.HasFlag(AnimFlags.Vertex))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (vertoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(vertoff + offset, SeekOrigin.Begin);
+                                // Read rotation values
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    if (shortRot)
+                                    {
+                                        var frame = sr.ReadBE<short>();
+                                        if (!data.RotationData.ContainsKey(frame))
+                                            data.RotationData.Add(frame, new Rotation(sr.ReadBE<short>(), sr.ReadBE<short>(), sr.ReadBE<short>()));
+                                    }
+                                    else
+                                    {
+                                        var frame = sr.ReadBE<int>();
+                                        if (!data.RotationData.ContainsKey(frame))
+                                            data.RotationData.Add(frame, new Rotation(sr));
+                                    }
+                                }
+                                break;
+                            case AnimFlags.Scale:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Scale.Add(sr.ReadBE<int>(), sr.ReadBEV3());
+                                }
+                                break;
+                            case AnimFlags.Vector:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Vector.Add(sr.ReadBE<int>(), sr.ReadBEV3());
+                                }
+                                break;
+                            case AnimFlags.Vertex:
+                                vtxcount = vtxcount < 0 ? GetVertexCount(sr, framesOffset, counts[f]) : vtxcount;
 
-                        vtxcount = vtxcount < 0 ? GetVertexCount(sr, vertoff, frames) : vtxcount;
+                                sr.Seek(framesOffset + offset, SeekOrigin.Begin);
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    Vector3[] verts = new Vector3[vtxcount];
+                                    int frame = sr.ReadBE<int>();
+                                    int vertSetOffset = sr.ReadBE<int>();
 
-                        sr.Seek(vertoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            Vector3[] verts = new Vector3[vtxcount];
-                            int frame = sr.ReadBE<int>();
-                            int vertSetOffset = sr.ReadBE<int>();
+                                    var vertSetBookmark = sr.Position;
+                                    sr.Seek(vertSetOffset + offset, SeekOrigin.Begin);
+                                    for (int k = 0; k < verts.Length; k++)
+                                    {
+                                        verts[k] = sr.ReadBEV3();
+                                    }
 
-                            var vertSetBookmark = sr.Position;
-                            sr.Seek(vertSetOffset + offset, SeekOrigin.Begin);
-                            for (int k = 0; k < verts.Length; k++)
-                            {
-                                verts[k] = sr.ReadBEV3();
-                            }
+                                    if (!data.Vertex.ContainsKey(frame))
+                                    {
+                                        data.Vertex.Add(frame, verts);
+                                    }
+                                    sr.Seek(vertSetBookmark, SeekOrigin.Begin);
+                                }
+                                break;
+                            case AnimFlags.Normal:
+                                vtxcount = vtxcount < 0 ? GetVertexCount(sr, framesOffset, counts[f]) : vtxcount;
 
-                            if (!data.Vertex.ContainsKey(frame))
-                            {
-                                data.Vertex.Add(frame, verts);
-                            }
-                            sr.Seek(vertSetBookmark, SeekOrigin.Begin);
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Normal))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (normoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(normoff + offset, SeekOrigin.Begin);
-                        vtxcount = vtxcount < 0 ? GetVertexCount(sr, normoff, frames) : vtxcount;
+                                sr.Seek(framesOffset + offset, SeekOrigin.Begin);
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    Vector3[] verts = new Vector3[vtxcount];
+                                    int frame = sr.ReadBE<int>();
+                                    int vertSetOffset = sr.ReadBE<int>();
 
-                        sr.Seek(normoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            Vector3[] verts = new Vector3[vtxcount];
-                            int frame = sr.ReadBE<int>();
-                            int vertSetOffset = sr.ReadBE<int>();
+                                    var vertSetBookmark = sr.Position;
+                                    sr.Seek(vertSetOffset + offset, SeekOrigin.Begin);
+                                    for (int k = 0; k < verts.Length; k++)
+                                    {
+                                        verts[k] = sr.ReadBEV3();
+                                    }
 
-                            var vertSetBookmark = sr.Position;
-                            sr.Seek(vertSetOffset + offset, SeekOrigin.Begin);
-                            for (int k = 0; k < verts.Length; k++)
-                            {
-                                verts[k] = sr.ReadBEV3();
-                            }
-
-                            if (!data.Normal.ContainsKey(frame))
-                            {
-                                data.Normal.Add(frame, verts);
-                            }
-                            sr.Seek(vertSetBookmark, SeekOrigin.Begin);
+                                    if (!data.Normal.ContainsKey(frame))
+                                    {
+                                        data.Normal.Add(frame, verts);
+                                    }
+                                    sr.Seek(vertSetBookmark, SeekOrigin.Begin);
+                                }
+                                break;
+                            case AnimFlags.Target:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Target.Add(sr.ReadBE<int>(), sr.ReadBEV3());
+                                }
+                                break;
+                            case AnimFlags.Roll:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Roll.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
+                                }
+                                break;
+                            case AnimFlags.Angle:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Angle.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
+                                }
+                                break;
+                            case AnimFlags.Color:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Color.Add(sr.ReadBE<int>(), sr.ReadBE<uint>());
+                                }
+                                break;
+                            case AnimFlags.Intensity:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Intensity.Add(sr.ReadBE<int>(), sr.ReadBE<float>());
+                                }
+                                break;
+                            case AnimFlags.Spot:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Spot.Add(sr.ReadBE<int>(), new Spotlight(sr));
+                                }
+                                break;
+                            case AnimFlags.Point:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    data.Point.Add(sr.ReadBE<int>(), sr.ReadBEV2());
+                                }
+                                break;
+                            case AnimFlags.Quaternion:
+                                for (int j = 0; j < counts[f]; j++)
+                                {
+                                    //WXYZ order
+                                    data.Quaternion.Add(sr.ReadBE<int>(), new float[] { sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>() });
+                                }
+                                break;
                         }
-
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Target))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (targoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(targoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Target.Add(sr.ReadBE<int>(), sr.ReadBEV3());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Roll))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (rolloff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(rolloff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Roll.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Angle))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (angoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(angoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Angle.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Color))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (coloff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(coloff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Color.Add(sr.ReadBE<int>(), sr.ReadBE<uint>());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Intensity))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (intoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(intoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Intensity.Add(sr.ReadBE<int>(), sr.ReadBE<float>());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Spot))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (spotoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(spotoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Spot.Add(sr.ReadBE<int>(), new Spotlight(sr));
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Point))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (pntoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(pntoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            data.Point.Add(sr.ReadBE<int>(), sr.ReadBEV2());
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
-                    }
-                }
-                if (animType.HasFlag(AnimFlags.Quaternion))
-                {
-                    int frames = sr.ReadBE<int>();
-                    if (quatoff != 0 && frames > 0)
-                    {
-                        data = data ?? new AnimModelData();
-                        var bookmark = sr.Position;
-                        sr.Seek(quatoff + offset, SeekOrigin.Begin);
-                        for (int j = 0; j < frames; j++)
-                        {
-                            //WXYZ order
-                            data.Quaternion.Add(sr.ReadBE<int>(), new float[] { sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>() });
-                        }
-                        sr.Seek(bookmark, SeekOrigin.Begin);
                     }
                 }
 
