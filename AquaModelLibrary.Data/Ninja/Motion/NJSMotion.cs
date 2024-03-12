@@ -176,6 +176,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 {
                     counts.Add(sr.ReadBE<int>());
                 }
+                var bookmark = sr.Position;
 
                 //Handle based on anim flag order
                 for(int f = 0; f < animFlagList.Count; f++)
@@ -344,8 +345,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                         }
                     }
                 }
+                sr.Seek(bookmark, SeekOrigin.Begin);
 
-                if(data != null)
+                if (data != null)
                 {
                     KeyDataList.Add(i, data);
                 }
