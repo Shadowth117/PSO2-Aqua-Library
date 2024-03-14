@@ -268,12 +268,12 @@ namespace SoulsFormats
                         }
                         else if (member.Type == LayoutType.Byte4C)
                         {
-                            UVs.Add(new Vector3(br.ReadInt16(), br.ReadInt16(), 0) / uvFactor);
-                        }
-                        else if (member.Type == LayoutType.Byte4C)
-                        {
                             UVs.Add(new Vector3(br.ReadByte() / 255f, br.ReadByte() / 255f, br.ReadByte() / 255f));
                             br.AssertByte(0);
+                        }
+                        else if (member.Type == LayoutType.UV)
+                        {
+                            UVs.Add(new Vector3(br.ReadInt16(), br.ReadInt16(), 0) / uvFactor);
                         }
                         else if (member.Type == LayoutType.UVPair)
                         {
@@ -528,7 +528,12 @@ namespace SoulsFormats
                     }
                     else if (member.Semantic == LayoutSemantic.UV)
                     {
-                        Vector3 uv = uvQueue.Dequeue() * uvFactor;
+                        Vector3 uv = uvQueue.Dequeue();
+                        if(member.Type != LayoutType.Byte4C)
+                        {
+                            uv *= uvFactor;
+                        }
+
                         if (member.Type == LayoutType.Float2)
                         {
                             bw.WriteSingle(uv.X);
