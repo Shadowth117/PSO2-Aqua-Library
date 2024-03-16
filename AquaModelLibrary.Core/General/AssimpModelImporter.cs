@@ -765,7 +765,9 @@ namespace AquaModelLibrary.Core.General
             Dictionary<string, int> boneDict = new Dictionary<string, int>();
             var aqnRoot = GetRootNode(aiScene.RootNode);
             int nodeCounter = 0;
-            BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict);
+            bool useNameNodeNum = false;
+            CheckForNameNodeNumbers(aiScene.RootNode, ref useNameNodeNum);
+            BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict, useNameNodeNum);
 
             var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
             parentMatrix.M41 *= baseScale;
@@ -830,12 +832,11 @@ namespace AquaModelLibrary.Core.General
             return null;
         }
 
-        private static void BuildAiNodeDictionary(Assimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum = false)
+        private static void BuildAiNodeDictionary(Assimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum)
         {
             var nodeCountName = GetNodeNumber(aiNode.Name);
             if (nodeCountName != -1)
             {
-                useNameNodeNum = true;
                 boneDict.Add(aiNode.Name, nodeCountName);
             }
             else if (useNameNodeNum == false)
@@ -850,10 +851,28 @@ namespace AquaModelLibrary.Core.General
                 }
             }
 
-
             foreach (var childNode in aiNode.Children)
             {
                 BuildAiNodeDictionary(childNode, ref nodeCounter, boneDict, useNameNodeNum);
+            }
+        }
+
+        private static void CheckForNameNodeNumbers(Assimp.Node aiNode, ref bool useNameNodeNum)
+        {
+            var nodeCountName = GetNodeNumber(aiNode.Name);
+            if (nodeCountName != -1)
+            {
+                useNameNodeNum = true;
+                return;
+            }
+
+            foreach (var childNode in aiNode.Children)
+            {
+                CheckForNameNodeNumbers(childNode, ref useNameNodeNum);
+                if(useNameNodeNum)
+                {
+                    return;
+                }
             }
         }
 
