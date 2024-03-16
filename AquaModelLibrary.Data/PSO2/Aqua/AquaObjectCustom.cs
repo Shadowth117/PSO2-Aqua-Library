@@ -709,19 +709,76 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// </summary>>
         public void OptimizeBonePalettes()
         {
-            List<uint> globalBonePalette = new List<uint>();
-            for (int i = 0; i < vtxlList.Count; i++)
+            //Consider it NGS style globalBonePalettes if we have anything assigned to the globalBonePalette
+            if (bonePalette.Count > 0)
             {
-                if (vtxlList[i].bonePalette?.Count > 0)
+                bonePalette = OptimizeBonePaletteGroup(vtxlList, bonePalette);
+            } else
+            {
+                foreach(var vtxl in vtxlList)
                 {
-                    globalBonePalette = new List<uint>();
+                    var newBonePalette = OptimizeBonePaletteGroup(new List<VTXL> { vtxl }, vtxl.bonePalette.ConvertAll(bone => (uint)bone));
+                    vtxl.bonePalette = newBonePalette.ConvertAll(bone => (ushort)bone);
                 }
-                OptimizeBonePalette(vtxlList[i], globalBonePalette, !(vtxlList[i].bonePalette?.Count > 0));
             }
-            if(bonePalette.Count > 0)
+        }
+
+        //Returns the newly constructed bone palette after altering the vtxl(s) to fit it
+        private static List<uint> OptimizeBonePaletteGroup(List<VTXL> vtxlList, List<uint> originalBonePalette)
+        {
+            List<uint> globalBonePalette = new List<uint>();
+            Dictionary<int, int> globalBonePaletteMap = new Dictionary<int, int>();
+
+            //Gather bones that are actually used
+            foreach (var vtxl in vtxlList)
             {
-                bonePalette = globalBonePalette;
+                //Loop through weight indices and gather them
+                for (int v = 0; v < vtxl.vertWeightIndices.Count; v++)
+                {
+                    for (int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
+                    {
+                        if (!globalBonePalette.Contains((uint)vtxl.vertWeightIndices[v][vi]))
+                        {
+                            globalBonePalette.Add((uint)vtxl.vertWeightIndices[v][vi]);
+                        }
+                    }
+                }
             }
+            globalBonePalette.Sort();
+
+            //Create map for the new bone list back to the old one
+            for (int i = 0; i < originalBonePalette.Count; i++)
+            {
+                uint boneId = originalBonePalette[i];
+                if (globalBonePalette.Contains(boneId))
+                {
+                    globalBonePaletteMap.Add(i, globalBonePalette.IndexOf(boneId));
+                }
+            }
+
+            //Reassign indices
+            foreach (var vtxl in vtxlList)
+            {
+                for (int v = 0; v < vtxl.vertWeightIndices.Count; v++)
+                {
+                    List<int> usedIds = new List<int>();
+                    for (int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
+                    {
+                        //Repeat ids shouldn't exist and should be 0ed. Usually a duplicate implies that the original was 0 anyways.
+                        if (usedIds.Contains(vtxl.vertWeightIndices[v][vi]))
+                        {
+                            vtxl.vertWeightIndices[v][vi] = 0;
+                        }
+                        else
+                        {
+                            usedIds.Add(vtxl.vertWeightIndices[v][vi]);
+                            vtxl.vertWeightIndices[v][vi] = globalBonePaletteMap[vtxl.vertWeightIndices[v][vi]];
+                        }
+                    }
+                }
+            }
+
+            return globalBonePalette;
         }
 
         /// <summary>
