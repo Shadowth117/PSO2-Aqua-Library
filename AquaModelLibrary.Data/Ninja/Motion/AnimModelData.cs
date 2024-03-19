@@ -23,6 +23,75 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         {
         }
 
+        public AnimFlags GetAnimFlags(bool billyMode)
+        {
+            AnimFlags flags = new AnimFlags();
+            if(Position.Count > 0)
+            {
+                flags |= AnimFlags.Position;
+            }
+            if (RotationData.Count > 0)
+            {
+                if(billyMode)
+                {
+                    flags |= AnimFlags.Normal;
+                } else
+                {
+                    flags |= AnimFlags.Rotation;
+                }
+            }
+            if (Scale.Count > 0)
+            {
+                flags |= AnimFlags.Scale;
+            }
+            if (Vector.Count > 0)
+            {
+                flags |= AnimFlags.Vector;
+            }
+            if (Vertex.Count > 0)
+            {
+                flags |= AnimFlags.Vertex;
+            }
+            if (Normal.Count > 0)
+            {
+                flags |= AnimFlags.Normal;
+            }
+            if (Target.Count > 0)
+            {
+                flags |= AnimFlags.Target;
+            }
+            if (Roll.Count > 0)
+            {
+                flags |= AnimFlags.Roll;
+            }
+            if (Angle.Count > 0)
+            {
+                flags |= AnimFlags.Angle;
+            }
+            if (Color.Count > 0)
+            {
+                flags |= AnimFlags.Color;
+            }
+            if (Intensity.Count > 0)
+            {
+                flags |= AnimFlags.Intensity;
+            }
+            if (Spot.Count > 0)
+            {
+                flags |= AnimFlags.Spot;
+            }
+            if (Point.Count > 0)
+            {
+                flags |= AnimFlags.Point;
+            }
+            if (Quaternion.Count > 0)
+            {
+                flags |= AnimFlags.Quaternion;
+            }
+
+            return flags;
+        }
+
         public Vector3 GetPosition(float frame)
         {
             if (Math.Floor(frame) == frame && Position.ContainsKey((int)Math.Floor(frame)))

@@ -1,64 +1,25 @@
-﻿using AquaModelLibrary.Helpers.Readers;
-using System.Drawing.Drawing2D;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
 
 //Addapted from SA Tools
 namespace AquaModelLibrary.Data.Ninja.Motion
 {
     public class NJSMotion
     {
-        public bool BillyMode = false;
-        public int frameCount = 0;
-        public AnimFlags animType = 0;
-        public InterpolationMode interpoMode = 0;
-        public Dictionary<int, AnimModelData> KeyDataList = new Dictionary<int, AnimModelData>();
-
-        public NJSMotion() { }
-        public NJSMotion(byte[] file, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        public enum MotionWriteMode
         {
-            BillyMode = billyMode;
-            Read(file, offset, shortRot, nodeCount);
+            Standard = 0,
+            ShortRot = 1,
+            BillyMode = 2,
         }
 
-        public NJSMotion(BufferedStreamReaderBE<MemoryStream> sr, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        public static List<AnimFlags> GetAnimFlagListFromEnum(AnimFlags animType, bool BillyMode)
         {
-            BillyMode = billyMode;
-            Read(sr, offset, shortRot, nodeCount);
-        }
-
-        public NJSMotion(byte[] file, int offset = 0, bool shortRot = false, int nodeCount = 0)
-        {
-            Read(file, offset, shortRot, nodeCount);
-        }
-
-        public NJSMotion(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0, bool shortRot = false, int nodeCount = 0)
-        {
-            Read(sr, offset, shortRot, nodeCount);
-        }
-
-        public void Read(byte[] file, int offset = 0, bool shortRot = false, int nodeCount = 0)
-        {
-            using (var ms = new MemoryStream(file))
-            using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
-            {
-                Read(sr, offset, shortRot, nodeCount);
-            }
-        }
-
-        public void Read(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0, bool shortRot = false, int nodeCount = 0)
-        {
-            bool shortRotCheck = true;
-            nodeCount = nodeCount == 0 ? CalculateNodeCount(sr, offset) : nodeCount;
-
-            var initialPointer = sr.ReadBE<int>();
-            frameCount = sr.ReadBE<int>();
-            animType = sr.ReadBE<AnimFlags>();
-
             List<AnimFlags> animFlagList = new List<AnimFlags>();
-            if(BillyMode)
+            if (BillyMode)
             {
-                if((animType & AnimFlags.Position) > 0)
+                if ((animType & AnimFlags.Position) > 0)
                 {
                     animFlagList.Add(AnimFlags.Position);
                 }
@@ -70,8 +31,6 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 if ((animType & AnimFlags.Normal) > 0)
                 {
                     animFlagList.Add(AnimFlags.Rotation);
-                    shortRot = true;
-                    shortRotCheck = false;
                 }
                 if ((animType & AnimFlags.Quaternion) > 0)
                 {
@@ -117,10 +76,11 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 {
                     animFlagList.Add(AnimFlags.Point);
                 }
-            } else
+            }
+            else
             {
                 //Default just has these in order, seemingly
-                foreach(var flag in Enum.GetValues(typeof(AnimFlags)))
+                foreach (var flag in Enum.GetValues(typeof(AnimFlags)))
                 {
                     var enFlag = (AnimFlags)flag;
                     if ((animType & enFlag) > 0)
@@ -128,6 +88,327 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                         animFlagList.Add(enFlag);
                     }
                 }
+            }
+
+            return animFlagList;
+        }
+
+        public bool BillyMode = false;
+        public int frameCount = 0;
+        public AnimFlags animType = 0;
+        public InterpolationMode interpoMode = 0;
+        public List<AnimModelData> KeyDataList = new List<AnimModelData>();
+
+        public NJSMotion() { }
+        public NJSMotion(byte[] file, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        {
+            BillyMode = billyMode;
+            Read(file, offset, shortRot, nodeCount);
+        }
+
+        public NJSMotion(BufferedStreamReaderBE<MemoryStream> sr, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        {
+            BillyMode = billyMode;
+            Read(sr, offset, shortRot, nodeCount);
+        }
+
+        public NJSMotion(byte[] file, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        {
+            Read(file, offset, shortRot, nodeCount);
+        }
+
+        public NJSMotion(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        {
+            Read(sr, offset, shortRot, nodeCount);
+        }
+
+        public byte[] GetBytesNJM(bool writeBE, MotionWriteMode writeMode)
+        {
+            ByteListExtension.AddAsBigEndian = writeBE;
+            List<byte> outBytes = new List<byte>();
+            List<int> pofSets = new List<int>();
+
+            Write(outBytes, pofSets, writeMode);
+
+            List<byte> headerBytes = new List<byte> { 0x4E, 0x4D, 0x44, 0x4D };
+            headerBytes.AddRange(BitConverter.GetBytes(outBytes.Count));
+            outBytes.InsertRange(0, headerBytes);
+            outBytes.AddRange(POF0.GeneratePOF0(pofSets));
+
+            return outBytes.ToArray();
+        }
+
+        public void Write(List<byte> outBytes, List<int> POF0Offsets, MotionWriteMode writeMode)
+        {
+            POF0Offsets.Add(outBytes.Count);
+            outBytes.ReserveInt("MotionStart");
+            outBytes.AddValue(frameCount);
+
+            AnimFlags flags = new AnimFlags();
+            foreach (var data in KeyDataList)
+            {
+                flags |= data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode);
+            }
+            ushort dataCount = 0;
+            foreach (AnimFlags flag in Enum.GetValues(typeof(AnimFlags)))
+            {
+                if ((flag & flags) > 0)
+                {
+                    dataCount++;
+                }
+            }
+            outBytes.AddValue((ushort)flags);
+            outBytes.AddValue((ushort)((ushort)interpoMode | dataCount));
+
+            var dataTypeList = GetAnimFlagListFromEnum(flags, writeMode == MotionWriteMode.BillyMode);
+            outBytes.FillInt("MotionStart", outBytes.Count);
+            for(int i = 0; i <  KeyDataList.Count; i++)
+            {
+                var data = KeyDataList[i];
+                outBytes.AlignWriter(0x4);
+                //Reserve frame set offsets
+                for (int j = 0; j < dataTypeList.Count; j++)
+                {
+                    outBytes.ReserveInt($"MotionOffset_{i}_{j}");
+                }
+
+                //Write frame set counts
+                for (int j = 0; j < dataTypeList.Count; j++)
+                {
+                    var type = dataTypeList[j];
+                    switch(type)
+                    {
+                        case AnimFlags.Position:
+                            outBytes.AddValue(data.Position.Count);
+                            break;
+                        case AnimFlags.Rotation:
+                            outBytes.AddValue(data.RotationData.Count);
+                            break;
+                        case AnimFlags.Scale:
+                            outBytes.AddValue(data.Scale.Count);
+                            break;
+                        case AnimFlags.Vector:
+                            outBytes.AddValue(data.Vector.Count);
+                            break;
+                        case AnimFlags.Vertex:
+                            outBytes.AddValue(data.Vertex.Count);
+                            break;
+                        case AnimFlags.Normal:
+                            if(writeMode == MotionWriteMode.BillyMode)
+                            {
+                                outBytes.AddValue(data.RotationData.Count);
+                            } else
+                            {
+                                outBytes.AddValue(data.Normal.Count);
+                            }
+                            break;
+                        case AnimFlags.Target:
+                            outBytes.AddValue(data.Target.Count);
+                            break;
+                        case AnimFlags.Roll:
+                            outBytes.AddValue(data.Roll.Count);
+                            break;
+                        case AnimFlags.Angle:
+                            outBytes.AddValue(data.Angle.Count);
+                            break;
+                        case AnimFlags.Color:
+                            outBytes.AddValue(data.Color.Count);
+                            break;
+                        case AnimFlags.Intensity:
+                            outBytes.AddValue(data.Intensity.Count);
+                            break;
+                        case AnimFlags.Spot:
+                            outBytes.AddValue(data.Spot.Count);
+                            break;
+                        case AnimFlags.Point:
+                            outBytes.AddValue(data.Point.Count);
+                            break;
+                        case AnimFlags.Quaternion:
+                            outBytes.AddValue(data.Quaternion.Count);
+                            break;
+                    }
+                }
+
+                //Write frame sets, fill reserved offsets if used
+                for (int j = 0; j < dataTypeList.Count; j++)
+                {
+                    var type = dataTypeList[j];
+                    outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count);
+                    switch (type)
+                    {
+                        case AnimFlags.Position:
+                            foreach(var set in data.Position)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value.X);
+                                outBytes.AddValue(set.Value.Y);
+                                outBytes.AddValue(set.Value.Z);
+                            }
+                            break;
+                        case AnimFlags.Rotation:
+                            foreach (var set in data.RotationData)
+                            {
+                                switch(writeMode)
+                                {
+                                    case MotionWriteMode.Standard:
+                                        outBytes.AddValue(set.Key);
+                                        outBytes.AddValue(set.Value.X);
+                                        outBytes.AddValue(set.Value.Y);
+                                        outBytes.AddValue(set.Value.Z);
+                                        break;
+                                    case MotionWriteMode.ShortRot:
+                                    case MotionWriteMode.BillyMode:
+                                        outBytes.AddValue((short)set.Key);
+                                        outBytes.AddValue((short)set.Value.X);
+                                        outBytes.AddValue((short)set.Value.Y);
+                                        outBytes.AddValue((short)set.Value.Z);
+                                        break;
+                                }
+                            }
+                            break;
+                        case AnimFlags.Scale:
+                            foreach (var set in data.Scale)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value.X);
+                                outBytes.AddValue(set.Value.Y);
+                                outBytes.AddValue(set.Value.Z);
+                            }
+                            break;
+                        case AnimFlags.Vector:
+                            foreach (var set in data.Vector)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value.X);
+                                outBytes.AddValue(set.Value.Y);
+                                outBytes.AddValue(set.Value.Z);
+                            }
+                            break;
+                        case AnimFlags.Vertex:
+                            foreach (var set in data.Vertex)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.ReserveInt($"VertSetOffset_{i}_{j}");
+                            }
+                            foreach (var set in data.Vertex)
+                            {
+                                outBytes.FillInt($"VertSetOffset_{i}_{j}", outBytes.Count);
+                                foreach(var setValue in set.Value)
+                                {
+                                    outBytes.AddValue(setValue.X);
+                                    outBytes.AddValue(setValue.Y);
+                                    outBytes.AddValue(setValue.Z);
+                                }
+                            }
+                            break;
+                        case AnimFlags.Normal: //Billy stuff should already be handled as rotation data so we just write the Normal flag data here
+                            foreach (var set in data.Normal)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.ReserveInt($"NrmSetOffset_{i}_{j}");
+                            }
+                            foreach (var set in data.Normal)
+                            {
+                                outBytes.FillInt($"NrmSetOffset_{i}_{j}", outBytes.Count);
+                                foreach (var setValue in set.Value)
+                                {
+                                    outBytes.AddValue(setValue.X);
+                                    outBytes.AddValue(setValue.Y);
+                                    outBytes.AddValue(setValue.Z);
+                                }
+                            }
+                            break;
+                        case AnimFlags.Target:
+                            foreach (var set in data.Target)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value.X);
+                                outBytes.AddValue(set.Value.Y);
+                                outBytes.AddValue(set.Value.Z);
+                            }
+                            break;
+                        case AnimFlags.Roll:
+                            foreach (var set in data.Roll)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value);
+                            }
+                            break;
+                        case AnimFlags.Angle:
+                            foreach (var set in data.Angle)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value);
+                            }
+                            break;
+                        case AnimFlags.Color:
+                            foreach (var set in data.Color)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value);
+                            }
+                            break;
+                        case AnimFlags.Intensity:
+                            foreach (var set in data.Intensity)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value);
+                            }
+                            break;
+                        case AnimFlags.Spot:
+                            foreach (var set in data.Spot)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddRange(set.Value.GetBytes(ByteListExtension.AddAsBigEndian));
+                            }
+                            break;
+                        case AnimFlags.Point:
+                            foreach (var set in data.Point)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value.X);
+                                outBytes.AddValue(set.Value.Y);
+                            }
+                            break;
+                        case AnimFlags.Quaternion:
+                            foreach (var set in data.Quaternion)
+                            {
+                                outBytes.AddValue(set.Key);
+                                outBytes.AddValue(set.Value[0]);
+                                outBytes.AddValue(set.Value[1]);
+                                outBytes.AddValue(set.Value[2]);
+                                outBytes.AddValue(set.Value[3]);
+                            }
+                            break;
+                    }
+                }
+            }
+            outBytes.AlignWriter(0x4);
+        }
+
+        public void Read(byte[] file, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        {
+            using (var ms = new MemoryStream(file))
+            using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr, offset, shortRot, nodeCount);
+            }
+        }
+
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        {
+            bool shortRotCheck = true;
+            nodeCount = nodeCount == 0 ? CalculateNodeCount(sr, offset) : nodeCount;
+
+            var initialPointer = sr.ReadBE<int>();
+            frameCount = sr.ReadBE<int>();
+            animType = sr.ReadBE<AnimFlags>();
+
+            List<AnimFlags> animFlagList = GetAnimFlagListFromEnum(animType, BillyMode);
+            if (BillyMode)
+            {
+                shortRot = true;
+                shortRotCheck = false;
             }
 
             var interpolationFrameSizeCombo = sr.ReadBE<ushort>();
@@ -147,7 +428,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
             sr.Seek(initialPointer + offset, SeekOrigin.Begin);
             var dataStart = sr.Position;
-            if(ReadAnimData(sr, offset, animFlagList, nodeCount, shortRot, shortRotCheck) == false)
+
+            /// Ninja motions do not provide a natural way of finding if rotations use shorts in Sonic Adventure 2/Battle and can feature both types of rotation within the same game so we brute force a bit if that goes wrong.
+            if (ReadAnimData(sr, offset, animFlagList, nodeCount, shortRot, shortRotCheck) == false)
             {
                 KeyDataList.Clear();
                 sr.Seek(dataStart, SeekOrigin.Begin);
@@ -157,7 +440,6 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
         /// <summary>
         /// Reads anim frame data. Returns false if rotation anim data seems to be out of range. 
-        /// Ninja motions do not provide a natural way of finding this and can feature both types of rotation within the same game so this brute forcing is needed.
         /// </summary>
         private bool ReadAnimData(BufferedStreamReaderBE<MemoryStream> sr, int offset, List<AnimFlags> animFlagList, int nodeCount, bool shortRot, bool shortRotCheck)
         {
@@ -179,10 +461,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 var bookmark = sr.Position;
 
                 //Handle based on anim flag order
-                for(int f = 0; f < animFlagList.Count; f++)
+                for (int f = 0; f < animFlagList.Count; f++)
                 {
                     var framesOffset = offsets[f];
-                    if(framesOffset != 0)
+                    if (framesOffset != 0)
                     {
                         int vtxcount = -1;
                         data = data ?? new AnimModelData();
@@ -349,7 +631,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
                 if (data != null)
                 {
-                    KeyDataList.Add(i, data);
+                    KeyDataList.Add(data);
                 }
             }
 
