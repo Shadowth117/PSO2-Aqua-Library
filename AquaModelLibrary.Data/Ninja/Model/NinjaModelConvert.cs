@@ -1,7 +1,7 @@
-﻿using AquaModelLibrary.Data.Ninja.Motion;
-using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -161,6 +161,29 @@ namespace AquaModelLibrary.Data.Ninja.Model
                 GatherModelDataRecursive(njObj.siblingObject, fullVertList, ref nodeId, aqo, aqn, parentMatrix, parentId);
             }
             aqn.nodeList[currentNodeId] = aqNode;
+        }
+
+        public static byte[] GetGjBytes(NJSObject njsObject)
+        {
+            ByteListExtension.AddAsBigEndian = true;
+            List<byte> outBytes = new List<byte>();
+            List<int> pofSets = new List<int>();
+            njsObject.Write(outBytes, pofSets, true);
+
+            List<byte> headerMagic = new List<byte>
+            {
+                0x47,
+                0x4A,
+                0x43,
+                0x4D
+            };
+            //This should almost always be little endian, but can be be in rare cases such as skies of arcadia
+            headerMagic.AddRange(BitConverter.GetBytes(outBytes.Count));
+
+            outBytes.InsertRange(0, headerMagic);
+            outBytes.AddRange(POF0.GeneratePOF0(pofSets));
+
+            return outBytes.ToArray();
         }
     }
 }

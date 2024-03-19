@@ -139,7 +139,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             }
             if (((flags & GCIndexAttributeFlags.HasNormal) > 0) || ((flags & GCIndexAttributeFlags.Normal16BitIndex) > 0))
             {
-                vtxl.vertNormals.Add(fullVtxl.vertPositions[loop.NormalIndex]);
+                vtxl.vertNormals.Add(fullVtxl.vertNormals[loop.NormalIndex]);
                 vertId += ((int)GCIndexAttributeFlags.HasNormal).ToString() + loop.NormalIndex;
             }
             if (((flags & GCIndexAttributeFlags.HasColor) > 0) || ((flags & GCIndexAttributeFlags.Color16BitIndex) > 0))
@@ -218,8 +218,11 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 if (vertData.posList.Count > 0)
                 {
                     vtxl.vertPositions.AddRange(vertData.posList);
-                    vtxl.rawVertWeights.Add(new List<float>() { 1 });
-                    vtxl.rawVertWeightIds.Add(new List<int>() { nodeId });
+                    for(int i = 0; i < vertData.posList.Count; i++)
+                    {
+                        vtxl.rawVertWeights.Add(new List<float>() { 1 });
+                        vtxl.rawVertWeightIds.Add(new List<int>() { nodeId });
+                    }
                 }
                 if (vertData.nrmList.Count > 0)
                 {
