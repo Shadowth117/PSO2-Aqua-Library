@@ -9,12 +9,12 @@ namespace AquaModelLibrary.Data.Ninja.Model
 {
     public class NinjaModelConvert
     {
-        public static AquaObject GinjaConvert(string fileName, out AquaNode aqn)
+        public static AquaObject GinjaConvert(string fileName, out AquaNode aqn, List<string> texNames = null)
         {
             return ModelConvert(File.ReadAllBytes(fileName), NinjaVariant.Ginja, out aqn);
         }
 
-        public static AquaObject ModelConvert(byte[] ninjaModel, NinjaVariant variant, out AquaNode aqn, int offset = 0)
+        public static AquaObject ModelConvert(byte[] ninjaModel, NinjaVariant variant, out AquaNode aqn, int offset = 0, List<string> texNames = null)
         {
             using (var ms = new MemoryStream(ninjaModel))
             using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
@@ -23,7 +23,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
             }
         }
 
-        public static AquaObject ModelConvert(BufferedStreamReaderBE<MemoryStream> sr, NinjaVariant variant, out AquaNode aqn, int offset = 0)
+        public static AquaObject ModelConvert(BufferedStreamReaderBE<MemoryStream> sr, NinjaVariant variant, out AquaNode aqn, int offset = 0, List<string> texNames = null)
         {
             var magic = sr.Peek<NJMagic>();
             switch(magic)
@@ -51,11 +51,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
             var beAddress = sr.PeekBigEndianInt32();
 
             var root = new NJSObject(sr, variant, leAddress > beAddress, offset);
-            var model = NinjaToAqua(root, out aqn);
+            var model = NinjaToAqua(root, out aqn, texNames);
             return model;
         }
 
-        public static AquaObject NinjaToAqua(NJSObject NinjaModelRoot, out AquaNode aqn)
+        public static AquaObject NinjaToAqua(NJSObject NinjaModelRoot, out AquaNode aqn, List<string> texNames = null)
         {
             VTXL fullVertList = null;
             AquaObject aqo = new AquaObject();
@@ -72,6 +72,19 @@ namespace AquaModelLibrary.Data.Ninja.Model
             GatherModelDataRecursive(NinjaModelRoot, fullVertList, ref nodeCounter, aqo, aqn, Matrix4x4.Identity, -1);
             aqn.ndtr.boneCount = aqn.nodeList.Count;
             aqo.objc.bonePaletteOffset = 1;
+
+            //Assign texture names, Ninja models don't contain these
+            foreach(var tempMats in aqo.tempMats)
+            {
+                for(int i = 0; i < tempMats.texNames.Count; i++)
+                {
+                    var texId = Int32.Parse(tempMats.texNames[i]);
+                    if (texNames?.Count > texId)
+                    {
+                        tempMats.texNames[i] = texNames[texId];
+                    }
+                }
+            }
             return aqo;
         }
 
