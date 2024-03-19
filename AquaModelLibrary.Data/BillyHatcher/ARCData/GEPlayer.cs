@@ -3,10 +3,11 @@ using AquaModelLibrary.Data.Ninja.Model;
 using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
-using System.Net;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
+    //For a lot of these, it seems like they have pointers to -1 for many elements. This probably means that they take from earlier in the hierarchy.
+    // Ex. ge_player.arc -> ge_player1.arc -> ge_player1n.arc
     public class GEPlayer : ARC
     {
         public PuyoFile gvm = null;
@@ -66,7 +67,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         break;
                     case "models":
                         List<int> modelPtrs = new List<int>();
-                        for (int m = 0; m < 4; m++)
+                        for (int m = 0; m < 5; m++)
                         {
                             modelPtrs.Add(sr.ReadBE<int>());
                         }
@@ -101,12 +102,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         var subType = "";
                         var splitName = fileName.Split('_');
 
-                        if(splitName.Length > 2)
+                        if (splitName.Length > 2)
                         {
                             subType = splitName[1];
                         }
 
-                        switch(subType)
+                        switch (subType)
                         {
                             case "lh":
                                 motions.Add(fileName, new NJSMotion(sr, true, 0x20, false, 0x16));
@@ -148,14 +149,20 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         {
             List<NJSMotion> motList = new List<NJSMotion>();
             int[] motPtrArr = new int[motionCount];
-            for(int i = 0; i < motionCount; i++)
+            for (int i = 0; i < motionCount; i++)
             {
                 motPtrArr[i] = sr.ReadBE<int>();
             }
-            foreach(var ptr in motPtrArr)
+            foreach (var ptr in motPtrArr)
             {
-                sr.Seek(offset + ptr, SeekOrigin.Begin);
-                motList.Add(new NJSMotion(sr, true, offset, false, nodeCount));
+                if(ptr != -1)
+                {
+                    sr.Seek(offset + ptr, SeekOrigin.Begin);
+                    motList.Add(new NJSMotion(sr, true, offset, false, nodeCount));
+                } else
+                {
+                    motList.Add(null);
+                }
             }
 
             return motList;
