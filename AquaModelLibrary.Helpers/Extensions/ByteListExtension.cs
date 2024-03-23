@@ -11,14 +11,17 @@
             reserveIntDict.Clear();
         }
 
-        public static void ReserveInt(this List<byte> outBytes, string key)
+        public static int ReserveInt(this List<byte> outBytes, string key)
         {
             reserveIntDict[key] = outBytes.Count;
             outBytes.AddRange(BitConverter.GetBytes(0));
+
+            return reserveIntDict[key];
         }
 
-        public static void FillInt(this List<byte> outBytes, string key, int value)
+        public static int FillInt(this List<byte> outBytes, string key, int value)
         {
+            var ptrLocation = reserveIntDict[key];
             var newBytes = BitConverter.GetBytes(value);
             if (AddAsBigEndian)
             {
@@ -26,19 +29,24 @@
             }
             for (int i = 0; i < 4; i++)
             {
-                outBytes[reserveIntDict[key] + i] = newBytes[i];
+                outBytes[ptrLocation + i] = newBytes[i];
             }
             reserveIntDict.Remove(key);
+
+            return ptrLocation;
         }
         private static Dictionary<string, uint> reserveUintDict = new Dictionary<string, uint>();
-        public static void ReserveUint(this List<byte> outBytes, string key)
+        public static uint ReserveUint(this List<byte> outBytes, string key)
         {
             reserveUintDict[key] = (uint)outBytes.Count;
             outBytes.AddRange(BitConverter.GetBytes((uint)0));
+
+            return reserveUintDict[key];
         }
 
-        public static void FillUint(this List<byte> outBytes, string key, uint value)
+        public static uint FillUint(this List<byte> outBytes, string key, uint value)
         {
+            var ptrLocation = reserveUintDict[key];
             var newBytes = BitConverter.GetBytes(value);
             if (AddAsBigEndian)
             {
@@ -46,18 +54,24 @@
             }
             for (int i = 0; i < 4; i++)
             {
-                outBytes[(int)reserveUintDict[key] + i] = newBytes[i];
+                outBytes[(int)ptrLocation + i] = newBytes[i];
             }
+            reserveUintDict.Remove(key);
+
+            return ptrLocation;
         }
         private static Dictionary<string, int> reserveInt16Dict = new Dictionary<string, int>();
-        public static void ReserveInt16(this List<byte> outBytes, string key)
+        public static int ReserveInt16(this List<byte> outBytes, string key)
         {
             reserveInt16Dict[key] = outBytes.Count;
             outBytes.AddRange(BitConverter.GetBytes((short)0));
+
+            return reserveInt16Dict[key];
         }
 
-        public static void FillInt16(this List<byte> outBytes, string key, short value)
+        public static int FillInt16(this List<byte> outBytes, string key, short value)
         {
+            var ptrLocation = reserveInt16Dict[key];
             var newBytes = BitConverter.GetBytes(value);
             if (AddAsBigEndian)
             {
@@ -65,18 +79,24 @@
             }
             for (int i = 0; i < 2; i++)
             {
-                outBytes[reserveInt16Dict[key] + i] = newBytes[i];
+                outBytes[ptrLocation + i] = newBytes[i];
             }
+            reserveInt16Dict.Remove(key);
+
+            return ptrLocation;
         }
         private static Dictionary<string, uint> reserveUint16Dict = new Dictionary<string, uint>();
-        public static void ReserveUint16(this List<byte> outBytes, string key)
+        public static uint ReserveUint16(this List<byte> outBytes, string key)
         {
             reserveUint16Dict[key] = (uint)outBytes.Count;
             outBytes.AddRange(BitConverter.GetBytes((ushort)0));
+
+            return reserveUint16Dict[key];
         }
 
-        public static void FillUint16(this List<byte> outBytes, string key, ushort value)
+        public static uint FillUint16(this List<byte> outBytes, string key, ushort value)
         {
+            var ptrLocation = reserveUint16Dict[key];
             var newBytes = BitConverter.GetBytes(value);
             if (AddAsBigEndian)
             {
@@ -84,18 +104,24 @@
             }
             for (int i = 0; i < 2; i++)
             {
-                outBytes[(int)reserveUint16Dict[key] + i] = newBytes[i];
+                outBytes[(int)ptrLocation + i] = newBytes[i];
             }
+            reserveUint16Dict.Remove(key);
+
+            return ptrLocation;
         }
         private static Dictionary<string, long> reserveLongDict = new Dictionary<string, long>();
-        public static void ReserveLong(this List<byte> outBytes, string key)
+        public static long ReserveLong(this List<byte> outBytes, string key)
         {
             reserveLongDict[key] = outBytes.Count;
             outBytes.AddRange(BitConverter.GetBytes((long)0));
+
+            return reserveLongDict[key];
         }
 
-        public static void FillLong(this List<byte> outBytes, string key, long value)
+        public static long FillLong(this List<byte> outBytes, string key, long value)
         {
+            var ptrLocation = reserveLongDict[key];
             var newBytes = BitConverter.GetBytes(value);
             if (AddAsBigEndian)
             {
@@ -103,18 +129,24 @@
             }
             for (int i = 0; i < 8; i++)
             {
-                outBytes[(int)reserveLongDict[key] + i] = newBytes[i];
+                outBytes[(int)ptrLocation + i] = newBytes[i];
             }
+            reserveLongDict.Remove(key);
+
+            return ptrLocation;
         }
         private static Dictionary<string, ulong> reserveUlongDict = new Dictionary<string, ulong>();
-        public static void ReserveUlong(this List<byte> outBytes, string key)
+        public static ulong ReserveUlong(this List<byte> outBytes, string key)
         {
-            reserveUintDict[key] = (uint)outBytes.Count;
+            reserveUlongDict[key] = (uint)outBytes.Count;
             outBytes.AddRange(BitConverter.GetBytes((ulong)0));
+
+            return reserveUlongDict[key];
         }
 
-        public static void FillUlong(this List<byte> outBytes, string key, uint value)
+        public static ulong FillUlong(this List<byte> outBytes, string key, uint value)
         {
+            var ptrLocation = reserveUlongDict[key];
             var newBytes = BitConverter.GetBytes(value);
             if (AddAsBigEndian)
             {
@@ -122,8 +154,11 @@
             }
             for (int i = 0; i < 8; i++)
             {
-                outBytes[(int)reserveUintDict[key] + i] = newBytes[i];
+                outBytes[(int)ptrLocation + i] = newBytes[i];
             }
+            reserveUlongDict.Remove(key);
+
+            return ptrLocation;
         }
 
         public static void AddValue(this List<byte> outBytes, ulong value)
