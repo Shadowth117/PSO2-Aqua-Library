@@ -33,8 +33,7 @@ namespace AquaModelLibrary.Data.Ninja
             for(int i = 0; i < count; i++)
             {
                 stringOffsets.Add(sr.ReadBE<int>());
-                //Unknown what these are, maybe reserves for runtime?
-                sr.ReadBE<int>();
+                sr.ReadBE<int>(); //Count
                 sr.ReadBE<int>();
             }
             foreach(var strOffset in stringOffsets)
@@ -46,7 +45,6 @@ namespace AquaModelLibrary.Data.Ninja
 
         public void Write(List<byte> outBytes, List<int> offsets, int offset = 0)
         {
-            outBytes.FillInt("TexListOffset", outBytes.Count);
             offsets.Add(outBytes.Count + offset);
             outBytes.ReserveInt("TexListReferencesOffset");
             outBytes.AddValue(texNames.Count);
@@ -55,7 +53,7 @@ namespace AquaModelLibrary.Data.Ninja
             {
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"TexRef{i}");
-                outBytes.AddValue(0);
+                outBytes.AddValue(i);
                 outBytes.AddValue(0);
             }
             for (int i = 0; i < texNames.Count; i++)
