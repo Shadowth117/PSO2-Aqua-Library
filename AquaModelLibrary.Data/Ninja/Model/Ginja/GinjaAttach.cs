@@ -60,7 +60,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             GenericMaterial mat = new GenericMaterial();
             mat.matName = "Mat_";
 
-            var textureSetting = ((TextureParameter)gcParams[ParameterType.Texture]);
+            var textureSetting = gcParams.ContainsKey(ParameterType.Texture) ? ((TextureParameter)gcParams[ParameterType.Texture]) : new TextureParameter();
             var blendAlpha = ((BlendAlphaParameter)gcParams[ParameterType.BlendAlpha]);
             var indexParam = (IndexAttributeParameter)gcParams[ParameterType.IndexAttributeFlags];
 
@@ -123,6 +123,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                     mesh.faceVerts.Add(faceVtxl);
                 }
             }
+
             aqo.tempTris.Add(mesh);
         }
 
@@ -228,6 +229,14 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 {
                     vtxl.vertNormals.AddRange(vertData.nrmList);
                 }
+                for(int i = 0; i < vtxl.vertPositions.Count; i++)
+                {
+                    vtxl.vertPositions[i] = Vector3.Transform(vtxl.vertPositions[i], transform);
+                }
+                for (int i = 0; i < vtxl.vertNormals.Count; i++)
+                {
+                    vtxl.vertNormals[i] = Vector3.TransformNormal(vtxl.vertNormals[i], transform);
+                }
 
                 //Only color set 0 is probably used
                 if (vertData.colorsArray[0]?.Count > 0)
@@ -332,13 +341,25 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         public void Write(List<byte> outBytes, List<int> POF0Offsets)
         {
             string attachAddress = outBytes.Count.ToString();
-            POF0Offsets.Add(outBytes.Count);
+            if (vertData?.elements?.Count > 0)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_vertex");
-            POF0Offsets.Add(outBytes.Count);
+            if (skinVertData?.elements?.Count > 0)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_skinVertex");
-            POF0Offsets.Add(outBytes.Count);
+            if (opaqueFaceData?.Count > 0)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_opaque");
-            POF0Offsets.Add(outBytes.Count);
+            if (transparentFaceData?.Count > 0)
+            {
+                POF0Offsets.Add(outBytes.Count);
+            }
             outBytes.ReserveInt($"{attachAddress}_transparent");
 
             outBytes.AddValue((ushort)(opaqueFaceData == null ? 0 : opaqueFaceData.Count));
@@ -381,8 +402,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             {
                 WriteMeshDataParameters(outBytes, POF0Offsets, transparentFaceData, "a");
             }
-            outBytes.AlignWriter(0x20);
 
+            outBytes.AlignWriter(0x20);
             if (opaqueFaceData?.Count != null)
             {
                 WriteMeshDataPrimitives(outBytes, POF0Offsets, opaqueFaceData, "o");
@@ -396,15 +417,9 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
         public void WriteMesh(List<byte> outBytes, List<int> POF0Offsets, List<GinjaMesh> meshList, string type)
         {
-            GCIndexAttributeFlags indexFlags = GCIndexAttributeFlags.Position16BitIndex;
             for (int i = 0; i < meshList.Count; i++)
             {
                 var mesh = meshList[i];
-                var meshFlags = mesh.IndexFlags;
-                if (meshFlags != null)
-                {
-                    indexFlags = (GCIndexAttributeFlags)meshFlags;
-                }
                 if(mesh.parameters.Count > 0)
                 {
                     POF0Offsets.Add(outBytes.Count);
@@ -412,15 +427,9 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 outBytes.ReserveInt($"meshParameter{type}_{i}");
                 outBytes.AddValue(mesh.parameters.Count);
 
-                List<byte> primitives = new List<byte>();
                 if (mesh.primitives.Count > 0)
                 {
-                    primitives = new List<byte>();
                     POF0Offsets.Add(outBytes.Count);
-                    foreach(var prim in mesh.primitives)
-                    {
-                        primitives.AddRange(prim.GetBytes(indexFlags));
-                    }
                 }
                 outBytes.ReserveInt($"meshPrimitive{type}_{i}");
                 outBytes.ReserveInt($"meshPrimitiveSize{type}_{i}");

@@ -38,9 +38,15 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 }
                 outBytes.AddValue((ushort)element.startingIndex);
                 outBytes.AddValue((ushort)element.posNrms.Count);
-                POF0Offsets.Add(outBytes.Count);
+                if(element.posNrms.Count > 0)
+                {
+                    POF0Offsets.Add(outBytes.Count);
+                }
                 outBytes.ReserveInt($"posNrms{i}Offset");
-                POF0Offsets.Add(outBytes.Count);
+                if (element.weightData.Count > 0)
+                {
+                    POF0Offsets.Add(outBytes.Count);
+                }
                 outBytes.ReserveInt($"weights{i}Offset");
             }
             outBytes.AddValue((ushort)3);
@@ -55,6 +61,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 var element = elements[i];
                 if (element.posNrms.Count > 0)
                 {
+                    outBytes.AlignWriter(0x20);
+
                     outBytes.FillInt($"posNrms{i}Offset", outBytes.Count);
                     foreach (var posNrm in element.posNrms)
                     {
@@ -76,7 +84,6 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                         outBytes.AddValue(wt.weight);
                     }
                 }
-                outBytes.AlignWriter(0x20);
             }
         }
     }

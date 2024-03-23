@@ -157,23 +157,23 @@ namespace AquaModelLibrary.Data.Ninja.Model
                 outBytes.AddValue(unkInt);
             }
 
-            POF0Offsets.Add(njsObjAddress + 0x4);
-            POF0Offsets.Add(njsObjAddress + 0x2C);
-            POF0Offsets.Add(njsObjAddress + 0x30);
             if (mesh != null)
             {
+                POF0Offsets.Add(njsObjAddress + 0x4);
                 outBytes.FillInt($"{njsObjAddress}_attach", outBytes.Count);
                 mesh.Write(outBytes, POF0Offsets);
             }
 
             if (childObject != null)
             {
+                POF0Offsets.Add(njsObjAddress + 0x2C);
                 outBytes.FillInt($"{njsObjAddress}_child", outBytes.Count);
                 childObject.Write(outBytes, POF0Offsets, ginjaWrite);
             }
 
             if (siblingObject != null)
             {
+                POF0Offsets.Add(njsObjAddress + 0x30);
                 outBytes.FillInt($"{njsObjAddress}_sibling", outBytes.Count);
                 siblingObject.Write(outBytes, POF0Offsets, ginjaWrite);
             }

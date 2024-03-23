@@ -154,7 +154,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
             if (fullVertList == null)
             {
                 tempVTXL = new VTXL();
-                njObj.GetVertexData(nodeId, tempVTXL, Matrix4x4.Identity);
+                njObj.GetVertexData(nodeId, tempVTXL, mat);
                 tempVTXL.ProcessToPSO2Weights();
             } else
             {

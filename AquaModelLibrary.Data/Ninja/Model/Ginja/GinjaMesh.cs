@@ -94,7 +94,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             // reading the primitives
             primitives = new List<GinjaPrimitive>();
 
-            int end_pos = primitives_offset + (int)primitives_size;
+            int end_pos = offset + primitives_offset + (int)primitives_size;
 
             sr.Seek(offset + primitives_offset, SeekOrigin.Begin);
             while (sr.Position < end_pos)
