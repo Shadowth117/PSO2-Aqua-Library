@@ -705,6 +705,27 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         #region BoneMethods
         /// <summary>
+        /// Increments all bones a value, such as for if additional nodes were inserted before the existing hierarchy
+        /// </summary>
+        public void IncrementBones(byte value)
+        {
+            if(bonePalette?.Count > 0)
+            {
+                for (int i = 0; i < bonePalette.Count; i++)
+                {
+                    bonePalette[i] = bonePalette[i] + value;
+                }
+            }
+            foreach(var vtxl in vtxlList)
+            {
+                for (int i = 0; i < vtxl.bonePalette.Count; i++)
+                {
+                    vtxl.bonePalette[i] = (ushort)(vtxl.bonePalette[i] + value);
+                }
+            }
+        }
+
+        /// <summary>
         /// Reconstructs globalBonePalette and optimizes local VTXL bonePalettes. Only intended for use during custom model creation!
         /// </summary>>
         public void OptimizeBonePalettes()
@@ -737,9 +758,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     for (int vi = 0; vi < vtxl.vertWeightIndices[v].Length; vi++)
                     {
-                        if (!globalBonePalette.Contains((uint)vtxl.vertWeightIndices[v][vi]))
+                        var originalBoneId = originalBonePalette[vtxl.vertWeightIndices[v][vi]];
+                        if (!globalBonePalette.Contains((uint)originalBoneId))
                         {
-                            globalBonePalette.Add((uint)vtxl.vertWeightIndices[v][vi]);
+                            globalBonePalette.Add((uint)originalBoneId);
                         }
                     }
                 }

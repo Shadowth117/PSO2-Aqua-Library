@@ -100,5 +100,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData
             m3 = new Vector4(bnMat.M31, bnMat.M32, bnMat.M33, bnMat.M34);
             m4 = new Vector4(bnMat.M41, bnMat.M42, bnMat.M43, bnMat.M44);
         }
+
+        public void SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4 invMat)
+        {
+            Matrix4x4.Invert(invMat, out var bnMat);
+            m1 = new Vector4(bnMat.M11, bnMat.M12, bnMat.M13, bnMat.M14);
+            m2 = new Vector4(bnMat.M21, bnMat.M22, bnMat.M23, bnMat.M24);
+            m3 = new Vector4(bnMat.M31, bnMat.M32, bnMat.M33, bnMat.M34);
+            m4 = new Vector4(bnMat.M41, bnMat.M42, bnMat.M43, bnMat.M44);
+        }
     }
 }

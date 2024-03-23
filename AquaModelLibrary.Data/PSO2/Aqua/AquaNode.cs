@@ -326,6 +326,76 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return outBytes.ToArray();
         }
 
+        private Matrix4x4 DefaultNewMatrix = Matrix4x4.Identity; 
+        public void AddRootNode(string rootNodeName = "Root_Node", Matrix4x4? matrix = null)
+        {
+            for(int i = 0; i < nodeList.Count; i++)
+            {
+                var oldNode = nodeList[i];
+                
+                if(oldNode.parentId != -1)
+                {
+                    oldNode.parentId++;
+                } else if (oldNode.parentId == -1)
+                {
+                    //We want to reparent this to the new node
+                    oldNode.parentId = 0;
+                }
+                if (oldNode.firstChild != -1)
+                {
+                    oldNode.firstChild++;
+                }
+                if (oldNode.nextSibling != -1)
+                {
+                    oldNode.nextSibling++;
+                }
+                if (oldNode.unkNode != -1)
+                {
+                    oldNode.unkNode++;
+                }
+
+                nodeList[i] = oldNode;
+            }
+
+            for (int i = 0; i < nodoList.Count; i++)
+            {
+                var oldNodo = nodoList[i];
+                if(oldNodo.parentId != -1)
+                {
+                    oldNodo.parentId++;
+                }
+                else if (oldNodo.parentId == -1)
+                {
+                    //We want to reparent this to the new node
+                    oldNodo.parentId = 0;
+                }
+
+                nodoList[i] = oldNodo;
+            }
+
+            NODE node = new NODE();
+            node.animatedFlag = 1;
+            node.boneName.SetString(rootNodeName);
+            if (matrix != null)
+            {
+                node.SetInverseBindPoseMatrixFromUninvertedMatrix((Matrix4x4)matrix);
+                //Set "local" transforms one day if the odd transformation is ever figured out for pso2.
+            }
+            else
+            {
+                node.m1 = new Vector4(1, 0, 0, 0);
+                node.m2 = new Vector4(0, 1, 0, 0);
+                node.m3 = new Vector4(0, 0, 1, 0);
+                node.m4 = new Vector4(0, 0, 0, 1);
+            }
+            node.parentId = -1;
+            node.firstChild = 1;
+            node.nextSibling = -1;
+            node.unkNode = -1;
+
+            nodeList.Insert(0, node);
+        }
+
         public Dictionary<int, int> GetNodeToParentIdDict()
         {
             Dictionary<int, int> dict = new Dictionary<int, int>();

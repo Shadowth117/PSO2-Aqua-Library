@@ -26,6 +26,8 @@ namespace AquaModelLibrary.Core.FromSoft
         public static bool transformMesh = false;
         public static bool extractUnreferencedMapData = false;
         public static bool separateMSBDumpByModel = false;
+        public static bool addRootNodeLikeBlenderSmdImport = true;
+        public static bool doNotAdjustRootRotation = false;
 
         public static SoulsGame game = SoulsGame.None;
 
@@ -337,6 +339,19 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     var aqp = ReadFlver(modelPath, bndFile.Bytes, out AquaNode aqn);
 
+                    if(addRootNodeLikeBlenderSmdImport)
+                    {
+                        var matrix = aqn.nodeList[0].GetInverseBindPoseMatrix();
+                        //Normal behavior of the fbx sdk for some reason sets the root to the identity. To not do this, we need another root.
+                        //By default it will do this, but the old behavior kept the model 'upright'
+                        if (doNotAdjustRootRotation)
+                        {
+                            matrix = Matrix4x4.Identity;
+                        }
+                        aqn.AddRootNode(Path.GetFileNameWithoutExtension(fileName) + "_skeleton", matrix);
+                        aqp.IncrementBones(1);
+                    }
+
                     string finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
                     var outName = Path.ChangeExtension(fileName, ".aqp");
                     if (aqp != null && aqp.vtxlList.Count > 0)
@@ -481,7 +496,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
                 }
-                if (parentId == -1 && i != 0)
+                if (addRootNodeLikeBlenderSmdImport == false && parentId == -1 && i != 0)
                 {
                     parentId = 0;
                 }
@@ -491,6 +506,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.boneShort1 = 0x1C0;
                 aqNode.animatedFlag = 1;
                 aqNode.parentId = parentId;
+                aqNode.firstChild = flverBone.ChildIndex;
+                aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
 
                 aqNode.scale = new Vector3(1, 1, 1);
@@ -727,7 +744,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
                 }
-                if (parentId == -1 && i != 0)
+                if (addRootNodeLikeBlenderSmdImport == false && parentId == -1 && i != 0)
                 {
                     parentId = 0;
                 }
@@ -737,6 +754,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.boneShort1 = 0x1C0;
                 aqNode.animatedFlag = 1;
                 aqNode.parentId = parentId;
+                aqNode.firstChild = flverBone.ChildIndex;
+                aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
 
                 aqNode.scale = new Vector3(1, 1, 1);
