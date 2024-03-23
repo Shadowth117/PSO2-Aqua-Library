@@ -351,13 +351,13 @@ namespace ArchiveLib
 					entrytable.AddRange(ByteConverter.GetBytes(gbix));
 				}
 				// Add padding if the data isn't aligned by 16
-				if ((12 + entrytable.Count) % 16 != 0)
+				if ((12 + entrytable.Count) % 0x20 != 0)
 				{
 					do
 					{
 						entrytable.Add(0);
 					}
-					while ((12 + entrytable.Count) % 16 != 0);
+					while ((12 + entrytable.Count) % 0x20 != 0);
 				}
 				// Write other header stuff
 				result.AddRange(BitConverter.GetBytes((uint)(firstoffset + entrytable.Count - 8))); // Offset of the first texture, Little Endian
