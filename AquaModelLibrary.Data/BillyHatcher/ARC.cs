@@ -82,16 +82,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         {
             sr._BEReadActive = true;
             //Generic ARC header
-            arcHeader = new ARCHeader();
-            arcHeader.fileSize = sr.ReadBE<int>();
-            arcHeader.pof0Offset = sr.ReadBE<int>();
-            arcHeader.pof0OffsetsSize = sr.ReadBE<int>();
-            arcHeader.group1FileCount = sr.ReadBE<int>();
-
-            arcHeader.group2FileCount = sr.ReadBE<int>();
-            arcHeader.magic = sr.ReadBE<int>();
-            arcHeader.unkInt0 = sr.ReadBE<int>();
-            arcHeader.unkInt1 = sr.ReadBE<int>();
+            arcHeader = ReadArcHeader(sr);
 
             //Get model references
             sr.Seek(0x20 + arcHeader.pof0Offset, SeekOrigin.Begin);
@@ -125,6 +116,22 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 sr.Seek(nameStart + modelRef.relativeNameOffset, SeekOrigin.Begin);
                 group2FileNames.Add(sr.ReadCString());
             }
+        }
+
+        public static ARCHeader ReadArcHeader(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            var arcHeader = new ARCHeader();
+            arcHeader.fileSize = sr.ReadBE<int>();
+            arcHeader.pof0Offset = sr.ReadBE<int>();
+            arcHeader.pof0OffsetsSize = sr.ReadBE<int>();
+            arcHeader.group1FileCount = sr.ReadBE<int>();
+
+            arcHeader.group2FileCount = sr.ReadBE<int>();
+            arcHeader.magic = sr.ReadBE<int>();
+            arcHeader.unkInt0 = sr.ReadBE<int>();
+            arcHeader.unkInt1 = sr.ReadBE<int>();
+
+            return arcHeader;
         }
 
         public static List<string> ReadTexNames(BufferedStreamReaderBE<MemoryStream> sr)
