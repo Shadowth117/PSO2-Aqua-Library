@@ -145,10 +145,14 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             outBytes.AddValue(frameCount);
 
             AnimFlags flags = new AnimFlags();
+            List<AnimFlags> keyDataAnimFlagsList = new List<AnimFlags>();
             foreach (var data in KeyDataList)
             {
-                flags |= data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode);
+                var dataFlags = data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode);
+                flags |= dataFlags;
+                keyDataAnimFlagsList.Add(dataFlags);
             }
+
             ushort dataCount = 0;
             foreach (AnimFlags flag in Enum.GetValues(typeof(AnimFlags)))
             {
@@ -157,12 +161,13 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     dataCount++;
                 }
             }
+
             outBytes.AddValue((ushort)flags);
             outBytes.AddValue((ushort)((ushort)interpoMode | dataCount));
 
             var dataTypeList = GetAnimFlagListFromEnum(flags, writeMode == MotionWriteMode.BillyMode);
             outBytes.FillInt("MotionStart", outBytes.Count);
-            for(int i = 0; i <  KeyDataList.Count; i++)
+            for (int i = 0; i < KeyDataList.Count; i++)
             {
                 var data = KeyDataList[i];
                 outBytes.AlignWriter(0x4);
@@ -176,7 +181,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 for (int j = 0; j < dataTypeList.Count; j++)
                 {
                     var type = dataTypeList[j];
-                    switch(type)
+                    switch (type)
                     {
                         case AnimFlags.Position:
                             outBytes.AddValue(data.Position.Count);
@@ -194,10 +199,11 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             outBytes.AddValue(data.Vertex.Count);
                             break;
                         case AnimFlags.Normal:
-                            if(writeMode == MotionWriteMode.BillyMode)
+                            if (writeMode == MotionWriteMode.BillyMode)
                             {
                                 outBytes.AddValue(data.RotationData.Count);
-                            } else
+                            }
+                            else
                             {
                                 outBytes.AddValue(data.Normal.Count);
                             }
@@ -228,15 +234,23 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             break;
                     }
                 }
+            }
 
+            for (int i = 0; i < KeyDataList.Count; i++)
+            {
+                var data = KeyDataList[i];
+                outBytes.AlignWriter(0x4);
                 //Write frame sets, fill reserved offsets if used
                 for (int j = 0; j < dataTypeList.Count; j++)
                 {
                     var type = dataTypeList[j];
-                    outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count);
                     switch (type)
                     {
                         case AnimFlags.Position:
+                            if(data.Position.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach(var set in data.Position)
                             {
                                 outBytes.AddValue(set.Key);
@@ -246,6 +260,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Rotation:
+                            if (data.RotationData.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.RotationData)
                             {
                                 switch(writeMode)
@@ -258,15 +276,29 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                         break;
                                     case MotionWriteMode.ShortRot:
                                     case MotionWriteMode.BillyMode:
-                                        outBytes.AddValue((short)set.Key);
-                                        outBytes.AddValue((short)set.Value.X);
-                                        outBytes.AddValue((short)set.Value.Y);
-                                        outBytes.AddValue((short)set.Value.Z);
+                                        //Check origianl flags and use normal rotation ints if needed
+                                        if((flags & AnimFlags.Rotation) > 0)
+                                        {
+                                            outBytes.AddValue(set.Key);
+                                            outBytes.AddValue(set.Value.X);
+                                            outBytes.AddValue(set.Value.Y);
+                                            outBytes.AddValue(set.Value.Z);
+                                        } else
+                                        {
+                                            outBytes.AddValue((short)set.Key);
+                                            outBytes.AddValue((short)set.Value.X);
+                                            outBytes.AddValue((short)set.Value.Y);
+                                            outBytes.AddValue((short)set.Value.Z);
+                                        }
                                         break;
                                 }
                             }
                             break;
                         case AnimFlags.Scale:
+                            if (data.Scale.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Scale)
                             {
                                 outBytes.AddValue(set.Key);
@@ -276,6 +308,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Vector:
+                            if (data.Vector.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Vector)
                             {
                                 outBytes.AddValue(set.Key);
@@ -285,9 +321,14 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Vertex:
+                            if (data.Vertex.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Vertex)
                             {
                                 outBytes.AddValue(set.Key);
+                                POF0Offsets.Add(outBytes.Count);
                                 outBytes.ReserveInt($"VertSetOffset_{i}_{j}");
                             }
                             foreach (var set in data.Vertex)
@@ -302,9 +343,14 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Normal: //Billy stuff should already be handled as rotation data so we just write the Normal flag data here
+                            if (data.Normal.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Normal)
                             {
                                 outBytes.AddValue(set.Key);
+                                POF0Offsets.Add(outBytes.Count);
                                 outBytes.ReserveInt($"NrmSetOffset_{i}_{j}");
                             }
                             foreach (var set in data.Normal)
@@ -319,6 +365,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Target:
+                            if (data.Target.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Target)
                             {
                                 outBytes.AddValue(set.Key);
@@ -328,6 +378,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Roll:
+                            if (data.Roll.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Roll)
                             {
                                 outBytes.AddValue(set.Key);
@@ -335,6 +389,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Angle:
+                            if (data.Angle.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Angle)
                             {
                                 outBytes.AddValue(set.Key);
@@ -342,6 +400,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Color:
+                            if (data.Color.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Color)
                             {
                                 outBytes.AddValue(set.Key);
@@ -349,6 +411,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Intensity:
+                            if (data.Intensity.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Intensity)
                             {
                                 outBytes.AddValue(set.Key);
@@ -356,6 +422,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Spot:
+                            if (data.Spot.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Spot)
                             {
                                 outBytes.AddValue(set.Key);
@@ -363,6 +433,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Point:
+                            if (data.Point.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Point)
                             {
                                 outBytes.AddValue(set.Key);
@@ -371,6 +445,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             }
                             break;
                         case AnimFlags.Quaternion:
+                            if (data.Quaternion.Count > 0)
+                            {
+                                POF0Offsets.Add(outBytes.FillInt($"MotionOffset_{i}_{j}", outBytes.Count));
+                            }
                             foreach (var set in data.Quaternion)
                             {
                                 outBytes.AddValue(set.Key);
@@ -445,7 +523,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         {
             for (int i = 0; i < nodeCount; i++)
             {
-                AnimModelData data = null;
+                AnimModelData data = new AnimModelData();
 
                 //Read frameData offsets and counts
                 List<uint> offsets = new List<uint>();
@@ -467,7 +545,6 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     if (framesOffset != 0)
                     {
                         int vtxcount = -1;
-                        data = data ?? new AnimModelData();
                         sr.Seek(framesOffset + offset, SeekOrigin.Begin);
                         switch (animFlagList[f])
                         {
@@ -480,6 +557,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             case AnimFlags.Rotation:
                                 if (shortRot == false && shortRotCheck == true)
                                 {
+                                    var shortBookmark = sr.Position;
                                     // Check if the animation uses short rotation or not
                                     for (int j = 0; j < counts[f]; j++)
                                     {
@@ -497,6 +575,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                             return false;
                                         }
                                     }
+                                    sr.Seek(shortBookmark, SeekOrigin.Begin);
                                 }
                                 // Read rotation values
                                 for (int j = 0; j < counts[f]; j++)
@@ -629,10 +708,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 }
                 sr.Seek(bookmark, SeekOrigin.Begin);
 
-                if (data != null)
-                {
-                    KeyDataList.Add(data);
-                }
+                KeyDataList.Add(data);
             }
 
             return true;
