@@ -15,7 +15,7 @@ namespace AquaModelLibrary.Helpers
                 {
                     nuint compressedSize = NativeMethods.prs_compress(srcPtr, destPtr, (nuint)bytes.Length);
                     var compressedBytes = new byte[compressedSize];
-                    Array.Copy(compressedBytes, dest, (int)compressedSize);
+                    Array.Copy(dest, compressedBytes, (int)compressedSize);
                     return compressedBytes;
                 }
             }
@@ -33,7 +33,7 @@ namespace AquaModelLibrary.Helpers
                 {
                     nuint actualDecompressedSize = NativeMethods.prs_decompress(srcPtr, destPtr);
                     var decompressedBytes = new byte[actualDecompressedSize];
-                    Array.Copy(decompressedBytes, dest, (int)actualDecompressedSize);
+                    Array.Copy(dest, decompressedBytes, (int)actualDecompressedSize);
                     return decompressedBytes;
                 }
             }
