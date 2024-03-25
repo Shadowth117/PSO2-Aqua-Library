@@ -64,7 +64,6 @@ namespace AquaModelLibrary.Core.BluePoint
 
         public static void ReadCMDL(string filePath)
         {
-            string rootPath = GetDeSRRootPath(filePath);
             string outPath = "";
             List<string> outNames = new List<string>();
             Dictionary<string, CMAT> materialDict = new Dictionary<string, CMAT>();
@@ -72,6 +71,7 @@ namespace AquaModelLibrary.Core.BluePoint
 
             if (filePath.EndsWith(".cmdl"))
             {
+                string rootPath = GetDeSRRootPath(filePath);
                 using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(new MemoryStream(File.ReadAllBytes(filePath))))
                 {
                     var cmdl = new CMDL(streamReader);
