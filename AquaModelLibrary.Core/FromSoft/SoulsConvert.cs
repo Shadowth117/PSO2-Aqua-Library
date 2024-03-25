@@ -89,6 +89,9 @@ namespace AquaModelLibrary.Core.FromSoft
                                                             0, 0, 0, 1);
         public static Matrix4x4 mirrorMat = mirrorMatZ;
 
+        /// <summary>
+        /// Purely for testing purposes
+        /// </summary>
         public static void ReadSoulsFile(string filePath)
         {
             JsonSerializerOptions jss = new JsonSerializerOptions() { WriteIndented = true };
