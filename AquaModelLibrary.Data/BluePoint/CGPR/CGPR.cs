@@ -13,8 +13,17 @@ namespace AquaModelLibrary.Data.BluePoint.CAWS
         {
 
         }
+        public CGPR(byte[] file)
+        {
+            file = CompressionHandler.CheckCompression(file);
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
 
-        public CGPR(BufferedStreamReaderBE<MemoryStream> sr)
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var cgprObjCount = sr.Read<int>(); //Doesn't always line up right. Correlates, but needs more research
 

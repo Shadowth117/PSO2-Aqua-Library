@@ -1,5 +1,4 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using Reloaded.Memory.Streams;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
@@ -14,7 +13,22 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public CMSHBoneData boneData = null;
         public CFooter footerData;
 
-        public CMSH(BufferedStreamReaderBE<MemoryStream> sr)
+        public CMSH()
+        {
+
+        }
+
+        public CMSH(byte[] file)
+        {
+            file = CompressionHandler.CheckCompression(file);
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new CMSHHeader(sr);
             if (header.variantFlag2 != 0x41)

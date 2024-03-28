@@ -17,7 +17,17 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 
         }
 
-        public CSKL(BufferedStreamReaderBE<MemoryStream> sr)
+        public CSKL(byte[] file)
+        {
+            file = CompressionHandler.CheckCompression(file);
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new CSKLHeader(sr);
             sr.Seek(header.transformListOffset, System.IO.SeekOrigin.Begin);

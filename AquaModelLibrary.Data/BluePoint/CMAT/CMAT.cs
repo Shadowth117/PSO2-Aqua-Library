@@ -25,11 +25,18 @@ namespace AquaModelLibrary.Data.BluePoint.CMAT
         public string shaderName;
         public List<CMTLMeta0> meta0List = new List<CMTLMeta0>();
         public List<string> texNames = new List<string>();
-        public CMAT()
-        {
 
+        public CMAT(byte[] file)
+        {
+            file = CompressionHandler.CheckCompression(file);
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
         }
-        public CMAT(BufferedStreamReaderBE<MemoryStream> sr)
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             magic = sr.Read<int>();
             unk0 = sr.Read<int>();

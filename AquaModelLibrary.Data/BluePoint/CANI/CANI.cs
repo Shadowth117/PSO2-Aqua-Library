@@ -10,7 +10,17 @@ namespace AquaModelLibrary.Data.BluePoint.CANI
         public CANIFooter caniFooterData = null;
         public CFooter footerData;
 
-        public CANI(BufferedStreamReaderBE<MemoryStream> sr)
+        public CANI(byte[] file)
+        {
+            file = CompressionHandler.CheckCompression(file);
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             header = new CANIHeader(sr);
 
