@@ -75,6 +75,16 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                     flt00 = sr.ReadBE<float>();
                     sht00 = sr.ReadBE<short>();
                     flt01 = sr.ReadBE<float>();
+                    
+                    //Sometimes values can just be here. With no context!
+                    var test0x844F9D5C = sr.ReadBE<ushort>();
+                    if (test0x844F9D5C <= 0xFF)
+                    {
+                        sht01 = (short)test0x844F9D5C;
+                    } else
+                    {
+                        sr.Seek(-2, SeekOrigin.Current);
+                    }
                     return;
                 case 0xA03AC256: //cpid
                 case 0xB7683EF2: //cclm
