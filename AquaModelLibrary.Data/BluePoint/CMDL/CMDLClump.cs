@@ -15,6 +15,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
         public short sht02;
         public float flt00;
         public float flt01;
+        public float flt02;
 
         public CMDLClump() { }
 
@@ -53,25 +54,44 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                 /* SOTC */
                 case 0x6E799B50:
                 case 0x501E51A0:
+                case 0x5cf5e72d:
+                case 0xA2622CF6:
                 case 0xAE5653B6:
                     sht00 = sr.ReadBE<short>();
                     sht01 = sr.ReadBE<short>();
+
+                    if((check is 0xAE5653B6 or 0xA2622CF6) && sht00 == 0x4)
+                    {
+                        sht02 = sr.ReadBE<short>();
+                    }
                     return;
                 case 0xCCEEF10A:
                 case 0x4221B9CA:
+                case 0x82260250:
+                case 0xA342ACB3:
                     sht00 = sr.ReadBE<short>();
                     sht01 = sr.ReadBE<short>();
                     sht02 = sr.ReadBE<short>();
                     return;
+                case 0x39ea2e52:
                 case 0x5A880BFB:
                 case 0xBDED10EA:
+                case 0xA03FA36F:
                     sht00 = sr.ReadBE<short>();
                     flt00 = sr.ReadBE<float>();
+                    return;
+                case 0xC24907E5:
+                    sht00 = sr.ReadBE<short>();
+                    flt00 = sr.ReadBE<float>();
+                    flt01 = sr.ReadBE<float>();
+                    flt02 = sr.ReadBE<float>();
                     return;
                 case 0xB3D3CBBE:
                     sht00 = sr.ReadBE<short>();
                     return;
                 case 0x844F9D5C:
+                case 0x6BA55380:
+                case 0xE57D47D0:
                     flt00 = sr.ReadBE<float>();
                     sht00 = sr.ReadBE<short>();
                     flt01 = sr.ReadBE<float>();
@@ -86,6 +106,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                         sr.Seek(-2, SeekOrigin.Current);
                     }
                     return;
+                case 0x2CBA9737: //Unknown?
                 case 0xA03AC256: //cpid
                 case 0xB7683EF2: //cclm
                     return;
