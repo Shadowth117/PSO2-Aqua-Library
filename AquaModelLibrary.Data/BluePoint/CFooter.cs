@@ -4,6 +4,6 @@
     {
         public int magic;
         public int flags;
-        public int sizeBeforeFooter;
+        public int uncompressedSize;
     }
 }

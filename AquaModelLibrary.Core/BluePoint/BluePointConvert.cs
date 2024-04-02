@@ -76,8 +76,28 @@ namespace AquaModelLibrary.Core.BluePoint
                 var cmdl = new CMDL(File.ReadAllBytes(filePath));
                 foreach (var cmatSet in cmdl.cmatReferences)
                 {
-                    var cmatPath = Path.Combine(rootPath, cmatSet.cmatPath.str.Substring(2).Replace("****", "_cmn")).Replace("/", "\\");
-                    materialDict.Add(cmatSet.cmshMaterialName.str, new CMAT(File.ReadAllBytes(cmatPath)));
+                    var cmatPath = Path.Combine(rootPath, cmatSet.cmatPath.str.Substring(2)).Replace("/", "\\");
+                    var cmatPathCmn = cmatPath.Replace("****", "_cmn");
+                    var cmatPathPs5 = cmatPath.Replace("****", "_ps5");
+                    var cmatPathPs4 = cmatPath.Replace("****", "_ps4");
+                    if (File.Exists(cmatPathCmn))
+                    {
+                        cmatPath = cmatPathCmn;
+                    } else if(File.Exists(cmatPathPs5))
+                    {
+                        cmatPath = cmatPathPs5;
+                    } else if(File.Exists(cmatPathPs4))
+                    {
+                        cmatPath = cmatPathPs4;
+                    }
+
+                    if(File.Exists(cmatPath))
+                    {
+                        materialDict.Add(cmatSet.cmshMaterialName.str, new CMAT(File.ReadAllBytes(cmatPath)));
+                    } else
+                    {
+                        materialDict.Add(cmatSet.cmshMaterialName.str, null);
+                    }
                 }
                 foreach (var cmshPartialPath in cmdl.cmshReferences)
                 {
