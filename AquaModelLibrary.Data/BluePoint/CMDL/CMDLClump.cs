@@ -5,6 +5,9 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
 {
     public class CMDLClump
     {
+        /// <summary>
+        /// Assumedly, this is a hash for the original 'type' name of the of the data clump. Types appear unique to the game they appear in. 
+        /// </summary>
         public uint magic;
         public CVariableTrail trail0 = null;
         public CVariableTrail trail1 = null;
@@ -34,24 +37,30 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                 /* DeSR */
                 case 0xA5428144:
                     readExtra = 2;
-                    break;
+                    ReadDeSRCMDLClumpEnd(sr, check, limit, readExtra);
+                    return;
                 case 0x5C6DB65F:
                     readExtra = 3;
-                    break;
+                    ReadDeSRCMDLClumpEnd(sr, check, limit, readExtra);
+                    return;
                 case 0xcf9c5789:
                 case 0x233dd489:
                 case 0x09258d3b:
                 case 0x43C6AFBA:
                     limit = 5;
-                    break;
+                    ReadDeSRCMDLClumpEnd(sr, check, limit, readExtra);
+                    return;
                 case 0xEB06473D:
                     limit = 2;
-                    break;
+                    ReadDeSRCMDLClumpEnd(sr, check, limit, readExtra);
+                    return;
                 case 0x2354F238: //Should be initial tag
                 case 0x95CBEB14:
                 case 0x4A285982:
-                    break;
+                    ReadDeSRCMDLClumpEnd(sr, check, limit, readExtra);
+                    return;
                 /* SOTC */
+                case 0xBB3B0A79:
                 case 0x6E799B50:
                 case 0x501E51A0:
                 case 0x5cf5e72d:
@@ -60,7 +69,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                     sht00 = sr.ReadBE<short>();
                     sht01 = sr.ReadBE<short>();
 
-                    if((check is 0xAE5653B6 or 0xA2622CF6) && sht00 == 0x4)
+                    if ((check is 0xAE5653B6 or 0xA2622CF6) && sht00 == 0x4)
                     {
                         sht02 = sr.ReadBE<short>();
                     }
@@ -87,7 +96,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                     flt02 = sr.ReadBE<float>();
                     return;
                 case 0xB3D3CBBE:
+                case 0x7CB1241A:
                     sht00 = sr.ReadBE<short>();
+                    return;
+                case 0x6A236525:
+                    sht00 = sr.ReadBE<short>();
+                    bt00 = sr.ReadBE<byte>();
                     return;
                 case 0x844F9D5C:
                 case 0x6BA55380:
@@ -95,13 +109,14 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                     flt00 = sr.ReadBE<float>();
                     sht00 = sr.ReadBE<short>();
                     flt01 = sr.ReadBE<float>();
-                    
+
                     //Sometimes values can just be here. With no context!
                     var test0x844F9D5C = sr.ReadBE<ushort>();
                     if (test0x844F9D5C <= 0xFF)
                     {
                         sht01 = (short)test0x844F9D5C;
-                    } else
+                    }
+                    else
                     {
                         sr.Seek(-2, SeekOrigin.Current);
                     }
@@ -114,6 +129,10 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                     Debug.WriteLine($"Unexpected tag: {check:X8}");
                     throw new Exception();
             }
+        }
+
+        private void ReadDeSRCMDLClumpEnd(BufferedStreamReaderBE<MemoryStream> sr, uint check, int limit, int readExtra)
+        {
             trail0 = new CVariableTrail(sr, limit);
             if ((check == 0x09258d3b || check == 0x2354F238) && sr.Peek<byte>() == 0)
             {
@@ -134,7 +153,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                 }
             }
 
-            if(check == 0x4A285982)
+            if (check == 0x4A285982)
             {
                 sht00 = sr.ReadBE<short>();
             }
