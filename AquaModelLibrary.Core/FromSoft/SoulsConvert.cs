@@ -406,6 +406,7 @@ namespace AquaModelLibrary.Core.FromSoft
             aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true, false);
             aqp.ConvertToLegacyTypes();
             aqp.CreateTrueVertWeights();
+
             FbxExporterNative.ExportToFile(aqp, aqn, motions, finalPath, nsaNames, new List<Matrix4x4>(), false);
 
             //Temp, delete after testing
