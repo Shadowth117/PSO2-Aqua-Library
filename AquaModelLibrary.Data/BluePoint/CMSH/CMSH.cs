@@ -22,7 +22,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         {
             file = CompressionHandler.CheckCompression(file);
             var test = BitConverter.ToUInt16(file, 0);
-            if(test == 0x1500 || test == 0x500 || test == 0xD01)
+            if(test == 0x1500 || test == 0x500 || test == 0xD01 || test == 0x4100 || test == 0x1100 || test == 0x4901 || test == 0x5100)
             {
                 //Maybe one day we'll support these, but they're kinda dumb and all LODs
                 return;
