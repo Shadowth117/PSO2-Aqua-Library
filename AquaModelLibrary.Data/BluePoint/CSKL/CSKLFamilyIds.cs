@@ -6,9 +6,9 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
     {
         public ushort boneFlag0; //Sometiems 0x100 for unknown reasons
         public ushort boneFlag1; //Sometimes 0x8000 for unknown reasons
-        public int parentId;
-        public int firstChildId;
-        public int nextSiblingId;
+        public int parentId = -1;
+        public int firstChildId = -1;
+        public int nextSiblingId = -1;
 
         public CSKLFamilyIds()
         {

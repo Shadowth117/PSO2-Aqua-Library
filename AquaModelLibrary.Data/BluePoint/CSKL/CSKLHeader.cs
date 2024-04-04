@@ -34,43 +34,73 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
         public int int_58;
         public int int_5C;
 
+        //SOTC
+        public int boneNamesOffset;
+
         public CSKLHeader()
         {
 
         }
 
-        public CSKLHeader(BufferedStreamReaderBE<MemoryStream> sr)
+        public CSKLHeader(BufferedStreamReaderBE<MemoryStream> sr, int csklVersion)
         {
             magic = sr.Read<int>();
-            crc = sr.Read<int>();
-            crc2 = sr.Read<int>();
-            fileSize = sr.Read<int>();
+            switch (csklVersion)
+            {
+                case 0x9:
+                    var footerOffset = sr.Read<int>();
+                    var unkSize0 = sr.Read<int>();
+                    var unkSize1 = sr.Read<int>();
 
-            boneCount = sr.Read<ushort>();
-            boneCount2 = sr.Read<ushort>();
-            secondaryBoneCount = sr.Read<ushort>();
-            flags = sr.Read<ushort>();
-            usht_18 = sr.Read<ushort>();
-            usht_1A = sr.Read<ushort>();
-            int_1C = sr.Read<int>();
+                    boneCount = sr.Read<ushort>();
+                    var unkCount0 = sr.Read<ushort>();
+                    var boneDepth = sr.Read<ushort>();
+                    var unkUsht0 = sr.Read<ushort>();
+                    transformListOffset = sr.Read<int>() + 0x18;
+                    var unknownMetaData0Offset = sr.Read<int>() + 0x1C;
 
-            transformListOffset = sr.Read<int>();
-            size1 = sr.Read<int>();
-            inverseBoneMatricesOffset = sr.Read<int>();
-            int_3C = sr.Read<int>();
+                    var unknownMetaData1Offset = sr.Read<int>() + 0x20;
+                    var unknownMetaData2Offset = sr.Read<int>() + 0x24;
+                    var unknownMetaData3Offset = sr.Read<int>() + 0x28;
+                    var unknownMetaData4Offset = sr.Read<int>() + 0x2C;
 
-            int_40 = sr.Read<int>();
-            int_44 = sr.Read<int>();
-            int_48 = sr.Read<int>();
-            boneMetadataOffset = sr.Read<int>();
+                    boneNamesOffset = sr.Read<int>() + 0x30;
+                    var unkInt0 = sr.Read<int>();
+                    var unkInt1 = sr.Read<int>();
+                    var unkInt2 = sr.Read<int>();
+                    break;
+                case 0x19:
+                    crc = sr.Read<int>();
+                    crc2 = sr.Read<int>();
+                    fileSize = sr.Read<int>();
 
-            boneCount3 = sr.Read<ushort>();
-            boneCount4 = sr.Read<ushort>();
-            secondaryBoneCount2 = sr.Read<ushort>();
-            secondaryBoneCount3 = sr.Read<ushort>();
-            int_58 = sr.Read<int>();
-            int_5C = sr.Read<int>();
-            int_5C = sr.Read<int>();
+                    boneCount = sr.Read<ushort>();
+                    boneCount2 = sr.Read<ushort>();
+                    secondaryBoneCount = sr.Read<ushort>();
+                    flags = sr.Read<ushort>();
+                    usht_18 = sr.Read<ushort>();
+                    usht_1A = sr.Read<ushort>();
+                    int_1C = sr.Read<int>();
+
+                    transformListOffset = sr.Read<int>();
+                    size1 = sr.Read<int>();
+                    inverseBoneMatricesOffset = sr.Read<int>();
+                    int_3C = sr.Read<int>();
+
+                    int_40 = sr.Read<int>();
+                    int_44 = sr.Read<int>();
+                    int_48 = sr.Read<int>();
+                    boneMetadataOffset = sr.Read<int>();
+
+                    boneCount3 = sr.Read<ushort>();
+                    boneCount4 = sr.Read<ushort>();
+                    secondaryBoneCount2 = sr.Read<ushort>();
+                    secondaryBoneCount3 = sr.Read<ushort>();
+                    int_58 = sr.Read<int>();
+                    int_5C = sr.Read<int>();
+                    int_5C = sr.Read<int>();
+                    break;
+            }
         }
     }
 }

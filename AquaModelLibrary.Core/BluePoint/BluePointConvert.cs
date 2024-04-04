@@ -230,7 +230,14 @@ namespace AquaModelLibrary.Core.BluePoint
                     var tfmMat = Matrix4x4.Identity;
 
                     Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
-                    Matrix4x4 invMatReal = cskl.invTransforms[i];
+                    Matrix4x4 invMatReal;
+                    if(cskl.invTransforms.Count > 0)
+                    {
+                        invMatReal = cskl.invTransforms[i];
+                    } else
+                    {
+                        Matrix4x4.Invert(mat, out invMatReal);
+                    }
                     //invMatReal = Matrix4x4.Transpose(invMatReal);
                     Matrix4x4.Invert(invMatReal, out var invInvMat);
                     mat *= tfmMat;

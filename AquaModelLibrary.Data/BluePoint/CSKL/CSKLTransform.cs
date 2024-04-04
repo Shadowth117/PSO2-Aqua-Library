@@ -14,13 +14,25 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 
         }
 
-        public CSKLTransform(BufferedStreamReaderBE<MemoryStream> sr)
+        public CSKLTransform(BufferedStreamReaderBE<MemoryStream> sr, int csklVersion)
         {
-            scale = sr.Read<Vector3>();
-            sr.Seek(4, System.IO.SeekOrigin.Current);
-            rotation = sr.Read<Quaternion>();
-            position = sr.Read<Vector3>();
-            sr.Seek(4, System.IO.SeekOrigin.Current);
+            switch(csklVersion)
+            {
+                case 0x9:
+                    rotation = sr.Read<Quaternion>();
+                    position = sr.Read<Vector3>();
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
+                    scale = sr.Read<Vector3>();
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
+                    break;
+                case 0x19:
+                    scale = sr.Read<Vector3>();
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
+                    rotation = sr.Read<Quaternion>();
+                    position = sr.Read<Vector3>();
+                    sr.Seek(4, System.IO.SeekOrigin.Current);
+                    break;
+            }
         }
 
         /// <summary>

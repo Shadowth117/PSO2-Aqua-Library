@@ -54,7 +54,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMAT
             
             byte textLen;
             int texCount;
-            switch (footerData.flags)
+            switch (footerData.version)
             {
                 case 0x39:  //SOTC
 
@@ -102,7 +102,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMAT
                     //TODO - Material color metadata
                     break;
                 default:
-                    throw new Exception($"Unexpected CMAT type {footerData.flags}");
+                    throw new Exception($"Unexpected CMAT type {footerData.version}");
             }
         }
     }

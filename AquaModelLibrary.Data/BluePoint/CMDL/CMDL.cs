@@ -52,7 +52,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
         {
             magic = sr.Read<CMDLMagic>();
 
-
             unkUshtCount0 = sr.Read<ushort>();
             unkUshtCount1 = sr.Read<ushort>();
             unkId0 = sr.Read<int>();
