@@ -125,11 +125,14 @@ namespace AquaModelLibrary.Core.BluePoint
                 var outName = outNames[i];
 
                 var aqp = ReadCMSH(mshPath, materialDict, out var aqn);
-                aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true);
-                aqp.ConvertToLegacyTypes();
-                aqp.CreateTrueVertWeights();
+                if(aqp != null)
+                {
+                    aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true);
+                    aqp.ConvertToLegacyTypes();
+                    aqp.CreateTrueVertWeights();
 
-                FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false);
+                    FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false);
+                }
             }
 
         }
@@ -153,7 +156,7 @@ namespace AquaModelLibrary.Core.BluePoint
 
         public static AquaObject CMDLToAqua(CMSH msh, Dictionary<string, CMAT> materialDict, string cmtlPath, string modelPath, out AquaNode aqn)
         {
-            if (msh.header.variantFlag2 == 0x41)
+            if (msh.header == null || msh.header.variantFlag2 == 0x41)
             {
                 aqn = null;
                 return null;

@@ -21,6 +21,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public CMSH(byte[] file)
         {
             file = CompressionHandler.CheckCompression(file);
+            var test = BitConverter.ToUInt16(file, 0);
+            if(test == 0x1500 || test == 0x500 || test == 0xD01)
+            {
+                //Maybe one day we'll support these, but they're kinda dumb and all LODs
+                return;
+            }
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
