@@ -304,7 +304,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             for (int i = 0; i < count; i++)
             {
                 array<short>^ texCoord = uvList[i];
-                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, (float)texCoord[1] / 32767));
+                lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, 1.0 - (float)texCoord[1] / 32767));
             }
         }
         else {
