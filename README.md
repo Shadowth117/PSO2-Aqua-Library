@@ -3,7 +3,7 @@ A library for handling PSO2 Aqua formats, with a focus on models, functional in 
 
 Programs utilizing this lib have been moved to: https://github.com/Shadowth117/Aqua-Toolset
 
-#Building 
+# Building 
 Intended for at least .NET 6 and x64 systems, but should build fine with higher .NET versions easy enough. 
 Note for the AquaModelLibrary.Native that you must obtain the FBX SDK (Free as of writing) and copy the include and lib folders to /AquaModelLibrary.Native/Dependencies/FBX/. 
 
