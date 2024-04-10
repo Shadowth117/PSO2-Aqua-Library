@@ -115,8 +115,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 for (int i = 0; i < matCount; i++)
                 {
                     CMSHMatReference matRef = new CMSHMatReference();
-                    matRef.texNameHash = sr.ReadBytes(sr.Position, 0x18);
-                    sr.Seek(0x18, System.IO.SeekOrigin.Current);
+                    matRef.minBounding = sr.ReadBEV3();
+                    matRef.maxBounding = sr.ReadBEV3();
                     matRef.matNameLength = sr.Read<byte>();
                     matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, matRef.matNameLength));
                     sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);

@@ -1,8 +1,11 @@
-﻿namespace AquaModelLibrary.Data.BluePoint.CMSH
+﻿using System.Numerics;
+
+namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHMatReference
     {
-        public byte[] texNameHash = new byte[0x18]; //Hash for material name? 
+        public Vector3 minBounding;
+        public Vector3 maxBounding;
         public byte matNameLength;
         public string matName = null;
         public int startingFaceIndex = -1;
