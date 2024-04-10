@@ -370,6 +370,18 @@ namespace DirectXTex
                 CUBEMAP = 0x00000008, // DDSCAPSCOMPLEX
             }
 
+            public enum Caps2Flags : uint
+            {
+                CUBEMAP = 0x200, // Required for a cube map
+                CUBEMAP_POSITIVEX = 0x400, // Required when these surfaces are stored in a cubemap
+                CUBEMAP_NEGATIVEX = 0x800, // Required when these surfaces are stored in a cubemap
+                CUBEMAP_POSITIVEY = 0x1000, // Required when these surfaces are stored in a cubemap
+                CUBEMAP_NEGATIVEY = 0x2000, // Required when these surfaces are stored in a cubemap
+                CUBEMAP_POSITIVEZ = 0x4000, // Required when these surfaces are stored in a cubemap
+                CUBEMAP_NEGATIVEZ = 0x8000, // Required when these surfaces are stored in a cubemap
+                VOLUME = 0x200000, // Required for a volume texture
+        }
+
             /// <summary>
             /// DDS Magic/Four CC
             /// </summary>
@@ -417,7 +429,7 @@ namespace DirectXTex
             public uint[] Reserved1;
             public DDSPixelFormat PixelFormat;
             public uint Caps;
-            public uint Caps2;
+            public Caps2Flags Caps2;
             public uint Caps3;
             public uint Caps4;
             public uint Reserved2;
@@ -898,7 +910,7 @@ namespace DirectXTex
         /// <param name="flags">Flags</param>
         /// <param name="header">DDS Header Output</param>
         /// <param name="dx10Header">DX10 Header Output</param>
-        public static void GenerateDDSHeader(TexMetadata metaData, DDSFlags flags, out DDSHeader header, out DX10Header dx10Header)
+        public static void GenerateDDSHeader(TexMetadata metaData, DDSFlags flags, out DDSHeader header, out DX10Header dx10Header, bool isCubeMap)
         {
             // Check array size
             if (metaData.ArraySize > 1)
@@ -1081,7 +1093,7 @@ namespace DirectXTex
                             throw new ArgumentException(String.Format("Image Depth too large: {0}. Max: {1}", metaData.Depth, UInt16.MaxValue));
                         // Set
                         header.Flags |= DDSHeader.HeaderFlags.VOLUME;
-                        header.Caps2 |= 0x00200000;
+                        header.Caps2 |= DDSHeader.Caps2Flags.VOLUME;
                         header.Width = (uint)metaData.Width;
                         header.Height = (uint)metaData.Height;
                         header.Depth = (uint)metaData.Depth;
@@ -1092,6 +1104,19 @@ namespace DirectXTex
                     throw new ArgumentException("Invalid Texture Dimension.");
 
             }
+
+            //Handle extra data for cubemaps
+            if(isCubeMap)
+            {
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP;
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP_NEGATIVEX;
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP_NEGATIVEY;
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP_NEGATIVEZ;
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP_POSITIVEX;
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP_POSITIVEY;
+                header.Caps2 |= DDSHeader.Caps2Flags.CUBEMAP_POSITIVEZ;
+            }
+
             // Calculate the Pitch
             ComputePitch(metaData.Format, metaData.Width, metaData.Height, out long rowPitch, out long slicePitch, CPFLAGS.NONE);
             // Validate results

@@ -17,6 +17,28 @@ namespace AquaModelLibrary.Helpers.MathHelpers
         public const float basicEpsilon = 0.00001f;
         public const float kEpsilonNormalSqrt = 1e-15F;
 
+        /// <summary>
+        /// Takes in a pixel buffer size, pixel size, the width, or top / left,of an aspect ratio and the height, or bottom / right, of an aspect ratio and outputs a width and height.
+        /// Intended for integer output for things like pixel dimensions.
+        /// </summary>
+        public static void GetDimensionsFromPixelBufferCount_PixelSizeAndAspectRatio(int bufferSize, int pixelSize, int aspectWidth, int aspectHeight, out int width, out int height)
+        {
+            GetDimensionsFromAreaAndAspectRatio(bufferSize / pixelSize, aspectWidth, aspectHeight, out width, out height);
+        }
+
+        /// <summary>
+        /// Takes in an area, the width, or top / left,of an aspect ratio and the height, or bottom / right, of an aspect ratio and outputs a width and height.
+        /// Intended for integer output for things like pixel dimensions.
+        /// </summary>
+        public static void GetDimensionsFromAreaAndAspectRatio(int area, int aspectWidth, int aspectHeight, out int width, out int height)
+        {
+            int multFactorWidth = area * aspectWidth / aspectWidth;
+            int multFactorHeight = area * aspectHeight / aspectWidth;
+
+            width = (int)Math.Sqrt(multFactorWidth); 
+            height = (int)Math.Sqrt(multFactorHeight); 
+        }
+
         public static Vector3 GetMaximumBounding(Vector3 maxPoint, Vector3 newPoint)
         {
             GetMaximumBounding(ref maxPoint, newPoint);

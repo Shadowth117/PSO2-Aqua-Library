@@ -1,7 +1,6 @@
 ﻿using AquaModelLibrary.Helpers;
 using System.Diagnostics;
-using VrSharp.Xvr;
-using static VrSharp.Xvr.DirectXTexUtility;
+using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.PSO
 {
@@ -219,7 +218,7 @@ namespace AquaModelLibrary.Data.PSO
             {
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;
             }
-            DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header);
+            DirectXTex.DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, false);
 
             List<byte> outbytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
             outbytes.InsertRange(0, new byte[] { 0x44, 0x44, 0x53, 0x20 });

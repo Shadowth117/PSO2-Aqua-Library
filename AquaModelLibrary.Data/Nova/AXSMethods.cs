@@ -5,6 +5,7 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
+using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
@@ -20,6 +21,7 @@ namespace AquaModelLibrary.Data.Nova
         public static AquaObject ReadAXS(string filePath, bool writeTextures, out AquaNode aqn)
         {
             AquaObject aqp = new AquaObject();
+            var ext = Path.GetExtension(filePath);
             aqp.objc.type = 0xC33;
             aqn = new AquaNode();
 
@@ -54,8 +56,8 @@ namespace AquaModelLibrary.Data.Nova
                 {
                     var tag = streamReader.Peek<int>();
                     var test = Encoding.UTF8.GetString(BitConverter.GetBytes(tag));
-                    Debug.WriteLine(streamReader.Position.ToString("X"));
-                    Debug.WriteLine(test);
+                    //Debug.WriteLine(streamReader.Position.ToString("X"));
+                    //Debug.WriteLine(test);
                     switch (tag)
                     {
                         case __oa:
@@ -88,7 +90,7 @@ namespace AquaModelLibrary.Data.Nova
                             var xgmiData = streamReader.ReadXgmi();
                             if (!xgmiIdByCombined.ContainsKey(xgmiData.stamCombinedId))
                             {
-                                xgmiIdByCombined.Add(xgmiData.stamCombinedId, xgmiList.Count);
+                                xgmiIdByCombined.Add(xgmiData.stamCombinedId, xgmiIdByCombined.Count);
                             }
                             xgmiIdByUnique.Add(xgmiData.stamUniqueId, xgmiList.Count);
                             xgmiList.Add(xgmiData);
@@ -162,7 +164,7 @@ namespace AquaModelLibrary.Data.Nova
                         aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
                         aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
                         aqNode.boneName = rttaNode.nodeName;
-                        Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
+                        //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                         aqn.nodeList.Add(aqNode);
                     }
                 }
@@ -198,42 +200,89 @@ namespace AquaModelLibrary.Data.Nova
                 int meshCount = meshDefList.Count;
 
                 //Read image data
-                var ext = Path.GetExtension(filePath);
-                for (int i = 0; i < xgmiList.Count; i++)
+                Dictionary<string, List<XgmiStruct>> xgmiDict = new Dictionary<string, List<XgmiStruct>>();
+                foreach(var xgmiMip in xgmiList)
                 {
-                    var xgmiData = xgmiList[i];
-                    var imgBufferInfo = imgRddaList[$"{xgmiData.md5_1.ToString("X")}{xgmiData.md5_2.ToString("X")}"];
-                    Debug.WriteLine($"Image set {i}: " + imgBufferInfo.md5_1.ToString("X") + " " + imgBufferInfo.dataStartOffset.ToString("X") + " " + imgBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset).ToString("X"));
+                    string id = xgmiMip.stamCombinedId;
+                    if(!xgmiDict.ContainsKey(id))
+                    {
+                        xgmiDict.Add(id, new List<XgmiStruct>() { xgmiMip });
+                    } else
+                    {
+                        xgmiDict[id].Add(xgmiMip);
+                    }
+                }
 
-                    var position = meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset;
-                    var buffer = streamReader.ReadBytes(position, imgBufferInfo.dataSize);
-                    var outImagePath = filePath.Replace(ext, $"_tex_{i}" + ".dds");
+                //Sort mips in case they're out of order
+                //In theory, they're probably in order and just work and we could do this more simply by just reading them in order and splitting when a new combined id is detected.
+                //In practice there's no reason it would have to be like that from the file structure and so we take the safe road.
+                foreach(var set in xgmiDict)
+                {
+                    set.Value.Sort((x, y) => x.mipIdByte > y.mipIdByte ? 1 : x.mipIdByte == y.mipIdByte ? 0 : -1);
+                }
+
+                //Write out as single dds
+                foreach (var set in xgmiDict)
+                {
+                    var xgmiData = set.Value[0];
+                    bool isCubemap = (xgmiData.int_50 & 0x81FF) > 0;
+
+                    byte mipCount;
+                    if(isCubemap)
+                    {
+                        mipCount = (byte)(set.Value.Count / 6);
+                    } else
+                    {
+                        mipCount = (byte)set.Value.Count;
+                    }
+
+                    List<byte> ddsBytes = new List<byte>();
+                    ddsBytes.AddRange(AIFMethods.GetDDSHeaderBytes(xgmiData.width, xgmiData.height, xgmiData, mipCount, isCubemap));
+
+                    if(isCubemap)
+                    {
+                        for(int i = 0; i < 6; i++)
+                        {
+                            for(int j = 0; j < mipCount; j++)
+                            {
+                                var xgmiMip = set.Value[i + j * 6];
+                                var imgBufferInfo = imgRddaList[$"{xgmiMip.md5_1.ToString("X")}{xgmiMip.md5_2.ToString("X")}"];
+                                var position = meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset;
+                                ddsBytes.AddRange(AIFMethods.GetMipImage(xgmiMip, streamReader.ReadBytes(position, imgBufferInfo.dataSize)));
+                            }
+                        }
+                    } else
+                    {
+                        foreach (var xgmiMip in set.Value)
+                        {
+                            var imgBufferInfo = imgRddaList[$"{xgmiMip.md5_1.ToString("X")}{xgmiMip.md5_2.ToString("X")}"];
+                            var position = meshSettingStart + imgFfub.dataStartOffset + imgBufferInfo.dataStartOffset;
+                            ddsBytes.AddRange(AIFMethods.GetMipImage(xgmiMip, streamReader.ReadBytes(position, imgBufferInfo.dataSize)));
+                        }
+                    }
+
+                    var outImagePath = filePath.Replace(ext, $"_tex_{xgmiData.stamCombinedId}" + ".dds");
                     texNames.Add(Path.GetFileName(outImagePath));
                     try
                     {
-                        string name = Path.GetFileName(filePath);
-                        Debug.WriteLine($"{name}_xgmi_{i}");
-
                         if (writeTextures)
                         {
-                            var image = AIFMethods.GetImage(xgmiData, buffer);
-                            File.WriteAllBytes(filePath.Replace(ext, $"_tex_{i}" + ".dds"), image);
+                            File.WriteAllBytes(outImagePath, ddsBytes.ToArray());
                         }
                     }
                     catch (Exception exc)
                     {
 #if DEBUG
                         string name = Path.GetFileName(filePath);
-                        Debug.WriteLine($"Extract tex {i} failed.");
+                        Debug.WriteLine($"Extract tex {xgmiData.stamCombinedId} failed.");
+                        /*
                         File.WriteAllBytes($"C:\\{name}_xgmiHeader_{i}.bin", xgmiData.GetBytes());
                         File.WriteAllBytes($"C:\\{name}_xgmiBuffer_{i}.bin", buffer);
+                        */
                         Debug.WriteLine(exc.Message);
 #endif
                     }
-                    buffer = null;
                 }
-
-
 
                 //Read model data - Since ffubs are initialized, they default to 0. 
                 int vertFfubPadding = imgFfub.structSize;
@@ -254,14 +303,14 @@ namespace AquaModelLibrary.Data.Nova
                     }
                     var vertBufferInfo = vertRddaList[$"{mesh.salvStr.md5_1.ToString("X")}{mesh.salvStr.md5_2.ToString("X")}"];
                     var faceBufferInfo = faceRddaList[$"{mesh.lxdiStr.md5_1.ToString("X")}{mesh.lxdiStr.md5_2.ToString("X")}"];
-                    Debug.WriteLine($"Vert set {i}: " + vertBufferInfo.md5_1.ToString("X") + " " + vertBufferInfo.dataStartOffset.ToString("X") + " " + vertBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset).ToString("X"));
-                    Debug.WriteLine($"Face set {i}: " + faceBufferInfo.md5_1.ToString("X") + " " + faceBufferInfo.dataStartOffset.ToString("X") + " " + faceBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + faceFfubPadding + faceFfub.dataStartOffset + faceBufferInfo.dataStartOffset).ToString("X"));
+                    //Debug.WriteLine($"Vert set {i}: " + vertBufferInfo.md5_1.ToString("X") + " " + vertBufferInfo.dataStartOffset.ToString("X") + " " + vertBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset).ToString("X"));
+                    //Debug.WriteLine($"Face set {i}: " + faceBufferInfo.md5_1.ToString("X") + " " + faceBufferInfo.dataStartOffset.ToString("X") + " " + faceBufferInfo.toTagStruct.ToString("X") + " " + (meshSettingStart + faceFfubPadding + faceFfub.dataStartOffset + faceBufferInfo.dataStartOffset).ToString("X"));
 
                     //Vert data
                     var vertCount = vertBufferInfo.dataSize / mesh.salvStr.vertLen;
 
                     streamReader.Seek((meshSettingStart + vertFfubPadding + vertFfub.dataStartOffset + vertBufferInfo.dataStartOffset), SeekOrigin.Begin);
-                    Debug.WriteLine(streamReader.Position.ToString("X"));
+                    //Debug.WriteLine(streamReader.Position.ToString("X"));
                     VTXL vtxl = new VTXL(streamReader, mesh.vtxe, vertCount);
 
                     //Account for indices without weights
@@ -352,7 +401,8 @@ namespace AquaModelLibrary.Data.Nova
                 {
                     if (xgmiIdByCombined.ContainsKey(xgmiKey))
                     {
-                        texNames.Add(cachedTexNames[xgmiIdByCombined[xgmiKey]]);
+                        var id = xgmiIdByCombined[xgmiKey];
+                        texNames.Add(cachedTexNames[id]);
                     }
                     else if (xgmiIdByUnique.ContainsKey(xgmiKey))
                     {
@@ -643,7 +693,9 @@ namespace AquaModelLibrary.Data.Nova
             {
                 var key0 = BitConverter.GetBytes(streamReader.Read<int>());
                 int key1 = streamReader.Read<int>();
-                stamDataObj.texIds.Add(key0[0].ToString("X2") + key0[1].ToString("X2") + key0[2].ToString("X2") + key0[3].ToString("X2") + key1.ToString("X"));
+                stamDataObj.texIds.Add("00" + key0[1].ToString("X2") + key0[2].ToString("X2") + key0[3].ToString("X2") + key1.ToString("X")); //The first key digit can be an LOD sometimes, but we only want the highest quality.
+                                                                                                                                              //Mips don't seem to be specially distinct and so this should be fine.
+                //stamDataObj.texIds.Add(key0[0].ToString("X2") + key0[1].ToString("X2") + key0[2].ToString("X2") + key0[3].ToString("X2") + key1.ToString("X"));
                 streamReader.Seek(0x18, SeekOrigin.Current);
             }
 
@@ -669,7 +721,7 @@ namespace AquaModelLibrary.Data.Nova
                     case ydbm:
                         if (mesh != null)
                         {
-                            Debug.WriteLine(defs.Count);
+                            //Debug.WriteLine(defs.Count);
                             defs.Add(mesh);
                         }
                         mesh = new MeshDefinitions();
@@ -708,7 +760,7 @@ namespace AquaModelLibrary.Data.Nova
             }
             if (mesh != null)
             {
-                Debug.WriteLine(defs.Count);
+                //Debug.WriteLine(defs.Count);
                 defs.Add(mesh);
             }
         }

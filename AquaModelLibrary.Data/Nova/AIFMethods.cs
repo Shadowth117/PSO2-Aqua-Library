@@ -1,5 +1,8 @@
 ﻿using AquaModelLibrary.Data.Nova.Structures;
+using AquaModelLibrary.Helpers;
+using DirectXTex;
 using Reloaded.Memory.Streams;
+using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.Nova
 {
@@ -65,156 +68,116 @@ namespace AquaModelLibrary.Data.Nova
             return xgmiStr;
         }
 
-        public static byte[] GetImage(XgmiStruct xgmiStr, byte[] buffer)
+        public static byte[] GetMipImage(XgmiStruct xgmiStr, byte[] buffer)
         {
             int sourceBytesPerPixel;
+            DXGIFormat pixelFormat;
+            int deswizzleWidth = xgmiStr.width;
+            int deswizzleHeight = xgmiStr.height;
+            pixelFormat = GetDDSType(xgmiStr, ref deswizzleWidth, ref deswizzleHeight);
+
+            return Deswizzler.VitaDeswizzle(buffer, deswizzleWidth, deswizzleHeight, pixelFormat);
+        }
+
+        private static DXGIFormat GetDDSType(XgmiStruct xgmiStr, ref int deswizzleWidth, ref int deswizzleHeight)
+        {
+            DXGIFormat pixelFormat;
             switch (xgmiStr.dxtType)
             {
+                case 0x1:
+                    //Not sure actual pixel format for this, needs a fix
+                    if (xgmiStr.alphaTesting == 0x8)
+                    {
+                        pixelFormat = DXGIFormat.BC3UNORM;
+                    }
+                    else
+                    {
+                        pixelFormat = DXGIFormat.BC1UNORM;
+                    }
+                    deswizzleWidth >>= 2;
+                    deswizzleHeight >>= 2;
+                    break;
+                case 0x8:
+                    pixelFormat = DXGIFormat.R8G8B8A8UNORM;
+                    break;
+                case 0xD:
+                    //Not sure actual pixel format for this, needs a fix
+                    if (xgmiStr.alphaTesting == 0x8)
+                    {
+                        pixelFormat = DXGIFormat.BC3UNORM;
+                    }
+                    else
+                    {
+                        pixelFormat = DXGIFormat.BC1UNORM;
+                    }
+                    deswizzleWidth >>= 2;
+                    deswizzleHeight >>= 2;
+                    break;
                 case 0x10:
-                    sourceBytesPerPixel = 0x8;
+                    if (xgmiStr.alphaTesting == 0x8)
+                    {
+                        pixelFormat = DXGIFormat.BC3UNORM;
+                    }
+                    else
+                    {
+                        pixelFormat = DXGIFormat.BC1UNORM;
+                    }
+                    deswizzleWidth >>= 2;
+                    deswizzleHeight >>= 2;
                     break;
                 case 0x12:
-                    sourceBytesPerPixel = 0x10;
+                    if (xgmiStr.alphaTesting == 0x8)
+                    {
+                        pixelFormat = DXGIFormat.BC2UNORM;
+                    }
+                    else
+                    {
+                        pixelFormat = DXGIFormat.BC1UNORM;
+                    }
+                    deswizzleWidth >>= 2;
+                    deswizzleHeight >>= 2;
                     break;
                 case 0x14:
-                    sourceBytesPerPixel = 0x10;
+                    if (xgmiStr.alphaTesting == 0x8)
+                    {
+                        pixelFormat = DXGIFormat.BC3UNORM;
+                    }
+                    else
+                    {
+                        pixelFormat = DXGIFormat.BC1UNORM;
+                    }
+                    deswizzleWidth >>= 2;
+                    deswizzleHeight >>= 2;
+                    break;
+                case 0x2A:
+                    //Not sure actual pixel format for this, needs a fix
+                    if (xgmiStr.alphaTesting == 0x8)
+                    {
+                        pixelFormat = DXGIFormat.BC3UNORM;
+                    }
+                    else
+                    {
+                        pixelFormat = DXGIFormat.BC1UNORM;
+                    }
+                    deswizzleWidth >>= 2;
+                    deswizzleHeight >>= 2;
                     break;
                 default:
-                    sourceBytesPerPixel = 0x8;
-                    break;
+                    throw new Exception($"Unexpected format {xgmiStr.dxtType}");
             }
-            var processedBuffer = Unswizzle(buffer, xgmiStr.width >> 2, xgmiStr.height >> 2, sourceBytesPerPixel);
-            var dds = AssembleDDS(processedBuffer, xgmiStr.height, xgmiStr.width, xgmiStr.alphaTesting, xgmiStr.dxtType);
-            return dds;
+
+            return pixelFormat;
         }
 
-        //Massive credit to Agrajag for the deswizzling here
-        public static byte[] Unswizzle(byte[] swizzledData, int width, int height, int sourceBytesPerPixel)
+        public static byte[] GetDDSHeaderBytes(int width, int height, XgmiStruct headXgmiStruct, byte mipCount, bool isCubeMap)
         {
-            int maxU = (int)(Math.Log(width, 2));
-            int maxV = (int)(Math.Log(height, 2));
+            int a = 0;
+            int b = 0;
+            var meta = GenerateMataData(width, height, mipCount, GetDDSType(headXgmiStruct, ref a, ref b), isCubeMap);
+            GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, isCubeMap);
 
-            byte[] unswizzledData = new byte[swizzledData.Length];
-
-            for (int j = 0; (j < width * height) && (j * sourceBytesPerPixel < swizzledData.Length); j++)
-            {
-                int u = 0, v = 0;
-                int origCoord = j;
-                for (int k = 0; k < maxU || k < maxV; k++)
-                {
-                    if (k < maxV)   //Transpose!
-                    {
-                        v |= (origCoord & 1) << k;
-                        origCoord >>= 1;
-                    }
-                    if (k < maxU)   //Transpose!
-                    {
-                        u |= (origCoord & 1) << k;
-                        origCoord >>= 1;
-                    }
-                }
-                if (u < width && v < height)
-                {
-                    Array.Copy(swizzledData, j * sourceBytesPerPixel, unswizzledData, (v * width + u) * sourceBytesPerPixel, sourceBytesPerPixel);
-                }
-
-            }
-            return unswizzledData;
-        }
-
-        //Massive credit to Agrajag for the deswizzling here
-        public static byte[] blockLevelUnswizzle(byte[] swizzledData, int width, int height, int bytesPerPixel)
-        {
-            int maxV = (int)(Math.Log(width, 2)) - 2; //-2 exponent = /4
-            int maxU = (int)(Math.Log(height, 2)) - 2; //-2 exponent = /4
-
-            byte[] unswizzledData = new byte[width * height * bytesPerPixel];
-
-            for (int j = 0; (j * 16 < width * height) && (j * bytesPerPixel * 16 < swizzledData.Length); j++)
-            {
-                int u = 0, v = 0;
-                int originalBlockId = j;
-                for (int k = 0; k < maxU || k < maxV; k++)
-                {
-                    if (k < maxV)   //Transpose!
-                    {
-                        v |= (originalBlockId & 1) << k;
-                        originalBlockId >>= 1;
-                    }
-                    if (k < maxU)   //Transpose!
-                    {
-                        u |= (originalBlockId & 1) << k;
-                        originalBlockId >>= 1;
-                    }
-                }
-                if (u < (height / 4) && v < (width / 4))
-                {
-                    copyBlock(bytesPerPixel, width, swizzledData, u, v, unswizzledData, j);
-                }
-            }
-            return unswizzledData;
-        }
-
-        //Again, massive credit to Agrajag for the deswizzling here
-        public static void copyBlock(int bytesPerPixel, int stride, byte[] swizzledData, int swizzleBlockX, int swizzleBlockY, byte[] unswizzledData, int unswizzledOffset)
-        {
-            int blocksPerRow = stride / 4;
-            int row = unswizzledOffset / blocksPerRow;
-            int indexInRow = unswizzledOffset % blocksPerRow;
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    //Copy each row over.
-                    Array.Copy(swizzledData, (row * stride * 4 + indexInRow * 4 + i * stride + j) * bytesPerPixel, unswizzledData, ((swizzleBlockY * 4 + i) * stride + swizzleBlockX * 4 + j) * bytesPerPixel, bytesPerPixel);
-                }
-            }
-        }
-
-        public static byte[] AssembleDDS(byte[] buffer, int width, int height, byte alphaTesting, byte pixelFormat, byte mipCount = 1)
-        {
-            List<byte> outBytes = new List<byte>();
-            outBytes.AddRange(GenerateDDSHeader((ushort)width, (ushort)height, buffer.Length, alphaTesting, pixelFormat, mipCount));
-            outBytes.AddRange(buffer);
-
-            return outBytes.ToArray();
-        }
-
-        public static byte[] GenerateDDSHeader(ushort height, ushort width, int size, byte alphaTesting, byte pixelFormat, byte mipCount = 1)
-        {
-            var outBytes = new List<byte>();
-
-            outBytes.AddRange(new byte[] { 0x44, 0x44, 0x53, 0x20, 0x7C, 0x00, 0x00, 0x00, 0x07, 0x10, 0x08, 0x00 });
-            outBytes.AddRange(BitConverter.GetBytes(height));
-            outBytes.AddRange(new byte[] { 0x00, 0x00 });
-            outBytes.AddRange(BitConverter.GetBytes(width));
-            outBytes.AddRange(new byte[] { 0x00, 0x00 });
-            outBytes.AddRange(BitConverter.GetBytes(size));
-            outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00, });
-            outBytes.AddRange(new byte[] { mipCount, 0x00, 0x00, 0x00, });
-            outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x20, 0x00, 0x00, 0x00,
-                0x04, 0x00, 0x00, 0x00,  });
-            outBytes.AddRange(new byte[] { 0x44, 0x58, 0x54 });
-            if (alphaTesting == 0x8)
-            {
-                if (pixelFormat == 0x12)
-                {
-                    outBytes.Add(0x33); //DXT3
-                }
-                else
-                {
-                    outBytes.Add(0x35); //DXT5
-                }
-            }
-            else
-            {
-                outBytes.Add(0x31); //DXT1
-            }
-            outBytes.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x10, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00 });
+            List<byte> outBytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
+            outBytes.InsertRange(0, new byte[] { 0x44, 0x44, 0x53, 0x20 });
 
             return outBytes.ToArray();
         }
