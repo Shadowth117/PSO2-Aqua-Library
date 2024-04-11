@@ -763,7 +763,7 @@ namespace AquaModelLibrary.Data.Utility
             AddIfExistsBasic(generalUiOut, rebootBasePath, rbLobbyMapImageCentral, "");
             AddIfExistsBasic(generalUiOut, rebootBasePath, rbMainCrop, "");
 
-            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "General UI.csv"), generalUiOut, Encoding.UTF8);
+            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "Reboot General UI.csv"), generalUiOut, Encoding.UTF8);
 
             //--------------------------World Map files
             List<string> worldMapOut = new List<string>();
