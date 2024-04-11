@@ -186,9 +186,12 @@ namespace AquaModelLibrary.Core.General
                             }
                             posKeys.keyCount++;
                         }
-                        posKeys.frameTimings[posKeys.keyCount - 1] += 2; //Account for final frame bitflags
+                        if(posKeys.frameTimings.Count > 0)
+                        {
+                            posKeys.frameTimings[posKeys.keyCount - 1] += 2; //Account for final frame bitflags
+                            animEndFrame = (int)Math.Max(animEndFrame, posKeys.frameTimings[posKeys.keyCount - 1] / 0x10);
+                        }
 
-                        animEndFrame = (int)Math.Max(animEndFrame, posKeys.frameTimings[posKeys.keyCount - 1] / 0x10);
                         node.keyData.Add(posKeys);
                     }
 
@@ -220,9 +223,13 @@ namespace AquaModelLibrary.Core.General
                             }
                             rotKeys.keyCount++;
                         }
-                        rotKeys.frameTimings[rotKeys.keyCount - 1] += 2; //Account for final frame bitflags
+                        if(rotKeys.frameTimings.Count > 0)
+                        {
+                            rotKeys.frameTimings[rotKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
-                        animEndFrame = (int)Math.Max(animEndFrame, rotKeys.frameTimings[rotKeys.keyCount - 1] / 0x10);
+                            animEndFrame = (int)Math.Max(animEndFrame, rotKeys.frameTimings[rotKeys.keyCount - 1] / 0x10);
+                        }
+
                         node.keyData.Add(rotKeys);
                     }
 
@@ -271,9 +278,12 @@ namespace AquaModelLibrary.Core.General
                             }
                             sclKeys.keyCount++;
                         }
-                        sclKeys.frameTimings[sclKeys.keyCount - 1] += 2; //Account for final frame bitflags
+                        if(sclKeys.frameTimings.Count > 0)
+                        {
+                            sclKeys.frameTimings[sclKeys.keyCount - 1] += 2; //Account for final frame bitflags
 
-                        animEndFrame = (int)Math.Max(animEndFrame, sclKeys.frameTimings[sclKeys.keyCount - 1] / 0x10);
+                            animEndFrame = (int)Math.Max(animEndFrame, sclKeys.frameTimings[sclKeys.keyCount - 1] / 0x10);
+                        }
                         node.keyData.Add(sclKeys);
                     }
                 }
@@ -456,7 +466,7 @@ namespace AquaModelLibrary.Core.General
         {
             foreach (var set in motionList)
             {
-                File.WriteAllBytes(set.fileName, set.aqm.GetBytesNIFL());
+                File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(initialFilePath), set.fileName), set.aqm.GetBytesNIFL());
             }
         }
 
