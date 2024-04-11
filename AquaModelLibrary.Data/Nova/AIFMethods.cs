@@ -76,7 +76,7 @@ namespace AquaModelLibrary.Data.Nova
             int deswizzleHeight = xgmiStr.height;
             pixelFormat = GetDDSType(xgmiStr, ref deswizzleWidth, ref deswizzleHeight);
 
-            return Deswizzler.VitaDeswizzle(buffer, deswizzleWidth, deswizzleHeight, pixelFormat);
+            return DeSwizzler.VitaDeSwizzle(buffer, deswizzleWidth, deswizzleHeight, pixelFormat);
         }
 
         private static DXGIFormat GetDDSType(XgmiStruct xgmiStr, ref int deswizzleWidth, ref int deswizzleHeight)

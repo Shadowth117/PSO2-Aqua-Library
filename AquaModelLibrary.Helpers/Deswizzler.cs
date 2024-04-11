@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
-using static DirectXTex.DirectXTexUtility;
+﻿using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Helpers
 {
-    public class Deswizzler
+    public class DeSwizzler
     {
         /// <summary>
         /// RawTex Implementation
@@ -176,7 +174,8 @@ namespace AquaModelLibrary.Helpers
             if ((pixelFormatInt >= 70 && pixelFormatInt <= 84) || (pixelFormatInt >= 94 && pixelFormatInt <= 99))
             {
                 pixelBlockSize = 4;
-            } else
+            }
+            else
             {
                 pixelBlockSize = 1;
             }
@@ -185,7 +184,8 @@ namespace AquaModelLibrary.Helpers
             if (pixelBlockSize == 1)
             {
                 sourceBytesPerPixel = formatBpp / 8;
-            } else
+            }
+            else
             {
                 sourceBytesPerPixel = formatBpp * 2;
             }
@@ -194,7 +194,7 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// Massive credit to Agrajag for the deswizzling here
         /// </summary>
-        public static byte[] VitaDeswizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
+        public static byte[] VitaDeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
             GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
             int maxU = (int)(Math.Log(width, 2));
@@ -288,7 +288,7 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// RawTex Implementation
         /// </summary>
-        public static byte[] PS5Deswizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
+        public static byte[] PS5DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
             GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
 
@@ -370,7 +370,7 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// RawTex Implementation
         /// </summary>
-        public static byte[] SwitchDeswizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
+        public static byte[] SwitchDeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
             GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
 

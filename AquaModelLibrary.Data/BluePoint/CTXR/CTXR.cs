@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers;
+using AquaModelLibrary.Helpers.Readers;
 using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.BluePoint.CTXR
@@ -94,10 +95,22 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
             //Assume external mips come first
             var refList = GetSortedExternalRefList();
+            var pixelFormat = GetFormat();
+            List<byte[]> mipsList = new List<byte[]>();
             foreach(var reference in refList)
             {
-                FileStream fs = new FileStream(outPath, FileMode.Open, FileAccess.Read);
-
+                var chunk = File.ReadAllBytes(Path.Combine(rootPath, reference.externalMipReference.Substring(2)));
+                switch (footerData.version)
+                {
+                    case 0x25: //SOTC
+                        //mipsList.Add(Deswizzler.PS4DeSwizzle(chunk, ,, pixelFormat));
+                        break;
+                    case 0x6E: //DeSR
+                        //mipsList.Add(Deswizzler.PS5DeSwizzle(chunk, ,, pixelFormat));
+                        break;
+                    default:
+                        throw new Exception("Unexpected CTXR type!");
+                }
             }
 
         }
