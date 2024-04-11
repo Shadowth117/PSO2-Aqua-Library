@@ -305,9 +305,9 @@ namespace AquaModelLibrary.Data.Utility
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
+            GenerateUILists(pso2_binDir, outputDirectory, imageDiretory);
             GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
-            GenerateUILists(pso2_binDir, outputDirectory, imageDiretory);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
@@ -741,6 +741,50 @@ namespace AquaModelLibrary.Data.Utility
             Directory.CreateDirectory(outputImageStampDirectory);
             Directory.CreateDirectory(outputImageVGDirectory);
 
+            //---------------------------Reboot General UI files
+            var rebootBasePath = Path.Combine(pso2_binDir, dataReboot);
+            List<string> generalUiOut = new List<string>();
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbBanner, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbBattlePass, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbBenchmark, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbCredits, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbDefenseQuest, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbDownloadReb, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbEnding, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbEvent, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbGacha, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbIcon, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbLoginStamp, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbPlayableLoad, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbWorldMap, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbResidentFont, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbResidentHud, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbResidentProduction, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbLobbyMapImageCentral, "");
+            AddIfExistsBasic(generalUiOut, rebootBasePath, rbMainCrop, "");
+
+            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "General UI.csv"), generalUiOut, Encoding.UTF8);
+
+            //--------------------------World Map files
+            List<string> worldMapOut = new List<string>();
+            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + rbUiWorldMapTexSea, "");
+
+            for (int i = 0; i < 1000000; i++)
+            {
+                AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_mapmask_{i:D6}.ice", "");
+            }
+            for (int i = 0; i < 1000000; i++)
+            {
+                AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_{i:D6}.ice", "");
+            }
+            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000481_005001.ice", "");
+            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000482_005001.ice", "");
+            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000483_005001.ice", "");
+            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000505_005001.ice", "");
+            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000506_005001.ice", "");
+
+            File.WriteAllLines(Path.Combine(outputDirectory, "UI", "UIWorldMapTextures.csv"), worldMapOut, Encoding.UTF8);
+
             //---------------------------Generate Load Tunnel Lists
             List<string> loadTunnelsOut = new List<string>();
             loadTunnelsOut.Add($"PSO2 Classic Load Tunnel,{loadTunnelClassic},{GetFileHash(loadTunnelClassic)}");
@@ -818,6 +862,17 @@ namespace AquaModelLibrary.Data.Utility
 
             File.WriteAllLines(Path.Combine(outputVGDirectory, "Vital Guage.csv"), vgOut, Encoding.UTF8);
         }
+
+        private static void AddIfExistsBasic(List<string> worldMapOut, string basepath, string fileName, string label)
+        {
+            var fileHash = GetRebootHash(GetFileHash(fileName));
+            var filePath = Path.Combine(basepath, fileHash);
+            if (File.Exists(filePath))
+            {
+                worldMapOut.Add($"{label},{fileName},{fileHash}");
+            }
+        }
+
         public unsafe static Bitmap GetFirstImageFromIce(string fileName)
         {
             IceFile ice;
