@@ -26,7 +26,7 @@ namespace AquaModelLibrary.Core.FromSoft
         public static bool transformMesh = false;
         public static bool extractUnreferencedMapData = false;
         public static bool separateMSBDumpByModel = false;
-        public static bool addRootNodeLikeBlenderSmdImport = true;
+        public static bool addRootNodeLikeBlenderSmdImport = false;
         public static bool doNotAdjustRootRotation = false;
 
         public static SoulsGame game = SoulsGame.None;
