@@ -396,6 +396,15 @@ namespace AquaModelLibrary.Core.BluePoint
                     continue;
                 }
 
+                if ((mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0) 
+                    || (!mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
+                {
+                    startFace = currentFace;
+                    faceCount = mesh.faceData.faceList.Count - currentFace;
+                }
+                currentFace = startFace + faceCount;
+
+
                 var baseMatName = mesh.header.matList[m];
 
                 string texName = "test_d.dds";
@@ -444,13 +453,6 @@ namespace AquaModelLibrary.Core.BluePoint
                     texName
                 };
                 aqp.tempMats.Add(mat);
-
-                if ((mesh.header.matList[m].startingFaceIndex == 0 && mesh.header.matList[m].endingFaceIndex == 0) || (mesh.header.matList[m].startingFaceIndex == -1 && mesh.header.matList[m].endingFaceIndex == -1))
-                {
-                    startFace = currentFace;
-                    faceCount = mesh.faceData.faceList.Count - currentFace;
-                }
-                currentFace = startFace + faceCount;
 
                 Dictionary<int, int> vertIdDict = new Dictionary<int, int>();
                 VTXL matVtxl = new VTXL();
