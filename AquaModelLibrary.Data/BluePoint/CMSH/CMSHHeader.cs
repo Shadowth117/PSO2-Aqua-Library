@@ -21,16 +21,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public bool hasExtraFlags; //Used if extra flags are detected.
         public ulong dummyConstData = 7885087596553986582; //Certain 0x200 dummy models have 0ed extraFlags so we check this against address 0x25 to get around that.
 
-        //0x8C, 0xA data
-        public byte unk8C0ASize0Modifier;
-        public ushort unk8C0ASize0;
-        public byte subVariantFlag;
-        public ushort unk8C0ASize1;
-        public byte unk8C0AByte0;
-        public ushort unk8C0AShort0;
-        public byte unk8C0AInnerBigPtrByte; //Seems to be 0x1 for large pointers and 0x2 for larger ones
-        public int unk8C0AModelDataSize; //\Distance from directly after the short value to the end of the face indices
-
         //Some cmshs have this
         public int modelType;
 
@@ -80,27 +70,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         endInt = sr.Read<int>();
                     }
                     break;
-
-                case 0x68C:
-                    Debug.WriteLine("0x68C unimplemented");
-                    throw new Exception();
-                case 0xA8C:
-                    ReadA8CHeaderExtras(sr);
-                    ReadMaterialList(sr);
-                    break;
-                case 0xACC:
-                    unk0 = sr.Read<byte>();
-                    modelType = sr.Read<int>();
-                    if (modelType == 0x5)
-                    {
-                        ReadReferenceModelPath(sr);
-                    }
-                    else
-                    {
-                        matCount = sr.Read<int>();
-                        ReadMaterialList(sr);
-                    }
-                    break;
                 default:
                     Debug.WriteLine($"Unknown variant flags: {variantFlags:X}");
                     break;
@@ -109,8 +78,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         private void ReadMaterialList(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            //For 0x8C types, check the bit which says if there should be material
-            if ((variantFlag == 0x8C && !(subVariantFlag == 0x88 || subVariantFlag == 0x89)) || (extraFlags?.Length > 0 && (extraFlags[0] & 8) > 0) || matCount > 0)
+            if (matCount > 0)
             {
                 for (int i = 0; i < matCount; i++)
                 {
@@ -149,33 +117,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 sr.Seek(1, System.IO.SeekOrigin.Current);
             }
             OtherModelName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, mdlLen));
-        }
-
-        private void ReadA8CHeaderExtras(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            unk8C0ASize0Modifier = sr.Read<byte>();
-            unk8C0ASize0 = sr.Read<ushort>();
-            subVariantFlag = sr.Read<byte>();
-            unk8C0ASize1 = sr.Read<ushort>();
-            unk8C0AByte0 = sr.Read<byte>();
-            modelType = sr.Read<int>();
-            matCount = sr.Read<byte>();
-            unk8C0AShort0 = sr.Read<ushort>();
-            unk8C0AInnerBigPtrByte = sr.Read<byte>();
-
-            //We need to transform unk8C0AModelDataSize based on unk8C0AInnerBigPtrByte's value. If 0, we can ignore this
-            switch (unk8C0AInnerBigPtrByte)
-            {
-                case 1:
-                    throw new NotImplementedException();
-                case 2:
-                    throw new NotImplementedException();
-                case 0:
-                default:
-                    break;
-            }
-
-            //Unknown territory past here, needs research into the tokenization
         }
 
         private void CheckForExtraFlags(BufferedStreamReaderBE<MemoryStream> sr)

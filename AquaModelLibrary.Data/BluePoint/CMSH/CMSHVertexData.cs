@@ -75,63 +75,19 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             vertDefinitionsCount = sr.Read<int>();
             int_14 = sr.Read<int>();
 
-            //Subvariants 0x88 and 0x89 of 0xA8C have variable trailing data.
-            //Typical CMSHs, when they have vertex definitions, have the same layout of trailing data
-            if (header.subVariantFlag == 0x88 || header.subVariantFlag == 0x89)
+            for (int i = 0; i < vertDefinitionsCount; i++)
             {
-                for (int i = 0; i < vertDefinitionsCount; i++)
-                {
-                    var vertDef = new CMSHVertexDataDefinition();
-                    vertDef.dataMagic = sr.Read<VertexMagic>();
-                    switch (vertDef.dataMagic)
-                    {
-                        case VertexMagic.POS0:
-                            break;
-                        case VertexMagic.NRM0:
-                            break;
-                        case VertexMagic.TAN0:
-                            break;
-                        case VertexMagic.QUT0:
-                            break;
-                        case VertexMagic.COL0:
-                        case VertexMagic.COL1:
-                        case VertexMagic.COL2:
-                            break;
-                        case VertexMagic.TEX0:
-                        case VertexMagic.TEX1:
-                        case VertexMagic.TEX2:
-                        case VertexMagic.TEX3:
-                        case VertexMagic.TEX4:
-                        case VertexMagic.TEX5:
-                        case VertexMagic.TEX6:
-                        case VertexMagic.TEX7:
-                        case VertexMagic.TEX8:
-                            break;
-                        case VertexMagic.BONI:
-                            break;
-                        case VertexMagic.BONW:
-                            break;
-                        case VertexMagic.SAT_:
-                            break;
-                    }
-                    vertDefs.Add(vertDef);
-                }
+                var vertDef = new CMSHVertexDataDefinition();
+                vertDef.dataMagic = sr.Read<VertexMagic>();
+                vertDef.dataFormat = sr.Read<ushort>();
+                vertDef.usht_06 = sr.Read<ushort>();
+                vertDef.dataStart = sr.Read<int>();
+                vertDef.int_0C = sr.Read<int>();
+                vertDef.dataSize = sr.Read<int>();
+                vertDef.int_14 = sr.Read<int>();
+                vertDefs.Add(vertDef);
             }
-            else
-            {
-                for (int i = 0; i < vertDefinitionsCount; i++)
-                {
-                    var vertDef = new CMSHVertexDataDefinition();
-                    vertDef.dataMagic = sr.Read<VertexMagic>();
-                    vertDef.dataFormat = sr.Read<ushort>();
-                    vertDef.usht_06 = sr.Read<ushort>();
-                    vertDef.dataStart = sr.Read<int>();
-                    vertDef.int_0C = sr.Read<int>();
-                    vertDef.dataSize = sr.Read<int>();
-                    vertDef.int_14 = sr.Read<int>();
-                    vertDefs.Add(vertDef);
-                }
-            }
+
             var vertCount = vertDefs[0].dataSize / 0xC; //First should alwasy be position
             for (int i = 0; i < vertDefinitionsCount; i++)
             {
