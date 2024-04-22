@@ -12,11 +12,11 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public int fileCount;
         public short externalMipCount;
         public short internalMipCount;
-        
+
         /// <summary>
-        /// CTXRs can contain arrays of textures. CTXRs image arrays all share the same mip count. 
+        /// Related somehow to 
         /// </summary>
-        public short textureArrayCount;
+        public short pixelBlockSizeThing;
 
         public byte desWidthByte;
         public byte desHeightByte;
@@ -56,13 +56,15 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
             sr.Seek(0, SeekOrigin.Begin);
             textureFormat = sr.Read<int>();
-            switch(footerData.version)
+            long headerLength = 0;
+            switch (footerData.version)
             {
                 case 0x25: //SOTC
                     for (int i = 0; i < externalMipCount; i++)
                     {
                         mipPaths.Add(new CTXRExternalReference(sr));
                     }
+                    headerLength = sr.Position;
                     break;
                 case 0x6E: //DeSR
                     var unkSht0 = sr.Read<short>();
@@ -74,7 +76,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     externalMipCount = sr.Read<short>();
                     internalMipCount = sr.Read<short>();
                     var unkSht1 = sr.Read<short>();
-                    var unkSht2 = sr.Read<short>();
+                    pixelBlockSizeThing = sr.Read<short>();
                     var unkInt2 = sr.Read<int>();
 
                     for (int i = 0; i < externalMipCount; i++)
@@ -83,7 +85,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     }
                     var unkInt3 = sr.ReadBE<int>();
                     var unkSht3 = sr.ReadBE<short>();
-                    if(externalMipCount == 0)
+                    if (externalMipCount == 0)
                     {
                         var unkBt0 = sr.ReadBE<byte>();
                     }
@@ -96,9 +98,46 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     desHeightByte = sr.ReadBE<byte>();
                     var sht1 = sr.ReadBE<short>();
                     var sht2 = sr.ReadBE<short>();
-                    var sht3 = sr.ReadBE<short>();
+
+                    var sht3 = sr.ReadBE<short>(); //Usually has a value except for the very large textures
                     var sht4 = sr.ReadBE<short>();
                     var int0 = sr.ReadBE<int>();
+                    var int1 = sr.ReadBE<int>();
+                    var int2 = sr.ReadBE<int>();
+                    headerLength = sr.Position;
+
+                    var pixelFormat = GetFormat();
+                    DeSwizzler.GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
+                    //MathExtras.GetDimensionsFromPixelBufferCount_PixelSizeAndAspectRatio(, pixelBlockSize,desWidthByte, desHeightByte, out var pixelWidth, out var pixelheight);
+
+                    var totalBufferLength = sr.BaseStream.Length - headerLength - 0xC; //Subtract file header and footer from file total length
+                    int mipStart = 0xC; //Mip order is bottom to top for largest to smallest
+                    var bufferLength = totalBufferLength;
+                    bool doubleSplitCheck = true;
+
+                    //The texture buffers for internal mipmaps seemingly subdivide by 2 each time we go down a mip, UNTIL we reach 0x400. When the buffer should be 0x400, we instead skip to 0x200.
+                    //All mipmap buffers after this will be 0x100 regardless of true size.
+                    //While the buffers are larger than the actual texture size, the swizzling happens at the BUFFER level and thus reading the full buffer for deswizzling is paramount
+                    /*
+                    for(int i = 0; i < internalMipCount; i++)
+                    {
+                        bufferLength = bufferLength / 2;
+                        if(doubleSplitCheck == false)
+                        {
+                            bufferLength = 0x100;
+                        }
+                        if(doubleSplitCheck == true && bufferLength <= 0x400)
+                        {
+                            bufferLength = 0x200;
+                        }
+                        
+                        var mipFull = sr.ReadBytes(mipStart - bufferLength, (int)bufferLength);
+
+                        DeSwizzler.PS5DeSwizzle(mipFull, , , pixelFormat);
+
+                        mipMaps.Add();
+                    }
+                    */
                     break;
                 default:
                     throw new Exception("Unexpected CTXR type!");
@@ -111,7 +150,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public CTXRExternalReference[] GetSortedExternalRefList()
         {
             CTXRExternalReference[] refList = new CTXRExternalReference[externalMipCount];
-            foreach(var reference in mipPaths)
+            foreach (var reference in mipPaths)
             {
                 refList[reference.mipLevel] = reference;
             }
@@ -121,8 +160,10 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         public void WriteToDDS(string rootPath, string outPath)
         {
-            if(textureFormat == -1)
+            //If this is a png, just write it out directly
+            if (textureFormat == -1)
             {
+                File.WriteAllBytes(outPath, mipMaps[0]);
                 return;
             }
 
@@ -133,7 +174,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             var refList = GetSortedExternalRefList();
             var pixelFormat = GetFormat();
             List<byte[]> mipsList = new List<byte[]>();
-            foreach(var reference in refList)
+            foreach (var reference in refList)
             {
                 var chunk = File.ReadAllBytes(Path.Combine(rootPath, reference.externalMipReference.Substring(2)));
                 switch (footerData.version)
@@ -158,7 +199,9 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 case 0x0:
                     return DXGIFormat.R8G8B8A8UNORM;
                 case 0x1:
-                    return DXGIFormat.R16G16B16A16UNORM; //A guess for now; few examples
+                    return DXGIFormat.R16G16B16A16UNORM; //Incorrect type. Used in Demon's Souls only for HDR comparison textures. Unsure what this should be.
+                case 0x3:
+                    return DXGIFormat.BC1UNORM; //Incorrect type. Used in Demon's Souls for shadow maps. Unsure what this should be.
                 case 0xB:
                     return DXGIFormat.BC1UNORM;
                 case 0xC:
@@ -170,7 +213,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 case 0xF:
                     return DXGIFormat.BC5UNORM;
                 case 0x10:
-                    return DXGIFormat.BC6HUF16;
+                    return DXGIFormat.BC6HUF16; //Image Based Lighting maps may appear VERY dark just naturally. This is simply how they are and tools like RenderDoc can 'fix' the value grading
                 case 0x11:
                     return DXGIFormat.BC7UNORM;
                 default:

@@ -249,7 +249,6 @@ namespace AquaModelLibrary.Helpers
             return outBuffer;
         }
 
-
         /// <summary>
         /// RawTex Implementation
         /// </summary>
@@ -453,6 +452,20 @@ namespace AquaModelLibrary.Helpers
                 }
             }
             return num7 * sx + num6;
+        }
+
+        /// <summary>
+        /// Grabs a tile from from an array of pixels.
+        /// </summary>
+        public static byte[] ExtractTile(byte[] texBuffer, int pixelSize, int texBufferTotalWdith, int tileLeftmostPixel, int tileTopmostPixel, int tileWidth, int tileHeight)
+        {
+            byte[] tileBuffer = new byte[pixelSize * tileWidth * tileHeight];
+            for(int i = 0; i < tileHeight; i++)
+            {
+                Array.Copy(texBuffer, tileLeftmostPixel * pixelSize + tileHeight * (pixelSize * texBufferTotalWdith) + tileTopmostPixel * (pixelSize * texBufferTotalWdith), tileBuffer, tileHeight * (pixelSize * tileWidth), pixelSize * tileWidth);
+            }
+
+            return tileBuffer;
         }
     }
 }
