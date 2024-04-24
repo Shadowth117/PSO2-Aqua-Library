@@ -51,7 +51,8 @@ namespace AquaModelLibrary.Core.General
         public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
+            
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
 
             float baseScale = SetAssimpScale(aiScene);
@@ -67,6 +68,10 @@ namespace AquaModelLibrary.Core.General
             Dictionary<int, Assimp.Node> aiNodes = GetAnimatedNodes(aiScene);
             var nodeKeys = aiNodes.Keys.ToList();
             nodeKeys.Sort();
+            if(nodeKeys.Count == 0)
+            {
+                return aqmList;
+            }
             int animatedNodeCount = nodeKeys.Last() + 1;
 
             for (int i = 0; i < aiScene.Animations.Count; i++)
