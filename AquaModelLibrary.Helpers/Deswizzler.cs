@@ -271,7 +271,7 @@ namespace AquaModelLibrary.Helpers
                         int num7 = Morton(t, 8, 8);
                         int num8 = num7 / 8;
                         int num9 = num7 % 8;
-                        Array.Copy(swizzledData, streamPos * sourceBytesPerPixel, tempBuffer, 0, sourceBytesPerPixel);
+                        Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
                         streamPos += sourceBytesPerPixel;
                         if (index2 * 8 + num9 < sx && index1 * 8 + num8 < sy)
                         {
@@ -315,15 +315,15 @@ namespace AquaModelLibrary.Helpers
                             int num8 = Morton(t, 32, 16);
                             int num9 = num8 % 32;
                             int num10 = num8 / 32;
-                            for (int index3 = 0; index3 < 32; ++index3)
+                            for (int index3 = 0; index3 < 32 && streamPos < swizzledData.Length; ++index3)
                             {
-                                Array.Copy(swizzledData, streamPos * sourceBytesPerPixel, tempBuffer, 0, sourceBytesPerPixel);
+                                Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
                                 streamPos += sourceBytesPerPixel;
-                                int num11 = index2 * 128 + num9 * 4 + index3 % 4;
-                                int num12 = index1 * 128 + (num10 * 8 + index3 / 4);
-                                if (num11 < horizontalPixelBlockCount && num12 < verticalPixelBlockCount)
+                                int currentHorizontalPixelBlock = index2 * 128 + num9 * 4 + index3 % 4;
+                                int currentVerticalPixelBlock = index1 * 128 + (num10 * 8 + index3 / 4);
+                                if (currentHorizontalPixelBlock < horizontalPixelBlockCount && currentVerticalPixelBlock < verticalPixelBlockCount)
                                 {
-                                    int destinationIndex = sourceBytesPerPixel * (num12 * horizontalPixelBlockCount + num11);
+                                    int destinationIndex = sourceBytesPerPixel * (currentVerticalPixelBlock * horizontalPixelBlockCount + currentHorizontalPixelBlock);
                                     Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixel);
                                 }
                             }
@@ -344,15 +344,15 @@ namespace AquaModelLibrary.Helpers
                             int num10 = num8 % 16;
                             for (int index3 = 0; index3 < 16; ++index3)
                             {
-                                for (int index4 = 0; index4 < num7; ++index4)
+                                for (int index4 = 0; index4 < num7 && streamPos < swizzledData.Length; ++index4)
                                 {
-                                    Array.Copy(swizzledData, streamPos * sourceBytesPerPixel, tempBuffer, 0, sourceBytesPerPixel);
+                                    Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
                                     streamPos += sourceBytesPerPixel;
-                                    int num11 = index2 * 64 + (num9 * 4 + index3 / 4) * num7 + index4;
-                                    int num12 = index1 * 64 + num10 * 4 + index3 % 4;
-                                    if (num11 < horizontalPixelBlockCount && num12 < verticalPixelBlockCount)
+                                    int currentHorizontalPixelBlock = index2 * 64 + (num9 * 4 + index3 / 4) * num7 + index4;
+                                    int currentVerticalPixelBlock = index1 * 64 + num10 * 4 + index3 % 4;
+                                    if (currentHorizontalPixelBlock < horizontalPixelBlockCount && currentVerticalPixelBlock < verticalPixelBlockCount)
                                     {
-                                        int destinationIndex = sourceBytesPerPixel * (num12 * horizontalPixelBlockCount + num11);
+                                        int destinationIndex = sourceBytesPerPixel * (currentVerticalPixelBlock * horizontalPixelBlockCount + currentHorizontalPixelBlock);
                                         Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixel);
                                     }
                                 }
@@ -405,7 +405,7 @@ namespace AquaModelLibrary.Helpers
                                 int num11 = num10 / 4;
                                 int num12 = num10 % 4;
 
-                                Array.Copy(swizzledData, streamPos * sourceBytesPerPixel, tempBuffer, 0, sourceBytesPerPixel);
+                                Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
                                 streamPos += sourceBytesPerPixel;
                                 int index6 = (index1 * num7 + index3) * 8 + num11;
                                 int index7 = (index2 * 4 + num12) * num9 + index5;
@@ -457,15 +457,38 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// Grabs a tile from from an array of pixels.
         /// </summary>
-        public static byte[] ExtractTile(byte[] texBuffer, int pixelSize, int texBufferTotalWdith, int tileLeftmostPixel, int tileTopmostPixel, int tileWidth, int tileHeight)
+        public static byte[] ExtractTile(byte[] texBuffer, DXGIFormat pixelFormat, int texBufferTotalWdith, int tileLeftmostPixel, int tileTopmostPixel, int tileWidth, int tileHeight)
         {
+            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var pixelSize, out var pixelBlockSize);
             byte[] tileBuffer = new byte[pixelSize * tileWidth * tileHeight];
             for(int i = 0; i < tileHeight; i++)
             {
-                Array.Copy(texBuffer, tileLeftmostPixel * pixelSize + tileHeight * (pixelSize * texBufferTotalWdith) + tileTopmostPixel * (pixelSize * texBufferTotalWdith), tileBuffer, tileHeight * (pixelSize * tileWidth), pixelSize * tileWidth);
+                Array.Copy(texBuffer, tileLeftmostPixel * pixelSize + tileHeight * (pixelSize * texBufferTotalWdith) + tileTopmostPixel * (pixelSize * texBufferTotalWdith), tileBuffer, i * (pixelSize * tileWidth), pixelSize * tileWidth);
             }
 
             return tileBuffer;
+        }
+
+        /// <summary>
+        /// Takes in a pixel buffer size, pixel size, the width, or top / left,of an aspect ratio and the height, or bottom / right, of an aspect ratio and outputs a width and height.
+        /// Intended for integer output for things like pixel dimensions.
+        /// </summary>
+        public static void GetDimensionsFromPixelBufferCount_PixelSizeAndAspectRatio(int bufferSize, int pixelSize, int aspectWidth, int aspectHeight, out int width, out int height)
+        {
+            GetDimensionsFromAreaAndAspectRatio(bufferSize / pixelSize, aspectWidth, aspectHeight, out width, out height);
+        }
+
+        /// <summary>
+        /// Takes in an area, the width, or top / left,of an aspect ratio and the height, or bottom / right, of an aspect ratio and outputs a width and height.
+        /// Intended for integer output for things like pixel dimensions.
+        /// </summary>
+        public static void GetDimensionsFromAreaAndAspectRatio(int area, int aspectWidth, int aspectHeight, out int width, out int height)
+        {
+            int multFactorWidth = area * aspectWidth / aspectWidth;
+            int multFactorHeight = area * aspectHeight / aspectWidth;
+
+            width = (int)Math.Sqrt(multFactorWidth);
+            height = (int)Math.Sqrt(multFactorHeight);
         }
     }
 }
