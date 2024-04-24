@@ -137,7 +137,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                             long bufferLength = sliceBufferLength;
 
                             //Some buffer lengths are irregular and we want to adjust them for processing
-                            if(bufferLength == 0x60000)
+                            if(bufferLength == 0x60000 && internalMipCount > 1)
                             {
                                 bufferLength = 0x80000;
                             }
