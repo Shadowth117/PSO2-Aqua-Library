@@ -1,8 +1,7 @@
-﻿using AquaModelLibrary.Helpers;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
-using System.Diagnostics;
 using static DirectXTex.DirectXTexUtility;
-using static VrSharp.Pvr.PvrDataCodec;
 
 namespace AquaModelLibrary.Data.BluePoint.CTXR
 {
@@ -121,7 +120,6 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     //Get top internal mip resolution
                     var texWidth = GetDesResolutionComponent(desWidthBaseByte, desWidthByte);
                     var texHeight = GetDesResolutionComponent(desHeightBaseByte, desHeightByte);
-
                     GetLargestInternalMipResolution(texWidth, texHeight,
                         externalMipCount, out var finalWidth, out var finalHeight);
 
@@ -137,7 +135,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                             long bufferLength = sliceBufferLength;
 
                             //Some buffer lengths are irregular and we want to adjust them for processing
-                            if(bufferLength == 0x60000 && internalMipCount > 1)
+                            if (bufferLength == 0x60000 && internalMipCount > 1)
                             {
                                 bufferLength = 0x80000;
                             }
@@ -152,19 +150,19 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                                     {
                                         bufferLength = bufferLength / 2;
 
-                                        if(bufferLength == 0x400)
+                                        if (bufferLength == 0x400)
                                         {
                                             bufferLength = bufferLength / 2;
                                         }
                                     }
                                 }
                                 bufferUsed += bufferLength;
-                                var mipFull = sr.ReadBytes( ((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength, (int)bufferLength);
+                                var mipFull = sr.ReadBytes(((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength, (int)bufferLength);
 
                                 //Make sure that we have enough bytes to actually deswizzle
                                 int swizzleBlockWidth = mipWidth < 4 ? 4 : mipWidth;
                                 int swizzleBlockHeight = mipHeight < 4 ? 4 : mipHeight;
-                                
+
                                 //If it's too small, we don't need to deswizzle
                                 if (mipWidth <= 4 && mipHeight <= 4)
                                 {
@@ -172,7 +170,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                                 }
 
                                 //Extract as a tile from the pixels if we haven't done that at the deswizzle step
-                                if(swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
+                                if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
                                 {
                                     mipFull = DeSwizzler.ExtractTile(mipFull, pixelFormat, swizzleBlockWidth, 0, 0, mipWidth, mipHeight);
                                 }
@@ -193,7 +191,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         {
             finalWidth = width;
             finalHeight = height;
-            for(int i = 0; i < externalMipCount; i++)
+            for (int i = 0; i < externalMipCount; i++)
             {
                 finalWidth /= 2;
                 finalHeight /= 2;
@@ -203,8 +201,8 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public static int GetDesResolutionComponent(byte DesBaseByte, byte DesResByte)
         {
             var resByte = DesResByte % 0x10;
-            
-            switch(DesBaseByte)
+
+            switch (DesBaseByte)
             {
                 case 0x1B:
                     if (resByte == 2)
@@ -216,10 +214,11 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                         throw new Exception($"Unexpected Resolution Value For {DesBaseByte:X}!");
                     }
                 case 0xBF:
-                    if(resByte == 3)
+                    if (resByte == 3)
                     {
                         return 3840;
-                    } else
+                    }
+                    else
                     {
                         throw new Exception($"Unexpected Resolution Value For {DesBaseByte:X}!");
                     }
@@ -251,29 +250,97 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 return;
             }
 
-            FileStream outStream = new FileStream(outPath, FileMode.Create);
-            BinaryWriter outWriter = new BinaryWriter((Stream)outStream);
-
             //Assume external mips come first
             var refList = GetSortedExternalRefList();
             var pixelFormat = GetFormat();
-            List<byte[]> mipsList = new List<byte[]>();
+            var texWidth = GetDesResolutionComponent(desWidthBaseByte, desWidthByte);
+            var texHeight = GetDesResolutionComponent(desHeightBaseByte, desHeightByte);
+            var chunkWidth = texWidth;
+            var chunkHeight = texHeight;
+
+            List<byte> externalMipsData = new List<byte>();
             foreach (var reference in refList)
             {
-                var chunk = File.ReadAllBytes(Path.Combine(rootPath, reference.externalMipReference.Substring(2)));
-                switch (footerData.version)
+                var chunkPath = Path.Combine(rootPath, reference.externalMipReference.Substring(2));
+                if (File.Exists(chunkPath))
                 {
-                    case 0x25: //SOTC
-                        //mipsList.Add(Deswizzler.PS4DeSwizzle(chunk, ,, pixelFormat));
-                        break;
-                    case 0x6E: //DeSR
-                        //mipsList.Add(Deswizzler.PS5DeSwizzle(chunk, ,, pixelFormat));
-                        break;
-                    default:
-                        throw new Exception("Unexpected CTXR type!");
+                    var chunk = File.ReadAllBytes(chunkPath);
+                    switch (footerData.version)
+                    {
+                        case 0x25: //SOTC
+                                   //mipsList.Add(Deswizzler.PS4DeSwizzle(chunk, ,, pixelFormat));
+                            break;
+                        case 0x6E: //DeSR
+                            externalMipsData.AddRange(DeSwizzler.PS5DeSwizzle(chunk, chunkWidth, chunkHeight, pixelFormat));
+                            break;
+                        default:
+                            throw new Exception("Unexpected CTXR type!");
+                    }
                 }
+                chunkWidth /= 2;
+                chunkHeight /= 2;
             }
 
+            //Handle separately based on if this is a cubemap/volume texture vs a standard texture
+            switch(textureType)
+            {
+                case CTextureType.Standard:
+                    for (int i = 0; i < mipMapsList.Count; i++)
+                    {
+                        int mipCount = mipMapsList[i].Count;
+
+                        //Should only be possible to have external mips with one set of texture data. In theory, there won't be other texture slices in a texture with externals, but let's be safe
+                        if (i == 0)
+                        {
+                            mipCount += refList.Length;
+                        }
+
+                        List<byte> outbytes = GenerateDDSHeader(pixelFormat, texWidth, texHeight, mipCount);
+
+                        if (i == 0)
+                        {
+                            outbytes.AddRange(externalMipsData);
+                        }
+                        foreach (var mip in mipMapsList[i])
+                        {
+                            outbytes.AddRange(mip);
+                        }
+
+                        string texPath = outPath;
+                        if (mipMapsList.Count > 1)
+                        {
+                            texPath.Replace(".dds", $"._{i}dds");
+                        }
+
+                        File.WriteAllBytes(texPath, outbytes.ToArray());
+                    }
+                    break;
+                case CTextureType.LargeUI:
+                    break;
+                case CTextureType.CubeMap:
+                case CTextureType.Volume:
+                    break;
+            }
+
+
+        }
+
+        private List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount)
+        {
+            var meta = GenerateMataData(texWidth, texHeight, mipCount, pixelFormat, false);
+            if (alphaSetting > 0)
+            {
+                meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;
+            }
+            DirectXTex.DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, false);
+
+            List<byte> outbytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
+            if (isDx10())
+            {
+                outbytes.AddRange(DataHelpers.ConvertStruct(dx10Header));
+            }
+            outbytes.InsertRange(0, new byte[] { 0x44, 0x44, 0x53, 0x20 });
+            return outbytes;
         }
 
         public DXGIFormat GetFormat()
@@ -300,6 +367,28 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     return DXGIFormat.BC6HUF16; //Image Based Lighting maps may appear VERY dark just naturally. This is simply how they are and tools like RenderDoc can 'fix' the value grading
                 case 0x11:
                     return DXGIFormat.BC7UNORM;
+                default:
+                    throw new Exception($"Unexpected pixel format: {textureFormat:X}");
+            }
+        }
+
+        public bool isDx10()
+        {
+            switch (textureFormat)
+            {
+                case 0x0:
+                case 0x1:
+                    return true;
+                case 0x3:
+                case 0xB:
+                case 0xC:
+                case 0xD:
+                    return false;
+                case 0xE:
+                case 0xF:
+                case 0x10:
+                case 0x11:
+                    return true;
                 default:
                     throw new Exception($"Unexpected pixel format: {textureFormat:X}");
             }
