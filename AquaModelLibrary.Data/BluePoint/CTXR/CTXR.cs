@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
+using AquaModelLibrary.Data.Utility;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
 using static DirectXTex.DirectXTexUtility;
@@ -83,6 +84,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     var unkSht1 = sr.Read<short>();
                     pixelBlockSizeThing = sr.Read<short>();
                     var unkInt2 = sr.Read<int>();
+                    var unkByte = sr.Read<byte>();
 
                     for (int i = 0; i < externalMipCount; i++)
                     {
@@ -90,10 +92,6 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     }
                     var unkInt3 = sr.ReadBE<int>();
                     var unkSht3 = sr.ReadBE<short>();
-                    if (externalMipCount == 0)
-                    {
-                        var unkBt0 = sr.ReadBE<byte>();
-                    }
 
                     //Texture info structure
                     var sht0 = sr.ReadBE<short>();
@@ -112,7 +110,6 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     headerLength = sr.Position;
 
                     var pixelFormat = GetFormat();
-                    DeSwizzler.GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
 
                     var totalBufferLength = sr.BaseStream.Length - headerLength - 0xC; //Subtract file header and footer from file total length
                     var sliceBufferLength = totalBufferLength / sliceCount;
@@ -122,6 +119,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     var texHeight = GetDesResolutionComponent(desHeightBaseByte, desHeightByte);
                     GetLargestInternalMipResolution(texWidth, texHeight,
                         externalMipCount, out var finalWidth, out var finalHeight);
+                    DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out var formatBpp);
 
                     //The texture buffers for internal mipmaps seemingly subdivide by 2 each time we go down a mip, UNTIL we reach 0x400. When the buffer should be 0x400, we instead skip to 0x200.
                     //All mipmap buffers after this will be 0x100 regardless of true size.
@@ -160,19 +158,25 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                                 var mipFull = sr.ReadBytes(((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength, (int)bufferLength);
 
                                 //Make sure that we have enough bytes to actually deswizzle
-                                int swizzleBlockWidth = mipWidth < 4 ? 4 : mipWidth;
-                                int swizzleBlockHeight = mipHeight < 4 ? 4 : mipHeight;
+                                var deSwizzChunkSize = GetDeSwizzleSize(mipFull.Length, pixelFormat, mipWidth, mipHeight, out int deSwizzWidth, out int deSwizzHeight);
+                                int swizzleBlockWidth = deSwizzWidth < 8 ? 8 : deSwizzWidth;
+                                int swizzleBlockHeight = deSwizzHeight < 8 ? 8 : deSwizzHeight;
 
-                                //If it's too small, we don't need to deswizzle
-                                if (mipWidth <= 4 && mipHeight <= 4)
+                                if((formatBpp * mipWidth * mipHeight / 8) <= sourceBytesPerPixelSet)
                                 {
+                                    var newMipFull = new byte[sourceBytesPerPixelSet];
+                                    Array.Copy(mipFull, 0, newMipFull, 0, sourceBytesPerPixelSet);
+                                    mipFull = newMipFull;
+                                } else
+                                {
+                                    //If it's too small, we don't need to deswizzle
                                     mipFull = DeSwizzler.PS5DeSwizzle(mipFull, swizzleBlockWidth, swizzleBlockHeight, pixelFormat);
-                                }
 
-                                //Extract as a tile from the pixels if we haven't done that at the deswizzle step
-                                if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
-                                {
-                                    mipFull = DeSwizzler.ExtractTile(mipFull, pixelFormat, swizzleBlockWidth, 0, 0, mipWidth, mipHeight);
+                                    //Extract as a tile from the pixels if we haven't done that at the deswizzle step
+                                    if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
+                                    {
+                                        mipFull = DeSwizzler.ExtractTile(mipFull, pixelFormat, swizzleBlockWidth, 0, 0, mipWidth, mipHeight);
+                                    }
                                 }
 
                                 mipMapsList[s].Add(mipFull);
@@ -241,12 +245,14 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             return refList;
         }
 
-        public void WriteToDDS(string rootPath, string outPath)
+        public void WriteToDDS(string ctxrPath, string outPath)
         {
+            var rootPath = PSUtility.GetPSRootPath(ctxrPath);
+
             //If this is a png, just write it out directly
             if (textureFormat == -1)
             {
-                File.WriteAllBytes(outPath, mipMapsList[0][0]);
+                File.WriteAllBytes(outPath.Replace(".dds", ".png"), mipMapsList[0][0]);
                 return;
             }
 
@@ -261,22 +267,26 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             List<byte> externalMipsData = new List<byte>();
             foreach (var reference in refList)
             {
-                var chunkPath = Path.Combine(rootPath, reference.externalMipReference.Substring(2));
-                if (File.Exists(chunkPath))
+                var chunkPath = Path.Combine(rootPath, reference.externalMipReference.Substring(2).Replace("/", "\\"));
+                var ctxrPathCmn = chunkPath.Replace("****", "_cmn");
+                var ctxrPathPs5 = chunkPath.Replace("****", "_ps5");
+                var ctxrPathPs4 = chunkPath.Replace("****", "_ps4");
+                if (File.Exists(ctxrPathCmn))
                 {
-                    var chunk = File.ReadAllBytes(chunkPath);
-                    switch (footerData.version)
-                    {
-                        case 0x25: //SOTC
-                                   //mipsList.Add(Deswizzler.PS4DeSwizzle(chunk, ,, pixelFormat));
-                            break;
-                        case 0x6E: //DeSR
-                            externalMipsData.AddRange(DeSwizzler.PS5DeSwizzle(chunk, chunkWidth, chunkHeight, pixelFormat));
-                            break;
-                        default:
-                            throw new Exception("Unexpected CTXR type!");
-                    }
+                    chunkPath = ctxrPathCmn;
+                    ReadAndDeSwizzle(pixelFormat, chunkWidth, chunkHeight, externalMipsData, chunkPath);
                 }
+                else if (File.Exists(ctxrPathPs5))
+                {
+                    chunkPath = ctxrPathPs5;
+                    ReadAndDeSwizzle(pixelFormat, chunkWidth, chunkHeight, externalMipsData, chunkPath);
+                }
+                else if (File.Exists(ctxrPathPs4))
+                {
+                    chunkPath = ctxrPathPs4;
+                    ReadAndDeSwizzle(pixelFormat, chunkWidth, chunkHeight, externalMipsData, chunkPath);
+                }
+
                 chunkWidth /= 2;
                 chunkHeight /= 2;
             }
@@ -285,20 +295,23 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             switch(textureType)
             {
                 case CTextureType.Standard:
-                    for (int i = 0; i < mipMapsList.Count; i++)
+                case CTextureType.LargeUI:
+                    bool first = true;
+                    for (int i = mipMapsList.Count - 1; i >= 0; i--)
                     {
                         int mipCount = mipMapsList[i].Count;
 
                         //Should only be possible to have external mips with one set of texture data. In theory, there won't be other texture slices in a texture with externals, but let's be safe
-                        if (i == 0)
+                        if (first)
                         {
                             mipCount += refList.Length;
                         }
 
                         List<byte> outbytes = GenerateDDSHeader(pixelFormat, texWidth, texHeight, mipCount);
 
-                        if (i == 0)
+                        if (first)
                         {
+                            first = false;
                             outbytes.AddRange(externalMipsData);
                         }
                         foreach (var mip in mipMapsList[i])
@@ -309,30 +322,91 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                         string texPath = outPath;
                         if (mipMapsList.Count > 1)
                         {
-                            texPath.Replace(".dds", $"._{i}dds");
+                            texPath = texPath.Replace(".dds", $"_{mipMapsList.Count - 1 - i}.dds");
                         }
 
                         File.WriteAllBytes(texPath, outbytes.ToArray());
                     }
                     break;
-                case CTextureType.LargeUI:
-                    break;
                 case CTextureType.CubeMap:
+                    List<byte> cubeOut = GenerateDDSHeader(pixelFormat, texWidth, texHeight, internalMipCount);
+                    for(int i = 0; i < mipMapsList[i].Count; i++)
+                    {
+                        foreach (var mip in mipMapsList[i])
+                        {
+                            cubeOut.AddRange(mip);
+                        }
+                    }
+                    File.WriteAllBytes(outPath, cubeOut.ToArray());
+                    break;
                 case CTextureType.Volume:
+                    //Volume maps in Demon's Souls do not use mipmaps, but the pattern is to divide the count of mipmaps alongside their resolution. See: https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-file-layout-for-volume-textures
+                    List<byte> volumeOut = GenerateDDSHeader(pixelFormat, texWidth, texHeight, internalMipCount, sliceCount);
+                    for (int i = 0; i < mipMapsList[i].Count; i++)
+                    {
+                        volumeOut.AddRange(mipMapsList[i][0]);
+                    }
+                    File.WriteAllBytes(outPath, volumeOut.ToArray());
                     break;
             }
 
 
         }
 
-        private List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount)
+        private void ReadAndDeSwizzle(DXGIFormat pixelFormat, int chunkWidth, int chunkHeight, List<byte> externalMipsData, string chunkPath)
         {
-            var meta = GenerateMataData(texWidth, texHeight, mipCount, pixelFormat, false);
+            var chunk = File.ReadAllBytes(chunkPath);
+            chunk = CompressionHandler.CheckCompression(chunk);
+
+            var deSwizzChunkSize = GetDeSwizzleSize(chunk.Length - 0xC, pixelFormat, chunkWidth, chunkHeight, out int deSwizzWidth, out int deSwizzHeight);
+            byte[] data = null;
+            switch (footerData.version)
+            {
+                case 0x25: //SOTC
+                           //mipsList.Add(Deswizzler.PS4DeSwizzle(chunk, ,, pixelFormat));
+                    break;
+                case 0x6E: //DeSR
+                    data = DeSwizzler.PS5DeSwizzle(chunk, deSwizzWidth, deSwizzHeight, pixelFormat);
+                    break;
+                default:
+                    throw new Exception("Unexpected CTXR type!");
+            }
+            data = DeSwizzler.ExtractTile(data, pixelFormat, deSwizzWidth, 0, 0, chunkWidth, chunkHeight);
+            externalMipsData.AddRange(data);
+        }
+
+        public long GetDeSwizzleSize(long dataLength, DXGIFormat pixelFormat, int width, int height, out int deSwizzWidth, out int deSwizzHeight)
+        {
+            DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var a, out var b, out var formatBpp);
+            if(((width * height * formatBpp) / 8) < dataLength)
+            {
+                if(width > height)
+                {
+                    deSwizzWidth = width;
+                    deSwizzHeight = width;
+                    return (deSwizzWidth * deSwizzHeight * formatBpp) / 8;
+                } else
+                {
+                    deSwizzWidth = height;
+                    deSwizzHeight = height;
+                    return (deSwizzWidth * deSwizzHeight * formatBpp) / 8;
+                }
+            } else
+            {
+                deSwizzWidth = width;
+                deSwizzHeight = height;
+                return dataLength;
+            }
+        }
+
+        private List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount, int depth = 1)
+        {
+            var meta = GenerateMataData(texWidth, texHeight, mipCount, pixelFormat, textureType == CTextureType.CubeMap, depth);
             if (alphaSetting > 0)
             {
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;
             }
-            DirectXTex.DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, false);
+            DirectXTex.DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, textureType == CTextureType.CubeMap);
 
             List<byte> outbytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
             if (isDx10())

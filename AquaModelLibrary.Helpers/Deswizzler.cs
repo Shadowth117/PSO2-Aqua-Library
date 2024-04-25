@@ -7,7 +7,7 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// RawTex Implementation
         /// </summary>
-        private static int[] bpp = new int[116]
+        private static int[] bitsPerPixel = new int[116]
         {
               0,
               128,
@@ -168,7 +168,7 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// Based on RawTex handling
         /// </summary>
-        public static void GetSourceBytesPerPixelAndPixelSize(DXGIFormat pixelFormat, out int sourceBytesPerPixel, out int pixelBlockSize)
+        public static void GetsourceBytesPerPixelSetAndPixelSize(DXGIFormat pixelFormat, out int sourceBytesPerPixelSet, out int pixelBlockSize, out int formatBpp)
         {
             int pixelFormatInt = (int)pixelFormat;
             if ((pixelFormatInt >= 70 && pixelFormatInt <= 84) || (pixelFormatInt >= 94 && pixelFormatInt <= 99))
@@ -180,14 +180,14 @@ namespace AquaModelLibrary.Helpers
                 pixelBlockSize = 1;
             }
 
-            int formatBpp = bpp[pixelFormatInt];
+            formatBpp = bitsPerPixel[pixelFormatInt];
             if (pixelBlockSize == 1)
             {
-                sourceBytesPerPixel = formatBpp / 8;
+                sourceBytesPerPixelSet = formatBpp / 8;
             }
             else
             {
-                sourceBytesPerPixel = formatBpp * 2;
+                sourceBytesPerPixelSet = formatBpp * 2;
             }
         }
 
@@ -196,13 +196,13 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static byte[] VitaDeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
-            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
             int maxU = (int)(Math.Log(width, 2));
             int maxV = (int)(Math.Log(height, 2));
 
-            byte[] unswizzledData = new byte[swizzledData.Length];
+            byte[] unswizzledData = new byte[(formatbpp * width * height) / 8];
 
-            for (int j = 0; (j < width * height) && (j * sourceBytesPerPixel < swizzledData.Length); j++)
+            for (int j = 0; (j < width * height) && (j * sourceBytesPerPixelSet < swizzledData.Length); j++)
             {
                 int u = 0, v = 0;
                 int origCoord = j;
@@ -221,7 +221,7 @@ namespace AquaModelLibrary.Helpers
                 }
                 if (u < width && v < height)
                 {
-                    Array.Copy(swizzledData, j * sourceBytesPerPixel, unswizzledData, (v * width + u) * sourceBytesPerPixel, sourceBytesPerPixel);
+                    Array.Copy(swizzledData, j * sourceBytesPerPixelSet, unswizzledData, (v * width + u) * sourceBytesPerPixelSet, sourceBytesPerPixelSet);
                 }
 
             }
@@ -233,18 +233,18 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static byte[] PS3DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
-            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
 
-            byte[] outBuffer = new byte[swizzledData.Length];
-            byte[] tempBuffer = new byte[sourceBytesPerPixel];
+            byte[] outBuffer = new byte[(formatbpp * width * height) / 8];
+            byte[] tempBuffer = new byte[sourceBytesPerPixelSet];
             int sy = height / pixelBlockSize;
             int sx = width / pixelBlockSize;
             for (int t = 0; t < sx * sy; ++t)
             {
                 int num5 = Morton(t, sx, sy);
-                Array.Copy(swizzledData, t * sourceBytesPerPixel, tempBuffer, 0, sourceBytesPerPixel);
-                int destinationIndex = sourceBytesPerPixel * num5;
-                Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixel);
+                Array.Copy(swizzledData, t * sourceBytesPerPixelSet, tempBuffer, 0, sourceBytesPerPixelSet);
+                int destinationIndex = sourceBytesPerPixelSet * num5;
+                Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixelSet);
             }
             return outBuffer;
         }
@@ -254,10 +254,10 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static byte[] PS4DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
-            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
 
-            byte[] outBuffer = new byte[swizzledData.Length];
-            byte[] tempBuffer = new byte[sourceBytesPerPixel];
+            byte[] outBuffer = new byte[(formatbpp * width * height) / 8];
+            byte[] tempBuffer = new byte[sourceBytesPerPixelSet];
             int sy = height / pixelBlockSize;
             int sx = width / pixelBlockSize;
 
@@ -271,12 +271,12 @@ namespace AquaModelLibrary.Helpers
                         int num7 = Morton(t, 8, 8);
                         int num8 = num7 / 8;
                         int num9 = num7 % 8;
-                        Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
-                        streamPos += sourceBytesPerPixel;
+                        Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixelSet);
+                        streamPos += sourceBytesPerPixelSet;
                         if (index2 * 8 + num9 < sx && index1 * 8 + num8 < sy)
                         {
-                            int destinationIndex = sourceBytesPerPixel * ((index1 * 8 + num8) * sx + index2 * 8 + num9);
-                            Array.Copy((Array)tempBuffer, 0, (Array)outBuffer, destinationIndex, sourceBytesPerPixel);
+                            int destinationIndex = sourceBytesPerPixelSet * ((index1 * 8 + num8) * sx + index2 * 8 + num9);
+                            Array.Copy((Array)tempBuffer, 0, (Array)outBuffer, destinationIndex, sourceBytesPerPixelSet);
                         }
                     }
                 }
@@ -289,18 +289,18 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static byte[] PS5DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
-            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
 
-            byte[] outBuffer = new byte[swizzledData.Length];
-            byte[] tempBuffer = new byte[sourceBytesPerPixel];
+            byte[] outBuffer = new byte[(formatbpp * width * height) / 8];
+            byte[] tempBuffer = new byte[sourceBytesPerPixelSet];
             int verticalPixelBlockCount = height / pixelBlockSize;
             int horizontalPixelBlockCount = width / pixelBlockSize;
             int num7 = 1;
-            if (sourceBytesPerPixel == 16)
+            if (sourceBytesPerPixelSet == 16)
                 num7 = 1;
-            if (sourceBytesPerPixel == 8)
+            if (sourceBytesPerPixelSet == 8)
                 num7 = 2;
-            if (sourceBytesPerPixel == 4)
+            if (sourceBytesPerPixelSet == 4)
                 num7 = 4;
 
             int streamPos = 0;
@@ -315,16 +315,16 @@ namespace AquaModelLibrary.Helpers
                             int num8 = Morton(t, 32, 16);
                             int num9 = num8 % 32;
                             int num10 = num8 / 32;
-                            for (int index3 = 0; index3 < 32 && streamPos < swizzledData.Length; ++index3)
+                            for (int index3 = 0; index3 < 32 && streamPos + 0x10 < swizzledData.Length; ++index3)
                             {
-                                Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
-                                streamPos += sourceBytesPerPixel;
+                                Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixelSet);
+                                streamPos += sourceBytesPerPixelSet;
                                 int currentHorizontalPixelBlock = index2 * 128 + num9 * 4 + index3 % 4;
                                 int currentVerticalPixelBlock = index1 * 128 + (num10 * 8 + index3 / 4);
                                 if (currentHorizontalPixelBlock < horizontalPixelBlockCount && currentVerticalPixelBlock < verticalPixelBlockCount)
                                 {
-                                    int destinationIndex = sourceBytesPerPixel * (currentVerticalPixelBlock * horizontalPixelBlockCount + currentHorizontalPixelBlock);
-                                    Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixel);
+                                    int destinationIndex = sourceBytesPerPixelSet * (currentVerticalPixelBlock * horizontalPixelBlockCount + currentHorizontalPixelBlock);
+                                    Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixelSet);
                                 }
                             }
                         }
@@ -344,16 +344,16 @@ namespace AquaModelLibrary.Helpers
                             int num10 = num8 % 16;
                             for (int index3 = 0; index3 < 16; ++index3)
                             {
-                                for (int index4 = 0; index4 < num7 && streamPos < swizzledData.Length; ++index4)
+                                for (int index4 = 0; index4 < num7 && streamPos + 0x10 < swizzledData.Length; ++index4)
                                 {
-                                    Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
-                                    streamPos += sourceBytesPerPixel;
+                                    Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixelSet);
+                                    streamPos += sourceBytesPerPixelSet;
                                     int currentHorizontalPixelBlock = index2 * 64 + (num9 * 4 + index3 / 4) * num7 + index4;
                                     int currentVerticalPixelBlock = index1 * 64 + num10 * 4 + index3 % 4;
                                     if (currentHorizontalPixelBlock < horizontalPixelBlockCount && currentVerticalPixelBlock < verticalPixelBlockCount)
                                     {
-                                        int destinationIndex = sourceBytesPerPixel * (currentVerticalPixelBlock * horizontalPixelBlockCount + currentHorizontalPixelBlock);
-                                        Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixel);
+                                        int destinationIndex = sourceBytesPerPixelSet * (currentVerticalPixelBlock * horizontalPixelBlockCount + currentHorizontalPixelBlock);
+                                        Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixelSet);
                                     }
                                 }
                             }
@@ -371,10 +371,10 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static byte[] SwitchDeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
-            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var sourceBytesPerPixel, out var pixelBlockSize);
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
 
-            byte[] outBuffer = new byte[swizzledData.Length];
-            byte[] tempBuffer = new byte[sourceBytesPerPixel];
+            byte[] outBuffer = new byte[(formatbpp * width * height) / 8];
+            byte[] tempBuffer = new byte[sourceBytesPerPixelSet];
             int sy = height / pixelBlockSize;
             int sx = width / pixelBlockSize;
             int[,] numArray = new int[sx * 2, sy * 2];
@@ -383,11 +383,11 @@ namespace AquaModelLibrary.Helpers
                 num7 = 16;
             int num8 = 0;
             int num9 = 1;
-            if (sourceBytesPerPixel == 16)
+            if (sourceBytesPerPixelSet == 16)
                 num9 = 1;
-            if (sourceBytesPerPixel == 8)
+            if (sourceBytesPerPixelSet == 8)
                 num9 = 2;
-            if (sourceBytesPerPixel == 4)
+            if (sourceBytesPerPixelSet == 4)
                 num9 = 4;
 
             int streamPos = 0;
@@ -405,12 +405,12 @@ namespace AquaModelLibrary.Helpers
                                 int num11 = num10 / 4;
                                 int num12 = num10 % 4;
 
-                                Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixel);
-                                streamPos += sourceBytesPerPixel;
+                                Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixelSet);
+                                streamPos += sourceBytesPerPixelSet;
                                 int index6 = (index1 * num7 + index3) * 8 + num11;
                                 int index7 = (index2 * 4 + num12) * num9 + index5;
-                                int destinationIndex = sourceBytesPerPixel * (index6 * sx + index7);
-                                Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixel);
+                                int destinationIndex = sourceBytesPerPixelSet * (index6 * sx + index7);
+                                Array.Copy(tempBuffer, 0, outBuffer, destinationIndex, sourceBytesPerPixelSet);
                                 numArray[index7, index6] = num8;
                                 ++num8;
                             }
@@ -455,15 +455,26 @@ namespace AquaModelLibrary.Helpers
         }
 
         /// <summary>
-        /// Grabs a tile from from an array of pixels.
+        /// Grabs a tile from from an array of pixels. Expects a tile divisible by two
         /// </summary>
         public static byte[] ExtractTile(byte[] texBuffer, DXGIFormat pixelFormat, int texBufferTotalWdith, int tileLeftmostPixel, int tileTopmostPixel, int tileWidth, int tileHeight)
         {
-            GetSourceBytesPerPixelAndPixelSize(pixelFormat, out var pixelSize, out var pixelBlockSize);
-            byte[] tileBuffer = new byte[pixelSize * tileWidth * tileHeight];
-            for(int i = 0; i < tileHeight; i++)
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var pixelSetSize, out var pixelBlockSize, out int formatbpp);
+            byte[] tileBuffer = new byte[(formatbpp * tileWidth * tileHeight) / 8];
+
+            if (pixelBlockSize == 4)
             {
-                Array.Copy(texBuffer, tileLeftmostPixel * pixelSize + tileHeight * (pixelSize * texBufferTotalWdith) + tileTopmostPixel * (pixelSize * texBufferTotalWdith), tileBuffer, i * (pixelSize * tileWidth), pixelSize * tileWidth);
+                tileHeight /= 4;
+                tileTopmostPixel /= 4;
+                tileLeftmostPixel /= 4;
+                texBufferTotalWdith /= 4;
+                tileWidth /= 4;
+            }
+
+            for(int i = tileTopmostPixel; i < tileHeight; i++)
+            {
+                var rowStart = (tileLeftmostPixel * pixelSetSize) + (i * texBufferTotalWdith * pixelSetSize);
+                Array.Copy(texBuffer, rowStart, tileBuffer, i * (pixelSetSize * tileWidth), pixelSetSize * tileWidth);
             }
 
             return tileBuffer;

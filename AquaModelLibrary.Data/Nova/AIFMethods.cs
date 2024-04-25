@@ -70,7 +70,6 @@ namespace AquaModelLibrary.Data.Nova
 
         public static byte[] GetMipImage(XgmiStruct xgmiStr, byte[] buffer)
         {
-            int sourceBytesPerPixel;
             DXGIFormat pixelFormat;
             int deswizzleWidth = xgmiStr.width;
             int deswizzleHeight = xgmiStr.height;

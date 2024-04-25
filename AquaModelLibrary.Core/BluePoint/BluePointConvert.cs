@@ -12,6 +12,7 @@ using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Core.General;
 using System.Numerics;
 using System.IO;
+using AquaModelLibrary.Data.Utility;
 
 namespace AquaModelLibrary.Core.BluePoint
 {
@@ -72,7 +73,7 @@ namespace AquaModelLibrary.Core.BluePoint
 
             if (filePath.EndsWith(".cmdl"))
             {
-                string rootPath = GetRootPath(filePath);
+                string rootPath = PSUtility.GetPSRootPath(filePath);
                 var cmdl = new CMDL(File.ReadAllBytes(filePath));
                 foreach (var cmatSet in cmdl.cmatReferences)
                 {
@@ -174,7 +175,7 @@ namespace AquaModelLibrary.Core.BluePoint
                 {
                     if (modelPath.Contains("-app0"))
                     {
-                        string rootPath = GetRootPath(modelPath);
+                        string rootPath = PSUtility.GetPSRootPath(modelPath);
                         csklPath = Path.Combine(rootPath, msh.boneData.skeletonPath.Substring(2).Replace("****", "_cmn")).Replace("/", "\\");
                         cskl = new CSKL(File.ReadAllBytes(csklPath));
                     }
@@ -524,21 +525,5 @@ namespace AquaModelLibrary.Core.BluePoint
             return aqp;
         }
 
-        private static string GetRootPath(string currentPath)
-        {
-            int i = 0;
-            while (currentPath != null && !File.Exists(Path.Combine(currentPath, "eboot.bin")))
-            {
-                currentPath = Path.GetDirectoryName(currentPath);
-                i++;
-                //Should seriously never ever ever happen, but screw it
-                if (i == 255)
-                {
-                    break;
-                }
-            }
-
-            return currentPath;
-        }
     }
 }

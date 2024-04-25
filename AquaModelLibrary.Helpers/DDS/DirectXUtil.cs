@@ -887,19 +887,19 @@ namespace DirectXTex
         /// <param name="format">Compression Format</param>
         /// <param name="isCubeMap">Whether or not this is a cube map</param>
         /// <returns>Resulting TexMetaData Object</returns>
-        public static TexMetadata GenerateMataData(int width, int height, int mipMapLevels, DXGIFormat format, bool isCubeMap)
+        public static TexMetadata GenerateMataData(int width, int height, int mipMapLevels, DXGIFormat format, bool isCubeMap, int depth = 1)
         {
             // Create Texture MetaData
             return new TexMetadata(
                 width,
                 height,
-                1,
+                depth,
                 isCubeMap ? 6 : 1,
                 mipMapLevels,
                 isCubeMap ? TexMiscFlags.TEXTURECUBE : 0,
                 0,
                 format,
-                TexDimension.TEXTURE2D
+                depth > 1 ? TexDimension.TEXTURE3D : TexDimension.TEXTURE2D
                 );
         }
 

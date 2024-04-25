@@ -20,7 +20,6 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             bufferSize = sr.ReadBE<int>();
             unkSht1 = sr.ReadBE<short>();
             unkSht2 = sr.ReadBE<short>();
-            unkBt0 = sr.ReadBE<byte>();
             externalMipReference = sr.ReadCStringSeek();
         }
     }
