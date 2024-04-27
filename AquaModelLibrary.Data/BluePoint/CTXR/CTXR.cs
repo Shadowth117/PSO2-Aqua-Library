@@ -54,7 +54,25 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
         }
 
-        private void Read(BufferedStreamReaderBE<MemoryStream> sr, bool readData = true)
+        public CTXR(byte[] file, bool readTexBuffers)
+        {
+            file = CompressionHandler.CheckCompression(file);
+
+            //Apparently these can just be actual .png files? Well, gotta check for that.
+            var pngCheck = BitConverter.ToInt32(file, 0);
+            if (isPng = pngCheck == 0x474E5089)
+            {
+                mipMapsList.Add(new List<byte[]> { file });
+                return;
+            }
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr, readTexBuffers);
+            }
+        }
+
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr, bool readTexBuffers = true)
         {
 
             sr.Seek(sr.BaseStream.Length - 0xC, SeekOrigin.Begin);
@@ -124,7 +142,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     //The texture buffers for internal mipmaps seemingly subdivide by 2 each time we go down a mip, UNTIL we reach 0x400. When the buffer should be 0x400, we instead skip to 0x200.
                     //All mipmap buffers after this will be 0x100 regardless of true size.
                     //While the buffers are larger than the actual texture size, the swizzling happens at the BUFFER level and thus reading the full buffer for deswizzling is paramount
-                    if (readData)
+                    if (readTexBuffers)
                     {
                         for (int s = 0; s < sliceCount; s++)
                         {
@@ -148,7 +166,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                                     {
                                         bufferLength = bufferLength / 2;
 
-                                        if (bufferLength == 0x400)
+                                        if (bufferLength == 0x400 || (sliceBufferLength == 0x60000 && bufferLength == 0x20000))
                                         {
                                             bufferLength = bufferLength / 2;
                                         }
@@ -330,7 +348,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     break;
                 case CTextureType.CubeMap:
                     List<byte> cubeOut = GenerateDDSHeader(pixelFormat, texWidth, texHeight, internalMipCount);
-                    for(int i = 0; i < mipMapsList[i].Count; i++)
+                    for(int i = 0; i < mipMapsList.Count; i++)
                     {
                         foreach (var mip in mipMapsList[i])
                         {
@@ -342,7 +360,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 case CTextureType.Volume:
                     //Volume maps in Demon's Souls do not use mipmaps, but the pattern is to divide the count of mipmaps alongside their resolution. See: https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-file-layout-for-volume-textures
                     List<byte> volumeOut = GenerateDDSHeader(pixelFormat, texWidth, texHeight, internalMipCount, sliceCount);
-                    for (int i = 0; i < mipMapsList[i].Count; i++)
+                    for (int i = 0; i < mipMapsList.Count; i++)
                     {
                         volumeOut.AddRange(mipMapsList[i][0]);
                     }
