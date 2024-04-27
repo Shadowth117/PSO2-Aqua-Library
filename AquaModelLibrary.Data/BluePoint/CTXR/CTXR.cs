@@ -10,6 +10,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
     {
         public bool isPng = false;
         public int textureFormat = -1;
+        public short unkShort0;
         public short alphaSetting;
         public CTextureType textureType;
         public int fileCount;
@@ -91,7 +92,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     headerLength = sr.Position;
                     break;
                 case 0x6E: //DeSR
-                    var unkSht0 = sr.Read<short>();
+                    unkShort0 = sr.Read<short>();
                     alphaSetting = sr.Read<short>();
                     textureType = sr.Read<CTextureType>();
                     var unkInt1 = sr.Read<int>();
@@ -148,13 +149,17 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                         {
                             int mipWidth = finalWidth;
                             int mipHeight = finalHeight;
-                            long bufferLength = sliceBufferLength;
+                            long bufferLength = sliceBufferLength / 2;
 
-                            //Some buffer lengths are irregular and we want to adjust them for processing
-                            if (bufferLength == 0x60000 && internalMipCount > 1)
+                            //In some cases, we want the full buffer size because of overrun and the need for it in deswizzling,
+                            //but sometimes we want the calculated version since larger buffers don't have padding,
+                            //which means the smaller mips combined won't equal half the slice's buffer length
+                            long calculatedBufferLength = formatBpp * finalWidth * finalHeight / 8;
+                            if(calculatedBufferLength > bufferLength)
                             {
-                                bufferLength = 0x80000;
+                                bufferLength = calculatedBufferLength;
                             }
+
                             mipMapsList.Add(new List<byte[]>());
 
                             long bufferUsed = 0;
@@ -162,18 +167,19 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                             {
                                 if (internalMipCount > 1)
                                 {
-                                    if (bufferLength != 0x100)
+                                    if (bufferLength != 0x100 && i != 0)
                                     {
                                         bufferLength = bufferLength / 2;
 
-                                        if (bufferLength == 0x400 || (sliceBufferLength == 0x60000 && bufferLength == 0x20000))
+                                        if (bufferLength == 0x400 || (bufferLength >= 0x10000))
                                         {
                                             bufferLength = bufferLength / 2;
                                         }
                                     }
                                 }
                                 bufferUsed += bufferLength;
-                                var mipFull = sr.ReadBytes(((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength, (int)bufferLength);
+                                var mipOffset = ((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength;
+                                var mipFull = sr.ReadBytes(mipOffset, (int)bufferLength);
 
                                 //Make sure that we have enough bytes to actually deswizzle
                                 var deSwizzChunkSize = GetDeSwizzleSize(mipFull.Length, pixelFormat, mipWidth, mipHeight, out int deSwizzWidth, out int deSwizzHeight);
@@ -233,7 +239,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     }
                     else
                     {
-                        throw new Exception($"Unexpected Resolution Value For {DesBaseByte:X}!");
+                        return ((DesBaseByte + 1) * 4) * (resByte + 1);
                     }
                 case 0xBF:
                     if (resByte == 3)
@@ -242,7 +248,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     }
                     else
                     {
-                        throw new Exception($"Unexpected Resolution Value For {DesBaseByte:X}!");
+                        return ((DesBaseByte + 1) * 4) * (resByte + 1);
                     }
                 default:
                     return ((DesBaseByte + 1) * 4) * (resByte + 1);
