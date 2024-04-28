@@ -271,6 +271,12 @@ namespace AquaModelLibrary.Helpers
                         int num7 = Morton(t, 8, 8);
                         int num8 = num7 / 8;
                         int num9 = num7 % 8;
+
+                        var byteLimit = (swizzledData.Length - sourceBytesPerPixelSet);
+                        if (streamPos > byteLimit)
+                        {
+                            return outBuffer;
+                        }
                         Array.Copy(swizzledData, streamPos, tempBuffer, 0, sourceBytesPerPixelSet);
                         streamPos += sourceBytesPerPixelSet;
                         if (index2 * 8 + num9 < sx && index1 * 8 + num8 < sy)
