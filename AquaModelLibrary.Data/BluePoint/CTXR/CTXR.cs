@@ -1,5 +1,4 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
-using AquaModelLibrary.Data.Utility;
+﻿using AquaModelLibrary.Data.Utility;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
 using static DirectXTex.DirectXTexUtility;
@@ -17,16 +16,15 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public short externalMipCount;
         public short internalMipCount;
         public int sliceCount;
-
+        public int singleTextureSize;
         /// <summary>
-        /// Related somehow to the size of the texture, possibly pixel block sizes for swizzling
+        /// Combined size of all external texture buffers. Not in Demon's Souls
         /// </summary>
-        public short pixelBlockSizeThing;
-
-        public byte desWidthBaseByte;
-        public byte desWidthByte;
-        public byte desHeightBaseByte;
-        public byte desHeightByte;
+        public int externalTexturesSize;
+        public byte WidthBaseByte;
+        public byte WidthMultiplierByte;
+        public byte HeightBaseByte;
+        public byte HeightMultiplierByte;
 
         public List<CTXRExternalReference> mipPaths = new List<CTXRExternalReference>();
         public List<List<byte[]>> mipMapsList = new List<List<byte[]>>();
@@ -81,29 +79,93 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
             sr.Seek(0, SeekOrigin.Begin);
             textureFormat = sr.Read<int>();
+            var pixelFormat = GetFormat();
             long headerLength = 0;
+            long totalBufferLength;
+            long sliceBufferLength;
+            int texWidth;
+            int texHeight;
+            int finalWidth;
+            int finalHeight;
+            int sourceBytesPerPixelSet, pixelBlockSize, formatBpp;
+
             switch (footerData.version)
             {
                 case 0x25: //SOTC
+                    alphaSetting = sr.ReadBE<short>();
+                    textureType = (CTextureType)sr.ReadBE<ushort>();
+                    var sUnkSht1 = sr.ReadBE<short>();
+                    var sUnkSht2 = sr.ReadBE<short>();
+                    var sUnkSht3 = sr.ReadBE<short>();
+                    fileCount = sr.ReadBE<short>(); //Always 1 + external mipCount. 1 is probably this file
+                    var sUnkSht4 = sr.ReadBE<short>();
+                    externalMipCount = sr.ReadBE<short>();
+                    internalMipCount = sr.ReadBE<short>();
+                    singleTextureSize = sr.ReadBE<int>();
+                    externalTexturesSize = sr.ReadBE<int>();
+                    var sUnkByte = sr.ReadBE<byte>();
+
+                    switch(textureType)
+                    {
+                        case CTextureType.CubeMap:
+                            sliceCount = 6;
+                            internalMipCount /= 6;
+                            break;
+                        default:
+                            sliceCount = 1;
+                            break;
+                    }
+
                     for (int i = 0; i < externalMipCount; i++)
                     {
                         mipPaths.Add(new CTXRExternalReference(sr));
                     }
+
+                    var sUnkInt3 = sr.ReadBE<int>();
+                    var sUnkSht5 = sr.ReadBE<short>();
+
+                    //Texture info structure
+                    var sht0 = sr.ReadBE<short>();
+                    WidthBaseByte = sr.ReadBE<byte>();
+                    WidthMultiplierByte = sr.ReadBE<byte>();
+                    HeightBaseByte = sr.ReadBE<byte>();
+                    HeightMultiplierByte = sr.ReadBE<byte>();
+                    var sht1 = sr.ReadBE<short>();
+                    var sht2 = sr.ReadBE<short>();
+
+                    var sUnkSize = sr.ReadBE<int>();
+                    var sUnkInt0 = sr.ReadBE<int>();
+                    var sUnkInt1 = sr.ReadBE<int>();
+                    var sUnkInt2 = sr.ReadBE<int>();
                     headerLength = sr.Position;
+
+                    totalBufferLength = sr.BaseStream.Length - headerLength - 0xC; //Subtract file header and footer from file total length
+                    sliceBufferLength = totalBufferLength / sliceCount;
+
+                    //Get top internal mip resolution
+                    texWidth = GetSOTCWidthComponent(WidthBaseByte, WidthMultiplierByte);
+                    texHeight = GetSOTCHeightComponent(HeightBaseByte, HeightMultiplierByte);
+                    GetLargestInternalMipResolution(texWidth, texHeight,
+                        externalMipCount, out finalWidth, out finalHeight);
+                    DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out sourceBytesPerPixelSet, out pixelBlockSize, out formatBpp);
+
+                    if (readTexBuffers)
+                    {
+                        ReadSOTCTexBuffers(sr, pixelFormat, headerLength, sliceBufferLength, finalWidth, finalHeight, sourceBytesPerPixelSet, formatBpp);
+                    }
                     break;
                 case 0x6E: //DeSR
-                    unkShort0 = sr.Read<short>();
-                    alphaSetting = sr.Read<short>();
-                    textureType = sr.Read<CTextureType>();
-                    var unkInt1 = sr.Read<int>();
+                    unkShort0 = sr.ReadBE<short>();
+                    alphaSetting = sr.ReadBE<short>();
+                    textureType = sr.ReadBE<CTextureType>();
+                    var unkInt1 = sr.ReadBE<int>();
 
-                    fileCount = sr.Read<int>(); //Always 1 + external mipCount. 1 is probably this file
-                    externalMipCount = sr.Read<short>();
-                    internalMipCount = sr.Read<short>();
-                    var unkSht1 = sr.Read<short>();
-                    pixelBlockSizeThing = sr.Read<short>();
-                    var unkInt2 = sr.Read<int>();
-                    var unkByte = sr.Read<byte>();
+                    fileCount = sr.ReadBE<int>(); //Always 1 + external mipCount. 1 is probably this file
+                    externalMipCount = sr.ReadBE<short>();
+                    internalMipCount = sr.ReadBE<short>();
+                    singleTextureSize = sr.ReadBE<int>();
+                    var unkInt2 = sr.ReadBE<int>();
+                    var unkByte = sr.ReadBE<byte>();
 
                     for (int i = 0; i < externalMipCount; i++)
                     {
@@ -113,13 +175,13 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     var unkSht3 = sr.ReadBE<short>();
 
                     //Texture info structure
-                    var sht0 = sr.ReadBE<short>();
-                    desWidthBaseByte = sr.ReadBE<byte>();
-                    desWidthByte = sr.ReadBE<byte>();
-                    desHeightBaseByte = sr.ReadBE<byte>();
-                    desHeightByte = sr.ReadBE<byte>();
-                    var sht1 = sr.ReadBE<short>();
-                    var sht2 = sr.ReadBE<short>();
+                    var dSht0 = sr.ReadBE<short>();
+                    WidthBaseByte = sr.ReadBE<byte>();
+                    WidthMultiplierByte = sr.ReadBE<byte>();
+                    HeightBaseByte = sr.ReadBE<byte>();
+                    HeightMultiplierByte = sr.ReadBE<byte>();
+                    var dSht1 = sr.ReadBE<short>();
+                    var dSht2 = sr.ReadBE<short>();
 
                     sliceCount = sr.ReadBE<short>() + 1; //Usually has a value except for the very large textures
                     var sht4 = sr.ReadBE<short>();
@@ -128,90 +190,184 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     var int2 = sr.ReadBE<int>();
                     headerLength = sr.Position;
 
-                    var pixelFormat = GetFormat();
-
-                    var totalBufferLength = sr.BaseStream.Length - headerLength - 0xC; //Subtract file header and footer from file total length
-                    var sliceBufferLength = totalBufferLength / sliceCount;
+                    totalBufferLength = sr.BaseStream.Length - headerLength - 0xC; //Subtract file header and footer from file total length
+                    sliceBufferLength = totalBufferLength / sliceCount;
 
                     //Get top internal mip resolution
-                    var texWidth = GetDesResolutionComponent(desWidthBaseByte, desWidthByte);
-                    var texHeight = GetDesResolutionComponent(desHeightBaseByte, desHeightByte);
+                    texWidth = GetDesResolutionComponent(WidthBaseByte, WidthMultiplierByte, 0xC0);
+                    texHeight = GetDesResolutionComponent(HeightBaseByte, HeightMultiplierByte, 0x80);
                     GetLargestInternalMipResolution(texWidth, texHeight,
-                        externalMipCount, out var finalWidth, out var finalHeight);
-                    DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out var formatBpp);
+                        externalMipCount, out finalWidth, out finalHeight);
+                    DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out sourceBytesPerPixelSet, out pixelBlockSize, out formatBpp);
 
-                    //The texture buffers for internal mipmaps seemingly subdivide by 2 each time we go down a mip, UNTIL we reach 0x400. When the buffer should be 0x400, we instead skip to 0x200.
-                    //All mipmap buffers after this will be 0x100 regardless of true size.
-                    //While the buffers are larger than the actual texture size, the swizzling happens at the BUFFER level and thus reading the full buffer for deswizzling is paramount
                     if (readTexBuffers)
                     {
-                        for (int s = 0; s < sliceCount; s++)
-                        {
-                            int mipWidth = finalWidth;
-                            int mipHeight = finalHeight;
-                            long bufferLength = sliceBufferLength / 2;
-
-                            //In some cases, we want the full buffer size because of overrun and the need for it in deswizzling,
-                            //but sometimes we want the calculated version since larger buffers don't have padding,
-                            //which means the smaller mips combined won't equal half the slice's buffer length
-                            long calculatedBufferLength = formatBpp * finalWidth * finalHeight / 8;
-                            if(calculatedBufferLength > bufferLength)
-                            {
-                                bufferLength = calculatedBufferLength;
-                            }
-
-                            mipMapsList.Add(new List<byte[]>());
-
-                            long bufferUsed = 0;
-                            for (int i = 0; i < internalMipCount; i++)
-                            {
-                                if (internalMipCount > 1)
-                                {
-                                    if (bufferLength != 0x100 && i != 0)
-                                    {
-                                        bufferLength = bufferLength / 2;
-
-                                        if (bufferLength == 0x400 || (bufferLength >= 0x10000))
-                                        {
-                                            bufferLength = bufferLength / 2;
-                                        }
-                                    }
-                                }
-                                bufferUsed += bufferLength;
-                                var mipOffset = ((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength;
-                                var mipFull = sr.ReadBytes(mipOffset, (int)bufferLength);
-
-                                //Make sure that we have enough bytes to actually deswizzle
-                                var deSwizzChunkSize = GetDeSwizzleSize(mipFull.Length, pixelFormat, mipWidth, mipHeight, out int deSwizzWidth, out int deSwizzHeight);
-                                int swizzleBlockWidth = deSwizzWidth < 8 ? 8 : deSwizzWidth;
-                                int swizzleBlockHeight = deSwizzHeight < 8 ? 8 : deSwizzHeight;
-
-                                if((formatBpp * mipWidth * mipHeight / 8) <= sourceBytesPerPixelSet)
-                                {
-                                    var newMipFull = new byte[sourceBytesPerPixelSet];
-                                    Array.Copy(mipFull, 0, newMipFull, 0, sourceBytesPerPixelSet);
-                                    mipFull = newMipFull;
-                                } else
-                                {
-                                    //If it's too small, we don't need to deswizzle
-                                    mipFull = DeSwizzler.PS5DeSwizzle(mipFull, swizzleBlockWidth, swizzleBlockHeight, pixelFormat);
-
-                                    //Extract as a tile from the pixels if we haven't done that at the deswizzle step
-                                    if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
-                                    {
-                                        mipFull = DeSwizzler.ExtractTile(mipFull, pixelFormat, swizzleBlockWidth, 0, 0, mipWidth, mipHeight);
-                                    }
-                                }
-
-                                mipMapsList[s].Add(mipFull);
-                                mipWidth /= 2;
-                                mipHeight /= 2;
-                            }
-                        }
+                        ReadDeSRTexBuffers(sr, pixelFormat, headerLength, sliceBufferLength, finalWidth, finalHeight, sourceBytesPerPixelSet, formatBpp);
                     }
                     break;
                 default:
                     throw new Exception("Unexpected CTXR type!");
+            }
+        }
+
+        private void ReadSOTCTexBuffers(BufferedStreamReaderBE<MemoryStream> sr, DXGIFormat pixelFormat, long headerLength, long sliceBufferLength, int finalWidth, int finalHeight, int sourceBytesPerPixelSet, int formatBpp)
+        {
+            long bufferUsed = 0;
+            int mipWidth = finalWidth;
+            int mipHeight = finalHeight;
+
+            //Swizzling can go outside the bounds of the texture so we want to check the full buffer in these cases. Hopefully it's only for single mip instances
+            long bufferLength = internalMipCount == 1 ? sliceBufferLength : formatBpp * finalWidth * finalHeight / 8;
+
+            //Prepare mip set lists
+            for(int i = 0; i < sliceCount; i++)
+            {
+                mipMapsList.Add(new List<byte[]>());
+            }
+
+            int sliceBufferMin;
+            if (sliceCount > 1)
+            {
+                sliceBufferMin = 0x400;
+            }
+            else
+            {
+                sliceBufferMin = 0x200;
+            }
+
+            //SOTC textures seem to lay out slices at the same level sequentially rather than having slices go through each mip in their set before proceeding to the next slice
+            for (int i = 0; i < internalMipCount; i++)
+            {
+                if (internalMipCount > 1 || sliceCount > 1)
+                {
+                    if (bufferLength != sliceBufferMin && i != 0)
+                    {
+                        bufferLength = bufferLength / 4;
+                        if (bufferLength < sliceBufferMin)
+                        {
+                            bufferLength = sliceBufferMin;
+                        }
+                    }
+                }
+
+                for (int s = 0; s < sliceCount; s++)
+                {
+                    var mipOffset = bufferUsed + headerLength;
+                    var mipFull = sr.ReadBytes(mipOffset, (int)bufferLength);
+                    bufferUsed += bufferLength;
+
+                    //Make sure that we have enough bytes to actually deswizzle
+                    var deSwizzChunkSize = GetDeSwizzleSize(mipFull.Length, pixelFormat, mipWidth, mipHeight, out int deSwizzWidth, out int deSwizzHeight);
+                    int swizzleBlockWidth = deSwizzWidth < 8 ? 8 : deSwizzWidth;
+                    int swizzleBlockHeight = deSwizzHeight < 8 ? 8 : deSwizzHeight;
+
+                    //If it's too small, we don't need to deswizzle
+                    if ((formatBpp * mipWidth * mipHeight / 8) <= sourceBytesPerPixelSet)
+                    {
+                        var newMipFull = new byte[sourceBytesPerPixelSet];
+                        Array.Copy(mipFull, 0, newMipFull, 0, sourceBytesPerPixelSet);
+                        mipFull = newMipFull;
+                    }
+                    else
+                    {
+                        mipFull = DeSwizzler.PS4DeSwizzle(mipFull, swizzleBlockWidth, swizzleBlockHeight, pixelFormat);
+
+                        //Extract as a tile from the pixels if we haven't done that at the deswizzle step
+                        if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
+                        {
+                            mipFull = DeSwizzler.ExtractTile(mipFull, pixelFormat, swizzleBlockWidth, 0, 0, mipWidth, mipHeight);
+                        }
+                    }
+
+                    mipMapsList[s].Add(mipFull);
+                }
+                mipWidth /= 2;
+                mipHeight /= 2;
+
+                //Cubemaps seem to pad to the size of 8 textures
+                if(sliceCount > 1)
+                {
+                    //If volume textures exist in SOTC, those need to be figured out
+                    if(sliceCount > 8)
+                    {
+                        throw new Exception();
+                    }
+
+                    bufferUsed += 8 * bufferLength - sliceCount * bufferLength;
+                }
+            }
+        }
+
+        /// <summary> 
+        /// The texture buffers for internal mipmaps seemingly subdivide by 2 each time we go down a mip, UNTIL we reach 0x400. When the buffer should be 0x400, we instead skip to 0x200.
+        /// All mipmap buffers after this will be 0x100 regardless of true size.
+        /// While the buffers are larger than the actual texture size, the swizzling happens at the BUFFER level and thus reading the full buffer for deswizzling is paramount
+        /// </summary>
+        private void ReadDeSRTexBuffers(BufferedStreamReaderBE<MemoryStream> sr, DXGIFormat pixelFormat, long headerLength, long sliceBufferLength, int finalWidth, int finalHeight, int sourceBytesPerPixelSet, int formatBpp)
+        {
+            for (int s = 0; s < sliceCount; s++)
+            {
+                int mipWidth = finalWidth;
+                int mipHeight = finalHeight;
+                long bufferLength = sliceBufferLength / 2;
+
+                //In some cases, we want the full buffer size because of overrun and the need for it in deswizzling,
+                //but sometimes we want the calculated version since larger buffers don't have padding,
+                //which means the smaller mips combined won't equal half the slice's buffer length
+                long calculatedBufferLength = formatBpp * finalWidth * finalHeight / 8;
+                if (calculatedBufferLength > bufferLength)
+                {
+                    bufferLength = calculatedBufferLength;
+                }
+
+                mipMapsList.Add(new List<byte[]>());
+
+                long bufferUsed = 0;
+                for (int i = 0; i < internalMipCount; i++)
+                {
+                    if (internalMipCount > 1)
+                    {
+                        if (bufferLength != 0x100 && i != 0)
+                        {
+                            bufferLength = bufferLength / 2;
+
+                            if (bufferLength == 0x400 || (bufferLength >= 0x10000))
+                            {
+                                bufferLength = bufferLength / 2;
+                            }
+                        }
+                    }
+                    bufferUsed += bufferLength;
+                    var mipOffset = ((sliceBufferLength * sliceCount) - (sliceBufferLength * s)) - bufferUsed + headerLength;
+                    var mipFull = sr.ReadBytes(mipOffset, (int)bufferLength);
+
+                    //Make sure that we have enough bytes to actually deswizzle
+                    var deSwizzChunkSize = GetDeSwizzleSize(mipFull.Length, pixelFormat, mipWidth, mipHeight, out int deSwizzWidth, out int deSwizzHeight);
+                    int swizzleBlockWidth = deSwizzWidth < 8 ? 8 : deSwizzWidth;
+                    int swizzleBlockHeight = deSwizzHeight < 8 ? 8 : deSwizzHeight;
+
+                    //If it's too small, we don't need to deswizzle
+                    if ((formatBpp * mipWidth * mipHeight / 8) <= sourceBytesPerPixelSet)
+                    {
+                        var newMipFull = new byte[sourceBytesPerPixelSet];
+                        Array.Copy(mipFull, 0, newMipFull, 0, sourceBytesPerPixelSet);
+                        mipFull = newMipFull;
+                    }
+                    else
+                    {
+                        mipFull = DeSwizzler.PS5DeSwizzle(mipFull, swizzleBlockWidth, swizzleBlockHeight, pixelFormat);
+
+                        //Extract as a tile from the pixels if we haven't done that at the deswizzle step
+                        if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
+                        {
+                            mipFull = DeSwizzler.ExtractTile(mipFull, pixelFormat, swizzleBlockWidth, 0, 0, mipWidth, mipHeight);
+                        }
+                    }
+
+                    mipMapsList[s].Add(mipFull);
+                    mipWidth /= 2;
+                    mipHeight /= 2;
+                }
             }
         }
 
@@ -226,9 +382,124 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
         }
 
-        public static int GetDesResolutionComponent(byte DesBaseByte, byte DesResByte)
+        /// <summary>
+        /// Outside of special cases, the first byte + 1, NOT multiplied by 4, is the base resolution which gets multiplied by the 2nd nybble in the 2nd byte.
+        /// </summary>
+        public static int GetSOTCWidthComponent(byte SOTCBaseByte, byte SOTCResByte)
         {
-            var resByte = DesResByte % 0x10;
+            var resByte = SOTCResByte - 0xC0;
+
+            switch (SOTCBaseByte)
+            {
+                case 0x3F:
+                    switch (resByte)
+                    {
+                        case 6:
+                            return 1600;
+                    }
+                    break;
+                case 0x57:
+                    switch(resByte)
+                    {
+                        case 6:
+                            return 1624;
+                        case 2:
+                            return 600;
+                    }
+                    break;
+                case 0x7F:
+                    switch(resByte)
+                    {
+                        case 1:
+                            return 380;
+                        case 2:
+                            return 636;
+                        case 7:
+                            return 1920;
+                        case 0xC:
+                            return 3200;
+                    }
+                    break;
+                case 0xA3:
+                    switch (resByte)
+                    {
+                        case 1:
+                            return 420;
+                    }
+                    break;
+                case 0xBF:
+                    switch (resByte)
+                    {
+                        case 0:
+                            return 190;
+                    }
+                    break;
+                case 0xC3:
+                    switch (resByte)
+                    {
+                        case 6:
+                            return 1730;
+                    }
+                    break;
+
+            }
+            return (SOTCBaseByte + 1) * (resByte + 1);
+        }
+
+        /// <summary>
+        /// Outside of special cases, the first byte + 1, then multiplied by 4, is the base resolution which gets multiplied by the 2nd nybble in the 2nd byte.
+        /// </summary>
+        public static int GetSOTCHeightComponent(byte SOTCBaseByte, byte SOTCResByte)
+        {
+            var resByte = SOTCResByte - 0x70;
+
+            switch (SOTCBaseByte)
+            {
+                case 0x5:
+                    switch (resByte)
+                    {
+                        case 1:
+                            return 1048;
+                    }
+                    break;
+                case 0xD:
+                    switch (resByte)
+                    {
+                        case 1:
+                            return 1080;
+                    }
+                    break;
+                case 0x1B:
+                    if (resByte == 2)
+                    {
+                        return 2160;
+                    }
+                    break;
+                case 0x37:
+                    switch (resByte)
+                    {
+                        case 1:
+                            return 1248;
+                    }
+                    break;
+                case 0x9B:
+                    switch (resByte)
+                    {
+                        case 0:
+                            return 624;
+                    }
+                    break;
+            }
+            return ((SOTCBaseByte + 1) * 4) * (resByte + 1);
+        }
+
+        /// <summary>
+        /// Outside of special cases, the first byte + 1, then multiplied by 4, is the base resolution which gets multiplied by the 2nd nybble in the 2nd byte.
+        /// 0xC0 should be the width base while 0x80 should be the height base
+        /// </summary>
+        public static int GetDesResolutionComponent(byte DesBaseByte, byte DesResByte, byte multBase)
+        {
+            var resByte = DesResByte - multBase;
 
             switch (DesBaseByte)
             {
@@ -237,22 +508,15 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     {
                         return 2160;
                     }
-                    else
-                    {
-                        return ((DesBaseByte + 1) * 4) * (resByte + 1);
-                    }
+                    break;
                 case 0xBF:
                     if (resByte == 3)
                     {
                         return 3840;
                     }
-                    else
-                    {
-                        return ((DesBaseByte + 1) * 4) * (resByte + 1);
-                    }
-                default:
-                    return ((DesBaseByte + 1) * 4) * (resByte + 1);
+                    break;
             }
+            return ((DesBaseByte + 1) * 4) * (resByte + 1);
         }
 
         /// <summary>
@@ -283,8 +547,23 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             //Assume external mips come first
             var refList = GetSortedExternalRefList();
             var pixelFormat = GetFormat();
-            var texWidth = GetDesResolutionComponent(desWidthBaseByte, desWidthByte);
-            var texHeight = GetDesResolutionComponent(desHeightBaseByte, desHeightByte);
+            int texWidth;
+            int texHeight;
+
+            switch (footerData.version)
+            {
+                case 0x25: //SOTC
+                    texWidth = GetSOTCWidthComponent(WidthBaseByte, WidthMultiplierByte);
+                    texHeight = GetSOTCHeightComponent(HeightBaseByte, HeightMultiplierByte);
+                    break;
+                case 0x6E: //DeSR
+                    texWidth = GetDesResolutionComponent(WidthBaseByte, WidthMultiplierByte, 0xC0);
+                    texHeight = GetDesResolutionComponent(HeightBaseByte, HeightMultiplierByte, 0x80);
+                    break;
+                default:
+                    throw new Exception("Unexpected CTXR type!");
+            }
+
             var chunkWidth = texWidth;
             var chunkHeight = texHeight;
 
@@ -316,7 +595,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
 
             //Handle separately based on if this is a cubemap/volume texture vs a standard texture
-            switch(textureType)
+            switch (textureType)
             {
                 case CTextureType.Standard:
                 case CTextureType.LargeUI:
@@ -354,7 +633,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     break;
                 case CTextureType.CubeMap:
                     List<byte> cubeOut = GenerateDDSHeader(pixelFormat, texWidth, texHeight, internalMipCount);
-                    for(int i = 0; i < mipMapsList.Count; i++)
+                    for (int i = 0; i < mipMapsList.Count; i++)
                     {
                         foreach (var mip in mipMapsList[i])
                         {
@@ -387,7 +666,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             switch (footerData.version)
             {
                 case 0x25: //SOTC
-                           //mipsList.Add(Deswizzler.PS4DeSwizzle(chunk, ,, pixelFormat));
+                    data = DeSwizzler.PS4DeSwizzle(chunk, deSwizzWidth, deSwizzHeight, pixelFormat);
                     break;
                 case 0x6E: //DeSR
                     data = DeSwizzler.PS5DeSwizzle(chunk, deSwizzWidth, deSwizzHeight, pixelFormat);
@@ -402,20 +681,22 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public long GetDeSwizzleSize(long dataLength, DXGIFormat pixelFormat, int width, int height, out int deSwizzWidth, out int deSwizzHeight)
         {
             DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var a, out var b, out var formatBpp);
-            if(((width * height * formatBpp) / 8) < dataLength)
+            if (((width * height * formatBpp) / 8) < dataLength)
             {
-                if(width > height)
+                if (width > height)
                 {
                     deSwizzWidth = width;
                     deSwizzHeight = width;
                     return (deSwizzWidth * deSwizzHeight * formatBpp) / 8;
-                } else
+                }
+                else
                 {
                     deSwizzWidth = height;
                     deSwizzHeight = height;
                     return (deSwizzWidth * deSwizzHeight * formatBpp) / 8;
                 }
-            } else
+            }
+            else
             {
                 deSwizzWidth = width;
                 deSwizzHeight = height;
