@@ -3,7 +3,7 @@
     public class MotionConstants
     {
         public const int CAMO = 0x4F4D4143; //Camera animation
-        public const int SPMO = 0x4F4D5053; //UV animation
+        public const int SPMO = 0x4F4D5053; //Material animation
         public const int NDMO = 0x4F4D444E; //3d Motion animation
         public const int stdAnim = 0x10002;
         public const int stdPlayerAnim = 0x10012;
@@ -17,13 +17,13 @@
             {0x2, "0x2 Rotation" },  //Standard
             {0x3, "0x3 Scale" },     //Standard
             {0x4, "0x4 Unk Floats" }, //Camera
-            {0x8, "0x8 Unk Vector4s" }, //Alternate UV
-            {0x9, "0x9 Unk Vector4s" }, //Alternate UV
-            {0xA, "0xA Unk Vector4s" }, //Alternate UV
-            {0xB, "0xB Unk Vector4s" }, //Alternate UV
-            {0xC, "0xC Unk Vector4s" }, //Alternate UV
-            {0xD, "0xD Unk Vector4s" }, //Alternate UV
-            {0xE, "0xE Unk Vector4s" }, //Alternate UV
+            {0x8, "0x8 Unk Vector4s" }, //Alternate Material
+            {0x9, "0x9 Unk Vector4s" }, //Alternate Material
+            {0xA, "0xA Unk Vector4s" }, //Alternate Material
+            {0xB, "0xB Unk Vector4s" }, //Alternate Material
+            {0xC, "0xC Unk Vector4s" }, //Alternate Material
+            {0xD, "0xD Unk Vector4s" }, //Alternate Material
+            {0xE, "0xE Unk Vector4s" }, //Alternate Material
             //0x5-0x7 and 0xD-0x13 seemingly not used in this format. Effects seem to use values in this range for equivalent area there. 
             //In addition, the way those are constructed is akin to an alternative or early version of the overall motion format, based on namings and other bits.  
             {0x10, "0x10 NodeTreeFlag Ints 1" }, //Standard (Player)
@@ -31,18 +31,18 @@
             {0x12, "0x12 NodeTreeFlag Ints 3" }, //Standard (Player)
             {0x14, "0x14 Unk Floats" }, //Camera
             {0x15, "0x15 Unk Floats" }, //Camera
-            {0x16, "0x16 Unk Floats" }, //UV
-            {0x17, "0x17 Unk Floats" }, //UV
-            {0x18, "0x18 Unk Floats" }, //UV
-            {0x19, "0x19 Unk Floats" }, //UV
-            {0x1A, "0x1A Unk Floats" }, //UV
-            {0x1B, "0x1B Unk Floats" }, //UV
-            {0x1C, "0x1C Unk Floats" }, //UV
-            {0x1D, "0x1D Unk Floats" }, //UV
-            {0x1E, "0x1E Unk Floats" }, //Alternate UV
-            {0x1F, "0x1F Unk Floats" }, //Alternate UV
-            {0x20, "0x20 Unk Floats" }, //Alternate UV
-            {0x21, "0x21 Unk Floats" } //Alternate UV
+            {0x16, "0x16 Unk Floats" }, //Material
+            {0x17, "0x17 Unk Floats" }, //Material
+            {0x18, "0x18 Unk Floats" }, //Material
+            {0x19, "0x19 Unk Floats" }, //Material
+            {0x1A, "0x1A Unk Floats" }, //Material
+            {0x1B, "0x1B Unk Floats" }, //Material
+            {0x1C, "0x1C Unk Floats" }, //Material
+            {0x1D, "0x1D Unk Floats" }, //Material
+            {0x1E, "0x1E Unk Floats" }, //Alternate Material
+            {0x1F, "0x1F Unk Floats" }, //Alternate Material
+            {0x20, "0x20 Unk Floats" }, //Alternate Material
+            {0x21, "0x21 NGS Emissive Intensity" } //Alternate Material
         };
         public static readonly List<int> standardTypes = new List<int>()
         {
