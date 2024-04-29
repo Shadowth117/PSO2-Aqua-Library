@@ -123,7 +123,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         {
             //For certain SOTC models
             var crcCheck = sr.ReadBytes(sr.Position, 4);
-            hasExtraFlags = crcCheck[1] > 0 || crcCheck[2] > 0 || crcCheck[3] > 0;
+            hasExtraFlags = crcCheck[2] > 0 || crcCheck[3] > 0;
             if (variantFlags == 0x200 && BitConverter.ToUInt64(sr.ReadBytes(0x25, 8), 0) == dummyConstData)
             {
                 hasExtraFlags = true;
