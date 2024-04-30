@@ -762,9 +762,9 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 case 0xB:
                 case 0xC:
                 case 0xD:
-                    return false;
                 case 0xE:
                 case 0xF:
+                    return false;
                 case 0x10:
                 case 0x11:
                     return true;
