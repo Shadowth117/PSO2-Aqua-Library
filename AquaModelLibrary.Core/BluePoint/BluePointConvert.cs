@@ -1,18 +1,18 @@
-﻿using AquaModelLibrary.Data.BluePoint.CANI;
+﻿using AquaModelLibrary.Core.General;
+using AquaModelLibrary.Data.BluePoint.CANI;
 using AquaModelLibrary.Data.BluePoint.CMAT;
 using AquaModelLibrary.Data.BluePoint.CMDL;
 using AquaModelLibrary.Data.BluePoint.CMSH;
 using AquaModelLibrary.Data.BluePoint.CSKL;
+using AquaModelLibrary.Data.BluePoint.CTXR;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Data.Utility;
 using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Core.General;
 using System.Numerics;
-using System.IO;
-using AquaModelLibrary.Data.Utility;
 
 namespace AquaModelLibrary.Core.BluePoint
 {
@@ -64,16 +64,20 @@ namespace AquaModelLibrary.Core.BluePoint
             return bytes;
         }
 
-        public static void ReadCMDL(string filePath)
+        /// <summary>
+        /// Takes a path for a CMDL or CMSH and does the legwork to convert either and their textures to .fbx and .dds
+        /// </summary>
+        public static void ConvertCMDLCMSH(string filePath)
         {
             string outPath = "";
             List<string> outNames = new List<string>();
             Dictionary<string, CMAT> materialDict = new Dictionary<string, CMAT>();
             List<string> cmshPaths = new List<string>();
+            List<string> uniqueTexNames = new List<string>();
 
+            string rootPath = PSUtility.GetPSRootPath(filePath);
             if (filePath.EndsWith(".cmdl"))
             {
-                string rootPath = PSUtility.GetPSRootPath(filePath);
                 var cmdl = new CMDL(File.ReadAllBytes(filePath));
                 foreach (var cmatSet in cmdl.cmatReferences)
                 {
@@ -84,18 +88,30 @@ namespace AquaModelLibrary.Core.BluePoint
                     if (File.Exists(cmatPathCmn))
                     {
                         cmatPath = cmatPathCmn;
-                    } else if(File.Exists(cmatPathPs5))
+                    }
+                    else if (File.Exists(cmatPathPs5))
                     {
                         cmatPath = cmatPathPs5;
-                    } else if(File.Exists(cmatPathPs4))
+                    }
+                    else if (File.Exists(cmatPathPs4))
                     {
                         cmatPath = cmatPathPs4;
                     }
 
-                    if(File.Exists(cmatPath))
+                    if (File.Exists(cmatPath))
                     {
-                        materialDict.Add(cmatSet.cmshMaterialName.str, new CMAT(File.ReadAllBytes(cmatPath)));
-                    } else
+                        var cmat = new CMAT(File.ReadAllBytes(cmatPath));
+                        materialDict.Add(cmatSet.cmshMaterialName.str, cmat);
+
+                        foreach (var texName in cmat.texNames)
+                        {
+                            if (!uniqueTexNames.Contains(texName))
+                            {
+                                uniqueTexNames.Add(texName);
+                            }
+                        }
+                    }
+                    else
                     {
                         materialDict.Add(cmatSet.cmshMaterialName.str, null);
                     }
@@ -105,7 +121,7 @@ namespace AquaModelLibrary.Core.BluePoint
                     cmshPaths.Add(Path.Combine(rootPath, cmshPartialPath.str.Substring(2).Replace("****", "_cmn")).Replace("/", "\\"));
                     outNames.Add(Path.GetFileName(cmshPartialPath.str));
                 }
-                
+
                 outPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
                 Directory.CreateDirectory(outPath);
             }
@@ -120,13 +136,41 @@ namespace AquaModelLibrary.Core.BluePoint
                 return;
             }
 
-            for (int i = 0; i < cmshPaths.Count; i++)
+            //Dump textures
+            Parallel.ForEach(uniqueTexNames, texName =>
+            {
+                var ctxrPath = Path.Combine(rootPath, texName.Substring(2)).Replace("/", "\\");
+                var cmatPathCmn = ctxrPath.Replace("****", "_cmn");
+                var cmatPathPs5 = ctxrPath.Replace("****", "_ps5");
+                var cmatPathPs4 = ctxrPath.Replace("****", "_ps4");
+                if (File.Exists(cmatPathCmn))
+                {
+                    ctxrPath = cmatPathCmn;
+                }
+                else if (File.Exists(cmatPathPs5))
+                {
+                    ctxrPath = cmatPathPs5;
+                }
+                else if (File.Exists(cmatPathPs4))
+                {
+                    ctxrPath = cmatPathPs4;
+                }
+
+                if (File.Exists(ctxrPath))
+                {
+                    var ctxr = new CTXR(File.ReadAllBytes(ctxrPath));
+                    ctxr.WriteToDDS(ctxrPath, Path.Combine(outPath, Path.GetFileName(ctxrPath).Replace(".ctxr", ".dds")));
+                }
+            });
+
+            //Convert from CMSH paths
+            Parallel.For(0, cmshPaths.Count, i =>
             {
                 var mshPath = cmshPaths[i];
                 var outName = outNames[i];
 
-                var aqp = ReadCMSH(mshPath, materialDict, out var aqn);
-                if(aqp != null)
+                var aqp = ConvertCMSH(mshPath, materialDict, out var aqn);
+                if (aqp != null)
                 {
                     aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true);
                     aqp.ConvertToLegacyTypes();
@@ -134,11 +178,14 @@ namespace AquaModelLibrary.Core.BluePoint
 
                     FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false);
                 }
-            }
+            });
 
         }
 
-        public static AquaObject ReadCMSH(string filePath, Dictionary<string, CMAT> materialDict, out AquaNode aqn)
+        /// <summary>
+        /// Takes in a CMSH path, a dictionary of CMATs, and outputs an AquaObject and AquaNode
+        /// </summary>
+        public static AquaObject ConvertCMSH(string filePath, Dictionary<string, CMAT> materialDict, out AquaNode aqn)
         {
             string modelPath = Path.GetDirectoryName(filePath);
             var aboveModelPath = Path.GetDirectoryName(modelPath);
@@ -150,7 +197,7 @@ namespace AquaModelLibrary.Core.BluePoint
             return CMDLToAqua(new CMSH(File.ReadAllBytes(filePath)), materialDict, cmtlPath, modelPath, out aqn);
         }
 
-        public static CANI ReadCANI(string filePath)
+        public static CANI ConvertCANI(string filePath)
         {
             return new CANI(File.ReadAllBytes(filePath));
         }
@@ -235,10 +282,11 @@ namespace AquaModelLibrary.Core.BluePoint
 
                     Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
                     Matrix4x4 invMatReal;
-                    if(cskl.invTransforms.Count > 0)
+                    if (cskl.invTransforms.Count > 0)
                     {
                         invMatReal = cskl.invTransforms[i];
-                    } else
+                    }
+                    else
                     {
                         Matrix4x4.Invert(mat, out invMatReal);
                     }
@@ -397,7 +445,7 @@ namespace AquaModelLibrary.Core.BluePoint
                     continue;
                 }
 
-                if ((mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0) 
+                if ((mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0)
                     || (!mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
                 {
                     startFace = currentFace;
@@ -423,7 +471,7 @@ namespace AquaModelLibrary.Core.BluePoint
                 {
                     var matFileName = baseMatName.matName.Replace("_mat1", "");
                     matFileName = matFileName.Replace("_mat", "");
-                    if(cmtlPath != null)
+                    if (cmtlPath != null)
                     {
                         var matPath = Path.Combine(cmtlPath, matFileName + ".cmat");
                         var backupMatPath = Path.Combine(modelPath, matFileName + ".cmat");
