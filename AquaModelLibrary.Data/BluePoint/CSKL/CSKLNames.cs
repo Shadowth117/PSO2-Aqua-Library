@@ -26,7 +26,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                 for (int i = 0; i < count; i++)
                 {
                     int relativeOffset = sr.Read<int>();
-                    long absoluteOffset = relativeOffset + sr.Position;
+                    long absoluteOffset = relativeOffset + sr.Position - 0x4;
 
                     var bookmark = sr.Position;
                     sr.Seek(absoluteOffset, System.IO.SeekOrigin.Begin);
@@ -53,7 +53,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
         public List<int> secondaryParams = new List<int>();
 
         //Helper
-        public int primaryNameOffsetListAbsoluteOffset;
+        public long primaryNameOffsetListAbsoluteOffset;
 
         public long secondaryNameOffsetListAbsoluteOffset;
         public long secondaryParamOffsetListAbsoluteOffset;
@@ -67,7 +67,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
         {
             crc = sr.Read<int>();
             unk0 = sr.Read<int>();
-            var unk1 = sr.Read<int>();
+            secondaryNameCount = sr.Read<int>(); //Not used in 0x9 version
 
             switch (csklVersion)
             {
@@ -75,16 +75,18 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                     primaryNames = new CSKLNameList(sr, boneCount);
                     break;
                 case 0x19:
-                    secondaryNameCount = sr.Read<int>();
+                    var tempPos = sr.Position;
                     primaryNameOffsetListOffset = sr.Read<int>();
+                    primaryNameOffsetListAbsoluteOffset = primaryNameOffsetListOffset + tempPos;
 
-                    var secondaryNameOffsetListOffsetPosition = sr.Position;
-                    var secondaryParamOffsetListOffsetPosition = secondaryNameOffsetListOffsetPosition + 4;
+                    tempPos = sr.Position;
                     secondaryNameOffsetListOffset = sr.Read<int>();
-                    secondaryParamOffsetListOffset = sr.Read<int>();
+                    secondaryNameOffsetListAbsoluteOffset = secondaryNameOffsetListOffset + tempPos;
 
-                    secondaryNameOffsetListAbsoluteOffset = secondaryNameOffsetListOffsetPosition + secondaryNameOffsetListOffset;
-                    secondaryParamOffsetListAbsoluteOffset = secondaryParamOffsetListOffsetPosition + secondaryParamOffsetListOffset;
+                    tempPos = sr.Position;
+                    secondaryParamOffsetListOffset = sr.Read<int>();
+                    secondaryParamOffsetListAbsoluteOffset = secondaryParamOffsetListOffset + tempPos;
+
                     //Primary Name List
                     primaryNames = new CSKLNameList(sr);
                     if (secondaryNameCount > 0 && secondaryNameOffsetListOffset > 0)
