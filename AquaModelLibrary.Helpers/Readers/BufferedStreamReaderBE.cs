@@ -155,6 +155,17 @@ namespace AquaModelLibrary.Helpers.Readers
         }
 
         /// <summary>
+        /// Returns an array of bytes without optimizations. Best used for large sets.
+        /// </summary>
+        public byte[] ReadBytesSeek(int blockSize)
+        {
+            Span<byte> bytes = new byte[blockSize];
+            ReadBytesUnbuffered(Position, bytes);
+            Seek(Position + blockSize, SeekOrigin.Begin);
+            return bytes.ToArray();
+        }
+
+        /// <summary>
         /// Reads 4 bytes at the current position and returns them as an array of ints.
         /// </summary>
         public int[] Read4BytesToIntArray()

@@ -25,6 +25,7 @@
   <ItemGroup>
     <PackageReference Include="prs_rs.Net.Sys" Version="1.0.1" />
     <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
 
 </Project>

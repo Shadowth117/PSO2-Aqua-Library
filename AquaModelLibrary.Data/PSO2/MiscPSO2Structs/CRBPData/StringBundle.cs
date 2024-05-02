@@ -1,9 +1,4 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs.CRBPData
 {
@@ -40,7 +35,7 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs.CRBPData
             var stringCount = sr.Read<int>();
 
             List<int> relativeAddresses = new List<int>();
-            for(int i = 0; i < stringCount; i++)
+            for (int i = 0; i < stringCount; i++)
             {
                 relativeAddresses.Add(sr.Read<int>());
             }
@@ -50,7 +45,7 @@ namespace AquaModelLibrary.Data.PSO2.MiscPSO2Structs.CRBPData
                 strIdList.Add(sr.Read<int>());
             }
 
-            foreach(var address in relativeAddresses)
+            foreach (var address in relativeAddresses)
             {
                 sr.Seek(startPos + address, SeekOrigin.Begin);
                 strList.Add(sr.ReadCString());
