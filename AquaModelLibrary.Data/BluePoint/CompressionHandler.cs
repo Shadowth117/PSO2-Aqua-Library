@@ -10,7 +10,7 @@ namespace AquaModelLibrary.Data.BluePoint
             if((compCheck == 0xA8C) || (compCheck == 0xACC))
             {
                 var decompLength = BitConverter.ToUInt32(file, file.Length - 4) - 0x60000000L;
-                if(decompLength <= 0)
+                if(decompLength < 0)
                 {
                     return file;
                 }
