@@ -86,6 +86,10 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     matRef.minBounding = sr.ReadBEV3();
                     matRef.maxBounding = sr.ReadBEV3();
                     matRef.matNameLength = sr.Read<byte>();
+                    if(sr.Peek<byte>() == 0x1)
+                    {
+                        sr.Read<byte>();
+                    }
                     matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, matRef.matNameLength));
                     sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
                     if (hasExtraFlags && matCount > 1 && (i + 1 != matCount))
