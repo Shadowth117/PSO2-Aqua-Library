@@ -228,6 +228,16 @@ namespace AquaModelLibrary.Helpers
             return unswizzledData;
         }
 
+
+        public static byte[] Xbox360DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
+        {
+            GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
+
+
+
+            return swizzledData;
+        }
+
         /// <summary>
         /// RawTex Implementation
         /// </summary>
