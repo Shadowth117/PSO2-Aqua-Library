@@ -1404,6 +1404,7 @@
             { 535, "ダガー, Daggers"},
             { 536, "レネッサダガー,Renaissa Daggers"},
             { 538, "エヴォルイクリスダガー,Evoleclipse Daggers"},
+            { 550, "???, Xover Laluz Re-L Blades"}
             { 999, "デバッグウェポン,Debug Weapon"},
         };
 
@@ -4604,6 +4605,7 @@
             { 538, "カタナ, Katana"},
             { 539, "レネッサカタナ,Renaissa Katana"},
             { 541, "エヴォルイクリスカタナ,Evoleclipse Katana"},
+            { 522, "Xover Laluz Re-L Katana"}
             { 999, "デバッグウェポン,Debug Weapon"},
         };
 
