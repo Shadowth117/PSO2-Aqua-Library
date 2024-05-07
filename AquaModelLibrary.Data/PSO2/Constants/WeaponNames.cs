@@ -1404,6 +1404,7 @@
             { 535, "ダガー, Daggers"},
             { 536, "レネッサダガー,Renaissa Daggers"},
             { 538, "エヴォルイクリスダガー,Evoleclipse Daggers"},
+            { 553, "コルボ・ラルースRe-Lダガー,Xover Laluz Re-L Daggers"},
             { 999, "デバッグウェポン,Debug Weapon"},
         };
 
