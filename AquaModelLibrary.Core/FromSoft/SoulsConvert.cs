@@ -278,9 +278,9 @@ namespace AquaModelLibrary.Core.FromSoft
         {
             byte[] newFile = file;
 
-            if (SoulsFormats.DCX.Is(file))
+            if (SoulsFormats.DCX.Is(newFile))
             {
-                newFile = DCX.Decompress(file);
+                newFile = DCX.Decompress(newFile);
             }
 
             IBinder files = null;
