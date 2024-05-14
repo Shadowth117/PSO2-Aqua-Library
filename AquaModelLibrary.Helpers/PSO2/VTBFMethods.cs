@@ -338,6 +338,9 @@ namespace AquaModelLibrary.Helpers.PSO2
                             {
                                 ((Vector3[])data)[j] = streamReader.Read<Vector3>();
                             }
+                        } else
+                        {
+                            throw new Exception("Unexpected subDataType for dataType 0xCA!");
                         }
                         break;
                     default:
