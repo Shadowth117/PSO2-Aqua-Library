@@ -307,8 +307,14 @@ namespace AquaModelLibrary.Helpers.PSO2
 
                         switch (subDataType)
                         {
+                            case 0x9:
+                                subDataAdditions = streamReader.Read<byte>() + (uint)1; //last array entry id
+                                break;
                             case 0xA:
                                 subDataAdditions = streamReader.Read<byte>() + (uint)1; //last array entry id
+                                break;
+                            case 0x11:
+                                subDataAdditions = streamReader.Read<ushort>() + (uint)1; //last array entry id
                                 break;
                             case 0x12:
                                 subDataAdditions = streamReader.Read<ushort>() + (uint)1; //last array entry id
@@ -318,10 +324,20 @@ namespace AquaModelLibrary.Helpers.PSO2
                                 throw new NotImplementedException();
                         }
 
-                        data = new Vector4[subDataAdditions];
-                        for (int j = 0; j < subDataAdditions; j++)
+                        if((subDataType & 0x2) > 0)
                         {
-                            ((Vector4[])data)[j] = streamReader.Read<Vector4>();
+                            data = new Vector4[subDataAdditions];
+                            for (int j = 0; j < subDataAdditions; j++)
+                            {
+                                ((Vector4[])data)[j] = streamReader.Read<Vector4>();
+                            }
+                        } else if((subDataType & 0x1) > 0)
+                        {
+                            data = new Vector3[subDataAdditions];
+                            for (int j = 0; j < subDataAdditions; j++)
+                            {
+                                ((Vector3[])data)[j] = streamReader.Read<Vector3>();
+                            }
                         }
                         break;
                     default:
@@ -615,7 +631,7 @@ namespace AquaModelLibrary.Helpers.PSO2
             return count;
         }
 
-        public static void HandleOptionalArrayHeader(List<byte> outBytes, byte subTagID, int vertIdCount, byte baseDataType)
+        public static void HandleOptionalArrayHeader(List<byte> outBytes, byte subTagID, int vertIdCount, byte baseDataType, int extraDataType = 0)
         {
             outBytes.Add(subTagID);
             if (vertIdCount > 1)
@@ -625,24 +641,28 @@ namespace AquaModelLibrary.Helpers.PSO2
                 {
                     if (vertIdCount - 1 > ushort.MaxValue)
                     {
-                        outBytes.Add(0x18);
+                        outBytes.Add((byte)(0x18 + extraDataType));
                         outBytes.AddRange(BitConverter.GetBytes(vertIdCount - 1));
                     }
                     else
                     {
-                        outBytes.Add(0x10);
+                        outBytes.Add((byte)(0x10 + extraDataType));
                         outBytes.AddRange(BitConverter.GetBytes((ushort)(vertIdCount - 1)));
                     }
                 }
                 else
                 {
-                    outBytes.Add(0x08);
+                    outBytes.Add((byte)(0x08 + extraDataType));
                     outBytes.Add((byte)(vertIdCount - 1));
                 }
             }
             else
             {
                 outBytes.Add(baseDataType);
+                if(extraDataType != 0)
+                {
+                    outBytes.Add((byte)extraDataType);
+                }
             }
         }
 

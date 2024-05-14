@@ -23,6 +23,26 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
                                                          //Also uses the designator for int keys in newer iterations. Combine every 4 to convert to an int array.
         public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
 
+        public int GetKeyCount()
+        {
+            switch (dataType)
+            {
+                //0x1, 0x2, and 0x3 are Vector4 arrays essentially. 0x1 is seemingly a Vector3 with alignment padding, but could potentially have things.
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                    return vector4Keys.Count;
+                case 0x5:
+                    return intKeys.Count;
+                //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
+                case 0x4:
+                case 0x6:
+                    return floatKeys.Count;
+                default:
+                    throw new Exception("Unexpected data type!");
+            }
+        }
+
         public MKEY() { }
         public MKEY(List<Dictionary<int, object>> mkeyRaw)
         {
@@ -123,15 +143,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
             VTBFMethods.AddBytes(outBytes, 0xEB, 0x9, BitConverter.GetBytes(keyType));
             VTBFMethods.AddBytes(outBytes, 0xEC, 0x9, BitConverter.GetBytes(dataType));
             VTBFMethods.AddBytes(outBytes, 0xF0, 0x9, BitConverter.GetBytes(unkInt0));
-            VTBFMethods.AddBytes(outBytes, 0xED, 0x9, BitConverter.GetBytes(keyCount));
-
-            //Set frame timings. The data types stored are different depending on the key count
-            VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xEF, keyCount, 0x06);
-            //Write the actual timings
-            for (int j = 0; j < frameTimings.Count; j++)
-            {
-                outBytes.AddRange(BitConverter.GetBytes((ushort)frameTimings[j]));
-            }
+            VTBFMethods.AddBytes(outBytes, 0xED, 0x9, BitConverter.GetBytes(GetKeyCount()));
 
             //Write frame data. Types will vary.
             switch (dataType)
@@ -140,17 +152,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
                 case 0x1:
                 case 0x2:
                 case 0x3:
-                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xEE, keyCount, 0x4A);
-                    for (int j = 0; j < frameTimings.Count; j++)
+                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xEE, vector4Keys.Count, 0x4A, 0x2);
+                    for (int j = 0; j < vector4Keys.Count; j++)
                     {
                         outBytes.AddRange(DataHelpers.ConvertStruct(vector4Keys[j]));
                     }
                     break;
                 case 0x5:
-                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xF3, keyCount, 0x48);
+                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xF3, intKeys.Count, 0x48);
                     if (intKeys.Count > 0)
                     {
-                        for (int j = 0; j < frameTimings.Count; j++)
+                        for (int j = 0; j < intKeys.Count; j++)
                         {
 
                             outBytes.AddRange(BitConverter.GetBytes(intKeys[j]));
@@ -164,8 +176,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
                 //0x4 is texture/uv related, 0x6 is Camera related - Array of floats. 0x4 seems to be used for every .aqv frame set interestingly
                 case 0x4:
                 case 0x6:
-                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xF1, keyCount, 0xA);
-                    for (int j = 0; j < frameTimings.Count; j++)
+                    VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xF1, floatKeys.Count, 0xA);
+                    for (int j = 0; j < floatKeys.Count; j++)
                     {
                         outBytes.AddRange(BitConverter.GetBytes(floatKeys[j]));
                     }
@@ -173,6 +185,20 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
                 default:
                     throw new Exception("Unexpected data type!");
             }
+
+            //Set frame timings. The data types stored are different depending on the key count
+            if (frameTimings.Count > 0)
+            {
+                VTBFMethods.HandleOptionalArrayHeader(outBytes, 0xEF, keyCount, 0x06);
+            }
+            //Write the actual timings
+            for (int j = 0; j < frameTimings.Count; j++)
+            {
+                outBytes.AddRange(BitConverter.GetBytes((ushort)frameTimings[j]));
+            }
+
+            int usesFrameTimings = frameTimings.Count > 0 ? 1 : 0;
+            VTBFMethods.WriteTagHeader(outBytes, "MKEY", 0, (ushort)(5 + usesFrameTimings));
 
             return outBytes.ToArray();
         }

@@ -34,9 +34,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
             //Node name
             string nodeStr = nodeName.GetString();
             VTBFMethods.AddBytes(outBytes, 0xE9, 0x2, (byte)nodeStr.Length, Encoding.UTF8.GetBytes(nodeStr));
-            VTBFMethods.AddBytes(outBytes, 0xEA, 0x9, BitConverter.GetBytes(nodeDataCount));
+            VTBFMethods.AddBytes(outBytes, 0xEA, 0x9, BitConverter.GetBytes(nodeId));
 
-            VTBFMethods.WriteTagHeader(outBytes, "MSEG", 0x3, 0x4);
+            switch(nodeType)
+            {
+                case 0x20:
+                    VTBFMethods.WriteTagHeader(outBytes, "MSEG", 0x6, 0x4);
+                    break;
+                default:
+                    VTBFMethods.WriteTagHeader(outBytes, "MSEG", 0x3, 0x4);
+                    break;
+            }
 
             return outBytes.ToArray();
         }

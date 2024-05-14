@@ -40,7 +40,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
             VTBFMethods.AddBytes(outBytes, 0xE0, 0x9, BitConverter.GetBytes(variant));
             VTBFMethods.AddBytes(outBytes, 0xE1, 0x9, BitConverter.GetBytes(loopPoint));
             VTBFMethods.AddBytes(outBytes, 0xE2, 0x9, BitConverter.GetBytes(endFrame));
-            VTBFMethods.AddBytes(outBytes, 0xE3, 0x9, BitConverter.GetBytes(frameSpeed));
+            VTBFMethods.AddBytes(outBytes, 0xE3, 0xA, BitConverter.GetBytes(frameSpeed));
             VTBFMethods.AddBytes(outBytes, 0xE4, 0x9, BitConverter.GetBytes(unkInt0));
             VTBFMethods.AddBytes(outBytes, 0xE5, 0x9, BitConverter.GetBytes(nodeCount));
 
