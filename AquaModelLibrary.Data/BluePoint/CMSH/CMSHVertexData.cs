@@ -55,6 +55,10 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public Dictionary<VertexMagic, List<Vector2>> uvDict = new Dictionary<VertexMagic, List<Vector2>>(); //Access by magic, ex 0XET or 3XET (TEX0 and TEX3) as ints. UVs seem stored as half floats
         public Dictionary<VertexMagic, byte[]> unkDict = new Dictionary<VertexMagic, byte[]>();
 
+        //SOTC Extra
+        public List<CMSHSOTCUnkData0> sotcUnk0List = new List<CMSHSOTCUnkData0>();
+        public List<CMSHSOTCUnkData1> sotcUnk1List = new List<CMSHSOTCUnkData1>();
+
         public CMSHVertexData()
         {
 
@@ -68,6 +72,21 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 flags = sr.Read<int>();
             }
             int_04 = sr.Read<int>();
+
+            //Read special SOTC stuff, if it's there
+            if(int_04 != 0)
+            {
+                for(int i = 0; i < int_04; i++)
+                {
+                    sotcUnk0List.Add(sr.Read<CMSHSOTCUnkData0>());
+                }
+                var unk1Count = sr.Read<int>();
+                for (int i = 0; i < unk1Count; i++)
+                {
+                    sotcUnk1List.Add(sr.Read<CMSHSOTCUnkData1>());
+                }
+            }
+
             int_08 = sr.Read<int>();
             vertexBufferSize = sr.Read<int>();
             var vertexDataStart = sr.Position;
