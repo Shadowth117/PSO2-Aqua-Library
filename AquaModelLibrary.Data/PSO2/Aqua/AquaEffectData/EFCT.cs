@@ -31,7 +31,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
         public fixed byte color[4]; //0x42, Type 0xC
 
         public int int_50;
-        public int boolInt_54;    //0x4, Type 0x1
+        /// <summary>
+        /// Determines if the aqe is a looping type or not. 0 means no loop, 1 means a loop.
+        /// </summary>
+        public int loopEffect;    //0x4, Type 0x1
         public int boolInt_58;    //0x0, Type 0x1
         public int boolInt_5C;    //0x7, Type 0x1
 
@@ -67,7 +70,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData
                 }
             }
 
-            boolInt_54 = VTBFMethods.GetObject<byte>(efctRaw[0], 0x4);
+            loopEffect = VTBFMethods.GetObject<byte>(efctRaw[0], 0x4);
             boolInt_58 = VTBFMethods.GetObject<byte>(efctRaw[0], 0x0);
             boolInt_5C = VTBFMethods.GetObject<byte>(efctRaw[0], 0x7);
 
