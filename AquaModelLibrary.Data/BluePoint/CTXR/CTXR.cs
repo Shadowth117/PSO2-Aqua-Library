@@ -40,8 +40,8 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             file = CompressionHandler.CheckCompression(file);
 
             //Apparently these can just be actual .png files? Well, gotta check for that.
-            var pngCheck = BitConverter.ToInt32(file, 0);
-            if (isPng = pngCheck == 0x474E5089)
+            var magicCheck = BitConverter.ToInt32(file, 0);
+            if (isPng = magicCheck == 0x474E5089)
             {
                 mipMapsList.Add(new List<byte[]> { file });
                 return;
@@ -49,7 +49,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
-                Read(sr);
+                Read(sr, magicCheck);
             }
         }
 
@@ -58,8 +58,8 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             file = CompressionHandler.CheckCompression(file);
 
             //Apparently these can just be actual .png files? Well, gotta check for that.
-            var pngCheck = BitConverter.ToInt32(file, 0);
-            if (isPng = pngCheck == 0x474E5089)
+            var magicCheck = BitConverter.ToInt32(file, 0);
+            if (isPng = magicCheck == 0x474E5089)
             {
                 mipMapsList.Add(new List<byte[]> { file });
                 return;
@@ -67,13 +67,12 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
-                Read(sr, readTexBuffers);
+                Read(sr, magicCheck, readTexBuffers);
             }
         }
 
-        private void Read(BufferedStreamReaderBE<MemoryStream> sr, bool readTexBuffers = true)
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr, int magicCheck, bool readTexBuffers = true)
         {
-
             sr.Seek(sr.BaseStream.Length - 0xC, SeekOrigin.Begin);
             footerData = sr.Read<CFooter>();
 
