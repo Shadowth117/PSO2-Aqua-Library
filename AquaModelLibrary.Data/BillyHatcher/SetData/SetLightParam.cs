@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace AquaModelLibrary.Data.BillyHatcher
+namespace AquaModelLibrary.Data.BillyHatcher.SetData
 {
     public unsafe struct SetLightParam
     {
@@ -15,8 +15,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public ushort usht1;
         public Vector3 lightDirection;
 
-        public fixed byte color0[4]; //4 byte RGBA color
-        public fixed byte color1[4]; //4 byte RGBA color
+        public fixed byte directionalLightingColor[4]; //4 byte RGBA color
+        public fixed byte ambientLightingColor[4]; //4 byte RGBA color
         public float unkRange0; //Range of some sort
         public float flt1C;
 
