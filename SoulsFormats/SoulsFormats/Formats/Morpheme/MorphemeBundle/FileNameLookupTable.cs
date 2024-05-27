@@ -65,7 +65,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 hashList.Add(br.ReadInt32());
             }
 
-            br.Position = dataStart + dataSize;
+            br.Position = dataStart + format.dataSize;
         }
 
         /// <summary>

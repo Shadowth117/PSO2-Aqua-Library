@@ -1,4 +1,6 @@
-﻿namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
+﻿using Org.BouncyCastle.Crypto.Agreement.Srp;
+
+namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
     /// <summary>
     /// Header for Morpheme files.
@@ -6,24 +8,24 @@
     public class MorphemeFileHeader : MorphemeBundle_Base
     {
         /// <summary>
-        /// Header variable 0
+        /// Runtime Target Name Size
         /// </summary>
-        public long iVar0 { get; set; }
+        public long runtimeTargetNameSize { get; set; }
 
         /// <summary>
-        /// Header variable 1
+        /// RuntimeTargetName (Yes it's meant to be name)
         /// </summary>
-        public long iVar1 { get; set; }
+        public long runtimeTargetName { get; set; }
 
         /// <summary>
-        /// Header variable 2
+        /// Unknown variable integer 0
         /// </summary>
-        public long iVar2 { get; set; }
+        public long unkVarint0 { get; set; }
 
         /// <summary>
-        /// Header variable 3
+        /// Unknown variable integer 1
         /// </summary>
-        public long iVar3 { get; set; }
+        public long unkVarint1 { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -44,7 +46,7 @@
         /// </summary>
         public override long CalculateBundleSize()
         {
-            return isX64 ? 0x20 : 0x10;
+            return isX64 ? 0x20 : 0x14;
         }
 
         /// <summary>
@@ -53,10 +55,10 @@
         public override void Read(BinaryReaderEx br)
         {
             base.Read(br);
-            iVar0 = br.ReadVarint();
-            iVar1 = br.ReadVarint();
-            iVar2 = br.ReadVarint();
-            iVar3 = br.ReadVarint();
+            runtimeTargetNameSize = br.ReadInt64();
+            runtimeTargetName = br.ReadVarint();
+            unkVarint0 = br.ReadVarint();
+            unkVarint1 = br.ReadVarint();
         }
 
         /// <summary>
@@ -65,10 +67,10 @@
         public override void Write(BinaryWriterEx bw)
         {
             base.Write(bw);
-            bw.WriteVarint(iVar0);
-            bw.WriteVarint(iVar1);
-            bw.WriteVarint(iVar2);
-            bw.WriteVarint(iVar3);
+            bw.WriteInt64(runtimeTargetNameSize);
+            bw.WriteVarint(runtimeTargetName);
+            bw.WriteVarint(unkVarint0);
+            bw.WriteVarint(unkVarint1);
         }
     }
 }

@@ -9,8 +9,8 @@ namespace SoulsFormats.Formats.Morpheme
     {
         public List<MorphemeBundle_Base> bundles;
 
-        public List<MorphemeBundle_Base> skeletonMap = new List<MorphemeBundle_Base>();
-        public List<MorphemeBundle_Base> messageIndices = new List<MorphemeBundle_Base>();
+        public List<MorphemeBundle_Base> rig = new List<MorphemeBundle_Base>();
+        public List<RigToAnimMap> animMapping = new List<RigToAnimMap>();
         public List<EventTrack> eventTracks = new List<EventTrack>();
         public List<MorphemeBundle_Base> characterControllerDef = new List<MorphemeBundle_Base>();
         public NetworkBundle network;
@@ -35,14 +35,15 @@ namespace SoulsFormats.Formats.Morpheme
                 var nextBundle = MorphemeBundle_Base.ReadBundleType(br);
                 switch (nextBundle)
                 {
-                    case eBundleType.Bundle_SkeletonMap:
-                        skeletonMap.Add(new MorphemeBundleGeneric(br));
+                    case eBundleType.Bundle_Skeleton:
+                        rig.Add(new Rig(br));
                         break;
-                    case eBundleType.Bundle_MessageIndices:
-                        messageIndices.Add(new MorphemeBundleGeneric(br));
+                    case eBundleType.Bundle_SkeletonToAnimMap:
+                        animMapping.Add(new RigToAnimMap(br));
                         break;
                     case eBundleType.Bundle_DiscreteEventTrack:
                     case eBundleType.Bundle_DurationEventTrack:
+                    case eBundleType.Bundle_CurveEventTrack:
                         eventTracks.Add(new EventTrack(br));
                         break;
                     case eBundleType.Bundle_CharacterControllerDef:
@@ -52,7 +53,7 @@ namespace SoulsFormats.Formats.Morpheme
                         br.StepIn(br.Position);
                         //network = new NetworkBundle(br);
                         br.StepOut();
-                        networkRaw = new MorphemeBundleGeneric();
+                        networkRaw = new MorphemeBundleGeneric(br);
                         break;
                     case eBundleType.Bundle_FileHeader:
                         fileHeader = new MorphemeFileHeader(br);
@@ -71,12 +72,12 @@ namespace SoulsFormats.Formats.Morpheme
         public void Write(BinaryWriterEx bw)
         {
             fileHeader.Write(bw);
-            if (characterControllerDef.Count == skeletonMap.Count)
+            if (characterControllerDef.Count == rig.Count)
             {
                 for (int i = 0; i < characterControllerDef.Count; i++)
                 {
                     characterControllerDef[i].Write(bw);
-                    skeletonMap[i].Write(bw);
+                    rig[i].Write(bw);
 
                     bw.WriteBytes(new byte[] { 0xCD, 0xCD, 0xCD, 0xCD });
                 }
@@ -87,7 +88,7 @@ namespace SoulsFormats.Formats.Morpheme
                 eTrack.Write(bw);
             }
 
-            foreach (var msg in messageIndices)
+            foreach (var msg in animMapping)
             {
                 msg.Write(bw);
             }

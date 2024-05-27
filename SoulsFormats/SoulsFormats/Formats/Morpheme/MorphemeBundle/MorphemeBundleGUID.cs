@@ -5,12 +5,12 @@
     /// TODO: Detail this if it's ever figured out.
     /// </summary>
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public struct MorphemeBundleHeader
+    public struct MorphemeBundleGUID
     {
-        public int int_00;
-        public int int_04;
-        public int int_08;
-        public int int_0C;
+        public int GUID_00;
+        public int GUID_04;
+        public int GUID_08;
+        public int GUID_0C;
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

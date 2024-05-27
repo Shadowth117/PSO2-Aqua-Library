@@ -38,7 +38,7 @@
         public override void Read(BinaryReaderEx br)
         {
             base.Read(br);
-            data = br.ReadBytes((int)dataSize);
+            data = br.ReadBytes((int)format.dataSize);
         }
 
         /// <summary>

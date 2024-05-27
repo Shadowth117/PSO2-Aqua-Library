@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
@@ -10,7 +11,12 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// <summary>
         /// Number of events in this EventTrack.
         /// </summary>
-        public long numEvents;
+        public int numEvents;
+
+        /// <summary>
+        /// The EventTrack variation for this EventTrack
+        /// </summary>
+        public EventType eventType;
 
         /// <summary>
         /// The name of this EventTrack.
@@ -20,7 +26,12 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         /// <summary>
         /// The id of the evenet.
         /// </summary>
-        public long eventId;
+        public int userData;
+
+        /// <summary>
+        /// The id of the evenet.
+        /// </summary>
+        public int trackId;
 
         /// <summary>
         /// An offset to event data
@@ -57,7 +68,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         {
             long size = (isX64 ? 0x20 : 0x10) + 0xC * numEvents + trackName.Length + 1;
 
-            long remainder = size % dataAlignment;
+            long remainder = size % format.dataAlignment;
 
             if (remainder != 0)
             {
@@ -76,9 +87,11 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         {
             base.Read(br);
             var dataStart = br.Position;
-            numEvents = br.ReadVarint();
+            numEvents = br.ReadInt32();
+            eventType = br.ReadEnum32<EventType>();
             trackName = br.GetASCII(br.Position + br.ReadVarint());
-            eventId = br.ReadVarint();
+            userData = br.ReadInt32();
+            trackId = br.ReadInt32();
 
             if (numEvents > 0)
             {
@@ -89,7 +102,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 }
             }
 
-            br.Position = dataStart + (long)dataSize;
+            br.Position = dataStart + (long)format.dataSize;
         }
 
         /// <summary>
@@ -99,9 +112,11 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
         public override void Write(BinaryWriterEx bw)
         {
             base.Write(bw);
+            throw new NotImplementedException();
+            /*
             bw.WriteVarint(events.Count);
             bw.WriteVarint(0x20 + 0xC * events.Count);
-            bw.WriteVarint(eventId);
+            bw.WriteVarint(trackId);
 
             if (events.Count > 0)
             {
@@ -114,7 +129,8 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 }
             }
             bw.WriteASCII(trackName, true);
-            bw.Pad((int)dataAlignment, 0xCD);
+            bw.Pad((int)format.dataAlignment, 0xCD);
+            */
         }
     }
 }

@@ -18,17 +18,13 @@
         /// <summary>
         /// Morpheme Bundle Header. Usually all 0s.
         /// </summary>
-        public MorphemeBundleHeader header { get; set; }
+        public MorphemeBundleGUID guid { get; set; }
+
 
         /// <summary>
-        /// Size of this bundle structure
+        /// Structure for Morpheme data and alignment info.
         /// </summary>
-        public long dataSize { get; set; }
-
-        /// <summary>
-        /// Alignment for this bundle structure. Only observed 0x4 and 0x10.
-        /// </summary>
-        public int dataAlignment { get; set; }
+        public MorphemeSizeAlignFormatting format { get; set; }
 
         /// <summary>
         /// Unknown value
@@ -94,7 +90,7 @@
         {
             eBundleType bundleTypeCheck;
             br.StepIn(br.Position); br.AssertInt32(0x18);
-            br.AssertInt32(0xA);
+            br.AssertInt32(0x6, 0xA);
             bundleTypeCheck = br.ReadEnum32<eBundleType>();
             br.StepOut();
 
@@ -113,21 +109,24 @@
         {
             isX64 = br.VarintLong;
             br.AssertInt32(0x18);
-            br.AssertInt32(0xA);
+            br.AssertInt32(0x6,0xA);
             bundleType = br.ReadEnum32<eBundleType>();
             signature = br.ReadUInt32();
-            header = new MorphemeBundleHeader
+            guid = new MorphemeBundleGUID
             {
-                int_00 = br.ReadInt32(),
-                int_04 = br.ReadInt32(),
-                int_08 = br.ReadInt32(),
-                int_0C = br.ReadInt32()
+                GUID_00 = br.ReadInt32(),
+                GUID_04 = br.ReadInt32(),
+                GUID_08 = br.ReadInt32(),
+                GUID_0C = br.ReadInt32()
             };
-            dataSize = br.ReadVarint();
-            dataAlignment = br.ReadInt32();
-            unk0 = br.ReadInt32();
+            format = new MorphemeSizeAlignFormatting()
+            {
+                dataSize = br.ReadVarint(),
+                dataAlignment = br.ReadInt32(),
+                unkValue = isX64 ? br.ReadInt32() : 0
+            };
 
-            br.Pad(dataAlignment);
+            br.Pad((int)format.dataAlignment);
         }
 
         /// <summary>
@@ -139,13 +138,13 @@
             bw.WriteUInt32(0xA);
             bw.WriteInt32((int)bundleType);
             bw.WriteUInt32(signature);
-            bw.WriteInt32(header.int_00);
-            bw.WriteInt32(header.int_04);
-            bw.WriteInt32(header.int_08);
-            bw.WriteInt32(header.int_0C);
+            bw.WriteInt32(guid.GUID_00);
+            bw.WriteInt32(guid.GUID_04);
+            bw.WriteInt32(guid.GUID_08);
+            bw.WriteInt32(guid.GUID_0C);
             bw.WriteVarint(CalculateBundleSize());
-            bw.WriteVarint(dataAlignment);
-            bw.Pad(dataAlignment);
+            bw.WriteVarint(format.dataAlignment);
+            bw.Pad((int)format.dataAlignment);
         }
     }
 }

@@ -6,15 +6,37 @@
     /// </summary>
     public enum eBundleType : uint
     {
-        Bundle_Invalid = 0,
-        Bundle_SkeletonMap = 1,
-        Bundle_MessageIndices = 2,
+        Bundle_Invalid = uint.MaxValue,
+        Bundle_Skeleton = 1,
+        Bundle_SkeletonToAnimMap = 2,
         Bundle_DiscreteEventTrack = 3,
         Bundle_DurationEventTrack = 4,
+        Bundle_CurveEventTrack = 5,
         Bundle_CharacterControllerDef = 7,
         Bundle_Network = 10,
         Bundle_FileHeader = 12,
         Bundle_FileNameLookupTable = 13
+    };
+
+    /// <summary>
+    /// The variant of a RigToAnimMap
+    /// </summary>
+    public enum RigToAnimMapType : uint
+    {
+        MapPairs = 0,
+        AnimToRig = 1,
+        CompToRig = 2,
+    }
+
+    /// <summary>
+    /// EventTrack Types
+    /// </summary>
+    public enum EventType : uint
+    {
+        kEventType_Discrete = 0,
+        kEventType_Curve = 1,
+        kEventType_Duration = 2,
+        kEventTypeNumTypes = 3,
     };
 
     /// <summary>
