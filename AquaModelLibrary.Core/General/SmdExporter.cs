@@ -1,5 +1,4 @@
-﻿using AquaModelLibrary.Data.Ninja.Model.Ginja;
-using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Helpers.MathHelpers;
 using System.Globalization;
 using System.Numerics;
@@ -17,7 +16,7 @@ namespace AquaModelLibrary.Core.General
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("version 1");
             sb.AppendLine("nodes");
-            for(int i = 0; i < aqn.nodeList.Count; i++)
+            for (int i = 0; i < aqn.nodeList.Count; i++)
             {
                 sb.AppendLine($"{i} \"{aqn.nodeList[i].boneName.GetString()}\" {aqn.nodeList[i].parentId}");
             }
@@ -29,14 +28,14 @@ namespace AquaModelLibrary.Core.General
             sb.AppendLine("skeleton");
             sb.AppendLine("");
 
-            if(aqm == null)
+            if (aqm == null)
             {
                 sb.AppendLine("time 0");
                 for (int i = 0; i < aqn.nodeList.Count; i++)
                 {
                     var bone = aqn.nodeList[i];
                     var tfm = bone.GetInverseBindPoseMatrixInverted();
-                    if(bone.parentId != -1)
+                    if (bone.parentId != -1)
                     {
                         var parBone = aqn.nodeList[bone.parentId];
                         var parTfm = parBone.GetInverseBindPoseMatrix();
@@ -57,9 +56,10 @@ namespace AquaModelLibrary.Core.General
                     sb.AppendLine($"{i + aqn.nodeList.Count} {pos.X.ToString("0.######", numberFormatInfo)} {pos.Y.ToString("0.######", numberFormatInfo)} {pos.Z.ToString("0.######", numberFormatInfo)}" +
                         $" {eulRot.X.ToString("0.######", numberFormatInfo)} {eulRot.Y.ToString("0.######", numberFormatInfo)} {eulRot.Z.ToString("0.######", numberFormatInfo)}");
                 }
-            } else
+            }
+            else
             {
-                for(int i = 0; i < aqm.moHeader.endFrame; i++)
+                for (int i = 0; i < aqm.moHeader.endFrame; i++)
                 {
                     sb.AppendLine($"time {i}");
                     for (int j = 0; j < aqm.motionKeys.Count; j++)
@@ -74,7 +74,7 @@ namespace AquaModelLibrary.Core.General
 
                         var posMkey = aqm.motionKeys[i].GetMKEYofType(0x1);
                         var rotMkey = aqm.motionKeys[i].GetMKEYofType(0x2);
-                        if(posMkey != null)
+                        if (posMkey != null)
                         {
                             var tempPos = posMkey.GetLinearInterpolatedVec4Key(i);
                             pos = new Vector3(tempPos.X, tempPos.Y, tempPos.Z);
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Core.General
                 }
             }
             sb.AppendLine("end");
-            for(int i = 0; i < aqo.meshList.Count; i++)
+            for (int i = 0; i < aqo.meshList.Count; i++)
             {
                 var mesh = aqo.meshList[i];
                 var vtxl = aqo.vtxlList[i];
@@ -107,13 +107,13 @@ namespace AquaModelLibrary.Core.General
                 var tris = aqo.strips[mesh.psetIndex].GetTriangles();
                 var matName = aqo.matUnicodeNames[mesh.mateIndex];
                 var texNames = aqo.GetTexListNamesUnicode(mesh.tsetIndex);
-                if(texNames.Count == 0)
+                if (texNames.Count == 0)
                 {
                     texNames.Add("");
                 }
 
                 sb.AppendLine("triangles");
-                for(int j = 0; j < tris.Count; j++)
+                for (int j = 0; j < tris.Count; j++)
                 {
                     var vertXWeightCount = vtxl.trueVertWeightIndices[(int)tris[j].X].Length;
                     var vertYWeightCount = vtxl.trueVertWeightIndices[(int)tris[j].Y].Length;
