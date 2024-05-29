@@ -1,4 +1,5 @@
-﻿using static DirectXTex.DirectXTexUtility;
+﻿using AquaModelLibrary.Helpers.Swizzling;
+using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Helpers
 {
@@ -228,14 +229,10 @@ namespace AquaModelLibrary.Helpers
             return unswizzledData;
         }
 
-
         public static byte[] Xbox360DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
             GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
-
-
-
-            return swizzledData;
+            return Xbox360Deswizzler.ByteSwap16(Xbox360Deswizzler.Deswizzle(swizzledData, width, height, 1, pixelFormat, sourceBytesPerPixelSet, pixelBlockSize, formatbpp));
         }
 
         /// <summary>
