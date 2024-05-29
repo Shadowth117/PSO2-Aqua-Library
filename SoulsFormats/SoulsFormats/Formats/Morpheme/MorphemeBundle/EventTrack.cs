@@ -89,7 +89,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             var dataStart = br.Position;
             numEvents = br.ReadInt32();
             eventType = br.ReadEnum32<EventType>();
-            trackName = br.GetASCII(br.Position + br.ReadVarint());
+            trackName = br.GetASCII(dataStart + br.ReadVarint());
             userData = br.ReadInt32();
             trackId = br.ReadInt32();
 
