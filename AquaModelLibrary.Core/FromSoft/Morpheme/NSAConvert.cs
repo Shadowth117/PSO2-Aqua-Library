@@ -3,6 +3,7 @@ using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
 using AquaModelLibrary.Helpers.MathHelpers;
 using SoulsFormats;
+using SoulsFormats.Formats.Morpheme;
 using SoulsFormats.Formats.Morpheme.NSA;
 using System.Numerics;
 
@@ -10,7 +11,7 @@ namespace AquaModelLibrary.Core.Morpheme
 {
     public class NSAConvert
     {
-        public static AquaMotion GetAquaMotionFromNSA(NSA nsa, IFlver flv)
+        public static AquaMotion GetAquaMotionFromNSA(NSA nsa, IFlver flv, NMB nmb)
         {
             GetNSAKeyframes(nsa, flv, out var translationKeyFrameListList, out var rotationkeyFrameListList);
 

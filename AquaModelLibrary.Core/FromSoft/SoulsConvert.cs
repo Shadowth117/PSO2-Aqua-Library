@@ -386,8 +386,9 @@ namespace AquaModelLibrary.Core.FromSoft
 
         }
 
-        public static void ConvertMorphemeAnims(List<string> nsaPaths, string modelPath)
+        public static void ConvertMorphemeAnims(List<string> nsaPaths, string modelPath, string nmbPath)
         {
+            var nmb = SoulsConvert.ReadNMB(nmbPath, File.ReadAllBytes(nmbPath));
             //Temp, delete after testing and fix rotations up to match
             var temp = mirrorMat;
             mirrorMat = Matrix4x4.Identity;
@@ -398,7 +399,7 @@ namespace AquaModelLibrary.Core.FromSoft
             foreach (var path in nsaPaths)
             {
                 nsaNames.Add(Path.GetFileName(path));
-                motions.Add(NSAConvert.GetAquaMotionFromNSA(ReadNSA(path, File.ReadAllBytes(path)), flver));
+                motions.Add(NSAConvert.GetAquaMotionFromNSA(ReadNSA(path, File.ReadAllBytes(path)), flver, nmb));
             }
 
             string finalPath = Path.ChangeExtension(modelPath, ".fbx");
@@ -420,10 +421,10 @@ namespace AquaModelLibrary.Core.FromSoft
             return new NSA(br);
         }
 
-        public static void ReadNMB(string filePath, byte[] raw)
+        public static NMB ReadNMB(string filePath, byte[] raw)
         {
             BinaryReaderEx br = new BinaryReaderEx(false, raw);
-            var nmb = new NMB(br);
+            return new NMB(br);
         }
 
         public static AquaObject ReadFlver(string filePath, byte[] raw, out AquaNode aqn)
