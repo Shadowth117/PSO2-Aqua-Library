@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
+using System.Diagnostics;
 using System.Text;
 
 namespace AquaModelLibrary.Data.BlueDragon
@@ -14,17 +15,17 @@ namespace AquaModelLibrary.Data.BlueDragon
         public int fileCount;
         public int fileSize;
 
-        public List<IPKFileInfo> fileInfoList = new List<IPKFileInfo>();
+        public Dictionary<string, IPKFileInfo> fileInfoList = new Dictionary<string, IPKFileInfo>();
         public Dictionary<string, byte[]> fileDict = new Dictionary<string, byte[]>();
 
         public IPK() { }
 
-        public IPK(byte[] fileBytes)
+        public IPK(byte[] fileBytes, bool convertDDS = true)
         {
             Read(fileBytes);
         }
 
-        public void Read(byte[] fileBytes)
+        public void Read(byte[] fileBytes, bool convertDDS = true)
         {
             using (var ms = new MemoryStream(fileBytes))
             using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
@@ -54,7 +55,31 @@ namespace AquaModelLibrary.Data.BlueDragon
                     {
                         innerFileBytes = CompressionHelper.ZlibDefaultDecompress(innerFileBytes, ipkFileInfo.uncompressedSize);
                     }
+                    fileInfoList[ipkFileInfo.filePath] = ipkFileInfo;
                     fileDict[ipkFileInfo.filePath] = innerFileBytes;
+                }
+            }
+
+            if(convertDDS)
+            {
+                Dictionary<string, byte[]> tempfileDict = new Dictionary<string, byte[]>();
+                foreach (var fileName in fileDict.Keys)
+                {
+                    if (fileName.ToLower().EndsWith(".dds"))
+                    {
+                        var bddds = new BDDDS(fileDict[fileName]);
+                        bddds.GetResolution(out int width, out int height);
+                        var newDds = bddds.GenerateDDSHeader(bddds.GetPixelFormat(), width, height, 1, 1);
+                        newDds.AddRange(DeSwizzler.Xbox360DeSwizzle(bddds.buffer, width, height, bddds.GetPixelFormat()));
+#if DEBUG
+                        tempfileDict[fileName + "_original"] = fileDict[fileName];
+#endif
+                        fileDict[fileName] = newDds.ToArray();
+                    }
+                }
+                foreach(var filename in tempfileDict.Keys)
+                {
+                    fileDict[filename] = tempfileDict[filename];
                 }
             }
         }
