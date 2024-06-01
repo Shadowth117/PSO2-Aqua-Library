@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.Utility;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
+using System.Security.Cryptography.X509Certificates;
 using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.BluePoint.CTXR
@@ -26,6 +27,10 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public byte HeightBaseByte;
         public byte HeightMultiplierByte;
 
+        //Mainly used in older types
+        public int explicitWidth;
+        public int explicitHeight;
+
         public List<CTXRExternalReference> mipPaths = new List<CTXRExternalReference>();
         public List<List<byte[]>> mipMapsList = new List<List<byte[]>>();
         public CFooter footerData;
@@ -40,7 +45,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             file = CompressionHandler.CheckCompression(file);
 
             //Apparently these can just be actual .png files? Well, gotta check for that.
-            var magicCheck = BitConverter.ToInt32(file, 0);
+            var magicCheck = BitConverter.ToUInt32(file, 0);
             if (isPng = magicCheck == 0x474E5089)
             {
                 mipMapsList.Add(new List<byte[]> { file });
@@ -58,7 +63,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             file = CompressionHandler.CheckCompression(file);
 
             //Apparently these can just be actual .png files? Well, gotta check for that.
-            var magicCheck = BitConverter.ToInt32(file, 0);
+            var magicCheck = BitConverter.ToUInt32(file, 0);
             if (isPng = magicCheck == 0x474E5089)
             {
                 mipMapsList.Add(new List<byte[]> { file });
@@ -71,8 +76,22 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
         }
 
-        private void Read(BufferedStreamReaderBE<MemoryStream> sr, int magicCheck, bool readTexBuffers = true)
+        private void Read(BufferedStreamReaderBE<MemoryStream> sr, uint magicCheck, bool readTexBuffers = true)
         {
+            switch(magicCheck)
+            {
+                //Double check if this is a PS3 CTXR
+                case 0x01010002:
+                case 0xFF000002:
+                    sr.ReadBE<int>();
+                    textureFormat = 0;
+                    if (sr.ReadBE<int>(true) == sr.BaseStream.Length - 0x80)
+                    {
+                        ReadTopHeaderPS3(sr, readTexBuffers);
+                    }
+                    return;
+            }
+
             sr.Seek(sr.BaseStream.Length - 0xC, SeekOrigin.Begin);
             footerData = sr.Read<CFooter>();
 
@@ -206,6 +225,93 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     break;
                 default:
                     throw new Exception("Unexpected CTXR type!");
+            }
+        }
+
+        /// <summary>
+        /// For reading the variation of the format found in PS3 Shadow of the Colossus + Ico and Metal Gear Solid HD Collection
+        /// </summary>
+        private void ReadTopHeaderPS3(BufferedStreamReaderBE<MemoryStream> sr, bool readTexBuffers = true)
+        {
+            sr._BEReadActive = true;
+            footerData = new CFooter();
+            footerData.version = (byte)sr.ReadBE<int>();
+            var int_0C = sr.ReadBE<int>();
+
+            int headerSize = sr.ReadBE<int>();
+            int bufferDataSize = sr.ReadBE<int>(); //Size of the buffer with used data
+            int int_18 = sr.ReadBE<int>();
+            int int_1C = sr.ReadBE<int>();
+
+            int int_20 = sr.ReadBE<int>();
+            byte bt_24 = sr.ReadBE<byte>();
+            internalMipCount = sr.ReadBE<byte>();
+            byte bt_26 = sr.ReadBE<byte>();
+            byte bt_27 = sr.ReadBE<byte>();
+            int int_28 = sr.ReadBE<int>();
+            explicitWidth = sr.ReadBE<ushort>();
+            explicitHeight = sr.ReadBE<ushort>();
+            sliceCount = sr.ReadBE<ushort>();
+
+            var pixelFormat = GetFormat();
+            DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out int sourceBytesPerPixelSet, out int pixelBlockSize, out int formatBpp);
+            sr.Seek(0x80, SeekOrigin.Begin);
+            int finalWidth = explicitWidth;
+            int finalHeight = explicitHeight;
+            for (int s = 0; s < sliceCount; s++)
+            {
+                int mipWidth = finalWidth;
+                int mipHeight = finalHeight;
+
+                mipMapsList.Add(new List<byte[]>());
+
+                long bufferUsed = 0;
+                for (int i = 0; i < internalMipCount; i++)
+                {
+                    long bufferLength = (formatBpp * mipWidth * mipHeight) / 8;
+                    var mipOffset = bufferUsed + 0x80;
+                    bufferUsed += bufferLength;
+                    var mipFull = sr.ReadBytes(mipOffset, (int)bufferLength);
+                    ARGBToRGBA(mipFull);
+                    //If it's too small, we don't need to deswizzle
+                    if ((formatBpp * mipWidth * mipHeight / 8) <= sourceBytesPerPixelSet)
+                    {
+                        var newMipFull = new byte[sourceBytesPerPixelSet];
+                        Array.Copy(mipFull, 0, newMipFull, 0, sourceBytesPerPixelSet);
+                        mipFull = newMipFull;
+                    }
+                    else
+                    {
+                        mipFull = DeSwizzler.PS3DeSwizzle(mipFull, mipWidth, mipHeight, pixelFormat);
+                    }
+
+                    mipMapsList[s].Add(mipFull);
+                    mipWidth /= 2;
+                    mipHeight /= 2;
+                    if (mipWidth == 0)
+                    {
+                        mipWidth = 1;
+                    }
+                    if (mipHeight == 0)
+                    {
+                        mipHeight = 1;
+                    }
+                }
+            }
+        }
+
+        public static void ARGBToRGBA(byte[] raw)
+        {
+            for (int i = 0; i < raw.Length; i += 4)
+            {
+                byte low = raw[i];
+                byte low1 = raw[i + 1];
+                byte high = raw[i + 1];
+                byte high2 = raw[i + 2];
+                raw[i] = low1;
+                raw[i + 1] = high;
+                raw[i + 2] = high2;
+                raw[i + 3] = low;
             }
         }
 
@@ -551,6 +657,10 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
             switch (footerData.version)
             {
+                case 0x1:
+                    texWidth = explicitWidth;
+                    texHeight = explicitHeight;
+                    break;
                 case 0x25: //SOTC
                     texWidth = GetSOTCWidthComponent(WidthBaseByte, WidthMultiplierByte);
                     texHeight = GetSOTCHeightComponent(HeightBaseByte, HeightMultiplierByte);
@@ -745,6 +855,8 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     return DXGIFormat.BC6HUF16; //Image Based Lighting maps may appear VERY dark just naturally. This is simply how they are and tools like RenderDoc can 'fix' the value grading
                 case 0x11:
                     return DXGIFormat.BC7UNORM;
+                case -0x101:
+                    return DXGIFormat.R8G8B8A8SNORM;
                 default:
                     throw new Exception($"Unexpected pixel format: {textureFormat:X}");
             }
@@ -754,7 +866,9 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         {
             switch (textureFormat)
             {
+                case -0x101:
                 case 0x0:
+                    return false;
                 case 0x1:
                     return true;
                 case 0x3:
