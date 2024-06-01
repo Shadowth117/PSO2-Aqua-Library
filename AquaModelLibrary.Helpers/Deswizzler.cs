@@ -166,6 +166,7 @@ namespace AquaModelLibrary.Helpers
               27,
               31
         };
+
         /// <summary>
         /// Based on RawTex handling
         /// </summary>
