@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Helpers.Extensions
+﻿using System.Numerics;
+
+namespace AquaModelLibrary.Helpers.Extensions
 {
     public static class ByteListExtension
     {
@@ -159,6 +161,27 @@
             reserveUlongDict.Remove(key);
 
             return ptrLocation;
+        }
+
+        public static void AddValue(this List<byte> outBytes, Vector2 value)
+        {
+            outBytes.AddValue(value.X);
+            outBytes.AddValue(value.Y);
+        }
+
+        public static void AddValue(this List<byte> outBytes, Vector3 value)
+        {
+            outBytes.AddValue(value.X);
+            outBytes.AddValue(value.Y);
+            outBytes.AddValue(value.Z);
+        }
+
+        public static void AddValue(this List<byte> outBytes, Vector4 value)
+        {
+            outBytes.AddValue(value.X);
+            outBytes.AddValue(value.Y);
+            outBytes.AddValue(value.Z);
+            outBytes.AddValue(value.W);
         }
 
         public static void AddValue(this List<byte> outBytes, ulong value)

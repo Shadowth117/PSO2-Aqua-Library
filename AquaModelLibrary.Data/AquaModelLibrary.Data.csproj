@@ -43,12 +43,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="BillyHatcher\SetData\SetObjDefinitions\45.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Extra\PSO2Scripts\ScriptReference.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Libraries\NvTriStripDotNet.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Ninja\Model\Basic\" />
+    <Folder Include="Ninja\Model\Chunk\" />
   </ItemGroup>
 
 </Project>

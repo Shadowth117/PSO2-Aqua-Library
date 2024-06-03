@@ -4,9 +4,11 @@
     {
         public string ObjectName { get; set; }
         public int ObjectId { get; set; }
+        public string Position { get; set; }
         public string PositionX { get; set; }
         public string PositionY { get; set; }
         public string PositionZ { get; set; }
+        public string Rotation { get; set; }
         public string RotationX { get; set; }
         public string RotationY { get; set; }
         public string RotationZ { get; set; }
@@ -23,12 +25,8 @@
         public string ByteProperty3 { get; set; }
         public string ByteProperty4 { get; set; }
 
-        public string PositionXHint { get; set; }
-        public string PositionYHint { get; set; }
-        public string PositionZHint { get; set; }
-        public string RotationXHint { get; set; }
-        public string RotationYHint { get; set; }
-        public string RotationZHint { get; set; }
+        public string PositionHint { get; set; }
+        public string RotationHint { get; set; }
         public string IntProperty1Hint { get; set; }
         public string IntProperty2Hint { get; set; }
         public string IntProperty3Hint { get; set; }
