@@ -46,9 +46,10 @@ namespace SoulsFormats
             public Color Color { get; set; }
 
             /// <summary>
-            /// Unknown.
+            /// False: Transform relative to ParentBoneIndex.
+            /// True: Transform relative to AttachBoneIndex.
             /// </summary>
-            public bool Flag1 { get; set; }
+            public bool ParentTransformType { get; set; }
 
             /// <summary>
             /// If false, the upward vector is not read.
@@ -95,7 +96,7 @@ namespace SoulsFormats
                 ParentBoneIndex = br.ReadInt16();
                 Upward = br.ReadVector3();
                 AttachBoneIndex = br.ReadInt16();
-                Flag1 = br.ReadBoolean();
+                ParentTransformType = br.ReadBoolean();
                 UseUpwardVector = br.ReadBoolean();
                 Unk30 = br.ReadInt32();
                 Unk34 = br.ReadInt32();
@@ -115,7 +116,7 @@ namespace SoulsFormats
                 bw.WriteInt16(ParentBoneIndex);
                 bw.WriteVector3(Upward);
                 bw.WriteInt16(AttachBoneIndex);
-                bw.WriteBoolean(Flag1);
+                bw.WriteBoolean(ParentTransformType);
                 bw.WriteBoolean(UseUpwardVector);
                 bw.WriteInt32(Unk30);
                 bw.WriteInt32(Unk34);
