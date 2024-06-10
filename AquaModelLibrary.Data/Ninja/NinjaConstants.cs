@@ -4,6 +4,10 @@
     {
         public const double FromBAMSvalueToRadians = ((2 * Math.PI) / 65536.0);
         public const double ToBAMSValueFromRadians = (65536.0 / (2 * Math.PI));
+        public const double FromBAMSValueToDegrees = (360.0 / 65536.0);
+        public const double ToBAMSValueFromDegrees = (65536.0 / 360.0);
+        public const double FromDegreesToRadians = (Math.PI / 180.0);
+        public const double FromRadiansToDegrees = (180.0 / Math.PI);
     }
 
     public enum AlphaInstruction : int

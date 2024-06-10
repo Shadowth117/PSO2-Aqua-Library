@@ -9,6 +9,19 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
     {
         public List<SetObj> setObjs = new List<SetObj>();
         public SetObjList() { }
+        public SetObjList(byte[] file)
+        {
+            using (MemoryStream ms = new MemoryStream(file))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(sr);
+            }
+        }
+
+        public SetObjList(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
 
         public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
