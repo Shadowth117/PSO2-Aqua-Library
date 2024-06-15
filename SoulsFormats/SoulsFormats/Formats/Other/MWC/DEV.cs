@@ -8,10 +8,25 @@ namespace SoulsFormats.Formats.Other.MWC
     /// </summary>
     public class DEV : SoulsFile<DEV>
     {
+        /// <summary>
+        /// Archive headers
+        /// </summary>
         public List<ArchiveHeader> archiveHeaders = new List<ArchiveHeader>();
+        /// <summary>
+        /// Sets of file headers
+        /// </summary>
         public List<List<FileHeader>> fileHeaderSets = new List<List<FileHeader>>();
+        /// <summary>
+        /// Sets of files
+        /// </summary>
         public List<List<byte[]>> fileSets = new List<List<byte[]>>();
+        /// <summary>
+        /// File Magic
+        /// </summary>
         public string magic;
+        /// <summary>
+        /// Method to check if this is a DEV/DIV
+        /// </summary>
         protected override bool Is(BinaryReaderEx br)
         {
             if (br.Length < 4)
@@ -20,7 +35,9 @@ namespace SoulsFormats.Formats.Other.MWC
             string magic = br.GetASCII(0, 4);
             return magic == "DEV\0" || magic == "DIV\0";
         }
-
+        /// <summary>
+        /// Method to read DEV/DIV
+        /// </summary>
         protected override void Read(BinaryReaderEx br)
         {
             magic = br.AssertASCII("DEV\0", "DIV\0");
@@ -69,6 +86,9 @@ namespace SoulsFormats.Formats.Other.MWC
             }
         }
 
+        /// <summary>
+        /// Method to read file data
+        /// </summary>
         public void ReadData(string filePath)
         {
             if(magic == "DEV\0")
@@ -110,6 +130,9 @@ namespace SoulsFormats.Formats.Other.MWC
             }
         }
 
+        /// <summary>
+        /// Archive Header
+        /// </summary>
         public class ArchiveHeader
         {
             public ushort id;
@@ -119,6 +142,9 @@ namespace SoulsFormats.Formats.Other.MWC
             public uint fileHeadersOffset;
         }
 
+        /// <summary>
+        /// File header
+        /// </summary>
         public class FileHeader
         {
             public ushort id;

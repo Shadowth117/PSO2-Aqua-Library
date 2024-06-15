@@ -64,12 +64,18 @@ namespace SoulsFormats
             /// </summary>
             public short ScalingMode { get; set; }
 
+            /// <summary>
+            /// Base Shape Constructor
+            /// </summary>
             public Shape()
             {
                 ScalingOriginX = -1;
                 ScalingOriginY = -1;
             }
 
+            /// <summary>
+            /// Shape Read method
+            /// </summary>
             internal static Shape Read(BinaryReaderEx br, DRBVersion version, Dictionary<int, string> strings, long shprStart)
             {
                 int typeOffset = br.ReadInt32();

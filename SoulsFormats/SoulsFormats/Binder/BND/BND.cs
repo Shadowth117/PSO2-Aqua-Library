@@ -110,7 +110,6 @@ namespace SoulsFormats
         /// Reads a BND file header
         /// </summary>
         /// <param name="br"></param>
-        /// <param name="rootFilePath"></param>
         /// <returns>BinderFileHeader which contains everything needed to grab a file from the BinaryReaderEx</returns>
         internal static BinderFileHeader ReadBinderFileHeader(BinaryReaderEx br)
         {
