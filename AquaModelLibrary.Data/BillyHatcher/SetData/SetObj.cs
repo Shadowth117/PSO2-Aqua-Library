@@ -67,10 +67,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(setObj.fltProperty2);
                 outBytes.AddValue(setObj.fltProperty3);
                 outBytes.AddValue(setObj.fltProperty4);
-                outBytes.AddValue(setObj.btProperty1);
-                outBytes.AddValue(setObj.btProperty2);
-                outBytes.AddValue(setObj.btProperty3);
-                outBytes.AddValue(setObj.btProperty4);
+                outBytes.Add(setObj.btProperty1);
+                outBytes.Add(setObj.btProperty2);
+                outBytes.Add(setObj.btProperty3);
+                outBytes.Add(setObj.btProperty4);
             }
 
             ByteListExtension.AddAsBigEndian = false;
