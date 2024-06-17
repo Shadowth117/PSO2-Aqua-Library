@@ -14,20 +14,46 @@ namespace SoulsFormats.Formats.Other.MWC
     /// </summary>
     public class MMD : SoulsFile<MMD>
     {
+        /// <summary>
+        /// MMD Header data
+        /// </summary>
         public MMDHeader header;
+        /// <summary>
+        /// Mesh headers List
+        /// </summary>
         public List<MeshHeader> meshHeaders = new List<MeshHeader>();
+        /// <summary>
+        /// Vertices List
+        /// </summary>
         public List<Vertex> vertices = new List<Vertex>();
+        /// <summary>
+        /// Face Indices List
+        /// </summary>
         public List<ushort> faceIndices = new List<ushort>();
+        /// <summary>
+        /// Bones list
+        /// </summary>
         public List<Bone> bones = new List<Bone>();
+        /// <summary>
+        /// Texture names list
+        /// </summary>
         public List<string> texNames = new List<string>();
-
+        /// <summary>
+        /// MMD Base Constructor
+        /// </summary>
         public MMD() { }
 
+        /// <summary>
+        /// MMD BinaryReaderEx Constructor
+        /// </summary>
         public MMD(BinaryReaderEx br)
         {
             Read(br);
         }
 
+        /// <summary>
+        /// Method to determine if this is indeed an MMD
+        /// </summary>
         protected override bool Is(BinaryReaderEx br)
         {
             if (br.Length < 8)
@@ -38,6 +64,9 @@ namespace SoulsFormats.Formats.Other.MWC
             return magic == "MMD ";
         }
 
+        /// <summary>
+        /// Method to read MMD
+        /// </summary>
         protected override void Read(BinaryReaderEx br)
         {
             header = new MMDHeader();
@@ -130,6 +159,9 @@ namespace SoulsFormats.Formats.Other.MWC
             }
         }
 
+        /// <summary>
+        /// Structure of the MMDHeader
+        /// </summary>
         public struct MMDHeader
         {
             //public int fileSize;
@@ -154,6 +186,9 @@ namespace SoulsFormats.Formats.Other.MWC
             public int unkCount4;
         }
 
+        /// <summary>
+        /// Structure of a mesh header in an MMD
+        /// </summary>
         public struct MeshHeader
         {
             public int materialId;
@@ -162,6 +197,9 @@ namespace SoulsFormats.Formats.Other.MWC
             public int faceIndexStart;
         }
 
+        /// <summary>
+        /// Vertex in an MMD
+        /// </summary>
         public class Vertex
         {
             /// <summary>
@@ -195,6 +233,9 @@ namespace SoulsFormats.Formats.Other.MWC
             }
         }
 
+        /// <summary>
+        /// Structure of a node in an MMD
+        /// </summary>
         public struct Bone
         {
             public int int00;
