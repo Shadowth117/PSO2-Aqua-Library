@@ -25,15 +25,18 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// egg_gold : Elder golden egg data : Has file groups.
     /// egg_suit : Legendary chicken suit : Has file groups.
     /// event_ : Level scripting? 
-    /// gallery_egg : Data for eggs in the gallery?
-    /// ge_ : Egg and player character data. Has file groups.
-    /// geobj_ : Level geometry objects : Has file groups.
+    /// gallery_egg : Data for eggs in the gallery
+    /// ge_egg : Egg data. Has file groups.
+    /// ge_player : Player character data. Has file groups.
+    /// geobj_ : Level geometry objects : Has partial file groups. Some data is listed at the start with counts as to how much of a particular data type is there, followed by pointers to it. 
+    ///                                   Following all of this data starts the file group data.
+    ///                                   geobj_ that aren't common or a specific stage geobj_ are a different format variation entirely. These object ones ARE file group based with redundant references leading off.
     /// item_ani : Used for item data.
     /// item_cap : Used for cap item data.
     /// item_chickenbomb : What it sounds like.
     /// item_comb : Chicken comb item data.
     /// item_ : All others items work similarly to the above.
-    /// lib_ : Gallery data.
+    /// lib_ : Gallery data. Same as item_ data in layout and many entries here are identical to that area.
     /// main_menu : Menu data.
     /// menu : Menu data.
     /// obj_ : Various objects and their data. Has file groups.
@@ -46,7 +49,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// 
     /// egglevel.bin : Tables for configuring the various eggs. See EggLevel.cs for details.
     /// .lnd : Stage geometry, comes in an ARC and non ARC variant. ARC variant has file groups and is used in the final game. The other variant is seemingly unused in final.
-    /// .pad : Action data for various things. Has file groups.
+    /// .pad : PArtical Data. Has file groups. ani_ files and some others contain this type of data too.
     /// </summary>
     public class ARC
     {
