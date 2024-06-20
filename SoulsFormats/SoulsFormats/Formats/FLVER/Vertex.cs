@@ -269,7 +269,7 @@ namespace SoulsFormats
                         else if (member.Type == LayoutType.Byte4C)
                         {
                             UVs.Add(new Vector3(br.ReadByte() / 255f, br.ReadByte() / 255f, br.ReadByte() / 255f));
-                            br.AssertByte(0);
+                            var unkByte = br.ReadByte();
                         }
                         else if (member.Type == LayoutType.UV)
                         {
@@ -283,7 +283,7 @@ namespace SoulsFormats
                         else if (member.Type == LayoutType.Short4toFloat4B)
                         {
                             UVs.Add(new Vector3(br.ReadInt16(), br.ReadInt16(), br.ReadInt16()) / uvFactor);
-                            br.AssertInt16(0);
+                            var unkShort = br.AssertInt16(0);
                         }
                         else
                             throw new NotImplementedException($"Read not implemented for {member.Type} {member.Semantic}.");
