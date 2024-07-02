@@ -50,9 +50,9 @@ namespace SoulsFormats
         public List<BufferLayout> BufferLayouts { get; set; }
 
         /// <summary>
-        /// Unknown; only present in Sekiro.
+        /// Unknown; only present in Sekiro forward.
         /// </summary>
-        public SekiroUnkStruct SekiroUnk { get; set; }
+        public BoneMapping SekiroUnk { get; set; }
 
         /// <summary>
         /// Creates a FLVER with a default header and empty lists.
@@ -180,7 +180,7 @@ namespace SoulsFormats
                 textures.Add(new Texture(br, Header));
 
             if (Header.Version >= 0x2001A)
-                SekiroUnk = new SekiroUnkStruct(br);
+                SekiroUnk = new BoneMapping(br);
 
             Dictionary<int, Texture> textureDict = SFUtil.Dictionize(textures);
             foreach (Material material in Materials)

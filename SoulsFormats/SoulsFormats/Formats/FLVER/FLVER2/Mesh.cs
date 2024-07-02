@@ -83,7 +83,7 @@ namespace SoulsFormats
                 int boneOffset = br.ReadInt32();
                 int faceSetCount = br.ReadInt32();
                 int faceSetOffset = br.ReadInt32();
-                int vertexBufferCount = br.AssertInt32(1, 2, 3);
+                int vertexBufferCount = br.AssertInt32(0, 1, 2, 3);
                 int vertexBufferOffset = br.ReadInt32();
 
                 if (boundingBoxOffset != 0)
@@ -162,7 +162,11 @@ namespace SoulsFormats
                 int tanCap = layoutMembers.Where(m => m.Semantic == FLVER.LayoutSemantic.Tangent).Count();
                 int colorCap = layoutMembers.Where(m => m.Semantic == FLVER.LayoutSemantic.VertexColor).Count();
 
-                int vertexCount = VertexBuffers[0].VertexCount;
+                int vertexCount = 0;
+                if(VertexBuffers[0]?.VertexCount > 0)
+                {
+                    vertexCount = VertexBuffers[0].VertexCount;
+                }
                 Vertices = new List<FLVER.Vertex>(vertexCount);
                 for (int i = 0; i < vertexCount; i++)
                     Vertices.Add(new FLVER.Vertex(uvCap, tanCap, colorCap));
