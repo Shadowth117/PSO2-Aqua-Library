@@ -463,12 +463,35 @@ namespace AquaModelLibrary.Core.FromSoft
             //Dump metadata
             if (useMetaData)
             {
-                string materialData = JsonSerializer.Serialize(flver.Materials, jss);
-                string dummyData = JsonSerializer.Serialize(flver.Dummies, jss);
-                string boneData = JsonSerializer.Serialize(flver.Bones, jss);
-                File.WriteAllText(filePath + ".matData.json", materialData);
-                File.WriteAllText(filePath + ".dummyData.json", dummyData);
-                File.WriteAllText(filePath + ".boneData.json", boneData);
+                string materialData = null;
+                string dummyData = null;
+                string boneData = null;
+                if (flver is FLVER0)
+                {
+                    materialData = JsonSerializer.Serialize((List<FLVER0.Material>)flver.Materials, jss);
+                    dummyData = JsonSerializer.Serialize(((FLVER0)flver).Dummies, jss);
+                    boneData = JsonSerializer.Serialize(((FLVER0)flver).Bones, jss);
+                }
+                else if (flver is FLVER2)
+                {
+                    materialData = JsonSerializer.Serialize((List<FLVER2.Material>)flver.Materials, jss);
+                    dummyData = JsonSerializer.Serialize(((FLVER2)flver).Dummies, jss);
+                    boneData = JsonSerializer.Serialize(((FLVER2)flver).Bones, jss);
+                }
+                if(materialData != null)
+                {
+                    File.WriteAllText(filePath + ".matData.json", materialData);
+                }
+                if (materialData != null)
+                {
+                    File.WriteAllText(filePath + ".dummyData.json", dummyData);
+                }
+                if (materialData != null)
+                {
+                    File.WriteAllText(filePath + ".boneData.json", boneData);
+                }
+                
+                
             }
             return FlverToAqua(flver, out aqn, useMetaData);
         }
@@ -1634,8 +1657,7 @@ namespace AquaModelLibrary.Core.FromSoft
             List<int> rootSiblings = new List<int>();
             flver.Bones = new List<FLVER.Bone>();
 
-            if (true)
-            //if (boneDataText == null)
+            if (boneDataText == null)
             {
                 //Set up bones
                 for (int i = 0; i < aqn.nodeList.Count; i++)
