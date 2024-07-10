@@ -6,7 +6,7 @@ using System.Numerics;
 namespace SoulsFormats.Other
 {
     /// <summary>
-    /// A 3D model format used in Xbox games. Extension: .mdl
+    /// A 3D model format used in Xbox games, for instance, Otogi 2. Extension: .mdl
     /// </summary>
     public class MDL : SoulsFile<MDL>
     {
@@ -217,7 +217,7 @@ namespace SoulsFormats.Other
             public List<Faceset> Facesets;
             public byte IndexCount;
             public byte Unk03;
-            public short[] Indices;
+            public short[] BoneIndices;
 
             internal FacesetC(BinaryReaderEx br)
             {
@@ -225,7 +225,7 @@ namespace SoulsFormats.Other
                 IndexCount = br.ReadByte();
                 Unk03 = br.ReadByte();
                 int facesetsOffset = br.ReadInt32();
-                Indices = br.ReadInt16s(8);
+                BoneIndices = br.ReadInt16s(8);
 
                 br.StepIn(facesetsOffset);
                 {
@@ -255,10 +255,10 @@ namespace SoulsFormats.Other
             public Vector2[] UVs;
 
             /// <summary>
-            /// Flag for staticly weighted vertices to indicate a different bone. 0x4 is the parent bone.
+            /// Flag for staticly weighted vertices to indicate a different bone. 0x4 is usually the parent bone. If FaceSetC, the BoneIndices take precedence and these correlate to those.
             /// </summary>
-            public short StaticWeightFlag;
-            public short UnkShortB;
+            public MDLWeightIndex PrimaryWeightFlag;
+            public MDLWeightIndex SecondaryWeightFlag;
 
             /// <summary>
             /// Weight for dynamically weighted vertices to indicate weight to the current bone.
@@ -289,14 +289,40 @@ namespace SoulsFormats.Other
                 if (format >= VertexFormat.B)
                 {
                     // Both may be 0, 4, 8, 12, etc
-                    StaticWeightFlag = br.ReadInt16();
-                    UnkShortB = br.ReadInt16();
+                    PrimaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
+                    SecondaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
                 }
 
                 if (format >= VertexFormat.C)
                 {
                     PrimaryVertexWeight = br.ReadSingle();
                     SecondaryVertexWeight = br.ReadSingle();
+                }
+            }
+            public short GetPrimaryWeightIndex()
+            {
+                return GetWeightIndex(PrimaryWeightFlag);
+            }
+
+            public short GetSecondaryWeightIndex()
+            {
+                return GetWeightIndex(SecondaryWeightFlag);
+            }
+
+            private short GetWeightIndex(MDLWeightIndex weightIndex)
+            {
+                switch (weightIndex)
+                {
+                    case MDLWeightIndex.Index0:
+                        return 0;
+                    case MDLWeightIndex.Index1:
+                        return 1;
+                    case MDLWeightIndex.Index2:
+                        return 2;
+                    case MDLWeightIndex.Index3:
+                        return 3;
+                    default:
+                        throw new System.NotImplementedException("Unexpected weight index!");
                 }
             }
         }
@@ -355,8 +381,8 @@ namespace SoulsFormats.Other
                 for (int i = 0; i < 4; i++)
                     UVs[i] = br.ReadVector2();
 
-                StaticWeightFlag = br.ReadInt16();
-                UnkShortB = br.ReadInt16();
+                PrimaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
+                SecondaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
                 PrimaryVertexWeight = br.ReadSingle();
                 SecondaryVertexWeight = br.ReadSingle();
             }

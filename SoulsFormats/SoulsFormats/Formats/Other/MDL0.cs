@@ -233,10 +233,10 @@ namespace SoulsFormats.Other
             public Vector3 Normal;
             public Color Color;
             public Vector2[] UVs;
-            public short UnkShortA;
-            public short UnkShortB;
-            public float UnkFloatA;
-            public float UnkFloatB;
+            public MDLWeightIndex PrimaryWeightFlag;
+            public MDLWeightIndex SecondaryWeightFlag;
+            public float PrimaryVertexWeight;
+            public float SecondaryVertexWeight;
 
             public Vertex(Vector3 position, Vector3 normal)
             {
@@ -256,14 +256,42 @@ namespace SoulsFormats.Other
 
                 if (format >= VertexFormat.B)
                 {
-                    UnkShortA = br.ReadInt16();
-                    UnkShortB = br.ReadInt16();
+                    // Both may be 0, 4, 8, 12, etc
+                    PrimaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
+                    SecondaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
                 }
 
                 if (format >= VertexFormat.C)
                 {
-                    UnkFloatA = br.ReadSingle();
-                    UnkFloatB = br.ReadSingle();
+                    PrimaryVertexWeight = br.ReadSingle();
+                    SecondaryVertexWeight = br.ReadSingle();
+                }
+            }
+
+            public short GetPrimaryWeightIndex()
+            {
+                return GetWeightIndex(PrimaryWeightFlag);
+            }
+
+            public short GetSecondaryWeightIndex()
+            {
+                return GetWeightIndex(SecondaryWeightFlag);
+            }
+
+            private short GetWeightIndex(MDLWeightIndex weightIndex)
+            {
+                switch(weightIndex)
+                {
+                    case MDLWeightIndex.Index0:
+                        return 0;
+                    case MDLWeightIndex.Index1:
+                        return 1;
+                    case MDLWeightIndex.Index2:
+                        return 2;
+                    case MDLWeightIndex.Index3:
+                        return 3;
+                    default:
+                        throw new System.NotImplementedException("Unexpected weight index!");
                 }
             }
         }

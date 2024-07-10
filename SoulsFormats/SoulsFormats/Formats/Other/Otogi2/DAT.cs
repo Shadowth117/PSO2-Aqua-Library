@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SoulsFormats.Otogi2
 {
     /// <summary>
-    /// Model-related file container used in Otogi 2. Extension: .dat
+    /// Model-related file container used in Otogi 1 and 2. Extension: .dat
     /// </summary>
     public class DAT : SoulsFile<DAT>
     {
