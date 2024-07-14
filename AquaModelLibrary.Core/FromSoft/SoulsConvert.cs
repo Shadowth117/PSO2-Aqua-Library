@@ -761,7 +761,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 mat *= tfmMat;
 
                 //If there's a parent, multiply by it
-                if (parentId != -1)
+                //Some of these are malformed and specify a bone greater than what exists. Thanks, From
+                if (parentId != -1 && parentId < aqn.nodeList.Count)
                 {
                     var pn = aqn.nodeList[parentId];
                     var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
