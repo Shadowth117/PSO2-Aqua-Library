@@ -305,8 +305,8 @@ namespace AquaModelLibrary.Data.Utility
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
-            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateUILists(pso2_binDir, outputDirectory, imageDiretory);
+            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
@@ -733,13 +733,19 @@ namespace AquaModelLibrary.Data.Utility
         {
             string outputStampDirectory = Path.Combine(outputDirectory, "UI", "Stamps");
             string outputVGDirectory = Path.Combine(outputDirectory, "UI", "Vital Gauge");
+            string outputLDDirectory = Path.Combine(outputDirectory, "UI", "Line Duel");
+            string outputArksCardBGDirectory = Path.Combine(outputDirectory, "UI", "Arks Card Backgrounds");
             Directory.CreateDirectory(outputStampDirectory);
             Directory.CreateDirectory(outputVGDirectory);
+            Directory.CreateDirectory(outputLDDirectory);
+            Directory.CreateDirectory(outputArksCardBGDirectory);
 
             string outputImageStampDirectory = Path.Combine(imageDirectory, "UI", "Stamps");
             string outputImageVGDirectory = Path.Combine(imageDirectory, "UI", "Vital Gauge");
+            string outputImageLDDirectory = Path.Combine(imageDirectory, "UI", "Line Duel");
             Directory.CreateDirectory(outputImageStampDirectory);
             Directory.CreateDirectory(outputImageVGDirectory);
+            Directory.CreateDirectory(outputImageLDDirectory);
 
             //---------------------------Reboot General UI files
             var rebootBasePath = Path.Combine(pso2_binDir, dataReboot);
@@ -764,6 +770,174 @@ namespace AquaModelLibrary.Data.Utility
             AddIfExistsBasic(generalUiOut, rebootBasePath, rbMainCrop, "");
 
             File.WriteAllLines(Path.Combine(outputDirectory, "UI", "Reboot General UI.csv"), generalUiOut, Encoding.UTF8);
+
+            //---------------------------Arks Card BG Files
+            List<string> acbgOut = new List<string>();
+            for (int i = 0; i < 1000; i++)
+            {
+                string name = arksIdBgPath + $"{i:D3}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                if (File.Exists(path))
+                {
+                    acbgOut.Add(name + "," + hash);
+                }
+            }
+
+            if(acbgOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputArksCardBGDirectory, "Arks Card BG.csv"), acbgOut, Encoding.UTF8);
+            }
+
+            //---------------------------Arks Card Ticket BG Files
+            List<string> actbgOut = new List<string>();
+            for (int i = 0; i < 100000; i++)
+            {
+                string name = arksIdTiBgPath + $"{i:D5}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                string pathNA = Path.Combine(pso2_binDir, dataRebootNA, hash);
+                if (File.Exists(path))
+                {
+                    string iname = largeIconPath + $"609{i:D6}.ice";
+                    string ihash = GetRebootHash(GetFileHash(name));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    if (!File.Exists(ipath))
+                    {
+                        iname = "";
+                        ihash = "";
+                    }
+
+                    actbgOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                }
+            }
+
+            if (actbgOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputArksCardBGDirectory, "Arks Card Ticket BG.csv"), actbgOut, Encoding.UTF8);
+            }
+
+            //---------------------------Line Duel files
+            List<string> ldcOut = new List<string>();
+            List<string> ldBoardOut = new List<string>();
+            List<string> ldCardOut = new List<string>();
+            List<string> ldIconOut = new List<string>();
+            List<string> ldSleeveOut = new List<string>();
+            AddIfExistsBasic(ldcOut, rebootBasePath, lineDuelCommonFilename, "");
+            AddIfExistsBasic(ldcOut, rebootBasePath, lineDuelEffectFilename, "");
+            AddIfExistsBasic(ldcOut, rebootBasePath, lineDuelTextFilename, "");
+            for (int i = 0; i < 100000; i++)
+            {
+                string name = lineDuelBoardPath + $"{i}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                if (File.Exists(path))
+                {
+                    string iname = largeIconPath + $"611{i:D6}.ice";
+                    string ihash = GetRebootHash(GetFileHash(name));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    if(!File.Exists(ipath))
+                    {
+                        iname = "";
+                        ihash = "";
+                    }
+
+                    ldBoardOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputImageLDDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+            for (int i = 0; i < 100000; i++)
+            {
+                string name = lineDuelCardPath + $"{i}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                if (File.Exists(path))
+                {
+                    string iname = largeIconPath + $"612{i:D6}.ice";
+                    string ihash = GetRebootHash(GetFileHash(name));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    if (!File.Exists(ipath))
+                    {
+                        iname = "";
+                        ihash = "";
+                    }
+
+                    ldCardOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputImageLDDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+            for (int i = 0; i < 100000; i++)
+            {
+                string name = lineDuelIconPath + $"{i}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                if (File.Exists(path))
+                {
+                    ldIconOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputImageLDDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+            for (int i = 0; i < 100000; i++)
+            {
+                string name = lineDuelSleevePath + $"{i}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                if (File.Exists(path))
+                {
+                    string iname = largeIconPath + $"610{i:D6}.ice";
+                    string ihash = GetRebootHash(GetFileHash(name));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    if (!File.Exists(ipath))
+                    {
+                        iname = "";
+                        ihash = "";
+                    }
+
+                    ldSleeveOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputImageLDDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+
+            if (ldcOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputLDDirectory, "Line Duel Common.csv"), ldcOut, Encoding.UTF8);
+            }
+            if (ldBoardOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputLDDirectory, "Line Duel Boards.csv"), ldBoardOut, Encoding.UTF8);
+            }
+            if (ldCardOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputLDDirectory, "Line Duel Cards.csv"), ldCardOut, Encoding.UTF8);
+            }
+            if (ldIconOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputLDDirectory, "Line Duel Icons.csv"), ldIconOut, Encoding.UTF8);
+            }
+            if (ldSleeveOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputLDDirectory, "Line Duel Sleeves.csv"), ldSleeveOut, Encoding.UTF8);
+            }
 
             //--------------------------World Map files
             List<string> worldMapOut = new List<string>();
@@ -832,6 +1006,7 @@ namespace AquaModelLibrary.Data.Utility
 
             //---------------------------Vital Gauge
             List<string> vgOut = new List<string>();
+            List<string> vgNAOut = new List<string>();
             for (int i = 0; i < 10000; i++)
             {
                 string name = vitalGaugePath + $"{i:D4}.ice";
@@ -850,7 +1025,7 @@ namespace AquaModelLibrary.Data.Utility
                 }
                 if (File.Exists(pathNA))
                 {
-                    stampsNAOut.Add(name + "," + hash);
+                    vgNAOut.Add(name + "," + hash);
                     var image = GetFirstImageFromIce(pathNA);
                     if (image != null)
                     {
@@ -860,7 +1035,14 @@ namespace AquaModelLibrary.Data.Utility
                 }
             }
 
-            File.WriteAllLines(Path.Combine(outputVGDirectory, "Vital Guage.csv"), vgOut, Encoding.UTF8);
+            if(vgOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputVGDirectory, "Vital Guage.csv"), vgOut, Encoding.UTF8);
+            }
+            if(vgNAOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputVGDirectory, "Vital Guage NA.csv"), vgNAOut, Encoding.UTF8);
+            }
         }
 
         private static void AddIfExistsBasic(List<string> worldMapOut, string basepath, string fileName, string label)

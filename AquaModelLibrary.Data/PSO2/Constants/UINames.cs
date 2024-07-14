@@ -6,7 +6,26 @@
         public static string loadTunnelClassic = "ui_playable_load.ice";
         public static string loadTunnelReboot = "interface/ui_playable_load.ice";
         public static string stampPath = "ui_stamp/ui_stamp_";
+        /// <summary>
+        /// Path for inventory items in classic and reboot. Uses the actual item id, eg. large_icon/ui_item_6030022.ice
+        /// </summary>
+        public static string largeIconPath = "large_icon/ui_item_";
         public static string vitalGaugePath = "large_icon/ui_vital_card_";
+        public static string lineDuelBoardPath = "large_icon/ui_ld_board_";
+        /// <summary>
+        /// Eg. large_icon/ui_ld_card_790.ice
+        /// </summary>
+        public static string lineDuelCardPath = "large_icon/ui_ld_card_";
+        public static string lineDuelIconPath = "large_icon/ui_ld_icon_";
+        public static string lineDuelSleevePath = "large_icon/ui_ld_sleeve_";
+        public static string lineDuelCommonFilename = "interface/ui_ld.ice";
+        public static string lineDuelEffectFilename = "interface/ui_ld_effect.ice";
+        public static string lineDuelTextFilename = "ui_lineduel_text.ice";
+        /// <summary>
+        /// Eg. interface/arkscard/ui_arkscard_bg_038.ice
+        /// </summary>
+        public static string arksIdBgPath = "interface/arkscard/ui_arkscard_bg_";
+        public static string arksIdTiBgPath = "interface/arkscard/ui_ticket_arkscard_";
         public static string uiRoomIce = "ui_myroom.ice";
         public static string uiRoomFilename = "ui_myroom.text";
 
