@@ -743,33 +743,119 @@ namespace AquaModelLibrary.Data.Utility
             string outputImageStampDirectory = Path.Combine(imageDirectory, "UI", "Stamps");
             string outputImageVGDirectory = Path.Combine(imageDirectory, "UI", "Vital Gauge");
             string outputImageLDDirectory = Path.Combine(imageDirectory, "UI", "Line Duel");
+            string outputImageEnemyDirectory = Path.Combine(imageDirectory, "UI", "Enemy", "Classic");
+            string outputImageEnemyRebootDirectory = Path.Combine(imageDirectory, "UI", "Enemy", "Reboot");
             Directory.CreateDirectory(outputImageStampDirectory);
             Directory.CreateDirectory(outputImageVGDirectory);
             Directory.CreateDirectory(outputImageLDDirectory);
+            Directory.CreateDirectory(outputImageEnemyDirectory);
+            Directory.CreateDirectory(outputImageEnemyRebootDirectory);
 
             //---------------------------Reboot General UI files
             var rebootBasePath = Path.Combine(pso2_binDir, dataReboot);
             List<string> generalUiOut = new List<string>();
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbBanner, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbBattlePass, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbBenchmark, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbCredits, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbDefenseQuest, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbDownloadReb, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbEnding, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbEvent, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbGacha, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbIcon, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbLoginStamp, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbPlayableLoad, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbWorldMap, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbResidentFont, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbResidentHud, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbResidentProduction, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbLobbyMapImageCentral, "");
-            AddIfExistsBasic(generalUiOut, rebootBasePath, rbMainCrop, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbBanner, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbBattlePass, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbBenchmark, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbCredits, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbDefenseQuest, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbDownloadReb, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbEnding, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbEvent, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbGacha, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbIcon, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbLoginStamp, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbPlayableLoad, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbWorldMap, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbResidentFont, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbResidentHud, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbResidentProduction, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbLobbyMapImageCentral, "");
+            AddIfExists(generalUiOut, rebootBasePath, rbMainCrop, "");
 
             File.WriteAllLines(Path.Combine(outputDirectory, "UI", "Reboot General UI.csv"), generalUiOut, Encoding.UTF8);
+
+            //---------------------------Enemy Icon Files
+            List<string> enemyIconsOut = new List<string>();
+            if(AddIfExistsBase(enemyIconsOut, Path.Combine(pso2_binDir, dataDir), largeEnemyNoDataIconPath, ""))
+            {
+                var image = GetFirstImageFromIce(Path.Combine(pso2_binDir, dataDir, GetFileHash(largeEnemyNoDataIconPath)));
+                if (image != null)
+                {
+                    var imagePath = Path.Combine(outputImageEnemyDirectory, Path.ChangeExtension(Path.GetFileName(largeEnemyNoDataIconPath), ".png"));
+                    image.Save(imagePath);
+                }
+            }
+            if(AddIfExistsBase(enemyIconsOut, Path.Combine(pso2_binDir, dataDir), largeEnemyUnknownIconPath, ""))
+            {
+                var image = GetFirstImageFromIce(Path.Combine(pso2_binDir, dataDir, GetFileHash(largeEnemyUnknownIconPath)));
+                if (image != null)
+                {
+                    var imagePath = Path.Combine(outputImageEnemyDirectory, Path.ChangeExtension(Path.GetFileName(largeEnemyUnknownIconPath), ".png"));
+                    image.Save(imagePath);
+                }
+            }
+            for (int i = 0; i < 10000; i++)
+            {
+                string name = largeEnemyIconPath + $"normal_{i:D4}.ice";
+                string hash = GetFileHash(name);
+                string path = Path.Combine(pso2_binDir, dataDir, hash);
+                if (File.Exists(path))
+                {
+                    enemyIconsOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputImageEnemyDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+            if (enemyIconsOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputDirectory, "UI", "Enemy Icons.csv"), enemyIconsOut, Encoding.UTF8);
+            }
+
+            //---------------------------Reboot Enemy Icon Files
+            List<string> enemyIconsRBOut = new List<string>();
+            if(AddIfExistsReboot(enemyIconsRBOut, Path.Combine(pso2_binDir, dataReboot), largeEnemyNoDataIconPath, ""))
+            {
+                var image = GetFirstImageFromIce(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(largeEnemyNoDataIconPath))));
+                if (image != null)
+                {
+                    var imagePath = Path.Combine(outputImageEnemyRebootDirectory, Path.ChangeExtension(Path.GetFileName(largeEnemyNoDataIconPath), ".png"));
+                    image.Save(imagePath);
+                }
+            }
+            if(AddIfExistsReboot(enemyIconsRBOut, Path.Combine(pso2_binDir, dataReboot), largeEnemyUnknownIconPath, ""))
+            {
+                var image = GetFirstImageFromIce(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(largeEnemyUnknownIconPath))));
+                if (image != null)
+                {
+                    var imagePath = Path.Combine(outputImageEnemyRebootDirectory, Path.ChangeExtension(Path.GetFileName(largeEnemyUnknownIconPath), ".png"));
+                    image.Save(imagePath);
+                }
+            }
+            for (int i = 0; i < 10000; i++)
+            {
+                string name = largeEnemyIconPath + $"normal_{i:D4}.ice";
+                string hash = GetRebootHash(GetFileHash(name));
+                string path = Path.Combine(pso2_binDir, dataReboot, hash);
+                if (File.Exists(path))
+                {
+                    enemyIconsRBOut.Add(name + "," + hash);
+                    var image = GetFirstImageFromIce(path);
+                    if (image != null)
+                    {
+                        var imagePath = Path.Combine(outputImageEnemyRebootDirectory, Path.ChangeExtension(Path.GetFileName(name), ".png"));
+                        image.Save(imagePath);
+                    }
+                }
+            }
+            if (enemyIconsRBOut.Count > 0)
+            {
+                File.WriteAllLines(Path.Combine(outputDirectory, "UI", "Reboot Enemy Icons.csv"), enemyIconsRBOut, Encoding.UTF8);
+            }
 
             //---------------------------Arks Card BG Files
             List<string> acbgOut = new List<string>();
@@ -832,9 +918,9 @@ namespace AquaModelLibrary.Data.Utility
             List<string> ldCardOut = new List<string>();
             List<string> ldIconOut = new List<string>();
             List<string> ldSleeveOut = new List<string>();
-            AddIfExistsBasic(ldcOut, rebootBasePath, lineDuelCommonFilename, "");
-            AddIfExistsBasic(ldcOut, rebootBasePath, lineDuelEffectFilename, "");
-            AddIfExistsBasic(ldcOut, rebootBasePath, lineDuelTextFilename, "");
+            AddIfExists(ldcOut, rebootBasePath, lineDuelCommonFilename, "");
+            AddIfExists(ldcOut, rebootBasePath, lineDuelEffectFilename, "");
+            AddIfExists(ldcOut, rebootBasePath, lineDuelTextFilename, "");
             for (int i = 0; i < 100000; i++)
             {
                 string name = lineDuelBoardPath + $"{i}.ice";
@@ -977,21 +1063,21 @@ namespace AquaModelLibrary.Data.Utility
 
             //--------------------------World Map files
             List<string> worldMapOut = new List<string>();
-            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + rbUiWorldMapTexSea, "");
+            AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + rbUiWorldMapTexSea, "");
 
             for (int i = 0; i < 1000000; i++)
             {
-                AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_mapmask_{i:D6}.ice", "");
+                AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_mapmask_{i:D6}.ice", "");
             }
             for (int i = 0; i < 1000000; i++)
             {
-                AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_{i:D6}.ice", "");
+                AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_{i:D6}.ice", "");
             }
-            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000481_005001.ice", "");
-            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000482_005001.ice", "");
-            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000483_005001.ice", "");
-            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000505_005001.ice", "");
-            AddIfExistsBasic(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000506_005001.ice", "");
+            AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000481_005001.ice", "");
+            AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000482_005001.ice", "");
+            AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000483_005001.ice", "");
+            AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000505_005001.ice", "");
+            AddIfExists(worldMapOut, rebootBasePath, rbUiWorldMapTexBase + $"ui_worldmap_000506_005001.ice", "");
 
             File.WriteAllLines(Path.Combine(outputDirectory, "UI", "UIWorldMapTextures.csv"), worldMapOut, Encoding.UTF8);
 
@@ -1081,14 +1167,31 @@ namespace AquaModelLibrary.Data.Utility
             }
         }
 
-        private static void AddIfExistsBasic(List<string> worldMapOut, string basepath, string fileName, string label)
+        private static bool AddIfExistsBase(List<string> outList, string basepath, string fileName, string label)
         {
-            var fileHash = GetRebootHash(GetFileHash(fileName));
+            return AddIfExists(outList, basepath, fileName, label, false);
+        }
+
+        private static bool AddIfExistsReboot(List<string> outList, string basepath, string fileName, string label)
+        {
+            return AddIfExists(outList, basepath, fileName, label, true);
+        }
+
+        private static bool AddIfExists(List<string> outList, string basepath, string fileName, string label, bool reboot = true)
+        {
+            var fileHash = GetFileHash(fileName);
+            if (reboot)
+            {
+                fileHash = GetRebootHash(fileHash);
+            }
             var filePath = Path.Combine(basepath, fileHash);
             if (File.Exists(filePath))
             {
-                worldMapOut.Add($"{label},{fileName},{fileHash}");
+                outList.Add($"{label},{fileName},{fileHash}");
+                return true;
             }
+
+            return false;
         }
 
         public unsafe static Bitmap GetFirstImageFromIce(string fileName)

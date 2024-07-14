@@ -6,6 +6,7 @@
         public static string loadTunnelClassic = "ui_playable_load.ice";
         public static string loadTunnelReboot = "interface/ui_playable_load.ice";
         public static string stampPath = "ui_stamp/ui_stamp_";
+        public static string largeEnemyIconPath = "large_icon/ui_enemy_";
         /// <summary>
         /// Path for inventory items in classic and reboot. Uses the actual item id, eg. large_icon/ui_item_6030022.ice
         /// </summary>
@@ -28,6 +29,10 @@
         public static string arksIdTiBgPath = "interface/arkscard/ui_ticket_arkscard_";
         public static string uiRoomIce = "ui_myroom.ice";
         public static string uiRoomFilename = "ui_myroom.text";
+
+        //Set Icon names
+        public static string largeEnemyNoDataIconPath = "large_icon/ui_enemy_nodata_0000.ice";
+        public static string largeEnemyUnknownIconPath = "large_icon/ui_enemy_unknown_0000.ice";
 
         //Reboot Interface UI
         public static string rbBanner = "interface/ui_banner.ice";
