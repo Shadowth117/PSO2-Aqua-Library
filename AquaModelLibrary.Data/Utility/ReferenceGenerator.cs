@@ -800,15 +800,24 @@ namespace AquaModelLibrary.Data.Utility
                 if (File.Exists(path))
                 {
                     string iname = largeIconPath + $"609{i:D6}.ice";
-                    string ihash = GetRebootHash(GetFileHash(name));
-                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    string ihash = GetRebootHash(GetFileHash(iname));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, ihash);
                     if (!File.Exists(ipath))
                     {
                         iname = "";
                         ihash = "";
                     }
 
-                    actbgOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    string i64name = largeIconPath + $"609{i:D6}_64.ice";
+                    string i64hash = GetRebootHash(GetFileHash(i64name));
+                    string i64path = Path.Combine(pso2_binDir, dataReboot, i64hash);
+                    if (!File.Exists(i64path))
+                    {
+                        i64name = "";
+                        i64hash = "";
+                    }
+
+                    actbgOut.Add(name + "," + hash + "," + iname + "," + ihash + "," + i64name + "," + i64hash);
                 }
             }
 
@@ -834,15 +843,24 @@ namespace AquaModelLibrary.Data.Utility
                 if (File.Exists(path))
                 {
                     string iname = largeIconPath + $"611{i:D6}.ice";
-                    string ihash = GetRebootHash(GetFileHash(name));
-                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
-                    if(!File.Exists(ipath))
+                    string ihash = GetRebootHash(GetFileHash(iname));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, ihash);
+                    if (!File.Exists(ipath))
                     {
                         iname = "";
                         ihash = "";
                     }
 
-                    ldBoardOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    string i64name = largeIconPath + $"609{i:D6}_64.ice";
+                    string i64hash = GetRebootHash(GetFileHash(i64name));
+                    string i64path = Path.Combine(pso2_binDir, dataReboot, i64hash);
+                    if (!File.Exists(i64path))
+                    {
+                        i64name = "";
+                        i64hash = "";
+                    }
+
+                    ldBoardOut.Add(name + "," + hash + "," + iname + "," + ihash + "," + i64name + "," + i64hash);
                     var image = GetFirstImageFromIce(path);
                     if (image != null)
                     {
@@ -859,15 +877,24 @@ namespace AquaModelLibrary.Data.Utility
                 if (File.Exists(path))
                 {
                     string iname = largeIconPath + $"612{i:D6}.ice";
-                    string ihash = GetRebootHash(GetFileHash(name));
-                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    string ihash = GetRebootHash(GetFileHash(iname));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, ihash);
                     if (!File.Exists(ipath))
                     {
                         iname = "";
                         ihash = "";
                     }
 
-                    ldCardOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    string i64name = largeIconPath + $"609{i:D6}_64.ice";
+                    string i64hash = GetRebootHash(GetFileHash(i64name));
+                    string i64path = Path.Combine(pso2_binDir, dataReboot, i64hash);
+                    if (!File.Exists(i64path))
+                    {
+                        i64name = "";
+                        i64hash = "";
+                    }
+
+                    ldCardOut.Add(name + "," + hash + "," + iname + "," + ihash + "," + i64name + "," + i64hash);
                     var image = GetFirstImageFromIce(path);
                     if (image != null)
                     {
@@ -900,15 +927,24 @@ namespace AquaModelLibrary.Data.Utility
                 if (File.Exists(path))
                 {
                     string iname = largeIconPath + $"610{i:D6}.ice";
-                    string ihash = GetRebootHash(GetFileHash(name));
-                    string ipath = Path.Combine(pso2_binDir, dataReboot, hash);
+                    string ihash = GetRebootHash(GetFileHash(iname));
+                    string ipath = Path.Combine(pso2_binDir, dataReboot, ihash);
                     if (!File.Exists(ipath))
                     {
                         iname = "";
                         ihash = "";
                     }
 
-                    ldSleeveOut.Add(name + "," + hash + "," + iname + "," + ihash);
+                    string i64name = largeIconPath + $"609{i:D6}_64.ice";
+                    string i64hash = GetRebootHash(GetFileHash(i64name));
+                    string i64path = Path.Combine(pso2_binDir, dataReboot, i64hash);
+                    if (!File.Exists(i64path))
+                    {
+                        i64name = "";
+                        i64hash = "";
+                    }
+
+                    ldSleeveOut.Add(name + "," + hash + "," + iname + "," + ihash + "," + i64name + "," + i64hash);
                     var image = GetFirstImageFromIce(path);
                     if (image != null)
                     {
