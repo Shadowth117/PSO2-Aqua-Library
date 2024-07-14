@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using static SoulsFormats.DDS;
+using static SoulsFormats.TPF;
 
 namespace SoulsFormats
 {
@@ -44,6 +45,9 @@ namespace SoulsFormats
     */
     internal static class Headerizer
     {
+        /// <summary>
+        /// Compressed Bits Per Block
+        /// </summary>
         private static Dictionary<byte, int> CompressedBPB = new Dictionary<byte, int>
         {
             [0] = 8,
@@ -67,6 +71,9 @@ namespace SoulsFormats
             [113] = 16,
         };
 
+        /// <summary>
+        /// Uncompressed Bytes Per Pixel
+        /// </summary>
         private static Dictionary<byte, int> UncompressedBPP = new Dictionary<byte, int>
         {
             [6] = 2,
@@ -77,6 +84,9 @@ namespace SoulsFormats
             [105] = 4,
         };
 
+        /// <summary>
+        /// DDS FourCC bytes
+        /// </summary>
         private static Dictionary<byte, string> FourCC = new Dictionary<byte, string>
         {
             [0] = "DXT1",
@@ -95,9 +105,15 @@ namespace SoulsFormats
             [110] = "DXT5",
         };
 
+        /// <summary>
+        /// DX10+ dds pixel formats
+        /// </summary>
         private static byte[] DX10Formats = { 6, 100, 102, 106, 107, 112, 113 };
 
-        public static byte[] Headerize(TPF.Texture texture)
+        /// <summary>
+        /// By default, we'll assume no swizzling, PC type. Bear in mind Demon's Souls and Dark Souls 1 do NOT use PS3 swizzling and should be assigned 'PC'!
+        /// </summary>
+        public static byte[] Headerize(TPF.Texture texture, TPFPlatform platform = TPFPlatform.PC)
         {
             if (SFEncoding.ASCII.GetString(texture.Bytes, 0, 4) == "DDS ")
                 return texture.Bytes;
@@ -206,7 +222,7 @@ namespace SoulsFormats
                     dds.header10.miscFlag = RESOURCE_MISC.TEXTURECUBE;
             }
 
-            byte[] bytes = RebuildPixelData(texture.Bytes, format, width, height, mipCount, type);
+            byte[] bytes = RebuildPixelData(texture.Bytes, format, width, height, mipCount, type, platform);
             return dds.Write(bytes);
         }
 
@@ -215,7 +231,7 @@ namespace SoulsFormats
             return (int)Math.Ceiling(Math.Log(Math.Max(width, height), 2)) + 1;
         }
 
-        private static byte[] RebuildPixelData(byte[] bytes, byte format, short width, short height, int mipCount, TPF.TexType type)
+        private static byte[] RebuildPixelData(byte[] bytes, byte format, short width, short height, int mipCount, TPF.TexType type, TPFPlatform platform = TPFPlatform.PC)
         {
             int imageCount = type == TPF.TexType.Cubemap ? 6 : 1;
             int padDimensions = 1;
@@ -243,7 +259,7 @@ namespace SoulsFormats
                     for (int i = 0; i < image.MipLevels.Count; i++)
                     {
                         int scale = (int)Math.Pow(2, i);
-                        image.MipLevels[i] = DeswizzleMipLevel(image.MipLevels[i], format, texelSize, width / scale, height / scale, padDimensions);
+                        image.MipLevels[i] = DeswizzleMipLevel(image.MipLevels[i], format, texelSize, width / scale, height / scale, padDimensions, platform);
                     }
                 }
             }
@@ -256,7 +272,7 @@ namespace SoulsFormats
             return (int)Math.Ceiling(value / (float)pad) * pad;
         }
 
-        private static byte[] DeswizzleMipLevel(byte[] swizzled, byte format, int texelSize, int width, int height, int padDimensions)
+        private static byte[] DeswizzleMipLevel(byte[] swizzled, byte format, int texelSize, int width, int height, int padDimensions, TPFPlatform platform = TPFPlatform.PC)
         {
             int paddedWidth = PadTo(width, padDimensions);
             int paddedHeight = PadTo(height, padDimensions);
