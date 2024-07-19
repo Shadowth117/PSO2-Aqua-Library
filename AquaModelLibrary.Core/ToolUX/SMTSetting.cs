@@ -10,7 +10,6 @@ namespace AquaModelLibrary.Core.ToolUX
         public bool transformMesh = true;
         public bool extractUnreferencedMapData = true;
         public bool separateMSBDumpByModel = true;
-        public bool addRootNodeLikeBlenderSmdImport = false;
         public bool doNotAdjustRootRotation = false;
         public SoulsGame soulsGame = SoulsGame.None;
     }
