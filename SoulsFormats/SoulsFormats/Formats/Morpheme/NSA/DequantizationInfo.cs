@@ -1,5 +1,6 @@
 ﻿namespace SoulsFormats.Formats.Morpheme.NSA
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class DequantizationInfo
     {
         public byte[] init; //3 bytes
@@ -13,4 +14,5 @@
             factorIdx = br.ReadBytes(3);
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

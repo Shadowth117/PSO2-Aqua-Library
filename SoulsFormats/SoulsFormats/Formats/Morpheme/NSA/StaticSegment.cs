@@ -3,6 +3,7 @@ using System.Numerics;
 
 namespace SoulsFormats.Formats.Morpheme.NSA
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class StaticSegment
     {
         public int translationBoneCount;
@@ -73,4 +74,5 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             }
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

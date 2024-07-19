@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace SoulsFormats.Formats.Morpheme
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class NMB
     {
         public List<MorphemeBundle_Base> bundles;
@@ -97,4 +98,5 @@ namespace SoulsFormats.Formats.Morpheme
             fileNameLookupTable.Write(bw);
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

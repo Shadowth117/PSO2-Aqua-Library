@@ -97,7 +97,7 @@ namespace SoulsFormats
 
             // Gundam Unicorn: 0x20005, 0x2000E
             // ACVD: 
-            // DS1: 2000B (PS3 o0700/1), 2000C, 2000D
+            // DS1: 2000B (PS3 o0700/1), 2000C, 2000D, 20008 (DS1 360 AM_M_6200_M.partsbnd)
             // DS2 NT: 2000F, 20010
             // DS2: 20010, 20009 (armor 9320)
             // SFS: 20010
@@ -105,7 +105,7 @@ namespace SoulsFormats
             // DS3: 20013, 20014
             // SDT: 2001A, 20016 (test chr)
             // AC6: 2001B
-            Header.Version = br.AssertInt32(0x20005, 0x20007, 0x20009, 0x2000B, 0x2000C, 0x2000D, 0x2000E, 0x2000F, 0x20010, 0x20013, 0x20014, 0x20016, 0x2001A, 0x2001B);
+            Header.Version = br.AssertInt32(0x20005, 0x20007, 0x20008, 0x20009, 0x2000B, 0x2000C, 0x2000D, 0x2000E, 0x2000F, 0x20010, 0x20013, 0x20014, 0x20016, 0x2001A, 0x2001B);
 
             int dataOffset = br.ReadInt32();
             br.ReadInt32(); // Data length

@@ -125,6 +125,11 @@ namespace SoulsFormats
             public string Name { get; set; }
 
             /// <summary>
+            /// Indicates the hardware platform of the tpf.
+            /// </summary>
+            public TPFPlatform Platform { get; set; }
+
+            /// <summary>
             /// Indicates format of the texture.
             /// </summary>
             public byte Format { get; set; }
@@ -162,16 +167,18 @@ namespace SoulsFormats
             /// <summary>
             /// Creates an empty Texture.
             /// </summary>
-            public Texture()
+            public Texture(TPFPlatform platform)
             {
                 Name = "Unnamed";
                 Bytes = new byte[0];
+                Platform = platform;
             }
 
             /// <summary>
-            /// Create a new PC Texture with the specified information; Cubemap and Mipmaps are determined based on bytes.
+            /// Create a new Texture with the specified information; Cubemap and Mipmaps are determined based on bytes.
+            /// We assume that the input texture is a standard pc .dds file
             /// </summary>
-            public Texture(string name, byte format, byte flags1, byte[] bytes)
+            public Texture(string name, byte format, byte flags1, byte[] bytes, TPFPlatform platform)
             {
                 Name = name;
                 Format = format;
@@ -186,6 +193,7 @@ namespace SoulsFormats
                 else
                     Type = TexType.Texture;
                 Mipmaps = (byte)dds.dwMipMapCount;
+                Platform = platform;
             }
 
             internal Texture(BinaryReaderEx br, TPFPlatform platform, byte flag2, byte encoding)
@@ -193,6 +201,7 @@ namespace SoulsFormats
                 uint fileOffset = br.ReadUInt32();
                 int fileSize = br.ReadInt32();
 
+                Platform = platform;
                 Format = br.ReadByte();
                 Type = br.ReadEnum8<TexType>();
                 Mipmaps = br.ReadByte();
@@ -214,17 +223,17 @@ namespace SoulsFormats
                         if (flag2 != 0)
                             Header.Unk2 = br.AssertInt32(0, 0x69E0, 0xAAE4);
                     }
-                    else if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone)
+                    else if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone || platform == TPFPlatform.PS5)
                     {
                         Header.TextureCount = br.AssertInt32(1, 6);
-                        Header.Unk2 = br.AssertInt32(0xD);
+                        Header.Unk2 = br.AssertInt32(0x9, 0xD);
                     }
                 }
 
                 uint nameOffset = br.ReadUInt32();
                 bool hasFloatStruct = br.AssertInt32(0, 1) == 1;
 
-                if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone)
+                if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone || platform == TPFPlatform.PS5)
                     Header.DXGIFormat = br.ReadInt32();
 
                 if (hasFloatStruct)
@@ -365,6 +374,11 @@ namespace SoulsFormats
             /// Headerless DDS with DX10 metadata.
             /// </summary>
             Xbone = 5,
+
+            /// <summary>
+            /// Headerless DDS with DX10 metadata.
+            /// </summary>
+            PS5 = 8,
         }
 
         /// <summary>

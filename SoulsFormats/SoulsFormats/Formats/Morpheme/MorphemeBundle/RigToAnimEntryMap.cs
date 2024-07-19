@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Crypto.Agreement.Srp;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
@@ -44,9 +43,9 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             br.Position = start + mappingsPtr;
 
             mappings = new List<MapPair>();
-            for(int i = 0; i < numberOfEntries; i++)
+            for (int i = 0; i < numberOfEntries; i++)
             {
-                mappings.Add(new MapPair() 
+                mappings.Add(new MapPair()
                 {
                     rigChannelIndex = br.ReadUInt16(),
                     animChannelIndex = br.ReadUInt16(),
@@ -60,7 +59,13 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
     /// </summary>
     public struct MapPair
     {
+        /// <summary>
+        /// Channel index for the rig
+        /// </summary>
         public ushort rigChannelIndex;
+        /// <summary>
+        /// Channel index for the anim rig
+        /// </summary>
         public ushort animChannelIndex;
     }
 }

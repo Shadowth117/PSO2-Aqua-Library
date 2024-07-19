@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
+    /// <summary>
+    /// Mapping from rig to the animation rig
+    /// </summary>
     public class RigToAnimMap : MorphemeBundle_Base
     {
         /// <summary>

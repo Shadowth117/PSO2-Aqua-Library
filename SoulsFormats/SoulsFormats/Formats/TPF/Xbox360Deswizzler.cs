@@ -1,13 +1,27 @@
-﻿using static DirectXTex.DirectXTexUtility;
+﻿using System;
+using System.IO;
+using static DrSwizzler.DDS.DXEnums;
 
-namespace AquaModelLibrary.Helpers.Swizzling
+namespace MdSwizzler.Swizzling
 {
+
     /// <summary>
     /// Borrowed and edited from https://github.com/emoose/FtexTool/blob/6874f4fb9c2e9c18d1dd01f7a877ed2cb78cf75e/FtexTool/FtexDdsConverter.cs
     /// Thank you to emoose!
     /// </summary>
-    public class Xbox360Deswizzler
+    internal class Xbox360Deswizzler
     {
+
+        public static byte[] Xbox360Deswizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
+        {
+            DrSwizzler.Util.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytesPerPixelSet, out var pixelBlockSize, out int formatbpp);
+            return Xbox360Deswizzle(swizzledData, width, height, pixelFormat, sourceBytesPerPixelSet, pixelBlockSize, formatbpp);
+        }
+
+        public static byte[] Xbox360Deswizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat, int sourceBytesPerPixelSet, int pixelBlockSize, int formatbpp)
+        {
+            return Xbox360Deswizzler.ByteSwap16(Xbox360Deswizzler.Deswizzle(swizzledData, width, height, 1, pixelFormat, sourceBytesPerPixelSet, pixelBlockSize, formatbpp));
+        }
         public static byte[] ByteSwap16(byte[] raw)
         {
             MemoryStream ms = new MemoryStream();
@@ -52,8 +66,10 @@ namespace AquaModelLibrary.Helpers.Swizzling
             int curAddr = 0;
             for (int i = 0; i < numMipMaps; i++)
             {
-                int width1 = Align(width, X360AlignX);
-                int height1 = Align(height, X360AlignY);
+                int width1 = width;
+                //int width1 = Align(width, X360AlignX);
+                int height1 = height;
+                //int height1 = Align(height, X360AlignY);
 
                 int size = (width1 / pixelBlockSize) * (height1 / pixelBlockSize) * sourceBytesPerPixelSet;
 

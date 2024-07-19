@@ -7,12 +7,30 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
     /// </summary>
     public class FileNameLookupTable : MorphemeBundle_Base
     {
+        /// <summary>
+        /// Lookup table for animation table
+        /// </summary>
         public LookupTable animTable;
+        /// <summary>
+        /// Lookup table for animation format
+        /// </summary>
         public LookupTable animFormat;
+        /// <summary>
+        /// Lookup table for source xmd
+        /// </summary>
         public LookupTable sourceXmdList;
+        /// <summary>
+        /// Lookup table for tags
+        /// </summary>
         public LookupTable tagList;
+        /// <summary>
+        /// List of filename hashes for lookup
+        /// </summary>
         public List<int> hashList = new List<int>();
 
+        /// <summary>
+        /// Default Constructor
+        /// </summary>
         public FileNameLookupTable() { }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace AquaModelLibrary.Core.Billy
             TPF tpf = new TPF();
             foreach(var tex in puyoFile.Entries)
             {
-                tpf.Textures.Add(new TPF.Texture(tex.Name, 0, 0, TextureEncoding.EncodeDDS(tex)));
+                tpf.Textures.Add(new TPF.Texture(tex.Name, 0, 0, TextureEncoding.EncodeDDS(tex), TPF.TPFPlatform.PC));
             }
 
             return tpf;
@@ -23,7 +23,7 @@ namespace AquaModelLibrary.Core.Billy
         public static TPF LoosePuyoTexture2TPF(string fileName, VrTexture tex)
         {
             TPF tpf = new TPF();
-            tpf.Textures.Add(new TPF.Texture(Path.GetFileNameWithoutExtension(fileName), 0, 0, TextureEncoding.EncodeDDS(tex.ToBitmap())));
+            tpf.Textures.Add(new TPF.Texture(Path.GetFileNameWithoutExtension(fileName), 0, 0, TextureEncoding.EncodeDDS(tex.ToBitmap()), TPF.TPFPlatform.PC));
             
             return tpf;
         }

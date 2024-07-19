@@ -2,6 +2,7 @@
 
 namespace SoulsFormats.Formats.Morpheme.NSA
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class DequantizationFactor
     {
         public Vector3 min = new Vector3();
@@ -20,4 +21,5 @@ namespace SoulsFormats.Formats.Morpheme.NSA
             scaledExtent = br.ReadVector3();
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

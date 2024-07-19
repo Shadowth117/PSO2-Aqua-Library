@@ -1,9 +1,9 @@
-﻿using Org.BouncyCastle.Crypto.Agreement.Srp;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     /// <summary>
     /// Skeleton Rig
     /// </summary>
@@ -74,7 +74,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             var parentArrayPtr = br.ReadVarint();
             br.Position = hierarchyStart + parentArrayPtr;
             parentIdList = new List<int>();
-            for(int i = 0; i < boneCount; i++)
+            for (int i = 0; i < boneCount; i++)
             {
                 parentIdList.Add(br.ReadInt32());
             }
@@ -94,7 +94,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             //Read Ids
             br.Position = boneNamesStart + IdsPtr;
             idList = new List<int>();
-            for(int i = 0; i < numEntries; i++)
+            for (int i = 0; i < numEntries; i++)
             {
                 idList.Add(br.ReadInt32());
             }
@@ -122,7 +122,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             br.Position += isX64 ? 8 : 4; //Skip padding
             var unkSht0 = br.ReadInt16();
             var attributeType = br.ReadEnum16<AttribType>(); //Should always be 0xD, transform buffer
-            if(isX64)
+            if (isX64)
             {
                 br.Position += 4;
             }
@@ -138,11 +138,11 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
                 unkValue = isX64 ? br.ReadInt32() : 0
             };
             var transformSeCount = br.ReadInt32();
-            var unkBt0 = br.ReadByte(); 
+            var unkBt0 = br.ReadByte();
             //Padding
             br.ReadByte(); br.ReadByte(); br.ReadByte();
             var elementCount = br.ReadInt32();
-            if(isX64)
+            if (isX64)
             {
                 br.Position += 4;
             }
@@ -152,7 +152,7 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
 
             br.Position = transformDataStart + elementDescriptorsPtr;
             elementDescriptors = new List<ElementDescriptor>();
-            for(int i = 0; i < elementCount; i++)
+            for (int i = 0; i < elementCount; i++)
             {
                 elementDescriptors.Add(new ElementDescriptor()
                 {
@@ -165,17 +165,17 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             //Read Transforms
             br.Position = transformDataStart + dataPointersPtr;
             List<long> elementPointers = new List<long>();
-            for(int i = 0; i < elementCount; i++)
+            for (int i = 0; i < elementCount; i++)
             {
                 elementPointers.Add(br.ReadVarint());
             }
 
             boneTranslations = new List<Vector3>();
             boneRotations = new List<Quaternion>();
-            for(int i = 0; i < elementCount; i++)
+            for (int i = 0; i < elementCount; i++)
             {
                 br.Position = transformDataStart + elementPointers[i];
-                for(int j = 0; j < transformSeCount; j++)
+                for (int j = 0; j < transformSeCount; j++)
                 {
                     switch (elementDescriptors[i].elementType)
                     {
@@ -217,4 +217,5 @@ namespace SoulsFormats.Formats.Morpheme.MorphemeBundle
             public int elementAlignment;
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
