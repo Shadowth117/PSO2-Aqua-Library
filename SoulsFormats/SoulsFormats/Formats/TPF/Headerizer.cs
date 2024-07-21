@@ -277,6 +277,15 @@ namespace SoulsFormats
             {
                 dds.dwMipMapCount = images[0].subImages.Count;
             }
+
+            //Bandaid fix for the moment for PS5 textures that somehow don't have enough data
+            if(texture.Platform == TPFPlatform.PS5)
+            {
+                List<byte> outBytes = new List<byte>();
+                outBytes.AddRange(dds.Write(Image.Write(images)));
+                outBytes.AddRange(new byte[0x100]);
+                return outBytes.ToArray();
+            } 
             return dds.Write(Image.Write(images));
         }
 
@@ -303,6 +312,8 @@ namespace SoulsFormats
             {
                 case TPFPlatform.Xbox360:
                     return Read360Images(new BinaryReaderEx(false, bytes), width, height, depth, mipCount, format);
+                case TPFPlatform.Xbone:
+                    throw new NotImplementedException();
                 case TPFPlatform.PS3:
                     return ReadPS3Images(new BinaryReaderEx(false, bytes), width, height, depth, mipCount, format);
                 case TPFPlatform.PS4:
@@ -311,11 +322,9 @@ namespace SoulsFormats
                     return ReadPS5Images(new BinaryReaderEx(false, bytes), width, height, depth, mipCount, format);
                 case TPFPlatform.PC:
                 default:
-                    //Original behavior, probably not necessary.
+                    //Similar to original SF behavior, probably not necessary.
                     return ReadPS3Images(new BinaryReaderEx(false, bytes), width, height, depth, mipCount, format);
             }
-
-            return null;
         }
 
         private static List<Image> Read360Images(BinaryReaderEx br, int finalWidth, int finalHeight, int depth, int mipCount, int format)
@@ -505,6 +514,10 @@ namespace SoulsFormats
 
         public static byte[] WritePS4Images(List<Image> images, TPF.TexType type)
         {
+            if(type == TexType.Volume)
+            {
+                throw new NotImplementedException();
+            }
             AddEmptyImagePadding(images, type);
             int maxMipCount = 0;
             int minBufferSize = images.Count > 1 ? 0x400 : 0x200;

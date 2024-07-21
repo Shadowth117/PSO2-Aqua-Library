@@ -741,6 +741,11 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                             texPath = texPath.Replace(".dds", $"_{mipMapsList.Count - 1 - i}.dds");
                         }
 
+                        //Add for safety since some PS5 writes aren't perfect
+                        if(footerData.version == 0x6E)
+                        {
+                            outbytes.AddRange(new byte[0x100]);
+                        }
                         File.WriteAllBytes(texPath, outbytes.ToArray());
                     }
                     break;
@@ -753,6 +758,12 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                             cubeOut.AddRange(mip);
                         }
                     }
+
+                    //Add for safety since some PS5 writes aren't perfect
+                    if (footerData.version == 0x6E)
+                    {
+                        cubeOut.AddRange(new byte[0x100]);
+                    }
                     File.WriteAllBytes(outPath, cubeOut.ToArray());
                     break;
                 case CTextureType.Volume:
@@ -761,6 +772,13 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     for (int i = 0; i < mipMapsList.Count; i++)
                     {
                         volumeOut.AddRange(mipMapsList[i][0]);
+                    }
+
+
+                    //Add for safety since some PS5 writes aren't perfect
+                    if (footerData.version == 0x6E)
+                    {
+                        volumeOut.AddRange(new byte[0x100]);
                     }
                     File.WriteAllBytes(outPath, volumeOut.ToArray());
                     break;
