@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace SoulsFormats
@@ -167,7 +168,7 @@ namespace SoulsFormats
             /// <summary>
             /// Creates an empty Texture.
             /// </summary>
-            public Texture(TPFPlatform platform)
+            public Texture(TPFPlatform platform = TPFPlatform.PC)
             {
                 Name = "Unnamed";
                 Bytes = new byte[0];
@@ -183,7 +184,6 @@ namespace SoulsFormats
                 Name = name;
                 Format = format;
                 Flags1 = flags1;
-                Bytes = bytes;
 
                 var dds = new DDS(bytes);
                 if (dds.dwCaps2.HasFlag(DDS.DDSCAPS2.CUBEMAP))
@@ -194,6 +194,32 @@ namespace SoulsFormats
                     Type = TexType.Texture;
                 Mipmaps = (byte)dds.dwMipMapCount;
                 Platform = platform;
+
+                if(Platform == TPFPlatform.PC)
+                {
+                    Bytes = bytes;
+                    return;
+                }
+
+                var images = Headerizer.GetDDSTextureBuffers(dds, bytes);
+                switch (Platform)
+                {
+                    case TPFPlatform.Xbox360:
+                        //Bytes = Write360Images(images);
+                        throw new NotImplementedException();
+                    case TPFPlatform.Xbone:
+                        //We need a swizzling solution before we can even think about this one.
+                        throw new NotImplementedException("");
+                    case TPFPlatform.PS3:
+                        Bytes = Headerizer.WritePS3Images(images);
+                        break;
+                    case TPFPlatform.PS4:
+                        Bytes = Headerizer.WritePS4Images(images, Type);
+                        break;
+                    case TPFPlatform.PS5:
+                        //Bytes = WritePS5Images(images);
+                        throw new NotImplementedException();
+                }
             }
 
             internal Texture(BinaryReaderEx br, TPFPlatform platform, byte flag2, byte encoding)
@@ -205,7 +231,7 @@ namespace SoulsFormats
                 Format = br.ReadByte();
                 Type = br.ReadEnum8<TexType>();
                 Mipmaps = br.ReadByte();
-                Flags1 = br.AssertByte(0, 1, 2, 3);
+                Flags1 = br.AssertByte(0, 1, 2, 3, 0x80);
 
                 if (platform != TPFPlatform.PC)
                 {
@@ -225,7 +251,7 @@ namespace SoulsFormats
                     }
                     else if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone || platform == TPFPlatform.PS5)
                     {
-                        Header.TextureCount = br.AssertInt32(1, 6);
+                        Header.TextureCount = br.ReadInt32();
                         Header.Unk2 = br.AssertInt32(0x9, 0xD);
                     }
                 }
@@ -251,6 +277,8 @@ namespace SoulsFormats
                     Name = br.GetUTF16(nameOffset);
                 else if (encoding == 0 || encoding == 2)
                     Name = br.GetShiftJIS(nameOffset);
+
+                Debug.WriteLine($"DataOffset: {fileOffset:X} Filename: {Name}");
             }
 
             internal void WriteHeader(BinaryWriterEx bw, int index, TPFPlatform platform, byte flag2)
@@ -290,7 +318,7 @@ namespace SoulsFormats
                         if (flag2 != 0)
                             bw.WriteInt32(Header.Unk2);
                     }
-                    else if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone)
+                    else if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone || platform == TPFPlatform.PS5)
                     {
                         bw.WriteInt32(Header.TextureCount);
                         bw.WriteInt32(Header.Unk2);

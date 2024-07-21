@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
+using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using static SoulsFormats.DDS;
+using static SoulsFormats.MSBS.Event;
 using static SoulsFormats.TPF;
 
 namespace SoulsFormats
@@ -269,13 +270,12 @@ namespace SoulsFormats
                 if (type == TPF.TexType.Cubemap)
                     dds.header10.miscFlag = RESOURCE_MISC.TEXTURECUBE;
             }
-
             var images = RebuildPixelData(texture.Bytes, format, width, height, depth, mipCount, type, texture.Platform);
             
             //Failsafe for if whatever reason we don't read all of the mipmaps
             if(images.Count > 0)
             {
-                dds.dwMipMapCount = images[0].MipLevels.Count;
+                dds.dwMipMapCount = images[0].subImages.Count;
             }
             return dds.Write(Image.Write(images));
         }
@@ -349,7 +349,7 @@ namespace SoulsFormats
 
                     byte[] mip = DrSwizzler.Deswizzler.Xbox360Deswizzle(br.ReadBytes((int)calculatedBufferLength), w, h, pixelFormat);
                     mip = DrSwizzler.Util.ExtractTile(mip, pixelFormat, w, 0, 0, ogW, ogH);
-                    image.MipLevels.Add(mip);
+                    image.subImages.Add(mip);
 
                     //Skip all but the first mip unless someone wants to finish it offer more properly.
                     break;
@@ -386,11 +386,26 @@ namespace SoulsFormats
                     {
                         mip = DrSwizzler.Deswizzler.PS3Deswizzle(mip, w, h, pixelFormat);
                     }
-                    image.MipLevels.Add(mip);
+                    image.subImages.Add(mip);
                 }
                 images.Add(image);
             }
             return images;
+        }
+
+        public static byte[] WritePS3Images(List<Image> images)
+        {
+            var bw = new BinaryWriterEx(false);
+            foreach(var img in images)
+            {
+                bw.Pad(0x80);
+                foreach(var mip in img.subImages)
+                {
+                    bw.WriteBytes(mip);
+                }
+            }
+
+            return bw.FinishBytes();
         }
 
         private static List<Image> ReadPS4Images(BinaryReaderEx br, int finalWidth, int finalHeight, int depth, int mipCount, int format, TPF.TexType type)
@@ -472,7 +487,7 @@ namespace SoulsFormats
                         }
                     }
 
-                    imageList[s].MipLevels.Add(mipFull);
+                    imageList[s].subImages.Add(mipFull);
                 }
                 mipWidth /= 2;
                 mipHeight /= 2;
@@ -485,6 +500,58 @@ namespace SoulsFormats
             }
 
             return imageList;
+        }
+
+
+        public static byte[] WritePS4Images(List<Image> images, TPF.TexType type)
+        {
+            AddEmptyImagePadding(images, type);
+            int maxMipCount = 0;
+            int minBufferSize = images.Count > 1 ? 0x400 : 0x200;
+            foreach (var img in images)
+            {
+                maxMipCount = Math.Max(img.subImages.Count, maxMipCount);
+            }
+
+            var bw = new BinaryWriterEx(false);
+            for (int m = 0; m < maxMipCount; m++)
+            {
+                foreach (var img in images)
+                {
+                    if (img.subImages.Count > m)
+                    {
+                        bw.WriteBytes(img.subImages[m]);
+
+                        //Pad out mipmap buffers as needed
+                        if (img.subImages[m].Length < minBufferSize)
+                        {
+                            bw.WritePattern(minBufferSize - img.subImages[m].Length, 0);
+                        }
+                    }
+                }
+            }
+
+            return bw.FinishBytes();
+        }
+
+        /// <summary>
+        /// PS4 textures require some extra, blank images to ensure they function properly
+        /// </summary>
+        private static void AddEmptyImagePadding(List<Image> images, TexType type)
+        {
+            if (type == TexType.Cubemap && images.Count < 8)
+            {
+                while (images.Count < 8)
+                {
+                    Image paddingImage = new Image();
+                    foreach (var img in images[0].subImages)
+                    {
+                        paddingImage.subImages.Add(new byte[img.Length]);
+                    }
+
+                    images.Add(paddingImage);
+                }
+            }
         }
 
         /// <summary> 
@@ -509,7 +576,11 @@ namespace SoulsFormats
             {
                 int mipWidth = finalWidth;
                 int mipHeight = finalHeight;
-                long bufferLength = sliceBufferLength / 2;
+                long bufferLength = sliceBufferLength;
+                if (mipCount > 1)
+                {
+                    bufferLength /= 2;
+                }
 
                 //In some cases, we want the full buffer size because of overrun and the need for it in deswizzling,
                 //but sometimes we want the calculated version since larger buffers don't have padding,
@@ -537,6 +608,7 @@ namespace SoulsFormats
                     }
                     bufferUsed += bufferLength;
                     var mipOffset = ((sliceBufferLength * depth) - (sliceBufferLength * s)) - bufferUsed;
+                    Debug.WriteLine($"MipOffset: {mipOffset:X} BufferLength: {bufferLength:X}");
                     br.Position = mipOffset;
                     var mipFull = br.ReadBytes((int)bufferLength);
 
@@ -563,13 +635,21 @@ namespace SoulsFormats
                         }
                     }
 
-                    imageList[s].MipLevels.Add(mipFull);
+                    imageList[s].subImages.Add(mipFull);
                     mipWidth /= 2;
                     mipHeight /= 2;
                 }
             }
 
             return imageList;
+        }
+
+        public static byte[] WritePS5Images(List<Image> images)
+        {
+            List<byte> outBytes = new List<byte>();
+
+
+            return outBytes.ToArray();
         }
 
         private static long GetDeswizzleSize(long dataLength, int formatBpp, int width, int height, out int deSwizzWidth, out int deSwizzHeight)
@@ -597,20 +677,86 @@ namespace SoulsFormats
             }
         }
 
-        private class Image
+        /// <summary>
+        /// Grab a dds's texture buffer data.
+        /// Returns a List which contains 
+        /// </summary>
+        public static List<Image> GetDDSTextureBuffers(DDS ddsHeader, byte[] ddsBytes)
         {
-            public List<byte[]> MipLevels;
+            BinaryReaderEx br = new BinaryReaderEx(false, ddsBytes);
+            List<Image> imageList = new List<Image>();
+            br.Position = ddsHeader.DataOffset;
+            DrSwizzler.Util.GetsourceBytesPerPixelSetAndPixelSize((DrSwizzler.DDS.DXEnums.DXGIFormat)ddsHeader.GetDXGIFormat(), out int sourceBytesPerPixelSet, out int pixelBlockSize, out int formatBpp);
+            long fullImageSize = formatBpp * ddsHeader.dwWidth * ddsHeader.dwHeight / 8;
+
+            if (ddsHeader.dwCaps2.HasFlag(DDS.DDSCAPS2.VOLUME))
+            {
+                int depth = ddsHeader.dwDepth;
+                for(int m = 0; m < ddsHeader.dwMipMapCount; m++)
+                {
+                    Image img = new Image();
+                    var imageSize = fullImageSize;
+                    for (int i = 0; i < depth; i++)
+                    {
+                        img.subImages.Add(br.ReadBytes((int)imageSize));
+                        imageSize /= 4;
+                        if (imageSize < sourceBytesPerPixelSet)
+                        {
+                            imageSize = sourceBytesPerPixelSet;
+                        }
+                    }
+
+                    //After we hit 1 depth, we should continue with 1 map for each subsequent mip
+                    if(depth != 1)
+                    {
+                        depth /= 2;
+                    }
+                    imageList.Add(img);
+                }
+
+            } else //We can read CubeMaps and standard textures together
+            {
+                int depth = 1;
+                if(ddsHeader.dwDepth > 1)
+                {
+                    depth = ddsHeader.dwDepth;
+                }
+
+                for (int i = 0; i < depth; i++)
+                {
+                    Image img = new Image();
+                    var imageSize = fullImageSize;
+                    for(int m = 0; m < ddsHeader.dwMipMapCount; m++)
+                    {
+                        img.subImages.Add(br.ReadBytes((int)imageSize));
+                        imageSize /= 4;
+                        if(imageSize < sourceBytesPerPixelSet)
+                        {
+                            imageSize = sourceBytesPerPixelSet;
+                        }
+                    }
+                    imageList.Add(img);
+                }
+            }
+
+            return imageList;
+        }
+
+        public class Image
+        {
+            //Used for a particular image's mipmap, or for all images of a particular miplevel for a volume texture
+            public List<byte[]> subImages;
 
             public Image()
             {
-                MipLevels = new List<byte[]>();
+                subImages = new List<byte[]>();
             }
 
             public static byte[] Write(List<Image> images)
             {
                 var bw = new BinaryWriterEx(false);
                 foreach (Image image in images)
-                    foreach (byte[] mip in image.MipLevels)
+                    foreach (byte[] mip in image.subImages)
                         bw.WriteBytes(mip);
                 return bw.FinishBytes();
             }
