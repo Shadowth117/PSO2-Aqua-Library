@@ -414,7 +414,11 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             {
                 int mipWidth = finalWidth;
                 int mipHeight = finalHeight;
-                long bufferLength = sliceBufferLength / 2;
+                long bufferLength = sliceBufferLength;
+                if (internalMipCount > 1)
+                {
+                    bufferLength /= 2;
+                }
 
                 //In some cases, we want the full buffer size because of overrun and the need for it in deswizzling,
                 //but sometimes we want the calculated version since larger buffers don't have padding,
