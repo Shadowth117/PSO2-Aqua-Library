@@ -37,10 +37,10 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             var model = mdl;
             Dictionary<int, int> usedMatIds = new Dictionary<int, int>();
             List<Matrix4x4> worldMats = new List<Matrix4x4>();
-            for (int boneId = 0; boneId < mdl.Bones.Count; boneId++)
+            for (int boneId = 0; boneId < mdl.Nodes.Count; boneId++)
             {
                 aqp.bonePalette.Add((uint)boneId);
-                var bone = model.Bones[boneId];
+                var bone = model.Nodes[boneId];
 
                 NODE node = new NODE();
                 node.animatedFlag = 1;
@@ -69,9 +69,9 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             aqn.ndtr.boneCount = aqn.nodeList.Count;
             aqp.objc.bonePaletteOffset = 1;
 
-            for (int i = 0; i < model.Bones.Count; i++)
+            for (int i = 0; i < model.Nodes.Count; i++)
             {
-                var bone = model.Bones[i];
+                var bone = model.Nodes[i];
                 //Mesh A
                 if (bone.MeshesA.Count > 0)
                 {
@@ -101,7 +101,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
         }
 
 
-        private static void AddMesh(AquaObject aqp, MDL0 model, Dictionary<int, int> usedMatIds, MDL0.Bone bone, int vertSetAddition, List<MDL0.Vertex> vertices, List<MDL0.Mesh> faceSets, List<Matrix4x4> worldMats, int boneId, MDL.VertexFormat fmt, short[] boneIndices = null)
+        private static void AddMesh(AquaObject aqp, MDL0 model, Dictionary<int, int> usedMatIds, MDL0.Node bone, int vertSetAddition, List<MDL0.Vertex> vertices, List<MDL0.Mesh> faceSets, List<Matrix4x4> worldMats, int boneId, MDL.VertexFormat fmt, short[] boneIndices = null)
         {
             int fs = 0;
             foreach (var faceSet in faceSets)
@@ -242,7 +242,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             return vert.Normal;
         }
 
-        private static void AddVert(VTXL faceVtxl, MDL0.Vertex vert, MDL0.Bone bone, List<Matrix4x4> worldMats, int boneId, short[] boneIndices)
+        private static void AddVert(VTXL faceVtxl, MDL0.Vertex vert, MDL0.Node bone, List<Matrix4x4> worldMats, int boneId, short[] boneIndices)
         {
             faceVtxl.vertPositions.Add(vert.Position / 2000);
             faceVtxl.vertNormals.Add(vert.Normal);
@@ -289,10 +289,10 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             var model = mdl;
             Dictionary<int, int> usedMatIds = new Dictionary<int, int>();
             List<Matrix4x4> worldMats = new List<Matrix4x4>();
-            for (int boneId = 0; boneId < mdl.Bones.Count; boneId++)
+            for (int boneId = 0; boneId < mdl.Nodes.Count; boneId++)
             {
                 aqp.bonePalette.Add((uint)boneId);
-                var bone = model.Bones[boneId];
+                var bone = model.Nodes[boneId];
 
                 NODE node = new NODE();
                 node.animatedFlag = 1;
@@ -321,9 +321,9 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             aqn.ndtr.boneCount = aqn.nodeList.Count;
             aqp.objc.bonePaletteOffset = 1;
 
-            for (int i = 0; i < model.Bones.Count; i++)
+            for (int i = 0; i < model.Nodes.Count; i++)
             {
-                var bone = model.Bones[i];
+                var bone = model.Nodes[i];
                 //Mesh A
                 if (bone.FacesetsA.Count > 0)
                 {
@@ -359,7 +359,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             return aqp;
         }
 
-        private static void AddMesh(AquaObject aqp, MDL model, Dictionary<int, int> usedMatIds, MDL.Bone bone, int vertSetAddition, List<MDL.Vertex> vertices, List<MDL.Faceset> faceSets, List<Matrix4x4> worldMats, int boneId, MDL.VertexFormat fmt, short[] boneIndices = null)
+        private static void AddMesh(AquaObject aqp, MDL model, Dictionary<int, int> usedMatIds, MDL.Node bone, int vertSetAddition, List<MDL.Vertex> vertices, List<MDL.Faceset> faceSets, List<Matrix4x4> worldMats, int boneId, MDL.VertexFormat fmt, short[] boneIndices = null)
         {
             int fs = 0;
             foreach (var faceSet in faceSets)
@@ -495,7 +495,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             }
         }
 
-        private static Vector3 GetVertNormal(MDL.Vertex vert, MDL.Bone bone, List<Matrix4x4> worldMats, int boneId, short[] boneIndices)
+        private static Vector3 GetVertNormal(MDL.Vertex vert, MDL.Node bone, List<Matrix4x4> worldMats, int boneId, short[] boneIndices)
         {
 
             if (vert.PrimaryWeightFlag != MDLWeightIndex.Index0)
@@ -512,7 +512,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             return Vector3.TransformNormal(vert.Normal, worldMats[boneId]);
         }
 
-        private static void AddVert(VTXL faceVtxl, MDL.Vertex vert, MDL.Bone bone, List<Matrix4x4> worldMats, int boneId, short[] boneIndices)
+        private static void AddVert(VTXL faceVtxl, MDL.Vertex vert, MDL.Node bone, List<Matrix4x4> worldMats, int boneId, short[] boneIndices)
         {
             if(vert.PrimaryWeightFlag != MDLWeightIndex.Index0)
             {

@@ -435,7 +435,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     string materialData = JsonSerializer.Serialize(mdl4.Materials, jss);
                     string dummyData = JsonSerializer.Serialize(mdl4.Dummies, jss);
-                    string boneData = JsonSerializer.Serialize(mdl4.Bones, jss);
+                    string boneData = JsonSerializer.Serialize(mdl4.Nodes, jss);
                     File.WriteAllText(filePath + ".matData.json", materialData);
                     File.WriteAllText(filePath + ".dummyData.json", dummyData);
                     File.WriteAllText(filePath + ".boneData.json", boneData);
@@ -456,13 +456,13 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     materialData = JsonSerializer.Serialize((List<FLVER0.Material>)flver.Materials, jss);
                     dummyData = JsonSerializer.Serialize(((FLVER0)flver).Dummies, jss);
-                    boneData = JsonSerializer.Serialize(((FLVER0)flver).Bones, jss);
+                    boneData = JsonSerializer.Serialize(((FLVER0)flver).Nodes, jss);
                 }
                 else if (flver is FLVER2)
                 {
                     materialData = JsonSerializer.Serialize((List<FLVER2.Material>)flver.Materials, jss);
                     dummyData = JsonSerializer.Serialize(((FLVER2)flver).Dummies, jss);
-                    boneData = JsonSerializer.Serialize(((FLVER2)flver).Bones, jss);
+                    boneData = JsonSerializer.Serialize(((FLVER2)flver).Nodes, jss);
                 }
                 if(materialData != null)
                 {
@@ -488,9 +488,9 @@ namespace AquaModelLibrary.Core.FromSoft
             AquaObject aqp = new AquaObject();
             List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
             aqn = new AquaNode();
-            for (int i = 0; i < mdl4.Bones.Count; i++)
+            for (int i = 0; i < mdl4.Nodes.Count; i++)
             {
-                var flverBone = mdl4.Bones[i];
+                var flverBone = mdl4.Nodes[i];
                 var parentId = flverBone.ParentIndex;
 
                 var tfmMat = Matrix4x4.Identity;
@@ -694,7 +694,7 @@ namespace AquaModelLibrary.Core.FromSoft
             {
                 if (flver2.Header.Version > 0x20010)
                 {
-                    for (int i = 0; i < flver2.Bones.Count; i++)
+                    for (int i = 0; i < flver2.Nodes.Count; i++)
                     {
                         aqp.bonePalette.Add((uint)i);
                     }
@@ -703,9 +703,9 @@ namespace AquaModelLibrary.Core.FromSoft
             aqn = new AquaNode();
             Vector3 maxTest = new Vector3();
             Vector3 minTest = new Vector3();
-            for (int i = 0; i < flver.Bones.Count; i++)
+            for (int i = 0; i < flver.Nodes.Count; i++)
             {
-                var flverBone = flver.Bones[i];
+                var flverBone = flver.Nodes[i];
                 var parentId = flverBone.ParentIndex;
 
                 var tfmMat = Matrix4x4.Identity;
@@ -761,7 +761,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.boneShort1 = 0x1C0;
                 aqNode.animatedFlag = 1;
                 aqNode.parentId = parentId;
-                aqNode.firstChild = flverBone.ChildIndex;
+                aqNode.firstChild = flverBone.FirstChildIndex;
                 aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
 
@@ -915,7 +915,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     }
                     if (useNormalWTransform == false)
                     {
-                        useDefaultBoneTransform = mesh2.DefaultBoneIndex != -1 && mesh2.DefaultBoneIndex < flver.Bones.Count;
+                        useDefaultBoneTransform = mesh2.NodeIndex != -1 && mesh2.NodeIndex < flver.Nodes.Count;
                     }
 
                     //Dark souls 3+ (Maybe bloodborne too) use direct bone id references instead of a bone palette
@@ -981,7 +981,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     {
                         var f2Mesh = (FLVER2.Mesh)mesh;
                         bool useDefaultBoneIndex = false;
-                        if (f2Mesh.Dynamic == 0 && vert.NormalW < flver.Bones.Count)
+                        if (f2Mesh.Dynamic == 0 && vert.NormalW < flver.Nodes.Count)
                         {
                             boneTransformationIndex = vert.NormalW;
                         }
@@ -996,9 +996,9 @@ namespace AquaModelLibrary.Core.FromSoft
                                 boneTransformationIndex = vert.BoneIndices[0];
                             }
                         }
-                        else if (useDefaultBoneTransform && flver.Bones.Count > f2Mesh.DefaultBoneIndex)
+                        else if (useDefaultBoneTransform && flver.Nodes.Count > f2Mesh.NodeIndex)
                         {
-                            boneTransformationIndex = f2Mesh.DefaultBoneIndex;
+                            boneTransformationIndex = f2Mesh.NodeIndex;
                             useDefaultBoneIndex = true;
                         }
 
@@ -1033,7 +1033,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         vertNorm = Vector3.Normalize(Vector3.Transform(vertPosNorm, mirrorMat) - vertPos);
                     }
 
-                    var alter = Vector3.Transform(vertPos, flver.Bones[0].ComputeLocalTransform());
+                    var alter = Vector3.Transform(vertPos, flver.Nodes[0].ComputeLocalTransform());
                     //Recalc model bounding
                     if (maxBounding == null)
                     {
@@ -1095,7 +1095,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { normalWOverride, 0, 0, 0 });
                     }
-                    else if (vert.NormalW < 65535 && vert.NormalW < flver.Bones.Count)
+                    else if (vert.NormalW < 65535 && vert.NormalW < flver.Nodes.Count)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { vert.NormalW, 0, 0, 0 });
@@ -1215,7 +1215,7 @@ namespace AquaModelLibrary.Core.FromSoft
 
             var dummyPath = Path.ChangeExtension(initialFilePath, "flver.dummyData.json");
             var matPath = Path.ChangeExtension(initialFilePath, "flver.matData.json");
-            var bonePath = Path.ChangeExtension(initialFilePath, "flver.boneData.json");
+            var bonePath = Path.ChangeExtension(initialFilePath, "FLVER.NodeData.json");
             var dummyDataText = File.Exists(dummyPath) ? File.ReadAllText(dummyPath) : null;
             var materialDataText = File.Exists(matPath) ? File.ReadAllText(matPath) : null;
             var boneDataText = File.Exists(bonePath) ? File.ReadAllText(bonePath) : null;
@@ -1634,7 +1634,7 @@ namespace AquaModelLibrary.Core.FromSoft
             }
 
             List<int> rootSiblings = new List<int>();
-            flver.Bones = new List<FLVER.Bone>();
+            flver.Nodes = new List<FLVER.Node>();
 
             if (boneDataText == null)
             {
@@ -1651,16 +1651,15 @@ namespace AquaModelLibrary.Core.FromSoft
                     aqBone.SetInverseBindPoseMatrix(aqBoneInvWorldTfm);
                     aqn.nodeList[i] = aqBone;
 
-                    FLVER.Bone bone = new FLVER.Bone();
+                    FLVER.Node bone = new FLVER.Node();
                     var name = bone.Name = aqBone.boneName.GetString();
                     bone.BoundingBoxMax = MaxBoundingBoxByBone.ContainsKey(i) ? MaxBoundingBoxByBone[i] : defaultMaxBound;
                     bone.BoundingBoxMin = MinBoundingBoxByBone.ContainsKey(i) ? MinBoundingBoxByBone[i] : defaultMinBound;
-                    bone.Unk3C = bone.Name.ToUpper().EndsWith("NUB") ? 1 : 0;
+                    bone.Flags = bone.Name.ToUpper().EndsWith("NUB") ? (FLVER.Node.NodeFlags)1 : (FLVER.Node.NodeFlags)0;
                     bone.ParentIndex = (short)aqBone.parentId;
-                    bone.ChildIndex = (short)aqBone.firstChild;
+                    bone.FirstChildIndex = (short)aqBone.firstChild;
                     bone.PreviousSiblingIndex = (short)GetPreviousSibling(aqn.nodeList, i, rootSiblings);
                     bone.NextSiblingIndex = (short)aqn.nodeList[i].nextSibling;
-                    bone.ChildIndex = (short)aqn.nodeList[i].firstChild;
 
                     Matrix4x4 localTfm;
                     if (aqBone.parentId == -1)
@@ -1698,12 +1697,12 @@ namespace AquaModelLibrary.Core.FromSoft
                     bone.Scale = new Vector3(1, 1, 1);
                     //Debug.WriteLine($"{i} {bone.Rotation.X} {bone.Rotation.Y} {bone.Rotation.Z}");
                     var mat = bone.ComputeLocalTransform();
-                    flver.Bones.Add(bone);
+                    flver.Nodes.Add(bone);
                 }
             }
             else
             {
-                flver.Bones = JsonSerializer.Deserialize<List<FLVER.Bone>>(boneDataText);
+                flver.Nodes = JsonSerializer.Deserialize<List<FLVER.Node>>(boneDataText);
             }
 
             flver.Header.BoundingBoxMax = (Vector3)maxBounding;

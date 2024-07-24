@@ -5,7 +5,7 @@ VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZamboniLib", "ZamboniLib\ZamboniLib\ZamboniLib.csproj", "{84D63988-81DE-4639-8E44-FE5A25EDDC97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsFormats", "SoulsFormats\SoulsFormats\SoulsFormats.csproj", "{7ABBE830-6DE3-4ADE-915C-2FEEB20A45D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsFormats", "SoulsFormatsNEXT\SoulsFormats\SoulsFormats.csproj", "{7ABBE830-6DE3-4ADE-915C-2FEEB20A45D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnluacNET", "UnluacNET\UnluacNET.csproj", "{ED5D3E22-804B-4BAA-BD7F-F47F19804CF8}"
 EndProject
