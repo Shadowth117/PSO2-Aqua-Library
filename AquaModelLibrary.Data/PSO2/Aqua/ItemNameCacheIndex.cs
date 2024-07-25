@@ -102,7 +102,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
                 for(int i = 0; i < entryCount; i++)
                 {
-                    entries[i].name = sr.ReadUTF16String();
+                    entries[i].name = sr.ReadUTF16String(0x1000);
                     sr.Seek((entries[i].name.Length + 1) * 2, SeekOrigin.Current);
                 }
             }
