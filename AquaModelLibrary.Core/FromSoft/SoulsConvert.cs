@@ -510,6 +510,10 @@ namespace AquaModelLibrary.Core.FromSoft
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
                 }
+                if (parentId == -1 && i != 0)
+                {
+                    parentId = 0;
+                }
 
                 //Create AQN node
                 NODE aqNode = new NODE();
@@ -754,6 +758,10 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
+                }
+                if (parentId == -1 && i != 0)
+                {
+                    parentId = 0;
                 }
 
                 //Create AQN node
