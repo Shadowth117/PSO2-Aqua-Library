@@ -1,4 +1,5 @@
-﻿using Reloaded.Memory.Streams;
+﻿using Reloaded.Memory.Extensions;
+using Reloaded.Memory.Streams;
 using Reloaded.Memory.Utilities;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -308,7 +309,7 @@ namespace AquaModelLibrary.Helpers.Readers
             long bookmark = Position;
 
             Seek(address, SeekOrigin.Begin);
-            var str = ReadUTF16String(true, blockSize);
+            var str = ReadUTF16String(blockSize);
             Seek(bookmark, SeekOrigin.Begin);
 
             return str;
@@ -385,35 +386,42 @@ namespace AquaModelLibrary.Helpers.Readers
 
         /// <summary>
         /// Attempts to read a null terminated terminated UTF16 String from the current stream position.
-        /// If quickmode is false, end will have position subtracted to determine the max read length. Intended for files with in an array of files to stop bleedover.
         /// </summary>
-        public string ReadUTF16String(bool quickMode = true, int blockSize = 0x1000)
+        public string ReadUTF16String(int blockSize = 0x100)
         {
-            var pos = Position;
-            var strLen = BaseStream.Length;
-            if (strLen <= pos + blockSize)
+            if (Position >= BaseStream.Length)
             {
-                blockSize = (int)(strLen - pos);
-            }
-            //Past end of file
-            if (blockSize <= 0)
-            {
+                // Past end of file
                 return null;
             }
-            string str = "\0";
-            // There's really no string limit, but it takes a long time to read these accurately. To avoid this attempt reading a short amount first. Then, go to failsafe if needed.
-            if (quickMode == true)
-            {
-                str = Encoding.Unicode.GetString(ReadBytes(Position, blockSize));
-                int strEnd = str.IndexOf(char.MinValue);
 
-                //Return the string if the buffer is valid
-                if (strEnd != -1)
+            var sb = new StringBuilder();
+            var decoder = Encoding.Unicode.GetDecoder();
+
+            unsafe
+            {
+                Span<char> dest = stackalloc char[blockSize];
+
+                var foundEnd = false;
+                do
                 {
-                    return str.Remove(strEnd);
-                }
+                    var shorts = ReadRaw<ushort>(blockSize, out var len);
+                    var source = new ReadOnlySpan<ushort>(shorts, len);
+
+                    var endIndex = source.IndexOf(char.MinValue);
+                    if (endIndex >= 0)
+                    {
+                        foundEnd = true;
+                        source = source.Slice(0, endIndex);
+                        Seek(endIndex - blockSize, SeekOrigin.Current);
+                    }
+
+                    decoder.Convert(source.AsBytes(), dest, foundEnd, out var bytesUsed, out var charsUsed, out var completed);
+                    sb.Append(dest.Slice(0, charsUsed));
+                } while (!foundEnd);
             }
-            return str.Remove(str.IndexOf(char.MinValue));
+
+            return sb.ToString();
         }
     }
 }
