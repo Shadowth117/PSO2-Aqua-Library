@@ -148,7 +148,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         pair.name = sr.ReadCString();
 
                         sr.Seek(textLoc + offset, SeekOrigin.Begin);
-                        pair.str = sr.ReadUTF16String();
+                        pair.str = sr.ReadUTF16String(this.nifl.NOF0Offset);
 
                         text[i][subCategoryId].Add(pair);
                         sr.Seek(bookmarkLocal, SeekOrigin.Begin);
