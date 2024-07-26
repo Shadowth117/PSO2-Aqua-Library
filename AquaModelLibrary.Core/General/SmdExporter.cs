@@ -8,11 +8,10 @@ namespace AquaModelLibrary.Core.General
 {
     public class SmdExporter
     {
+        public static NumberFormatInfo numberFormatInfo = new NumberFormatInfo() { NumberDecimalSeparator = "."};
+
         public static void ExportToFile(AquaObject aqo, AquaNode aqn, string exportPath, AquaMotion aqm = null)
         {
-            NumberFormatInfo numberFormatInfo = new NumberFormatInfo();
-            numberFormatInfo.NumberDecimalSeparator = ".";
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("version 1");
             sb.AppendLine("nodes");
@@ -26,7 +25,6 @@ namespace AquaModelLibrary.Core.General
             }
             sb.AppendLine("end");
             sb.AppendLine("skeleton");
-            sb.AppendLine("");
 
             if (aqm == null)
             {
@@ -45,16 +43,16 @@ namespace AquaModelLibrary.Core.General
                     Matrix4x4.Decompose(tfm, out var scale, out var rot, out var pos);
                     var eulRot = MathExtras.QuaternionToEulerRadians(rot);
 
-                    sb.AppendLine($"{i} {pos.X.ToString("0.######", numberFormatInfo)} {pos.Y.ToString("0.######", numberFormatInfo)} {pos.Z.ToString("0.######", numberFormatInfo)}" +
-                        $" {eulRot.X.ToString("0.######", numberFormatInfo)} {eulRot.Y.ToString("0.######", numberFormatInfo)} {eulRot.Z.ToString("0.######", numberFormatInfo)}");
+                    sb.AppendLine($"{i}  {pos.X.ToString("0.########", numberFormatInfo)} {pos.Y.ToString("0.########", numberFormatInfo)} {pos.Z.ToString("0.########", numberFormatInfo)}" +
+                        $" {eulRot.X.ToString("0.#############", numberFormatInfo)} {eulRot.Y.ToString("0.#############", numberFormatInfo)} {eulRot.Z.ToString("0.#############", numberFormatInfo)}");
                 }
                 for (int i = 0; i < aqn.nodoList.Count; i++)
                 {
                     var bone = aqn.nodoList[i];
                     var pos = bone.pos;
                     var eulRot = bone.eulRot;
-                    sb.AppendLine($"{i + aqn.nodeList.Count} {pos.X.ToString("0.######", numberFormatInfo)} {pos.Y.ToString("0.######", numberFormatInfo)} {pos.Z.ToString("0.######", numberFormatInfo)}" +
-                        $" {eulRot.X.ToString("0.######", numberFormatInfo)} {eulRot.Y.ToString("0.######", numberFormatInfo)} {eulRot.Z.ToString("0.######", numberFormatInfo)}");
+                    sb.AppendLine($"{i + aqn.nodeList.Count}  {pos.X.ToString("0.########", numberFormatInfo)} {pos.Y.ToString("0.########", numberFormatInfo)} {pos.Z.ToString("0.########", numberFormatInfo)}" +
+                        $" {eulRot.X.ToString("0.#############", numberFormatInfo)} {eulRot.Y.ToString("0.#############", numberFormatInfo)} {eulRot.Z.ToString("0.#############", numberFormatInfo)}");
                 }
             }
             else
@@ -85,16 +83,16 @@ namespace AquaModelLibrary.Core.General
                             eulRot = MathExtras.QuaternionToEulerRadians(tempRot.ToQuat());
                         }
 
-                        sb.AppendLine($"{j + aqn.nodeList.Count} {pos.X.ToString("0.######", numberFormatInfo)} {pos.Y.ToString("0.######", numberFormatInfo)} {pos.Z.ToString("0.######", numberFormatInfo)}" +
-                            $" {eulRot.X.ToString("0.######", numberFormatInfo)} {eulRot.Y.ToString("0.######", numberFormatInfo)} {eulRot.Z.ToString("0.######", numberFormatInfo)}");
+                        sb.AppendLine($"{j + aqn.nodeList.Count}  {pos.X.ToString("0.########", numberFormatInfo)} {pos.Y.ToString("0.########", numberFormatInfo)} {pos.Z.ToString("0.########", numberFormatInfo)}" +
+                            $" {eulRot.X.ToString("0.#############", numberFormatInfo)} {eulRot.Y.ToString("0.#############", numberFormatInfo)} {eulRot.Z.ToString("0.#############", numberFormatInfo)}");
                     }
                     for (int j = 0; j < aqn.nodoList.Count; j++)
                     {
                         var bone = aqn.nodoList[j];
                         var pos = bone.pos;
                         var eulRot = bone.eulRot;
-                        sb.AppendLine($"{j + aqn.nodeList.Count} {pos.X.ToString("0.######", numberFormatInfo)} {pos.Y.ToString("0.######", numberFormatInfo)} {pos.Z.ToString("0.######", numberFormatInfo)}" +
-                            $" {eulRot.X.ToString("0.######", numberFormatInfo)} {eulRot.Y.ToString("0.######", numberFormatInfo)} {eulRot.Z.ToString("0.######", numberFormatInfo)}");
+                        sb.AppendLine($"{j + aqn.nodeList.Count}  {pos.X.ToString("0.########", numberFormatInfo)} {pos.Y.ToString("0.########", numberFormatInfo)} {pos.Z.ToString("0.########", numberFormatInfo)}" +
+                            $" {eulRot.X.ToString("0.#############", numberFormatInfo)} {eulRot.Y.ToString("0.#############", numberFormatInfo)} {eulRot.Z.ToString("0.#############", numberFormatInfo)}");
                     }
                 }
             }
@@ -123,24 +121,29 @@ namespace AquaModelLibrary.Core.General
                     var weightDataY = GetWeightDataString(vtxl, (int)tris[j].Y, vertYWeightCount, bonePalette);
                     var weightDataZ = GetWeightDataString(vtxl, (int)tris[j].Z, vertZWeightCount, bonePalette);
 
-                    sb.AppendLine($"{matName}|{texNames[0]}");
-                    sb.AppendLine($"0 {vtxl.vertPositions[(int)tris[j].X].X} {vtxl.vertPositions[(int)tris[j].X].Y} {vtxl.vertPositions[(int)tris[j].X].Z} " +
-                                    $"{vtxl.vertNormals[(int)tris[j].X].X} {vtxl.vertNormals[(int)tris[j].X].Y} {vtxl.vertNormals[(int)tris[j].X].Z} " +
-                                    $"{vtxl.uv1List[(int)tris[j].X].X} {vtxl.uv1List[(int)tris[j].X].Y} " +
+                    sb.AppendLine($"{matName}\\");
+                    sb.AppendLine($"0  {VertStr(vtxl.vertPositions[(int)tris[j].X].X)} {VertStr(vtxl.vertPositions[(int)tris[j].X].Y)} {VertStr(vtxl.vertPositions[(int)tris[j].X].Z)}  " +
+                                    $"{VertStr(vtxl.vertNormals[(int)tris[j].X].X)} {VertStr(vtxl.vertNormals[(int)tris[j].X].Y)} {VertStr(vtxl.vertNormals[(int)tris[j].X].Z)}  " +
+                                    $"{VertStr(vtxl.uv1List[(int)tris[j].X].X)} {VertStr(vtxl.uv1List[(int)tris[j].X].Y)} " +
                                     $"{vertXWeightCount} {weightDataX}");
-                    sb.AppendLine($"0 {vtxl.vertPositions[(int)tris[j].Y].X} {vtxl.vertPositions[(int)tris[j].Y].Y} {vtxl.vertPositions[(int)tris[j].Y].Z} " +
-                                    $"{vtxl.vertNormals[(int)tris[j].Y].X} {vtxl.vertNormals[(int)tris[j].Y].Y} {vtxl.vertNormals[(int)tris[j].Y].Z} " +
-                                    $"{vtxl.uv1List[(int)tris[j].Y].X} {vtxl.uv1List[(int)tris[j].Y].Y} " +
+                    sb.AppendLine($"0  {VertStr(vtxl.vertPositions[(int)tris[j].Y].X)} {VertStr(vtxl.vertPositions[(int)tris[j].Y].Y)} {VertStr(vtxl.vertPositions[(int)tris[j].Y].Z)}  " +
+                                    $"{VertStr(vtxl.vertNormals[(int)tris[j].Y].X)} {VertStr(vtxl.vertNormals[(int)tris[j].Y].Y)} {VertStr(vtxl.vertNormals[(int)tris[j].Y].Z)}  " +
+                                    $"{VertStr(vtxl.uv1List[(int)tris[j].Y].X)} {VertStr(vtxl.uv1List[(int)tris[j].Y].Y)} " +
                                     $"{vertYWeightCount} {weightDataY}");
-                    sb.AppendLine($"0 {vtxl.vertPositions[(int)tris[j].Z].X} {vtxl.vertPositions[(int)tris[j].Z].Y} {vtxl.vertPositions[(int)tris[j].Z].Z} " +
-                                    $"{vtxl.vertNormals[(int)tris[j].Z].X} {vtxl.vertNormals[(int)tris[j].Z].Y} {vtxl.vertNormals[(int)tris[j].Z].Z} " +
-                                    $"{vtxl.uv1List[(int)tris[j].Z].X} {vtxl.uv1List[(int)tris[j].Z].Y} " +
+                    sb.AppendLine($"0  {VertStr(vtxl.vertPositions[(int)tris[j].Z].X)} {VertStr(vtxl.vertPositions[(int)tris[j].Z].Y)} {VertStr(vtxl.vertPositions[(int)tris[j].Z].Z)}  " +
+                                    $"{VertStr(vtxl.vertNormals[(int)tris[j].Z].X)} {VertStr(vtxl.vertNormals[(int)tris[j].Z].Y)} {VertStr(vtxl.vertNormals[(int)tris[j].Z].Z)} " +
+                                    $"{VertStr(vtxl.uv1List[(int)tris[j].Z].X)} {VertStr(vtxl.uv1List[(int)tris[j].Z].Y)} " +
                                     $"{vertZWeightCount} {weightDataZ}");
                 }
                 sb.AppendLine("end");
             }
 
             File.WriteAllText(exportPath, sb.ToString());
+        }
+
+        private static string VertStr(float value)
+        {
+            return value.ToString("0.######", numberFormatInfo);
         }
 
         private static string GetWeightDataString(Data.PSO2.Aqua.AquaObjectData.VTXL vtxl, int vertId, int weightCount, List<uint> bonePalette)
@@ -152,16 +155,16 @@ namespace AquaModelLibrary.Core.General
                 switch (wt)
                 {
                     case 0:
-                        weightData += $"{vtxl.trueVertWeights[vertId].X} ";
+                        weightData += $"{VertStr(vtxl.trueVertWeights[vertId].X)} ";
                         break;
                     case 1:
-                        weightData += $"{vtxl.trueVertWeights[vertId].Y} ";
+                        weightData += $"{VertStr(vtxl.trueVertWeights[vertId].Y)} ";
                         break;
                     case 2:
-                        weightData += $"{vtxl.trueVertWeights[vertId].Z} ";
+                        weightData += $"{VertStr(vtxl.trueVertWeights[vertId].Z)} ";
                         break;
                     case 3:
-                        weightData += $"{vtxl.trueVertWeights[vertId].W} ";
+                        weightData += $"{VertStr(vtxl.trueVertWeights[vertId].W)} ";
                         break;
                 }
             }

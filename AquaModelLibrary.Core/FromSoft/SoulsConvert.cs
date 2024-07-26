@@ -5,6 +5,7 @@ using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Data.Utility;
 using AquaModelLibrary.Helpers.MathHelpers;
 using SoulsFormats;
 using SoulsFormats.Formats.Morpheme;
@@ -15,6 +16,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Matrix4x4 = System.Numerics.Matrix4x4;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace AquaModelLibrary.Core.FromSoft
 {
@@ -22,13 +24,15 @@ namespace AquaModelLibrary.Core.FromSoft
     {
         public static bool useMetaData = false;
         public static bool applyMaterialNamesToMesh = false;
-        public static bool mirrorMesh = false;
         public static bool transformMesh = false;
         public static bool extractUnreferencedMapData = false;
         public static bool separateMSBDumpByModel = false;
         public static bool doNotAdjustRootRotation = false;
 
         public static SoulsGame game = SoulsGame.None;
+        public static ExportFormat exportFormat = ExportFormat.Fbx;
+        public static MirrorType mirrorType = MirrorType.Z;
+        public static CoordSystem coordSystem = CoordSystem.Max;
 
         public class GameFile
         {
@@ -341,7 +345,7 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     var aqp = ReadFlver(modelPath, bndFile.Bytes, out AquaNode aqn);
 
-                    string finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
+                    string finalPath;
                     var outName = Path.ChangeExtension(fileName, ".aqp");
                     if (aqp != null && aqp.vtxlList.Count > 0)
                     {
@@ -349,7 +353,33 @@ namespace AquaModelLibrary.Core.FromSoft
                         aqp.ConvertToLegacyTypes();
                         aqp.CreateTrueVertWeights();
 
-                        FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false);
+                        switch(mirrorType)
+                        {
+                            //Default
+                            case MirrorType.Z:
+                                HandednessUtility.FlipHandednessAqpAndAqnZ(aqp, aqn);
+                                break;
+                            case MirrorType.Y:
+                                HandednessUtility.FlipHandednessAqpAndAqnY(aqp, aqn);
+                                break;
+                            case MirrorType.X:
+                                HandednessUtility.FlipHandednessAqpAndAqnX(aqp, aqn);
+                                break;
+                            case MirrorType.None:
+                                break;
+                        }
+
+                        switch(exportFormat)
+                        {
+                            case ExportFormat.Fbx:
+                                finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
+                                FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)coordSystem);
+                                break;
+                            case ExportFormat.Smd:
+                                finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".smd"));
+                                SmdExporter.ExportToFile(aqp, aqn, finalPath, null);
+                                break;
+                        }
                     }
                 }
                 else if (TPF.Is(bndFile.Bytes))
@@ -394,7 +424,7 @@ namespace AquaModelLibrary.Core.FromSoft
             aqp.ConvertToLegacyTypes();
             aqp.CreateTrueVertWeights();
 
-            FbxExporterNative.ExportToFile(aqp, aqn, motions, finalPath, nsaNames, new List<Matrix4x4>(), false);
+            FbxExporterNative.ExportToFile(aqp, aqn, motions, finalPath, nsaNames, new List<Matrix4x4>(), false, (int)coordSystem);
 
             //Temp, delete after testing
             mirrorMat = temp;
@@ -484,7 +514,6 @@ namespace AquaModelLibrary.Core.FromSoft
 
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
         {
-            mirrorMat = mirrorMatZ;
             AquaObject aqp = new AquaObject();
             List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
             aqn = new AquaNode();
@@ -510,7 +539,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
                 }
-                if (parentId == -1 && i != 0)
+                if (exportFormat == ExportFormat.Fbx && parentId == -1 && i != 0)
                 {
                     parentId = 0;
                 }
@@ -523,7 +552,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.firstChild = flverBone.ChildIndex;
                 aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
-
+                aqNode.pos = flverBone.Translation;
+                aqNode.eulRot = flverBone.Rotation;
                 aqNode.scale = new Vector3(1, 1, 1);
 
                 BoneTransforms.Add(mat);
@@ -534,25 +564,6 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
                 aqNode.boneName.SetString(flverBone.Name);
                 aqn.nodeList.Add(aqNode);
-            }
-            //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
-            if (mirrorMesh)
-            {
-                for (int i = 0; i < aqn.nodeList.Count; i++)
-                {
-                    var bone = aqn.nodeList[i];
-                    Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                    mat *= mirrorMat;
-                    BoneTransforms[i] = mat;
-
-                    Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
-                    bone.pos = translation;
-                    bone.eulRot = MathExtras.QuaternionToEuler(rot);
-
-                    Matrix4x4.Invert(mat, out var invMat);
-                    bone.SetInverseBindPoseMatrix(invMat);
-                    aqn.nodeList[i] = bone;
-                }
             }
 
             for (int i = 0; i < mdl4.Meshes.Count; i++)
@@ -581,13 +592,6 @@ namespace AquaModelLibrary.Core.FromSoft
                     var vert = mesh.Vertices[v];
                     Vector3 vertPos = vert.Position;
                     Vector3 vertNorm = new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z);
-
-                    if (mirrorMesh && !transformMesh)
-                    {
-                        vertPos = Vector3.Transform(vertPos, mirrorMat);
-                        vertNorm = Vector3.TransformNormal(vertNorm, mirrorMat);
-                        vertNorm *= -1;
-                    }
 
                     if (transformMesh && mesh.BoneIndices?[0] != -1)
                     {
@@ -759,7 +763,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
                     mat = mat * invParentInvTfm;
                 }
-                if (parentId == -1 && i != 0)
+                if (exportFormat == ExportFormat.Fbx && parentId == -1 && i != 0)
                 {
                     parentId = 0;
                 }
@@ -772,7 +776,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.firstChild = flverBone.FirstChildIndex;
                 aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
-
+                aqNode.pos = flverBone.Translation;
+                aqNode.eulRot = flverBone.Rotation;
                 aqNode.scale = new Vector3(1, 1, 1);
 
 #if DEBUG
@@ -797,26 +802,6 @@ namespace AquaModelLibrary.Core.FromSoft
             Vector3? minBounding = null;
             Vector3? maxBounding2 = null;
             Vector3? minBounding2 = null;
-
-            //I 100% believe there's a better way to do this when constructing the matrix, but for now we do this.
-            if (mirrorMesh)
-            {
-                for (int i = 0; i < aqn.nodeList.Count; i++)
-                {
-                    var bone = aqn.nodeList[i];
-                    Matrix4x4.Invert(bone.GetInverseBindPoseMatrix(), out var mat);
-                    mat *= mirrorMat;
-                    BoneTransforms[i] = mat;
-
-                    Matrix4x4.Decompose(mat, out var scale, out var rot, out var translation);
-                    bone.pos = translation;
-                    bone.eulRot = MathExtras.QuaternionToEuler(rot);
-
-                    Matrix4x4.Invert(mat, out var invMat);
-                    bone.SetInverseBindPoseMatrix(invMat);
-                    aqn.nodeList[i] = bone;
-                }
-            }
 
             for (int i = 0; i < flver.Meshes.Count; i++)
             {
@@ -1035,12 +1020,6 @@ namespace AquaModelLibrary.Core.FromSoft
                         }
                     }
 
-                    if (mirrorMesh && wasTransformed == false)
-                    {
-                        vertPos = Vector3.Transform(vertPos, mirrorMat);
-                        vertNorm = Vector3.Normalize(Vector3.Transform(vertPosNorm, mirrorMat) - vertPos);
-                    }
-
                     var alter = Vector3.Transform(vertPos, flver.Nodes[0].ComputeLocalTransform());
                     //Recalc model bounding
                     if (maxBounding == null)
@@ -1125,7 +1104,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 List<Vector3> triList = new List<Vector3>();
                 for (int id = 0; id < indices.Count - 2; id += 3)
                 {
-                    if (mirrorMesh)
+                    if (mirrorType != MirrorType.None)
                     {
                         triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
                     }

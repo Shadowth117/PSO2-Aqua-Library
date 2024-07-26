@@ -12,6 +12,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Zamboni;
 using static AquaModelLibrary.Data.PSO2.Aqua.LHIObjectDetailLayout;
+using AquaModelLibrary.Data.Utility;
 
 namespace AquaModelLibrary.Core.PSO2
 {
@@ -102,7 +103,7 @@ namespace AquaModelLibrary.Core.PSO2
                 //Models
                 foreach (var mdlName in lhiPair.Value.aqos.Keys)
                 {
-                    FbxExporterNative.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $".fbx"), new List<string>(), new List<Matrix4x4>(), false);
+                    FbxExporterNative.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $".fbx"), new List<string>(), new List<Matrix4x4>(), false, (int)CoordSystem.OpenGL);
 
                     //We need to kill the weighting values if we want these to translate properly. They should already be, but yeah. Doesn't matter in the above case^
                     if (lhiPair.Value.lhiMatrices.Count > 0)
@@ -119,7 +120,7 @@ namespace AquaModelLibrary.Core.PSO2
                     }
                     foreach (var lhiMat in lhiPair.Value.lhiMatrices)
                     {
-                        FbxExporterNative.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $"_{lhiMat.Key}.fbx"), new List<string>(), lhiMat.Value, false);
+                        FbxExporterNative.ExportToFile(lhiPair.Value.aqos[mdlName], lhiPair.Value.aqns[mdlName], new List<AquaMotion>(), Path.Combine(lhiPath, mdlName + $"_{lhiMat.Key}.fbx"), new List<string>(), lhiMat.Value, false, (int)CoordSystem.OpenGL);
                     }
                 }
 
@@ -457,7 +458,7 @@ namespace AquaModelLibrary.Core.PSO2
 
                     if (lhiData == null)
                     {
-                        FbxExporterNative.ExportToFile(models[model], bones[model], new List<AquaMotion>(), Path.Combine(outFolder, model + ".fbx"), new List<string>(), new List<Matrix4x4>(), false);
+                        FbxExporterNative.ExportToFile(models[model], bones[model], new List<AquaMotion>(), Path.Combine(outFolder, model + ".fbx"), new List<string>(), new List<Matrix4x4>(), false, (int)CoordSystem.OpenGL);
                     }
                     else
                     {

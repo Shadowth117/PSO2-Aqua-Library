@@ -176,7 +176,7 @@ namespace AquaModelLibrary.Core.BluePoint
                     aqp.ConvertToLegacyTypes();
                     aqp.CreateTrueVertWeights();
 
-                    FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false);
+                    FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false, (int)CoordSystem.OpenGL);
                 }
             });
 

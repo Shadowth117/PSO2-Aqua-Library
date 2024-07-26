@@ -5,6 +5,7 @@ using AquaModelLibrary.Core.General;
 using SoulsFormats;
 using System.Numerics;
 using static AquaModelLibrary.Core.FromSoft.SoulsConvert;
+using AquaModelLibrary.Data.Utility;
 
 namespace AquaModelLibrary.Core.FromSoft
 {
@@ -21,7 +22,6 @@ namespace AquaModelLibrary.Core.FromSoft
         }
         public static void ExtractMSBMapModels(string outDir, string filePath, byte[] file, bool useMetaData = false)
         {
-            mirrorMat = mirrorMatZ;
             byte[] newFile = file;
             string msbMapId = Path.GetFileNameWithoutExtension(filePath);
 
@@ -344,19 +344,19 @@ namespace AquaModelLibrary.Core.FromSoft
                     {
                         for (int m = 0; m < aqpList.Count; m++)
                         {
-                            FbxExporterNative.ExportToFile(aqpList[m], aqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, $"{modelNames[m]}.fbx"), new List<string>(), instanceTransformList[m], useMetaData);
+                            FbxExporterNative.ExportToFile(aqpList[m], aqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, $"{modelNames[m]}.fbx"), new List<string>(), instanceTransformList[m], useMetaData, (int)coordSystem);
                         }
                     }
                     else
                     {
-                        FbxExporterNative.ExportToFileSets(aqpList, aqnList, modelNames, outPath, instanceTransformList, useMetaData);
+                        FbxExporterNative.ExportToFileSets(aqpList, aqnList, modelNames, outPath, instanceTransformList, useMetaData, (int)coordSystem);
                     }
 
                     if (extractUnreferencedMapData)
                     {
                         for (int m = 0; m < unrefAqpList.Count; m++)
                         {
-                            FbxExporterNative.ExportToFile(unrefAqpList[m], unrefAqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, "Unreferenced", $"{unrefModelNames[m]}.fbx"), new List<string>(), new List<Matrix4x4>(), useMetaData);
+                            FbxExporterNative.ExportToFile(unrefAqpList[m], unrefAqnList[m], new List<AquaMotion>(), Path.Combine(outPathDirectory, "Unreferenced", $"{unrefModelNames[m]}.fbx"), new List<string>(), new List<Matrix4x4>(), useMetaData, (int)coordSystem);
                         }
                     }
 
@@ -448,6 +448,21 @@ namespace AquaModelLibrary.Core.FromSoft
 
                 if (foundKey)
                 {
+                    switch (mirrorType)
+                    {
+                        case MirrorType.Z:
+                            HandednessUtility.FlipHandednessAqpAndAqnZ(aqp, aqn);
+                            break;
+                        case MirrorType.Y:
+                            HandednessUtility.FlipHandednessAqpAndAqnY(aqp, aqn);
+                            break;
+                        case MirrorType.X:
+                            HandednessUtility.FlipHandednessAqpAndAqnX(aqp, aqn);
+                            break;
+                        case MirrorType.None:
+                            break;
+                    }
+
                     foreach (var vtxl in aqp.vtxlList)
                     {
                         vtxl.vertWeightIndices.Clear();

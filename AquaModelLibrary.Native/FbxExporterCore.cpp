@@ -691,7 +691,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     }
     
     //Expects pre VSET split model
-    void FbxExporterCore::ExportToFile(AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, List<Matrix4x4>^ instanceTransforms, bool includeMetadata)
+    void FbxExporterCore::ExportToFile(AquaObject^ aqo, AquaNode^ aqn, List<AquaMotion^>^ aqmList, String^ destinationFilePath, List<String^>^ aqmNameList, List<Matrix4x4>^ instanceTransforms, bool includeMetadata, int coordSystem)
     {
         String^ texturesDirectoryPath = Path::GetDirectoryName(destinationFilePath);
         String^ aqoName = Path::GetFileNameWithoutExtension(destinationFilePath);
@@ -816,7 +816,18 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             }
         }
 
-        lScene->GetGlobalSettings().SetAxisSystem( FbxAxisSystem::OpenGL );
+        switch (coordSystem)
+        {
+            case 0:
+                lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::OpenGL);
+                break;
+            case 1:
+                lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::Max);
+                break;
+            case 2:
+                lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::DirectX);
+                break;
+        }
         lScene->GetGlobalSettings().SetSystemUnit( FbxSystemUnit::m );
         lExporter->Export( lScene );
         lExporter->Destroy();
@@ -825,7 +836,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
     }
     
     //Expects pre VSET split model
-    void FbxExporterCore::ExportToFileSets(List<AquaObject^>^ aqoList, List<AquaNode^>^ aqnList, List<String^>^ modelNames, String^ destinationFilePath, List<List<Matrix4x4>^>^ instanceTransformsList, bool includeMetadata)
+    void FbxExporterCore::ExportToFileSets(List<AquaObject^>^ aqoList, List<AquaNode^>^ aqnList, List<String^>^ modelNames, String^ destinationFilePath, List<List<Matrix4x4>^>^ instanceTransformsList, bool includeMetadata, int coordSystem)
     {
         String^ texturesDirectoryPath = Path::GetDirectoryName(destinationFilePath);
 
@@ -938,7 +949,18 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
         lScene->AddPose(lBindPose);
 
-        lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::OpenGL);
+        switch (coordSystem)
+        {
+            case 0:
+                lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::OpenGL);
+                break;
+            case 1:
+                lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::Max);
+                break;
+            case 2:
+                lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::DirectX);
+                break;
+        }
         lScene->GetGlobalSettings().SetSystemUnit(FbxSystemUnit::m);
         lExporter->Export(lScene);
         lExporter->Destroy();

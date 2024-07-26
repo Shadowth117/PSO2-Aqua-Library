@@ -6,6 +6,7 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Core.General;
 using System.Numerics;
+using AquaModelLibrary.Data.Utility;
 
 namespace AquaModelLibrary.Core.AM2
 {
@@ -156,7 +157,7 @@ namespace AquaModelLibrary.Core.AM2
             }
 
             string exportName = Path.Combine(outFolder, Path.GetFileName(stgFileName) + ".fbx");
-            FbxExporterNative.ExportToFileSets(exportAqpList, exportAqnList, modelNames, exportName, instanceTransformListList, false);
+            FbxExporterNative.ExportToFileSets(exportAqpList, exportAqnList, modelNames, exportName, instanceTransformListList, false, (int)CoordSystem.OpenGL);
         }
 
         public static void ExtractTXP(string txpArchive, byte[] txpRaw, string outPath = null)
