@@ -529,7 +529,31 @@ namespace AquaModelLibrary.Core.FromSoft
         private static void AddToTFMDict(Dictionary<string, List<Matrix4x4>> objectTransformsDict, IMsbPart p, string mapId = "")
         {
             var mdlName = p.ModelName;
-            var tfm = MathExtras.ComposeFromDegreeRotation(p.Position, p.Rotation, p.Scale);
+            var position = p.Position;
+            var rotation = p.Rotation;
+            var scale = p.Scale;
+
+            switch (mirrorType)
+            {
+                case MirrorType.Z:
+                    position.Z *= -1;
+                    rotation.X *= -1;
+                    rotation.Y *= -1;
+                    break;
+                case MirrorType.Y:
+                    position.Y *= -1;
+                    rotation.X *= -1;
+                    rotation.Z *= -1;
+                    break;
+                case MirrorType.X:
+                    position.X *= -1;
+                    rotation.Y *= -1;
+                    rotation.Z *= -1;
+                    break;
+                case MirrorType.None:
+                    break;
+            }
+            var tfm = MathExtras.ComposeFromDegreeRotation(position, rotation, scale);
 
             switch (game)
             {
