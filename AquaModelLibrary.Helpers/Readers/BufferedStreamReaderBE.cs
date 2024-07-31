@@ -397,10 +397,9 @@ namespace AquaModelLibrary.Helpers.Readers
 
             var sb = new StringBuilder();
             var decoder = Encoding.Unicode.GetDecoder();
-
             unsafe
             {
-                Span<char> dest = stackalloc char[blockSize];
+                char[] dest = new char[blockSize / 2];
 
                 var foundEnd = false;
                 do
@@ -413,14 +412,13 @@ namespace AquaModelLibrary.Helpers.Readers
                     {
                         foundEnd = true;
                         source = source.Slice(0, endIndex);
-                        Seek(endIndex - blockSize, SeekOrigin.Current);
+                        Seek(Position + endIndex - (len * 2), SeekOrigin.Begin);
                     }
 
                     decoder.Convert(source.AsBytes(), dest, foundEnd, out var bytesUsed, out var charsUsed, out var completed);
-                    sb.Append(dest.Slice(0, charsUsed));
+                    sb.Append(new string(dest, 0, charsUsed));
                 } while (!foundEnd);
             }
-
             return sb.ToString();
         }
     }

@@ -150,7 +150,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         sr.Seek(textLoc + offset, SeekOrigin.Begin);
                         if(sr.Position < this.nifl.NOF0Offset)
                         {
-                            pair.str = sr.ReadUTF16String(this.nifl.NOF0Offset - sr.Position);
+                            pair.str = sr.ReadUTF16String(sr.Position, (int)(this.nifl.NOF0Offset - sr.Position));
                         }
 
                         text[i][subCategoryId].Add(pair);

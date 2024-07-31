@@ -38,7 +38,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 sr.Seek(strPointer + offset, SeekOrigin.Begin);
                 if(sr.Position < this.nifl.NOF0Offset)
                 {
-                    output.AppendLine($"{category.ToString("X")} {id.ToString("X")} " + sr.ReadUTF16String(this.nifl.NOF0Offset - sr.Position));
+                    output.AppendLine($"{category.ToString("X")} {id.ToString("X")} " + sr.ReadUTF16String(sr.Position, (int)(this.nifl.NOF0Offset - sr.Position)));
                 }
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
