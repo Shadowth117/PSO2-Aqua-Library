@@ -29,6 +29,7 @@
         public static string arksIdTiBgPath = "interface/arkscard/ui_ticket_arkscard_";
         public static string uiRoomIce = "ui_myroom.ice";
         public static string uiRoomFilename = "ui_myroom.text";
+        public static string uiArsenal = "ui_arsenal_module_text.ice";
 
         //Set Icon names
         public static string largeEnemyNoDataIconPath = "large_icon/ui_enemy_nodata_0000.ice";

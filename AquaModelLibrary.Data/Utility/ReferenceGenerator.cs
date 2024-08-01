@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using UnluacNET;
 using Zamboni;
 using static AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndex;
+using static AquaModelLibrary.Data.PSO2.Constants.CharacterAnimationNames;
 using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingDynamic;
 using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingIce;
 using static AquaModelLibrary.Data.PSO2.Constants.CharacterMakingStatic;
@@ -2127,17 +2128,6 @@ namespace AquaModelLibrary.Data.Utility
             genAnimListNGS.Add("All files listed will be in win32reboot");
 
             //Special character anims
-            var loadDollAnims = characterStart + "apc_loaddoll_citizen.ice";
-            var npcAnims = characterStart + "np_npc_object.ice";
-            var supportPartnerAnims = characterStart + "np_support_partner.ice";
-            var npcDelicious = characterStart + "npc_delicious.ice";
-            var tpdAnims = characterStart + "pl_bodel.ice";
-            var plLightLooks = characterStart + "pl_light_looks_basnet.ice";
-            var laconiumAnims = characterStart + "pl_object_rgrs.ice";
-            var playerRideRoidAnims = characterStart + "pl_object_rideroid.ice";
-            var dashPanelAnims = characterStart + "pl_object_dashpanel.ice";
-            var monHunAnim = characterStart + "pl_volcano.ice";
-            var monHunCarve = characterStart + "pl_volcano_pickup.ice";
             genAnimList.Add("," + loadDollAnims + "," + GetFileHash(loadDollAnims));
             genAnimList.Add("NPC Anims," + npcAnims + "," + GetFileHash(npcAnims));
             genAnimList.Add("Support Partner Anims," + supportPartnerAnims + "," + GetFileHash(supportPartnerAnims));
@@ -2163,19 +2153,16 @@ namespace AquaModelLibrary.Data.Utility
             genAnimList.Add("," + plCommon + "_std_cm00.ice" + "," + GetFileHash(plCommon + "_std_cm00.ice"));
 
             var plBattle = characterStart + "pl_battle";
-            genAnimListNGS.Add("," + characterStart + "np_common_human_reboot.ice" + "," + GetFileHash(characterStart + "np_common_human_reboot.ice"));
-            genAnimListNGS.Add("," + plBattle + ".ice" + "," + GetFileHash(plBattle + ".ice"));
-            genAnimListNGS.Add("," + plBattle + "_sdt.ice" + "," + GetFileHash(plBattle + "_std.ice"));
-            genAnimListNGS.Add("," + plBattle + "_cam.ice" + "," + GetFileHash(plBattle + "_cam.ice"));
-            genAnimListNGS.Add("," + plBattle + "_act.ice" + "," + GetFileHash(plBattle + "_act.ice"));
-            genAnimListNGS.Add("," + plCommon + ".ice" + "," + GetFileHash(plCommon + ".ice"));
-            genAnimListNGS.Add("," + plCommon + "_bti.ice" + "," + GetFileHash(plCommon + "_bti.ice"));
-            genAnimListNGS.Add("," + plCommon + "_cam.ice" + "," + GetFileHash(plCommon + "_cam.ice"));
-            genAnimListNGS.Add("," + plCommon + "_std.ice" + "," + GetFileHash(plCommon + "_std.ice"));
+            genAnimListNGS.Add("," + npCommonHumanReboot + "," + GetRebootHash(GetFileHash(npCommonHumanReboot)));
+            genAnimListNGS.Add("," + plBattle + ".ice" + "," + GetRebootHash(GetFileHash(plBattle + ".ice")));
+            genAnimListNGS.Add("," + plBattle + "_sdt.ice" + "," + GetRebootHash(GetFileHash(plBattle + "_std.ice")));
+            genAnimListNGS.Add("," + plBattle + "_cam.ice" + "," + GetRebootHash(GetFileHash(plBattle + "_cam.ice")));
+            genAnimListNGS.Add("," + plBattle + "_act.ice" + "," + GetRebootHash(GetFileHash(plBattle + "_act.ice")));
+            genAnimListNGS.Add("," + plCommon + ".ice" + "," + GetRebootHash(GetFileHash(plCommon + ".ice")));
+            genAnimListNGS.Add("," + plCommon + "_bti.ice" + "," + GetRebootHash(GetFileHash(plCommon + "_bti.ice")));
+            genAnimListNGS.Add("," + plCommon + "_cam.ice" + "," + GetRebootHash(GetFileHash(plCommon + "_cam.ice")));
+            genAnimListNGS.Add("," + plCommon + "_std.ice" + "," + GetRebootHash(GetFileHash(plCommon + "_std.ice")));
 
-            var wepTypeList = new List<string>() { "compoundbow", "doublesaber", "dualblade", "gunslash", "jetboots", "katana", "knuckle", "launcher", "master_doublesaber",
-            "master_dualblade", "master_wand", "partisan", "poka_compoundbow", "rifle", "rod", "slayer_gunslash", "sword", "takt", "talis", "twindagger", "twinsubmachinegun",
-            "unarmed", "villain_katana", "villain_rifle", "villain_rod", "wand", "wiredlance", "wpnman_sword", "wpnman_talis", "wpnman_twinsubmachinegun"};
             foreach (var wep in wepTypeList)
             {
                 string entry = "";
@@ -2191,8 +2178,6 @@ namespace AquaModelLibrary.Data.Utility
             }
 
             //PVP Anims
-            var pvpWepList = new List<string>() { "compoundbow", "doublesaber", "dualblade", "gunslash", "jetboots", "katana", "knuckle", "launcher", "partisan", "rifle", "rod",
-                "unarmed", "wand", "wiredlance"};
             foreach (var wep in wepTypeList)
             {
                 genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_act.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_act.ice"));
@@ -2202,18 +2187,16 @@ namespace AquaModelLibrary.Data.Utility
                 genAnimList.Add("," + pvpStart + "pl_" + "poka_" + wep + "_std.ice" + "," + GetFileHash(pvpStart + "pl_" + "poka_" + wep + "_std.ice"));
             }
 
-            var wepTypeListNGS = new List<string>() { "compoundbow", "doublesaber", "dualblade", "gunslash", "jetboots", "katana", "knuckle", "launcher",
-                "partisan", "rifle", "rod", "sword", "takt", "talis", "twindagger", "twinsubmachinegun",
-            "unarmed", "wand", "wiredlance"};
             foreach (var wep in wepTypeListNGS)
             {
                 //We know most of the list above should be in and probably the same name, but we only want to list them if they exist at present
                 if (File.Exists(Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_std.ice")))))
                 {
-                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_act.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_act.ice"));
-                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_base.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_base.ice"));
-                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_cam.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_cam.ice"));
-                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_std.ice" + "," + GetFileHash(characterStart + "pl_" + wep + "_std.ice"));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_base.ice" + "," + GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_base.ice")));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_caf.ice" + "," + GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_caf.ice")));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_cam.ice" + "," + GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_cam.ice")));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_std.ice" + "," + GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_std.ice")));
+                    genAnimListNGS.Add("," + characterStart + "pl_" + wep + "_dynamic.ice" + "," + GetRebootHash(GetFileHash(characterStart + "pl_" + wep + "_dynamic.ice")));
                 }
             }
 
@@ -2369,9 +2352,6 @@ namespace AquaModelLibrary.Data.Utility
 
                     WriteCSV(playerRAnimDirOut, $"SubstituteMotion{sub}.csv", subMotions[cat]);
                 }
-#if DEBUG
-                // File.WriteAllLines(Path.Combine(outputDirectory, "motionSubs_md5.txt"), subMotionsDebug);
-#endif
 
             }
         }
