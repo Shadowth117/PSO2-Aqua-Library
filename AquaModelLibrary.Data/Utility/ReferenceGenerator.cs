@@ -75,7 +75,7 @@ namespace AquaModelLibrary.Data.Utility
         public unsafe static void OutputFileLists(string pso2_binDir, string outputDirectory)
         {
             var rootDumpDirectory = (string)outputDirectory.Clone();
-            var imageDiretory = Path.Combine(rootDumpDirectory, "Images");
+            var imageDirectory = Path.Combine(rootDumpDirectory, "Images");
             outputDirectory = Path.Combine(rootDumpDirectory, "Sheets");
             string playerDirOut = Path.Combine(outputDirectory, playerOut);
             string playerClassicDirOut = Path.Combine(playerDirOut, classicOut);
@@ -306,7 +306,7 @@ namespace AquaModelLibrary.Data.Utility
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
-            GenerateUILists(pso2_binDir, outputDirectory, imageDiretory);
+            GenerateUILists(pso2_binDir, outputDirectory, imageDirectory);
             GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
