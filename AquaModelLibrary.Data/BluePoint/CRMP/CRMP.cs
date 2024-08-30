@@ -1,7 +1,6 @@
-﻿using AquaModelLibrary.Data.BluePoint.CRMP;
-using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.Data.BluePoint.CTAL
+namespace AquaModelLibrary.Data.BluePoint.CRMP
 {
     /// <summary>
     /// BluePoint Reference MaP
