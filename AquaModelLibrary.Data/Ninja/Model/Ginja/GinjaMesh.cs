@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Data.Gamecube;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 
 //Sourced from SA Tools
@@ -18,7 +19,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         /// <summary>
         /// The polygon data
         /// </summary>
-        public List<GinjaPrimitive> primitives { get; private set; }
+        public List<GCPrimitive> primitives { get; private set; }
 
         /// <summary>
         /// The index attribute flags of this mesh. If it has no IndexAttribParam, it will return null
@@ -45,7 +46,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         public GinjaMesh()
         {
             parameters = new List<GCParameter>();
-            primitives = new List<GinjaPrimitive>();
+            primitives = new List<GCPrimitive>();
         }
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         /// </summary>
         /// <param name="parameters"></param>
         /// <param name="primitives"></param>
-        public GinjaMesh(List<GCParameter> parameters, List<GinjaPrimitive> primitives)
+        public GinjaMesh(List<GCParameter> parameters, List<GCPrimitive> primitives)
         {
             this.parameters = parameters;
             this.primitives = primitives;
@@ -92,7 +93,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 indexFlags = flags.Value;
 
             // reading the primitives
-            primitives = new List<GinjaPrimitive>();
+            primitives = new List<GCPrimitive>();
 
             int end_pos = offset + primitives_offset + (int)primitives_size;
 
@@ -101,7 +102,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             {
                 // if the primitive isnt valid
                 if (sr.Peek<byte>() == 0) break;
-                primitives.Add(new GinjaPrimitive(sr, indexFlags));
+                primitives.Add(new GCPrimitive(sr, indexFlags));
             }
             primitiveSize = primitives_size;
 

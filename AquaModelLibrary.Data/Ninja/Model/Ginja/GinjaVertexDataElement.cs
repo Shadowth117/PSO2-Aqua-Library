@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Data.Gamecube;
+using AquaModelLibrary.Helpers.Readers;
 
 //Sourced from SA Tools
 namespace AquaModelLibrary.Data.Ninja.Model.Ginja

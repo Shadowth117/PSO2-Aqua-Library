@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.Gamecube;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Extensions;
