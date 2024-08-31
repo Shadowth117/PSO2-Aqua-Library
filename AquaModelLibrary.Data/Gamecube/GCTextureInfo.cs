@@ -5,7 +5,7 @@
     /// </summary>
     public class GCTextureInfo
     {
-        public enum TPLFormat
+        public enum TPLFormat : int
         {
             I4 = 0x0,
             I8 = 0x1,
@@ -20,7 +20,7 @@
             CMPR = 0xE,
         }
 
-        public Dictionary<TPLFormat, int> GCBPP = new Dictionary<TPLFormat, int>()
+        public static Dictionary<TPLFormat, int> GCBPP = new Dictionary<TPLFormat, int>()
         {
             { TPLFormat.I4, 4 },
             { TPLFormat.I8, 8 },
@@ -35,7 +35,7 @@
             { TPLFormat.CMPR, 4 },
         };
 
-        public Dictionary<TPLFormat, int> GCBlockWidth = new Dictionary<TPLFormat, int>()
+        public static Dictionary<TPLFormat, int> GCBlockWidth = new Dictionary<TPLFormat, int>()
         {
             { TPLFormat.I4, 8 },
             { TPLFormat.I8, 8 },
@@ -50,7 +50,7 @@
             { TPLFormat.CMPR, 8 },
         };
 
-        public Dictionary<TPLFormat, int> GCBlockHeight = new Dictionary<TPLFormat, int>()
+        public static Dictionary<TPLFormat, int> GCBlockHeight = new Dictionary<TPLFormat, int>()
         {
             { TPLFormat.I4, 8 },
             { TPLFormat.I8, 4 },
@@ -65,7 +65,7 @@
             { TPLFormat.CMPR, 8 },
         };
 
-        public Dictionary<TPLFormat, int> GCBlockSize = new Dictionary<TPLFormat, int>()
+        public static Dictionary<TPLFormat, int> GCBlockSize = new Dictionary<TPLFormat, int>()
         {
             { TPLFormat.I4, 32 },
             { TPLFormat.I8, 32 },

@@ -5,15 +5,16 @@
         /// <summary>
         /// Position - 0x9
         /// Normal   - 0xA
+        /// Color    - 0xB
         /// UV1      - 0xD
         /// UV2      - 0xE
         /// End?     - 0xFF
         /// </summary>
         public int dataType;
         /// <summary>
-        /// Always 2?
+        /// 2 for 8 bit, 3 for 16 bit index
         /// </summary>
-        public int int_04;
+        public int size;
         /// <summary>
         /// 1 for position and UVs, 0 for others
         /// </summary>

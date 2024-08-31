@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
+﻿using AquaModelLibrary.Helpers.Readers;
+
+namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 {
     public class CRBRMaterialColorData
     {
@@ -25,5 +27,16 @@
         /// Maybe glossiness?
         /// </summary>
         public float unkFloat1;
+
+        public CRBRMaterialColorData() { }
+
+        public CRBRMaterialColorData(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            ambientColor = sr.ReadBE<int>();
+            diffuseColor = sr.ReadBE<int>();
+            specularColor = sr.ReadBE<int>();
+            unkFloat0 = sr.ReadBE<float>();
+            unkFloat1 = sr.ReadBE<float>();
+        }
     }
 }

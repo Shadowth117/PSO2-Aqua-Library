@@ -343,13 +343,13 @@ namespace AquaModelLibrary.Data.Gamecube
         /// </summary>
         HasUV = 1 << 11,
         /// <summary>
-        /// Unused
+        /// Perhaps not really used, but we use it for Custom Robo
         /// </summary>
-        Bit12 = 1 << 12,
+        UV2_16BitIndex = 1 << 12,
         /// <summary>
-        /// Unused
+        /// Perhaps not really used, but we use it for Custom Robo
         /// </summary>
-        Bit13 = 1 << 13,
+        HasUV2 = 1 << 13,
         /// <summary>
         /// Unused
         /// </summary>

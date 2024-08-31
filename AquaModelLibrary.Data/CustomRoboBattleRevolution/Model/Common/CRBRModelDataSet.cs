@@ -29,7 +29,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             if (nodetreeOffset != 0)
             {
                 sr.Seek(motionNodeTreeOffset + offset, SeekOrigin.Begin);
-                rootMotionNode = new CRBRMotionNode(sr, offset);
+                //rootMotionNode = new CRBRMotionNode(sr, offset);
             }
 
 #if DEBUG

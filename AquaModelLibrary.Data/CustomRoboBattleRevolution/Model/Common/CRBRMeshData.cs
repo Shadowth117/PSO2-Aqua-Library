@@ -12,7 +12,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         public List<Vector3> vertUV2s = new List<Vector3>();
         
         public List<CRBRVertexDefinition> vertDefinitions = new List<CRBRVertexDefinition>();
-        public List<GCPrimitive> gCPrimitives = new List<GCPrimitive>();
+        public List<GCPrimitive> gcPrimitives = new List<GCPrimitive>();
 
         public int int_00;
         public int int_04;
@@ -34,9 +34,92 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 
         public CRBRMeshData() { }
 
-        public CRBRMeshData(BufferedStreamReaderBE<MemoryStream> sr)
+        public CRBRMeshData(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
+            int_00 = sr.ReadBE<int>();
+            int_04 = sr.ReadBE<int>();
+            vertexDefinitionsOffset = sr.ReadBE<int>();
+            bt_0C = sr.ReadBE<byte>();
+            bt_0D = sr.ReadBE<byte>();
+            maxPrimitiveCount = sr.ReadBE<ushort>();
+            primitiveSetsOffset = sr.ReadBE<int>();
+            int_14 = sr.ReadBE<int>();
+            int_18 = sr.ReadBE<int>();
+            int_1C = sr.ReadBE<int>();
 
+            GCIndexAttributeFlags indexFlags = 0;
+            if (vertexDefinitionsOffset != 0)
+            {
+                sr.Seek(vertexDefinitionsOffset + offset, SeekOrigin.Begin);
+                int dataType = 1;
+                do
+                {
+                    CRBRVertexDefinition vd = new CRBRVertexDefinition();
+                    dataType = vd.dataType = sr.ReadBE<int>();
+                    vd.size = sr.ReadBE<int>();
+                    vd.int_08 = sr.ReadBE<int>();
+                    vd.int_0C = sr.ReadBE<int>();
+                    vd.strideInBytes = sr.ReadBE<int>();
+                    vd.dataOffset = sr.ReadBE<int>();
+
+                    switch(dataType)
+                    {
+                        case 0x9:
+                            indexFlags |= GCIndexAttributeFlags.HasPosition;
+                            if(vd.size == 3)
+                            {
+                                indexFlags |= GCIndexAttributeFlags.Position16BitIndex;
+                            }
+                            break;
+                        case 0xA:
+                            indexFlags |= GCIndexAttributeFlags.HasNormal;
+                            if (vd.size == 3)
+                            {
+                                indexFlags |= GCIndexAttributeFlags.Normal16BitIndex;
+                            }
+                            break;
+                        case 0xB:
+                            indexFlags |= GCIndexAttributeFlags.HasColor;
+                            if (vd.size == 3)
+                            {
+                                indexFlags |= GCIndexAttributeFlags.Color16BitIndex;
+                            }
+                            break;
+                        case 0xD:
+                            indexFlags |= GCIndexAttributeFlags.HasUV;
+                            if (vd.size == 3)
+                            {
+                                indexFlags |= GCIndexAttributeFlags.UV16BitIndex;
+                            }
+                            break;
+                        case 0xE:
+                            indexFlags |= GCIndexAttributeFlags.HasUV2;
+                            if (vd.size == 3)
+                            {
+                                indexFlags |= GCIndexAttributeFlags.UV2_16BitIndex;
+                            }
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    vertDefinitions.Add(vd);
+                } while (dataType > 0 && dataType < 0xFF);
+            }
+
+            if(primitiveSetsOffset != 0)
+            {
+                sr.Seek(primitiveSetsOffset + offset, SeekOrigin.Begin);
+                for(int i = 0; i > maxPrimitiveCount; i++)
+                {
+                    var primPeek = sr.Peek<byte>();
+                    if(primPeek == 0)
+                    {
+                        break;
+                    }
+                    gcPrimitives.Add(new GCPrimitive(sr, indexFlags));
+                }
+            }
         }
     }
 }
