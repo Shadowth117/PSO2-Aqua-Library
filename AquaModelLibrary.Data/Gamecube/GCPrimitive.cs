@@ -29,9 +29,14 @@ namespace AquaModelLibrary.Data.Gamecube
         /// </summary>
         public ushort UV0Index;
 
+        /// <summary>
+        /// The index of the second texture coordinate value
+        /// </summary>
+        public ushort UV1Index;
+
         public bool Equals(Loop other)
         {
-            return PositionIndex == other.PositionIndex && NormalIndex == other.NormalIndex && Color0Index == other.Color0Index && UV0Index == other.UV0Index;
+            return PositionIndex == other.PositionIndex && NormalIndex == other.NormalIndex && Color0Index == other.Color0Index && UV0Index == other.UV0Index && UV1Index == other.UV1Index;
         }
     }
 
@@ -86,12 +91,14 @@ namespace AquaModelLibrary.Data.Gamecube
             bool has_color = hasFlag(GCIndexAttributeFlags.HasColor);
             bool has_normal = hasFlag(GCIndexAttributeFlags.HasNormal);
             bool has_uv = hasFlag(GCIndexAttributeFlags.HasUV);
+            bool has_uv2 = hasFlag(GCIndexAttributeFlags.HasUV2);
 
             //whether any of the indices use 16 bits instead of 8
             bool pos16bit = hasFlag(GCIndexAttributeFlags.Position16BitIndex);
             bool col16bit = hasFlag(GCIndexAttributeFlags.Color16BitIndex);
             bool nrm16bit = hasFlag(GCIndexAttributeFlags.Normal16BitIndex);
             bool uv16bit = hasFlag(GCIndexAttributeFlags.UV16BitIndex);
+            bool uv216bit = hasFlag(GCIndexAttributeFlags.UV2_16BitIndex);
 
             loops = new List<Loop>();
 
@@ -148,6 +155,19 @@ namespace AquaModelLibrary.Data.Gamecube
                     }
                 }
 
+                // reading uv2s
+                if (has_uv)
+                {
+                    if (uv16bit)
+                    {
+                        l.UV1Index = sr.ReadBE<ushort>();
+                    }
+                    else
+                    {
+                        l.UV1Index = sr.ReadBE<byte>();
+                    }
+                }
+
                 loops.Add(l);
             }
 
@@ -181,11 +201,13 @@ namespace AquaModelLibrary.Data.Gamecube
             bool has_color = hasFlag(GCIndexAttributeFlags.HasColor);
             bool has_normal = hasFlag(GCIndexAttributeFlags.HasNormal);
             bool has_uv = hasFlag(GCIndexAttributeFlags.HasUV);
+            bool has_uv2 = hasFlag(GCIndexAttributeFlags.HasUV2);
 
             bool is_position_16bit = hasFlag(GCIndexAttributeFlags.Position16BitIndex);
             bool is_color_16bit = hasFlag(GCIndexAttributeFlags.Color16BitIndex);
             bool is_normal_16bit = hasFlag(GCIndexAttributeFlags.Normal16BitIndex);
             bool is_uv_16bit = hasFlag(GCIndexAttributeFlags.UV16BitIndex);
+            bool is_uv2_16bit = hasFlag(GCIndexAttributeFlags.UV2_16BitIndex);
 
             foreach (Loop v in loops)
             {
@@ -244,6 +266,21 @@ namespace AquaModelLibrary.Data.Gamecube
                     else
                     {
                         result.Add((byte)v.UV0Index);
+                    }
+                }
+
+                if (has_uv2)
+                {
+                    if (is_uv2_16bit)
+                    {
+                        byte[] big_endian_uv = BitConverter.GetBytes(v.UV1Index);
+                        // writing count as big endian
+                        result.Add(big_endian_uv[1]);
+                        result.Add(big_endian_uv[0]);
+                    }
+                    else
+                    {
+                        result.Add((byte)v.UV1Index);
                     }
                 }
             }

@@ -2,15 +2,7 @@
 {
     public struct CRBRVertexDefinition
     {
-        /// <summary>
-        /// Position - 0x9
-        /// Normal   - 0xA
-        /// Color    - 0xB
-        /// UV1      - 0xD
-        /// UV2      - 0xE
-        /// End?     - 0xFF
-        /// </summary>
-        public int dataType;
+        public CRBRVertexType dataType;
         /// <summary>
         /// 2 for 8 bit, 3 for 16 bit index
         /// </summary>

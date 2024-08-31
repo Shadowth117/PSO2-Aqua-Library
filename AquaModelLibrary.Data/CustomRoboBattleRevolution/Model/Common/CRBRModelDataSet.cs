@@ -26,10 +26,22 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 rootNode = new CRBRNode(sr, offset);
             }
 
-            if (nodetreeOffset != 0)
+            if (motionNodeTreeOffset != 0)
             {
                 sr.Seek(motionNodeTreeOffset + offset, SeekOrigin.Begin);
-                //rootMotionNode = new CRBRMotionNode(sr, offset);
+                int firstMotionNodeoffset = sr.ReadBE<int>();
+                int unkValue = sr.ReadBE<int>();
+#if DEBUG
+                if(unkValue != 0)
+                {
+                    throw new NotImplementedException();
+                }
+#endif
+                if(firstMotionNodeoffset != 0)
+                {
+                    sr.Seek(firstMotionNodeoffset + offset, SeekOrigin.Begin);
+                    rootMotionNode = new CRBRMotionNode(sr, offset);
+                }
             }
 
 #if DEBUG

@@ -52,6 +52,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         {
             int_00 = sr.ReadBE<int>();
             nextTextureInfoOffset = sr.ReadBE<int>();
+            int_08 = sr.ReadBE<int>();
             int_0C = sr.ReadBE<int>();
 
             int_10 = sr.ReadBE<int>();
