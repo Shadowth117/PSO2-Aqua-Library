@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Data.Gamecube;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
@@ -32,5 +33,10 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         public int int_1C;
 
         public CRBRMeshData() { }
+
+        public CRBRMeshData(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+
+        }
     }
 }

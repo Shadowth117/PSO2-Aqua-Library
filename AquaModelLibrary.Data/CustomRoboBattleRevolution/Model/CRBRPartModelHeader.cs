@@ -9,8 +9,8 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
         /// </summary>
         //public int offset;
         public int fileSize;
-        public int offset0;
-        public int offset0Count;
+        public int modelDataListOffset;
+        public int modelDataListCount;
 
         public int unkBytesOffset0;
         public int unkCount0; //Usually -1
@@ -49,8 +49,8 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
         {
             offset = sr.ReadBE<int>();
             fileSize = sr.ReadBE<int>();
-            offset0 = sr.ReadBE<int>();
-            offset0Count = sr.ReadBE<int>();
+            modelDataListOffset = sr.ReadBE<int>();
+            modelDataListCount = sr.ReadBE<int>();
 
             unkBytesOffset0 = sr.ReadBE<int>();
             unkCount0 = sr.ReadBE<int>();

@@ -8,10 +8,6 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
     public abstract class CRBRModel
     {
         public CRBRModelHeader Header = null;
-        /// <summary>
-        /// Texture images are referenced by offset and can be referenced from multiple materials. 
-        /// </summary>
-        public Dictionary<int, byte[]> imageData = new Dictionary<int, byte[]>();
         public CRBRModel() { }
 
         public CRBRModel(byte[] data)

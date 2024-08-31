@@ -1,9 +1,11 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
 {
     public class CRBRPartModel : CRBRModel
     {
+        List<CRBRModelDataSet> meshDataList = new List<CRBRModelDataSet>();
         public new CRBRPartModelHeader Header { 
             get { return (CRBRPartModelHeader)base.Header; } 
             set { base.Header = value; } }
@@ -27,17 +29,14 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
         {
             sr._BEReadActive = true;
             Header = new CRBRPartModelHeader(sr);
-            sr.Seek(Header.offset0 + Header.offset, SeekOrigin.Begin);
+            sr.Seek(Header.modelDataListOffset + Header.offset, SeekOrigin.Begin);
 
-            int offset0Offset0 = sr.Read<int>();
-            int offset0Offset1 = sr.Read<int>();
-            int offset0Unk0 = sr.Read<int>();
-            int offset0Unk1 = sr.Read<int>();
-            
-            int offset0Offset_10 = sr.Read<int>();
-            int offset0Unk2 = sr.Read<int>();
-            int offset0Unk3 = sr.Read<int>();
-            int offset0Unk4 = sr.Read<int>();
+            for(int i = 0; i < Header.modelDataListCount; i++)
+            {
+                var bookmark = sr.Position;
+                meshDataList.Add(new CRBRModelDataSet(sr, Header.offset));
+                sr.Seek(bookmark + 0x10, SeekOrigin.Begin);
+            }
         }
     }
 }

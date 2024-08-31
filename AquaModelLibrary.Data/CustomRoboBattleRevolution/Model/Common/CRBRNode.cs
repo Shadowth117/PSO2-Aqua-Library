@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using AquaModelLibrary.Helpers.Readers;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 {
@@ -35,5 +36,12 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         //Padding to 0x20?
         public int int_38;
         public int int_3C;
+
+        public CRBRNode() { }
+
+        public CRBRNode(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        {
+            int_00 = sr.ReadBE<int>();
+        }
     }
 }
