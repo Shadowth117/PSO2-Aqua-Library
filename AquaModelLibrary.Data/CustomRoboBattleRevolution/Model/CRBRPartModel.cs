@@ -5,7 +5,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
 {
     public class CRBRPartModel : CRBRModel
     {
-        List<CRBRModelDataSet> meshDataList = new List<CRBRModelDataSet>();
+        public List<CRBRModelDataSet> modelDataList = new List<CRBRModelDataSet>();
         public new CRBRPartModelHeader Header { 
             get { return (CRBRPartModelHeader)base.Header; } 
             set { base.Header = value; } }
@@ -34,7 +34,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
             for(int i = 0; i < Header.modelDataListCount; i++)
             {
                 var bookmark = sr.Position;
-                meshDataList.Add(new CRBRModelDataSet(sr, Header.offset));
+                modelDataList.Add(new CRBRModelDataSet(sr, Header.offset, this));
                 sr.Seek(bookmark + 0x10, SeekOrigin.Begin);
             }
         }

@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
 {
@@ -8,6 +9,10 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
     public abstract class CRBRModel
     {
         public CRBRModelHeader Header = null;
+        /// <summary>
+        /// Models will reference the same texture buffer from multiple places so it's just better to keep one copy since in theory texture definitions are identical too, despite being in different areas
+        /// </summary>
+        public Dictionary<int, CRBRTextureDefinition> Textures = new Dictionary<int, CRBRTextureDefinition>();
         public CRBRModel() { }
 
         public CRBRModel(byte[] data)

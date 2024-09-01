@@ -31,16 +31,11 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             int_0C = sr.ReadBE<int>();
             int_10 = sr.ReadBE<int>();
             int_14 = sr.ReadBE<int>();
-
-            if (textureBufferOffset != 0)
-            {
-                textureBuffer = sr.ReadBytes(textureBufferOffset + offset, (GCBPP[textureFormat] * textureWidth * textureHeight) / 8);
-            }
         }
 
         public byte[] GetTPL()
         {
-            if(textureBuffer != null)
+            if (textureBuffer != null)
             {
                 List<byte> tpl = new List<byte>();
                 ByteListExtension.AddAsBigEndian = true;
@@ -56,6 +51,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 tpl.AddValue(textureWidth);
                 tpl.AddValue(textureHeight);
                 tpl.AddValue((int)textureFormat);
+                tpl.AddValue(0x40); //Data offset
 
                 tpl.AddValue((int)0x0);
                 tpl.AddValue((int)0x0);

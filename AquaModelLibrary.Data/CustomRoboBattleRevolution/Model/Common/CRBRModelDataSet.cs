@@ -13,7 +13,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         public int int_0C;
 
         public CRBRModelDataSet() { }
-        public CRBRModelDataSet(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        public CRBRModelDataSet(BufferedStreamReaderBE<MemoryStream> sr, int offset, CRBRModel model)
         {
             nodetreeOffset = sr.ReadBE<int>();
             motionNodeTreeOffset = sr.ReadBE<int>();
@@ -23,7 +23,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             if(nodetreeOffset != 0)
             {
                 sr.Seek(nodetreeOffset + offset, SeekOrigin.Begin);
-                rootNode = new CRBRNode(sr, offset);
+                rootNode = new CRBRNode(sr, offset, model);
             }
 
             if (motionNodeTreeOffset != 0)

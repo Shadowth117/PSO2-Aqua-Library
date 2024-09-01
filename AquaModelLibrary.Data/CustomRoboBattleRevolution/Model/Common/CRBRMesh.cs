@@ -14,7 +14,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 
         public CRBRMesh() { }
         
-        public CRBRMesh(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        public CRBRMesh(BufferedStreamReaderBE<MemoryStream> sr, int offset, CRBRModel model)
         {
             int_00 = sr.ReadBE<int>();
             int_04 = sr.ReadBE<int>();
@@ -35,7 +35,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             if (materialDataOffset != 0)
             {
                 sr.Seek(materialDataOffset + offset, SeekOrigin.Begin);
-                matData = new CRBRMaterialData(sr, offset);
+                matData = new CRBRMaterialData(sr, offset, model);
             }
             if (meshDataOffset != 0)
             {

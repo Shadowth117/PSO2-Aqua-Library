@@ -43,7 +43,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 
         public CRBRNode() { }
 
-        public CRBRNode(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+        public CRBRNode(BufferedStreamReaderBE<MemoryStream> sr, int offset, CRBRModel model)
         {
             int_00 = sr.ReadBE<int>();
             hasChildFlag = sr.ReadBE<byte>();
@@ -63,19 +63,19 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             if(childOffset != 0)
             {
                 sr.Seek(childOffset + offset, SeekOrigin.Begin);
-                childNode = new CRBRNode(sr, offset);
+                childNode = new CRBRNode(sr, offset, model);
             }
 
             if (siblingOffset != 0)
             {
                 sr.Seek(siblingOffset + offset, SeekOrigin.Begin);
-                siblingNode = new CRBRNode(sr, offset);
+                siblingNode = new CRBRNode(sr, offset, model);
             }
 
             if (meshOffset != 0)
             {
                 sr.Seek(meshOffset + offset, SeekOrigin.Begin);
-                crbrMesh = new CRBRMesh(sr, offset);
+                crbrMesh = new CRBRMesh(sr, offset, model);
             }
         }
     }

@@ -5,7 +5,6 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 {
     public class CRBRTextureInfo
     {
-        public CRBRTextureInfo nextTextureInfo = null;
         public CRBRTextureDefinition texture = null;
 
         public int int_00;
@@ -48,6 +47,9 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 
         public CRBRTextureInfo() { }
 
+        /// <summary>
+        /// Sibling textures will get read within MaterialData 
+        /// </summary>
         public CRBRTextureInfo(BufferedStreamReaderBE<MemoryStream> sr, int offset)
         {
             int_00 = sr.ReadBE<int>();
@@ -82,12 +84,6 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             int_50 = sr.ReadBE<int>();
             int_54 = sr.ReadBE<int>();
             int_58 = sr.ReadBE<int>();
-
-            if(nextTextureInfoOffset != 0)
-            {
-                sr.Seek(nextTextureInfoOffset + offset, SeekOrigin.Begin);
-                nextTextureInfo = new CRBRTextureInfo(sr, offset);
-            }
 
             if(textureDefinitionOffset != 0)
             {
