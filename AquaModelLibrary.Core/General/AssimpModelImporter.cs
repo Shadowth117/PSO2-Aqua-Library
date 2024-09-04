@@ -21,6 +21,23 @@ namespace AquaModelLibrary.Core.General
         public static ScaleHandling scaleHandling = ScaleHandling.NoScaling;
         public static double customScale = 1;
 
+        public static Assimp.PostProcessSteps GetPostProcessSteps(bool preTransformVertices = false)
+        {
+            Assimp.PostProcessSteps steps = Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs;
+
+            if(preTransformVertices)
+            {
+                steps |=  Assimp.PostProcessSteps.PreTransformVertices;
+            }
+
+            if(scaleHandling == ScaleHandling.FileScaling)
+            {
+                steps |= Assimp.PostProcessSteps.GlobalScale;
+            }
+
+            return steps;
+        }
+
         public static Assimp.Scene GetAssimpScene(string path, Assimp.PostProcessSteps pps)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
@@ -53,9 +70,9 @@ namespace AquaModelLibrary.Core.General
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
             
-            Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            Assimp.Scene aiScene = context.ImportFile(initialFilePath, GetPostProcessSteps(false));
 
-            float baseScale = SetAssimpScale(aiScene);
+            double baseScale = SetAssimpScale(aiScene);
 
             bool playerExport = aiScene.RootNode.Children[0].Name.Contains("pl_");
             if (playerExport && forceNoPlayerExport)
@@ -175,7 +192,7 @@ namespace AquaModelLibrary.Core.General
                         var first = true;
                         foreach (var pos in animNode.PositionKeys)
                         {
-                            posKeys.vector4Keys.Add(new Vector4(pos.Value.X * baseScale, pos.Value.Y * baseScale, pos.Value.Z * baseScale, 0));
+                            posKeys.vector4Keys.Add(new Vector4((float)(pos.Value.X * baseScale), (float)(pos.Value.Y * baseScale), (float)(pos.Value.Z * baseScale), 0));
                             if (animNode.PositionKeys.Count > 1)
                             {
                                 //Account for first frame difference
@@ -525,14 +542,14 @@ namespace AquaModelLibrary.Core.General
             node.keyData.Add(rotKeys);
         }
 
-        private static void AddOnePosFrame(KeyData node, Assimp.Node aiNode, float baseScale, bool add0x80 = false)
+        private static void AddOnePosFrame(KeyData node, Assimp.Node aiNode, double baseScale, bool add0x80 = false)
         {
             MKEY posKeys = new MKEY();
             posKeys.keyType = 1;
             posKeys.dataType = 1;
             posKeys.keyCount = 1;
             var mat4 = GetMat4FromAssimpMat4(aiNode.Transform);
-            posKeys.vector4Keys = new List<Vector4>() { new Vector4(mat4.M14 * baseScale, mat4.M24 * baseScale, mat4.M34 * baseScale, 0) };
+            posKeys.vector4Keys = new List<Vector4>() { new Vector4((float)(mat4.M14 * baseScale), (float)(mat4.M24 * baseScale), (float)(mat4.M34 * baseScale), 0) };
             node.keyData.Add(posKeys);
         }
 
@@ -616,9 +633,10 @@ namespace AquaModelLibrary.Core.General
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
-            Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            var postProcessSteps = GetPostProcessSteps(true);
 
-            float baseScale = SetAssimpScale(aiScene);
+            Assimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
+            double baseScale = SetAssimpScale(aiScene);
 
             PRM prm = new PRM();
 
@@ -626,19 +644,19 @@ namespace AquaModelLibrary.Core.General
 
             //Iterate through and combine meshes. PRMs can only have a single mesh
             var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
-            parentMatrix.M41 *= baseScale;
-            parentMatrix.M42 *= baseScale;
-            parentMatrix.M43 *= baseScale;
+            parentMatrix.M41 = (float)(parentMatrix.M41 * baseScale);
+            parentMatrix.M42 = (float)(parentMatrix.M42 * baseScale);
+            parentMatrix.M43 = (float)(parentMatrix.M43 * baseScale);
             IterateAiNodesPRM(prm, ref totalVerts, aiScene, aiScene.RootNode, parentMatrix, baseScale);
             File.WriteAllBytes(finalFilePath, prm.GetBytes(4));
         }
 
-        private static void IterateAiNodesPRM(PRM prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, float baseScale)
+        private static void IterateAiNodesPRM(PRM prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, double baseScale)
         {
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(node.Transform));
-            nodeMat.M41 *= baseScale;
-            nodeMat.M42 *= baseScale;
-            nodeMat.M43 *= baseScale;
+            nodeMat.M41 = (float)(nodeMat.M41 * baseScale);
+            nodeMat.M42 = (float)(nodeMat.M42 * baseScale);
+            nodeMat.M43 = (float)(nodeMat.M43 * baseScale);
             nodeMat = Matrix4x4.Multiply(nodeMat, parentTfm);
 
             foreach (int meshId in node.MeshIndices)
@@ -653,14 +671,14 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void AddAiMeshToPRM(PRM prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat, float baseScale)
+        private static void AddAiMeshToPRM(PRM prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat, double baseScale)
         {
             //Convert vertices
             for (int vertId = 0; vertId < aiMesh.VertexCount; vertId++)
             {
                 PRM.PRMVert vert = new PRM.PRMVert();
                 var aiPos = aiMesh.Vertices[vertId];
-                var newPos = new Vector3(aiPos.X, aiPos.Y, aiPos.Z) * baseScale;
+                var newPos = new Vector3((float)(aiPos.X * baseScale), (float)(aiPos.Y * baseScale), (float)(aiPos.Z * baseScale));
                 vert.pos = (Vector3.Transform(newPos, nodeMat));
 
                 if (aiMesh.HasVertexColors(0))
@@ -718,13 +736,14 @@ namespace AquaModelLibrary.Core.General
         }
 
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
-        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true)
+        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true, bool preTransformVerts = false)
         {
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
-            Assimp.Scene aiScene = context.ImportFile(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            var postProcessSteps = GetPostProcessSteps(preTransformVerts);
 
-            float baseScale = SetAssimpScale(aiScene);
+            Assimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
+            double baseScale = SetAssimpScale(aiScene);
 
             AquaObject aqp = new AquaObject();
             aqn = new AquaNode();
@@ -785,9 +804,9 @@ namespace AquaModelLibrary.Core.General
             BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict, useNameNodeNum);
 
             var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
-            parentMatrix.M41 *= baseScale;
-            parentMatrix.M42 *= baseScale;
-            parentMatrix.M43 *= baseScale;
+            parentMatrix.M41 = (float)(parentMatrix.M41 * baseScale);
+            parentMatrix.M42 = (float)(parentMatrix.M42 * baseScale);
+            parentMatrix.M43 = (float)(parentMatrix.M43 * baseScale);
             IterateAiNodesAQP(aqp, aqn, aiScene, aiScene.RootNode, parentMatrix, baseScale, boneDict);
 
             //Generate bonepalette. No real reason not to just put in every bone at the moment.
@@ -805,21 +824,16 @@ namespace AquaModelLibrary.Core.General
             return aqp;
         }
 
-        public static float SetAssimpScale(Assimp.Scene aiScene)
-        {
-            float baseScale = 1;
+        public static double SetAssimpScale(Assimp.Scene aiScene)
+        { 
+            double baseScale = 1;
             switch (scaleHandling)
             {
                 case ScaleHandling.CustomScale:
-                    baseScale = (float)(1 / customScale);
+                    baseScale = (baseScale / customScale);
                     break;
                 case ScaleHandling.FileScaling:
-                    double unitScaleFactor = 1;
-                    if (aiScene.Metadata.ContainsKey("UnitScaleFactor"))
-                    {
-                        unitScaleFactor = (double)aiScene.Metadata["UnitScaleFactor"].Data;
-                    }
-                    baseScale = (float)(1.0 / unitScaleFactor);
+                    //Handled through GlobalScale PostProcessStep now
                     break;
                 case ScaleHandling.NoScaling:
                 default:
@@ -891,7 +905,7 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, Assimp.Scene aiScene, Assimp.Node aiNode, Matrix4x4 parentTfm, float baseScale, Dictionary<string, int> boneDict)
+        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, Assimp.Scene aiScene, Assimp.Node aiNode, Matrix4x4 parentTfm, double baseScale, Dictionary<string, int> boneDict)
         {
             //Decide if this is an effect node or not
             string nodeName = aiNode.Name;
@@ -972,8 +986,11 @@ namespace AquaModelLibrary.Core.General
                 node.m1 = new Vector4(worldMatInv.M11, worldMatInv.M12, worldMatInv.M13, worldMatInv.M14);
                 node.m2 = new Vector4(worldMatInv.M21, worldMatInv.M22, worldMatInv.M23, worldMatInv.M24);
                 node.m3 = new Vector4(worldMatInv.M31, worldMatInv.M32, worldMatInv.M33, worldMatInv.M34);
-                node.m4 = new Vector4(worldMatInv.M41 * baseScale, worldMatInv.M42 * baseScale, worldMatInv.M43 * baseScale, worldMatInv.M44);
-                node.pos = localMat.Translation * baseScale;
+                node.m4 = new Vector4((float)(worldMatInv.M41 * baseScale), (float)(worldMatInv.M42 * baseScale), (float)(worldMatInv.M43 * baseScale), worldMatInv.M44);
+                node.pos = localMat.Translation;
+                node.pos.X = (float)(node.pos.X * baseScale);
+                node.pos.Y = (float)(node.pos.Y * baseScale);
+                node.pos.Z = (float)(node.pos.Z * baseScale);
                 node.eulRot = MathExtras.QuaternionToEuler(Quaternion.CreateFromRotationMatrix(localMat));
                 node.scale = new Vector3(1, 1, 1); //This is a bit of a weird thing
 
@@ -1020,9 +1037,9 @@ namespace AquaModelLibrary.Core.General
             }
 
             Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform));
-            nodeMat.M41 *= baseScale;
-            nodeMat.M42 *= baseScale;
-            nodeMat.M43 *= baseScale;
+            nodeMat.M41 *= (float)(nodeMat.M41 * baseScale);
+            nodeMat.M42 *= (float)(nodeMat.M42 * baseScale);
+            nodeMat.M43 *= (float)(nodeMat.M43 * baseScale);
             nodeMat = Matrix4x4.Multiply(nodeMat, parentTfm);
 
             foreach (int meshId in aiNode.MeshIndices)
@@ -1037,7 +1054,7 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, float baseScale, Dictionary<string, int> boneDict)
+        private static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, double baseScale, Dictionary<string, int> boneDict)
         {
             GenericTriangles genTris = new GenericTriangles();
             genTris.name = mesh.Name;
@@ -1069,7 +1086,7 @@ namespace AquaModelLibrary.Core.General
                     faceVtxl.rawVertId.Add(v);
                     var vertPos = new Vector3(mesh.Vertices[v].X, mesh.Vertices[v].Y, mesh.Vertices[v].Z);
                     vertPos = Vector3.Transform(vertPos, nodeMat);
-                    vertPos = new Vector3(vertPos.X * baseScale, vertPos.Y * baseScale, vertPos.Z * baseScale);
+                    vertPos = new Vector3((float)(vertPos.X * baseScale), (float)(vertPos.Y * baseScale), (float)(vertPos.Z * baseScale));
                     faceVtxl.vertPositions.Add(vertPos);
                     if (mesh.HasNormals)
                     {
