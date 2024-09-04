@@ -4,11 +4,14 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 {
     public class CRBRMesh
     {
+        public CRBRNode nextCRBRNode = null;
+        public CRBRMesh nextCRBRMesh = null;
+
         public CRBRMeshData meshData = null;
         public CRBRMaterialData matData = null;
 
-        public int int_00;
-        public int int_04;
+        public int nextCRBRNodeOffset;
+        public int nextCRBRMeshOffset;
         public int materialDataOffset;
         public int meshDataOffset;
 
@@ -16,21 +19,22 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         
         public CRBRMesh(BufferedStreamReaderBE<MemoryStream> sr, int offset, CRBRModel model)
         {
-            int_00 = sr.ReadBE<int>();
-            int_04 = sr.ReadBE<int>();
+            nextCRBRNodeOffset = sr.ReadBE<int>();
+            nextCRBRMeshOffset = sr.ReadBE<int>();
             materialDataOffset = sr.ReadBE<int>();
             meshDataOffset = sr.ReadBE<int>();
 
-#if DEBUG
-            if(int_00 != 0)
+            if(nextCRBRNodeOffset != 0)
             {
-                throw new NotImplementedException();
+                sr.Seek(nextCRBRNodeOffset + offset, SeekOrigin.Begin);
+                nextCRBRNode = new CRBRNode(sr, offset, model);
             }
-            if (int_04 != 0)
+
+            if (nextCRBRMeshOffset != 0)
             {
-                throw new NotImplementedException();
+                sr.Seek(nextCRBRMeshOffset + offset, SeekOrigin.Begin);
+                nextCRBRMesh = new CRBRMesh(sr, offset, model);
             }
-#endif
 
             if (materialDataOffset != 0)
             {

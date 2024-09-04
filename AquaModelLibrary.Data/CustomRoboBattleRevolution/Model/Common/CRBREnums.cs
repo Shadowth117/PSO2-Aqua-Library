@@ -2,6 +2,10 @@
 {
     public enum CRBRVertexType : int
     {
+        /// <summary>
+        /// No idea what the None here exists for, but it shows up sometimes
+        /// </summary>
+        None = 0x0,
         Position = 0x9,
         Normal = 0xA,
         Color = 0xB,

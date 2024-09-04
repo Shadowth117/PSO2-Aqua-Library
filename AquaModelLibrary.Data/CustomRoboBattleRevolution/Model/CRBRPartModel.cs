@@ -31,7 +31,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
             Header = new CRBRPartModelHeader(sr);
             sr.Seek(Header.modelDataListOffset + Header.offset, SeekOrigin.Begin);
 
-            for(int i = 0; i < Header.modelDataListCount; i++)
+            for(int i = 0; i < 1; i++)
             {
                 var bookmark = sr.Position;
                 modelDataList.Add(new CRBRModelDataSet(sr, Header.offset, this));

@@ -100,6 +100,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                                 indexFlags |= GCIndexAttributeFlags.UV2_16BitIndex;
                             }
                             break;
+                        case CRBRVertexType.None:
                         case CRBRVertexType.End:
                             break;
                         default:
@@ -107,7 +108,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                     }
 
                     vertDefinitions.Add(vd);
-                } while ((int)dataType > 0 && (int)dataType < 0xFF);
+                } while ((int)dataType < 0xFF);
             }
 
             if (primitiveSetsOffset != 0)

@@ -40,10 +40,6 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
             {
                 throw new NotImplementedException();
             }
-            if (int_14 != 0)
-            {
-                throw new NotImplementedException();
-            }
 #endif 
             if(textureInfoOffset != 0)
             {
