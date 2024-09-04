@@ -641,7 +641,7 @@ namespace AquaModelLibrary.Core.BillyHatcher
                 }
                 else if (Path.GetExtension(file) == ".fbx")
                 {
-                    var aqp = AssimpModelImporter.AssimpAquaConvertFull(file, 1, true, true, out var aqn, false);
+                    var aqp = AssimpModelImporter.AssimpAquaConvertFull(file, 1, true, true, out var aqn, false, true);
                     AquaObject nightAqp = null;
                     AquaMotion aqm = null;
                     AquaNode placementAqn = null;
@@ -725,7 +725,7 @@ namespace AquaModelLibrary.Core.BillyHatcher
             List<ModelData> animModels = new List<ModelData>();
 
             //Get texture lists;
-            lnd.texnames = lnd.gvm.Entries.Select(e => e.Name).ToList();
+            lnd.texnames = lnd.gvm.Entries.Select(e => Path.GetFileNameWithoutExtension(e.Name)).ToList();
 
             //Get model data
             foreach (var mdl in modelData)
@@ -969,6 +969,10 @@ namespace AquaModelLibrary.Core.BillyHatcher
                 ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();
                 var texName = Path.GetFileNameWithoutExtension(mdl.aqp.texfList[tset.tstaTexIDs[0]].texName.GetString());
                 matEntry.TextureId = texNames.IndexOf(texName);
+                if(matEntry.TextureId == -1)
+                {
+                    matEntry.TextureId = 0;
+                }
                 ARCLNDMaterialEntryRef matRef = new ARCLNDMaterialEntryRef();
                 matRef.extraDataEnabled = 1;
 
