@@ -2,8 +2,8 @@
 {
     public class MainSetting
     {
-        public string BBPS4BonePath = "";
-        public string customScaleSelection = "0";
-        public string customScaleValue = "1.0";
+        public string BBPS4BonePath { get; set; } = "";
+        public string customScaleSelection { get; set; } = "0";
+        public string customScaleValue { get; set; } = "1.0";
     }
 }

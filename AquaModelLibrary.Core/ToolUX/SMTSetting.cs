@@ -5,15 +5,15 @@ namespace AquaModelLibrary.Core.ToolUX
 {
     public class SMTSetting
     {
-        public bool useMetaData = true;
-        public bool applyMaterialNamesToMesh = false;
-        public bool transformMesh = true;
-        public bool extractUnreferencedMapData = true;
-        public bool separateMSBDumpByModel = true;
-        public bool doNotAdjustRootRotation = false;
-        public SoulsGame soulsGame = SoulsGame.None;
-        public ExportFormat exportFormat = ExportFormat.Fbx;
-        public MirrorType mirrorType = MirrorType.Z;
-        public CoordSystem coordSystem = CoordSystem.Max;
+        public bool useMetaData { get; set; } = true;
+        public bool applyMaterialNamesToMesh { get; set; } = false;
+        public bool transformMesh { get; set; } = true;
+        public bool extractUnreferencedMapData { get; set; } = true;
+        public bool separateMSBDumpByModel { get; set; } = true;
+        public bool doNotAdjustRootRotation { get; set; } = false;
+        public SoulsGame soulsGame { get; set; } = SoulsGame.None;
+        public ExportFormat exportFormat { get; set; } = ExportFormat.Fbx;
+        public MirrorType mirrorType { get; set; } = MirrorType.Z;
+        public CoordSystem coordSystem { get; set; } = CoordSystem.Max;
     }
 }
