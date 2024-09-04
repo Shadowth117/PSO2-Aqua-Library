@@ -126,10 +126,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public static MC2 ConvertToMC2(string initialFilePath)
         {
             MC2 mc2 = new MC2();
-            var scene = AssimpModelImporter.GetAssimpScene(initialFilePath, Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs);
+            var scene = AssimpModelImporter.GetAssimpScene(initialFilePath, AssimpModelImporter.GetPostProcessSteps(preTransformVertices: true));
             var baseScale = AssimpModelImporter.SetAssimpScale(scene);
 
-            Vector3 rootBoxMinExtents = new Vector3(scene.Meshes[0].Vertices[0].X, scene.Meshes[0].Vertices[0].Y, scene.Meshes[0].Vertices[0].Z) * baseScale;
+            Vector3 rootBoxMinExtents = new Vector3((float)(scene.Meshes[0].Vertices[0].X * baseScale), (float)(scene.Meshes[0].Vertices[0].Y * baseScale), (float)(scene.Meshes[0].Vertices[0].Z * baseScale));
             Vector3 rootBoxMaxExtents = rootBoxMinExtents;
             for (int i = 0; i < scene.MeshCount; i++)
             {
@@ -138,12 +138,19 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 for (int v = 0; v < mesh.VertexCount; v++)
                 {
-                    var vert = mesh.Vertices[v] * baseScale;
-
+                    var vert = mesh.Vertices[v];
+                    vert.X = (float)(vert.X * baseScale);
+                    vert.Y = (float)(vert.Y * baseScale);
+                    vert.Z = (float)(vert.Z * baseScale);
+                    
                     //Min extents
                     if (rootBoxMinExtents.X > vert.X)
                     {
                         rootBoxMinExtents.X = vert.X;
+                    }
+                    if (rootBoxMinExtents.Y > vert.Y)
+                    {
+                        rootBoxMinExtents.Y = vert.Y;
                     }
                     if (rootBoxMinExtents.Z > vert.Z)
                     {
@@ -154,6 +161,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     if (rootBoxMaxExtents.X < vert.X)
                     {
                         rootBoxMaxExtents.X = vert.X;
+                    }
+                    if (rootBoxMaxExtents.Y < vert.Y)
+                    {
+                        rootBoxMaxExtents.Y = vert.Y;
                     }
                     if (rootBoxMaxExtents.Z < vert.Z)
                     {
