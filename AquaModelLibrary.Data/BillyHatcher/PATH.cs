@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
+using static AquaModelLibrary.Data.BillyHatcher.MC2;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -14,7 +15,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public List<List<float>> lengthsListList = new List<List<float>>();
         public List<PathInfo> pathInfoList = new List<PathInfo>();
         public List<VertDefinition> vertDefinitions = new List<VertDefinition>();
-        public List<PathDefinition> pathDefinitions = new List<PathDefinition>();
+        public List<PathSector> pathSectors = new List<PathSector>();
         public List<RawPathDefinition> rawPathDefinitions = new List<RawPathDefinition>();
 
         public PATH() { }
@@ -99,17 +100,17 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr.Seek(pathHeader.pathOffset + 0x8, SeekOrigin.Begin);
             for (int i = 0; i < pathHeader.pathCount; i++)
             {
-                PathDefinition pathDef = new PathDefinition();
-                pathDef.unkShort0 = sr.ReadBE<ushort>();
+                PathSector pathDef = new PathSector();
+                pathDef.isFinalSubdivision = sr.ReadBE<ushort>();
                 pathDef.usesRawPathOffset = sr.ReadBE<ushort>();
                 pathDef.rawPathOffset = sr.ReadBE<int>();
-                pathDef.minBounding = sr.ReadBEV2();
-                pathDef.maxBounding = sr.ReadBEV2();
-                pathDef.index0 = sr.ReadBE<ushort>();
-                pathDef.index1 = sr.ReadBE<ushort>();
-                pathDef.index2 = sr.ReadBE<ushort>();
-                pathDef.index3 = sr.ReadBE<ushort>();
-                pathDefinitions.Add(pathDef);
+                pathDef.xRange = sr.ReadBEV2();
+                pathDef.zRange = sr.ReadBEV2();
+                pathDef.childId0 = sr.ReadBE<ushort>();
+                pathDef.childId1 = sr.ReadBE<ushort>();
+                pathDef.childId2 = sr.ReadBE<ushort>();
+                pathDef.childId3 = sr.ReadBE<ushort>();
+                pathSectors.Add(pathDef);
             }
 
             sr.Seek(pathHeader.rawPathOffset + 0x8, SeekOrigin.Begin);
@@ -158,27 +159,60 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public List<Vector3> vertNormals = new List<Vector3>();
         }
 
-        public struct PathDefinition
-        {
-            public ushort unkShort0;
-            public ushort usesRawPathOffset;
-            public int rawPathOffset; // Divide by 0x8 for index
-            public Vector2 minBounding;
-            public Vector2 maxBounding;
-
-            //If usesOffset is 0, indices are here
-            public ushort index0;
-            public ushort index1;
-            public ushort index2;
-            public ushort index3;
-        }
-
         public struct RawPathDefinition
         {
             public ushort unkShort0;
             public ushort vertSet;
             public ushort startVert;
             public ushort endVert;
+        }
+
+        /// <summary>
+        /// A Path Sector is a quadtree box within the Path.
+        /// 
+        /// This is a representation of the four boxes that can be subdivided within this one.
+        /// Boxes are always separated horizontally so Y/Vertical values remain constant.
+        ///   
+        /// ---------------------------------------
+        /// |                  |                  |
+        /// |                  |                  |
+        /// |                  |                  |
+        /// |    ChildBox1     |    ChildBox3     |
+        /// |                  |                  |
+        /// |                  |                  |
+        /// |                  |                  |
+        /// | ------------------------------------| 
+        /// |                  |                  |
+        /// |                  |                  |
+        /// |                  |                  |
+        /// |     ChildBox0    |    ChildBox2     |
+        /// |                  |                  |
+        /// |                  |                  |
+        /// |                  |                  |
+        /// ---------------------------------------
+        /// </summary>
+
+        public class PathSector
+        {
+            /// <summary>
+            /// If true, sector does not subdivide further
+            /// </summary>
+            public ushort isFinalSubdivision;
+            public ushort usesRawPathOffset;
+            public int rawPathOffset; // Divide by 0x8 for index
+            public Vector2 xRange;
+            public Vector2 zRange;
+
+            //If usesOffset is 0, indices are here
+            public ushort childId0;
+            public ushort childId1;
+            public ushort childId2;
+            public ushort childId3;
+            public PathSector childSector0;
+            public PathSector childSector1;
+            public PathSector childSector2;
+            public PathSector childSector3;
+            public int depth = -1;
         }
     }
 }
