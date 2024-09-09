@@ -433,15 +433,20 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return;
     }
     
-    FbxNode* CreateFbxNodeFromAqnNode(NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex, bool includeMetadata)
+    FbxNode* CreateFbxNodeFromAqnNode(NODE node, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex, bool includeMetadata, AquaNode^ aqn)
     {
         const char* name;
+        System::String^ boneName = node.boneName.GetString();
+        if (aqn->nodeUnicodeNames->Count > boneIndex)
+        {
+            boneName = aqn->nodeUnicodeNames[boneIndex];
+        }
         if (includeMetadata)
         {
-            name = Utf8String(String::Format("(" + boneIndex + ")" + node.boneName.GetString() + "#" + node.boneShort1.ToString("X") + "#" + node.boneShort2.ToString("X"))).ToCStr();
+            name = Utf8String(String::Format("(" + boneIndex + ")" + boneName + "#" + node.boneShort1.ToString("X") + "#" + node.boneShort2.ToString("X"))).ToCStr();
         }
         else {
-            name = Utf8String(node.boneName.GetString()).ToCStr();
+            name = Utf8String(boneName).ToCStr();
         }
         FbxNode* lNode = FbxNode::Create(lScene, name);
 
@@ -472,15 +477,20 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lNode;
     }
 
-    FbxNode* CreateFbxNodeFromAqnNodo(NODO nodo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, bool includeMetadata)
+    FbxNode* CreateFbxNodeFromAqnNodo(NODO nodo, const Matrix4x4& inverseParentTransformation, FbxScene* lScene, FbxPose* lBindPose, int boneIndex, bool includeMetadata, AquaNode^ aqn)
     {
         const char* name;
+        System::String^ boneName = nodo.boneName.GetString();
+        if (aqn->nodoUnicodeNames->Count > boneIndex)
+        {
+            boneName = aqn->nodoUnicodeNames[boneIndex];
+        }
         if (includeMetadata)
         {
-            name = Utf8String(nodo.boneName.GetString() + "#" + nodo.boneShort1.ToString("X") + "#" + nodo.boneShort2.ToString("X")).ToCStr();
+            name = Utf8String(boneName + "#" + nodo.boneShort1.ToString("X") + "#" + nodo.boneShort2.ToString("X")).ToCStr();
         }
         else {
-            name = Utf8String(nodo.boneName.GetString()).ToCStr();
+            name = Utf8String(boneName).ToCStr();
         }
         FbxNode* lNode = FbxNode::Create(lScene, name);
 
@@ -724,7 +734,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             name = Utf8String(node0.boneName.GetString()).ToCStr();
         }
 
-        FbxNode* lSkeletonNode = CreateFbxNodeFromAqnNode(node0, Matrix4x4::Identity, lScene, lBindPose, 0, includeMetadata);
+        FbxNode* lSkeletonNode = CreateFbxNodeFromAqnNode(node0, Matrix4x4::Identity, lScene, lBindPose, 0, includeMetadata, aqn);
         convertedBones->Add(IntPtr(lSkeletonNode));
 
         FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
@@ -749,7 +759,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             else {
                 parentInvTfm = Matrix4x4::Identity;
             }
-            FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose, i, includeMetadata);
+            FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose, i, includeMetadata, aqn);
 
             convertedBones->Add(IntPtr(fbxNode));
         }
@@ -790,7 +800,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 parentInvTfm = Matrix4x4::Identity;
             }
             
-            FbxNode* fbxNode = CreateFbxNodeFromAqnNodo(nodo, parentInvTfm, lScene, lBindPose, includeMetadata);
+            FbxNode* fbxNode = CreateFbxNodeFromAqnNodo(nodo, parentInvTfm, lScene, lBindPose, i, includeMetadata, aqn);
             parentNode->AddChild(fbxNode);
         }
 
@@ -881,7 +891,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 name = Utf8String(node0.boneName.GetString()).ToCStr();
             }
 
-            FbxNode* lSkeletonNode = CreateFbxNodeFromAqnNode(node0, Matrix4x4::Identity, lScene, lBindPose, 0, includeMetadata);
+            FbxNode* lSkeletonNode = CreateFbxNodeFromAqnNode(node0, Matrix4x4::Identity, lScene, lBindPose, 0, includeMetadata, aqn);
             convertedBones->Add(IntPtr(lSkeletonNode));
 
             FbxSkeleton* lSkeleton = FbxSkeleton::Create(lScene, name);
@@ -908,7 +918,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 else {
                     parentInvTfm = Matrix4x4::Identity;
                 }
-                FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose, i, includeMetadata);
+                FbxNode* fbxNode = CreateFbxNodeFromAqnNode(node, parentInvTfm, lScene, lBindPose, i, includeMetadata, aqn);
                 if (parentFbxNode != nullptr)
                 {
                     parentFbxNode->AddChild(fbxNode);
@@ -934,7 +944,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                     parentInvTfm = Matrix4x4::Identity;
                 }
 
-                FbxNode* fbxNode = CreateFbxNodeFromAqnNodo(nodo, parentInvTfm, lScene, lBindPose, includeMetadata);
+                FbxNode* fbxNode = CreateFbxNodeFromAqnNodo(nodo, parentInvTfm, lScene, lBindPose, i, includeMetadata, aqn);
                 parentNode->AddChild(fbxNode);
             }
 

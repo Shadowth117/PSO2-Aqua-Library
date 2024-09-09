@@ -795,7 +795,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
                 aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
                 aqNode.boneName.SetString(flverBone.Name);
-                //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
+                aqn.nodeUnicodeNames.Add(flverBone.Name);
                 aqn.nodeList.Add(aqNode);
             }
             Vector3? maxBounding = null;

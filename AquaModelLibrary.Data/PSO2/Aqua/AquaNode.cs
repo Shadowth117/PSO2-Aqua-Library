@@ -15,8 +15,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     public unsafe class AquaNode : AquaCommon
     {
         public NDTR ndtr = new NDTR();
+        
         public List<NODE> nodeList = new List<NODE>();
         public List<NODO> nodoList = new List<NODO>();
+
+        //Extra
+        public List<string> nodeUnicodeNames = new List<string>();
+        public List<string> nodoUnicodeNames = new List<string>();
 
         public override string[] GetEnvelopeTypes()
         {
