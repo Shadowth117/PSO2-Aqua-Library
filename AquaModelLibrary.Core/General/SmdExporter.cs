@@ -17,11 +17,21 @@ namespace AquaModelLibrary.Core.General
             sb.AppendLine("nodes");
             for (int i = 0; i < aqn.nodeList.Count; i++)
             {
-                sb.AppendLine($"{i} \"{aqn.nodeList[i].boneName.GetString()}\" {aqn.nodeList[i].parentId}");
+                string name = aqn.nodeList[i].boneName.GetString();
+                if(aqn.nodeUnicodeNames.Count > i)
+                {
+                    name = aqn.nodeUnicodeNames[i];
+                }
+                sb.AppendLine($"{i} \"{name}\" {aqn.nodeList[i].parentId}");
             }
             for (int i = 0; i < aqn.nodoList.Count; i++)
             {
-                sb.AppendLine($"{i + aqn.nodeList.Count} \"{aqn.nodoList[i].boneName.GetString()}\" {aqn.nodoList[i].parentId}");
+                string name = aqn.nodoList[i].boneName.GetString();
+                if (aqn.nodoUnicodeNames.Count > i)
+                {
+                    name = aqn.nodoUnicodeNames[i];
+                }
+                sb.AppendLine($"{i + aqn.nodeList.Count} \"{name}\" {aqn.nodoList[i].parentId}");
             }
             sb.AppendLine("end");
             sb.AppendLine("skeleton");
