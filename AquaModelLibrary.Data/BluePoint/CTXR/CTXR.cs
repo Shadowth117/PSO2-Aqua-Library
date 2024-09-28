@@ -811,7 +811,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         public long GetDeSwizzleSize(long dataLength, DXGIFormat pixelFormat, int width, int height, out int deSwizzWidth, out int deSwizzHeight)
         {
-            DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var a, out var b, out var formatBpp);
+            DeSwizzler.GetsourceBytesPerPixelSetAndPixelSize(pixelFormat, out var sourceBytePerPixelSet, out var pixelBlockSize, out var formatBpp);
             if (((width * height * formatBpp) / 8) < dataLength)
             {
                 if (width > height)
