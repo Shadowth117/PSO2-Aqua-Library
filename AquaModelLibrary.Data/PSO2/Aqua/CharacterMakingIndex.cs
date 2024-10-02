@@ -445,6 +445,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     face.face2.unkInt0 = BitConverter.ToInt16(bytes, 2);
                     face.face2.unkInt1 = 0;
                 }
+                if (rel0DataStart >= CMXConstants.oct124TableAddressInt)
+                {
+                    face.unkOct12024Int = streamReader.Read<int>();
+                }
                 if (rel0DataStart > CMXConstants.dec14_21TableAddressInt)
                 {
                     face.unkFloatRitem = streamReader.Read<float>();

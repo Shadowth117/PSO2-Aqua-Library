@@ -7,6 +7,8 @@
         public static string db_vehicle = "vehicle/";
 
         //Indexing
+        public static string fieldPlayerObjectSettingsIce = "fpobject/fpobject_data_setting.ice";
+        public static string fieldPlayerObjectSettingsFpo = "fpobject_object_setting.fpo";
         public static string mySpaceBaseSettingsIce = "myspace/myspace_base_setting.ice";
         public static string mySpaceBaseSettingsMsb = "myspace_base_setting.msb";
         public static string mySpaceObjectSettingsIce = "myspace/myspace_data_setting.ice";

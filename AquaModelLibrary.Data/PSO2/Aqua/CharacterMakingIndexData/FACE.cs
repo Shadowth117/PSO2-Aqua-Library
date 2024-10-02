@@ -8,6 +8,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public FACE face;
         public FACERitem faceRitem;
         public FACE2 face2;
+        public int unkOct12024Int;
         public float unkFloatRitem;
         public int unkVer2Int;
 

@@ -5,6 +5,7 @@ using AquaModelLibrary.Helpers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -306,9 +307,9 @@ namespace AquaModelLibrary.Data.Utility
             List<Dictionary<string, string>> strNameDicts;
             List<string> genAnimList, genAnimListNGS;
 
-            GenerateUILists(pso2_binDir, outputDirectory, imageDirectory);
-            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat);
             GenerateCharacterPartLists(pso2_binDir, playerDirOut, playerClassicDirOut, playerRebootDirOut, aquaCMX, faceIds, textByCat, out masterIdList, out nameDicts, out masterNameList, out strNameDicts);
+            GenerateUILists(pso2_binDir, outputDirectory, imageDirectory);
+            GenerateObjectLists(pso2_binDir, outputDirectory, objectCommonByCat, actorNameByCat, uiMyRoomByCat, textByCat);
             GenerateLobbyActionLists(pso2_binDir, playerCAnimDirOut, playerRAnimDirOut, lac, rebootLac, lacTruePath, lacTruePathReboot, commByCat, commRebootByCat, masterNameList, strNameDicts);
             GenerateVoiceLists(pso2_binDir, playerDirOut, npcDirOut, textByCat, masterIdList, nameDicts, masterNameList, strNameDicts, actorNameByCat, actorNameRebootByCat, actorNameRebootNPCByCat);
             GenerateWeaponLists(pso2_binDir, outputDirectory);
@@ -319,7 +320,7 @@ namespace AquaModelLibrary.Data.Utility
             GenerateVehicle_SpecialWeaponList(playerDirOut, playerCAnimDirOut, playerRAnimDirOut, genAnimList, genAnimListNGS);
             GeneratePetList(petsDirOut);
             GenerateEnemyDataList(pso2_binDir, enemyDirOut, actorNameRebootByCat, out masterNameList, out strNameDicts);
-            GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat);
+            GenerateRoomLists(pso2_binDir, outputDirectory, uiMyRoomByCat, textByCat);
             GenerateAreaData(pso2_binDir, stageDirOut);
             DumpPaletteData(outputDirectory, aquaCMX);
             GenerateMusicData(pso2_binDir, musicDirOut);
@@ -337,7 +338,7 @@ namespace AquaModelLibrary.Data.Utility
             return str;
         }
 
-        private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.TextPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> uiRoomByCat)
+        private static void GenerateObjectLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.TextPair>>> objectCommonByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> actorNameByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> uiRoomByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat)
         {
             string objectOutDir = Path.Combine(outputDirectory, "Objects");
             Directory.CreateDirectory(objectOutDir);
@@ -366,6 +367,10 @@ namespace AquaModelLibrary.Data.Utility
             {
                 GatherTextIdsStringRef(objectCommonByCat, masterNameList, commonDict, objNamesConst, true);
             }
+
+            List<Dictionary<string, string>> roomFpDict = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(textByCat, masterNameList, roomFpDict, "mysmaterial", true);
+            GatherTextIdsStringRef(textByCat, masterNameList, roomFpDict, "fpobject", true);
 
             //Classic objects
             string scriptsPath = Path.Combine(pso2_binDir, dataDir, GetFileHash(classicScripts));
@@ -402,48 +407,57 @@ namespace AquaModelLibrary.Data.Utility
                         classicObjectsList.Add(obj + ",,\n");
                         obj = "";
                     }
-                    if (ObjectNames.classicObjectNames.ContainsKey(str))
-                    {
-                        obj += ObjectNames.classicObjectNames[str] + ",";
-                    }
-                    else
-                    {
-                        string jpName = "";
-                        string enName = "";
+                    string jpName = "";
+                    string enName = "";
 
-                        //Check room dictionary
-                        if (roomDict?.Count > 0)
+                    if(classicObjectNames.ContainsKey(str))
+                    {
+                        var name = classicObjectNames[str].Split(',');
+                        jpName = name[0];
+                        enName = name[1];
+                    }
+
+                    //Check room dictionary
+                    if (roomDict?.Count > 0)
+                    {
+                        if (roomDict?[0].ContainsKey(str) == true)
                         {
-                            if (roomDict?[0].ContainsKey(str) == true)
+                            jpName = roomDict[0][str];
+                        }
+                        if (roomDict?.Count > 1)
+                        {
+                            if (roomDict?[1].ContainsKey(str) == true)
                             {
-                                jpName = roomDict[0][str];
-                            }
-                            if (roomDict?.Count > 1)
-                            {
-                                if (roomDict?[1].ContainsKey(str) == true)
-                                {
-                                    enName = roomDict[1][str];
-                                }
+                                enName = roomDict[1][str];
                             }
                         }
+                    }
 
-                        //Check actor dictionary
-                        if (actorDict?.Count > 0)
+                    if (jpName == "" && roomFpDict[0].ContainsKey(str))
+                    {
+                        jpName = roomFpDict[0][str];
+                    }
+                    if (enName == "" && roomFpDict[1].ContainsKey(str))
+                    {
+                        enName = roomFpDict[1][str];
+                    }
+
+                    //Check actor dictionary
+                    if (actorDict?.Count > 0)
+                    {
+                        if (actorDict?[0].ContainsKey(str) == true)
                         {
-                            if (actorDict?[0].ContainsKey(str) == true)
+                            jpName = actorDict[0][str];
+                        }
+                        if (actorDict?.Count > 1)
+                        {
+                            if (actorDict?[1].ContainsKey(str) == true)
                             {
-                                jpName = actorDict[0][str];
-                            }
-                            if (actorDict?.Count > 1)
-                            {
-                                if (actorDict?[1].ContainsKey(str) == true)
-                                {
-                                    enName = actorDict[1][str];
-                                }
+                                enName = actorDict[1][str];
                             }
                         }
-                        obj += $"{Escape(jpName)},{Escape(enName)},";
                     }
+                    obj += $"{Escape(jpName)},{Escape(enName)},";
                     obj += $"{str},";
 
                     var modelFile = $"object/map_object/{str}.ice";
@@ -492,32 +506,42 @@ namespace AquaModelLibrary.Data.Utility
                         classicObjectsList.Add(obj + ",,\n");
                         obj = "";
                     }
-                    if (ObjectNames.classicObjectNames.ContainsKey(str))
-                    {
-                        obj += ObjectNames.classicObjectNames[str] + ",";
-                    }
-                    else
-                    {
-                        string jpName = "";
-                        string enName = "";
+                    string jpName = "";
+                    string enName = "";
 
-                        //Check actor dictionary
-                        if (actorDict?.Count > 0)
+                    if (classicObjectNames.ContainsKey(str))
+                    {
+                        var name = classicObjectNames[str].Split(',');
+                        jpName = name[0];
+                        enName = name[1];
+                    }
+
+                    if (roomFpDict[0].ContainsKey(str))
+                    {
+                        jpName = roomFpDict[0][str];
+                    }
+                    if (roomFpDict[1].ContainsKey(str))
+                    {
+                        enName = roomFpDict[1][str];
+                    }
+
+                    //Check actor dictionary
+                    if (actorDict?.Count > 0)
+                    {
+                        if (actorDict?[0].ContainsKey(str) == true)
                         {
-                            if (actorDict?[0].ContainsKey(str) == true)
+                            jpName = actorDict[0][str];
+                        }
+                        if (actorDict?.Count > 1)
+                        {
+                            if (actorDict?[1].ContainsKey(str) == true)
                             {
-                                jpName = actorDict[0][str];
-                            }
-                            if (actorDict?.Count > 1)
-                            {
-                                if (actorDict?[1].ContainsKey(str) == true)
-                                {
-                                    enName = actorDict[1][str];
-                                }
+                                enName = actorDict[1][str];
                             }
                         }
-                        obj += $"{Escape(jpName)},{Escape(enName)},";
                     }
+                    obj += $"{Escape(jpName)},{Escape(enName)},";
+                    
                     obj += $"{str},";
 
                     var modelFile = $"object/map_object/{str}.ice";
@@ -722,11 +746,67 @@ namespace AquaModelLibrary.Data.Utility
                         }
                     }
 
+                    if (jpName == "" && roomFpDict[0].ContainsKey(objName))
+                    {
+                        jpName = roomFpDict[0][objName];
+                    }
+                    if (enName == "" && roomFpDict[1].ContainsKey(objName))
+                    {
+                        enName = roomFpDict[1][objName];
+                    }
+
                     rbObjectsList.Add($"{jpName},{enName},{objName},{detail},{objLOD1},{objLOD1Hash},{objLOD2},{objLOD2Hash},{objLOD3},{objLOD3Hash},{objLOD4},{objLOD4Hash},{coll},{collHash},{common},{commonHash},{effect},{effHash},{seasonListing}");
                 }
 
                 rbObjectsList.Insert(0, "Object Name JP,Object Name EN,Object ID,Object Detail,Object LOD1,Object LOD1 Hash,Object LOD2,Object LOD2 Hash,Object LOD3,Object LOD3 Hash,Object LOD4,Object LOD4 Hash,Object Collision,Object Collision Hash,Object Common,Object Common Hash,Object Effect,Object Effect Hash,Seasonal Object Swaps");
                 WriteCSV(objectOutDir, $"NGSObjects.csv", rbObjectsList);
+            }
+
+            //Field Player Objects
+            string fieldObjPath = Path.Combine(pso2_binDir, dataReboot, GetRebootHash(GetFileHash(fieldPlayerObjectSettingsIce)));
+            if (File.Exists(fieldObjPath))
+            {
+                var iceFile = IceFile.LoadIceFile(new MemoryStream(File.ReadAllBytes(fieldObjPath)));
+                List<byte[]> files = new List<byte[]>();
+                files.AddRange(iceFile.groupOneFiles);
+                files.AddRange(iceFile.groupTwoFiles);
+
+                for (int i = 0; i < files.Count; i++)
+                {
+                    var name = IceFile.getFileName(files[i]);
+                    if (name == fieldPlayerObjectSettingsFpo)
+                    {
+                        var fpo = new FieldPlayerObject(files[i]);
+                        List<string> fpoInfo = new List<string>();
+                        fpoInfo.Add("JP Name,Global Name,Internal Name,ID,Filename,Hash Filename");
+                        foreach (var entry in fpo.fpoEntries)
+                        {
+                            var objFile1 = $"object/map_object/{entry.asciiName}.ice";
+
+                            var objFile1Hash = GetRebootHash(GetFileHash(objFile1));
+
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
+                            {
+                                objFile1Hash = "";
+                            }
+                            string JPobjName = "";
+                            if (roomFpDict[0].ContainsKey(entry.asciiName))
+                            {
+                                JPobjName = roomFpDict[0][entry.asciiName];
+                            }
+                            string NAobjName = "";
+                            if (roomFpDict[1].ContainsKey(entry.asciiName))
+                            {
+                                NAobjName = roomFpDict[1][entry.asciiName];
+                            }
+
+                            string entryString = $"{JPobjName},{NAobjName},{entry.asciiName},{entry.fpoEntry.id},{objFile1},{objFile1Hash}";
+
+                            fpoInfo.Add(entryString);
+                        }
+                        WriteCSV(objectOutDir, "Portable Holograms.csv", fpoInfo);
+                    }
+                }
             }
         }
 
@@ -1942,11 +2022,15 @@ namespace AquaModelLibrary.Data.Utility
             File.WriteAllLines(Path.Combine(unitOutDir, "Units.csv"), aoxOut);
         }
 
-        private static void GenerateRoomLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.TextPair>>> uiRoomByCat)
+        private static void GenerateRoomLists(string pso2_binDir, string outputDirectory, Dictionary<string, List<List<PSO2Text.TextPair>>> uiRoomByCat, Dictionary<string, List<List<PSO2Text.TextPair>>> textByCat)
         {
             List<string> masterNameList = new List<string>();
             List<Dictionary<string, string>> textDict = new List<Dictionary<string, string>>();
             GatherTextIdsStringRef(uiRoomByCat, masterNameList, textDict, "Room", true);
+
+            List<Dictionary<string, string>> roomDict = new List<Dictionary<string, string>>();
+            GatherTextIdsStringRef(textByCat, masterNameList, roomDict, "mysmaterial", true);
+            GatherTextIdsStringRef(textByCat, masterNameList, roomDict, "fpobject", true);
 
             List<string> roomsOut = new List<string>();
             List<string> roomGoodsOut = new List<string>();
@@ -1966,6 +2050,7 @@ namespace AquaModelLibrary.Data.Utility
                     foreach (var good in rg.roomGoodsList)
                     {
                         //Id appears to be 1 less than what it actually should reference
+                        string objName = $"ob_1000_{good.goods.id + 1:D4}";
                         string obj = $"object/map_object/ob_1000_{good.goods.id + 1:D4}.ice";
                         string objHash = GetFileHash(obj);
                         string objEx = $"object/map_object/ob_1000_{good.goods.id + 1:D4}_ex.ice";
@@ -1975,8 +2060,26 @@ namespace AquaModelLibrary.Data.Utility
 
                         if (File.Exists(objFile))
                         {
-                            string goodsName = roomGoodsNames.ContainsKey(obj) ? roomGoodsNames[obj] : ",";
-                            string output = goodsName + $",{good.functionString},{good.motionType},{good.categoryString},{good.categoryString2}," + obj + "," + objHash;
+                            string JPobjName = "";
+                            if (roomDict[0].ContainsKey(objName))
+                            {
+                                JPobjName = roomDict[0][objName];
+                            }
+                            string NAobjName = "";
+                            if (roomDict[1].ContainsKey(objName))
+                            {
+                                NAobjName = roomDict[1][objName];
+                            }
+                            if(JPobjName == "" && roomGoodsNames.ContainsKey(objName))
+                            {
+                                JPobjName = roomGoodsNames[objName].Split(',')[0];
+                            }
+                            if(NAobjName == "" && roomGoodsNames.ContainsKey(objName))
+                            {
+                                NAobjName = roomGoodsNames[objName].Split(',')[1];
+                            }
+
+                            string output = $"{JPobjName},{NAobjName},{good.functionString},{good.motionType},{good.categoryString},{good.categoryString2}," + obj + "," + objHash;
                             if (File.Exists(objFileEx))
                             {
                                 output += "," + objExHash;
@@ -2059,7 +2162,7 @@ namespace AquaModelLibrary.Data.Utility
                     {
                         var mso = new MySpaceObjectsSettings(files[i]);
                         List<string> msoInfo = new List<string>();
-                        msoInfo.Add("Name,LOD1,LOD1 Hash,LOD2,LOD2 Hash,LOD3,LOD3 Hash,LOD4,LOD4 Hash,Collision,Common (Animation, if existant),Effect,Trait 1,Trait 2,Trait 3,Trait 4,Trait 5,Trait 6,Trait 7,Trait 8,Null Hashes indicate unfound files");
+                        msoInfo.Add("JP Object Name,Global Object Name,Internal Name,LOD1,LOD1 Hash,LOD2,LOD2 Hash,LOD3,LOD3 Hash,LOD4,LOD4 Hash,Collision,Common (Animation, if existant),Effect,Trait 1,Trait 2,Trait 3,Trait 4,Trait 5,Trait 6,Trait 7,Trait 8,Null Hashes indicate unfound files");
                         foreach (var entry in mso.msoEntries)
                         {
                             var objFile1 = $"object/map_object/{entry.asciiName}_l1.ice";
@@ -2106,8 +2209,18 @@ namespace AquaModelLibrary.Data.Utility
                             {
                                 objFileEffHash = "";
                             }
+                            string JPobjName = "";
+                            if (roomDict[0].ContainsKey(entry.asciiName))
+                            {
+                                JPobjName = roomDict[0][entry.asciiName];
+                            }
+                            string NAobjName = "";
+                            if (roomDict[1].ContainsKey(entry.asciiName))
+                            {
+                                NAobjName = roomDict[1][entry.asciiName];
+                            }
 
-                            string entryString = $"{entry.asciiName},{objFile1},{objFile1Hash},{objFile2},{objFile2Hash},{objFile3},{objFile3Hash},{objFile4},{objFile4Hash},{objFileCol},{objFileColHash},{objFileCom},{objFileComHash},{objFileEff},{objFileEffHash}" +
+                            string entryString = $"{JPobjName},{NAobjName},{entry.asciiName},{objFile1},{objFile1Hash},{objFile2},{objFile2Hash},{objFile3},{objFile3Hash},{objFile4},{objFile4Hash},{objFileCol},{objFileColHash},{objFileCom},{objFileComHash},{objFileEff},{objFileEffHash}" +
                                 $",[{entry.asciiTrait1.Replace(',', '_')}],[{entry.asciiTrait2.Replace(',', '_')}],[{entry.asciiTrait3.Replace(',', '_')}],[{entry.asciiTrait4.Replace(',', '_')}],[{entry.asciiTrait5.Replace(',', '_')}]" +
                                 $",[{entry.asciiTrait6.Replace(',', '_')}],[{entry.asciiTrait7.Replace(',', '_')}],[{entry.asciiTrait8.Replace(',', '_')}]";
 
