@@ -9,6 +9,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public FACERitem faceRitem;
         public FACE2 face2;
         public int unkOct12024Int;
+        public FACE2Split face2Split;
         public float unkFloatRitem;
         public int unkVer2Int;
 
@@ -37,7 +38,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 
             //0x77 seemingly isn't parsed
             //0x78 seemingly isn't parsed
-            face2.unkInt5 = VTBFMethods.GetObject<int>(faceRaw[0], 0x79);
+            face2Split.unkInt5 = VTBFMethods.GetObject<int>(faceRaw[0], 0x79);
         }
     }
 
@@ -68,6 +69,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public int unkInt3;
 
         public int unkInt4;
+    }
+
+    public struct FACE2Split
+    {
         public float unkFloat0;
         public float unkFloat1;
         public float unkFloat2;

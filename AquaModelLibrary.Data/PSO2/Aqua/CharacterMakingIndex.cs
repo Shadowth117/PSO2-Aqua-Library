@@ -429,11 +429,16 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 face.num = i;
                 face.originalOffset = streamReader.Position;
                 face.face = streamReader.Read<FACE>();
+                if (rel0DataStart >= CMXConstants.oct124TableAddressInt)
+                {
+                    face.unkOct12024Int = streamReader.Read<int>();
+                }
                 if (rel0DataStart > CMXConstants.dec14_21TableAddressInt)
                 {
                     face.faceRitem = streamReader.Read<FACERitem>();
                 }
                 face.face2 = streamReader.Read<FACE2>();
+                face.face2Split = streamReader.Read<FACE2Split>();
 
                 //Handle backwards compatibility
                 if (rel0DataStart < CMXConstants.dec14_21TableAddressInt)
@@ -444,10 +449,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     face.faceRitem.unkIntRT1 = BitConverter.ToInt16(bytes, 0);
                     face.face2.unkInt0 = BitConverter.ToInt16(bytes, 2);
                     face.face2.unkInt1 = 0;
-                }
-                if (rel0DataStart >= CMXConstants.oct124TableAddressInt)
-                {
-                    face.unkOct12024Int = streamReader.Read<int>();
                 }
                 if (rel0DataStart > CMXConstants.dec14_21TableAddressInt)
                 {
@@ -1861,6 +1862,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             outBytes.AddRange(DataHelpers.ConvertStruct(face.face));
             if (mode >= 1)
             {
+                outBytes.AddRange(DataHelpers.ConvertStruct(face.unkOct12024Int));
                 outBytes.AddRange(DataHelpers.ConvertStruct(face.faceRitem));
             }
             var face2Temp = face.face2;
@@ -1872,6 +1874,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 face2Temp.unkInt1 = face.faceRitem.unkIntRT1 + (face.face2.unkInt0 * 0x10000);
             }
             outBytes.AddRange(DataHelpers.ConvertStruct(face2Temp));
+            if (mode >= 1)
+            {
+                outBytes.AddRange(BitConverter.GetBytes(face.unkOct12024Int));
+            }
+            outBytes.AddRange(DataHelpers.ConvertStruct(face.face2Split));
             if (mode >= 1)
             {
                 outBytes.AddRange(BitConverter.GetBytes(face.unkFloatRitem));
