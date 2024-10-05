@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja.Model.Ginja;
+using AquaModelLibrary.Data.Ninja.Model.XJ;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Helpers.Extensions;
@@ -124,7 +125,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                     mesh = attachOffset > 0 ? new GinjaAttach(sr, be, offset) : null;
                     break;
                 case NinjaVariant.XJ:
-                    throw new NotImplementedException();
+                    mesh = attachOffset > 0 ? new XJAttach(sr, be, offset) : null;
                     break;
             }
 

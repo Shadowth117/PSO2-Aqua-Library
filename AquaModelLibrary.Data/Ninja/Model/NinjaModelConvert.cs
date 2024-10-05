@@ -14,6 +14,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
             return ModelConvert(File.ReadAllBytes(fileName), NinjaVariant.Ginja, out aqn);
         }
 
+        public static AquaObject XjConvert(string fileName, out AquaNode aqn, List<string> texNames = null)
+        {
+            return ModelConvert(File.ReadAllBytes(fileName), NinjaVariant.XJ, out aqn);
+        }
+
         public static AquaObject ModelConvert(byte[] ninjaModel, NinjaVariant variant, out AquaNode aqn, int offset = 0, List<string> texNames = null)
         {
             using (var ms = new MemoryStream(ninjaModel))
@@ -43,6 +48,21 @@ namespace AquaModelLibrary.Data.Ninja.Model
                     offset += 8;
                     sr.Seek(8, SeekOrigin.Current);
                     break;
+                case NJMagic.NJTL:
+                    var njtlStart = sr.Position;
+                    sr.Seek(0x4, SeekOrigin.Current);
+                    var size = sr.Read<int>();
+                    var njtl = new NJTextureList(sr, offset + 8);
+                    texNames = njtl.texNames;
+                    sr.Seek(njtlStart + size + 0x8, SeekOrigin.Begin);
+                    offset += size + 0x8;
+
+                    //Add POF0 size
+                    sr.Seek(0x4, SeekOrigin.Current);
+                    var pofSize = sr.Read<int>();
+                    sr.Seek(pofSize, SeekOrigin.Current);
+                    offset += 0x8 + pofSize;
+                    return ModelConvert(sr, variant, out aqn, offset, texNames);
                 default:
                     //Assume there's no 8 byte ninja header
                     break;

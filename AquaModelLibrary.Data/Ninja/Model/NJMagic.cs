@@ -5,5 +5,6 @@
         GJCM = 0x4D434A47,
         NJBM = 0x4D424A4E,
         NJCM = 0x4D434A4E,
+        NJTL = 0x4C544A4E
     }
 }
