@@ -1,4 +1,6 @@
-﻿namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
+﻿using AquaModelLibrary.Data.Gamecube;
+
+namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 {
     public struct CRBRVertexDefinition
     {
@@ -6,17 +8,15 @@
         /// <summary>
         /// 2 for 8 bit, 3 for 16 bit index
         /// </summary>
-        public int size;
+        public int indexSize;
         /// <summary>
         /// 1 for position and UVs, 0 for others
         /// </summary>
         public int int_08;
-        /// <summary>
-        /// Always 4?
-        /// </summary>
-        public int int_0C;
+        public GCDataType dataFormat;
 
-        public int strideInBytes;
+        public short sht_10;
+        public short strideInBytes;
         public int dataOffset;
     }
 }

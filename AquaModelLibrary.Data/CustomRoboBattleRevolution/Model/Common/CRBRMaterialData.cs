@@ -8,6 +8,8 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         public List<CRBRTextureInfo> textureList = new List<CRBRTextureInfo>();
         public CRBRMaterialColorData matColor = new CRBRMaterialColorData();
 
+        public long matAddress;
+
         public int int_00;
         /// <summary>
         /// NOT an offset
@@ -23,6 +25,8 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 
         public CRBRMaterialData(BufferedStreamReaderBE<MemoryStream> sr, int offset, CRBRModel model)
         {
+            matAddress = sr.Position;
+
             int_00 = sr.ReadBE<int>();
             unkValue = sr.ReadBE<int>();
             textureInfoOffset = sr.ReadBE<int>();

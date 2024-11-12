@@ -1,4 +1,7 @@
 ﻿using AquaModelLibrary.Data.Gamecube;
+using AquaModelLibrary.Data.PSO2.Aqua;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -57,45 +60,46 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 {
                     CRBRVertexDefinition vd = new CRBRVertexDefinition();
                     dataType = vd.dataType = sr.ReadBE<CRBRVertexType>();
-                    vd.size = sr.ReadBE<int>();
+                    vd.indexSize = sr.ReadBE<int>();
                     vd.int_08 = sr.ReadBE<int>();
-                    vd.int_0C = sr.ReadBE<int>();
-                    vd.strideInBytes = sr.ReadBE<int>();
+                    vd.dataFormat = sr.ReadBE<GCDataType>();
+                    vd.sht_10 = sr.ReadBE<short>();
+                    vd.strideInBytes = sr.ReadBE<short>();
                     vd.dataOffset = sr.ReadBE<int>();
 
                     switch (dataType)
                     {
                         case CRBRVertexType.Position:
                             indexFlags |= GCIndexAttributeFlags.HasPosition;
-                            if (vd.size == 3)
+                            if (vd.indexSize == 3)
                             {
                                 indexFlags |= GCIndexAttributeFlags.Position16BitIndex;
                             }
                             break;
                         case CRBRVertexType.Normal:
                             indexFlags |= GCIndexAttributeFlags.HasNormal;
-                            if (vd.size == 3)
+                            if (vd.indexSize == 3)
                             {
                                 indexFlags |= GCIndexAttributeFlags.Normal16BitIndex;
                             }
                             break;
                         case CRBRVertexType.Color:
                             indexFlags |= GCIndexAttributeFlags.HasColor;
-                            if (vd.size == 3)
+                            if (vd.indexSize == 3)
                             {
                                 indexFlags |= GCIndexAttributeFlags.Color16BitIndex;
                             }
                             break;
                         case CRBRVertexType.UV1:
                             indexFlags |= GCIndexAttributeFlags.HasUV;
-                            if (vd.size == 3)
+                            if (vd.indexSize == 3)
                             {
                                 indexFlags |= GCIndexAttributeFlags.UV16BitIndex;
                             }
                             break;
                         case CRBRVertexType.UV2:
                             indexFlags |= GCIndexAttributeFlags.HasUV2;
-                            if (vd.size == 3)
+                            if (vd.indexSize == 3)
                             {
                                 indexFlags |= GCIndexAttributeFlags.UV2_16BitIndex;
                             }
@@ -120,7 +124,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 int uv0Count = 0;
                 int uv1Count = 0;
 
-                for (int i = 0; i > maxPrimitiveCount; i++)
+                for (int i = 0; i < maxPrimitiveCount; i++)
                 {
                     var primPeek = sr.Peek<byte>();
                     if (primPeek == 0)
@@ -150,13 +154,13 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                         case CRBRVertexType.Position:
                             for(int i = 0; i < posCount; i++)
                             {
-                                vertPositions.Add(sr.ReadBEV3());
+                                vertPositions.Add(ReadPositionV3(sr, vd.dataFormat));
                             }
                             break;
                         case CRBRVertexType.Normal:
                             for (int i = 0; i < nrmCount; i++)
                             {
-                                vertNormals.Add(sr.ReadBEV3());
+                                vertNormals.Add(ReadNormalV3(sr, vd.dataFormat));
                             }
                             break;
                         case CRBRVertexType.Color:
@@ -181,5 +185,162 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 }
             }
         }
+
+        public Vector3 ReadPositionV3(BufferedStreamReaderBE<MemoryStream> sr, GCDataType type)
+        {
+            switch (type)
+            {
+                case GCDataType.Signed16:
+                    return new Vector3(sr.ReadBE<short>() / (float)0x2000, sr.ReadBE<short>() / (float)0x2000, sr.ReadBE<short>() / (float)0x2000);
+                case GCDataType.Float32:
+                    return sr.ReadBEV3();
+                default:
+                    throw new Exception();
+            }
+        }
+        public Vector3 ReadNormalV3(BufferedStreamReaderBE<MemoryStream> sr, GCDataType type)
+        {
+            switch(type)
+            {
+                case GCDataType.Signed16:
+                    return new Vector3(sr.ReadBE<short>() / (float)0x4000, sr.ReadBE<short>() / (float)0x4000, sr.ReadBE<short>() / (float)0x4000);
+                case GCDataType.Float32:
+                    return sr.ReadBEV3();
+                default:
+                    throw new Exception();
+            }
+        }
+        public Vector2 ReadUVV2(BufferedStreamReaderBE<MemoryStream> sr, GCDataType type)
+        {
+            switch (type)
+            {
+                case GCDataType.Signed16:
+                    return new Vector2(sr.ReadBE<short>() / (float)0x4000, sr.ReadBE<short>() / (float)0x4000);
+                case GCDataType.Float32:
+                    return sr.ReadBEV2();
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public void GatherVertexData(int nodeId, VTXL vtxl, Matrix4x4 transform)
+        {
+            if (vertPositions.Count > 0)
+            {
+                for(int i = 0; i < vertPositions.Count; i++)
+                {
+                    vtxl.vertPositions.Add(Vector3.Transform(vertPositions[i], transform));
+                    vtxl.vertWeightIndices.Add(new int[] { nodeId, 0, 0, 0 });
+                    vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
+                }
+            }
+            if (vertNormals.Count > 0)
+            {
+                for (int i = 0; i < vertNormals.Count; i++)
+                {
+                    vtxl.vertNormals.Add(Vector3.TransformNormal(vertNormals[i], transform));
+                }
+            }
+            if (vertColors.Count > 0)
+            {
+                vtxl.vertColors.AddRange(vertColors);
+            }
+            if (vertUV1s.Count > 0)
+            {
+                vtxl.uv1List.AddRange(vertUV1s);
+            }
+            if (vertUV2s.Count > 0)
+            {
+                vtxl.uv2List.AddRange(vertUV2s);
+            }
+
+        }
+
+        /// <summary>
+        /// Takes in the mesh's parent node id, a vtxl containing vertex data, an AquaObject to store it in, an index for this mesh within this node's meshes, and a material index
+        /// Most Gamecube models optimize vertex lists per data type and so faces must contain a reference to each of these optimized lists.
+        /// e.g. A model with vert position data, normal data, color data, and uv1 data would need 4 indices per triangle vertex, with 12 total indices for that triangle.
+        /// 
+        /// Since most modern vertex data expects these to by synced up, we recreate these vertices here, taking care not to store the inevitable duplicate vertex data.
+        /// </summary>
+        public void GetFaceData(int nodeId, VTXL tempVtxl, AquaObject aqo, int meshCounter, int materialId)
+        {
+            //Set up mesh
+            GenericTriangles mesh = new GenericTriangles();
+            Dictionary<string, int> vertTracker = new Dictionary<string, int>();
+            mesh.triList = new List<Vector3>();
+            mesh.name = $"Mesh_{nodeId}_{meshCounter}";
+            aqo.meshNames.Add(mesh.name);
+            int f = 0;
+            foreach (var triData in gcPrimitives)
+            {
+                var tris = triData.ToTriangles();
+                for (int index = 0; index < tris.Count - 2; index += 3)
+                {
+                    VTXL faceVtxl = new VTXL();
+                    faceVtxl.rawFaceId.Add(f);
+                    faceVtxl.rawFaceId.Add(f);
+                    faceVtxl.rawFaceId.Add(f++);
+
+                    var x = AddGCVert(tempVtxl, tris[index + 2], faceVtxl, mesh, vertTracker);
+                    var y = AddGCVert(tempVtxl, tris[index + 1], faceVtxl, mesh, vertTracker);
+                    var z = AddGCVert(tempVtxl, tris[index + 0], faceVtxl, mesh, vertTracker);
+                    mesh.triList.Add(new Vector3(x, y, z));
+                    faceVtxl.rawVertId.Add(x);
+                    faceVtxl.rawVertId.Add(y);
+                    faceVtxl.rawVertId.Add(z);
+                    mesh.matIdList.Add(materialId);
+
+                    mesh.faceVerts.Add(faceVtxl);
+                }
+            }
+
+            aqo.tempTris.Add(mesh);
+        }
+
+        private int AddGCVert(VTXL sourceVtxl, Loop loop, VTXL faceVtxl, GenericTriangles mesh, Dictionary<string, int> vertTracker)
+        {
+            string vertId = "";
+            if (sourceVtxl.vertPositions.Count > 0)
+            {
+                faceVtxl.vertPositions.Add(sourceVtxl.vertPositions[loop.PositionIndex]);
+                vertId += ((int)GCIndexAttributeFlags.HasPosition).ToString() + loop.PositionIndex;
+
+                faceVtxl.vertWeightIndices.Add((int[])sourceVtxl.vertWeightIndices[loop.PositionIndex].Clone());
+                faceVtxl.vertWeights.Add(sourceVtxl.vertWeights[loop.PositionIndex]);
+            }
+            if (sourceVtxl.vertNormals.Count > 0)
+            {
+                faceVtxl.vertNormals.Add(sourceVtxl.vertNormals[loop.NormalIndex]);
+                vertId += ((int)GCIndexAttributeFlags.HasNormal).ToString() + loop.NormalIndex;
+            }
+            if (sourceVtxl.vertColors.Count > 0)
+            {
+                faceVtxl.vertColors.Add((byte[])sourceVtxl.vertColors[loop.Color0Index].Clone());
+                vertId += ((int)GCIndexAttributeFlags.HasColor).ToString() + loop.Color0Index;
+            }
+            if (sourceVtxl.uv1List.Count > 0)
+            {
+                faceVtxl.uv1List.Add(sourceVtxl.uv1List[loop.UV0Index]);
+                vertId += ((int)GCIndexAttributeFlags.HasUV).ToString() + loop.UV0Index;
+            }
+            if (sourceVtxl.uv2List.Count > 0)
+            {
+                faceVtxl.uv2List.Add(sourceVtxl.uv2List[loop.UV1Index]);
+                vertId += ((int)GCIndexAttributeFlags.HasUV).ToString() + loop.UV1Index;
+            }
+
+
+            if (vertTracker.ContainsKey(vertId))
+            {
+                return vertTracker[vertId];
+            }
+            else
+            {
+                vertTracker.Add(vertId, mesh.vertCount);
+                return mesh.vertCount++;
+            }
+        }
+
     }
 }

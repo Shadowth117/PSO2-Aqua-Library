@@ -156,7 +156,7 @@ namespace AquaModelLibrary.Data.Gamecube
                 }
 
                 // reading uv2s
-                if (has_uv)
+                if (has_uv2)
                 {
                     if (uv16bit)
                     {

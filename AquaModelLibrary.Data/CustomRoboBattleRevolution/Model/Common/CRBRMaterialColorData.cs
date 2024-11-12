@@ -10,15 +10,15 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         /// <summary>
         /// Ambient?
         /// </summary>
-        public int ambientColor;
+        public byte[] ambientColor;
         /// <summary>
         /// Diffuse?
         /// </summary>
-        public int diffuseColor;
+        public byte[] diffuseColor;
         /// <summary>
         /// Specular?
         /// </summary>
-        public int specularColor;
+        public byte[] specularColor;
         /// <summary>
         /// Maybe opacity?
         /// </summary>
@@ -32,9 +32,9 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
 
         public CRBRMaterialColorData(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            ambientColor = sr.ReadBE<int>();
-            diffuseColor = sr.ReadBE<int>();
-            specularColor = sr.ReadBE<int>();
+            ambientColor = sr.Read4Bytes();
+            diffuseColor = sr.Read4Bytes();
+            specularColor = sr.Read4Bytes();
             unkFloat0 = sr.ReadBE<float>();
             unkFloat1 = sr.ReadBE<float>();
         }
