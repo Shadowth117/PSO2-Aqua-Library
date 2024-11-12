@@ -57,7 +57,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             njHeader = sr.Read<NinjaHeader>();
-            sr._BEReadActive = sr.Peek<int>() > sr.PeekBigEndianInt32();
+            sr._BEReadActive = sr.Peek<uint>() > sr.PeekBigEndianUInt32();
 
             MC2Header header = new MC2Header();
             header.vertPositionsOffset = sr.ReadBE<int>();
