@@ -26,7 +26,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL.CMDLBasic
             magic = sr.Read<int>();
             version = sr.ReadBE<int>(true);
             var triOffset = sr.ReadBE<int>(true);
-            var masterCollection = sr._BEReadActive = sr.Peek<int>() > sr.ReadBE<int>(true);
+            var masterCollection = sr._BEReadActive = sr.Peek<uint>() > sr.ReadBE<uint>(true);
 
             //From here, we read based on endianness. 
             //All little endian versions of these are 64 bit while all big endian versions are conveniently 32bit.
