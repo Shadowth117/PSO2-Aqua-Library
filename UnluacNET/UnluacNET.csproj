@@ -1,157 +1,33 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ED5D3E22-804B-4BAA-BD7F-F47F19804CF8}</ProjectGuid>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnluacNET</RootNamespace>
-    <AssemblyName>UnluacNET</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyTitle>Unluac .NET</AssemblyTitle>
+    <Description>Lua 5.1 decompiler based on %27unluac%27 by tehtmi.</Description>
+    <Product>Unluac .NET</Product>
+    <Copyright>Copyright © 2014 Mark Ludwig, tehtmi</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\Debug\UnluacNET.xml</DocumentationFile>
     <NoWarn>1591, 0659</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>bin\Release\UnluacNET.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Decompile\Block\AlwaysLoop.cs" />
-    <Compile Include="Decompile\Block\Block.cs" />
-    <Compile Include="Decompile\Block\BooleanIndicator.cs" />
-    <Compile Include="Decompile\Block\Break.cs" />
-    <Compile Include="Decompile\Block\CompareBlock.cs" />
-    <Compile Include="Decompile\Block\DoEndBlock.cs" />
-    <Compile Include="Decompile\Block\ElseEndBlock.cs" />
-    <Compile Include="Decompile\Block\ForBlock.cs" />
-    <Compile Include="Decompile\Block\IfThenElseBlock.cs" />
-    <Compile Include="Decompile\Block\IfThenEndBlock.cs" />
-    <Compile Include="Decompile\Block\OuterBlock.cs" />
-    <Compile Include="Decompile\Block\RepeatBlock.cs" />
-    <Compile Include="Decompile\Block\SetBlock.cs" />
-    <Compile Include="Decompile\Block\TForBlock.cs" />
-    <Compile Include="Decompile\Block\WhileBlock.cs" />
-    <Compile Include="Decompile\Branch\AndBranch.cs" />
-    <Compile Include="Decompile\Branch\AssignNode.cs" />
-    <Compile Include="Decompile\Branch\Branch.cs" />
-    <Compile Include="Decompile\Branch\EQNode.cs" />
-    <Compile Include="Decompile\Branch\LENode.cs" />
-    <Compile Include="Decompile\Branch\LTNode.cs" />
-    <Compile Include="Decompile\Branch\NotBranch.cs" />
-    <Compile Include="Decompile\Branch\OrBranch.cs" />
-    <Compile Include="Decompile\Branch\TestNode.cs" />
-    <Compile Include="Decompile\Branch\TestSetNode.cs" />
-    <Compile Include="Decompile\Branch\TrueNode.cs" />
-    <Compile Include="Decompile\Code.cs" />
-    <Compile Include="Decompile\Constant.cs" />
-    <Compile Include="Decompile\Declaration.cs" />
-    <Compile Include="Decompile\Decompiler.cs" />
-    <Compile Include="Decompile\Expression\BinaryExpression.cs" />
-    <Compile Include="Decompile\Expression\ClosureExpression.cs" />
-    <Compile Include="Decompile\Expression\ConstantExpression.cs" />
-    <Compile Include="Decompile\Expression\Expression.cs" />
-    <Compile Include="Decompile\Expression\FunctionCall.cs" />
-    <Compile Include="Decompile\Expression\GlobalExpression.cs" />
-    <Compile Include="Decompile\Expression\LocalVariable.cs" />
-    <Compile Include="Decompile\Expression\TableLiteral.cs" />
-    <Compile Include="Decompile\Expression\TableReference.cs" />
-    <Compile Include="Decompile\Expression\UnaryExpression.cs" />
-    <Compile Include="Decompile\Expression\UpvalueExpression.cs" />
-    <Compile Include="Decompile\Expression\Vararg.cs" />
-    <Compile Include="Decompile\Function.cs" />
-    <Compile Include="Decompile\Op.cs" />
-    <Compile Include="Decompile\OpcodeFormat.cs" />
-    <Compile Include="Decompile\OpcodeMap.cs" />
-    <Compile Include="Decompile\Operation\CallOperation.cs" />
-    <Compile Include="Decompile\Operation\GlobalSet.cs" />
-    <Compile Include="Decompile\Operation\Operation.cs" />
-    <Compile Include="Decompile\Operation\RegisterSet.cs" />
-    <Compile Include="Decompile\Operation\ReturnOperation.cs" />
-    <Compile Include="Decompile\Operation\TableSet.cs" />
-    <Compile Include="Decompile\Operation\UpvalueSet.cs" />
-    <Compile Include="Decompile\Output.cs" />
-    <Compile Include="Decompile\Registers.cs" />
-    <Compile Include="Decompile\Statement\Assignment.cs" />
-    <Compile Include="Decompile\Statement\Declare.cs" />
-    <Compile Include="Decompile\Statement\FunctionCallStatement.cs" />
-    <Compile Include="Decompile\Statement\Return.cs" />
-    <Compile Include="Decompile\Statement\Statement.cs" />
-    <Compile Include="Decompile\Target\GlobalTarget.cs" />
-    <Compile Include="Decompile\Target\TableTarget.cs" />
-    <Compile Include="Decompile\Target\Target.cs" />
-    <Compile Include="Decompile\Target\UpvalueTarget.cs" />
-    <Compile Include="Decompile\Target\VariableTarget.cs" />
-    <Compile Include="Decompile\Upvalues.cs" />
-    <Compile Include="Extensions\StreamExtensions.cs" />
-    <Compile Include="Parse\BHeader.cs" />
-    <Compile Include="Parse\BInteger.cs" />
-    <Compile Include="Parse\BIntegerType.cs" />
-    <Compile Include="Parse\BList.cs" />
-    <Compile Include="Parse\BObject.cs" />
-    <Compile Include="Parse\BObjectType.cs" />
-    <Compile Include="Parse\BSizeT.cs" />
-    <Compile Include="Parse\BSizeTType.cs" />
-    <Compile Include="Parse\LBoolean.cs" />
-    <Compile Include="Parse\LBooleanType.cs" />
-    <Compile Include="Parse\LConstantType.cs" />
-    <Compile Include="Parse\LFunction.cs" />
-    <Compile Include="Parse\LFunctionType.cs" />
-    <Compile Include="Parse\LLocal.cs" />
-    <Compile Include="Parse\LLocalType.cs" />
-    <Compile Include="Parse\LNil.cs" />
-    <Compile Include="Parse\LNumber.cs" />
-    <Compile Include="Parse\LNumberType.cs" />
-    <Compile Include="Parse\LObject.cs" />
-    <Compile Include="Parse\LSourceLines.cs" />
-    <Compile Include="Parse\LString.cs" />
-    <Compile Include="Parse\LStringType.cs" />
-    <Compile Include="Parse\LUpvalue.cs" />
-    <Compile Include="Parse\LUpvalueType.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Version.cs" />
+    <Compile Remove="Test\Unluac\Program.cs" />
+    <Compile Remove="Test\Unluac\Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
