@@ -1,14 +1,14 @@
-Unknown
-Title Screen - Day
+Multiplayer Dino Mountain, Blizzard Castle, Circus Park, Sand Ruin, 
+Forest/Title Screen - Day
 Pirates Island - Day
 Dino Mountain - Day
 Blizzard Castle - Day
 Circus Park - Day
-Unknown
+Sand Ruin Underground - Day
 Giant Palace - Day
 Unknown
 Unknown
-Forest - Night
+Forest/Title Screen - Night
 Pirates Island - Night
 Dino Mountain - Night
 Blizzard Castle - Night
@@ -18,3 +18,105 @@ Giant Palace - Night
 Unknown
 Unknown
 Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Sand Ruin - Day
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Unknown
+Multiplayer Forest 1, 2, Pirates Island, Giant Palace
