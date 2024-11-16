@@ -163,6 +163,14 @@ namespace AquaModelLibrary.Helpers.Extensions
             return ptrLocation;
         }
 
+        public static void AddValue(this List<byte> outBytes, byte[] value)
+        {
+            foreach(var val in value)
+            {
+                outBytes.Add(val);
+            }
+        }
+
         public static void AddValue(this List<byte> outBytes, Vector2 value)
         {
             outBytes.AddValue(value.X);
