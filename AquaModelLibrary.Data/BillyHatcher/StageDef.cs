@@ -278,6 +278,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             ByteListExtension.AddAsBigEndian = true;
             outBytes.AddValue((ushort)defs.Count);
             outBytes.AddValue((ushort)0);
+            offsets.Add(outBytes.Count);
             outBytes.AddValue((int)8);
             for (int i = 0; i < defs.Count; i++)
             {
