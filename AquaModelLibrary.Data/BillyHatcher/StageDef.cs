@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;
@@ -13,6 +14,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public int defOffset;
         public List<StageDefinition> defs = new List<StageDefinition>();
         public Dictionary<string, StageDefinition> defsDict = new Dictionary<string, StageDefinition>();
+        /// <summary>
+        /// A special StageCommonData that defines the fields for the others in the file.
+        /// </summary>
         public StageCommonData definition = null;
         /// <summary>
         /// Due to the nature of these, it's more efficient to store with the offset as the key 
@@ -269,17 +273,206 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public byte[] GetBytes()
         {
-            var outbytes = new List<byte>();
+            List<int> offsets = new List<int>();
+            var outBytes = new List<byte>();
+            ByteListExtension.AddAsBigEndian = true;
+            outBytes.AddValue((ushort)defs.Count);
+            outBytes.AddValue((ushort)0);
+            outBytes.AddValue((int)8);
             for (int i = 0; i < defs.Count; i++)
             {
+                var def = defs[i];
 
+                offsets.Add(outBytes.Count);
+                offsets.Add(outBytes.Count + 0x4);
+                offsets.Add(outBytes.Count + 0x8);
+                offsets.Add(outBytes.Count + 0xC);
+
+                offsets.Add(outBytes.Count + 0x10);
+                offsets.Add(outBytes.Count + 0x14);
+                offsets.Add(outBytes.Count + 0x18);
+                offsets.Add(outBytes.Count + 0x1C);
+
+                offsets.Add(outBytes.Count + 0x20);
+                offsets.Add(outBytes.Count + 0x24);
+                offsets.Add(outBytes.Count + 0x28);
+                offsets.Add(outBytes.Count + 0x2C);
+
+                offsets.Add(outBytes.Count + 0x30);
+                offsets.Add(outBytes.Count + 0x34);
+                offsets.Add(outBytes.Count + 0x38);
+
+                outBytes.ReserveInt($"{i}MissionName");
+                outBytes.ReserveInt($"{i}CommonData");
+                outBytes.ReserveInt($"{i}WorldName");
+                outBytes.ReserveInt($"{i}MissionType");
+
+                outBytes.ReserveInt($"{i}LndName");
+                outBytes.ReserveInt($"{i}BspName");
+                outBytes.ReserveInt($"{i}Mc2Name");
+                outBytes.ReserveInt($"{i}SetObjName");
+
+                outBytes.ReserveInt($"{i}SetEnemyName");
+                outBytes.ReserveInt($"{i}SetCameraName");
+                outBytes.ReserveInt($"{i}SetDesignName");
+                outBytes.ReserveInt($"{i}PathName");
+
+                outBytes.ReserveInt($"{i}EventCameraName");
+                outBytes.ReserveInt($"{i}MessageName");
+                outBytes.ReserveInt($"{i}EventName");
+
+                outBytes.AddValue(def.player1Start.playerPosition);
+                outBytes.AddValue(def.player1Start.rotation);
+                outBytes.AddValue(def.player2Start.playerPosition);
+                outBytes.AddValue(def.player2Start.rotation);
+                outBytes.AddValue(def.player3Start.playerPosition);
+                outBytes.AddValue(def.player3Start.rotation);
+                outBytes.AddValue(def.player4Start.playerPosition);
+                outBytes.AddValue(def.player4Start.rotation);
+
+                outBytes.AddValue(def.rankTimeThreshold);
+                outBytes.AddValue(def.scoreThreshold1);
+                outBytes.AddValue(def.scoreThreshold2);
+                outBytes.AddValue(def.scoreThreshold3);
+                outBytes.AddValue(def.scoreThreshold4);
+            }
+            if(definition != null)
+            {
+                offsets.Add(outBytes.Count);
+                offsets.Add(outBytes.Count + 0x4);
+                offsets.Add(outBytes.Count + 0x8);
+                offsets.Add(outBytes.Count + 0xC);
+
+                offsets.Add(outBytes.Count + 0x10);
+                offsets.Add(outBytes.Count + 0x14);
+                offsets.Add(outBytes.Count + 0x18);
+
+                outBytes.ReserveInt($"DefBank4");
+                outBytes.ReserveInt($"DefBank6");
+                outBytes.ReserveInt($"DefBank7");
+                outBytes.ReserveInt($"DefParticle");
+                outBytes.ReserveInt($"DefEffect");
+                outBytes.ReserveInt($"DefObjectDefinition");
+                outBytes.ReserveInt($"DefObjectData");
+            }
+
+            //Here we go through and make sure we don't write redundant StageCommonData
+            //We temporarily store the commonData id in the offset field since it's not used for anything else after being read.
+            List<StageCommonData> commonDataList = new List<StageCommonData>();
+            List<int> commonOffsets = new List<int>();
+            for (int i = 0; i < defs.Count; i++)
+            {
+                var def = defs[i];
+                if(def.commonData == null)
+                {
+                    def.commonDataOffset = -1;
+                    continue;
+                }
+                var defCom = def.commonData;
+                int match = -1;
+                for(int j = 0; j < commonDataList.Count; j++)
+                {
+                    var cmn = commonDataList[j];
+                    if(cmn.effect == defCom.effect && cmn.objectData == defCom.objectData && cmn.objectDefinition == defCom.objectDefinition 
+                        && cmn.particle == defCom.particle && cmn.SEBank4 == defCom.SEBank4 && cmn.SEBank6 == defCom.SEBank6 && cmn.SEBank7 == defCom.SEBank7)
+                    {
+                        match = j;
+                        break;
+                    }
+                }
+                if (match == -1)
+                {
+                    commonOffsets.Add(outBytes.Count);
+                    outBytes.FillInt($"{i}CommonData", outBytes.Count);
+                    offsets.Add(outBytes.Count);
+                    offsets.Add(outBytes.Count + 0x4);
+                    offsets.Add(outBytes.Count + 0x8);
+                    offsets.Add(outBytes.Count + 0xC);
+
+                    offsets.Add(outBytes.Count + 0x10);
+                    offsets.Add(outBytes.Count + 0x14);
+                    offsets.Add(outBytes.Count + 0x18);
+
+                    outBytes.ReserveInt($"{commonDataList.Count}Bank4");
+                    outBytes.ReserveInt($"{commonDataList.Count}Bank6");
+                    outBytes.ReserveInt($"{commonDataList.Count}Bank7");
+                    outBytes.ReserveInt($"{commonDataList.Count}Particle");
+                    outBytes.ReserveInt($"{commonDataList.Count}Effect");
+                    outBytes.ReserveInt($"{commonDataList.Count}ObjectDefinition");
+                    outBytes.ReserveInt($"{commonDataList.Count}ObjectData");
+                    commonDataList.Add(defCom);
+                } else
+                {
+                    outBytes.FillInt($"{i}CommonData", outBytes.Count);
+                }
+            }
+
+            //Write out string data
+            outBytes.AlignWriter(0x20);
+            var encoding = Encoding.GetEncoding("shift-jis");
+            Dictionary<string, int> stringTracker = new Dictionary<string, int>();
+            for(int i = 0; i < defs.Count; i++)
+            {
+                var def = defs[i];
+                outBytes.FillInt($"{i}MissionName", WriteUniqueString(outBytes, stringTracker, def.missionName, encoding));
+                outBytes.FillInt($"{i}WorldName", WriteUniqueString(outBytes, stringTracker, def.worldName, encoding));
+                outBytes.FillInt($"{i}MissionType", WriteUniqueString(outBytes, stringTracker, def.missionType, encoding));
+
+                outBytes.FillInt($"{i}LndName", WriteUniqueString(outBytes, stringTracker, def.lndFilename, encoding));
+                outBytes.FillInt($"{i}BspName", WriteUniqueString(outBytes, stringTracker, def.bspFilename, encoding));
+                outBytes.FillInt($"{i}Mc2Name", WriteUniqueString(outBytes, stringTracker, def.mc2Filename, encoding));
+                outBytes.FillInt($"{i}SetObjName", WriteUniqueString(outBytes, stringTracker, def.setObjFilename, encoding));
+
+                outBytes.FillInt($"{i}SetEnemyName", WriteUniqueString(outBytes, stringTracker, def.setEnemyFilename, encoding));
+                outBytes.FillInt($"{i}SetCameraName", WriteUniqueString(outBytes, stringTracker, def.setCameraFilename, encoding));
+                outBytes.FillInt($"{i}SetDesignName", WriteUniqueString(outBytes, stringTracker, def.setDesignFilename, encoding));
+                outBytes.FillInt($"{i}PathName", WriteUniqueString(outBytes, stringTracker, def.pathFilename, encoding));
+            }
+            if(definition != null)
+            {
+                outBytes.FillInt($"DefBank4", WriteUniqueString(outBytes, stringTracker, definition.SEBank4, encoding));
+                outBytes.FillInt($"DefBank6", WriteUniqueString(outBytes, stringTracker, definition.SEBank6, encoding));
+                outBytes.FillInt($"DefBank7", WriteUniqueString(outBytes, stringTracker, definition.SEBank7, encoding));
+                outBytes.FillInt($"DefParticle", WriteUniqueString(outBytes, stringTracker, definition.particle, encoding));
+
+                outBytes.FillInt($"DefEffect", WriteUniqueString(outBytes, stringTracker, definition.effect, encoding));
+                outBytes.FillInt($"DefObjectDefinition", WriteUniqueString(outBytes, stringTracker, definition.objectDefinition, encoding));
+                outBytes.FillInt($"DefObjectData", WriteUniqueString(outBytes, stringTracker, definition.objectData, encoding));
+            }
+            for(int i = 0; i < commonDataList.Count; i++)
+            {
+                var cmn = commonDataList[i];
+                outBytes.FillInt($"{commonDataList.Count}Bank4", WriteUniqueString(outBytes, stringTracker, cmn.SEBank4, encoding));
+                outBytes.FillInt($"{commonDataList.Count}Bank6", WriteUniqueString(outBytes, stringTracker, cmn.SEBank6, encoding));
+                outBytes.FillInt($"{commonDataList.Count}Bank7", WriteUniqueString(outBytes, stringTracker, cmn.SEBank7, encoding));
+                outBytes.FillInt($"{commonDataList.Count}Particle", WriteUniqueString(outBytes, stringTracker, cmn.particle, encoding));
+                outBytes.FillInt($"{commonDataList.Count}Effect", WriteUniqueString(outBytes, stringTracker, cmn.effect, encoding));
+                outBytes.FillInt($"{commonDataList.Count}ObjectDefinition", WriteUniqueString(outBytes, stringTracker, cmn.objectDefinition, encoding));
+                outBytes.FillInt($"{commonDataList.Count}ObjectData", WriteUniqueString(outBytes, stringTracker, cmn.objectData, encoding));
             }
 
             var njBytes = new List<byte>() { 0x47, 0x45, 0x53, 0x44 };
-            njBytes.AddRange(BitConverter.GetBytes(outbytes.Count));
-            outbytes.AddRange(njBytes);
+            njBytes.AddRange(BitConverter.GetBytes(outBytes.Count));
+            outBytes.AddRange(njBytes);
+            outBytes.AddRange(POF0.GeneratePOF0(offsets));
 
-            return outbytes.ToArray();
+            ByteListExtension.AddAsBigEndian = false;
+            return outBytes.ToArray();
+        }
+
+        private static int WriteUniqueString(List<byte> outBytes, Dictionary<string, int> stringTracker, string stringToWrite, Encoding encoding)
+        {
+            if(stringTracker.ContainsKey(stringToWrite))
+            {
+                return stringTracker[stringToWrite];
+            } else
+            {
+                var newOffset = outBytes.Count;
+                outBytes.AddRange(encoding.GetBytes(stringToWrite));
+                outBytes.Add(0);
+                stringTracker.Add(stringToWrite, newOffset);
+                return newOffset;
+            }
         }
 
         /// <summary>
