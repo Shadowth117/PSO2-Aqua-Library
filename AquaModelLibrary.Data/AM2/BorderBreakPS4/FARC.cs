@@ -18,8 +18,8 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
         public class FARCEntryObject
         {
             public FARCEntry entryStruct;
-            public string fileName;
-            public byte[] fileData;
+            public string? fileName;
+            public byte[]? fileData;
         }
 
         public struct FARCEntry

@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8601;CS8603;CS8604;CS8625;</NoWarn>
+    <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8604;CS8625;</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8601;CS8603;CS8604;CS8625;</NoWarn>
+    <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8604;CS8625;</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,8 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="prs_rs.Net.Sys" Version="1.0.1" />
-    <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
+    <PackageReference Include="prs_rs.Net.Sys" Version="1.0.4" />
+    <PackageReference Include="Reloaded.Memory" Version="9.4.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.11" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageReference Include="ZstdNet" Version="1.4.5" />
   </ItemGroup>
 

@@ -208,10 +208,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public ushort childId1;
             public ushort childId2;
             public ushort childId3;
-            public PathSector childSector0;
-            public PathSector childSector1;
-            public PathSector childSector2;
-            public PathSector childSector3;
+            public PathSector? childSector0;
+            public PathSector? childSector1;
+            public PathSector? childSector2;
+            public PathSector? childSector3;
             public int depth = -1;
         }
     }

@@ -71,7 +71,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public class GLKEntry
         {
-            public string fileName; //0x1C bytes with null terminator
+            public string? fileName; //0x1C bytes with null terminator
             public ushort unk0;
             public ushort unk1;
             public ushort unk2;

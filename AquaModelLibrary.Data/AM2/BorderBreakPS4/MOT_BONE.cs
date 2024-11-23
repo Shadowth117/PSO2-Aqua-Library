@@ -97,7 +97,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
         public class BoneObject
         {
             public bone boneStruct;
-            public string name;
+            public string? name;
             public List<ushort> childrenIds = new List<ushort>();
         }
 

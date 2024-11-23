@@ -659,10 +659,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public short childId1;
             public short childId2;
             public short childId3;
-            public MC2Sector childSector0;
-            public MC2Sector childSector1;
-            public MC2Sector childSector2;
-            public MC2Sector childSector3;
+            public MC2Sector? childSector0;
+            public MC2Sector? childSector1;
+            public MC2Sector? childSector2;
+            public MC2Sector? childSector3;
             public List<MC2FaceData> faceData = new List<MC2FaceData>();
             public int depth = -1;
             public Vector3? faceAverage = null;

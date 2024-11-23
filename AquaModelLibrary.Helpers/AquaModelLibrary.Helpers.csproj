@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8602</NoWarn>
+    <NoWarn>1701;1702;CS8600;CS8602;CS8603;CS8607;CS8625</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8602</NoWarn>
+    <NoWarn>1701;1702;CS8600;CS8602;CS8603;CS8607;CS8625</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,9 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DrSwizzler" Version="1.0.7" />
-    <PackageReference Include="prs_rs.Net.Sys" Version="1.0.1" />
-    <PackageReference Include="Reloaded.Memory" Version="9.3.2" />
+    <PackageReference Include="DrSwizzler" Version="1.0.8" />
+    <PackageReference Include="prs_rs.Net.Sys" Version="1.0.4" />
+    <PackageReference Include="Reloaded.Memory" Version="9.4.2" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
 

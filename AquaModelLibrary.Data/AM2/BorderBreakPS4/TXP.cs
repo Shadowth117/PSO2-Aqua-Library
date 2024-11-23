@@ -235,7 +235,7 @@ namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
         public int int_10;
         public int bufferSize;
 
-        public byte[] buffer;
+        public byte[]? buffer;
 
         public TXP2()
         {
