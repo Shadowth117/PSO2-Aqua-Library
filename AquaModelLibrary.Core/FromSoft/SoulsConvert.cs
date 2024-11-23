@@ -28,6 +28,7 @@ namespace AquaModelLibrary.Core.FromSoft
         public static bool extractUnreferencedMapData = false;
         public static bool separateMSBDumpByModel = false;
         public static bool doNotAdjustRootRotation = false;
+        public static bool addFBXRootNode = true;
 
         public static SoulsGame game = SoulsGame.None;
         public static ExportFormat exportFormat = ExportFormat.Fbx;
@@ -372,6 +373,11 @@ namespace AquaModelLibrary.Core.FromSoft
                         switch(exportFormat)
                         {
                             case ExportFormat.Fbx:
+                                if(addFBXRootNode)
+                                {
+                                    aqn.AddRootNode(Path.GetFileNameWithoutExtension(fileName) + "_skeleton", Matrix4x4.Identity);
+                                    aqp.IncrementBones(1);
+                                }
                                 finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
                                 FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)coordSystem);
                                 break;
