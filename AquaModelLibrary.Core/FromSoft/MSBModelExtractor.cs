@@ -22,6 +22,7 @@ namespace AquaModelLibrary.Core.FromSoft
         }
         public static void ExtractMSBMapModels(string outDir, string filePath, byte[] file, bool useMetaData = false)
         {
+            SoulsConvert.addFBXRootNode = false;
             byte[] newFile = file;
             string msbMapId = Path.GetFileNameWithoutExtension(filePath);
 
@@ -363,6 +364,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 }
             }
 
+            SoulsConvert.addFBXRootNode = true;
         }
 
         private static void ProcessModelsForExport(List<AquaObject> aqpList)

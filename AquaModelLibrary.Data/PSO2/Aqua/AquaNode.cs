@@ -381,6 +381,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             NODE node = new NODE();
             node.animatedFlag = 1;
             node.boneName.SetString(rootNodeName);
+            nodeUnicodeNames.Insert(0, rootNodeName);
             if (matrix != null)
             {
                 node.SetInverseBindPoseMatrixFromUninvertedMatrix((Matrix4x4)matrix);

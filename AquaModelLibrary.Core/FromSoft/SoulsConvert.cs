@@ -373,11 +373,6 @@ namespace AquaModelLibrary.Core.FromSoft
                         switch(exportFormat)
                         {
                             case ExportFormat.Fbx:
-                                if(addFBXRootNode)
-                                {
-                                    aqn.AddRootNode(Path.GetFileNameWithoutExtension(fileName) + "_skeleton", Matrix4x4.Identity);
-                                    aqp.IncrementBones(1);
-                                }
                                 finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
                                 FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)coordSystem);
                                 break;
@@ -478,7 +473,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 }
 
                 aqn = null;
-                return MDL4ToAqua(mdl4, out aqn, useMetaData);
+                return MDL4ToAqua(Path.GetFileNameWithoutExtension(filePath) + "_skeleton", mdl4, out aqn, useMetaData);
             }
             aqn = null;
 
@@ -515,11 +510,51 @@ namespace AquaModelLibrary.Core.FromSoft
                 
                 
             }
-            return FlverToAqua(flver, out aqn, useMetaData);
+            return FlverToAqua(Path.GetFileNameWithoutExtension(filePath) + "_skeleton", flver, out aqn, useMetaData);
         }
-
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
         {
+            return MDL4ToAqua("RootNode", mdl4, out aqn, useMetaData);
+        }
+        public static AquaObject MDL4ToAqua(string newRootName, SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
+        {
+            //Preprocessing
+            if(addFBXRootNode && exportFormat == ExportFormat.Fbx)
+            {
+                mdl4.Nodes.Insert(0, new SoulsFormats.Other.MDL4.Node() { Name = newRootName, ChildIndex = 1});
+                for(int i = 0; i < mdl4.Nodes.Count; i++)
+                {
+                    if(i == 0)
+                    {
+                        continue;
+                    }
+                    var node = mdl4.Nodes[i];
+                    node.ParentIndex++;
+                    if (node.ChildIndex != -1)
+                    {
+                        node.ChildIndex++;
+                    }
+                    if(node.NextSiblingIndex != -1)
+                    {
+                        node.NextSiblingIndex++;
+                    }
+                    if(node.PreviousSiblingIndex != -1)
+                    {
+                        node.PreviousSiblingIndex++;
+                    }
+                }
+                foreach(var mesh in mdl4.Meshes)
+                {
+                    for(int i = 0; i < mesh.BoneIndices.Length; i++)
+                    {
+                        if (mesh.BoneIndices[i] != -1)
+                        {
+                            mesh.BoneIndices[i] = (short)(mesh.BoneIndices[i] + 1);
+                        }
+                    }
+                }
+            }
+
             AquaObject aqp = new AquaObject();
             List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
             aqn = new AquaNode();
@@ -701,6 +736,93 @@ namespace AquaModelLibrary.Core.FromSoft
 
         public static AquaObject FlverToAqua(IFlver flver, out AquaNode aqn, bool useMetaData = false)
         {
+            return FlverToAqua("RootNode", flver, out aqn, useMetaData); 
+        }
+
+        public static AquaObject FlverToAqua(string newRootName, IFlver flver, out AquaNode aqn, bool useMetaData = false)
+        {
+            //Preprocessing
+            if (addFBXRootNode && exportFormat == ExportFormat.Fbx)
+            {
+                if (flver is FLVER2 flv2)
+                {
+                    flv2.Nodes.Insert(0, new FLVER.Node() { Name = newRootName, FirstChildIndex = 1 });
+                    for(int i = 0; i < flv2.Nodes.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            continue;
+                        }
+                        var node = flv2.Nodes[i];
+                        UpdateNodeForNewRoot(node);
+                    }
+                    foreach(var mesh in flv2.Meshes)
+                    {
+                        bool localIndicesUsed = false;
+                        for(int j = 0; j < mesh.BoneIndices.Count; j++)
+                        {
+                            if (mesh.BoneIndices[j] != -1)
+                            {
+                                mesh.BoneIndices[j] = mesh.BoneIndices[j] + 1;
+                                localIndicesUsed = true;
+                            }
+                        }
+                        if (localIndicesUsed == false)
+                        {
+                            foreach (var vert in mesh.Vertices)
+                            {
+                                if (vert.NormalW > 0 && vert.NormalW < 65535)
+                                {
+                                    vert.NormalW++;
+                                }
+                                vert.BoneIndices[0] = vert.BoneIndices[0] + 1;
+                                vert.BoneIndices[1] = vert.BoneIndices[1] + 1;
+                                vert.BoneIndices[2] = vert.BoneIndices[2] + 1;
+                                vert.BoneIndices[3] = vert.BoneIndices[3] + 1;
+                            }
+                        }
+                    }
+                } else if (flver is FLVER0 flv0)
+                {
+                    flv0.Nodes.Insert(0, new FLVER.Node() { Name = newRootName });
+                    for (int i = 0; i < flv0.Nodes.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            continue;
+                        }
+                        var node = flv0.Nodes[i];
+                        UpdateNodeForNewRoot(node);
+                    }
+                    foreach (var mesh in flv0.Meshes)
+                    {
+                        bool localIndicesUsed = false;
+                        for (int j = 0; j < mesh.BoneIndices.Length; j++)
+                        {
+                            if (mesh.BoneIndices[j] != -1)
+                            {
+                                mesh.BoneIndices[j] = (short)(mesh.BoneIndices[j] + 1);
+                                localIndicesUsed = true;
+                            }
+                        }
+                        if (localIndicesUsed == false)
+                        {
+                            foreach (var vert in mesh.Vertices)
+                            {
+                                if (vert.NormalW > 0 && vert.NormalW < 65535)
+                                {
+                                    vert.NormalW++;
+                                }
+                                vert.BoneIndices[0] = vert.BoneIndices[0] + 1;
+                                vert.BoneIndices[1] = vert.BoneIndices[1] + 1;
+                                vert.BoneIndices[2] = vert.BoneIndices[2] + 1;
+                                vert.BoneIndices[3] = vert.BoneIndices[3] + 1;
+                            }
+                        }
+                    }
+                }
+            }
+
             AquaObject aqp = new AquaObject();
             List<Matrix4x4> BoneTransforms = new List<Matrix4x4>();
 
@@ -1164,6 +1286,24 @@ namespace AquaModelLibrary.Core.FromSoft
             }
 
             return aqp;
+        }
+
+        private static void UpdateNodeForNewRoot(FLVER.Node node)
+        {
+
+            node.ParentIndex++;
+            if (node.FirstChildIndex != -1)
+            {
+                node.FirstChildIndex++;
+            }
+            if (node.NextSiblingIndex != -1)
+            {
+                node.NextSiblingIndex++;
+            }
+            if (node.PreviousSiblingIndex != -1)
+            {
+                node.PreviousSiblingIndex++;
+            }
         }
 
         public static void ConvertModelToFlverAndWrite(string initialFilePath, string outPath, float scaleFactor, bool preAssignNodeIds, bool isNGS, SoulsGame game)

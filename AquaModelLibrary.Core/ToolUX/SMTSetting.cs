@@ -10,7 +10,7 @@ namespace AquaModelLibrary.Core.ToolUX
         public bool transformMesh { get; set; } = true;
         public bool extractUnreferencedMapData { get; set; } = true;
         public bool separateMSBDumpByModel { get; set; } = true;
-        public bool addFBXRootNode = true;
+        public bool addFBXRootNode { get; set; } = false;
         public SoulsGame soulsGame { get; set; } = SoulsGame.None;
         public ExportFormat exportFormat { get; set; } = ExportFormat.Fbx;
         public MirrorType mirrorType { get; set; } = MirrorType.Z;
