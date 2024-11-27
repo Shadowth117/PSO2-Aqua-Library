@@ -163,6 +163,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             outBytes.FillInt("totalBufferSize", outBytes.Count);
 
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

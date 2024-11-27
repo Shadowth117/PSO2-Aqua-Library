@@ -73,7 +73,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.Add(setObj.btProperty4);
             }
 
-            ByteListExtension.AddAsBigEndian = false;
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

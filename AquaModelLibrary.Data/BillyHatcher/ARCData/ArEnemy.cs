@@ -2,16 +2,14 @@
 using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
-using ArchiveLib;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
     /// <summary>
     /// ar_ene_*.arc - These contain data for enemy models, motions, and a texture list. The GVM is stored externally with the same name, but no preceding ar_ and the .gvm extension
     /// </summary>
-    public class ArEnemy
+    public class ArEnemy : ARC
     {
-        public ARCHeader header;
         public List<NJSObject> models = new List<NJSObject>();
         public List<NJSMotion> anims = new List<NJSMotion>();
         public NJTextureList texList = null;
@@ -40,7 +38,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         {
             int nodeCount = 0;
             sr._BEReadActive = true;
-            header = ARC.ReadArcHeader(sr);
+            base.Read(sr);
+            sr.Seek(0x20, SeekOrigin.Begin);
 
             var modelOffset = sr.ReadBE<int>();
             var animOffset = sr.ReadBE<int>();

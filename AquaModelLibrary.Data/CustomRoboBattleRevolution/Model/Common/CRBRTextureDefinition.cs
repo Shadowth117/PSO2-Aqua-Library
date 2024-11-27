@@ -63,7 +63,8 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 tpl.AddValue((int)0x0);
                 tpl.AddValue((int)0x0);
                 tpl.AddRange(textureBuffer);
-                ByteListExtension.AddAsBigEndian = false;
+
+                ByteListExtension.Reset();
 
                 return tpl.ToArray();
             }

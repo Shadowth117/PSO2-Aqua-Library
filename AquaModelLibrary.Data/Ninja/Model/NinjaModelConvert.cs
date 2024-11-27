@@ -216,6 +216,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
             outBytes.InsertRange(0, headerMagic);
             outBytes.AddRange(POF0.GeneratePOF0(pofSets));
 
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

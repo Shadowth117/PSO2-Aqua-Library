@@ -2,6 +2,7 @@
 using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Data.BillyHatcher.Collision;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -23,7 +24,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public MC2Header header;
         public List<Vector3> vertPositions = new List<Vector3>();
         public List<MC2FaceData> faceData = new List<MC2FaceData>();
-        public List<MC2FaceBounds> faceBounds = new List<MC2FaceBounds>();
+        public List<CollisionBounds> faceBounds = new List<CollisionBounds>();
         public List<MC2Sector> sectors = new List<MC2Sector>(); //While depth is 6 or less, considering root depth 0, subdivide until 64 faces or less. At depth 6, take what's left. Retail has no higher than 231 for any particular mc2.
         public MC2Sector rootSector = null;
         public List<MC2UnkData> unkDataList = new List<MC2UnkData>();
@@ -270,7 +271,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 if (vertPositions[face.vert2].Z > MaxZ)
                     MaxZ = vertPositions[face.vert2].Z;
 
-                faceBounds.Add(new MC2FaceBounds() { Left = MinX, Right = MaxX, Down = MinZ, Up = MaxZ });
+                faceBounds.Add(new CollisionBounds() { MinX = MinX, MaxX = MaxX, MinZ = MinZ, MaxZ = MaxZ });
             }
         }
 
@@ -296,11 +297,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 //Check if this vertex is within the bounds of the bounding box. If it is, we include all faces it's used in.
                 //This check should include situations where an edge of a triangle interesects the bounding or the triangle surrounds the bounding.
-
-                //if ((IsInBounds(vertX.X, XRange) || IsInBounds(vertY.X, XRange) || IsInBounds(vertZ.X, XRange)) && (IsInBounds(vertX.Z, ZRange) || IsInBounds(vertY.Z, ZRange) || IsInBounds(vertZ.Z, ZRange)))
-                //if ((IsInBounds(vertX.X, XRange) && IsInBounds(vertX.Z, ZRange)) || (IsInBounds(vertY.X, XRange) && IsInBounds(vertY.Z, ZRange)) || (IsInBounds(vertZ.X, XRange) && IsInBounds(vertZ.Z, ZRange)))
-                if (bounds.Left <= XRange.Y && XRange.X <= bounds.Right && bounds.Up >= ZRange.X && ZRange.Y >= bounds.Down
-                    || bounds.Left >= XRange.Y && XRange.X >= bounds.Right && bounds.Up <= ZRange.X && ZRange.Y <= bounds.Down)
+                if (bounds.MinX <= XRange.Y && XRange.X <= bounds.MaxX && bounds.MaxZ >= ZRange.X && ZRange.Y >= bounds.MinZ
+                    || bounds.MinX >= XRange.Y && XRange.X >= bounds.MaxX && bounds.MaxZ <= ZRange.X && ZRange.Y <= bounds.MinZ)
                 {
                     newFaceIndices.Add(faceId);
                     newFaces.Add(face);
@@ -498,14 +496,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public ushort usht1;
             public ushort usht2;
             public ushort usht3;
-        }
-
-        public struct MC2FaceBounds
-        {
-            public float Left;
-            public float Right;
-            public float Down;
-            public float Up;
         }
 
         public struct MC2Header

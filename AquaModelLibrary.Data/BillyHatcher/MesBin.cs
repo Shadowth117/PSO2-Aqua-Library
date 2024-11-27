@@ -291,6 +291,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             outBytes.AddRange(refs);
             outBytes.AddRange(strBytes);
 
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

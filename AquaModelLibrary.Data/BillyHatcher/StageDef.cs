@@ -468,8 +468,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
 			outBytes.InsertRange(0, njBytes);
 			outBytes.AddRange(POF0.GeneratePOF0(offsets));
 
-			ByteListExtension.AddAsBigEndian = false;
-			return outBytes.ToArray();
+            ByteListExtension.Reset();
+            return outBytes.ToArray();
 		}
 
 		private static int WriteUniqueString(List<byte> outBytes, Dictionary<string, int> stringTracker, string stringToWrite, Encoding encoding)
