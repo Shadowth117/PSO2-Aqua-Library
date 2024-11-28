@@ -231,7 +231,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             {
                 sr.Seek(textureListsOffset2 + 0x20, SeekOrigin.Begin);
                 List<int> textureListsOffset2s = new List<int>();
-                for (int i = 0; i < textureListCount; i++)
+                for (int i = 0; i < textureListCount2; i++)
                 {
                     textureListsOffset2s.Add(sr.ReadBE<int>());
                 }
@@ -274,7 +274,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"collision_{i}";
+                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"collision2_{i}";
                     colModel2s.Add(name, new CSDY(sr, false, 0x20));
                 }
             }
