@@ -8,6 +8,18 @@
 		<DebugType>embedded</DebugType>
 		<Platforms>x64;x86</Platforms>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+	  <NoWarn>1701;1702;CA1416</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+	  <NoWarn>1701;1702;CA1416</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+	  <NoWarn>1701;1702;CA1416</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+	  <NoWarn>1701;1702;CA1416</NoWarn>
+	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\VrSharp\VrSharp.csproj" />
 	</ItemGroup>
