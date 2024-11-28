@@ -4,7 +4,10 @@ using System.Numerics;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
-    //Used for collision
+    /// <summary>
+    /// Collision Shape DummY?
+    /// Basic model with just positions and billy type collision faces
+    /// </summary>
     public class CSDY
     {
         public List<List<Vector3>> vertexListList = new List<List<Vector3>>();
