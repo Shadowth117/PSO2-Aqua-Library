@@ -14,14 +14,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
         public int keyCount; //0xED, type 0x9
         public int frameAddress;
         public int timeAddress;
-        public List<Vector4> vector4Keys = new List<Vector4>(); //0xEE, type 0x4A or 0xCA if multiple
-        public List<uint> frameTimings = new List<uint>(); //0xEF, type 0x06 or 0x86 if multiple //Frame timings start with 0 + 0x1 to represent the first frame.
+        public List<Vector4> vector4Keys = new(); //0xEE, type 0x4A or 0xCA if multiple
+        public List<uint> frameTimings = new(); //0xEF, type 0x06 or 0x86 if multiple //Frame timings start with 0 + 0x1 to represent the first frame.
                                                            //Subsequent frames are multiplied by 0x10 and the final frame will have 0x2 added.
                                                            //Ex. frame 0x14 would be stored as 0x140 (0x142 if it's the final frame)
-        public List<float> floatKeys = new List<float>(); //0xF1, type 0xA or 0x8A if multiple
-        public List<byte> byteKeys = new List<byte>();   //0xF2. Only observed in Alpha PSO2 animations. Appear to be int arrays rendered in bytes... for some reason.
+        public List<float> floatKeys = new(); //0xF1, type 0xA or 0x8A if multiple
+        public List<byte> byteKeys = new();   //0xF2. Only observed in Alpha PSO2 animations. Appear to be int arrays rendered in bytes... for some reason.
                                                          //Also uses the designator for int keys in newer iterations. Combine every 4 to convert to an int array.
-        public List<int> intKeys = new List<int>(); //0xF3, type 0x8 or 0x88 if multiple
+        public List<int> intKeys = new(); //0xF3, type 0x8 or 0x88 if multiple
 
         public int GetKeyCount()
         {
@@ -324,8 +324,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
                 //Don't add if it's there already
                 if (frameTimings[i] == timesToAdd[t])
                 {
-                    continue;
                     t++;
+                    continue;
                 }
 
                 //Add our missing frames when we reach the first frame that exists after them
