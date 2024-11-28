@@ -1,4 +1,7 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher.Collision;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -7,6 +10,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// <summary>
     /// Collision Shape DummY?
     /// Basic model with just positions and billy type collision faces
+    /// All CSDY files are vestigial and are only included on PC.
     /// </summary>
     public class CSDY
     {
@@ -89,6 +93,41 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 faces.Add(face);
             }
             faceListList.Add(faces);
+        }
+
+        public List<AquaObject> ConvertToAquaObject()
+        {
+            List<AquaObject> aqoList = new List<AquaObject>();
+            for(int i = 0; i < vertexListList.Count; i++)
+            {
+                var aqo = new AquaObject();
+                aqo.objc.type = 0xC33;
+
+                VTXL vtxl = new VTXL();
+                for (int v = 0; v < vertexListList[i].Count; v++)
+                {
+                    var vertex = vertexListList[i][v];
+                    vtxl.vertPositions.Add(vertex);
+                }
+                aqo.vtxlList.Add(vtxl);
+
+                List<ushort> indices = new List<ushort>();
+                for (int f = 0; f < faceListList[i].Count; f++)
+                {
+                    indices.Add(faceListList[i][f].index0);
+                    indices.Add(faceListList[i][f].index1);
+                    indices.Add(faceListList[i][f].index2);
+                }
+                var tris = new GenericTriangles(indices);
+                tris.matIdList = new List<int>(new int[tris.triList.Count]);
+                aqo.tempTris.Add(tris);
+                aqo.tempMats.Add(new GenericMaterial() { matName = "ColMat" });
+
+                aqo.ConvertToPSO2Model(false, true, false, true, false, false, false);
+                aqoList.Add(aqo);
+            }
+
+            return aqoList;
         }
     }
 }
