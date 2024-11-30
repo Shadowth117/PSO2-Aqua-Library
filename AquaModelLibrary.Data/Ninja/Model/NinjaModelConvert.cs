@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
@@ -105,6 +106,16 @@ namespace AquaModelLibrary.Data.Ninja.Model
                     }
                 }
             }
+            if(aqo.tempTris.Count == 0)
+            {
+                GenericTriangles genTri = new GenericTriangles();
+                genTri.triList.Add(new Vector3(0, 1, 2));
+                genTri.matIdList.Add(0);
+                aqo.tempTris.Add(genTri);
+                aqo.vtxlList.Add(new VTXL() { vertPositions = new List<Vector3>() { new Vector3(), new Vector3(), new Vector3() } });
+                aqo.tempMats.Add(new GenericMaterial() { matName = "GenericMat" });
+            }
+
             return aqo;
         }
 
