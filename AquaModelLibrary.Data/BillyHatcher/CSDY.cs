@@ -41,6 +41,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr._BEReadActive = true;
             if (hasNinjaHeader)
             {
+                offset += 8;
                 sr.Seek(0x8, SeekOrigin.Begin);
             }
 
@@ -48,7 +49,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             //No real tell of when these multi containers or just one collision piece. But if they are multiple, the offset will always be 8 before the offset table.
             //If it's greater, we're already in the offset table and there's only one model to worry about, at least for stock models
-            if (firstOffset > sr.Position + 4)
+            if (firstOffset == sr.Position + 4 - offset)
             {
                 var count = sr.ReadBE<int>();
                 for (int i = 0; i < count; i++)
@@ -104,19 +105,35 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 aqo.objc.type = 0xC33;
 
                 VTXL vtxl = new VTXL();
-                for (int v = 0; v < vertexListList[i].Count; v++)
+                if(vertexListList[i].Count == 0)
                 {
-                    var vertex = vertexListList[i][v];
-                    vtxl.vertPositions.Add(vertex);
+                    vtxl.vertPositions.Add(new Vector3());
+                    vtxl.vertPositions.Add(new Vector3());
+                    vtxl.vertPositions.Add(new Vector3());
+                } else
+                {
+                    for (int v = 0; v < vertexListList[i].Count; v++)
+                    {
+                        var vertex = vertexListList[i][v];
+                        vtxl.vertPositions.Add(vertex);
+                    }
                 }
                 aqo.vtxlList.Add(vtxl);
 
                 List<ushort> indices = new List<ushort>();
-                for (int f = 0; f < faceListList[i].Count; f++)
+                if (faceListList[i].Count == 0)
                 {
-                    indices.Add(faceListList[i][f].index0);
-                    indices.Add(faceListList[i][f].index1);
-                    indices.Add(faceListList[i][f].index2);
+                    indices.Add(0);
+                    indices.Add(1);
+                    indices.Add(2);
+                } else
+                {
+                    for (int f = 0; f < faceListList[i].Count; f++)
+                    {
+                        indices.Add(faceListList[i][f].index0);
+                        indices.Add(faceListList[i][f].index1);
+                        indices.Add(faceListList[i][f].index2);
+                    }
                 }
                 var tris = new GenericTriangles(indices);
                 tris.matIdList = new List<int>(new int[tris.triList.Count]);
