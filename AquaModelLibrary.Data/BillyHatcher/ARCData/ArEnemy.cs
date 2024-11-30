@@ -2,6 +2,7 @@
 using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Data.BillyHatcher.Collision;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
@@ -11,8 +12,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
     public class ArEnemy : ARC
     {
         public List<NJSObject> models = new List<NJSObject>();
-        public List<NJSMotion> anims = new List<NJSMotion>();
-        public NJTextureList texList = null;
+        public List<List<NJSMotion>> anims = new List<List<NJSMotion>>();
+        public List<NJTextureList> texList = new List<NJTextureList>();
+        public List<BoundsXYZ> boundsXYZList = new List<BoundsXYZ>();
 
         public ArEnemy() { }
 
@@ -44,15 +46,27 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             var modelOffset = sr.ReadBE<int>();
             var animOffset = sr.ReadBE<int>();
             var texListOffset = sr.ReadBE<int>();
+            var boundingOffset = sr.ReadBE<int>();
+            var firstOffset = sr.PeekBigEndianInt32();
+            List<int> offsetQueue = new List<int>() { animOffset, texListOffset, boundingOffset, firstOffset };
 
-            var modelCount = (animOffset - modelOffset) / 4;
-            var animCount = (texListOffset - animOffset) / 4;
+            int modelCount = GetCount(modelOffset, offsetQueue);
+            offsetQueue.RemoveAt(0);
+            int animCount = GetCount(animOffset, offsetQueue);
+            offsetQueue.RemoveAt(0);
+            int texListCount = GetCount(texListOffset, offsetQueue);
+            offsetQueue.RemoveAt(0);
+            int boundingCount = GetCount(boundingOffset, offsetQueue);
 
             //Read Models
             sr.Seek(0x20 + modelOffset, SeekOrigin.Begin);
             for (int i = 0; i < modelCount; i++)
             {
                 var offset = sr.ReadBE<int>();
+                if (offset == 0)
+                {
+                    break;
+                }
                 var bookmark = sr.Position;
                 sr.Seek(offset + 0x20, SeekOrigin.Begin);
                 models.Add(new NJSObject(sr, NinjaVariant.Ginja, true, 0x20));
@@ -61,20 +75,118 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             }
 
             //Read Motions
-            sr.Seek(0x20 + animOffset, SeekOrigin.Begin);
-            for (int i = 0; i < animCount; i++)
+            //This offset leads to a list of offset groups so it ends up being more work to parse out those counts
+            if(animOffset > 0)
+            {
+                sr.Seek(0x20 + animOffset, SeekOrigin.Begin);
+                int animSetCount = 0;
+                List<int> animSetOffsets = new List<int>();
+                for (int i = 0; i < animCount; i++)
+                {
+                    var offset = sr.ReadBE<int>();
+                    if (offset == 0)
+                    {
+                        break;
+                    }
+                    if (offset > firstOffset)
+                    {
+                        animSetCount = i;
+                        break;
+                    }
+                    else
+                    {
+                        animSetOffsets.Add(offset);
+                    }
+                }
+
+                var animSetOffsetsArr = animSetOffsets.ToArray();
+                animSetOffsets.RemoveAt(0);
+                if (texListOffset != 0)
+                {
+                    animSetOffsets.Add((int)texListOffset);
+                }
+                else if (boundingOffset != 0)
+                {
+                    animSetOffsets.Add((int)boundingOffset);
+                }
+                else
+                {
+                    animSetOffsets.Add(firstOffset);
+                }
+                for (int i = 0; i < animSetOffsetsArr.Length; i++)
+                {
+                    sr.Seek(0x20 + animSetOffsetsArr[i], SeekOrigin.Begin);
+                    var setCount = GetCount(animSetOffsetsArr[i], animSetOffsets);
+                    animSetOffsets.RemoveAt(0);
+
+                    List<NJSMotion> motions = new List<NJSMotion>();
+                    for (int j = 0; j < setCount; j++)
+                    {
+                        var offset = sr.ReadBE<int>();
+                        if (offset == 0)
+                        {
+                            break;
+                        }
+                        var bookmark = sr.Position;
+                        sr.Seek(offset + 0x20, SeekOrigin.Begin);
+                        motions.Add(new NJSMotion(sr, true, 0x20, true, nodeCount));
+
+                        sr.Seek(bookmark, SeekOrigin.Begin);
+                    }
+                    anims.Add(motions);
+                }
+            }
+
+            //Read Texlists
+            sr.Seek(0x20 + texListOffset, SeekOrigin.Begin);
+            for (int i = 0; i < texListCount; i++)
             {
                 var offset = sr.ReadBE<int>();
+                if(offset == 0)
+                {
+                    break;
+                }
                 var bookmark = sr.Position;
                 sr.Seek(offset + 0x20, SeekOrigin.Begin);
-                anims.Add(new NJSMotion(sr, true, 0x20, true, nodeCount));
+                texList.Add(new NJTextureList(sr, 0x20));
 
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
 
-            //Read Texture List - gvm should be external
-            sr.Seek(0x20 + texListOffset, SeekOrigin.Begin);
-            texList = new NJTextureList(sr, 0x20);
+            //Read Bounds
+            sr.Seek(0x20 + boundingOffset, SeekOrigin.Begin);
+            for (int i = 0; i < boundingCount; i++)
+            {
+                var offset = sr.ReadBE<int>();
+                if (offset == 0)
+                {
+                    break;
+                }
+                var bookmark = sr.Position;
+                sr.Seek(offset + 0x20, SeekOrigin.Begin);
+                boundsXYZList.Add(new BoundsXYZ() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3()});
+
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
+        }
+
+        public int GetCount(int offset, List<int> queue)
+        {
+            if(offset == 0)
+            {
+                return 0;
+            }
+            int finalOffset = 0;
+            for(int i = 0; i < queue.Count; i++)
+            {
+                if (queue[i] != 0)
+                {
+                    finalOffset = (queue[i] - offset) / 4;
+                    break;
+                }
+            }
+
+            return finalOffset;
         }
     }
 }
