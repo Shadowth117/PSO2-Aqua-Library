@@ -139,7 +139,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             ReadNGSTEETH(streamReader, offset, this);
             ReadNGSHorn(streamReader, offset, this);
 
-            ReadNGSSKIN(streamReader, offset, cmxTable.skinAddress, cmxTable.skinCount, ngsSkinDict);
+            ReadNGSSKIN(streamReader, offset, cmxTable.skinAddress, cmxTable.skinCount, ngsSkinDict, rel0.REL0DataStart);
             ReadEYEB(streamReader, offset, cmxTable.eyebrowAddress, cmxTable.eyebrowCount, eyebrowDict);
             ReadEYEB(streamReader, offset, cmxTable.eyelashAddress, cmxTable.eyelashCount, eyelashDict);
 
@@ -284,6 +284,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 body.originalOffset = streamReader.Position;
                 body.body = streamReader.Read<BODY>();
 
+                if (rel0DataStart >= CMXConstants.dec4_24TableAddressInt)
+                {
+                    body.string8Ptr = streamReader.Read<int>();
+                }
+
                 if (rel0DataStart >= CMXConstants.dec14_21TableAddressInt)
                 {
                     body.bodyMaskColorMapping = streamReader.Read<BODYMaskColorMapping>();
@@ -303,6 +308,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 if (rel0DataStart >= CMXConstants.ver2TableAddressInt)
                 {
                     body.bodyVer2 = streamReader.Read<BODYVer2>();
+                }
+
+                if (rel0DataStart >= CMXConstants.dec4_24TableAddressInt)
+                {
+                    body.body12_4_24 = streamReader.Read<BODY12_4_24>();
                 }
 
                 long temp = streamReader.Position;
@@ -341,6 +351,16 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     streamReader.Seek(body.body.texString6Ptr + offset, SeekOrigin.Begin);
                     body.texString6 = streamReader.ReadCString();
+                }
+                if (IsValidOffset(body.body.string7Ptr))
+                {
+                    streamReader.Seek(body.body.string7Ptr + offset, SeekOrigin.Begin);
+                    body.string7 = streamReader.ReadCString();
+                }
+                if (IsValidOffset(body.string8Ptr))
+                {
+                    streamReader.Seek(body.string8Ptr + offset, SeekOrigin.Begin);
+                    body.string8 = streamReader.ReadCString();
                 }
                 if (IsValidOffset(body.body2023_1.nodeStrPtr_0))
                 {
@@ -429,7 +449,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 face.num = i;
                 face.originalOffset = streamReader.Position;
                 face.face = streamReader.Read<FACE>();
-                if (rel0DataStart >= CMXConstants.oct124TableAddressInt)
+                if (rel0DataStart >= CMXConstants.oct2_24TableAddressInt)
                 {
                     face.unkOct12024Int = streamReader.Read<int>();
                 }
@@ -660,87 +680,91 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     acce.flt_90 = streamReader.Read<float>();
                 }
+                if (cmxDateSize >= CMXConstants.dec4_24TableAddressInt)
+                {
+                    acce.acce12_4_24 = streamReader.Read<ACCE12_4_24>();
+                }
 
                 long temp = streamReader.Position;
 
-                if (acce.acce.dataStringPtr + offset > 0)
+                if (acce.acce.dataStringPtr > 0)
                 {
                     streamReader.Seek(acce.acce.dataStringPtr + offset, SeekOrigin.Begin);
                     acce.dataString = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach1Ptr + offset > 0)
+                if (acce.acce.nodeAttach1Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach1Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach1 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach2Ptr + offset > 0)
+                if (acce.acce.nodeAttach2Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach2Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach2 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach3Ptr + offset > 0)
+                if (acce.acce.nodeAttach3Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach3Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach3 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach4Ptr + offset > 0)
+                if (acce.acce.nodeAttach4Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach4Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach4 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach5Ptr + offset > 0)
+                if (acce.acce.nodeAttach5Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach5Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach5 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach6Ptr + offset > 0)
+                if (acce.acce.nodeAttach6Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach6Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach6 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach7Ptr + offset > 0)
+                if (acce.acce.nodeAttach7Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach7Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach7 = streamReader.ReadCString();
                 }
-                if (acce.acce.nodeAttach8Ptr + offset > 0)
+                if (acce.acce.nodeAttach8Ptr > 0)
                 {
                     streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach8 = streamReader.ReadCString();
                 }
                 if (cmxDateSize >= CMXConstants.feb8_22TableAddressInt)
                 {
-                    if (acce.acceFeb8_22.acceString9Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString9Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString9Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach9 = streamReader.ReadCString();
                     }
-                    if (acce.acceFeb8_22.acceString10Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString10Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString10Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach10 = streamReader.ReadCString();
                     }
-                    if (acce.acceFeb8_22.acceString11Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString11Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString11Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach11 = streamReader.ReadCString();
                     }
-                    if (acce.acceFeb8_22.acceString12Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString12Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString12Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach12 = streamReader.ReadCString();
                     }
-                    if (acce.acceFeb8_22.acceString13Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString13Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString13Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach13 = streamReader.ReadCString();
                     }
-                    if (acce.acceFeb8_22.acceString14Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString14Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString14Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach14 = streamReader.ReadCString();
                     }
-                    if (acce.acceFeb8_22.acceString15Ptr + offset > 0)
+                    if (acce.acceFeb8_22.acceString15Ptr > 0)
                     {
                         streamReader.Seek(acce.acceFeb8_22.acceString15Ptr + offset, SeekOrigin.Begin);
                         acce.nodeAttach15 = streamReader.ReadCString();
@@ -748,7 +772,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                     if (cmxDateSize >= CMXConstants.oct4_22TableAddressInt)
                     {
-                        if (acce.effectNamePtr + offset > 0)
+                        if (acce.effectNamePtr > 0)
                         {
                             streamReader.Seek(acce.effectNamePtr + offset, SeekOrigin.Begin);
                             acce.effectName = streamReader.ReadCString();
@@ -756,17 +780,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                         if (cmxDateSize >= CMXConstants.ver2TableAddressInt)
                         {
-                            if (acce.accev2.acceString16Ptr + offset > 0)
+                            if (acce.accev2.acceString16Ptr > 0)
                             {
                                 streamReader.Seek(acce.accev2.acceString16Ptr + offset, SeekOrigin.Begin);
                                 acce.nodeAttach16 = streamReader.ReadCString();
                             }
-                            if (acce.accev2.acceString17Ptr + offset > 0)
+                            if (acce.accev2.acceString17Ptr > 0)
                             {
                                 streamReader.Seek(acce.accev2.acceString17Ptr + offset, SeekOrigin.Begin);
                                 acce.nodeAttach17 = streamReader.ReadCString();
                             }
-                            if (acce.accev2.acceString18Ptr + offset > 0)
+                            if (acce.accev2.acceString18Ptr > 0)
                             {
                                 streamReader.Seek(acce.accev2.acceString18Ptr + offset, SeekOrigin.Begin);
                                 acce.nodeAttach18 = streamReader.ReadCString();
@@ -846,7 +870,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        private static void ReadNGSSKIN(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int baseAddress, int count, Dictionary<int, NGS_SKINObject> dict)
+        private static void ReadNGSSKIN(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int baseAddress, int count, Dictionary<int, NGS_SKINObject> dict, int cmxDataSize)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -855,37 +879,96 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 ngsSkin.num = i;
                 ngsSkin.originalOffset = streamReader.Position;
                 ngsSkin.ngsSkin = streamReader.Read<NGS_Skin>();
+                if (cmxDataSize >= CMXConstants.feb8_22TableAddressInt)
+                {
+                    ngsSkin.skin12_4_24 = streamReader.Read<Skin_12_4_24>();
+                }
+
                 long temp = streamReader.Position;
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString1Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString1 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString1Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString1Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString1 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString2Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString2 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString2Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString2Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString2 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString3Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString3 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString3Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString3Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString3 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString4Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString4 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString4Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString4Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString4 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString5 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString5Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString5 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString6 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString6Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString6Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString6 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString7Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString7 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString7Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString7Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString7 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString8Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString8 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString8Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString8Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString8 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString9Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString9 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString9Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString9Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString9 = streamReader.ReadCString();
+                }
 
-                streamReader.Seek(ngsSkin.ngsSkin.texString10Ptr + offset, SeekOrigin.Begin);
-                ngsSkin.texString10 = streamReader.ReadCString();
+                if (ngsSkin.ngsSkin.texString10Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.ngsSkin.texString10Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString10 = streamReader.ReadCString();
+                }
+
+                if (ngsSkin.skin12_4_24.texString11Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.skin12_4_24.texString11Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString11 = streamReader.ReadCString();
+                }
+
+                if (ngsSkin.skin12_4_24.texString12Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.skin12_4_24.texString12Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString12 = streamReader.ReadCString();
+                }
+
+                if (ngsSkin.skin12_4_24.texString13Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.skin12_4_24.texString13Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString13 = streamReader.ReadCString();
+                }
+
+                if (ngsSkin.skin12_4_24.texString14Ptr > 0)
+                {
+                    streamReader.Seek(ngsSkin.skin12_4_24.texString14Ptr + offset, SeekOrigin.Begin);
+                    ngsSkin.texString14 = streamReader.ReadCString();
+                }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 
@@ -1679,6 +1762,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             DataHelpers.AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, skin.texString8);
             DataHelpers.AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, skin.texString9);
             DataHelpers.AddNIFLText(outBytes.Count + 0x28, nof0PointerLocations, textAddressDict, textList, skin.texString10);
+            if(mode >= 1)
+            {
+                DataHelpers.AddNIFLText(outBytes.Count + 0x2C, nof0PointerLocations, textAddressDict, textList, skin.texString11);
+                DataHelpers.AddNIFLText(outBytes.Count + 0x30, nof0PointerLocations, textAddressDict, textList, skin.texString12);
+                DataHelpers.AddNIFLText(outBytes.Count + 0x34, nof0PointerLocations, textAddressDict, textList, skin.texString13);
+            }
 
             outBytes.AddRange(DataHelpers.ConvertStruct(skin.ngsSkin));
         }
@@ -1759,6 +1848,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 DataHelpers.AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach14);
 
                 DataHelpers.AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach15);
+
+                DataHelpers.AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach16);
+                DataHelpers.AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach17);
+                DataHelpers.AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, acce.nodeAttach18);
                 outBytes.AddRange(DataHelpers.ConvertStruct(acce.acceFeb8_22));
             }
             outBytes.AddRange(DataHelpers.ConvertStruct(acce.acceB));
@@ -1809,6 +1902,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             if (mode >= 1)
             {
                 outBytes.AddRange(BitConverter.GetBytes(acce.flt_90));
+
+                outBytes.AddRange(DataHelpers.ConvertStruct(acce.acce12_4_24));
             }
         }
 
@@ -1913,12 +2008,16 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             outBytes.AddRange(DataHelpers.ConvertStruct(body.body));
             if (mode >= 1)
             {
+                DataHelpers.AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, body.string7);
+                DataHelpers.AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, body.string8);
+                outBytes.AddValue((int)0);
                 outBytes.AddRange(DataHelpers.ConvertStruct(body.bodyMaskColorMapping));
             }
             outBytes.AddRange(DataHelpers.ConvertStruct(body.body2));
             if (mode >= 1)
             {
                 outBytes.AddRange(DataHelpers.ConvertStruct(body.body40cap));
+                outBytes.AddRange(DataHelpers.ConvertStruct(body.body12_4_24));
             }
         }
         #endregion

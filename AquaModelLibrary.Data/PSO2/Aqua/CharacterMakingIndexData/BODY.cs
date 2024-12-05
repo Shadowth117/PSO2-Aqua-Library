@@ -7,11 +7,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
     public class BODYObject : BaseCMXObject
     {
         public BODY body;
+        public int string8Ptr;
         public BODYMaskColorMapping bodyMaskColorMapping;
         public BODY2 body2;
         public BODY40Cap body40cap;
         public BODY2023_1 body2023_1;
         public BODYVer2 bodyVer2;
+        public BODY12_4_24 body12_4_24;
         public string dataString = null;
         public string texString1 = null;
         public string texString2 = null;
@@ -19,6 +21,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public string texString4 = null;
         public string texString5 = null;
         public string texString6 = null;
+        public string string7 = null;
+        public string string8 = null;
         public string nodeString0 = null;
         public string nodeString1 = null;
         public string nodeString2 = null;
@@ -99,7 +103,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public int texString5Ptr;
         public int texString6Ptr;
 
-        public int int_20;
+        public int string7Ptr;
     }
 
     public struct BODYMaskColorMapping //Body struct section addition added with Ritem
@@ -154,5 +158,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public float flt_90;
         public float flt_94;
         public float flt_98;
+    }
+
+    public struct BODY12_4_24
+    {
+        public int unkInt0;
+        public int unkInt1;
+        public int unkInt2;
     }
 }

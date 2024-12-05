@@ -11,6 +11,7 @@
         public static int oct4_22TableAddressInt = 0x00320b1C; //October 5th 2022 update cmx
         public static int jan25_23TableAddressInt = 0x0034689C; //January 25th 2023 update cmx
         public static int ver2TableAddressInt = 0x0039B5EC; //Version 2, June 6th 2023 update cmx
-        public static int oct124TableAddressInt = 0x0040fb90; //October 2nd, 2024 update cmx
+        public static int oct2_24TableAddressInt = 0x0040fb90; //October 2nd, 2024 update cmx
+        public static int dec4_24TableAddressInt = 0x00457354; //December 12th, 2024 update cmx
     }
 }

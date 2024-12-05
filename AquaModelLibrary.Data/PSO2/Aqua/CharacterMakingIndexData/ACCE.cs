@@ -13,6 +13,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public ACCE2B acce2b;
         public List<ACCE_12Object> acce12List = new List<ACCE_12Object>();
         public ACCEV2 accev2;
+        public ACCE12_4_24 acce12_4_24;
         public int effectNamePtr;
         public float flt_90;
 
@@ -137,6 +138,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public int acceString16Ptr;
         public int acceString17Ptr;
         public int acceString18Ptr;
+    }
+
+    public struct ACCE12_4_24
+    {
+        public int unkInt11;
+        public int unkInt12;
+        public int unkInt13;
     }
 
     public class ACCE_12Object
