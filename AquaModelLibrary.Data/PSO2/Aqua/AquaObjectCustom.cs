@@ -2085,5 +2085,27 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
         #endregion
+
+        #region String Management
+        public string GetMeshName(int id, bool includeMetadata)
+        {
+            var msh = meshList[id];
+            string meshName = null;
+            if (meshNames.Count - 1 >= id)
+            {
+                meshName = meshNames[id];
+            }
+            else if (includeMetadata)
+            {
+                meshName = String.Format("mesh[{4}]_{0}_{1}_{2}_{3}#{5}#{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, id, msh.baseMeshNodeId, msh.baseMeshDummyId);
+            }
+            else
+            {
+                meshName = String.Format("mesh[{0}]", id);
+            }
+
+            return meshName;
+        }
+        #endregion
     }
 }
