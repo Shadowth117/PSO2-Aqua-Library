@@ -140,7 +140,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 aqo.tempTris.Add(tris);
                 aqo.tempMats.Add(new GenericMaterial() { matName = "ColMat" });
 
-                aqo.ConvertToPSO2Model(false, true, false, true, false, false, false);
+                aqo.ConvertToPSO2Model(true, true, false, true, false, false, false);
                 aqoList.Add(aqo);
             }
 

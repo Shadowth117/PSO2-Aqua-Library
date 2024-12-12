@@ -50,13 +50,13 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             var firstOffset = sr.PeekBigEndianInt32();
             List<int> offsetQueue = new List<int>() { animOffset, texListOffset, boundingOffset, firstOffset };
 
-            int modelCount = GetCount(modelOffset, offsetQueue);
+            int modelCount = HelperFunctions.GetCount(modelOffset, offsetQueue);
             offsetQueue.RemoveAt(0);
-            int animCount = GetCount(animOffset, offsetQueue);
+            int animCount = HelperFunctions.GetCount(animOffset, offsetQueue);
             offsetQueue.RemoveAt(0);
-            int texListCount = GetCount(texListOffset, offsetQueue);
+            int texListCount = HelperFunctions.GetCount(texListOffset, offsetQueue);
             offsetQueue.RemoveAt(0);
-            int boundingCount = GetCount(boundingOffset, offsetQueue);
+            int boundingCount = HelperFunctions.GetCount(boundingOffset, offsetQueue);
 
             //Read Models
             sr.Seek(0x20 + modelOffset, SeekOrigin.Begin);
@@ -116,7 +116,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 for (int i = 0; i < animSetOffsetsArr.Length; i++)
                 {
                     sr.Seek(0x20 + animSetOffsetsArr[i], SeekOrigin.Begin);
-                    var setCount = GetCount(animSetOffsetsArr[i], animSetOffsets);
+                    var setCount = HelperFunctions.GetCount(animSetOffsetsArr[i], animSetOffsets);
                     animSetOffsets.RemoveAt(0);
 
                     List<NJSMotion> motions = new List<NJSMotion>();
@@ -168,25 +168,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
-        }
-
-        public int GetCount(int offset, List<int> queue)
-        {
-            if(offset == 0)
-            {
-                return 0;
-            }
-            int finalOffset = 0;
-            for(int i = 0; i < queue.Count; i++)
-            {
-                if (queue[i] != 0)
-                {
-                    finalOffset = (queue[i] - offset) / 4;
-                    break;
-                }
-            }
-
-            return finalOffset;
         }
     }
 }
