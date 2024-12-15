@@ -109,6 +109,15 @@ namespace AquaModelLibrary.Helpers.Readers
         }
 
         /// <summary>
+        /// Reads a Vector4. If this reader's _BEReadActive = true, it will be read as Big Endian.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Quaternion ReadBEQuat()
+        {
+            return new Quaternion(ReadBE<float>(), ReadBE<float>(), ReadBE<float>(), ReadBE<float>());
+        }
+
+        /// <summary>
         /// Reads a Matrix4x4. If this reader's _BEReadActive = true, it will be read as Big Endian.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
