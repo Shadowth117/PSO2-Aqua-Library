@@ -278,12 +278,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData
             return Quaternion.Slerp(lowValue.ToQuat(), highValue.ToQuat(), (float)ratio).ToVec4();
         }
 
-        private static double GetTimeRatio(ref double time, ref uint lowTime, ref uint highTime)
+        private double GetTimeRatio(ref double time, ref uint lowTime, ref uint highTime)
         {
             //Interpolate based on results
-            time /= 0x10;
-            highTime /= 0x10;
-            lowTime /= 0x10;
+            var timeMult = (uint)GetTimeMultiplier();
+            time /= timeMult;
+            highTime /= timeMult;
+            lowTime /= timeMult;
             double ratio = (time - lowTime) / (highTime - lowTime);
             return ratio;
         }
