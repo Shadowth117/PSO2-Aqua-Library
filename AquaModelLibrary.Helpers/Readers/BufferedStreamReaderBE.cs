@@ -332,7 +332,12 @@ namespace AquaModelLibrary.Helpers.Readers
                 return null;
             }
             string str = Encoding.ASCII.GetString(ReadBytes(pos, blockSize));
-            return str.Remove(str.IndexOf(char.MinValue));
+            var minVal = str.IndexOf(char.MinValue);
+            if(minVal != -1)
+            {
+                return str;
+            }
+            return str.Remove(minVal);
         }
 
         /// <summary>
@@ -356,6 +361,7 @@ namespace AquaModelLibrary.Helpers.Readers
             if (minVal == -1)
             {
                 Seek(blockSize, SeekOrigin.Current);
+                return str;
             }
             else
             {
@@ -381,7 +387,12 @@ namespace AquaModelLibrary.Helpers.Readers
                 return null;
             }
             string str = Encoding.UTF8.GetString(ReadBytes(Position, blockSize)); //Shouldn't ever be more than 0x60... in theory
-            return str.Remove(str.IndexOf(char.MinValue));
+            var minVal = str.IndexOf(char.MinValue);
+            if (minVal != -1)
+            {
+                return str;
+            }
+            return str.Remove(minVal);
         }
 
         /// <summary>
