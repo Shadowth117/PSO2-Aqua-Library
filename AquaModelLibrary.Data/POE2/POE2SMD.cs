@@ -150,11 +150,19 @@ namespace AquaModelLibrary.Data.POE2
             public Vector4 weights;
         }
 
-        public List<AquaObject> ConvertToAquaObject()
+        public List<AquaObject> ConvertToAquaObject(AquaNode aqn = null)
         {
             List<AquaObject> aqoList = new List<AquaObject>();
             var aqo = new AquaObject();
             aqo.objc.type = 0xC33;
+
+            if(aqn != null)
+            {
+                for(int i = 0; i < aqn.nodeList.Count; i++)
+                {
+                    aqo.bonePalette.Add((uint)i);
+                }
+            }
 
             List<Dictionary<int, int>> vertMappingList = new List<Dictionary<int, int>>();
 
@@ -169,9 +177,9 @@ namespace AquaModelLibrary.Data.POE2
                     var vert1 = meshIndices[m][f + 1];
                     var vert2 = meshIndices[m][f + 2];
 
-                    AddVertex(vtxl, vertexMapping, vert0);
-                    AddVertex(vtxl, vertexMapping, vert1);
-                    AddVertex(vtxl, vertexMapping, vert2);
+                    AddVertex(vtxl, vertexMapping, vert0, aqn != null);
+                    AddVertex(vtxl, vertexMapping, vert1, aqn != null);
+                    AddVertex(vtxl, vertexMapping, vert2, aqn != null);
 
                     indices.Add(new Vector3(vertexMapping[vert0], vertexMapping[vert1], vertexMapping[vert2]));
                 }
@@ -190,7 +198,7 @@ namespace AquaModelLibrary.Data.POE2
             return aqoList;
         }
 
-        private void AddVertex(VTXL vtxl, Dictionary<int, int> vertexMapping, int vert)
+        private void AddVertex(VTXL vtxl, Dictionary<int, int> vertexMapping, int vert, bool hasBones)
         {
             if (!vertexMapping.ContainsKey(vert))
             {
@@ -199,6 +207,11 @@ namespace AquaModelLibrary.Data.POE2
                 vertexMapping[vertId] = vtxl.vertPositions.Count;
                 vtxl.vertPositions.Add(newVert.position);
                 vtxl.uv1List.Add(newVert.uv1);
+                if(hasBones)
+                {
+                    vtxl.vertWeightIndices.Add(new int[] { newVert.weightIndices[0], newVert.weightIndices[1], newVert.weightIndices[2], newVert.weightIndices[3] });
+                    vtxl.vertWeights.Add(newVert.weights);
+                }
             }
         }
     }

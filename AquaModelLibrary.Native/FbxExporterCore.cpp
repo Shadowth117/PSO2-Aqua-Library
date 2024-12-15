@@ -14,6 +14,7 @@ using namespace AquaModelLibrary::Data::PSO2::Aqua::AquaObjectData::Intermediary
 
 namespace AquaModelLibrary::Objects::Processing::Fbx
 {
+    const char* optionThree = "Xzy";
 
     FbxAMatrix CreateFbxAMatrixFromNumerics( Matrix4x4 matrix )
     {
@@ -826,6 +827,11 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             case 2:
                 lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::DirectX);
                 break;
+            case 3:
+                FbxAxisSystem axisSystem;
+                FbxAxisSystem::ParseAxisSystem(optionThree, axisSystem);
+                lScene->GetGlobalSettings().SetAxisSystem(axisSystem);
+                break;
         }
         lScene->GetGlobalSettings().SetSystemUnit( FbxSystemUnit::m );
         lExporter->Export( lScene );
@@ -958,6 +964,11 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 break;
             case 2:
                 lScene->GetGlobalSettings().SetAxisSystem(FbxAxisSystem::DirectX);
+                break;
+            case 3:
+                FbxAxisSystem axisSystem;
+                FbxAxisSystem::ParseAxisSystem(optionThree, axisSystem);
+                lScene->GetGlobalSettings().SetAxisSystem(axisSystem);
                 break;
         }
         lScene->GetGlobalSettings().SetSystemUnit(FbxSystemUnit::m);
