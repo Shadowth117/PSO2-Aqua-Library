@@ -1,27 +1,25 @@
-﻿using AquaModelLibrary.Data.BluePoint.CSKL;
-using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
-using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using System.Text;
 
 namespace AquaModelLibrary.Data.POE2
 {
-    public class POE2Armature
+    public class POE2Action
     {
         public List<Bone> bones = new List<Bone>();
         public List<Anim> animList = new List<Anim>();
-        public POE2Armature() { }
+        public POE2Action() { }
 
-        public POE2Armature(byte[] file)
+        public POE2Action(byte[] file)
         {
             Read(file);
         }
 
-        public POE2Armature(BufferedStreamReaderBE<MemoryStream> sr)
+        public POE2Action(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
@@ -41,11 +39,11 @@ namespace AquaModelLibrary.Data.POE2
             var animCount = sr.ReadBE<byte>();
             var int_04 = sr.ReadBE<int>();
 
-            for(int i = 0; i < boneCount; i++)
+            for (int i = 0; i < boneCount; i++)
             {
                 bones.Add(new Bone(sr));
             }
-            for(int i = 0; i < animCount; i++)
+            for (int i = 0; i < animCount; i++)
             {
                 animList.Add(new Anim(sr));
             }
@@ -64,7 +62,7 @@ namespace AquaModelLibrary.Data.POE2
 
         public void ReadAnimData(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            for(int a = 0; a < animList.Count; a++)
+            for (int a = 0; a < animList.Count; a++)
             {
                 var anim = animList[a];
                 sr.Seek(anim.animOffset, SeekOrigin.Begin);
@@ -119,7 +117,7 @@ namespace AquaModelLibrary.Data.POE2
                 var unkInt2 = sr.ReadBE<int>();
                 var unkInt3 = sr.ReadBE<int>();
 
-                for(int i = 0; i < scaleFrameCount; i++)
+                for (int i = 0; i < scaleFrameCount; i++)
                 {
                     scaleFrameTimes.Add(sr.ReadBE<float>());
                     scaleFrameData.Add(sr.ReadBEV3());
@@ -228,11 +226,11 @@ namespace AquaModelLibrary.Data.POE2
                 {
                     parentId = parentDict[i];
                 }
-                if(bone.childId != 0xFF)
+                if (bone.childId != 0xFF)
                 {
                     parentDict.Add(bone.childId, i);
                 }
-                if(bone.nextSiblingId != 0xFF && parentId != 0xFF)
+                if (bone.nextSiblingId != 0xFF && parentId != 0xFF)
                 {
                     parentDict.Add(bone.nextSiblingId, parentId);
                 }
@@ -257,7 +255,8 @@ namespace AquaModelLibrary.Data.POE2
                 if (parentId == 0xFF && i != 0)
                 {
                     parentId = 0;
-                } else if (parentId == 0xFF && i == 0)
+                }
+                else if (parentId == 0xFF && i == 0)
                 {
                     parentId = -1;
                 }
@@ -292,7 +291,7 @@ namespace AquaModelLibrary.Data.POE2
         {
             motionList = new List<AquaMotion>();
             motionNames = new List<string>();
-            for(int i = 0; i < animList.Count; i++)
+            for (int i = 0; i < animList.Count; i++)
             {
                 var anim = animList[i];
                 motionNames.Add(anim.animName);
@@ -302,15 +301,15 @@ namespace AquaModelLibrary.Data.POE2
                 motion.moHeader.endFrame = (int)anim.keySets[0].scaleFrameTimes[^1];
                 motion.moHeader.nodeCount = anim.keySets.Count;
                 motion.motionKeys = new List<KeyData>();
-                for(int ks = 0; ks < anim.keySets.Count; ks++)
+                for (int ks = 0; ks < anim.keySets.Count; ks++)
                 {
                     var keySet = anim.keySets[ks];
                     KeyData keyData = new KeyData();
                     keyData.mseg.nodeName.SetString(bones[keySet.nodeId].boneName);
                     keyData.mseg.nodeId = keySet.nodeId;
                     keyData.keyData = new List<MKEY>();
-                    
-                    if(keySet.posFrameData.Count > 0)
+
+                    if (keySet.posFrameData.Count > 0)
                     {
                         MKEY mkey = new MKEY();
                         mkey.dataType = 1;
