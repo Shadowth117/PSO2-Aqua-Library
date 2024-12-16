@@ -4,12 +4,14 @@ using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using Half = AquaModelLibrary.Data.DataTypes.Half;
-using AquaModelLibrary.Data.BillyHatcher.ARCData;
 
 namespace AquaModelLibrary.Data.POE2
 {
-    public enum VertexData : byte
+    [Flags]
+    public enum VertexData : int
     {
+        Color = 0x1,
+        UV2 = 0x2,       //Always 0 in the file found. Might not be a uv at all
         Weights = 0x4,
         UV = 0x8,        //UV, Normal, and Position might be mixed up as they seem to all be used every time
         Normal = 0x10,
@@ -78,7 +80,7 @@ namespace AquaModelLibrary.Data.POE2
             byte bt_26 = sr.ReadBE<byte>();
             byte meshCount = sr.ReadBE<byte>();
             byte bt_28 = sr.ReadBE<byte>();
-            int int_29 = sr.ReadBE<int>();
+            VertexData vertexFormat = (VertexData)sr.ReadBE<int>();
             int int_2D = sr.ReadBE<int>();
             int vertexCount = sr.ReadBE<int>();
 
@@ -119,22 +121,32 @@ namespace AquaModelLibrary.Data.POE2
             for(int i = 0; i < vertexCount; i++)
             {
                 POE2Vertex vertex = new POE2Vertex();
-                vertex.position = sr.ReadBE<Vector3>();
-
-                //Normals, Tangents/Binormals, UVs are probably all shorts we need to divide by some magnitude (Maybe just short.Max in this case?)
-                //Weights + weight indices and vert colors usually aren't together, probably.
-                vertex.normal = new Quaternion(sr.ReadBE<short>() / (float)short.MaxValue, sr.ReadBE<short>() / (float)short.MaxValue, sr.ReadBE<short>() / (float)short.MaxValue, sr.ReadBE<short>() / (float)short.MaxValue);
-                vertex.uv1 = new Vector2(sr.ReadBE<Half>(), sr.ReadBE<Half>());
-
-                if (isSMD)
+                if((vertexFormat & VertexData.Position) > 0)
+                {
+                    vertex.position = sr.ReadBE<Vector3>();
+                }
+                if ((vertexFormat & VertexData.Normal) > 0)
+                {
+                    vertex.normal = new Quaternion(sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>());
+                }
+                if ((vertexFormat & VertexData.UV) > 0)
+                {
+                    vertex.uv1 = new Vector2(sr.ReadBE<Half>(), sr.ReadBE<Half>());
+                }
+                if ((vertexFormat & VertexData.UV2) > 0)
+                {
+                    vertex.uv2 = new Vector2(sr.ReadBE<Half>(), sr.ReadBE<Half>());
+                }
+                if ((vertexFormat & VertexData.Color) > 0)
+                {
+                    vertex.color = sr.Read4Bytes();
+                }
+                if ((vertexFormat & VertexData.Weights) > 0)
                 {
                     vertex.weightIndices = sr.Read4Bytes();
                     vertex.weights = new Vector4(sr.ReadBE<byte>() / (float)byte.MaxValue, sr.ReadBE<byte>() / (float)byte.MaxValue, sr.ReadBE<byte>() / (float)byte.MaxValue, sr.ReadBE<byte>() / (float)byte.MaxValue);
-                    /*
-                    vertex.ints.Add(sr.ReadBE<int>());
-                    vertex.ints.Add(sr.ReadBE<int>());
-                    */
                 }
+
                 vertices.Add(vertex);
             }
         }
@@ -145,6 +157,10 @@ namespace AquaModelLibrary.Data.POE2
             public Quaternion normal;
             public Vector3 tangent;
             public Vector2 uv1;
+            public Vector2 uv2;
+            /// <summary>
+            /// RGBA, probably
+            /// </summary>
             public byte[] color = null;
             public byte[] weightIndices = null;
             public Vector4 weights;
