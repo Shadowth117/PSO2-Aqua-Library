@@ -84,6 +84,17 @@
                                         {
                                             extension = ".tmd";
                                         }
+
+                                        if(extension == "")
+                                        {
+                                            var magic3 = BitConverter.ToInt16(fileBytes, 0x8);
+                                            //Really not a magic, but most armatures will have bone 1 as the child and should always have no bone, or -1/FF, for the sibling.
+                                            //Exceptions might be single bone armatures which probably don't have anything of interest to see anyways.
+                                            if (magic3 == 0x1FF)
+                                            {
+                                                extension = ".action"; //Not the real extension name, but it's not easy to tell what it should be so this will have to do
+                                            }
+                                        }
                                     }
                                     break;
                             }
