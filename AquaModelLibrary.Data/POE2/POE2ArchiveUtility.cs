@@ -77,20 +77,21 @@
                                     if(fileBytes.Length > 0x24)
                                     {
                                         var magic2 = BitConverter.ToInt32(fileBytes, 0x20);
+                                        var magic3 = BitConverter.ToInt32(fileBytes, 0x1F);
                                         if(magic2 == 0x6D4C4F44) //DOLm
                                         {
                                             extension = ".smd";
-                                        } else if(magic2 == 0x026D4C4F)
+                                        } else if (magic3 == 0x6D4C4F44)
                                         {
                                             extension = ".tmd";
                                         }
 
                                         if(extension == "")
                                         {
-                                            var magic3 = BitConverter.ToInt16(fileBytes, 0x8);
+                                            var magic4 = BitConverter.ToInt16(fileBytes, 0x8);
                                             //Really not a magic, but most armatures will have bone 1 as the child and should always have no bone, or -1/FF, for the sibling.
                                             //Exceptions might be single bone armatures which probably don't have anything of interest to see anyways.
-                                            if (magic3 == 0x1FF)
+                                            if (magic4 == 0x1FF)
                                             {
                                                 extension = ".action"; //Not the real extension name, but it's not easy to tell what it should be so this will have to do
                                             }
