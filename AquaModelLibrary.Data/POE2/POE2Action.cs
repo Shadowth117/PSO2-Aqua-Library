@@ -177,9 +177,11 @@ namespace AquaModelLibrary.Data.POE2
             public ushort usht_02;
             public byte bt_04;
             public int nameLength;
+            public int parentAnimNameLength;
             public int animOffset;
             public int animSize;
             public string animName;
+            public string parentAnimName; //?Not sure
 
             public List<KeySet> keySets = new List<KeySet>();
             public Anim() { }
@@ -206,10 +208,12 @@ namespace AquaModelLibrary.Data.POE2
                 boneCount = sr.ReadBE<ushort>();
                 usht_02 = sr.ReadBE<ushort>();
                 bt_04 = sr.ReadBE<byte>();
-                nameLength = sr.ReadBE<ushort>();
+                nameLength = sr.ReadBE<byte>();
+                parentAnimNameLength = sr.ReadBE<byte>();
                 animOffset = sr.ReadBE<int>();
                 animSize = sr.ReadBE<int>();
                 animName = Encoding.UTF8.GetString(sr.ReadBytesSeek(nameLength));
+                parentAnimName = Encoding.UTF8.GetString(sr.ReadBytesSeek(parentAnimNameLength));
             }
         }
 
