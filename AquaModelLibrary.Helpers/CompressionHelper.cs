@@ -5,7 +5,7 @@ namespace AquaModelLibrary.Helpers
 {
     public class CompressionHelper
     {
-        public static byte[] ZlibDefaultDecompress(byte[] bytes, int unCompressedSize = int.MaxValue)
+        public static byte[] ZlibDefaultDecompress(byte[] bytes, int unCompressedSize)
         {
             var output = new byte[unCompressedSize];
             int realSize;
