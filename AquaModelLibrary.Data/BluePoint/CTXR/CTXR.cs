@@ -268,6 +268,8 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 long bufferUsed = 0;
                 for (int i = 0; i < internalMipCount; i++)
                 {
+                    mipWidth = Math.Max(mipWidth, pixelBlockSize);
+                    mipHeight = Math.Max(mipHeight, pixelBlockSize);
                     long bufferLength = (formatBpp * mipWidth * mipHeight) / 8;
                     var mipOffset = bufferUsed + 0x80;
                     bufferUsed += bufferLength;
