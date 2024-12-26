@@ -342,7 +342,7 @@ namespace AquaModelLibrary.Helpers.Readers
             }
             string str = Encoding.ASCII.GetString(ReadBytes(pos, blockSize));
             var minVal = str.IndexOf(char.MinValue);
-            if(minVal != -1)
+            if(minVal == -1)
             {
                 return str;
             }
@@ -397,7 +397,7 @@ namespace AquaModelLibrary.Helpers.Readers
             }
             string str = Encoding.UTF8.GetString(ReadBytes(Position, blockSize)); //Shouldn't ever be more than 0x60... in theory
             var minVal = str.IndexOf(char.MinValue);
-            if (minVal != -1)
+            if (minVal == -1)
             {
                 return str;
             }
