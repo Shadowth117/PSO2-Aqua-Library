@@ -2,21 +2,22 @@
 using System.Numerics;
 using System.Text;
 
-namespace AquaModelLibrary.Data.BluePoint.CAWS
+namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
     public enum CGPRMagic : uint
     {
         xC1A69458 = 0x5894A6C1,
         xFAE88582 = 0x8285E8FA,
+        x427AC0E6 = 0xE6C07A42,
+        x2C146841 = 0x4168142C,
     }
     public abstract class CGPRObject
     {
         public uint magic;
 
         //Ending bytes
-        public int int_SemiFinal;
-        public int int_Final;
-        public byte bt_Final;
+        public byte bt_EndSize;
+        public byte[] endBytes = null;
 
         public CGPRObject()
         {
@@ -25,7 +26,7 @@ namespace AquaModelLibrary.Data.BluePoint.CAWS
 
         public CGPRObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            magic = sr.Read<uint>();
+            magic = sr.Peek<uint>();
         }
     }
 
@@ -174,8 +175,7 @@ namespace AquaModelLibrary.Data.BluePoint.CAWS
 
             postStrInt_25 = sr.Read<int>();
 
-            int_SemiFinal = sr.Read<int>();
-            int_Final = sr.Read<int>();
+            endBytes = sr.ReadBytesSeek(8);
         }
     }
 
@@ -253,9 +253,76 @@ namespace AquaModelLibrary.Data.BluePoint.CAWS
                     throw new Exception($"Unexpected typeFlag0 value {type0Flag}");
             }
 
-            int_SemiFinal = sr.Read<int>();
-            int_Final = sr.Read<int>();
-            bt_Final = sr.Read<byte>();
+            bt_EndSize = sr.Read<byte>();
+            endBytes = sr.ReadBytesSeek(bt_EndSize);
+        }
+    }
+
+    public class _427AC0E6_Object : CGPRObject
+    {
+        public cgprCommonHeader mainHeader;
+        public cgprCommonHeader subHeader0;
+        public ushort subStructCount;
+
+        public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
+
+        public _427AC0E6_Object()
+        {
+
+        }
+
+        public _427AC0E6_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            magic = sr.Peek<uint>();
+            mainHeader = sr.Read<cgprCommonHeader>();
+            subHeader0 = sr.Read<cgprCommonHeader>();
+            subStructCount = sr.Read<ushort>();
+            for(int i = 0; i < subStructCount; i++)
+            {
+                subStructs.Add(CGPRSubObject.ReadSubObject(sr));
+            }
+
+            bt_EndSize = sr.Read<byte>();
+            endBytes = sr.ReadBytesSeek(bt_EndSize);
+        }
+    }
+
+    public class _2C146841_Object : CGPRObject
+    {
+        public int int_00;
+        public ushort usht_04;
+        public ushort bt_06;
+        public ushort byteArrayLen;
+        public byte[] byteArray0 = null;
+        public int unkInt0;
+        public byte[] byteArray1 = null;
+
+        public List<string> strings = new List<string>();
+
+        public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
+
+        public _2C146841_Object()
+        {
+
+        }
+
+        public _2C146841_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            magic = sr.Read<uint>();
+            int_00 = sr.Read<int>();
+            usht_04 = sr.Read<ushort>();
+            bt_06 = sr.Read<byte>();
+            byteArrayLen = sr.Read<byte>();
+            byteArray0 = sr.ReadBytesSeek(byteArrayLen);
+            unkInt0 = sr.Read<int>();
+            byteArray1 = sr.ReadBytesSeek(byteArrayLen);
+
+            var stringCount = sr.Read<ushort>();
+            for (int i = 0; i < stringCount; i++)
+            {
+                var strLen = sr.Read<byte>();
+                strings.Add(sr.ReadCStringSeek(strLen));
+            }
         }
     }
 }

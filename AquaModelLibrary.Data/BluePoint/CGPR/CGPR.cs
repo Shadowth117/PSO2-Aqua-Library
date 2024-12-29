@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 
-namespace AquaModelLibrary.Data.BluePoint.CAWS
+namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
     public class CGPR
     {
@@ -44,6 +44,12 @@ namespace AquaModelLibrary.Data.BluePoint.CAWS
                         break;
                     case (uint)CGPRMagic.xFAE88582:
                         objects.Add(new _FAE88582_Object(sr));
+                        break;
+                    case (uint)CGPRMagic.x427AC0E6:
+                        objects.Add(new _427AC0E6_Object(sr));
+                        break;
+                    case (uint)CGPRMagic.x2C146841:
+                        objects.Add(new _2C146841_Object(sr));
                         break;
                     default:
                         throw new Exception($"Unexpected object {type0.ToString("X")} discovered");
