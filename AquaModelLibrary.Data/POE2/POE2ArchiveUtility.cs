@@ -44,8 +44,6 @@
             
             if(index != null)
             {
-                var test = index.fileNames.ToArray().ToList();
-                test.Sort();
                 var id = index.fileNames.IndexOf(path);
                 if(id == -1)
                 {
@@ -53,55 +51,80 @@
                 } else
                 {
                     int counter = 0;
+
+                    //In theory we don't need this dictionary, but just in case...
+                    Dictionary<string, int> filePathCounter = new Dictionary<string, int>();
                     foreach(var header in index.fileHeaderList)
                     {
                         if(header.archiveIndexId == id)
                         {
                             var fileBytes = new byte[header.fileSize];
                             Array.Copy(fileBlob, header.archiveOffset, fileBytes, 0, header.fileSize);
-                            string extension = "";
-
-                            var magic = BitConverter.ToInt32(fileBytes);
-                            switch(magic)
+                            ArchiveFile file = new ArchiveFile();
+                            
+                            if(header.virtualFilePath == null)
                             {
-                                case 0x20534444: //DDS
-                                    extension = ".dds";
-                                    break;
-                                case 0x5367674F: //OggS
-                                    extension = ".ogg";
-                                    break;
-                                case 0x46464952: //RIFF
-                                    extension = ".wav";
-                                    break;
-                                default:
-                                    if(fileBytes.Length > 0x24)
-                                    {
-                                        var magic2 = BitConverter.ToInt32(fileBytes, 0x20);
-                                        var magic3 = BitConverter.ToInt32(fileBytes, 0x1F);
-                                        if(magic2 == 0x6D4C4F44) //DOLm
+                                string extension = "";
+                                var magic = BitConverter.ToInt32(fileBytes);
+                                switch (magic)
+                                {
+                                    case 0x20534444: //DDS
+                                        extension = ".dds";
+                                        break;
+                                    case 0x5367674F: //OggS
+                                        extension = ".ogg";
+                                        break;
+                                    case 0x46464952: //RIFF
+                                        extension = ".wav";
+                                        break;
+                                    default:
+                                        if (fileBytes.Length > 0x24)
                                         {
-                                            extension = ".smd";
-                                        } else if (magic3 == 0x6D4C4F44)
-                                        {
-                                            extension = ".tmd";
-                                        }
-
-                                        if(extension == "")
-                                        {
-                                            var magic4 = BitConverter.ToInt16(fileBytes, 0x8);
-                                            //Really not a magic, but most armatures will have bone 1 as the child and should always have no bone, or -1/FF, for the sibling.
-                                            //Exceptions might be single bone armatures which probably don't have anything of interest to see anyways.
-                                            if (magic4 == 0x1FF)
+                                            var magic2 = BitConverter.ToInt32(fileBytes, 0x20);
+                                            var magic3 = BitConverter.ToInt32(fileBytes, 0x1F);
+                                            if (magic2 == 0x6D4C4F44) //DOLm
                                             {
-                                                extension = ".action"; //Not the real extension name, but it's not easy to tell what it should be so this will have to do
+                                                extension = ".smd";
+                                            }
+                                            else if (magic3 == 0x6D4C4F44)
+                                            {
+                                                extension = ".tmd";
+                                            }
+
+                                            if (extension == "")
+                                            {
+                                                var magic4 = BitConverter.ToInt16(fileBytes, 0x8);
+                                                //Really not a magic, but most armatures will have bone 1 as the child and should always have no bone, or -1/FF, for the sibling.
+                                                //Exceptions might be single bone armatures which probably don't have anything of interest to see anyways.
+                                                if (magic4 == 0x1FF)
+                                                {
+                                                    extension = ".ast"; //Formerly .action when I didn't know what this was
+                                                }
                                             }
                                         }
-                                    }
-                                    break;
+                                        break;
+                                }
+                                file.name = $"file_{counter}" + extension;
+                            } else
+                            {
+                                var fileName = header.virtualFilePath;
+                                if (!filePathCounter.ContainsKey(fileName))
+                                {
+                                    filePathCounter[fileName] = 1;
+                                } else
+                                {
+                                    filePathCounter[fileName] += 1;
+                                }
+
+                                //In the offchance it's possible for a duplicate since we're not retaining the original folders
+                                if(filePathCounter[fileName] > 1)
+                                {
+                                    var ext = Path.GetExtension(fileName);
+                                    fileName = fileName.Replace(ext, $"({filePathCounter[fileName]}).{ext}");
+                                }
+                                file.name = Path.GetFileName(fileName);
                             }
 
-                            ArchiveFile file = new ArchiveFile();
-                            file.name = $"file_{counter}" + extension;
                             file.file = fileBytes;
                             files.Add(file);
                             counter++;
