@@ -1386,7 +1386,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
 
         //Used to generate standard materials in which the texture names are used. 
-        public void GenerateMaterial(GenericMaterial mat, bool ngsMat = false)
+        public void GenerateMaterial(GenericMaterial mat, bool ngsMat = false, bool modelHadUnicodeNames = false)
         {
             if (mat.specialType != null)
             {
@@ -1687,7 +1687,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             mateList.Add(mate);
             shadList.Add(shad);
             rendList.Add(rend);
-            matUnicodeNames.Add(mat.matName);
+
+            if(modelHadUnicodeNames == false)
+            {
+                matUnicodeNames.Add(mat.matName);
+            }
         }
 
         public static string RemoveBlenderAndAssimpStringArtifacts(string name)
@@ -1863,9 +1867,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             //Set up materials and related data
             if (mateList.Count == 0)
             {
+                bool hadUnicodeNames = matUnicodeNames.Count > 0; 
                 for (int mat = 0; mat < tempMats.Count; mat++)
                 {
-                    GenerateMaterial(tempMats[mat], true);
+                    GenerateMaterial(tempMats[mat], true, hadUnicodeNames);
                 }
             }
 
