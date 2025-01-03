@@ -194,7 +194,13 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
 
                 if ( !clusterMap->TryGetValue( boneIndex, clusterPtr ) )
                 {
-                    lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, String::Format("(" + boneIndex + ")" + node.boneName.GetString()) ) ).ToCStr() );
+                    System::String^ boneName = node.boneName.GetString();
+                    if (aqn->nodeUnicodeNames->Count > boneIndex)
+                    {
+                        boneName = aqn->nodeUnicodeNames[boneIndex];
+                    }
+                    boneName = aqn->GetNodeName(boneIndex);
+                    lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, String::Format("({0}){1}", boneIndex, boneName) ) ).ToCStr() );
                     lCluster->SetLink( lBoneNode );
                     lCluster->SetLinkMode( FbxCluster::eTotalOne );
 
@@ -431,6 +437,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         {
             boneName = aqn->nodeUnicodeNames[boneIndex];
         }
+        boneName = aqn->GetNodeName(boneIndex);
         if (includeMetadata)
         {
             name = Utf8String(String::Format("(" + boneIndex + ")" + boneName + "#" + node.boneShort1.ToString("X") + "#" + node.boneShort2.ToString("X"))).ToCStr();
@@ -475,6 +482,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         {
             boneName = aqn->nodoUnicodeNames[boneIndex];
         }
+        boneName = aqn->GetNodoName(boneIndex);
         if (includeMetadata)
         {
             name = Utf8String(boneName + "#" + nodo.boneShort1.ToString("X") + "#" + nodo.boneShort2.ToString("X")).ToCStr();

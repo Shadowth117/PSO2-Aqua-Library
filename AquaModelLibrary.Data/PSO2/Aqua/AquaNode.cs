@@ -331,7 +331,33 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return outBytes.ToArray();
         }
 
-        private Matrix4x4 DefaultNewMatrix = Matrix4x4.Identity; 
+        public string GetNodeName(int id)
+        {
+            string finalName;
+            if(nodeUnicodeNames.Count > id)
+            {
+                finalName =  nodeUnicodeNames[id];
+            } else
+            {
+                finalName = nodeList[id].boneName.GetString();
+            }
+            return finalName;
+        }
+
+        public string GetNodoName(int id)
+        {
+            string finalName;
+            if (nodoUnicodeNames.Count > id)
+            {
+                finalName = nodoUnicodeNames[id];
+            }
+            else
+            {
+                finalName = nodoList[id].boneName.GetString();
+            }
+            return finalName;
+        }
+
         public void AddRootNode(string rootNodeName = "Root_Node", Matrix4x4? matrix = null)
         {
             for(int i = 0; i < nodeList.Count; i++)
