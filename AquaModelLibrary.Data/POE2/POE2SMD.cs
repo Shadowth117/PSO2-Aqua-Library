@@ -32,7 +32,7 @@ namespace AquaModelLibrary.Data.POE2
     }
 
     //Mesh data is stored here. Skeletal data is stored with animations
-    //SMD is presumably SkeletalMoDel while TMD is TerrainMoDel
+    //SMD is SkinnedMeshData while TMD is TerrainMeshData
     public class POE2SMD
     {
         public List<POE2Model> models = new List<POE2Model>();

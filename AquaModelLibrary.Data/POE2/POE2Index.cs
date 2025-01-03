@@ -65,7 +65,7 @@ namespace AquaModelLibrary.Data.POE2
                     bool shouldReset = false;
 
                     streamReader.Seek(textBlockInfo.textBlockOffset, SeekOrigin.Begin);
-                    while (streamReader.Position <= textBlockInfo.textBlockOffset + textBlockInfo.innerOffset - 0x4)
+                    while (streamReader.Position <= textBlockInfo.textBlockOffset + textBlockInfo.blockSize - 0x4)
                     {
                         int index = streamReader.ReadBE<int>();
                         if(index == 0)
@@ -80,7 +80,7 @@ namespace AquaModelLibrary.Data.POE2
                             index -= 1;
 
                             var posFirst = streamReader.Position;
-                            var filePath = streamReader.ReadCStringSeek();
+                            var filePath = streamReader.ReadCStringSeek(Math.Min(0x100, textBlockInfo.blockSize));
                             var posAfter = streamReader.Position;
 
                             if (index < currentTextList.Count)
@@ -166,8 +166,8 @@ namespace AquaModelLibrary.Data.POE2
         {
             public ulong hash;
             public int textBlockOffset;
-            public int innerOffset;
-            public int sectionSize;
+            public int blockSize;
+            public int recursiveSize;
             public TextBlockInfo() { }
             public TextBlockInfo(byte[] file)
             {
@@ -187,8 +187,8 @@ namespace AquaModelLibrary.Data.POE2
             {
                 hash = sr.ReadBE<ulong>();
                 textBlockOffset = sr.ReadBE<int>();
-                innerOffset = sr.ReadBE<int>();
-                sectionSize = sr.ReadBE<int>();
+                blockSize = sr.ReadBE<int>();
+                recursiveSize = sr.ReadBE<int>();
             }
 
         }
