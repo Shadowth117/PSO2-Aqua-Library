@@ -168,16 +168,15 @@ namespace AquaModelLibrary.Data.Utility
                                Matrix4x4.CreateRotationZ(bn.eulRot.Z);
 
                 tfm *= rotation;
-                tfm *= Matrix4x4.CreateTranslation(bn.pos);
                 tfm *= originalMatrices[i];
                 tfm = FlipMatrixX(tfm);
                 tfm *= originalMatricesInverted[i];
 
                 Matrix4x4.Decompose(tfm, out var scale, out var rot, out var pos);
-                bn.pos = pos;
+                bn.pos = new Vector3(-bn.pos.X, bn.pos.Y, bn.pos.Z);
                 bn.eulRot = MathExtras.QuaternionToEuler(rot);
 
-                aqn.nodoList.Add(bn);
+                aqn.nodoList[i] = bn;
             }
         }
 
@@ -252,16 +251,15 @@ namespace AquaModelLibrary.Data.Utility
                                Matrix4x4.CreateRotationZ(bn.eulRot.Z);
 
                 tfm *= rotation;
-                tfm *= Matrix4x4.CreateTranslation(bn.pos);
                 tfm *= originalMatrices[i];
                 tfm = FlipMatrixY(tfm);
                 tfm *= originalMatricesInverted[i];
 
                 Matrix4x4.Decompose(tfm, out var scale, out var rot, out var pos);
-                bn.pos = pos;
+                bn.pos = new Vector3(bn.pos.X, -bn.pos.Y, bn.pos.Z);
                 bn.eulRot = MathExtras.QuaternionToEuler(rot);
 
-                aqn.nodoList.Add(bn);
+                aqn.nodoList[i] = bn;
             }
         }
 
@@ -336,16 +334,15 @@ namespace AquaModelLibrary.Data.Utility
                    Matrix4x4.CreateRotationZ(bn.eulRot.Z);
 
                 tfm *= rotation;
-                tfm *= Matrix4x4.CreateTranslation(bn.pos);
-                tfm *= originalMatrices[i];
+                tfm *= originalMatrices[bn.parentId];
                 tfm = FlipMatrixZ(tfm);
-                tfm *= originalMatricesInverted[i];
+                tfm *= originalMatricesInverted[bn.parentId];
 
                 Matrix4x4.Decompose(tfm, out var scale, out var rot, out var pos);
-                bn.pos = pos;
+                bn.pos = new Vector3(bn.pos.X, bn.pos.Y, -bn.pos.Z);
                 bn.eulRot = MathExtras.QuaternionToEuler(rot);
 
-                aqn.nodoList.Add(bn);
+                aqn.nodoList[i] = bn;
             }
         }
 
