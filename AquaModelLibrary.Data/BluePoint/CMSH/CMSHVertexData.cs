@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.MathHelpers;
+using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
@@ -43,7 +44,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         //Data
         public List<Vector3> positionList = new List<Vector3>();
-        public List<Quaternion> normals = new List<Quaternion>();
+        public List<Vector3> normals = new List<Vector3>();
+        public List<Quaternion> normalQs = new List<Quaternion>();
         public List<byte[]> normalsTesting = new List<byte[]>();
         public List<string> normalsTesting2 = new List<string>();
         public List<byte[]> normalTemp = new List<byte[]>();
@@ -131,31 +133,18 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 case VertexMagic.QUT0:
                     for (int v = 0; v < vertCount; v++)
                     {
-                        /*
-                        var byteArr = sr.ReadBytes(sr.Position(), 4);
-                        sr.Seek(4, System.IO.SeekOrigin.Current);
-                        Quaternion quat = new Quaternion(ConvertBPSbyte(byteArr[0]), ConvertBPSbyte(byteArr[1]), ConvertBPSbyte(byteArr[2]), ConvertBPSbyte(byteArr[3]));
+                        var byteArr = sr.Read4Bytes();
+                        //Quaternion quat = new Quaternion(ConvertBPSbyte(byteArr[0]), ConvertBPSbyte(byteArr[1]), ConvertBPSbyte(byteArr[2]), ConvertBPSbyte(byteArr[3]));
                         normalTemp.Add(byteArr);
-                        */
-                        var vector = sr.Read<int>();
-#if DEBUG
-                        var a = BitConverter.GetBytes(vector);
-                        normalsTesting.Add(a);
-                        normalsTesting2.Add($"{a[0]:X2}{a[1]:X2}{a[2]:X2}{a[3]:X2}");
-#endif
-                        //var vector = BitConverter.ToInt32(byteArr, 0);
-                        int x = vector << 21 >> 21;
-                        int y = vector << 10 >> 21;
-                        int z = vector << 0 >> 22;
-                        var processedVectorTest = new Vector3(x / (float)0b11_1111_1111, y / (float)0b11_1111_1111, z / (float)0b1_1111_1111);
-                        var squareMagnitude = processedVectorTest.X * processedVectorTest.X + processedVectorTest.Y * processedVectorTest.Y + processedVectorTest.Z * processedVectorTest.Z;
-                        var scalar = 2.0 / (squareMagnitude + 1.0);
-                        var vector4 = new Vector4((float)(scalar * processedVectorTest.X), (float)(scalar * processedVectorTest.Y), (float)(scalar * processedVectorTest.Z), (float)((1.0 - squareMagnitude) / (1.0 + squareMagnitude)));
-                        Quaternion quatNormal = new Quaternion((float)(scalar * processedVectorTest.X), (float)(scalar * processedVectorTest.Y), (float)(scalar * processedVectorTest.Z), (float)((1.0 - squareMagnitude) / (1.0 + squareMagnitude)));
-                        normals.Add(quatNormal);
+
                         //Debug.WriteLine($"Byte represntation {byteArr[0]:X2} {byteArr[1]:X2} {byteArr[2]:X2} {byteArr[3]:X2} - {((float)byteArr[0]) / 255} {((float)byteArr[1]) / 255} {((float)byteArr[2]) / 255} {((float)byteArr[3]) / 255} \nSByte representation {sbyteArr[0]:X2} {sbyteArr[1]:X2} {sbyteArr[2]:X2} {sbyteArr[3]:X2} - {((float)sbyteArr[0]) / 127} {((float)sbyteArr[1]) / 127} {((float)sbyteArr[2]) / 127} {((float)sbyteArr[3]) / 127} ");
-                        //Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
-                        //normals.Add(quat);
+                        Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
+                        var testQuat = new Quaternion(quat.Z, quat.Y, quat.X, quat.W);
+                        quat = testQuat;
+                        var vq4Quat = quat.ToVec4() * 2;
+                        vq4Quat -= new Vector4(1,1,1,1);
+                        var n = new Vector3(0, 0, 1) + new Vector3(2, 2, -2) * vq4Quat.X * new Vector3(vq4Quat.Z, vq4Quat.W, vq4Quat.X) + new Vector3(-2, 2, -2) * vq4Quat.Y * new Vector3(vq4Quat.W, vq4Quat.Z, vq4Quat.Y);
+                        normals.Add(n);
                     }
                     break;
                 case VertexMagic.COL0:
