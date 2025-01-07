@@ -1,7 +1,6 @@
 ﻿using AquaModelLibrary.Data.Utility;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
-using System.Security.Cryptography.X509Certificates;
 using static DirectXTex.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.BluePoint.CTXR
