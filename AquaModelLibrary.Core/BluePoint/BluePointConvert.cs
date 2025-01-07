@@ -182,6 +182,15 @@ namespace AquaModelLibrary.Core.BluePoint
 
         }
 
+        public static void ConvertCTXR(string ctxrPath)
+        {
+            if (File.Exists(ctxrPath))
+            {
+                var ctxr = new CTXR(File.ReadAllBytes(ctxrPath));
+                ctxr.WriteToDDS(ctxrPath, Path.Combine(Path.GetDirectoryName(ctxrPath), Path.GetFileName(ctxrPath).Replace(".ctxr", ".dds")));
+            }
+        }
+
         /// <summary>
         /// Takes in a CMSH path, a dictionary of CMATs, and outputs an AquaObject and AquaNode
         /// </summary>
@@ -346,7 +355,7 @@ namespace AquaModelLibrary.Core.BluePoint
             for (int v = 0; v < vertCount; v++)
             {
                 vtxl.vertPositions.Add(mesh.vertData.positionList[v]);
-                //vtxl.vertNormals.Add(Vector3.Transform(mesh.vertData.normals[v], mirrorMat));
+                //vtxl.vertNormals.Add(mesh.vertData.normals[v]);
                 //var quat = mesh.vertData.normals[v];
 
                 //UVs
