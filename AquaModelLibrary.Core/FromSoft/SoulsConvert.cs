@@ -29,6 +29,8 @@ namespace AquaModelLibrary.Core.FromSoft
         public static bool separateMSBDumpByModel = false;
         public static bool doNotAdjustRootRotation = false;
         public static bool addFBXRootNode = true;
+        public static bool addFlverDummies = false;
+        public static bool parentDummiesToAttachNodes = true;
 
         public static SoulsGame game = SoulsGame.None;
         public static ExportFormat exportFormat = ExportFormat.Fbx;
@@ -905,7 +907,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
                 aqNode.pos = flverBone.Translation;
-                aqNode.eulRot = flverBone.Rotation;
+                aqNode.eulRot = flverBone.Rotation * (float)(180 / Math.PI);
                 aqNode.scale = new Vector3(1, 1, 1);
 
 #if DEBUG
@@ -925,6 +927,45 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.boneName.SetString(flverBone.Name);
                 aqn.nodeUnicodeNames.Add(flverBone.Name);
                 aqn.nodeList.Add(aqNode);
+            }
+
+            if(addFlverDummies)
+            {
+                for (int i = 0; i < flver.Dummies.Count; i++)
+                {
+                    var dummy = flver.Dummies[i];
+                    var transform = Matrix4x4.CreateLookAt(new Vector3(), dummy.Forward, dummy.UseUpwardVector ? dummy.Upward : new Vector3(0, 1, 0)) * Matrix4x4.CreateTranslation(dummy.Position);
+                    NODO nodo = new NODO();
+                    if (dummy.AttachBoneIndex > -1)
+                    {
+                        var realParent = flver.Nodes[dummy.AttachBoneIndex];
+                        if (parentDummiesToAttachNodes)
+                        {
+                            var realParentAqn = aqn.nodeList[dummy.AttachBoneIndex];
+                            var pseudoParentAqn = aqn.nodeList[dummy.ParentBoneIndex];
+                            transform *= pseudoParentAqn.GetInverseBindPoseMatrixInverted();
+                            transform *= realParentAqn.GetInverseBindPoseMatrix();
+                            nodo.parentId = dummy.AttachBoneIndex;
+                        } else
+                        {
+                            nodo.parentId = dummy.ParentBoneIndex;
+                        }
+                        var name = string.Format("Dummy#{0}#{1}#{2}#{3}#{4}#{5}#{6}", dummy.ReferenceID, realParent.Name, flver.Nodes[dummy.ParentBoneIndex].Name, dummy.Flag1, dummy.Unk30, dummy.Unk34, $"{dummy.Color.R:X}{dummy.Color.G:X}{dummy.Color.B:X}{dummy.Color.A:X}");
+                        nodo.boneName.SetString(name);
+                        aqn.nodoUnicodeNames.Add(name);
+                    }
+                    else
+                    {
+                        var name = string.Format("Dummy#{0}#None#{1}#{2}#{3}#{4}#{5}", dummy.ReferenceID, flver.Nodes[dummy.ParentBoneIndex].Name, dummy.Flag1, dummy.Unk30, dummy.Unk34, $"{dummy.Color.R:X}{dummy.Color.G:X}{dummy.Color.B:X}{dummy.Color.A:X}");
+                        nodo.boneName.SetString(name);
+                        aqn.nodoUnicodeNames.Add(name);
+                        nodo.parentId = dummy.ParentBoneIndex;
+                    }
+                    Matrix4x4.Decompose(transform, out var scale, out var rot, out var pos);
+                    nodo.eulRot = MathExtras.GetFlverEulerFromQuaternion_Bone(rot) * (float)(180 / Math.PI);
+                    nodo.pos = pos;
+                    aqn.nodoList.Add(nodo);
+                }
             }
             Vector3? maxBounding = null;
             Vector3? minBounding = null;
