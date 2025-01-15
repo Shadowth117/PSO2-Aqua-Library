@@ -304,7 +304,15 @@ namespace AquaModelLibrary.Data.PSU
                         //Read and store data
                         for (int j = 0; j < typeCount; j++)
                         {
-                            short rawValue = streamReader.Read<short>();
+                            short rawValue;
+                            //Fix for files that seem to end prematurely. I can only assume they assume the remaining data as 0, but who knows
+                            if (streamReader.Position >= streamReader.BaseStream.Length - 1)
+                            {
+                                rawValue = 0;
+                            } else
+                            {
+                                rawValue = streamReader.Read<short>();
+                            }
                             nomFrame.rawData.Add(rawValue);
                             nomFrame.data.Add(unpackValue(rawValue, isRotList));
                         }
