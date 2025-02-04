@@ -25,6 +25,7 @@ using static AquaModelLibrary.Data.PSO2.Constants.StageFilenames;
 using static AquaModelLibrary.Data.PSO2.Constants.UINames;
 using static AquaModelLibrary.Data.PSO2.Constants.UnitNames;
 using static AquaModelLibrary.Data.PSO2.Constants.WeaponNames;
+using static AquaModelLibrary.Data.Utility.ReferenceGenerator;
 using static AquaModelLibrary.Helpers.HashHelpers;
 
 namespace AquaModelLibrary.Data.Utility
@@ -3323,6 +3324,7 @@ namespace AquaModelLibrary.Data.Utility
             masterNameList = new List<string>();
             strNameDicts = new List<Dictionary<string, string>>();
             GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "facevariation", true);
+            GatherTextIds(textByCat, masterIdList, nameDicts, "face", true);
 
             //Add potential cmx ids that wouldn't be stored in
             GatherDictKeys(masterIdList, aquaCMX.faceDict.Keys);
@@ -3341,9 +3343,15 @@ namespace AquaModelLibrary.Data.Utility
                 }
 
 
-                foreach (var dict in strNameDicts)
+                for(int i = 0; i < strNameDicts.Count; i++)
                 {
+                    var dict = strNameDicts[i];
+                    var idDict = nameDicts[i];
                     if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
+                    {
+                        partData.namesByLanguage.Add(str);
+                    }
+                    else if (idDict.TryGetValue(id, out str) && str != null && str != "" && str.Length > 0)
                     {
                         partData.namesByLanguage.Add(str);
                     }
@@ -8888,6 +8896,7 @@ namespace AquaModelLibrary.Data.Utility
             masterNameList = new List<string>();
             strNameDicts = new List<Dictionary<string, string>>();
             GatherTextIdsStringRef(textByCat, masterNameList, strNameDicts, "facevariation", true);
+            GatherTextIds(textByCat, masterIdList, nameDicts, "face", true);
 
             //Add potential cmx ids that wouldn't be stored in
             GatherDictKeys(masterIdList, aquaCMX.faceDict.Keys);
@@ -8908,11 +8917,17 @@ namespace AquaModelLibrary.Data.Utility
                 }
 
 
-                foreach (var dict in strNameDicts)
+                for (int i = 0; i < strNameDicts.Count; i++)
                 {
+                    var dict = strNameDicts[i];
+                    var idDict = nameDicts[i];
                     if (dict.TryGetValue(realId, out string str) && str != null && str != "" && str.Length > 0)
                     {
                         named = true;
+                        data.namesByLanguage.Add(str);
+                    }
+                    else if (idDict.TryGetValue(id, out str) && str != null && str != "" && str.Length > 0)
+                    {
                         data.namesByLanguage.Add(str);
                     }
                     else
