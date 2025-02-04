@@ -11,7 +11,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
     public class GEPlayer : ARC
     {
         public PuyoFile gvm = null;
-        public List<string> texnames = new List<string>();
+        public NJTextureList texnames = null;
         public NJSObject dFace = null;
         public List<NJSMotion> faceMotions = new List<NJSMotion>();
         public List<NJSMotion> faceShapeMotions = new List<NJSMotion>();
@@ -91,7 +91,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         break;
                     case "texlists":
                         sr.Seek(0x20 + sr.ReadBE<int>(), SeekOrigin.Begin);
-                        texnames = ReadTexNames(sr);
+                        texnames = new NJTextureList(sr, 0x20);
                         break;
                     case "textures":
                         sr.Seek(0x20 + sr.ReadBE<int>(), SeekOrigin.Begin);

@@ -9,7 +9,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
     public class GEEGG : ARC
     {
         public PuyoFile gvm = null;
-        public List<List<string>> texnamesList = new List<List<string>>();
+        public List<NJTextureList> texnamesList = new List<NJTextureList>();
         public Dictionary<string, NJSMotion> motions = new Dictionary<string, NJSMotion>();
         public List<NJSObject> models = new List<NJSObject>();
         public GEEGG() { }
@@ -80,7 +80,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         for(int t = 0; t < 7; t++)
                         {
                             sr.Seek(0x20 + texListOffsets[t], SeekOrigin.Begin);
-                            texnamesList.Add(ReadTexNames(sr));
+                            texnamesList.Add(new NJTextureList(sr, 0x20));
                         }
                         break;
                     case "textures":

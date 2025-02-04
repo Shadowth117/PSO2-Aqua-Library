@@ -65,7 +65,7 @@ namespace AquaModelLibrary.Core.BillyHatcher
         public static List<ModelData> ARCLNDToAqua(LND lnd)
         {
             //Refresh texname list in case it's changed
-            lnd.texnames = lnd.gvm.Entries.Select(e => e.Name).ToList();
+            lnd.texnames.texNames = lnd.gvm.Entries.Select(e => e.Name).ToList();
             List<ModelData> mdlList = new List<ModelData>();
 
             //Standard ARCLND models
@@ -224,7 +224,7 @@ namespace AquaModelLibrary.Core.BillyHatcher
                     matName += $"#S_{mat.entry.sourceAlpha}";
                     matName += $"#D_{mat.entry.destinationAlpha}";
                     int matId;
-                    var tex = texId < 0 ? lnd.texnames[0] : lnd.texnames[texId];
+                    var tex = texId < 0 ? lnd.texnames.texNames[0] : lnd.texnames.texNames[texId];
                     if (materialDict.ContainsKey(matName + $"#{tex}"))
                     {
                         matId = materialDict[matName + $"#{tex}"];
@@ -437,15 +437,15 @@ namespace AquaModelLibrary.Core.BillyHatcher
 
         private static void CreateMaterials(LND lnd, AquaObject aqp)
         {
-            for (int i = 0; i < lnd.texnames.Count; i++)
+            for (int i = 0; i < lnd.texnames.texNames.Count; i++)
             {
-                var tex = lnd.texnames[i];
+                var tex = lnd.texnames.texNames[i];
                 var mat = new GenericMaterial();
                 mat.matName = $"{tex}_{i}";
                 mat.texNames = new List<string>() { $"{tex}.png" };
                 aqp.tempMats.Add(mat);
             }
-            if (lnd.texnames.Count == 0)
+            if (lnd.texnames.texNames.Count == 0)
             {
                 CreateDefaultMaterial(aqp);
             }
@@ -725,14 +725,14 @@ namespace AquaModelLibrary.Core.BillyHatcher
             List<ModelData> animModels = new List<ModelData>();
 
             //Get texture lists;
-            lnd.texnames = lnd.gvm.Entries.Select(e => Path.GetFileNameWithoutExtension(e.Name)).ToList();
+            lnd.texnames.texNames = lnd.gvm.Entries.Select(e => Path.GetFileNameWithoutExtension(e.Name)).ToList();
 
             //Get model data
             foreach (var mdl in modelData)
             {
                 if (mdl.aqm == null)
                 {
-                    var model = AquaToLND(lnd, mdl, false, lnd.texnames);
+                    var model = AquaToLND(lnd, mdl, false, lnd.texnames.texNames);
                     if (mdl.name.ToLower() != "block")
                     {
                         model.arcAltVertColorList.Clear();
