@@ -5,7 +5,6 @@ using AquaModelLibrary.Helpers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -25,7 +24,6 @@ using static AquaModelLibrary.Data.PSO2.Constants.StageFilenames;
 using static AquaModelLibrary.Data.PSO2.Constants.UINames;
 using static AquaModelLibrary.Data.PSO2.Constants.UnitNames;
 using static AquaModelLibrary.Data.PSO2.Constants.WeaponNames;
-using static AquaModelLibrary.Data.Utility.ReferenceGenerator;
 using static AquaModelLibrary.Helpers.HashHelpers;
 
 namespace AquaModelLibrary.Data.Utility
