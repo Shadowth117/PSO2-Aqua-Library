@@ -523,7 +523,7 @@ namespace AquaModelLibrary.Core.FromSoft
             //Preprocessing
             if(addFBXRootNode && exportFormat == ExportFormat.Fbx)
             {
-                mdl4.Nodes.Insert(0, new SoulsFormats.Other.MDL4.Node() { Name = newRootName, ChildIndex = 1});
+                mdl4.Nodes.Insert(0, new SoulsFormats.Other.MDL4.Node() { Name = newRootName, FirstChildIndex = 1});
                 for(int i = 0; i < mdl4.Nodes.Count; i++)
                 {
                     if(i == 0)
@@ -532,9 +532,9 @@ namespace AquaModelLibrary.Core.FromSoft
                     }
                     var node = mdl4.Nodes[i];
                     node.ParentIndex++;
-                    if (node.ChildIndex != -1)
+                    if (node.FirstChildIndex != -1)
                     {
-                        node.ChildIndex++;
+                        node.FirstChildIndex++;
                     }
                     if(node.NextSiblingIndex != -1)
                     {
@@ -592,7 +592,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqNode.boneShort1 = 0x1C0;
                 aqNode.animatedFlag = 1;
                 aqNode.parentId = parentId;
-                aqNode.firstChild = flverBone.ChildIndex;
+                aqNode.firstChild = flverBone.FirstChildIndex;
                 aqNode.nextSibling = flverBone.NextSiblingIndex;
                 aqNode.unkNode = -1;
                 aqNode.pos = flverBone.Translation;
@@ -628,7 +628,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     }
                     vtxl.bonePalette.Add((ushort)mesh0.BoneIndices[b]);
                 }
-                var indices = mesh0.ToTriangleList();
+                var indices = mesh0.Triangulate(true, false);
 
                 for (int v = 0; v < vertCount; v++)
                 {
@@ -639,7 +639,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     if (transformMesh && mesh.BoneIndices?[0] != -1)
                     {
                         int boneTransformationIndex = -1;
-                        if (vert.BoneIndices != null && vert.BoneIndices[0] == vert.BoneIndices[1] && vert.BoneIndices[0] == vert.BoneIndices[2] && vert.BoneIndices[0] == vert.BoneIndices[3])
+                        if (vert.BoneIndices[0] == vert.BoneIndices[1] && vert.BoneIndices[0] == vert.BoneIndices[2] && vert.BoneIndices[0] == vert.BoneIndices[3])
                         {
                             boneTransformationIndex = mesh.BoneIndices[vert.BoneIndices[0]];
                         }
@@ -682,7 +682,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
                     }
                     var color = vert.Color;
-                    vtxl.vertColors.Add(new byte[] { (color[2]), (color[1]), (color[0]), (color[3]) });
+                    vtxl.vertColors.Add(new byte[] { (color.B), (color.G), (color.R), (color.A) });
 
                     if ((vert.BoneWeights[0] + vert.BoneWeights[1] + vert.BoneWeights[2] + vert.BoneWeights[3]) > 0)
                     {
@@ -694,7 +694,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { (int)vert.Normal.W, 0, 0, 0 });
                     }
-                    else if (vert.BoneIndices?.Length > 0)
+                    else if (vert.BoneIndices.Length > 0)
                     {
                         vtxl.vertWeights.Add(new Vector4(1, 0, 0, 0));
                         vtxl.vertWeightIndices.Add(new int[] { vert.BoneIndices[0], 0, 0, 0 });
@@ -709,7 +709,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 GenericTriangles genMesh = new GenericTriangles();
 
                 List<Vector3> triList = new List<Vector3>();
-                for (int id = 0; id < indices.Length - 2; id += 3)
+                for (int id = 0; id < indices.Count - 2; id += 3)
                 {
                     triList.Add(new Vector3(indices[id], indices[id + 1], indices[id + 2]));
                 }
@@ -934,7 +934,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 for (int i = 0; i < flver.Dummies.Count; i++)
                 {
                     var dummy = flver.Dummies[i];
-                    var transform = Matrix4x4.CreateLookAt(new Vector3(), dummy.Forward, dummy.UseUpwardVector ? dummy.Upward : new Vector3(0, 1, 0)) * Matrix4x4.CreateTranslation(dummy.Position);
+                    var transform = Matrix4x4.CreateWorld(dummy.Position, dummy.Forward, dummy.Upward);
+                    var ogTransform = transform;
                     NODO nodo = new NODO();
                     if (dummy.AttachBoneIndex > -1)
                     {
@@ -962,7 +963,8 @@ namespace AquaModelLibrary.Core.FromSoft
                         nodo.parentId = dummy.ParentBoneIndex;
                     }
                     Matrix4x4.Decompose(transform, out var scale, out var rot, out var pos);
-                    nodo.eulRot = MathExtras.GetFlverEulerFromQuaternion_Bone(rot) * (float)(180 / Math.PI);
+                    Matrix4x4.Decompose(ogTransform, out var ogscale, out var ogrot, out var ogpos);
+                    nodo.eulRot = MathExtras.GetFlverEulerFromQuaternion_Bone(ogrot) * (float)(180 / Math.PI);
                     nodo.pos = pos;
                     aqn.nodoList.Add(nodo);
                 }
@@ -1151,7 +1153,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         {
                             if (f2Mesh.BoneIndices?.Count > 0 && f2Mesh.BoneIndices[0] != -1)
                             {
-                                boneTransformationIndex = f2Mesh.BoneIndices[vert.BoneIndices[0]];
+                                boneTransformationIndex = vert.BoneIndices[0];
                             }
                             else
                             {
