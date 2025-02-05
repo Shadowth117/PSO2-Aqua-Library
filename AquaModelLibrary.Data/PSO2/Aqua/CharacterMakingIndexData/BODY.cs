@@ -14,6 +14,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public BODY2023_1 body2023_1;
         public BODYVer2 bodyVer2;
         public BODY12_4_24 body12_4_24;
+        public int body2_5_25;
+
         public string dataString = null;
         public string texString1 = null;
         public string texString2 = null;

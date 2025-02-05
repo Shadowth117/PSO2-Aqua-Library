@@ -315,6 +315,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     body.body12_4_24 = streamReader.Read<BODY12_4_24>();
                 }
 
+                if(rel0DataStart >= CMXConstants.feb5_24TableAddressInt)
+                {
+                    body.body2_5_25 = streamReader.Read<int>();
+                }
+
                 long temp = streamReader.Position;
 
                 if (IsValidOffset(body.body.dataStringPtr))
@@ -478,6 +483,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     face.unkVer2Int = streamReader.Read<int>();
                 }
+                if(rel0DataStart >= CMXConstants.feb5_24TableAddressInt)
+                {
+                    face.face3 = streamReader.Read<FACE3>();
+                }
                 long temp = streamReader.Position;
 
                 if (face.face.dataStringPtr + offset > 0)
@@ -520,6 +529,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     streamReader.Seek(face.face.texString6Ptr + offset, SeekOrigin.Begin);
                     face.texString6 = streamReader.ReadCString();
+                }
+
+                if (face.face3.dataString2Ptr + offset > 0)
+                {
+                    streamReader.Seek(face.face3.dataString2Ptr + offset, SeekOrigin.Begin);
+                    face.dataString2 = streamReader.ReadCString();
                 }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
@@ -1953,6 +1968,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             DataHelpers.AddNIFLText(outBytes.Count + 0x14, nof0PointerLocations, textAddressDict, textList, face.texString4);
             DataHelpers.AddNIFLText(outBytes.Count + 0x18, nof0PointerLocations, textAddressDict, textList, face.texString5);
             DataHelpers.AddNIFLText(outBytes.Count + 0x1C, nof0PointerLocations, textAddressDict, textList, face.texString6);
+            if (mode >= 1)
+            {
+                DataHelpers.AddNIFLText(outBytes.Count + 0x74, nof0PointerLocations, textAddressDict, textList, face.dataString2);
+            }
 
             outBytes.AddRange(DataHelpers.ConvertStruct(face.face));
             if (mode >= 1)
@@ -1977,6 +1996,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             if (mode >= 1)
             {
                 outBytes.AddRange(BitConverter.GetBytes(face.unkFloatRitem));
+                outBytes.AddRange(DataHelpers.ConvertStruct(face.face3));
             }
         }
 
@@ -2018,6 +2038,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 outBytes.AddRange(DataHelpers.ConvertStruct(body.body40cap));
                 outBytes.AddRange(DataHelpers.ConvertStruct(body.body12_4_24));
+                outBytes.AddRange(DataHelpers.ConvertStruct(body.body2_5_25));
             }
         }
         #endregion

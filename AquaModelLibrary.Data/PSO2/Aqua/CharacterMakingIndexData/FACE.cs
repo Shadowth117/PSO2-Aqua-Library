@@ -12,6 +12,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public FACE2Split face2Split;
         public float unkFloatRitem;
         public int unkVer2Int;
+        public FACE3 face3;
 
         public string dataString = null;
         public string texString1 = null;
@@ -21,6 +22,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public string texString4 = null;
         public string texString5 = null;
         public string texString6 = null;
+
+        public string dataString2 = null;
 
         public FACEObject() { }
 
@@ -86,5 +89,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public int unkInt9;
         public int unkInt10;
         public int unkInt11;
+    }
+
+    public struct FACE3
+    {
+        public int dataString2Ptr;
+        public int int_04;
+        public int int_08;
+        public int int_0C;
     }
 }
