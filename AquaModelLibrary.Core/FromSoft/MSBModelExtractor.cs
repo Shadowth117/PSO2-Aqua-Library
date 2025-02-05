@@ -246,6 +246,14 @@ namespace AquaModelLibrary.Core.FromSoft
                     case SoulsGame.DarkSouls3:
                     case SoulsGame.Sekiro:
                     case SoulsGame.EldenRing:
+
+                        rootPath = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
+                        if (Path.GetFileName(rootPath).ToLower() != "map")
+                        {
+                            rootPath = Path.GetDirectoryName(rootPath);
+                        }
+                        var gameRootPath = Path.GetDirectoryName(rootPath);
+                        List<BND4Reader> matBnds = new List<BND4Reader>();
                         switch (game)
                         {
                             case SoulsGame.DarkSouls3:
@@ -256,21 +264,57 @@ namespace AquaModelLibrary.Core.FromSoft
                                 break;
                             case SoulsGame.EldenRing:
                                 msb = SoulsFormats.SoulsFile<SoulsFormats.MSBE>.Read(bndFile.Bytes);
+                                string allMatPath = Path.Combine(gameRootPath, "material", "allmaterial.matbinbnd.dcx");
+                                string allMatDLC01Path = Path.Combine(gameRootPath, "material", "allmaterial_dlc01.matbinbnd.dcx");
+                                string allMatDLC02Path = Path.Combine(gameRootPath, "material", "allmaterial_dlc02.matbinbnd.dcx");
+                                string allMatSpeedTreePath = Path.Combine(gameRootPath, "material", "speedtree.matbinbnd.dcx");
+                                if(File.Exists(allMatPath))
+                                {
+                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatPath)));
+                                    var a = MATBIN.Read(matBnds[0].ReadFile(0));
+
+                                }
+                                if (File.Exists(allMatDLC01Path))
+                                {
+                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatDLC01Path)));
+                                }
+                                if (File.Exists(allMatDLC02Path))
+                                {
+                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatDLC02Path)));
+                                }
+                                if (File.Exists(allMatSpeedTreePath))
+                                {
+                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatSpeedTreePath)));
+                                }
+                                break;
+                            case SoulsGame.ArmoredCore6:
+                                //msb = SoulsFormats.SoulsFile<SoulsFormats.MSBE>.Read(bndFile.Bytes);
+                                string allMtPath = Path.Combine(gameRootPath, "material", "allmaterial.matbinbnd.dcx");
+                                if (File.Exists(allMtPath))
+                                {
+                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMtPath)));
+                                }
                                 break;
                         }
+
+                        List<string> aegModelPaths = new List<string>();
                         foreach (var p in msb.Parts.GetEntries())
                         {
-                            if (p is SoulsFormats.MSB3.Part.MapPiece || p is SoulsFormats.MSBS.Part.MapPiece || p is SoulsFormats.MSBE.Part.MapPiece)
-                            {
+                            if (p is SoulsFormats.MSB3.Part.MapPiece || p is SoulsFormats.MSBS.Part.MapPiece || p is SoulsFormats.MSBE.Part.MapPiece || p is SoulsFormats.MSBE.Part.Asset)
+                            {/*
+                                if(p is SoulsFormats.MSBE.Part.Asset)
+                                {
+                                    string aegFolder = p.ModelName.Substring(0, 6);
+                                    var aeg = $@"asset\aeg\{aegFolder}\{p.ModelName}.geombnd.dcx";
+                                    if(!aegModelPaths.Contains(aeg))
+                                    {
+                                        aegModelPaths.Add(aeg);
+                                    }
+                                }*/
                                 AddToTFMDict(objectTransformsDict, p, msbMapId);
                             }
                         }
 
-                        rootPath = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
-                        if (Path.GetFileName(rootPath).ToLower() != "map")
-                        {
-                            rootPath = Path.GetDirectoryName(rootPath);
-                        }
                         switch (game)
                         {
                             case SoulsGame.DarkSouls3:
@@ -284,9 +328,18 @@ namespace AquaModelLibrary.Core.FromSoft
                                 break;
                         }
 
-                        modelFiles = Directory.GetFiles(modelPath, "*.mapbnd.dcx");
+                        var modelFilesList = Directory.GetFiles(modelPath, "*.mapbnd.dcx").ToList();
+                        List<string> fullAetPathList = new List<string>();
+                        foreach (var aegPath in aegModelPaths)
+                        {
+                            var fullPath = Path.Combine(gameRootPath, aegPath);
+                            if(File.Exists(fullPath))
+                            {
+                                modelFilesList.Add(fullPath);
+                            }
+                        }
 
-                        foreach (var modelFile in modelFiles)
+                        foreach (var modelFile in modelFilesList)
                         {
                             var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(modelFile)).ToLower();
                             if (objectTransformsDict.ContainsKey(id) || extractUnreferencedMapData)
@@ -566,6 +619,15 @@ namespace AquaModelLibrary.Core.FromSoft
                     break;
                 case SoulsGame.DemonsSouls:
                 case SoulsGame.DarkSouls2:
+                    break;
+                case SoulsGame.EldenRing:
+                    if(p is MSBE.Part.Asset)
+                    {
+                        mdlName = mdlName;
+                    } else
+                    {
+                        mdlName = $@"{mapId}_{mdlName.Substring(1)}";
+                    }
                     break;
                 default:
                     mdlName = $@"{mapId}_{mdlName.Substring(1)}";
