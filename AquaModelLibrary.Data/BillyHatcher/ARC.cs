@@ -136,32 +136,5 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             return arcHeader;
         }
-
-        public static List<string> ReadTexNames(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            List<string> texnames = new List<string>();
-
-            var arcRefTable = new ARCRefTableHead();
-            arcRefTable.entryOffset = sr.ReadBE<int>();
-            arcRefTable.entryCount = sr.ReadBE<int>();
-
-            List<ARCRefEntry> refEntries = new List<ARCRefEntry>();
-            sr.Seek(0x20 + arcRefTable.entryOffset, SeekOrigin.Begin);
-            for (int i = 0; i < arcRefTable.entryCount; i++)
-            {
-                ARCRefEntry refEntry = new ARCRefEntry();
-                refEntry.textOffset = sr.ReadBE<int>();
-                refEntry.unkInt0 = sr.ReadBE<int>();
-                refEntry.unkInt1 = sr.ReadBE<int>();
-                refEntries.Add(refEntry);
-            }
-            foreach (ARCRefEntry entry in refEntries)
-            {
-                sr.Seek(entry.textOffset + 0x20, SeekOrigin.Begin);
-                texnames.Add(sr.ReadCString());
-            }
-
-            return texnames;
-        }
     }
 }

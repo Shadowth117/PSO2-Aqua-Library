@@ -17,7 +17,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         /// Model texture references. All model textures map to this and so use its order ids. The GVM textures are then referenced by the texture names here.
         /// Essentially, order here doesn't need to match the GVM order. Howevever all models must go off the order in this list.
         /// </summary>
-        public List<string> texnames = new List<string>();
+        public NJTextureList texnames = new NJTextureList();
 
         /// <summary>
         /// The names of 'files' within the lnd. These will always be the main model followed by non animated supplemental models and finally the land definition and the mpl, if it exists.
@@ -124,7 +124,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public List<ushort> modelNodeIds = new List<ushort>();
         public List<uint> objectOffsets = new List<uint>();
         public List<LNDMeshInfo> meshInfo = new List<LNDMeshInfo>();
-        public LNDTexDataEntryHead texDataEntryHead;
+        public NJTextureList njtexList = null;
         public List<LNDTexDataEntry> texDataEntries = new List<LNDTexDataEntry>();
         public List<int> motionDataOffsets = new List<int>();
         public List<LNDMotionDataHead> motionDataHeadList = new List<LNDMotionDataHead>();
@@ -280,7 +280,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             //Read texture reference table
             sr.Seek(0x20 + arcLand.arcLndHeader.texRefTableOffset, SeekOrigin.Begin);
-            texnames = ARC.ReadTexNames(sr);
+            texnames = new NJTextureList(sr, 0x20);
 
             return arcLand;
         }
@@ -717,13 +717,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
             if (header.lndTexNameListOffset > 0)
             {
                 sr.Seek(header.lndTexNameListOffset + 0x8, SeekOrigin.Begin);
-                texDataEntryHead = new LNDTexDataEntryHead();
-                texDataEntryHead.offset = sr.ReadBE<int>();
-                texDataEntryHead.count = sr.ReadBE<ushort>();
-                texDataEntryHead.texCount = sr.ReadBE<ushort>();
+                njtexList = new NJTextureList();
+                var offset = sr.ReadBE<int>();
+                var count = sr.ReadBE<ushort>();
+                var texCount = sr.ReadBE<ushort>();
 
-                sr.Seek(texDataEntryHead.offset + 0x8, SeekOrigin.Begin);
-                for (int i = 0; i < texDataEntryHead.texCount; i++)
+                sr.Seek(offset + 0x8, SeekOrigin.Begin);
+                for (int i = 0; i < texCount; i++)
                 {
                     LNDTexDataEntry entry = new LNDTexDataEntry();
                     entry.offset = sr.ReadBE<int>();
@@ -734,7 +734,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 foreach (LNDTexDataEntry entry in texDataEntries)
                 {
                     sr.Seek(entry.offset + 0x8, SeekOrigin.Begin);
-                    texnames.Add(sr.ReadCString());
+                    njtexList.texNames.Add(sr.ReadCString());
                 }
             }
 
@@ -1077,7 +1077,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             uint mplOffset = 0;
 
             //Write lnd
-            outBytes.AddRange(arcLand.GetBytes(0, arcLndModels.Count - 1, texnames, out var lndOffsets));
+            outBytes.AddRange(arcLand.GetBytes(0, arcLndModels.Count - 1, texnames.texNames, out var lndOffsets));
             offsets.AddRange(lndOffsets);
             outBytes.AlignWriter(0x20);
 
