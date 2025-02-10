@@ -2676,6 +2676,34 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
+        public static AquaObject GetEmptyAquaObject()
+        {
+            var aqo = GetEmptyAquaObjectUnprocessed();
+            aqo.ConvertToPSO2Model(false, true, false, true, false, false, false);
+
+            return aqo;
+        }
+
+        public static AquaObject GetEmptyAquaObjectUnprocessed()
+        {
+            var aqo = new AquaObject();
+            aqo.objc.type = 0xC33;
+
+            VTXL vtxl = new VTXL();
+            for (int v = 0; v < 3; v++)
+            {
+                vtxl.vertPositions.Add(new Vector3());
+            }
+            aqo.vtxlList.Add(vtxl);
+
+            var tris = new GenericTriangles(new ushort[] { 0, 1, 2 });
+            tris.matIdList = new List<int>(new int[tris.triList.Count]);
+            aqo.tempTris.Add(tris);
+            aqo.tempMats.Add(new GenericMaterial() { matName = "DummyMat" });
+
+            return aqo;
+        }
+
         public AquaObject Clone()
         {
             AquaObject aqp = new AquaObject();
