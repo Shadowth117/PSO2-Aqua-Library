@@ -52,8 +52,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public int scriptValue0;
         public int int_08;
         public int subStructType;
-        public int subStructOffsetOffset;
 
+        public int subStructOffsetOffset;
         public int subStructOffset;
 
     }

@@ -83,7 +83,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 string texPath = "";
                 string[] modelFiles;
                 string[] tpfFiles;
-                string[] texBhds;
+                string[] texBhds = new string[0];
 
                 switch (game)
                 {
@@ -246,7 +246,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     case SoulsGame.DarkSouls3:
                     case SoulsGame.Sekiro:
                     case SoulsGame.EldenRing:
-
+                    case SoulsGame.ArmoredCore6:
                         rootPath = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
                         if (Path.GetFileName(rootPath).ToLower() != "map")
                         {
@@ -310,7 +310,7 @@ namespace AquaModelLibrary.Core.FromSoft
                                 }
                                 break;
                             case SoulsGame.ArmoredCore6:
-                                //msb = SoulsFormats.SoulsFile<SoulsFormats.MSBE>.Read(bndFile.Bytes);
+                                msb = SoulsFormats.SoulsFile<SoulsFormats.MSBVI>.Read(bndFile.Bytes);
                                 string allMtPath = Path.Combine(gameRootPath, "material", "allmaterial.matbinbnd.dcx");
                                 if (File.Exists(allMtPath))
                                 {
@@ -328,13 +328,20 @@ namespace AquaModelLibrary.Core.FromSoft
                         List<string> aegModelPaths = new List<string>();
                         foreach (var p in msb.Parts.GetEntries())
                         {
-                            if (p is SoulsFormats.MSB3.Part.MapPiece || p is SoulsFormats.MSBS.Part.MapPiece || p is SoulsFormats.MSBE.Part.MapPiece || p is SoulsFormats.MSBE.Part.Asset)
+                            if (p is SoulsFormats.MSB3.Part.MapPiece || p is SoulsFormats.MSBS.Part.MapPiece || p is SoulsFormats.MSBE.Part.MapPiece || p is SoulsFormats.MSBE.Part.Asset || p is SoulsFormats.MSBVI.Part.MapPiece || p is SoulsFormats.MSBVI.Part.Asset)
                             {
                                 if(p is SoulsFormats.MSBE.Part.Asset)
                                 {
                                     string aegFolder = p.ModelName.Substring(0, 6);
                                     var aeg = $@"asset\aeg\{aegFolder}\{p.ModelName}.geombnd.dcx";
                                     if(!aegModelPaths.Contains(aeg))
+                                    {
+                                        aegModelPaths.Add(aeg);
+                                    }
+                                } else if(p is SoulsFormats.MSBVI.Part.Asset)
+                                {
+                                    var aeg = $@"asset\environment\geometry\{p.ModelName}.geombnd.dcx";
+                                    if (!aegModelPaths.Contains(aeg))
                                     {
                                         aegModelPaths.Add(aeg);
                                     }
@@ -351,12 +358,17 @@ namespace AquaModelLibrary.Core.FromSoft
                                 texPath = Path.Combine(rootPath, $"{worldString}\\");
                                 break;
                             case SoulsGame.EldenRing:
+                            case SoulsGame.ArmoredCore6:
                                 modelPath = Path.Combine(rootPath, $"{worldString}\\{msbMapId}\\");
                                 texPath = modelPath;
                                 break;
                         }
 
-                        var modelFilesList = Directory.GetFiles(modelPath, "*.mapbnd.dcx").ToList();
+                        List<string> modelFilesList = new List<string>();
+                        if(Directory.Exists(modelPath))
+                        {
+                            modelFilesList = Directory.GetFiles(modelPath, "*.mapbnd.dcx").ToList();
+                        }
                         List<string> fullAegPathList = new List<string>();
                         List<string> fullAetPathList = new List<string>();
                         foreach (var aegPath in aegModelPaths)
@@ -402,15 +414,27 @@ namespace AquaModelLibrary.Core.FromSoft
                         }
                         foreach (var path in fullAetPathList)
                         {
-                            var fullPath = Path.Combine(gameRootPath, $@"asset\aet\{path}.tpf.dcx");
+                            string fullPath = null;
+                            switch(game)
+                            {
+                                case SoulsGame.EldenRing:
+                                    fullPath = Path.Combine(gameRootPath, $@"asset\aet\{path}.tpf.dcx");
+                                    break;
+                                case SoulsGame.ArmoredCore6:
+                                    fullPath = Path.Combine(gameRootPath, $@"asset\environment\texture\{path}.tpf.dcx");
+                                    break;
+                            }
                             if(File.Exists(fullPath))
                             {
                                 GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(fullPath), Path.GetFileNameWithoutExtension(fullPath), File.ReadAllBytes(fullPath));
                             }
                         }
-                        if (game == SoulsGame.EldenRing)
+                        if (game == SoulsGame.EldenRing || game == SoulsGame.ArmoredCore6)
                         {
-                            texBhds = Directory.GetFiles(texPath, "*.tpfbnd*");
+                            if(Directory.Exists(texPath))
+                            {
+                                texBhds = Directory.GetFiles(texPath, "*.tpfbnd*");
+                            }
                             foreach (var bnd in texBhds)
                             {
                                 //Avoid LOD textures
@@ -476,11 +500,15 @@ namespace AquaModelLibrary.Core.FromSoft
 
         private static void ProcessModelsForExport(List<AquaObject> aqpList)
         {
-            foreach(var aqp in aqpList)
+            for(int i = 0; i < aqpList.Count; i++)
             {
-                aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true, false);
-                aqp.ConvertToLegacyTypes();
-                aqp.CreateTrueVertWeights();
+                if(aqpList[i] == null)
+                {
+                    aqpList[i] = AquaObject.GetEmptyAquaObjectUnprocessed();
+                }
+                aqpList[i].ConvertToPSO2Model(true, false, false, true, false, false, false, true, false);
+                aqpList[i].ConvertToLegacyTypes();
+                aqpList[i].CreateTrueVertWeights();
             }
         }
 
@@ -504,6 +532,8 @@ namespace AquaModelLibrary.Core.FromSoft
 
         private static void GatherModel(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList, string ext, string bFNameSansExt, bool foundKey, byte[] fileBytes, Dictionary<string, MATBIN> matBnds, bool isAEG, List<string> aetReferences)
         {
+            string speedtreeAddition = "";
+
             if (ext == ".dcx")
             {
                 if (SoulsFormats.DCX.Is(fileBytes))
@@ -525,6 +555,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     flver = SoulsFile<FLVER0>.Read(fileBytes);
                 }
+                speedtreeAddition += flver.IsSpeedtree() ? "_Speedtree" : "";
 
                 //Gather textures that are actually referenced by the model
                 if (foundKey || extractUnreferencedMapData)
@@ -568,15 +599,26 @@ namespace AquaModelLibrary.Core.FromSoft
                             if(isAEG && tex.Path != "")
                             {
                                 var aetName = Path.GetFileNameWithoutExtension(texName);
-                                if(aetName.Length > 10)
+                                if (aetName.Length > 10)
                                 {
                                     aetName = aetName.Substring(0, 10);
                                 }
-                                var aetDir = Path.GetFileName(Path.GetDirectoryName(tex.Path.ToLower()));
-                                var aetPath = $@"{aetDir}\{aetName}";
-                                if(!aetReferences.Contains(aetPath))
+                                switch (game)
                                 {
-                                    aetReferences.Add(aetPath);
+                                    case SoulsGame.EldenRing:
+                                        var aetDir = Path.GetFileName(Path.GetDirectoryName(tex.Path.ToLower()));
+                                        var aetPath = $@"{aetDir}\{aetName}";
+                                        if (!aetReferences.Contains(aetPath))
+                                        {
+                                            aetReferences.Add(aetPath);
+                                        }
+                                        break;
+                                    case SoulsGame.ArmoredCore6:
+                                        if (!aetReferences.Contains(aetName))
+                                        {
+                                            aetReferences.Add(aetName);
+                                        }
+                                        break;
                                 }
                             }
                         }
@@ -609,14 +651,14 @@ namespace AquaModelLibrary.Core.FromSoft
                     }
                     aqpList.Add(aqp);
                     aqnList.Add(aqn);
-                    modelNames.Add(bFNameSansExt);
+                    modelNames.Add(bFNameSansExt + speedtreeAddition);
                     instanceTransformList.Add(objectTransformsDict[bFNameSansExt]);
                 }
                 else
                 {
                     unrefAqpList.Add(aqp);
                     unrefAqnList.Add(aqn);
-                    unrefModelNames.Add(bFNameSansExt);
+                    unrefModelNames.Add(bFNameSansExt + speedtreeAddition);
                 }
             }
         }
@@ -704,10 +746,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 case SoulsGame.DarkSouls2:
                     break;
                 case SoulsGame.EldenRing:
-                    if(p is MSBE.Part.Asset)
-                    {
-                        mdlName = mdlName;
-                    } else
+                case SoulsGame.ArmoredCore6:
+                    if (!(p is MSBE.Part.Asset || p is MSBVI.Part.Asset))
                     {
                         mdlName = $@"{mapId}_{mdlName.Substring(1)}";
                     }
