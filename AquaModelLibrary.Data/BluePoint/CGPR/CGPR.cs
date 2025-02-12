@@ -51,6 +51,9 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                     case (uint)CGPRMagic.x2C146841:
                         objects.Add(new _2C146841_Object(sr));
                         break;
+                    case (uint)CGPRMagic.x7FB9F5F0:
+                        objects.Add(new _7FB9F5F0_Object(sr));
+                        break;
                     default:
                         throw new Exception($"Unexpected object {type0.ToString("X")} discovered");
                 }
