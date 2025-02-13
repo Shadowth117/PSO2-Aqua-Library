@@ -25,7 +25,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            var cgprObjCount = sr.Read<int>(); //Doesn't always line up right. Correlates, but needs more research
+            var cgprObjCount = sr.Read<int>();
 
             //Should just be an empty cgpr
             if (cgprObjCount == 0)
@@ -35,7 +35,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             }
 
             uint type0 = sr.Peek<uint>();
-            while (!(type0 == 0 || type0 == 0x47505250))
+            for(int i = 0; i < cgprObjCount; i++)
             {
                 switch (type0)
                 {
@@ -55,7 +55,8 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                         objects.Add(new _7FB9F5F0_Object(sr));
                         break;
                     default:
-                        throw new Exception($"Unexpected object {type0.ToString("X")} discovered");
+                        objects.Add(new CGPRGeneric_Object(sr));
+                        break;
                 }
 
                 type0 = sr.Peek<uint>();
@@ -67,6 +68,12 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                     type0 = sr.Peek<uint>();
                 }
 
+            }
+
+            //Read the non tagged objects. There's one of these per tagged object
+            for(int i = 0; i < cgprObjCount; i++)
+            {
+                
             }
         }
     }
