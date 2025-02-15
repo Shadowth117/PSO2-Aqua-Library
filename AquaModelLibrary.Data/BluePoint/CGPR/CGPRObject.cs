@@ -6,6 +6,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
     public enum CGPRMagic : uint
     {
+        x2FBDFD9B = 0x9BFDBD2F,
         xC1A69458 = 0x5894A6C1,
         xFAE88582 = 0x8285E8FA,
         x427AC0E6 = 0xE6C07A42,
@@ -81,10 +82,9 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
             subHeader0 = new CGPRCommonHeader(sr);
             subObjectCount = sr.Read<short>();
-            subObjects.Add(new String_SubObject(sr));
-            for (int i = 0; i < subObjectCount - 1; i++)
+            for (int i = 0; i < subObjectCount; i++)
             {
-                subObjects.Add(CGPRSubObject.ReadSubObject(sr));
+                subObjects.Add(CGPRSubObject.ReadSubObject(sr, true));
             }
 
             endLength = new CLength(sr);
@@ -233,7 +233,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public byte vecFlag0; //Default of 0x1. 0x2 signifies an extra vector3
         public byte vecFlag1;
 
-        public CGPRCommonHeader vec3_0Header;
+        public CGPRCommonHeader vec3_0_0Header;
         public Vector3 vec3_0_0;
 
         public CGPRCommonHeader vec3_1SetHeader;
@@ -268,8 +268,8 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 case 1:
                     break;
                 case 2:
-                    vec3_0Header = new CGPRCommonHeader(sr);
-                    vec3_0 = sr.Read<Vector3>();
+                    vec3_0_0Header = new CGPRCommonHeader(sr);
+                    vec3_0_0 = sr.Read<Vector3>();
                     break;
                 default:
                     throw new Exception($"Unexpected vecFlag0 value {vecFlag0}");
@@ -331,6 +331,25 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         }
     }
 
+    public class _2FBDFD9B_Object : CGPRObject
+    {
+        public CGPRCommonHeader mainHeader;
+        public CGPRCommonHeader subHeader0;
+        public short subObjectCount;
+        public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
+        public _2FBDFD9B_Object() { }
+        public _2FBDFD9B_Object(BufferedStreamReaderBE<MemoryStream> sr) 
+        {
+            mainHeader = new CGPRCommonHeader(sr);
+            subHeader0 = new CGPRCommonHeader(sr);
+            subObjectCount = sr.Read<short>();
+            for(int i = 0; i < subObjectCount; i++)
+            {
+                subStructs.Add(CGPRSubObject.ReadSubObject(sr));
+            }
+        }
+    }
+
     public class _2C146841_Object : CGPRObject
     {
         public CGPRCommonHeader mainHeader;
@@ -341,10 +360,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public int unkInt;
         public int unkShort;
         public List<_2C146841_listChunk> listChunks = new List<_2C146841_listChunk>();
-        public _2C146841_Object()
-        {
-
-        }
+        public _2C146841_Object() { }
 
         public _2C146841_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {

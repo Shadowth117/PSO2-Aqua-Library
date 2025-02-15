@@ -34,46 +34,42 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 cfooter = sr.Read<CFooter>();
             }
 
-            uint type0 = sr.Peek<uint>();
+            CGPRMagic type0 = (CGPRMagic)sr.Peek<uint>();
             for(int i = 0; i < cgprObjCount; i++)
             {
                 switch (type0)
                 {
-                    case (uint)CGPRMagic.xC1A69458:
+                    case CGPRMagic.xC1A69458:
                         objects.Add(new _C1A69458_Object(sr));
                         break;
-                    case (uint)CGPRMagic.xFAE88582:
+                    case CGPRMagic.xFAE88582:
                         objects.Add(new _FAE88582_Object(sr));
                         break;
-                    case (uint)CGPRMagic.x427AC0E6:
+                    case CGPRMagic.x427AC0E6:
                         objects.Add(new _427AC0E6_Object(sr));
                         break;
-                    case (uint)CGPRMagic.x2C146841:
+                    case CGPRMagic.x2C146841:
                         objects.Add(new _2C146841_Object(sr));
                         break;
-                    case (uint)CGPRMagic.x7FB9F5F0:
+                    case CGPRMagic.x7FB9F5F0:
                         objects.Add(new _7FB9F5F0_Object(sr));
+                        break;
+                    case CGPRMagic.x2FBDFD9B:
+                        //objects.Add()
                         break;
                     default:
                         objects.Add(new CGPRGeneric_Object(sr));
                         break;
                 }
 
-                type0 = sr.Peek<uint>();
-
-                //Try to account for weird scenarios where sizes don't align? Idk wtf the game is doing
-                if (sr.Peek<byte>() == 0)
-                {
-                    sr.Seek(1, System.IO.SeekOrigin.Current);
-                    type0 = sr.Peek<uint>();
-                }
-
+                type0 = (CGPRMagic)sr.Peek<uint>();
             }
+
+            var taggedEnd = sr.Position;
 
             //Read the non tagged objects. There's one of these per tagged object
             for(int i = 0; i < cgprObjCount; i++)
             {
-                
             }
         }
     }
