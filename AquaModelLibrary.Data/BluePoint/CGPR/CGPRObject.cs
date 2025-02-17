@@ -136,6 +136,8 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     //Used commonly for CMDLs
     public class _FAE88582_Object : CGPRObject
     {
+        public long position;
+
         public CGPRCommonHeader mainHeader;
         public byte bt_mainTest;
         public CGPRCommonHeader subHeader0;
@@ -180,6 +182,8 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         public _FAE88582_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            position = sr.Position;
+
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             subHeader0 = new CGPRCommonHeader(sr);
@@ -337,6 +341,9 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public CGPRCommonHeader subHeader0;
         public short subObjectCount;
         public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
+        public CLength endLength;
+        public int end00;
+        public int end04;
         public _2FBDFD9B_Object() { }
         public _2FBDFD9B_Object(BufferedStreamReaderBE<MemoryStream> sr) 
         {
@@ -346,6 +353,15 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             for(int i = 0; i < subObjectCount; i++)
             {
                 subStructs.Add(CGPRSubObject.ReadSubObject(sr));
+            }
+            endLength = new CLength(sr);
+            end00 = sr.Read<int>();
+            end04 = sr.Read<int>();
+
+            //These are probably a list section stub. Need to account for this if we find one that has a list
+            if(end00 != 0 || end04 != 0)
+            {
+                throw new NotImplementedException();
             }
         }
     }
