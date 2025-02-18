@@ -18,7 +18,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public uint magic;
 
         //Ending bytes
-        public byte bt_EndSize;
+        public CLength endSize;
         public byte[] endBytes = null;
 
         public CGPRObject()
@@ -68,9 +68,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     public class _7FB9F5F0_Object : CGPRObject
     {
         public CGPRCommonHeader mainHeader;
-        public CGPRCommonHeader subHeader0;
-        public short subObjectCount;
-        public List<CGPRSubObject> subObjects = new();
+        public CGPRSubObject subObject;
         public CLength endLength;
         public List<_7FB9F5F0_EndStruct1> endStruct1s = new();
         public _7FB9F5F0_Object(BufferedStreamReaderBE<MemoryStream> sr)
@@ -79,13 +77,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             var end = start + mainHeader.GetTrueLength();
-
-            subHeader0 = new CGPRCommonHeader(sr);
-            subObjectCount = sr.Read<short>();
-            for (int i = 0; i < subObjectCount; i++)
-            {
-                subObjects.Add(CGPRSubObject.ReadSubObject(sr, true));
-            }
+            subObject = CGPRSubObject.ReadSubObject(sr);
 
             endLength = new CLength(sr);
             int endCount0 = sr.Read<int>();
@@ -139,46 +131,12 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public long position;
 
         public CGPRCommonHeader mainHeader;
-        public byte bt_mainTest;
-        public CGPRCommonHeader subHeader0;
-        public byte bt_sub0Test0;
-        public byte bt_sub0Test1;
+        public CGPRSubObject subObject;
+        public CLength endLength;
+        public int end00;
+        public int end04;
 
-        public byte bt_testPad; //Optional inclusion? appears in most of these anyways as 0
-        public CGPRCommonHeader subHeader1;
-        public byte bt_sub1Test0;
-        public byte bt_sub1_0;
-        public byte bt_sub1_1;
-
-        public CGPRCommonHeader subHeader2; //Should be same first 4 bytes as mainHeader
-        public byte bt_sub2Test0;
-
-        public byte bt_18;
-        public byte bt_19;
-        public byte stringLengthPlus1;
-        public byte stringLength;
-
-        public int postStrInt_00;
-        public int postStrInt_04;
-        public int postStrInt_08;
-        public int postStrInt_0C;
-
-        public int postStrInt_10;
-        public byte postStrBt_14;
-
-        public int postStrInt_15;
-        public int postStrInt_19;
-        public int postStrInt_1D;
-        public int postStrInt_21;
-
-        public int postStrInt_25;
-
-        public string cmdlPath = null;
-
-        public _FAE88582_Object()
-        {
-
-        }
+        public _FAE88582_Object() { }
 
         public _FAE88582_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {
@@ -186,70 +144,30 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
-            subHeader0 = new CGPRCommonHeader(sr);
+            subObject = CGPRSubObject.ReadSubObject(sr);
 
-            //Secondary thing seemingly unrelated to previous struct's length
-            var byteTest = sr.Peek<byte>();
-            if (byteTest == 0x1)
+            endLength = new CLength(sr);
+            end00 = sr.Read<int>();
+            end04 = sr.Read<int>();
+
+            //These are probably a list section stub. Need to account for this if we find one that has a list
+            if (end00 != 0 || end04 != 0)
             {
-                bt_sub0Test1 = sr.Read<byte>();
+                throw new NotImplementedException();
             }
-            bt_testPad = sr.Read<byte>();
-
-            subHeader1 = new CGPRCommonHeader(sr);
-            bt_sub1_0 = sr.Read<byte>();
-            bt_sub1_1 = sr.Read<byte>();
-
-            subHeader2 = new CGPRCommonHeader(sr);
-            stringLengthPlus1 = sr.Read<byte>();
-            stringLength = sr.Read<byte>();
-            cmdlPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, stringLength));
-            sr.Seek(stringLength, System.IO.SeekOrigin.Current);
-
-            postStrInt_00 = sr.Read<int>();
-            postStrInt_04 = sr.Read<int>();
-            postStrInt_08 = sr.Read<int>();
-            postStrInt_0C = sr.Read<int>();
-
-            postStrInt_10 = sr.Read<int>();
-            postStrBt_14 = sr.Read<byte>();
-
-            postStrInt_15 = sr.Read<int>();
-            postStrInt_19 = sr.Read<int>();
-            postStrInt_1D = sr.Read<int>();
-            postStrInt_21 = sr.Read<int>();
-
-            postStrInt_25 = sr.Read<int>();
-
-            endBytes = sr.ReadBytesSeek(8);
         }
     }
 
     //Often at the start of CGPRs, sometimes spread throughout
     public class _C1A69458_Object : CGPRObject
     {
+        public long position;
+
         public CGPRCommonHeader mainHeader;
-        public CGPRCommonHeader subHeader0;
-        public byte type0Flag; //Default of 0x1. 0x2 signifies a trailing string
-        public byte type1Flag;
+        public CGPRSubObject subObject;
 
-        public CGPRCommonHeader subHeader1;
-        public byte vecFlag0; //Default of 0x1. 0x2 signifies an extra vector3
-        public byte vecFlag1;
-
-        public CGPRCommonHeader vec3_0_0Header;
-        public Vector3 vec3_0_0;
-
-        public CGPRCommonHeader vec3_1SetHeader;
-        public Vector3 vec3_0;
-        public Vector3 vec3_1;
-        public Vector3 vec3_2;
-        public Vector3 vec3_3;
-
-        public CGPRCommonHeader stringHeader;
-        public byte dataStringLength;
-        public string dataString;
-
+        public int end00;
+        public int end04;
         public _C1A69458_Object()
         {
 
@@ -257,50 +175,21 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         public _C1A69458_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            position = sr.Position;
+
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
-            subHeader0 = new CGPRCommonHeader(sr);
-            type0Flag = sr.Read<byte>();
-            type1Flag = sr.Read<byte>();
+            subObject = CGPRSubObject.ReadSubObject(sr);
 
-            subHeader1 = new CGPRCommonHeader(sr);
-            vecFlag0 = sr.Read<byte>();
-            vecFlag1 = sr.Read<byte>();
+            endSize = new CLength(sr);
+            end00 = sr.Read<int>();
+            end04 = sr.Read<int>();
 
-            switch (vecFlag0)
+            //These are probably a list section stub. Need to account for this if we find one that has a list
+            if (end00 != 0 || end04 != 0)
             {
-                case 1:
-                    break;
-                case 2:
-                    vec3_0_0Header = new CGPRCommonHeader(sr);
-                    vec3_0_0 = sr.Read<Vector3>();
-                    break;
-                default:
-                    throw new Exception($"Unexpected vecFlag0 value {vecFlag0}");
+                throw new NotImplementedException();
             }
-
-            //Should be a 4x3 Matrix, 4 rows, 3 across
-            vec3_1SetHeader = new CGPRCommonHeader(sr);
-            vec3_0 = sr.Read<Vector3>();
-            vec3_1 = sr.Read<Vector3>();
-            vec3_2 = sr.Read<Vector3>();
-            vec3_3 = sr.Read<Vector3>();
-
-            switch (type0Flag)
-            {
-                case 1:
-                    break;
-                case 2:
-                    stringHeader = new CGPRCommonHeader(sr);
-                    dataString = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, dataStringLength));
-                    sr.Seek(dataStringLength, System.IO.SeekOrigin.Current);
-                    break;
-                default:
-                    throw new Exception($"Unexpected typeFlag0 value {type0Flag}");
-            }
-
-            bt_EndSize = sr.Read<byte>();
-            endBytes = sr.ReadBytesSeek(bt_EndSize);
         }
     }
 
@@ -308,10 +197,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     {
         public long position;
         public CGPRCommonHeader mainHeader;
-        public CGPRCommonHeader subHeader0;
-        public ushort subStructCount;
-
-        public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
+        public CGPRSubObject subObject;
 
         public _427AC0E6_Object()
         {
@@ -323,38 +209,25 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             position = sr.Position;
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
-            subHeader0 = new CGPRCommonHeader(sr);
-            subStructCount = sr.Read<ushort>();
-            for(int i = 0; i < subStructCount; i++)
-            {
-                subStructs.Add(CGPRSubObject.ReadSubObject(sr));
-            }
+            subObject = CGPRSubObject.ReadSubObject(sr);
 
-            bt_EndSize = sr.Read<byte>();
-            endBytes = sr.ReadBytesSeek(bt_EndSize);
+            endSize = new CLength(sr);
+            endBytes = sr.ReadBytesSeek(endSize.GetTrueLength());
         }
     }
 
     public class _2FBDFD9B_Object : CGPRObject
     {
         public CGPRCommonHeader mainHeader;
-        public CGPRCommonHeader subHeader0;
-        public short subObjectCount;
-        public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
-        public CLength endLength;
+        public CGPRSubObject subObject;
         public int end00;
         public int end04;
         public _2FBDFD9B_Object() { }
         public _2FBDFD9B_Object(BufferedStreamReaderBE<MemoryStream> sr) 
         {
             mainHeader = new CGPRCommonHeader(sr);
-            subHeader0 = new CGPRCommonHeader(sr);
-            subObjectCount = sr.Read<short>();
-            for(int i = 0; i < subObjectCount; i++)
-            {
-                subStructs.Add(CGPRSubObject.ReadSubObject(sr));
-            }
-            endLength = new CLength(sr);
+            subObject = CGPRSubObject.ReadSubObject(sr);
+            endSize = new CLength(sr);
             end00 = sr.Read<int>();
             end04 = sr.Read<int>();
 
@@ -369,12 +242,9 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     public class _2C146841_Object : CGPRObject
     {
         public CGPRCommonHeader mainHeader;
-        public CGPRCommonHeader subHeader0;
-        public short subObjectCount;
-        public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
+        public CGPRSubObject subObject;
         public CLength listSectionLength;
         public int unkInt;
-        public int unkShort;
         public List<_2C146841_listChunk> listChunks = new List<_2C146841_listChunk>();
         public _2C146841_Object() { }
 
@@ -382,12 +252,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         {
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
-            subHeader0 = new CGPRCommonHeader(sr);
-            subObjectCount = sr.Read<short>();
-            for(int i = 0; i < subObjectCount; i++)
-            {
-                subStructs.Add(CGPRSubObject.ReadSubObject(sr));
-            }
+            subObject = CGPRSubObject.ReadSubObject(sr);
             listSectionLength = new CLength(sr);
             var listSectionCount = sr.Read<int>();
             unkInt = sr.Read<int>();
