@@ -1,6 +1,4 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using System.Numerics;
-using System.Text;
 
 namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
@@ -11,6 +9,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         xFAE88582 = 0x8285E8FA,
         x427AC0E6 = 0xE6C07A42,
         x2C146841 = 0x4168142C,
+        x58D3EEDC = 0xDCEED358,
         x7FB9F5F0 = 0xF0F5B97F,
     }
     public abstract class CGPRObject
@@ -63,6 +62,11 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         {
             return length.GetTrueLength();
         }
+
+        public int GetLengthWithHeaderLength()
+        {
+            return GetTrueLength() + 4 + length.GetCLengthStructSize();
+        }
     }
 
     public class _7FB9F5F0_Object : CGPRObject
@@ -70,7 +74,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
         public CLength endLength;
-        public List<_7FB9F5F0_EndStruct1> endStruct1s = new();
+        public List<CGPR_EndSubstruct0> endStruct1s = new();
         public _7FB9F5F0_Object(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var start = sr.Position;
@@ -88,7 +92,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             int endCount1 = sr.Read<int>();
             for(int i = 0; i < endCount1; i++)
             {
-                endStruct1s.Add(new _7FB9F5F0_EndStruct1() 
+                endStruct1s.Add(new CGPR_EndSubstruct0() 
                 {
                     int_00 = sr.Read<int>(),
                     int_04 = sr.Read<int>(),
@@ -105,23 +109,6 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                     bt_25 = sr.Read<byte>(),
                 });
             }
-        }
-
-        public struct _7FB9F5F0_EndStruct1
-        {
-            public int int_00;
-            public int int_04;
-            public int int_08;
-            public int int_0C;
-
-            public int int_10;
-            public int int_14;
-            public int int_18;
-            public byte bt_1C;
-
-            public int int_1D;
-            public int int_21;
-            public byte bt_25;
         }
     }
 
@@ -166,8 +153,10 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
 
-        public int end00;
-        public int end04;
+        public int end00Count;
+        public int end04Count;
+
+        public List<CGPR_EndSubstruct0> endStruct0s = new List<CGPR_EndSubstruct0>();
         public _C1A69458_Object()
         {
 
@@ -181,14 +170,36 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             mainHeader = new CGPRCommonHeader(sr);
             subObject = CGPRSubObject.ReadSubObject(sr);
 
+            var endSizePosition = sr.Position;
             endSize = new CLength(sr);
-            end00 = sr.Read<int>();
-            end04 = sr.Read<int>();
+            end00Count = sr.Read<int>();
 
-            //These are probably a list section stub. Need to account for this if we find one that has a list
-            if (end00 != 0 || end04 != 0)
+            for (int i = 0; i < end00Count; i++)
             {
-                throw new NotImplementedException();
+                endStruct0s.Add(new CGPR_EndSubstruct0()
+                {
+                    int_00 = sr.Read<int>(),
+                    int_04 = sr.Read<int>(),
+                    int_08 = sr.Read<int>(),
+                    int_0C = sr.Read<int>(),
+
+                    int_10 = sr.Read<int>(),
+                    int_14 = sr.Read<int>(),
+                    int_18 = sr.Read<int>(),
+                    bt_1C = sr.Read<byte>(),
+
+                    int_1D = sr.Read<int>(),
+                    int_21 = sr.Read<int>(),
+                    bt_25 = sr.Read<byte>(),
+                });
+            }
+
+            end04Count = sr.Read<int>();
+
+            if (end04Count != 0)
+            {
+                //throw new NotImplementedException();
+                sr.Seek(position + mainHeader.GetLengthWithHeaderLength(), SeekOrigin.Begin);
             }
         }
     }
@@ -307,6 +318,68 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 unkInt = sr.Read<int>();
             }
         }
+    }
+
+    public class _58D3EEDC_Object : CGPRObject
+    {
+        public CGPRCommonHeader mainHeader;
+        public CGPRSubObject subObject;
+        public int end00Count;
+        public int end04Count;
+
+        public List<CGPR_EndSubstruct0> endStruct1s = new List<CGPR_EndSubstruct0>();
+        public _58D3EEDC_Object() { }
+        public _58D3EEDC_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            mainHeader = new CGPRCommonHeader(sr);
+            subObject = CGPRSubObject.ReadSubObject(sr);
+            endSize = new CLength(sr);
+            end00Count = sr.Read<int>();
+            end04Count = sr.Read<int>();
+
+            for (int i = 0; i < end04Count; i++)
+            {
+                endStruct1s.Add(new CGPR_EndSubstruct0()
+                {
+                    int_00 = sr.Read<int>(),
+                    int_04 = sr.Read<int>(),
+                    int_08 = sr.Read<int>(),
+                    int_0C = sr.Read<int>(),
+
+                    int_10 = sr.Read<int>(),
+                    int_14 = sr.Read<int>(),
+                    int_18 = sr.Read<int>(),
+                    bt_1C = sr.Read<byte>(),
+
+                    int_1D = sr.Read<int>(),
+                    int_21 = sr.Read<int>(),
+                    bt_25 = sr.Read<byte>(),
+                });
+            }
+
+            //These are probably a list section stub. Need to account for this if we find one that has a list
+            if (end00Count != 0)
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
+
+    public struct CGPR_EndSubstruct0
+    {
+        public int int_00;
+        public int int_04;
+        public int int_08;
+        public int int_0C;
+
+        public int int_10;
+        public int int_14;
+        public int int_18;
+        public byte bt_1C;
+
+        public int int_1D;
+        public int int_21;
+        public byte bt_25;
     }
 
     public class CGPRGeneric_Object : CGPRObject

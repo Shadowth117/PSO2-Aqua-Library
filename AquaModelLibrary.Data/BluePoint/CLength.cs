@@ -17,9 +17,20 @@ namespace AquaModelLibrary.Data.BluePoint
             }
         }
 
+        /// <summary>
+        /// Get full calculated variable length
+        /// </summary>
         public int GetTrueLength()
         {
             return length + (lengthAddition - 1) * 0x80;
+        }
+
+        /// <summary>
+        /// Determine the number of bytes this length data is composed of
+        /// </summary>
+        public int GetCLengthStructSize()
+        {
+            return length >= 0x80 ? 2 : 1;
         }
     }
 }

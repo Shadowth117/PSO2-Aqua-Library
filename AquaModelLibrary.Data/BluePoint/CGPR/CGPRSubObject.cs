@@ -9,7 +9,11 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     /// </summary>
     public enum CGPRSubMagic : uint
     {
-        //Byte 
+        //Null
+        x00000000 = 0x00000000,
+        //Byte
+        x08265914 = 0x14592608,
+        x0ED3F07F = 0x7FF0D30E,
         x192F2CC7 = 0xC72C2F19,
         x4023FE7D = 0x7DFE2340,
         x4F13891F = 0x1F89134F,
@@ -24,6 +28,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         x38F25423 = 0x2354F238,
         x3B8D2509 = 0x09258D3B,
         x89DBCCD3 = 0xD3CCDB89,
+        xF194196D = 0x6D1994F1,
         //4Short
         xD5214B36 = 0x364B21D5,
         //Int
@@ -41,8 +46,11 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         x54490408 = 0x08044954,
         x772749BA = 0xBA492777,
         x7A4C040A = 0x0A044C7A,
+        x7DE15005 = 0x0550E17D,
+        x8338AB8D = 0x8DAB3883,
         x9BA667E8 = 0xE867A69B,
         x9D2A49BC = 0xBC492A9D,
+        xB8A23F0D = 0x0D3FA2B8,
         xC1A967EA = 0xEA67A9C1,
         xCEA86FAF = 0xAF6FA8CE,
         xE42549B9 = 0xB94925E4,
@@ -57,29 +65,44 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         x9658BB79 = 0x79BB5896,
         //Float 3
         x118E5228 = 0x28528E11,
+        x22AD50BC = 0xBC50AD22,
         //Matrix4x3
         xBBAB82AD = 0xAD82ABBB,
         //String
         x2FBDFD9B = 0x9BFDBD2F,
+        x3D6E4A22 = 0x224A6E3D,
         x427AC0E6 = 0xE6C07A42,
         x4486A731 = 0x31A78644,
+        x7FFE5BB3 = 0xB35BFE7F,
+        xEBE45CAB = 0xAB5CE4EB,
         xFAE88582 = 0x8285E8FA,
         //String Array
         x8D11D855 = 0x55D8118D,
+        //SubObject Array 2
+        x24CC5387 = 0x8753CC24,
+        x82977AD1 = 0xD17A9782,
+        xF7D9AE0F = 0x0FAED9F7,
         //SubObject Array
         x024007BD = 0xBD074002,
         x075602A6 = 0xA6025607,
         x1D2D64F7 = 0xF7642D1D,
         x3BB01156 = 0x5611B03B,
         x47A4191F = 0x1F19A447,
+        x51F0A744 = 0x44A7F051,
         x57F7926D = 0x6D92F757,
         x5A77756C = 0x6C75775A,
         x5B3CA418 = 0x18A43C5B,
+        x6C00F9ED = 0xEDF9006C,
+        x76FA4A83 = 0x834AFA76,
         x947E6E93 = 0x936E7E94,
         x97C0A9F4 = 0xF4A9C097,
+        x9F74338B = 0x8B33749F,
+        xA18E5EA1 = 0xA15E8EA1,
         xB2315805 = 0x055831B2,
+        xC3A5BE4F = 0x4FBEA5C3,
         xD4E77FA8 = 0xA87FE7D4,
         xDC55E007 = 0x07E055DC,
+        xE7C8165C = 0x5C16C8E7,
     }
 
     public abstract class CGPRSubObject
@@ -98,7 +121,13 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             var type = (CGPRSubMagic)sr.Peek<uint>();
             switch (type)
             {
+                //Null
+                case CGPRSubMagic.x00000000:
+                    sr.Read<int>();
+                    return null;
                 //Byte
+                case CGPRSubMagic.x08265914:
+                case CGPRSubMagic.x0ED3F07F:
                 case CGPRSubMagic.x192F2CC7:
                 case CGPRSubMagic.x4023FE7D:
                 case CGPRSubMagic.x4F13891F:
@@ -114,6 +143,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 case CGPRSubMagic.x38F25423:
                 case CGPRSubMagic.x3B8D2509:
                 case CGPRSubMagic.x89DBCCD3:
+                case CGPRSubMagic.xF194196D:
                     return new CGPRShort_SubObject(sr);
                 //4Short
                 case CGPRSubMagic.xD5214B36:
@@ -133,6 +163,8 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 case CGPRSubMagic.x54490408:
                 case CGPRSubMagic.x772749BA:
                 case CGPRSubMagic.x7A4C040A:
+                case CGPRSubMagic.x7DE15005:
+                case CGPRSubMagic.x8338AB8D:
                 case CGPRSubMagic.x9BA667E8:
                 case CGPRSubMagic.x9D2A49BC:
                 case CGPRSubMagic.xC1A967EA:
@@ -152,33 +184,49 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                     return new CGPRFloat_SubObject(sr);
                 //Float 3
                 case CGPRSubMagic.x118E5228:
+                case CGPRSubMagic.x22AD50BC:
                     return new CGPRVector3_SubObject(sr);
                 //Matrix4x3
                 case CGPRSubMagic.xBBAB82AD:
                     return new CGPRMatrix4x3_SubObject(sr);
                 //String
                 case CGPRSubMagic.x2FBDFD9B:
+                case CGPRSubMagic.x3D6E4A22:
                 case CGPRSubMagic.x427AC0E6:
                 case CGPRSubMagic.x4486A731:
+                case CGPRSubMagic.x7FFE5BB3:
+                case CGPRSubMagic.xEBE45CAB:
                 case CGPRSubMagic.xFAE88582:
                     return new CGPRString_SubObject(sr);
                 //String Array
                 case CGPRSubMagic.x8D11D855:
                     return new CGPRStringArray_SubObject(sr);
+                //SubObject Array 2
+                case CGPRSubMagic.x24CC5387:
+                case CGPRSubMagic.x82977AD1:
+                case CGPRSubMagic.xF7D9AE0F:
+                    return new CGPRSubObjectArray2_SubObject(sr);
                 //SubObject Array
                 case CGPRSubMagic.x024007BD:
                 case CGPRSubMagic.x075602A6:
                 case CGPRSubMagic.x1D2D64F7:
                 case CGPRSubMagic.x3BB01156:
                 case CGPRSubMagic.x47A4191F:
+                case CGPRSubMagic.x51F0A744:
                 case CGPRSubMagic.x57F7926D:
                 case CGPRSubMagic.x5A77756C:
                 case CGPRSubMagic.x5B3CA418:
+                case CGPRSubMagic.x6C00F9ED:
+                case CGPRSubMagic.x76FA4A83:
                 case CGPRSubMagic.x947E6E93:
                 case CGPRSubMagic.x97C0A9F4:
+                case CGPRSubMagic.x9F74338B:
+                case CGPRSubMagic.xA18E5EA1:
                 case CGPRSubMagic.xB2315805:
+                case CGPRSubMagic.xC3A5BE4F:
                 case CGPRSubMagic.xD4E77FA8:
                 case CGPRSubMagic.xDC55E007:
+                case CGPRSubMagic.xE7C8165C:
                     return new CGPRSubObjectArray_SubObject(sr);
                 default:
                     var pos = sr.Position;
@@ -266,6 +314,28 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             sht_06 = sr.Read<short>();
         }
     }
+    /// <summary>
+    /// No noted subobject count
+    /// </summary>
+    public class CGPRSubObjectArray2_SubObject : CGPRSubObject
+    {
+        public CGPRCommonHeader mainHeader;
+        public List<CGPRSubObject> subObjects = new List<CGPRSubObject>();
+
+        public CGPRSubObjectArray2_SubObject() { }
+        public CGPRSubObjectArray2_SubObject(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            var position = sr.Position;
+
+            magic = sr.Peek<uint>();
+            mainHeader = new CGPRCommonHeader(sr);
+            while (sr.Position < position + mainHeader.GetLengthWithHeaderLength())
+            {
+                subObjects.Add(ReadSubObject(sr));
+            }
+            
+        }
+    }
     public class CGPRSubObjectArray_SubObject : CGPRSubObject
     {
         public CGPRCommonHeader mainHeader;
@@ -274,12 +344,19 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public CGPRSubObjectArray_SubObject() { }
         public CGPRSubObjectArray_SubObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            var position = sr.Position;
+
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             ushort subStructCount = sr.Read<ushort>();
             for (int i = 0; i < subStructCount; i++)
             {
                 subObjects.Add(ReadSubObject(sr));
+            }
+
+            if(sr.Position != position + mainHeader.GetLengthWithHeaderLength())
+            {
+                throw new Exception("Unexpected SubObject Length!");
             }
         }
     }
@@ -295,6 +372,10 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             int_00 = sr.Read<int>();
+            if(mainHeader.GetTrueLength() != 4)
+            {
+                throw new Exception("Struct is NOT an int, please correct!");
+            }
         }
     }
     public class CGPR2Int_SubObject : CGPRSubObject
@@ -311,6 +392,10 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             mainHeader = new CGPRCommonHeader(sr);
             int_00 = sr.Read<int>();
             int_04 = sr.Read<int>();
+            if (mainHeader.GetTrueLength() != 8)
+            {
+                throw new Exception("Struct is NOT a 2int, please correct!");
+            }
         }
     }
     public class CGPRFloat_SubObject : CGPRSubObject
@@ -325,6 +410,11 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             flt_00 = sr.Read<float>();
+
+            if (mainHeader.GetTrueLength() != 4)
+            {
+                throw new Exception("Struct is NOT a float, please correct!");
+            }
         }
     }
     public class CGPRVector3_SubObject : CGPRSubObject
@@ -339,6 +429,11 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             vec3_00 = sr.Read<Vector3>();
+
+            if (mainHeader.GetTrueLength() != 0xC)
+            {
+                throw new Exception("Struct is NOT an vec3, please correct!");
+            }
         }
     }
     public class CGPRMatrix4x3_SubObject : CGPRSubObject
@@ -350,12 +445,19 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         public CGPRMatrix4x3_SubObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            var position = sr.Position;
+
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             mat = new Matrix4x4(sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), 0,
                                 sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), 0,
                                 sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), 0,
                                 sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), 0);
+
+            if (sr.Position != position + mainHeader.GetLengthWithHeaderLength())
+            {
+                throw new Exception("Unexpected SubObject Length!");
+            }
         }
     }
 
@@ -381,6 +483,8 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         public CGPRStringArray_SubObject() { }
         public CGPRStringArray_SubObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            var position = sr.Position;
+
             magic = sr.Peek<uint>();
             mainHeader = new CGPRCommonHeader(sr);
             var stringCount = sr.Read<ushort>();
@@ -388,6 +492,11 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             {
                 var strLen = sr.Read<byte>();
                 strings.Add(sr.ReadCStringSeek(strLen));
+            }
+
+            if (sr.Position != position + mainHeader.GetLengthWithHeaderLength())
+            {
+                throw new Exception("Unexpected SubObject Length!");
             }
         }
     }

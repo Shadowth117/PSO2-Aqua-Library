@@ -57,6 +57,9 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                     case CGPRMagic.x2FBDFD9B:
                         objects.Add(new _2FBDFD9B_Object(sr));
                         break;
+                    case CGPRMagic.x58D3EEDC:
+                        objects.Add(new _58D3EEDC_Object(sr));
+                        break;
                     default:
                         objects.Add(new CGPRGeneric_Object(sr));
                         break;
