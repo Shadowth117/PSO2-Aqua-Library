@@ -292,6 +292,9 @@ namespace AquaModelLibrary.Helpers.Extensions
 			outBytes.AddRange(newBytes);
 		}
 
+		/// <summary>
+		/// Aligns byte list to the alignment value ex. 0xB with alignmentValue 0x4 becomes 0xC. fillValue is the value of each byte added in 
+		/// </summary>
 		public static int AlignWriter(this List<byte> outBytes, int alignmentValue, byte fillValue = 0)
 		{
 			//Align to int align
@@ -317,6 +320,10 @@ namespace AquaModelLibrary.Helpers.Extensions
 			return 0;
 		}
 
+        /// <summary>
+        /// Like AlignWriter, aligns byte list to the alignment value ex. 0xB with alignmentValue 0x4 becomes 0xC. fillValue is the value of each byte added in 
+        /// This version is for PSO2 and accounts for bad modulo operation on their part and adds extra bytes to the file in the case that the size mod the alignment value is 0
+		/// </summary>
 		public static int AlignFileEndWriter(this List<byte> outBytes, int alignmentValue, byte fillValue = 0)
 		{
 			//Align to int align
