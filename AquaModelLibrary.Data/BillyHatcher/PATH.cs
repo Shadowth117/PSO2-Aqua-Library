@@ -149,7 +149,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     sector.childSector3 = pathSectors[sector.childId3];
                 }
 
-                if(sector.rawPathOffset != 0)
+                if(sector.usesRawPathOffset != 0)
                 {
                     sector.rawPathList = rawPathDefinitions[sector.rawPathOffset];
                 }
