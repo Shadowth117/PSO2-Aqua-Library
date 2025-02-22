@@ -125,6 +125,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     def.startVert = sr.ReadBE<ushort>();
                     def.endVert = sr.ReadBE<ushort>();
 
+                    def.pathInfo = pathInfoList[def.vertSet];
                     pathDef.defs.Add(def);
                 }
                 rawPathDefinitions.Add((int)(pathDef.relativeOffset), pathDef);
@@ -365,11 +366,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public List<RawPathDefinition> defs = new List<RawPathDefinition>();
         }
 
-        public struct RawPathDefinition
+        public class RawPathDefinition
         {
             public ushort vertSet;
             public ushort startVert;
             public ushort endVert;
+
+            public PathInfo pathInfo = null;
         }
 
         /// <summary>
