@@ -3,12 +3,13 @@ using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
     public class Event : ARC
     {
-        public List<EventScriptContainer> eventScriptContainers = new List<EventScriptContainer>();
+        public List<EventScriptContainer> eventScriptContainers { get; set; } = new List<EventScriptContainer>();
         public Event() { }
         public Event(byte[] file)
         {
@@ -96,11 +97,11 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             case "sw_on":
                             case "sw_chk_off":
                             case "sw_chk_on":
-                                eventScriptContainers[i].scripts[j].bytes_Data = sr.Read4Bytes();
+                                eventScriptContainers[i].scripts[j].bytes_Data = sr.Read4Bytes().ToList();
                                 break;
                             //8 bytes
                             case "set":
-                                eventScriptContainers[i].scripts[j].bytes_Data = sr.ReadBytesSeek(0x8);
+                                eventScriptContainers[i].scripts[j].bytes_Data = sr.ReadBytesSeek(0x8).ToList();
                                 break;
                             //1 int32
                             case "set_rescue":
@@ -126,7 +127,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                                 break;
                             //Float Vector3
                             case "sol":
-                                eventScriptContainers[i].scripts[j].vec3_Data = sr.ReadBEV3();
+                                eventScriptContainers[i].scripts[j].vec3_Data = new List<float>() { sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>()};
                                 break;
                             //Unique structure for set_race
                             case "set_race":
@@ -140,7 +141,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                                     loseRaceMessageId = sr.ReadBE<short>(),
                                     sht_0E = sr.ReadBE<short>(),
                                     animalScale = sr.ReadBE<float>(),
-                                    animalPosition = sr.ReadBEV3(),
+                                    animalPosition = new List<float> { sr.ReadBE<float>(), sr.ReadBE<float>(), sr.ReadBE<float>() },
                                 };
                                 break;
                             //Unique structure for minigame
@@ -225,12 +226,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 outBytes.ReserveInt($"ContainerScripts{i}");
 
                 outBytes.FillInt($"ContainerScripts{i}", outBytes.Count);
-                for (int j = 0; j < evt.scriptCount; j++)
+                for (int j = 0; j < evt.scripts.Count; j++)
                 {
                     pofSets.Add(outBytes.Count);
                     outBytes.ReserveInt($"ContainerScripts{i}{j}");
                 }
-                for (int j = 0; j < evt.scriptCount; j++)
+                for (int j = 0; j < evt.scripts.Count; j++)
                 {
                     //Aligns in case the last script's data wasn't aligned. We specifically don't want to do this for the final script
                     outBytes.AlignWriter(0x4);
@@ -302,35 +303,40 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
     public class EventScriptContainer
     {
+        [JsonIgnore]
         public long position;
 
-        public int int_00;
-        public int scriptValue0;
-        public int int_08;
+        public int int_00 { get; set; }
+        public int scriptValue0 { get; set; }
+        public int int_08 { get; set; }
+        [JsonIgnore]
         public int scriptCount;
 
+        [JsonIgnore]
         public int scriptOffsets;
 
-        public List<EventScript> scripts = new List<EventScript>();
+        public List<EventScript> scripts { get; set; } = new List<EventScript>();
     }
 
     public class EventScript
     {
-        public string name = null;
+        public string name { get; set; }
 
+        [JsonIgnore]
         public int scriptNameOffset;
-        public int scriptInt_04;
+        public int scriptInt_04 { get; set; }
+        [JsonIgnore]
         public int scriptDataOffset;
 
         //Potential script data
         //Could be abstracted out cleanly, but we're doing it this way to avoid complication
-        public byte[] bytes_Data = null;
-        public int int0_Data;
-        public int int1_Data;
-        public float flt_Data;
-        public Vector3 vec3_Data;
-        public RaceData race_Data;
-        public MinigameData minigame_Data;
+        public List<byte> bytes_Data { get; set; } = null;
+        public int? int0_Data { get; set; } = null;
+        public int? int1_Data { get; set; } = null;
+        public float? flt_Data { get; set; } = null;
+        public List<float> vec3_Data { get; set; } = null;
+        public RaceData? race_Data { get; set; } = null;
+        public MinigameData? minigame_Data { get; set; } = null;
 
         public byte[] GetDataBytes(bool getBigEndian)
         {
@@ -368,11 +374,11 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 case "hoverleaf":
                 case "blizzard":
                 case "se":
-                    outBytes.AddValue(int0_Data);
+                    outBytes.AddValue((int)int0_Data);
                     break;
                 //1 float, 2 int16s
                 case "bgm_vol":
-                    outBytes.AddValue(flt_Data);
+                    outBytes.AddValue((float)flt_Data);
                     outBytes.AddValue((short)int0_Data);
                     outBytes.AddValue((short)int1_Data);
                     break;
@@ -380,35 +386,41 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 case "talk":
                 case "load_stg_title":
                 case "set_talk_mode":
-                    outBytes.AddValue(int0_Data);
-                    outBytes.AddValue(int1_Data);
+                    outBytes.AddValue((int)int0_Data);
+                    outBytes.AddValue((int)int1_Data);
                     break;
                 //Float Vector3
                 case "sol":
-                    outBytes.AddValue(vec3_Data);
+                    outBytes.AddValue(vec3_Data[0]);
+                    outBytes.AddValue(vec3_Data[1]);
+                    outBytes.AddValue(vec3_Data[2]);
                     break;
                 //Unique structure for set_race
                 case "set_race":
-                    outBytes.AddValue(race_Data.aiSetting);
-                    outBytes.AddValue(race_Data.sht_02);
-                    outBytes.AddValue(race_Data.animalSpeed);
-                    outBytes.AddValue(race_Data.preRaceMessageId);
-                    outBytes.AddValue(race_Data.winRaceMessageId);
-                    outBytes.AddValue(race_Data.loseRaceMessageId);
-                    outBytes.AddValue(race_Data.sht_0E);
-                    outBytes.AddValue(race_Data.animalScale);
-                    outBytes.AddValue(race_Data.animalPosition);
+                    var rData = (RaceData)race_Data;
+                    outBytes.AddValue(rData.aiSetting);
+                    outBytes.AddValue(rData.sht_02);
+                    outBytes.AddValue(rData.animalSpeed);
+                    outBytes.AddValue(rData.preRaceMessageId);
+                    outBytes.AddValue(rData.winRaceMessageId);
+                    outBytes.AddValue(rData.loseRaceMessageId);
+                    outBytes.AddValue(rData.sht_0E);
+                    outBytes.AddValue(rData.animalScale);
+                    outBytes.AddValue(rData.animalPosition[0]);
+                    outBytes.AddValue(rData.animalPosition[1]);
+                    outBytes.AddValue(rData.animalPosition[2]);
                     break;
                 //Unique structure for minigame
                 case "minigame":
-                    outBytes.Add(minigame_Data.bt_00);
-                    outBytes.Add(minigame_Data.bt_01);
-                    outBytes.Add(minigame_Data.bt_02);
-                    outBytes.Add(minigame_Data.bt_03);
-                    outBytes.Add(minigame_Data.timeInMinutes);
-                    outBytes.Add(minigame_Data.timeInSeconds);
-                    outBytes.Add(minigame_Data.bt_06);
-                    outBytes.Add(minigame_Data.emblemScoreToWin);
+                    var minG = (MinigameData)minigame_Data;
+                    outBytes.Add(minG.bt_00);
+                    outBytes.Add(minG.bt_01);
+                    outBytes.Add(minG.bt_02);
+                    outBytes.Add(minG.bt_03);
+                    outBytes.Add(minG.timeInMinutes);
+                    outBytes.Add(minG.timeInSeconds);
+                    outBytes.Add(minG.bt_06);
+                    outBytes.Add(minG.emblemScoreToWin);
                     break;
                 //No data
                 case "takeoff_suit":
@@ -452,28 +464,28 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         /// Unknown what this does, but the non default values make the AI move erratically.
         /// 0x8 is the default for King Clippen, 0x3 is the default for Queen Rabbish
         /// </summary>
-        public short aiSetting;
-        public short sht_02;
-        public float animalSpeed;
-        public short preRaceMessageId;
-        public short winRaceMessageId;
-        public short loseRaceMessageId;
-        public short sht_0E;
+        public short aiSetting { get; set; }
+        public short sht_02 { get; set; }
+        public float animalSpeed { get; set; }
+        public short preRaceMessageId { get; set; }
+        public short winRaceMessageId { get; set; }
+        public short loseRaceMessageId { get; set; }
+        public short sht_0E { get; set; }
 
-        public float animalScale;
-        public Vector3 animalPosition;
+        public float animalScale { get; set; }
+        public List<float> animalPosition { get; set; }
     }
 
     public struct MinigameData
     {
-        public byte bt_00;
-        public byte bt_01;
-        public byte bt_02;
-        public byte bt_03;
+        public byte bt_00 { get; set; }
+        public byte bt_01 { get; set; }
+        public byte bt_02 { get; set; }
+        public byte bt_03 { get; set; }
 
-        public byte timeInMinutes;
-        public byte timeInSeconds;
-        public byte bt_06;
-        public byte emblemScoreToWin;
+        public byte timeInMinutes { get; set; }
+        public byte timeInSeconds { get; set; }
+        public byte bt_06 { get; set; }
+        public byte emblemScoreToWin { get; set; }
     }
 }
