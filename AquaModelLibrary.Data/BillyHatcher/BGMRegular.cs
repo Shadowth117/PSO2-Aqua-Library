@@ -2,7 +2,6 @@
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
-using System.Text.Unicode;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
