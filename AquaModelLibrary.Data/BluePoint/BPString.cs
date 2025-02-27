@@ -11,10 +11,11 @@ namespace AquaModelLibrary.Data.BluePoint
         public string str;
 
         public BPString() { }
-        public BPString(BufferedStreamReaderBE<MemoryStream> sr)
+        public BPString(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            lengthLength = new CLength(sr);
-            length = new CLength(sr);
+            lengthLength = new CLength(sr, newEra);
+            //In SOTC, this is probably either always one byte or a VLQ
+            length = new CLength(sr, BPEra.DemonsSouls);
             str = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, length.GetTrueLength()));
             sr.Seek(length.GetTrueLength(), SeekOrigin.Current);
         }

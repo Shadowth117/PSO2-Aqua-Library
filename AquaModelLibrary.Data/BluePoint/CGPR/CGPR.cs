@@ -4,6 +4,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
     public class CGPR
     {
+        public BPEra era;
         public List<CGPRObject> objects = new List<CGPRObject>();
         public CFooter cfooter;
         public int cgprObjCount;
@@ -34,38 +35,14 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 cfooter = sr.Read<CFooter>();
             }
 
-            CGPRMagic type0 = (CGPRMagic)sr.Peek<uint>();
+            era = BPEra.None;
             for(int i = 0; i < cgprObjCount; i++)
             {
-                switch (type0)
+                objects.Add(CGPRObject.ReadObject(sr, era));
+                if(i == 0 && objects[i] != null)
                 {
-                    case CGPRMagic.xC1A69458:
-                        objects.Add(new _C1A69458_Object(sr));
-                        break;
-                    case CGPRMagic.xFAE88582:
-                        objects.Add(new _FAE88582_Object(sr));
-                        break;
-                    case CGPRMagic.x427AC0E6:
-                        objects.Add(new _427AC0E6_Object(sr));
-                        break;
-                    case CGPRMagic.x2C146841:
-                        objects.Add(new _2C146841_Object(sr));
-                        break;
-                    case CGPRMagic.x7FB9F5F0:
-                        objects.Add(new _7FB9F5F0_Object(sr));
-                        break;
-                    case CGPRMagic.x2FBDFD9B:
-                        objects.Add(new _2FBDFD9B_Object(sr));
-                        break;
-                    case CGPRMagic.x58D3EEDC:
-                        objects.Add(new _58D3EEDC_Object(sr));
-                        break;
-                    default:
-                        objects.Add(new CGPRGeneric_Object(sr));
-                        break;
+                    era = objects[i].era;
                 }
-
-                type0 = (CGPRMagic)sr.Peek<uint>();
             }
 
             var taggedEnd = sr.Position;

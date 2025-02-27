@@ -4,16 +4,40 @@ namespace AquaModelLibrary.Data.BluePoint
 {
     public class CLength
     {
-        private byte length;
-        public byte lengthAddition = 1;
+        public BPEra era = BPEra.None;
+        private int length;
+        private byte lengthAddition0 = 1;
+        private byte lengthAddition1 = 1;
+        private byte lengthAddition2 = 1;
 
         public CLength() { }
-        public CLength(BufferedStreamReaderBE<MemoryStream> sr)
+        public CLength(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            length = sr.Read<byte>();
-            if (length >= 0x80)
+            era = newEra;
+            switch(era)
             {
-                lengthAddition = sr.Read<byte>();
+                case BPEra.DemonsSouls:
+                    length = sr.Read<byte>();
+                    if (length >= 0x80)
+                    {
+                        lengthAddition0 = sr.Read<byte>();
+                        if (lengthAddition0 >= 0x80)
+                        {
+                            lengthAddition1 = sr.Read<byte>();
+                            throw new NotImplementedException("Discovered CLength with unexpected length addition! Please review!");
+                            if (lengthAddition1 >= 0x80)
+                            {
+                                lengthAddition2 = sr.Read<byte>();
+                                throw new NotImplementedException("Discovered CLength with unexpected length addition! Please review!");
+                            }
+                        }
+                    }
+                    break;
+                case BPEra.SOTC:
+                    length = sr.ReadBE<ushort>();
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
         }
 
@@ -22,7 +46,15 @@ namespace AquaModelLibrary.Data.BluePoint
         /// </summary>
         public int GetTrueLength()
         {
-            return length + (lengthAddition - 1) * 0x80;
+            switch (era)
+            {
+                case BPEra.DemonsSouls:
+                    return length + (lengthAddition0 - 1) * 0x80;
+                case BPEra.SOTC:
+                    return length;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -30,7 +62,15 @@ namespace AquaModelLibrary.Data.BluePoint
         /// </summary>
         public int GetCLengthStructSize()
         {
-            return length >= 0x80 ? 2 : 1;
+            switch (era)
+            {
+                case BPEra.DemonsSouls:
+                    return length >= 0x80 ? 2 : 1;
+                case BPEra.SOTC:
+                    return 2;
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }

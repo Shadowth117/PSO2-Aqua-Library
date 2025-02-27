@@ -4,17 +4,44 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
     public enum CGPRMagic : uint
     {
+        x00000000 = 0x00000000,
+        //DeSR
+        x2C146841 = 0x4168142C,
         x2FBDFD9B = 0x9BFDBD2F,
+        x427AC0E6 = 0xE6C07A42,
+        x58D3EEDC = 0xDCEED358,
+        x6ACFBD6C = 0x6CBDCF6A,
+        x7FB9F5F0 = 0xF0F5B97F,
         xC1A69458 = 0x5894A6C1,
         xFAE88582 = 0x8285E8FA,
-        x427AC0E6 = 0xE6C07A42,
-        x2C146841 = 0x4168142C,
-        x58D3EEDC = 0xDCEED358,
-        x7FB9F5F0 = 0xF0F5B97F,
+
+        //SOTC
+        x2DE7F55C = 0x5CF5E72D,
+        xFBAD9897 = 0x9798ADFB,
     }
     public abstract class CGPRObject
     {
-        public uint magic;
+        public CGPRCommonHeader mainHeader;
+        public BPEra era
+        {
+            get
+            {
+                return mainHeader.era;
+            }
+            set
+            {
+                mainHeader.era = value;
+            }
+        }
+        public CGPRMagic magic 
+        { 
+          get {
+                return (CGPRMagic)mainHeader.magic;
+              } 
+          set {
+                mainHeader.magic = (uint)value;
+            } 
+        }
 
         //Ending bytes
         public CLength endSize;
@@ -27,35 +54,83 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         public CGPRObject(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            magic = sr.Peek<uint>();
+            magic = sr.Peek<CGPRMagic>();
+        }
+
+        public static CGPRObject ReadObject(BufferedStreamReaderBE<MemoryStream> sr, BPEra currentEra)
+        {
+            CGPRMagic type0 = (CGPRMagic)sr.Peek<uint>();
+            switch (type0)
+            {
+                case CGPRMagic.x00000000:
+                    sr.Read<int>();
+                    return null;
+                //DeSR
+                case CGPRMagic.x2C146841:
+                    return new _2C146841_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x2FBDFD9B:
+                    return new _2FBDFD9B_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x427AC0E6:
+                    return new _427AC0E6_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x58D3EEDC:
+                    return new _58D3EEDC_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x6ACFBD6C:
+                    return new _6ACFBD6C_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x7FB9F5F0:
+                    return new _7FB9F5F0_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.xC1A69458:
+                    return new _C1A69458_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.xFAE88582:
+                    return new _FAE88582_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                //SOTC
+                case CGPRMagic.x2DE7F55C:
+                    return new _2DE7F55C_Object(sr, DecideEra(currentEra, BPEra.SOTC));
+                case CGPRMagic.xFBAD9897:
+                    return new _FBAD9897_Object(sr, DecideEra(currentEra, BPEra.SOTC));
+                default:
+                    return new CGPRGeneric_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+            }
+        }
+        public static BPEra DecideEra(BPEra currentEra, BPEra newestEra)
+        {
+            if(currentEra == BPEra.None)
+            {
+                return newestEra;
+            } else
+            {
+                return currentEra;
+            }
         }
     }
 
     public class CGPRCommonHeader
     {
-        public byte bt_0;
-        public byte bt_1;
-        public byte bt_2;
-        public byte bt_3;
+        public BPEra era
+        {
+            get 
+            { 
+                return length.era; 
+            }
+            set
+            {
+                length.era = value;
+            }
+        }
+        
+        public uint magic;
         private CLength length;
 
         public CGPRCommonHeader() { }
-        public CGPRCommonHeader(uint magic, CLength len) 
+        public CGPRCommonHeader(uint newMagic, CLength len) 
         {
             var magicBytes = BitConverter.GetBytes(magic);
-            bt_0 = magicBytes[0];
-            bt_1 = magicBytes[1];
-            bt_2 = magicBytes[2];
-            bt_3 = magicBytes[3];
+            magic = newMagic;
             length = len;
         }
-        public CGPRCommonHeader(BufferedStreamReaderBE<MemoryStream> sr)
+        public CGPRCommonHeader(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            bt_0 = sr.Read<byte>();
-            bt_1 = sr.Read<byte>();
-            bt_2 = sr.Read<byte>();
-            bt_3 = sr.Read<byte>();
-            length = new CLength(sr);
+            magic = sr.ReadBE<uint>();
+            length = new CLength(sr, newEra);
         }
 
         public int GetTrueLength()
@@ -71,19 +146,17 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
     public class _7FB9F5F0_Object : CGPRObject
     {
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
         public CLength endLength;
         public List<CGPR_EndSubstruct0> endStruct1s = new();
-        public _7FB9F5F0_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public _7FB9F5F0_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
             var start = sr.Position;
-            magic = sr.Peek<uint>();
-            mainHeader = new CGPRCommonHeader(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
             var end = start + mainHeader.GetTrueLength();
-            subObject = CGPRSubObject.ReadSubObject(sr);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
 
-            endLength = new CLength(sr);
+            endLength = new CLength(sr, era);
             int endCount0 = sr.Read<int>();
             if(endCount0 != 0)
             {
@@ -117,7 +190,6 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     {
         public long position;
 
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
         public CLength endLength;
         public int end00;
@@ -125,15 +197,14 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         public _FAE88582_Object() { }
 
-        public _FAE88582_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public _FAE88582_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
             position = sr.Position;
 
-            magic = sr.Peek<uint>();
-            mainHeader = new CGPRCommonHeader(sr);
-            subObject = CGPRSubObject.ReadSubObject(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
 
-            endLength = new CLength(sr);
+            endLength = new CLength(sr, era);
             end00 = sr.Read<int>();
             end04 = sr.Read<int>();
 
@@ -144,13 +215,80 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             }
         }
     }
+    /// <summary>
+    /// DESR CMDL main object
+    /// </summary>
+    public class CMDLContainer_Object : CGPRObject
+    {
+        public long position;
 
+        public List<CGPRSubObject> subObjects = new List<CGPRSubObject>();
+
+        public CMDLContainer_Object() { }
+
+        public CMDLContainer_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
+        {
+            position = sr.Position;
+
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            var count = sr.ReadBE<short>();
+            for (int i = 0; i < count; i++)
+            {
+                subObjects.Add(CGPRSubObject.ReadSubObject(sr, era));
+            }
+        }
+    }
+    /// <summary>
+    /// DESR CMDL main object
+    /// </summary>
+    public class _6ACFBD6C_Object : CMDLContainer_Object
+    {
+        public _6ACFBD6C_Object() { }
+
+        public _6ACFBD6C_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra) : base(sr, newEra)
+        {
+        }
+    }
+    /// <summary>
+    /// SOTC CMDL main object
+    /// </summary>
+    public class _FBAD9897_Object : CMDLContainer_Object
+    {
+        public _FBAD9897_Object() { }
+
+        public _FBAD9897_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra) : base(sr, newEra)
+        {
+        }
+    }
+
+    /// <summary>
+    /// SOTC
+    /// </summary>
+    public class _2DE7F55C_Object : CGPRObject
+    {
+        public long position;
+
+        public List<CGPRSubObject> subObjects = new List<CGPRSubObject>();
+
+        public _2DE7F55C_Object() { }
+
+        public _2DE7F55C_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
+        {
+            position = sr.Position;
+
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            var count = sr.ReadBE<short>();
+            for (int i = 0; i < count; i++)
+            {
+                subObjects.Add(CGPRSubObject.ReadSubObject(sr, era));
+            }
+        }
+    }
     //Often at the start of CGPRs, sometimes spread throughout
     public class _C1A69458_Object : CGPRObject
     {
         public long position;
 
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
 
         public int end00Count;
@@ -162,16 +300,15 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         }
 
-        public _C1A69458_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public _C1A69458_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
             position = sr.Position;
 
-            magic = sr.Peek<uint>();
-            mainHeader = new CGPRCommonHeader(sr);
-            subObject = CGPRSubObject.ReadSubObject(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
 
             var endSizePosition = sr.Position;
-            endSize = new CLength(sr);
+            endSize = new CLength(sr, era);
             end00Count = sr.Read<int>();
 
             for (int i = 0; i < end00Count; i++)
@@ -207,7 +344,6 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     public class _427AC0E6_Object : CGPRObject
     {
         public long position;
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
 
         public _427AC0E6_Object()
@@ -215,30 +351,28 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         }
 
-        public _427AC0E6_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public _427AC0E6_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
             position = sr.Position;
-            magic = sr.Peek<uint>();
-            mainHeader = new CGPRCommonHeader(sr);
-            subObject = CGPRSubObject.ReadSubObject(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
 
-            endSize = new CLength(sr);
+            endSize = new CLength(sr, era);
             endBytes = sr.ReadBytesSeek(endSize.GetTrueLength());
         }
     }
 
     public class _2FBDFD9B_Object : CGPRObject
     {
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
         public int end00;
         public int end04;
         public _2FBDFD9B_Object() { }
-        public _2FBDFD9B_Object(BufferedStreamReaderBE<MemoryStream> sr) 
+        public _2FBDFD9B_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            mainHeader = new CGPRCommonHeader(sr);
-            subObject = CGPRSubObject.ReadSubObject(sr);
-            endSize = new CLength(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
+            endSize = new CLength(sr, era);
             end00 = sr.Read<int>();
             end04 = sr.Read<int>();
 
@@ -252,25 +386,23 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
     public class _2C146841_Object : CGPRObject
     {
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
         public CLength listSectionLength;
         public int unkInt;
         public List<_2C146841_listChunk> listChunks = new List<_2C146841_listChunk>();
         public _2C146841_Object() { }
 
-        public _2C146841_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public _2C146841_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            magic = sr.Peek<uint>();
-            mainHeader = new CGPRCommonHeader(sr);
-            subObject = CGPRSubObject.ReadSubObject(sr);
-            listSectionLength = new CLength(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
+            listSectionLength = new CLength(sr, era);
             var listSectionCount = sr.Read<int>();
             unkInt = sr.Read<int>();
 
             for (int i = 0; i < listSectionCount; i++)
             {
-                listChunks.Add(new _2C146841_listChunk(sr));
+                listChunks.Add(new _2C146841_listChunk(sr, era));
             }
         }
 
@@ -294,7 +426,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             public List<CGPRSubObject> subStructs = new List<CGPRSubObject>();
             public int unkInt;
             public _2C146841_listChunk() { }
-            public _2C146841_listChunk(BufferedStreamReaderBE<MemoryStream> sr)
+            public _2C146841_listChunk(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
             {
                 int_00 = sr.Read<int>();
                 int_04 = sr.Read<int>();
@@ -313,7 +445,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 subStructCount = sr.Read<short>();
                 for (int i = 0; i < subStructCount; i++)
                 {
-                    subStructs.Add(CGPRSubObject.ReadSubObject(sr));
+                    subStructs.Add(CGPRSubObject.ReadSubObject(sr, newEra));
                 }
                 unkInt = sr.Read<int>();
             }
@@ -322,18 +454,17 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
     public class _58D3EEDC_Object : CGPRObject
     {
-        public CGPRCommonHeader mainHeader;
         public CGPRSubObject subObject;
         public int end00Count;
         public int end04Count;
 
         public List<CGPR_EndSubstruct0> endStruct1s = new List<CGPR_EndSubstruct0>();
         public _58D3EEDC_Object() { }
-        public _58D3EEDC_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public _58D3EEDC_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            mainHeader = new CGPRCommonHeader(sr);
-            subObject = CGPRSubObject.ReadSubObject(sr);
-            endSize = new CLength(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
+            subObject = CGPRSubObject.ReadSubObject(sr, era);
+            endSize = new CLength(sr, era);
             end00Count = sr.Read<int>();
             end04Count = sr.Read<int>();
 
@@ -385,16 +516,14 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
     public class CGPRGeneric_Object : CGPRObject
     {
         public long position;
-        public CGPRCommonHeader mainHeader;
         public byte[] bytes = null;
 
         public CGPRGeneric_Object() { }
 
-        public CGPRGeneric_Object(BufferedStreamReaderBE<MemoryStream> sr)
+        public CGPRGeneric_Object(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
             position = sr.Position;
-            magic = sr.Peek<uint>();
-            mainHeader = new CGPRCommonHeader(sr);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
             bytes = sr.ReadBytesSeek(mainHeader.GetTrueLength());
         }
     }
