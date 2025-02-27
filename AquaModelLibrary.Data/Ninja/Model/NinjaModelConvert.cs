@@ -1,9 +1,13 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua;
+﻿using AquaModelLibrary.Data.Gamecube;
+using AquaModelLibrary.Data.Ninja.Model.Ginja;
+using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
+using NvTriStripDotNet;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model
@@ -27,6 +31,141 @@ namespace AquaModelLibrary.Data.Ninja.Model
             {
                 return ModelConvert(sr, variant, out aqn, offset);
             }
+        }
+
+        public static NJSObject ConvertToNinja(AquaObject aqo, AquaNode aqn, NinjaVariant variant, out NJTextureList njTL)
+        {
+            njTL = new NJTextureList();
+            if(aqo.texFUnicodeNames.Count > 0)
+            {
+                njTL.texNames = aqo.texFUnicodeNames;
+            } else
+            {
+                njTL.texNames = aqo.texfList.Select(x => x.texName.GetString()).ToList();
+            }
+            List<NJSObject> njsObjects = new List<NJSObject>();
+
+            //Do first loop to set up bulk of bone info
+            for(int i = 0; i < aqn.nodeList.Count; i++)
+            {
+                var bn = aqn.nodeList[i];
+                var bnTfm = bn.GetInverseBindPoseMatrixInverted();
+                if(bn.parentId != -1)
+                {
+                    var pn = aqn.nodeList[bn.parentId];
+                    var pnInvTfm = pn.GetInverseBindPoseMatrix();
+                    bnTfm = bnTfm * pnInvTfm;
+                }
+                Matrix4x4.Decompose(bnTfm, out var scl, out var rot, out var pos);
+                var eulRot = MathExtras.QuaternionToEulerRadians(rot);
+
+                NJSObject njBone = new();
+                njBone.pos = pos;
+                njBone.rot = eulRot;
+                njBone.scale = scl;
+                njBone.unkInt = -33686019; //For some reason gc models just use this.
+                njBone.variant = variant;
+                njsObjects.Add(njBone);
+            }
+
+            //Link neighboring nodes
+            for (int i = 0; i < aqn.nodeList.Count; i++)
+            {
+                var bn = aqn.nodeList[i];
+                var njBone = njsObjects[i];
+                njBone.childObject = njsObjects[bn.firstChild];
+                njBone.siblingObject = njsObjects[bn.nextSibling];
+            }
+
+            //Generate mesh data
+
+            //Check if we can treat this as an static weighted model
+            //Static weighted models not only allow more mesh data, but are structured fairly differently
+            bool isStaticWeighted = CheckIfStaticWeighted(aqo);
+
+            switch (variant)
+            {
+                case NinjaVariant.Basic:
+                    throw new NotImplementedException();
+                case NinjaVariant.Chunk:
+
+                    throw new NotImplementedException();
+                case NinjaVariant.Ginja:
+                    NvStripifier stripifier = new NvStripifier() { StitchStrips = false, UseRestart = false };
+                    //If this model is static weighted, we assign full mesh data per NJSObject it's attached to and do not use any weighted data. Static weighted models are also allowed to have
+                    //vertex colors or normals
+                    if (isStaticWeighted)
+                    {
+
+                    } else //If this model is not fully static weighted, we assign color, uv, and general mesh data to the root and then patch proportional vertex weighted data onto appropriate NJSObjects
+                           //The root NJSObject is also a valid area to put weighted data.Verts share a single list.
+                    {
+                        var posAtr = new VtxAttrFmtParameter(GCVertexAttribute.Position, true);
+                        var nrmAtr = new VtxAttrFmtParameter(GCVertexAttribute.Normal, true);
+
+                        //Gather aqo vertices into a singular, optimized vertex list
+
+                        /*
+                        for(int i = 0; i < aqo.meshList.Count; i++)
+                        {
+                            stripifier.GenerateStrips(tris.ToArray(), out var primitiveGroups);
+                            foreach (NvTriStripDotNet.PrimitiveGroup grp in primitiveGroups)
+                            {
+                                GC.GCPrimitive prim = new GC.GCPrimitive(GC.GCPrimitiveType.TriangleStrip);
+                                for (var j = 0; j < grp.Indices.Length; j++)
+                                {
+                                    GC.Loop vert = new GC.Loop();
+                                    vert.PositionIndex = (ushort)(vertStartIndex + grp.Indices[j]);
+                                    if (m.HasTextureCoords(0))
+                                        vert.UV0Index = (ushort)(uvStartIndex + grp.Indices[j]);
+                                    if (m.HasVertexColors(0))
+                                        vert.Color0Index = (ushort)(colorStartIndex + grp.Indices[j]);
+                                    else if (m.HasNormals)
+                                        vert.NormalIndex = (ushort)(normStartIndex + grp.Indices[j]);
+                                    prim.loops.Add(vert);
+                                }
+                                primitives.Add(prim);
+                            }
+                            gcmeshes.Add(new GC.GCMesh(parameters, primitives));
+                        }*/
+                    }
+                    break;
+                case NinjaVariant.XJ:
+                    throw new NotImplementedException();
+            }
+
+            return njsObjects[0];
+        }
+
+        private static bool CheckIfStaticWeighted(AquaObject aqo)
+        {
+            bool isStaticWeighted = true;
+            for (int i = 0; i < aqo.vtxlList.Count; i++)
+            {
+                //Check through vert weights, if this vertex list has them
+                //If we have more than one weight with a value other than 0, we assume this isn't static weighted
+                //We check this way to avoid issues with floating point nonsense
+                for (int j = 0; j < aqo.vtxlList[i].vertWeights.Count; j++)
+                {
+                    var weights = aqo.vtxlList[i].vertWeights[j];
+                    int weightCheck = weights.X != 0 ? 1 : 0;
+                    weightCheck = weights.Y != 0 ? weightCheck + 1 : weightCheck;
+                    weightCheck = weights.Z != 0 ? weightCheck + 1 : weightCheck;
+                    weightCheck = weights.W != 0 ? weightCheck + 1 : weightCheck;
+
+                    if (weightCheck > 1)
+                    {
+                        isStaticWeighted = false;
+                        break;
+                    }
+                }
+                if (isStaticWeighted == false)
+                {
+                    break;
+                }
+            }
+
+            return isStaticWeighted;
         }
 
         public static AquaObject ModelConvert(BufferedStreamReaderBE<MemoryStream> sr, NinjaVariant variant, out AquaNode aqn, int offset = 0, List<string> texNames = null)

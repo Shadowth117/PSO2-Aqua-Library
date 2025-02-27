@@ -157,9 +157,10 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
         /// <summary>
         /// Creates a new parameter with the default value according to each attribute type <br/> (which are the only ones that work ingame)
+        /// Models with non static weights must use a different value.
         /// </summary>
         /// <param name="vertexAttrib">The vertex attribute type that the parameter is for</param>
-        public VtxAttrFmtParameter(GCVertexAttribute vertexAttrib) : base(ParameterType.VtxAttrFmt)
+        public VtxAttrFmtParameter(GCVertexAttribute vertexAttrib, bool weightedModel = false) : base(ParameterType.VtxAttrFmt)
         {
             VertexAttribute = vertexAttrib;
 
@@ -167,16 +168,16 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             switch (vertexAttrib)
             {
                 case GCVertexAttribute.Position:
-                    Unknown = 5120;
+                    Unknown = (ushort)(weightedModel ? 0x1308 : 0x1400);
                     break;
                 case GCVertexAttribute.Normal:
-                    Unknown = 9216;
+                    Unknown = (ushort)(weightedModel ? 0x2308 : 0x2400);
                     break;
                 case GCVertexAttribute.Color0:
-                    Unknown = 27136;
+                    Unknown = (ushort)(0x6A00);
                     break;
                 case GCVertexAttribute.Tex0:
-                    Unknown = 33544;
+                    Unknown = (ushort)0x8308;
                     break;
                 default:
                     break;
