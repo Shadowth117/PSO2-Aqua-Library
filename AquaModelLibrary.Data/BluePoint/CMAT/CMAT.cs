@@ -94,7 +94,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMAT
                     for (int i = 0; i < texCount2; i++)
                     {
                         byte texLen = sr.Read<byte>();
-                        Debug.WriteLine($"{texLen}");
+                        //Debug.WriteLine($"{texLen}");
                         texNames.Add(Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, texLen)));
                         sr.Seek(texLen, System.IO.SeekOrigin.Current);
                     }
