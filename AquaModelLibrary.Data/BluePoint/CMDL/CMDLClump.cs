@@ -127,7 +127,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
                     return;
                 default:
                     Debug.WriteLine($"Unexpected tag: {check:X8}");
-                    throw new Exception();
+                    break;
             }
         }
 
