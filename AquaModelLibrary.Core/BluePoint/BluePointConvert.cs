@@ -472,10 +472,7 @@ namespace AquaModelLibrary.Core.BluePoint
                 if (materialDict.ContainsKey(baseMatName.matName))
                 {
                     var cmat = materialDict[baseMatName.matName];
-                    if (cmat.texNames.Count > 0)
-                    {
-                        texName = cmat.texNames[0];
-                    }
+                    texName = GetTexNameFromCMAT(texName, cmat);
                 }
                 else
                 {
@@ -488,10 +485,7 @@ namespace AquaModelLibrary.Core.BluePoint
                         if (File.Exists(matPath))
                         {
                             var cmat = new CMAT(File.ReadAllBytes(matPath));
-                            if (cmat.texNames.Count > 0)
-                            {
-                                texName = cmat.texNames[0];
-                            }
+                            texName = GetTexNameFromCMAT(texName, cmat);
                         }
                         else if (File.Exists(backupMatPath))
                         {
@@ -503,6 +497,8 @@ namespace AquaModelLibrary.Core.BluePoint
                         }
                     }
                 }
+
+                texName = Path.GetFileName(texName).Replace(".ctxr", ".dds");
 
                 //Material
                 var mat = new GenericMaterial();
@@ -583,5 +579,23 @@ namespace AquaModelLibrary.Core.BluePoint
             return aqp;
         }
 
+        private static string GetTexNameFromCMAT(string texName, CMAT cmat)
+        {
+            if (cmat.texNames.Count > 0)
+            {
+                texName = cmat.texNames[0];
+                //If we can find it, make the albedo the texture
+                foreach (var tex in cmat.texNames)
+                {
+                    if (tex.Contains("_col."))
+                    {
+                        texName = tex;
+                        break;
+                    }
+                }
+            }
+
+            return texName;
+        }
     }
 }

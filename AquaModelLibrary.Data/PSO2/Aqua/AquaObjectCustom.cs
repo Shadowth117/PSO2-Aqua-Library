@@ -1475,8 +1475,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     string texName;
                     if (mat.texNames?.Count > i)
                     {
-                        tsta.texName.SetString(mat.texNames[i]);
-                        texf.texName.SetString(mat.texNames[i]);
+                        tsta.texName.SetString(Path.GetFileName(mat.texNames[i]));
+                        texf.texName.SetString(Path.GetFileName(mat.texNames[i]));
                         texName = mat.texNames[i];
                     }
                     else
