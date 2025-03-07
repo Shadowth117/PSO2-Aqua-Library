@@ -81,11 +81,14 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             if (paletteBits == 0x10)
             {
                 
-                for (int i = 0; i < paletteData.Length; i++)
+                for (int i = 0; i < paletteData.Length; i+=2)
                 {
                     var bt = paletteData[i];
-                    paletteDataList.Add((byte)((bt & 0xF) * 0x11));
-                    paletteDataList.Add((byte)((bt >> 4) * 0x11));
+                    var bt1 = paletteData[i + 1];
+                    paletteDataList.Add((byte)Math.Min((bt & 0x1F) * 8, 0xFF));
+                    paletteDataList.Add((byte)Math.Min(((bt >> 5) | (bt1 & 3) << 3) * 8, 0xFF));
+                    paletteDataList.Add((byte)Math.Min(((bt1 >> 2) & 0x1F) * 8, 0xFF));
+                    paletteDataList.Add((byte)(((bt1 >> 7) & 0x1) * 0xFF));
                 }
             }
             else
