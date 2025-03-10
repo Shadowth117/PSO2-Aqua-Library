@@ -1,24 +1,15 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Capcom.MonsterHunter
 {
-    public enum AHIVert : ushort
-    {
-        Position = 0x7,
-        Normal = 0x8,
-        UV = 0xA, 
-        Color = 0xB,
-        /// <summary>
-        /// Values have an int count and then an array of int index + float pairs for the count per vertex
-        /// </summary>
-        Weights = 0xC,
-    }
     /// <summary>
     /// Model and skeletal node data. Seems to be one or the other for an AHI instance.
     /// </summary>
     public class AHI
     {
+        public static uint AHIMagic = 0xC0000000;
+
         public List<AHINode> nodesList = new List<AHINode>();
         public AHI(byte[] file)
         {
@@ -56,6 +47,7 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             }
             for(int i = 0; i < rootNodeCount -1; i++)
             {
+                nodesList.Add(sr.ReadBE<AHINode>());
             }
         }
         
@@ -97,7 +89,6 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             public Vector3 matrixRow0;
             public Vector3 matrixRow1;
             public Vector3 matrixRow2;
-            public int unkInt1;
 
             //0xC0 of padding?
             public Vector4 unkData0;
@@ -113,9 +104,7 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             public Vector4 unkData8;
             public Vector4 unkData9;
             public Vector4 unkData10;
-            public int unkInt2;
-            public int unkInt3;
-            public int unkInt4;
+            public Vector4 unkData11;
         }
     }
 }
