@@ -2,6 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using System.Numerics;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 
 namespace AquaModelLibrary.Data.Capcom.MonsterHunter
 {
@@ -12,9 +13,48 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             var modelRootSections = ((AMOModelRoot)amo.rootSection).sections;
             aqo = new AquaObject();
             aqn = new AquaNode();
+            var backupBonePalette = ahi.GenerateBonePaletteFromAHI();
 
-            //for()
-            aqn = AquaNode.GenerateBasicAQN();
+            if(ahi == null)
+            {
+                aqn = AquaNode.GenerateBasicAQN();
+            } else
+            {
+                aqn = new AquaNode();
+                var ahiList = (AHINodeList)ahi.rootSection;
+                for(int i = 0; i < ahiList.sections.Count; i++)
+                {
+                    var section = ahiList.sections[i];
+                    if(section is MHNode)
+                    {
+                        var node = ((MHNode)section).node;
+                        Vector3 parentPos = new Vector3();
+                        if(node.parentId != -1)
+                        {
+                            var parNd = aqn.nodeList[node.parentId];
+                            parentPos.X = parNd.m4.X;
+                            parentPos.Y = parNd.m4.Y;
+                            parentPos.Z = parNd.m4.Z;
+                        }
+
+                        NODE nd = new NODE();
+                        nd.animatedFlag = 1;
+                        nd.boneName.SetString($"Node_{aqn.nodeList.Count}");
+                        nd.m1 = new Vector4(1, 0, 0, 0);
+                        nd.m2 = new Vector4(0, 1, 0, 0);
+                        nd.m3 = new Vector4(0, 0, 1, 0);
+
+                        var finalPos = -node.position + parentPos;
+                        nd.m4 = new Vector4(finalPos.X, finalPos.Y, finalPos.Z, 1);
+                        nd.parentId = node.parentId;
+                        nd.nextSibling = node.nextSiblingId;
+                        nd.firstChild = node.firstChildId;
+                        nd.unkNode = -1;
+
+                        aqn.nodeList.Add(nd);
+                    }
+                }
+            }
             AMOMaterialList matList = MHTagFile.GetFirstSection<AMOMaterialList>(modelRootSections);
             AMOTextureInfo texInfoList = MHTagFile.GetFirstSection<AMOTextureInfo>(modelRootSections);
             
@@ -51,11 +91,26 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             for(int m = 0; m < matList.materials.Count; m++)
             {
                 var mhMat = matList.materials[m];
-                var texInfo = texInfoList.texInfoList[m];
+
+                //Setting this to a new one means if we don't have one it'll default to 0 later
+                AMOTextureInfo.TexInfo texInfo = new AMOTextureInfo.TexInfo();
+                if (mhMat.texInfoIds.Count > 0)
+                {
+                    texInfo = texInfoList.texInfoList[mhMat.texInfoIds[0]];
+                }
                 GenericMaterial mat = new GenericMaterial();
                 mat.matName = $"Mat_{m}";
                 mat.diffuseRGBA = new Vector4(mhMat.DiffuseColor, 0);
-                mat.texNames = new List<string> { texNames[texInfo.textureId] };
+                if(texNames.Count > texInfo.textureId)
+                {
+                    mat.texNames = new List<string> { texNames[texInfo.textureId] };
+                } else if (texNames.Count > 0)
+                {
+                    mat.texNames = new List<string> { texNames[0] };
+                } else
+                {
+                    mat.texNames = new List<string>() { "dummy.dds"};
+                }
                 aqo.tempMats.Add(mat);
             }
 
@@ -71,6 +126,11 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
                 var uvList = MHTagFile.GetFirstSection<MHVertUVs>(mesh.sections);
                 var colorList = MHTagFile.GetFirstSection<MHVertColors>(mesh.sections);
                 var weightList = MHTagFile.GetFirstSection<MHVertWeights>(mesh.sections);
+
+                if(bonePalette == null)
+                {
+                    bonePalette = backupBonePalette;
+                }
 
                 int stripCounter = 0; //We use this to orient the strip we're working with within the mesh's full list for material mapping 
                 for(int s = 0; s < stripList.sections.Count; s++)

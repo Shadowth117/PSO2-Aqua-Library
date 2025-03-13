@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Data.DataTypes;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Capcom.MonsterHunter
@@ -33,6 +34,51 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
         {
             rootSection = ReadMHSection(sr);
         }
+
+        public int GetNodeCount()
+        {
+            if(!(rootSection is AHINodeList))
+            {
+                return 0;
+            } else
+            {
+                int nodeCount = 0;
+                AHINodeList list = (AHINodeList)rootSection;
+                foreach(var section in list.sections)
+                {
+                    if(section is MHNode)
+                    {
+                        nodeCount++;
+                    }
+                }
+
+                return nodeCount;
+            }
+        }
+
+        public MHBonePalette GenerateBonePaletteFromAHI()
+        {
+            if (!(rootSection is AHINodeList))
+            {
+                return new MHBonePalette(new MHSectionHeader());
+            }
+            else
+            {
+                AHINodeList list = (AHINodeList)rootSection;
+                MHBonePalette bonePalette = new MHBonePalette(new MHSectionHeader());
+                int nodeCount = 0;
+                foreach (var section in list.sections)
+                {
+                    if (section is MHNode)
+                    {
+                        bonePalette.bonePalette.Add(nodeCount++);
+                    }
+                }
+
+                return bonePalette;
+            }
+        }
+
         public static MHSection ReadMHSection(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var hd = new MHSectionHeader() { type0 = sr.ReadBE<ushort>(), type1 = sr.ReadBE<ushort>(), subCount = sr.ReadBE<int>(), size = sr.ReadBE<int>() };
@@ -278,12 +324,21 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
                     UnkColor = sr.ReadBEV3(),
                     int_38 = sr.ReadBE<int>(),
                     flt_3C = sr.ReadBE<float>(),
-                    int_40 = sr.ReadBE<int>(),
+                    texCount = sr.ReadBE<int>(),
                 };
-                for (int j = 0; j < 0x33; j++)
+                for (int j = 0; j < 0x32; j++)
                 {
                     mat.unkValues.Add(sr.ReadBE<int>());
                 }
+                if(mat.texCount > 1)
+                {
+                    var a = 0;
+                }
+                for(int j = 0; j < mat.texCount; j++)
+                {
+                    mat.texInfoIds.Add(sr.ReadBE<int>());
+                }
+
                 materials.Add(mat);
             }
         }
@@ -298,28 +353,31 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             public Vector3 UnkColor;
             public int int_38;
             public float flt_3C;
-            public int int_40;
+            public int texCount;
 
             /// <summary>
-            /// 0xCC worth of int values
+            /// 0xC8 worth of int values
             /// </summary>
             public List<int> unkValues = new List<int>();
+
+            public List<int> texInfoIds = new List<int>();
         }
     }
     public class AMOTextureInfo : MHMainSection
     {
-        public List<AMOUnkAObject> texInfoList = new List<AMOUnkAObject>();
+        public List<TexInfo> texInfoList = new List<TexInfo>();
         public AMOTextureInfo(MHSectionHeader hd) : base(hd) { }
         public AMOTextureInfo(MHSectionHeader hd, BufferedStreamReaderBE<MemoryStream> sr) : base(hd, sr)
         {
             for (int i = 0; i < hd.subCount; i++)
             {
-                var mat = new AMOUnkAObject()
+                var mat = new TexInfo()
                 {
                     header = new MHSectionHeader() { type0 = sr.ReadBE<ushort>(), type1 = sr.ReadBE<ushort>(), subCount = sr.ReadBE<int>(), size = sr.ReadBE<int>() },
                     textureId = sr.ReadBE<int>(),
-                    int_04 = sr.ReadBE<int>(),
-                    usht_08 = sr.ReadBE<ushort>(),
+                    texWidth = sr.ReadBE<ushort>(),
+                    usht_06 = sr.ReadBE<ushort>(),
+                    texHeight = sr.ReadBE<ushort>(),
                     usht_0A = sr.ReadBE<ushort>(),
                 };
                 for (int j = 0; j < 0x3D; j++)
@@ -329,13 +387,14 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
                 texInfoList.Add(mat);
             }
         }
-        public class AMOUnkAObject
+        public class TexInfo
         {
             public MHSectionHeader header;
 
             public int textureId;
-            public int int_04;
-            public ushort usht_08;
+            public ushort texWidth;
+            public ushort usht_06;
+            public ushort texHeight;
             public ushort usht_0A;
 
             /// <summary>
@@ -370,17 +429,22 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
         public MHNode(MHSectionHeader hd) : base(hd) { }
         public MHNode(MHSectionHeader hd, BufferedStreamReaderBE<MemoryStream> sr) : base(hd, sr)
         {
-            node = new AHINode()
-            {
-                nodeId = sr.ReadBE<int>(),
-                parentId = sr.ReadBE<int>(),
-                firstChildId = sr.ReadBE<int>(),
-                nextSiblingId = sr.ReadBE<int>(),
-                scale = sr.ReadBEV3(),
-                matrixRow0 = sr.ReadBEV3(),
-                matrixRow1 = sr.ReadBEV3(),
-                matrixRow2 = sr.ReadBEV3(),
-            };
+            node = new AHINode();
+            node.nodeId = sr.ReadBE<int>();
+            node.parentId = sr.ReadBE<int>();
+            node.firstChildId = sr.ReadBE<int>();
+            node.nextSiblingId = sr.ReadBE<int>();
+            node.scale = sr.ReadBEV3();
+            node.pad0 = sr.ReadBE<float>();
+            node.rotation = new Vector3Int.Vec3Int(sr.ReadBE<int>(), sr.ReadBE<int>(), sr.ReadBE<int>());
+            node.rotationIntProcessed = new Vector3((float)(((double)node.rotation.X / int.MaxValue) * (360.0)), (float)(((double)node.rotation.Y / int.MaxValue) * (360.0)), (float)(((double)node.rotation.Z / int.MaxValue) * (360.0)));
+            sr.Seek(-0xC, SeekOrigin.Current);
+            node.rotationUint = new uint[] { sr.ReadBE<uint>(), sr.ReadBE<uint>(), sr.ReadBE<uint>()};
+            node.rotationUintProcessed = new Vector3((float)(((double)node.rotationUint[0] / uint.MaxValue) * (360.0)), (float)(((double)node.rotationUint[1] / uint.MaxValue) * (360.0)), (float)(((double)node.rotationUint[2] / uint.MaxValue) * (360.0)));
+            node.pad1 = sr.ReadBE<float>();
+            node.position = sr.ReadBEV3();
+            node.pad2 = sr.ReadBE<float>();
+            
             for (int i = 0; i < 0x30; i++)
             {
                 node.unkValues.Add(sr.ReadBE<int>());
@@ -404,9 +468,14 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
             public int nextSiblingId;
 
             public Vector3 scale;
-            public Vector3 matrixRow0;
-            public Vector3 matrixRow1;
-            public Vector3 matrixRow2;
+            public float pad0;
+            public Vector3Int.Vec3Int rotation;
+            public Vector3 rotationIntProcessed;
+            public uint[] rotationUint = null;
+            public Vector3 rotationUintProcessed;
+            public float pad1;
+            public Vector3 position;
+            public float pad2;
 
             /// <summary>
             /// 0xC0 worth of int values
