@@ -140,6 +140,20 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
                         default:
                             throw new NotImplementedException();
                     }
+                case 0x8000:
+                    if(hd.type0 > 0x8)
+                    {
+                        throw new NotImplementedException();
+                    } else
+                    {
+                        throw new NotImplementedException();
+                    }
+                case 0x8012:
+                    throw new NotImplementedException();
+                case 0x8013:
+                    throw new NotImplementedException();
+                case 0x8022:
+                    throw new NotImplementedException();
                 case 0xC000:
                     return new AHINodeList(hd, sr);
                 default:
