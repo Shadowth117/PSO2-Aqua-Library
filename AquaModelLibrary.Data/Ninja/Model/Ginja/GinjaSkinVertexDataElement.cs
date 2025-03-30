@@ -98,7 +98,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                         });
                     }
                     break;
-                case GCSkinAttribute.WeightEnd:
+                case GCSkinAttribute.WeightStructEndMarker:
                     break;
                 default:
                     throw new System.Exception($"Bad GCSkinVertexSetElement type {elementType:X}");

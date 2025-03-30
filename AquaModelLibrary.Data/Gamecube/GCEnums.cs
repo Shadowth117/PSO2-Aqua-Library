@@ -261,7 +261,7 @@ namespace AquaModelLibrary.Data.Gamecube
         StaticWeight = 0,
         PartialWeightStart = 1,
         PartialWeight = 2,
-        WeightEnd = 3,
+        WeightStructEndMarker = 3,
     }
 
     /// <summary>

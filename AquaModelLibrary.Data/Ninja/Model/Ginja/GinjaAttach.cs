@@ -208,7 +208,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                                 vtxl.rawVertWeightIds[vId].Add(nodeId);
                             }
                             break;
-                        case GCSkinAttribute.WeightEnd: //More of a marker than anything; No data here.
+                        case GCSkinAttribute.WeightStructEndMarker: //More of a marker than anything; No data here.
                             break;
                         default:
                             throw new Exception($"Unexpected GCSkinAttribute {element.elementType}");

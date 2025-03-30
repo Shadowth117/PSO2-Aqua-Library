@@ -11,7 +11,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         {
             sr._BEReadActive = be;
             var element = new GinjaSkinVertexDataElement(sr, be, offset);
-            while (element.elementType < GCSkinAttribute.WeightEnd)
+            while (element.elementType < GCSkinAttribute.WeightStructEndMarker)
             {
                 elements.Add(element);
                 element = new GinjaSkinVertexDataElement(sr, be, offset);
@@ -33,7 +33,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                     case GCSkinAttribute.PartialWeight:
                         outBytes.AddValue((ushort)(element.posNrms.Count * 4));
                         break;
-                    case GCSkinAttribute.WeightEnd:
+                    case GCSkinAttribute.WeightStructEndMarker:
                         outBytes.AddValue((ushort)0);
                         break;
                 }
