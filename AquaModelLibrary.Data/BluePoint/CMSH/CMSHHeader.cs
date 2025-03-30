@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Text;
 
@@ -12,13 +13,13 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public byte variantFlag2; //Sections being things such as vertexData, FaceData, etc.
         public byte unk0;
         public ushort unk1;
-        public byte[] extraFlags;          //Hash for file?
+        public float sizeFloat;          //Bounding value?
         public int matCount;     //Material reference count
         public List<CMSHMatReference> matList = new List<CMSHMatReference>();
         public int endInt;
 
         //Demon's Souls check
-        public bool hasExtraFlags; //Used if extra flags are detected.
+        public bool hasSizeFloat; //Used if extra flags are detected.
         public ulong dummyConstData = 7885087596553986582; //Certain 0x200 dummy models have 0ed extraFlags so we check this against address 0x25 to get around that.
 
         //Some cmshs have this
@@ -63,12 +64,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     CheckForExtraFlags(sr);
                     matCount = sr.Read<int>();
                     ReadMaterialList(sr);
-
-                    //Demon's Souls
-                    if (hasExtraFlags)
-                    {
-                        endInt = sr.Read<int>();
-                    }
                     break;
                 default:
                     Debug.WriteLine($"Unknown variant flags: {variantFlags:X}");
@@ -78,35 +73,32 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         private void ReadMaterialList(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            if (matCount > 0)
+            for (int i = 0; i < matCount; i++)
             {
-                for (int i = 0; i < matCount; i++)
+                CMSHMatReference matRef = new CMSHMatReference();
+                matRef.minBounding = sr.ReadBEV3();
+                matRef.maxBounding = sr.ReadBEV3();
+                matRef.matNameLength = sr.Read<byte>();
+                if (sr.Peek<byte>() == 0x1)
                 {
-                    CMSHMatReference matRef = new CMSHMatReference();
-                    matRef.minBounding = sr.ReadBEV3();
-                    matRef.maxBounding = sr.ReadBEV3();
-                    matRef.matNameLength = sr.Read<byte>();
-                    if(sr.Peek<byte>() == 0x1)
-                    {
-                        sr.Read<byte>();
-                    }
-                    matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, matRef.matNameLength));
-                    sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
-                    if (hasExtraFlags && matCount > 1 && (i + 1 != matCount))
-                    {
-                        matRef.startingFaceIndex = sr.Read<int>();
-                        matRef.endingFaceIndex = sr.Read<int>();
-                    }
-                    else if (!hasExtraFlags) //SOTC
-                    {
-                        matRef.unkByte = sr.Read<byte>();
-                        matRef.startingVertexIndex = sr.Read<int>();
-                        matRef.vertexIndicesUsed = sr.Read<int>();
-                        matRef.startingFaceVertIndex = sr.Read<int>();
-                        matRef.faceVertIndicesUsed = sr.Read<int>();
-                    }
-                    matList.Add(matRef);
+                    sr.Read<byte>();
                 }
+                matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, matRef.matNameLength));
+                sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
+                if (hasSizeFloat)
+                {
+                    matRef.startingFaceIndex = sr.Read<int>();
+                    matRef.endingFaceIndex = sr.Read<int>();
+                }
+                else if (!hasSizeFloat) //SOTC
+                {
+                    matRef.unkByte = sr.Read<byte>();
+                    matRef.startingVertexIndex = sr.Read<int>();
+                    matRef.vertexIndicesUsed = sr.Read<int>();
+                    matRef.startingFaceVertIndex = sr.Read<int>();
+                    matRef.faceVertIndicesUsed = sr.Read<int>();
+                }
+                matList.Add(matRef);
             }
         }
 
@@ -127,16 +119,91 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         {
             //For certain SOTC models
             var crcCheck = sr.ReadBytes(sr.Position, 4);
-            hasExtraFlags = crcCheck[2] > 0 || crcCheck[3] > 0;
+            hasSizeFloat = crcCheck[2] > 0 || crcCheck[3] > 0;
             if (variantFlags == 0x200 && BitConverter.ToUInt64(sr.ReadBytes(0x25, 8), 0) == dummyConstData)
             {
-                hasExtraFlags = true;
+                hasSizeFloat = true;
             }
 
-            if (hasExtraFlags)
+            if (hasSizeFloat)
             {
-                extraFlags = sr.ReadBytes(sr.Position, 4);
-                sr.Seek(4, System.IO.SeekOrigin.Current);
+                sizeFloat = sr.Read<float>();
+            }
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddValue(variantFlags);
+            outBytes.Add(variantFlag);
+            outBytes.Add(variantFlag2);
+            switch (variantFlags)
+            {
+                case 0x1100:
+                case 0x4100:
+                case 0x5100:
+                case 0x4901:
+                case 0x500:
+                    outBytes.Add(unk0);
+                    outBytes.AddValue(unk1);
+
+                    var nameLength = OtherModelName.Length;
+                    outBytes.Add((byte)OtherModelName.Length);
+                    if (nameLength >= 0x80 && !hasSizeFloat)
+                    {
+                        outBytes.Add(0x1);
+                    }
+                    outBytes.AddRange(Encoding.ASCII.GetBytes(OtherModelName));
+                    break;
+
+                case 0x200:
+                case 0xA01:
+                case 0x2A01:
+                case 0xAA01:
+                    outBytes.Add(unk0);
+                    outBytes.AddValue(unk1);
+                    if(hasSizeFloat)
+                    {
+                        outBytes.AddValue(sizeFloat);
+                    }
+                    outBytes.AddValue(matList.Count);
+                    WriteMaterialList(outBytes);
+                    break;
+                default:
+                    throw new Exception();
+            }
+
+            return outBytes.ToArray();
+        }
+
+        private void WriteMaterialList(List<byte> outBytes)
+        {
+            for (int i = 0; i < matList.Count; i++)
+            {
+                var mat = matList[i];
+                outBytes.AddValue(mat.minBounding);
+                outBytes.AddValue(mat.maxBounding);
+                outBytes.AddValue((byte)mat.matName.Length);
+                if (hasSizeFloat)
+                {
+                    if(mat.matName.Length >= 0x80)
+                    {
+                        outBytes.Add(0x1);
+                    }
+                }
+                outBytes.AddValue(Encoding.UTF8.GetBytes(mat.matName));
+                if(hasSizeFloat)
+                {
+                    outBytes.AddValue(mat.startingFaceIndex);
+                    outBytes.AddValue(mat.endingFaceIndex);
+                } else
+                {
+                    outBytes.Add(mat.unkByte);
+                    outBytes.AddValue(mat.startingVertexIndex);
+                    outBytes.AddValue(mat.vertexIndicesUsed);
+                    outBytes.AddValue(mat.startingFaceVertIndex);
+                    outBytes.AddValue(mat.faceVertIndicesUsed);
+                }
             }
         }
     }

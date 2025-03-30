@@ -18,16 +18,12 @@ namespace AquaModelLibrary.Core.BluePoint
 {
     public class BluePointConvert
     {
-        public static void ReadFileTest(string filePath, out int start, out int typeFlags, out int modelType)
+        public static void ReadFileTest(string filePath, out int start)
         {
             using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
             using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
                 start = streamReader.Read<ushort>();
-                streamReader.Seek(0x5, SeekOrigin.Begin);
-                typeFlags = streamReader.Read<byte>();
-                streamReader.Seek(0x9, SeekOrigin.Begin);
-                modelType = streamReader.Read<byte>();
             }
         }
 
@@ -214,6 +210,7 @@ namespace AquaModelLibrary.Core.BluePoint
 
         public static AquaObject CMDLToAqua(CMSH msh, Dictionary<string, CMAT> materialDict, string cmtlPath, string modelPath, out AquaNode aqn)
         {
+            List<string> objList = new List<string>();
             if (msh.header == null || msh.header.variantFlag2 == 0x41)
             {
                 aqn = null;
@@ -356,8 +353,13 @@ namespace AquaModelLibrary.Core.BluePoint
             for (int v = 0; v < vertCount; v++)
             {
                 vtxl.vertPositions.Add(mesh.vertData.positionList[v]);
-                //vtxl.vertNormals.Add(mesh.vertData.normals[v]);
-                //var quat = mesh.vertData.normals[v];
+                objList.Add($"v {mesh.vertData.positionList[v].X} {mesh.vertData.positionList[v].Y} {mesh.vertData.positionList[v].Z}");
+                if (mesh.vertData.normals.Count > 0)
+                {
+                    objList.Add($"# {mesh.vertData.normalTemp[v][0].ToString("X")} {mesh.vertData.normalTemp[v][1].ToString("X")} {mesh.vertData.normalTemp[v][2].ToString("X")} {mesh.vertData.normalTemp[v][3].ToString("X")}");
+                    vtxl.vertNormals.Add(mesh.vertData.normals[v]);
+                    //var quat = mesh.vertData.normals[v];
+                }
 
                 //UVs
                 if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
@@ -436,9 +438,11 @@ namespace AquaModelLibrary.Core.BluePoint
             int currentFace = 0;
             for (int m = 0; m < mesh.header.matList.Count; m++)
             {
+                objList.Add($"g Mesh_{m}");
+
                 int startFace;
                 int faceCount;
-                if (mesh.header.hasExtraFlags) //DeSR
+                if (mesh.header.hasSizeFloat) //DeSR
                 {
                     startFace = mesh.header.matList[m].startingFaceIndex / 3;
                     faceCount = mesh.header.matList[m].endingFaceIndex / 3;
@@ -455,8 +459,8 @@ namespace AquaModelLibrary.Core.BluePoint
                     continue;
                 }
 
-                if ((mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0)
-                    || (!mesh.header.hasExtraFlags && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
+                if ((mesh.header.hasSizeFloat && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0)
+                    || (!mesh.header.hasSizeFloat && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
                 {
                     startFace = currentFace;
                     faceCount = mesh.faceData.faceList.Count - currentFace;
@@ -557,6 +561,7 @@ namespace AquaModelLibrary.Core.BluePoint
                         continue;
                     }
                     triList.Add(new Vector3(x, y, z));
+                    objList.Add($"f {x + 1} {y + 1} {z + 1}");
                 }
                 genMesh.triList = triList;
 
@@ -575,7 +580,7 @@ namespace AquaModelLibrary.Core.BluePoint
                 }
             }
 
-
+            File.WriteAllLines(@"A:\GameBackups\PS5\Demon's Souls (PS5)\DeSR PS5\PPSA01342-app0\coredata\enginesupport\models\_cmn\plane_xz_2m\plane_xz_2m.obj", objList);
             return aqp;
         }
 

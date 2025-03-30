@@ -11,7 +11,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public int indexCount;
 
         //If vertCount exceeds 0xFFFF, these are ints
-        public List<int> rawFaces = new List<int>();
         public List<Vector3Int.Vec3Int> faceList = new List<Vector3Int.Vec3Int>();
 
         public CMSHFaceData()
