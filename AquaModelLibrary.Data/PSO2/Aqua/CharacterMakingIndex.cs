@@ -1,11 +1,10 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData;
-using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.PSO2;
+using AquaModelLibrary.Helpers.Readers;
 using System.Text;
-using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -658,7 +657,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        private static void ReadACCE(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int baseAddress, int count, Dictionary<int, ACCEObject> dict, int cmxDateSize)
+        private static void ReadACCE(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int baseAddress, int count, Dictionary<int, ACCEObject> dict, int rel0DataStart)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -667,35 +666,36 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 acce.num = i;
                 acce.originalOffset = streamReader.Position;
                 acce.acce = streamReader.Read<ACCE>();                      //0x28
-                if (cmxDateSize >= CMXConstants.feb8_22TableAddressInt)
+                if (rel0DataStart >= CMXConstants.feb8_22TableAddressInt)
                 {
                     acce.acceFeb8_22 = streamReader.Read<ACCE_Feb8_22>();   //0x1C
                 }
                 acce.acceB = streamReader.Read<ACCE_B>();                   //0x1C
                 acce.acce2a = streamReader.Read<ACCE2A>();                  //0x1C
                 //This float was added to the middle of these in the Aug_3_2021 patch
-                if (count >= 5977)
+                //Previously tracked by part count of 5977
+                if (rel0DataStart >= CMXConstants.oct_21TableAddressInt)
                 {
                     acce.flt_54 = streamReader.Read<float>();                 //0x4
                 }
                 acce.acce2b = streamReader.Read<ACCE2B>();                  //0xC
                 for (int j = 0; j < 3; j++)                                 //0x60
                 {
-                    acce.acce12List.Add(ReadAcce12Object(streamReader, count));
+                    acce.acce12List.Add(ReadAcce12Object(streamReader, rel0DataStart));
                 }
-                if (cmxDateSize >= CMXConstants.oct4_22TableAddressInt)
+                if (rel0DataStart >= CMXConstants.oct4_22TableAddressInt)
                 {
                     acce.effectNamePtr = streamReader.Read<int>();
                 }
-                if (cmxDateSize >= CMXConstants.ver2TableAddressInt)
+                if (rel0DataStart >= CMXConstants.ver2TableAddressInt)
                 {
                     acce.accev2 = streamReader.Read<ACCEV2>();
                 }
-                if (cmxDateSize >= CMXConstants.aug17_22TableAddressInt)
+                if (rel0DataStart >= CMXConstants.aug17_22TableAddressInt)
                 {
                     acce.flt_90 = streamReader.Read<float>();
                 }
-                if (cmxDateSize >= CMXConstants.dec4_24TableAddressInt)
+                if (rel0DataStart >= CMXConstants.dec4_24TableAddressInt)
                 {
                     acce.acce12_4_24 = streamReader.Read<ACCE12_4_24>();
                 }
@@ -747,7 +747,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     streamReader.Seek(acce.acce.nodeAttach8Ptr + offset, SeekOrigin.Begin);
                     acce.nodeAttach8 = streamReader.ReadCString();
                 }
-                if (cmxDateSize >= CMXConstants.feb8_22TableAddressInt)
+                if (rel0DataStart >= CMXConstants.feb8_22TableAddressInt)
                 {
                     if (acce.acceFeb8_22.acceString9Ptr > 0)
                     {
@@ -785,7 +785,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         acce.nodeAttach15 = streamReader.ReadCString();
                     }
 
-                    if (cmxDateSize >= CMXConstants.oct4_22TableAddressInt)
+                    if (rel0DataStart >= CMXConstants.oct4_22TableAddressInt)
                     {
                         if (acce.effectNamePtr > 0)
                         {
@@ -793,7 +793,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                             acce.effectName = streamReader.ReadCString();
                         }
 
-                        if (cmxDateSize >= CMXConstants.ver2TableAddressInt)
+                        if (rel0DataStart >= CMXConstants.ver2TableAddressInt)
                         {
                             if (acce.accev2.acceString16Ptr > 0)
                             {
@@ -827,7 +827,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        private static ACCE_12Object ReadAcce12Object(BufferedStreamReaderBE<MemoryStream> streamReader, int count)
+        private static ACCE_12Object ReadAcce12Object(BufferedStreamReaderBE<MemoryStream> streamReader, int rel06DataStart)
         {
             ACCE_12Object acce12Obj = new ACCE_12Object();
             acce12Obj.unkFloat0 = streamReader.Read<float>();
@@ -835,7 +835,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             acce12Obj.unkInt0 = streamReader.Read<int>();
             acce12Obj.unkInt1 = streamReader.Read<int>();
 
-            if (count >= 6249)
+            //Previously tracked by part count of 6249
+            if (rel06DataStart >= CMXConstants.feb8_22TableAddressInt)
             {
                 acce12Obj.unkIntFeb822_0 = streamReader.Read<int>();
             }
@@ -845,7 +846,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             acce12Obj.unkShort2 = streamReader.Read<short>();
             acce12Obj.unkShort3 = streamReader.Read<short>();
 
-            if (count >= 6249)
+            //Previously tracked by part count of 6249
+            if (rel06DataStart >= CMXConstants.feb8_22TableAddressInt)
             {
                 acce12Obj.unkIntFeb822_1 = streamReader.Read<int>();
             }
