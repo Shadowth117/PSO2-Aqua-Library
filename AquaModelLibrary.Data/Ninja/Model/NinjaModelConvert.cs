@@ -104,6 +104,123 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         var nrmAtr = new VtxAttrFmtParameter(GCVertexAttribute.Normal, true);
 
                         //Gather aqo vertices into a singular, optimized vertex list
+                        //We're going to assume all vertex lists in the model get used
+                        VTXL combinedVTXL = new();
+                        List<int> vtxlIndexAdditions = new List<int>();
+                        int totalVtxlIndices = 0;
+                        for (int i = 0; i < aqo.vtxlList.Count; i++)
+                        {
+                            vtxlIndexAdditions.Add(totalVtxlIndices);
+                            VTXL.AppendAllVertices(aqo.vtxlList[i], combinedVTXL);
+                            totalVtxlIndices += aqo.vtxlList[i].vertPositions.Count;
+                        }
+
+                        Dictionary<int, int> vertMapping = new Dictionary<int, int>();
+                        //Loop through combined vertex list, reorder vertices per node and track the mapping for the master ids
+                        //After, the tri indices will need to have their ids remapped based on this
+                        List<GinjaSkinVertexData> skinVerts = new List<GinjaSkinVertexData>();
+                        combinedVTXL.AssureSumOfOneOnWeights();
+                        combinedVTXL.SortBoneIndexWeightOrderByWeight();
+
+                        int currentVertCounter = 0;
+                        for(int b = 0; b < aqn.nodeList.Count; b++)
+                        {
+                            var transform = aqn.nodeList[b].GetInverseBindPoseMatrixInverted();
+
+                            GinjaSkinVertexData skinVertData = new();
+                            GinjaSkinVertexDataElement staticVerts = null;
+                            GinjaSkinVertexDataElement partialStartVerts = null;
+                            GinjaSkinVertexDataElement partialMidVerts = null;
+
+                            //Check first for static weights. Static weights and initial Partial weights MUST be in sequence
+                            for (int i = 0; i < combinedVTXL.vertPositions.Count; i++)
+                            {
+                                //Check early if this is a static weighted vertex
+                                if (combinedVTXL.vertWeightIndices[i][0] == b && combinedVTXL.vertWeights[i].X == 1f)
+                                {
+                                    if(staticVerts == null)
+                                    {
+                                        staticVerts = new GinjaSkinVertexDataElement(GCSkinAttribute.StaticWeight);
+                                        staticVerts.startingIndex = (ushort)currentVertCounter;
+                                    }
+                                    var pos = Vector3.Transform(combinedVTXL.vertPositions[i], transform);
+                                    var nrm = Vector3.TransformNormal(combinedVTXL.vertNormals[i], transform);
+                                    staticVerts.posNrms.Add(new GinjaSkinVertexSetPosNrm() 
+                                    { 
+                                        posX = (short)(pos.X * 255.0),
+                                        posY = (short)(pos.Y * 255.0),
+                                        posZ = (short)(pos.Z * 255.0),
+                                        nrmX = (short)(nrm.X * 255.0),
+                                        nrmY = (short)(nrm.Y * 255.0),
+                                        nrmZ = (short)(nrm.Z * 255.0),
+                                    });
+                                    vertMapping.Add(i, currentVertCounter);
+                                    currentVertCounter++;
+                                }
+                            }
+                            //Handle partial weights
+                            for (int i = 0; i < combinedVTXL.vertPositions.Count; i++)
+                            {
+                                for(int w = 0; w < combinedVTXL.vertWeightIndices[i].Length; w++)
+                                {
+                                    int wi = combinedVTXL.vertWeightIndices[i][w];
+                                    if(b == wi)
+                                    {
+                                        float weight = combinedVTXL.vertWeights[i].Get(w);
+
+                                        GinjaSkinVertexDataElement ele;
+
+                                        //Vert id should remain 0 if this is a starting weight
+                                        int vertId = 0;
+
+                                        //Decide if we handle this as a start or not
+                                        if (vertMapping.ContainsKey(i))
+                                        {
+                                            vertId = currentVertCounter;
+                                            if (partialMidVerts == null)
+                                            {
+                                                partialMidVerts = ele = new GinjaSkinVertexDataElement(GCSkinAttribute.PartialWeight);
+                                            } else
+                                            {
+                                                ele = partialMidVerts;
+                                            }
+                                        } else
+                                        {
+                                            vertMapping.Add(i, currentVertCounter);
+                                            if (partialStartVerts == null)
+                                            {
+                                                partialStartVerts = ele = new GinjaSkinVertexDataElement(GCSkinAttribute.PartialWeightStart);
+                                                ele.startingIndex = (ushort)currentVertCounter;
+                                            } else
+                                            {
+                                                ele = partialStartVerts;
+                                            }
+                                        }
+                                        var pos = Vector3.Transform(combinedVTXL.vertPositions[i], transform) * weight;
+                                        var nrm = Vector3.TransformNormal(combinedVTXL.vertNormals[i], transform) * weight;
+                                        ele.posNrms.Add(new GinjaSkinVertexSetPosNrm()
+                                        {
+                                            posX = (short)(pos.X * 255.0),
+                                            posY = (short)(pos.Y * 255.0),
+                                            posZ = (short)(pos.Z * 255.0),
+                                            nrmX = (short)(nrm.X * 255.0),
+                                            nrmY = (short)(nrm.Y * 255.0),
+                                            nrmZ = (short)(nrm.Z * 255.0),
+                                        });
+                                        ele.weightData.Add(new GinjaSkinVertexSetWeight()
+                                        {
+                                            vertIndex = (short)vertId,
+                                            weight = (short)(weight * 255.0)
+                                        });
+
+                                        if (ele.elementType == GCSkinAttribute.PartialWeightStart)
+                                        {
+                                            currentVertCounter++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         /*
                         for(int i = 0; i < aqo.meshList.Count; i++)
