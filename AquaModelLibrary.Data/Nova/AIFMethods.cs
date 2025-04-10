@@ -172,7 +172,7 @@ namespace AquaModelLibrary.Data.Nova
         {
             int a = 0;
             int b = 0;
-            var meta = GenerateMataData(width, height, mipCount, GetDDSType(headXgmiStruct, ref a, ref b), isCubeMap);
+            var meta = GenerateMetaData(width, height, mipCount, GetDDSType(headXgmiStruct, ref a, ref b), isCubeMap);
             GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, isCubeMap);
 
             List<byte> outBytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));

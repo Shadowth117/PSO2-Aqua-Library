@@ -122,7 +122,7 @@ namespace AquaModelLibrary.Data.Capcom.MonsterHunter
 
         private static List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount, int depth = 1)
         {
-            var meta = GenerateMataData(texWidth, texHeight, mipCount, pixelFormat, false, depth);
+            var meta = GenerateMetaData(texWidth, texHeight, mipCount, pixelFormat, false, depth);
             /*
             if (alphaSetting > 0)
             {

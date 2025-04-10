@@ -916,7 +916,7 @@ namespace VrSharp.Xvr
 		/// <param name="format">Compression Format</param>
 		/// <param name="isCubeMap">Whether or not this is a cube map</param>
 		/// <returns>Resulting TexMetaData Object</returns>
-		public static TexMetadata GenerateMataData(int width, int height, int mipMapLevels, DXGIFormat format, bool isCubeMap)
+		public static TexMetadata GenerateMetaData(int width, int height, int mipMapLevels, DXGIFormat format, bool isCubeMap)
 		{
 			// Create Texture MetaData
 			return new TexMetadata(
