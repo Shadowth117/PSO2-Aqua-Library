@@ -176,19 +176,30 @@ namespace AquaModelLibrary.Core.AM2
                 var TXP = new TXP(streamReader);
                 var path = outPath ?? txpArchive + "_out";
                 Directory.CreateDirectory(path);
-                for (int i = 0; i < TXP.txp3.txp4List.Count; i++)
+                if(TXP.txp3 != null)
                 {
-                    string baseFname;
-                    if (TXP.txp3.txp4Names.Count > 0)
+                    for (int i = 0; i < TXP.txp3.txp4List.Count; i++)
                     {
-                        baseFname = TXP.txp3.txp4Names[i];
+                        string baseFname;
+                        if (TXP.txp3.txp4Names.Count > 0)
+                        {
+                            baseFname = TXP.txp3.txp4Names[i];
+                        }
+                        else
+                        {
+                            baseFname = Path.GetFileName(txpArchive) + $"_{i}";
+                        }
+                        var fname = Path.Combine(path, baseFname + ".dds");
+                        File.WriteAllBytes(fname, TXP.txp3.txp4List[i].GetDDS());
                     }
-                    else
+                } else if(TXP.txp1 != null)
+                {
+                    for (int i = 0; i < TXP.txp1.textures.Count; i++)
                     {
-                        baseFname = Path.GetFileName(txpArchive) + $"_{i}";
+                        string baseFname = TXP.txp1.texStrings[i] + $"_{i}";
+                        var fname = Path.Combine(path, baseFname + ".dds");
+                        File.WriteAllBytes(fname, TXP.txp1.textures[i].GetDDS());
                     }
-                    var fname = Path.Combine(path, baseFname + ".dds");
-                    File.WriteAllBytes(fname, TXP.txp3.txp4List[i].GetDDS());
                 }
             }
         }
