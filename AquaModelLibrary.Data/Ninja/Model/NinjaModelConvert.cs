@@ -8,6 +8,7 @@ using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
 using NvTriStripDotNet;
+using System.Collections.Immutable;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model
@@ -102,6 +103,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                     {
                         var posAtr = new VtxAttrFmtParameter(GCVertexAttribute.Position, true);
                         var nrmAtr = new VtxAttrFmtParameter(GCVertexAttribute.Normal, true);
+                        var uvAtr = new VtxAttrFmtParameter(GCVertexAttribute.Tex0, true);
 
                         //Gather aqo vertices into a singular, optimized vertex list
                         //We're going to assume all vertex lists in the model get used
@@ -220,31 +222,180 @@ namespace AquaModelLibrary.Data.Ninja.Model
                                     }
                                 }
                             }
+
+                            //Only add this set if there's data to add
+                            if (staticVerts != null)
+                            {
+                                skinVertData.elements.Add(staticVerts);
+                            }
+                            if (partialStartVerts != null)
+                            {
+                                skinVertData.elements.Add(partialStartVerts);
+                            }
+                            if (partialMidVerts != null)
+                            {
+                                skinVertData.elements.Add(partialMidVerts);
+                            }
+                            if(skinVertData.elements.Count > 0)
+                            {
+                                skinVerts.Add(skinVertData);
+                            } else
+                            {
+                                skinVerts.Add(null);
+                            }
                         }
 
-                        /*
-                        for(int i = 0; i < aqo.meshList.Count; i++)
+                        //All we can have on a skinned model is uv data here
+                        GinjaVertexData faceVertData = new GinjaVertexData(); 
+                        GinjaVertexDataElement uv = new GinjaVertexDataElement(GCVertexAttribute.Tex0);
+                        faceVertData.elements.Add(uv);
+
+                        var vertMapKeys = vertMapping.Keys.ToList();
+                        vertMapKeys.Sort();
+                        Vector2[] uvs = new Vector2[vertMapKeys.Count];
+                        foreach(var key in vertMapKeys)
                         {
-                            stripifier.GenerateStrips(tris.ToArray(), out var primitiveGroups);
+                            uvs[vertMapKeys[key]] = combinedVTXL.uv1List[key]; 
+                        }
+                        faceVertData.uvsArray = new List<Vector2>[] { uvs.ToList() };
+
+                        //Convert mesh data
+                        TextureParameter texAttr = null;
+                        IndexAttributeParameter indexParam = new IndexAttributeParameter();
+                        List<GinjaMesh> opaqueMeshes = new List<GinjaMesh>();
+                        List<GinjaMesh> transparentMeshes = new List<GinjaMesh>();
+                        for (int i = 0; i < aqo.meshList.Count; i++)
+                        {
+                            var texList = aqo.GetTexListNames(aqo.meshList[i].tsetIndex);
+                            var texId = aqo.texFUnicodeNames.IndexOf(texList[0]);
+                            var newTexAttr = new TextureParameter((ushort)texId, GCTileMode.TileX | GCTileMode.TileY);
+                            if (texAttr != newTexAttr)
+                            {
+                                texAttr = newTexAttr;
+                            }
+                            else
+                            {
+                                newTexAttr = null;
+                            }
+                            var mateAlphaType = aqo.mateList[aqo.meshList[i].mateIndex].alphaType.curString.ToLower();
+                            int vertStartIndex = vtxlIndexAdditions[aqo.meshList[i].vsetIndex];
+                            var tris = aqo.strips[aqo.meshList[i].psetIndex];
+                            stripifier.GenerateStrips(tris.triStrips.ToArray(), out var primitiveGroups);
+
+                            int maxIndex = 0;
+                            List<GCPrimitive> primitives = new List<GCPrimitive>();
                             foreach (NvTriStripDotNet.PrimitiveGroup grp in primitiveGroups)
                             {
-                                GC.GCPrimitive prim = new GC.GCPrimitive(GC.GCPrimitiveType.TriangleStrip);
+                                GCPrimitive prim = new GCPrimitive(GCPrimitiveType.TriangleStrip);
                                 for (var j = 0; j < grp.Indices.Length; j++)
                                 {
-                                    GC.Loop vert = new GC.Loop();
-                                    vert.PositionIndex = (ushort)(vertStartIndex + grp.Indices[j]);
-                                    if (m.HasTextureCoords(0))
-                                        vert.UV0Index = (ushort)(uvStartIndex + grp.Indices[j]);
-                                    if (m.HasVertexColors(0))
-                                        vert.Color0Index = (ushort)(colorStartIndex + grp.Indices[j]);
-                                    else if (m.HasNormals)
-                                        vert.NormalIndex = (ushort)(normStartIndex + grp.Indices[j]);
+                                    Loop vert = new Loop();
+                                    int newIndex = vertMapping[vertStartIndex + grp.Indices[j]];
+                                    maxIndex = Math.Max(maxIndex, newIndex);
+                                    vert.PositionIndex = (ushort)newIndex;
+                                    vert.UV0Index = (ushort)newIndex;
+                                    vert.NormalIndex = (ushort)newIndex;
                                     prim.loops.Add(vert);
                                 }
                                 primitives.Add(prim);
                             }
-                            gcmeshes.Add(new GC.GCMesh(parameters, primitives));
-                        }*/
+
+                            var newIndexParam = new IndexAttributeParameter();
+                            
+                            newIndexParam.IndexAttributes = GCIndexAttributeFlags.HasPosition | GCIndexAttributeFlags.HasNormal | GCIndexAttributeFlags.HasUV;
+                            if (maxIndex > 255)
+                            {
+                                newIndexParam.IndexAttributes |= GCIndexAttributeFlags.Position16BitIndex | GCIndexAttributeFlags.Normal16BitIndex | GCIndexAttributeFlags.UV16BitIndex;
+                            }
+                            
+
+                            if(mateAlphaType == "blendalpha")
+                            {
+                                List<GCParameter> parameters = new List<GCParameter>() { };
+                                if (transparentMeshes.Count == 0)
+                                {
+                                    parameters.Add(posAtr);
+                                    parameters.Add(nrmAtr);
+                                }
+                                if (indexParam.IndexAttributes != newIndexParam.IndexAttributes)
+                                {
+                                    parameters.Add(newIndexParam);
+                                }
+                                if (transparentMeshes.Count == 0)
+                                {
+                                    parameters.Add(uvAtr);
+                                    parameters.Add(new BlendAlphaParameter() { DestAlpha = GCBlendModeControl.InverseSrcAlpha, NJDestAlpha = AlphaInstruction.InverseSourceAlpha, NJSourceAlpha = AlphaInstruction.SourceAlpha, SourceAlpha = GCBlendModeControl.SrcAlpha });
+                                }
+                                parameters.Add(new LightingParameter(0xC611, 1));
+                                if (transparentMeshes.Count == 0)
+                                {
+                                    parameters.Add(new AmbientColorParameter());
+                                }
+                                if (newTexAttr != null)
+                                {
+                                    parameters.Add(newTexAttr);
+                                }
+                                if (transparentMeshes.Count == 0)
+                                {
+                                    parameters.Add(new Unknown9Parameter());
+                                }
+                                parameters.Add(new TexCoordGenParameter(GCTexCoordID.TexCoord0, GCTexGenType.Matrix3x4, GCTexGenSrc.Tex0, GCTexGenMatrix.Matrix4));
+
+                                transparentMeshes.Add(new GinjaMesh(parameters, primitives));
+                            } else
+                            {
+                                List<GCParameter> parameters = new List<GCParameter>() { };
+                                if (opaqueMeshes.Count == 0)
+                                {
+                                    parameters.Add(posAtr);
+                                    parameters.Add(nrmAtr);
+                                }
+                                if (indexParam.IndexAttributes != newIndexParam.IndexAttributes)
+                                {
+                                    parameters.Add(newIndexParam);
+                                }
+                                if (opaqueMeshes.Count == 0)
+                                {
+                                    parameters.Add(uvAtr);
+                                    parameters.Add(new BlendAlphaParameter() { DestAlpha = GCBlendModeControl.InverseSrcAlpha, NJDestAlpha = AlphaInstruction.InverseSourceAlpha, NJSourceAlpha = AlphaInstruction.SourceAlpha, SourceAlpha = GCBlendModeControl.SrcAlpha });
+                                }
+                                parameters.Add(new LightingParameter(0xC611, 1));
+                                if (opaqueMeshes.Count == 0)
+                                {
+                                    parameters.Add(new AmbientColorParameter());
+                                }
+                                if (newTexAttr != null)
+                                {
+                                    parameters.Add(newTexAttr);
+                                }
+                                if (opaqueMeshes.Count == 0)
+                                {
+                                    parameters.Add(new Unknown9Parameter());
+                                }
+                                parameters.Add(new TexCoordGenParameter(GCTexCoordID.TexCoord0, GCTexGenType.Matrix3x4, GCTexGenSrc.Tex0, GCTexGenMatrix.Matrix4));
+
+                                opaqueMeshes.Add(new GinjaMesh(parameters, primitives));
+                            }
+                        }
+
+                        //Assign vertex and mesh data
+                        for(int i = 0; i < njsObjects.Count; i++)
+                        {
+                            var njsObject = njsObjects[i];
+                            if (i == 0)
+                            {
+                                njsObject.mesh = new GinjaAttach() { opaqueFaceData = opaqueMeshes, transparentFaceData = transparentMeshes, vertData = faceVertData };
+                               
+                            }
+                            if (skinVerts[i] != null)
+                            {
+                                if(njsObject.mesh == null)
+                                {
+                                    njsObject.mesh = new GinjaAttach();
+                                }
+                                ((GinjaAttach)njsObject.mesh).skinVertData = skinVerts[i];
+                            }
+                        }
                     }
                     break;
                 case NinjaVariant.XJ:

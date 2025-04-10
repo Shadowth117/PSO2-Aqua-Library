@@ -12,6 +12,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
     {
         public NinjaHeader header;
         public PATHHeader pathHeader;
+        /// <summary>
+        /// List of PathInfos, main path definitions.
+        /// Paths that use normals are stored first regardless of id
+        /// </summary>
         public List<PathInfo> pathInfoList = new List<PathInfo>();
         public List<PathSector> pathSectors = new List<PathSector>();
         public PathSector rootSector = null;
@@ -35,10 +39,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 PathInfo pathInfo = new PathInfo();
                 pathInfo.doesNotUseNormals = sr.Read<byte>();
-                pathInfo.unkByte1 = sr.Read<byte>();
+                pathInfo.isObjectPath = sr.Read<byte>();
                 pathInfo.lengthsCount = sr.ReadBE<ushort>();
                 pathInfo.id = sr.ReadBE<int>();
-                pathInfo.unkInt = sr.ReadBE<int>();
+                pathInfo.isLiquidCurrent = sr.ReadBE<int>();
                 pathInfo.totalLength = sr.ReadBE<float>();
                 pathInfo.definitionOffset = sr.ReadBE<int>();
                 pathInfo.lengthsOffset = sr.ReadBE<int>();
@@ -193,10 +197,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var pathInfo = pathInfoList[i];
                 byte doesNotUseVertNormals = pathInfo.vertDef.vertNormals.Count > 0 ? (byte)0 : (byte)1;
                 outBytes.Add(doesNotUseVertNormals);
-                outBytes.Add(pathInfo.unkByte1);
+                outBytes.Add(pathInfo.isObjectPath);
                 outBytes.AddValue(pathInfo.lengthsCount);
                 outBytes.AddValue(pathInfo.id);
-                outBytes.AddValue(pathInfo.unkInt);
+                outBytes.AddValue(pathInfo.isLiquidCurrent);
                 outBytes.AddValue(pathInfo.totalLength);
                 offsets.Add(outBytes.Count);
                 outBytes.ReserveInt($"PathInfoDefs{i}Offset");
@@ -331,10 +335,16 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public class PathInfo
         {
             public byte doesNotUseNormals;
-            public byte unkByte1;
+            /// <summary>
+            /// Used for Pirates Island sharks, Sand Ruin tornadoes, and the title screen chick/crow
+            /// </summary>
+            public byte isObjectPath;
             public ushort lengthsCount;
             public int id;
-            public int unkInt;
+            /// <summary>
+            /// Only used for the Forest Village river in retail.
+            /// </summary>
+            public int isLiquidCurrent;
             public float totalLength;
             public int definitionOffset;
             public int lengthsOffset;
