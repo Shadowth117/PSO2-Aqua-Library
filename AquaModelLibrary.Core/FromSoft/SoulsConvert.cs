@@ -942,6 +942,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     var dummy = flver.Dummies[i];
                     var transform = Matrix4x4.CreateWorld(dummy.Position, dummy.Forward, dummy.Upward);
+
                     var ogTransform = transform;
                     NODO nodo = new NODO();
                     if (dummy.AttachBoneIndex > -1)
