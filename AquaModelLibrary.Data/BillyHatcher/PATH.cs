@@ -257,7 +257,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 PathSector pathDef = pathSectors[i];
 
                 outBytes.AddValue(pathDef.isFinalSubdivision);
-                outBytes.AddValue((ushort)pathSegmentDict[pathDef.rawPathOffset].defs.Count);
+                outBytes.AddValue((ushort)(pathDef.rawPathCount > 0 ? pathSegmentDict[pathDef.rawPathOffset].defs.Count : 0));
                 outBytes.AddValue((int)(pathDef.rawPathCount > 0 ? rawPathCounter : 0));
                 outBytes.AddValue(pathDef.xzMin);
                 outBytes.AddValue(pathDef.xzMax);
