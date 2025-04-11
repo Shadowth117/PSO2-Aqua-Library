@@ -1,36 +1,15 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Data.BluePoint.CGPR;
+using AquaModelLibrary.Helpers.Readers;
+using UnluacNET;
 
 namespace AquaModelLibrary.Data.BluePoint.CMDL
 {
     public class CMDL
     {
         public CMDLMagic magic;
-        public ushort unkUshtCount0;
-        public ushort unkUshtCount1;
-        public int unkId0;
-
-        //DeSR
-        public CVariableTrail unkId0Trail0 = null;
-        //SOTC
-        public ushort unkId0sht0;
-        public ushort unkId0sht1;
-
-        public int unkInt1;
-
-        //DeSR
-        public CVariableTrail matTrail = null;
-        //SOTC
-        public ushort matsht0;
-        public ushort matsht1;
-
-        //CMDLs start with a dictionary containing a cmsh material name and a cmat path. This dictionary uses cmsh material name as a key for easy mapping
-        public List<CMDL_CMATMaterialMap> cmatReferences = new List<CMDL_CMATMaterialMap>();
-        public List<BPString> cmshReferences = new List<BPString>();
-        public List<CMDLMeshInfo> cmshInfoList = new List<CMDLMeshInfo>();
-        public List<BPString> cpidReferences = new List<BPString>();
-        public List<BPString> cclmReferences = new List<BPString>();
-        public List<BPString> highQualityCclmReferences = new List<BPString>();
-        public List<CMDLClump> clumps = new List<CMDLClump>();
+        public CGPRObject mainObject = null;
+        public CGPRObject secondObject = null;
+        public CFooter footer;
 
         public CMDL()
         {
@@ -50,94 +29,127 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
 
         private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            magic = sr.Read<CMDLMagic>();
-
-            unkUshtCount0 = sr.Read<ushort>();
-            unkUshtCount1 = sr.Read<ushort>();
-            unkId0 = sr.Read<int>();
-
+            magic = sr.Peek<CMDLMagic>();
+            mainObject = CGPRObject.ReadObject(sr, BPEra.None);
+            secondObject = CGPRObject.ReadObject(sr, mainObject.era);
+            footer = sr.Read<CFooter>();
+        }
+        public List<string> GetCMeshReferences()
+        {
+            List<string> cmeshReferences = new List<string>();
             switch (magic)
             {
                 case CMDLMagic.SOTC:
-                    unkId0sht0 = sr.Read<ushort>();
-                    unkId0sht1 = sr.Read<ushort>();
-                    break;
                 case CMDLMagic.DeSR:
-                    unkId0Trail0 = new CVariableTrail(sr);
+                    foreach (var obj in ((CMDLContainer_Object)mainObject).subObjects)
+                    {
+                        if (obj.magic == CGPRSubMagic.x8259284A || obj.magic == CGPRSubMagic.x0AF1EECC)
+                        {
+                            foreach (var set in ((CGPRMultiSubObjectArray_SubObject)obj).subObjectsList)
+                            {
+                                foreach(var setpiece in set.subObjects)
+                                {
+                                    switch (setpiece.magic)
+                                    {
+                                        case CGPRSubMagic.x68955D41:
+                                        case CGPRSubMagic.xDC55E007:
+                                            cmeshReferences.Add(((CGPRString_SubObject)setpiece).dataString.str);
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     break;
                 default:
                     throw new Exception("Unrecognized model type!");
             }
-            unkInt1 = sr.Read<int>();
 
-            int matCount;
+            return cmeshReferences;
+        }
+        public Dictionary<string, string> GetCMATMaterialMap()
+        {
+            Dictionary<string, string> cmatMap = new Dictionary<string, string>();
             switch (magic)
             {
                 case CMDLMagic.SOTC:
-                    matsht0 = sr.Read<ushort>();
-                    matCount = matsht1 = sr.Read<ushort>();
-                    break;
                 case CMDLMagic.DeSR:
-                    matTrail = new CVariableTrail(sr);
-                    matCount = matTrail.data[matTrail.data.Count - 1];
+                    foreach(var obj in ((CMDLContainer_Object)mainObject).subObjects)
+                    {
+                        if(obj.magic == CGPRSubMagic.xD4E77FA8 || obj.magic == CGPRSubMagic.x256BD189)
+                        {
+                            foreach(var subObj in ((CGPRSubObjectArray_SubObject)obj).subObjects)
+                            {
+                                if (subObj.magic == CGPRSubMagic.x89DBCCD3 || subObj.magic == CGPRSubMagic.x1694E619)
+                                {
+                                    foreach (var set in ((CGPRMultiSubObjectArray_SubObject)subObj).subObjectsList)
+                                    {
+                                        string matName = null;
+                                        string matFile = null;
+                                        foreach (var finalObj in set.subObjects)
+                                        {
+                                            switch(finalObj.magic)
+                                            {
+                                                case CGPRSubMagic.xC317C885:
+                                                case CGPRSubMagic.x804FDBCB:
+                                                    matName = ((CGPRString_SubObject)finalObj).dataString.str;
+                                                    break;
+                                                case CGPRSubMagic.x587568C3:
+                                                case CGPRSubMagic.x3B129F82:
+                                                    matFile = ((CGPRString_SubObject)finalObj).dataString.str;
+                                                    break;
+                                            }
+                                        }
+                                        cmatMap.Add(matName, matFile);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     break;
                 default:
                     throw new Exception("Unrecognized model type!");
             }
 
-            for (int i = 0; i < matCount; i++)
-            {
-                cmatReferences.Add(new CMDL_CMATMaterialMap(sr));
-            } 
-            
-            while (sr.Position < sr.BaseStream.Length - 0x4)
-            {
-                if (sr.Peek<ushort>() == 0)
-                {
-                    break;
-                }
-                var check = sr.Read<uint>();
+            return cmatMap;
+        }
 
-                switch (check)
+        /// <summary>
+        /// Only relevant for SOTC and most cmdls don't have this
+        /// </summary>
+        public string GetCPIDPath()
+        {
+            string cpidPath = null;
+            foreach(var obj in ((CMDLContainer_Object)mainObject).subObjects)
+            {
+                if(obj.magic == CGPRSubMagic.x56C23AA0)
                 {
-                    //CMSHInfo DeSR
-                    case 0xE7FC4F9A:
-                        cmshInfoList.Add(new CMDLMeshInfo(sr, check));
-                        break;
-                    //CMSH DeSR
-                    case 0x07E055DC:
-                    //CMSH SOTC
-                    case 0x415D9568:
-                        /*
-                         * Previous struct prior to the array of cmsh stuff contains count, but we don't necessarily need it
-                        var varTrail = clumps[clumps.Count - 1].trail0.data;
-                        var count = varTrail[varTrail.Count - 1];
-                        */
-                        cmshReferences.Add(new BPString(sr));
-                        break;
-                    //CPID SOTC
-                    case 0xA03AC256:
-                        cpidReferences.Add(new BPString(sr));
-                        break;
-                    //CCLM SOTC
-                    case 0xB7683EF2:
-                        cclmReferences.Add(new BPString(sr));
-                        break;
-                    //HQ CCLM SOTC
-                    case 0xC8C63A73:
-                        highQualityCclmReferences.Add(new BPString(sr));
-                        break;
-                    default:
-                        var clump = new CMDLClump(sr, check);
-                        clumps.Add(clump);
-                        break;
-                }
-                if (check == 0xE7FC4F9A)
-                {
-                    break;
+                    cpidPath = ((CGPRString_SubObject)obj).dataString.str;
                 }
             }
 
+            return cpidPath;
+        }
+
+        /// <summary>
+        /// Only relevant for SOTC and many cclms don't have one. Fewer still have both
+        /// </summary>
+        public void GetCCLMs(out string cclmPath, out string hqCclmPath)
+        {
+            cclmPath = null;
+            hqCclmPath = null;
+            foreach (var obj in ((CMDLContainer_Object)mainObject).subObjects)
+            {
+                switch(obj.magic)
+                {
+                    case CGPRSubMagic.xF23E68B7:
+                        cclmPath = ((CGPRString_SubObject)obj).dataString.str;
+                        break;
+                    case CGPRSubMagic.x733AC6C8:
+                        hqCclmPath = ((CGPRString_SubObject)obj).dataString.str;
+                        break;
+                }
+            }
         }
     }
 }

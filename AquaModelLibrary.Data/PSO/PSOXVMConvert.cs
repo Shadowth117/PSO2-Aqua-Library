@@ -213,7 +213,7 @@ namespace AquaModelLibrary.Data.PSO
                     fmt = DXGIFormat.A8UNORM;
                     break;
             }
-            var meta = GenerateMataData(width, height, mipCount, fmt, false);
+            var meta = GenerateMetaData(width, height, mipCount, fmt, false);
             if (PMAlpha)
             {
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;

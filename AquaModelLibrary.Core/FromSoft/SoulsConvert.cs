@@ -452,6 +452,7 @@ namespace AquaModelLibrary.Core.FromSoft
 
             JsonSerializerOptions jss = new JsonSerializerOptions() { WriteIndented = true };
 
+            aqn = AquaNode.GenerateBasicAQN();
             if (SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Is(raw))
             {
                 flver = SoulsFormats.SoulsFile<SoulsFormats.FLVER0>.Read(raw);
@@ -477,7 +478,6 @@ namespace AquaModelLibrary.Core.FromSoft
                 aqn = null;
                 return MDL4ToAqua(Path.GetFileNameWithoutExtension(filePath) + "_skeleton", mdl4, out aqn, useMetaData);
             }
-            aqn = null;
 
             //Dump metadata
             if (useMetaData)
@@ -512,6 +512,13 @@ namespace AquaModelLibrary.Core.FromSoft
                 
                 
             }
+
+            //We can't handle speedtree models right now
+            if(flver == null || flver.IsSpeedtree())
+            {
+                return null;
+            }
+
             return FlverToAqua(Path.GetFileNameWithoutExtension(filePath) + "_skeleton", flver, out aqn, useMetaData);
         }
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
@@ -935,6 +942,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     var dummy = flver.Dummies[i];
                     var transform = Matrix4x4.CreateWorld(dummy.Position, dummy.Forward, dummy.Upward);
+
                     var ogTransform = transform;
                     NODO nodo = new NODO();
                     if (dummy.AttachBoneIndex > -1)
@@ -1093,7 +1101,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         vtxl.bonePalette.Add((ushort)mesh2.BoneIndices[b]);
                     }
 
-                    FLVER2.FaceSet faceSet = mesh2.FaceSets[0];
+                    FLVER2.FaceSet faceSet = mesh2.FaceSets.Count > 0 ? mesh2.FaceSets[0] : new FLVER2.FaceSet();
                     //By order?
                     if (faceSet.Indices.Count == 0)
                     {

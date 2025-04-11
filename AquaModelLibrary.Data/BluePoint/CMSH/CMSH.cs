@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             header = new CMSHHeader(sr);
             if (header.variantFlag2 != 0x41)
             {
-                vertData = new CMSHVertexData(sr, header, header.hasExtraFlags);
+                vertData = new CMSHVertexData(sr, header, header.hasSizeFloat);
                 faceData = new CMSHFaceData(sr, header, vertData.positionList.Count);
 
                 if ((header.variantFlag2 & 0x20) > 0)
@@ -58,6 +58,35 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 }
                 footerData = sr.Read<CFooter>();
             }
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddRange(header.GetBytes());
+            switch(header.variantFlag2)
+            {
+                case 0x41:
+                    break;
+                default:
+                    //outBytes.AddRange(vertData.GetBytes());
+                    //outBytes.AddRange(faceData.GetBytes());
+                    if((header.variantFlag2 & 0x20) > 0)
+                    {
+                      //  outBytes.AddRange(unkdata0.GetBytes());
+                        //outBytes.AddRange(unkdata1.GetBytes());
+                    }
+                    if((header.variantFlag & 0x1) > 0)
+                    {
+                        if(unkdata2 != null)
+                        {
+                          //  outBytes.AddRange(unkdata2.GetBytes());
+                        }
+                        //outBytes.AddRange(boneData.GetBytes());
+                    }
+                    break;
+            }
+            return outBytes.ToArray();
         }
     }
 }

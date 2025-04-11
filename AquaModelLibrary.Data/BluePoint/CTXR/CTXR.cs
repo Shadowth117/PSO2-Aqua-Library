@@ -838,7 +838,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         private List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount, int depth = 1)
         {
-            var meta = GenerateMataData(texWidth, texHeight, mipCount, pixelFormat, textureType == CTextureType.CubeMap, depth);
+            var meta = GenerateMetaData(texWidth, texHeight, mipCount, pixelFormat, textureType == CTextureType.CubeMap, depth);
             if (alphaSetting > 0)
             {
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;

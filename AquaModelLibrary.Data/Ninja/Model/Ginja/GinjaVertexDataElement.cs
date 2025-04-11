@@ -78,7 +78,32 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             }
         }
 
-        public GinjaVertexDataElement() { }
+        public GinjaVertexDataElement(GCVertexAttribute attributeType)
+        {
+            dataCategoryAttribute = attributeType;
+
+            switch (dataCategoryAttribute)
+            {
+                case GCVertexAttribute.Position:
+                    dataType = GCDataType.Float32;
+                    structType = GCStructType.Position_XYZ;
+                    break;
+                case GCVertexAttribute.Normal:
+                    dataType = GCDataType.Float32;
+                    structType = GCStructType.Normal_XYZ;
+                    break;
+                case GCVertexAttribute.Color0:
+                    dataType = GCDataType.RGBA8;
+                    structType = GCStructType.Color_RGBA;
+                    break;
+                case GCVertexAttribute.Tex0:
+                    dataType = GCDataType.Signed16;
+                    structType = GCStructType.TexCoord_ST;
+                    break;
+                default:
+                    throw new ArgumentException($"Datatype {dataCategoryAttribute} is not a valid vertex type for SA2");
+            }
+        }
 
         public GinjaVertexDataElement(BufferedStreamReaderBE<MemoryStream> sr, bool be = true, int offset = 0)
         {

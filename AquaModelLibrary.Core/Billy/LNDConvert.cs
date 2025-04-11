@@ -1125,8 +1125,7 @@ namespace AquaModelLibrary.Core.BillyHatcher
             lndMdl.arcMeshDataRefList.Add(new ARCLNDMeshDataRef() { count = meshData.Count, unkEnum = 1 });
 
             //If we're optimizing vert colors, we need to dummy out the alt vert color set since we can no longer make a normal night vert color set 
-            lndMdl.arcAltVertColorList = new List<ARCLNDVertDataSet>();
-            lndMdl.arcAltVertColorList.Add(new ARCLNDVertDataSet());
+            lndMdl.arcAltVertColorList = new List<ARCLNDVertDataSet>() { new ARCLNDVertDataSet() };
             if (optimizeVertColors || mdl.nightAqp == null)
             {
                 lndMdl.arcAltVertColorList[0].VertColor = lndMdl.arcVertDataSetList[0].VertColor;

@@ -83,7 +83,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 string texPath = "";
                 string[] modelFiles;
                 string[] tpfFiles;
-                string[] texBhds;
+                string[] texBhds = new string[0];
 
                 switch (game)
                 {
@@ -109,7 +109,7 @@ namespace AquaModelLibrary.Core.FromSoft
                             var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(modelFile)).ToLower();
                             if (objectTransformsDict.ContainsKey(id) || extractUnreferencedMapData)
                             {
-                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), true, File.ReadAllBytes(modelFile));
+                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), true, File.ReadAllBytes(modelFile), new Dictionary<string, MATBIN>(), false, null);
                             }
                         }
                         foreach (var texFile in tpfFiles)
@@ -146,7 +146,7 @@ namespace AquaModelLibrary.Core.FromSoft
                             var foundKey = objectTransformsDict.ContainsKey(id);
                             if (foundKey || extractUnreferencedMapData)
                             {
-                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
+                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile), new Dictionary<string, MATBIN>(), false, null);
                             }
                         }
                         if (game == SoulsGame.DarkSouls1Remastered)
@@ -198,7 +198,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         var texBdtPath = Path.Combine(rootPath, $"model/map/{fileNameTex}.tpfbdt");
                         using (var bxf = new BXF4Reader(modelBhdPath, modelBdtPath))
                         {
-                            GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, bxf, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames);
+                            GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, bxf, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, new Dictionary<string, MATBIN>(), false, null);
                         }
                         using (var bxf = new BXF4Reader(texBhdPath, texBdtPath))
                         {
@@ -232,7 +232,7 @@ namespace AquaModelLibrary.Core.FromSoft
                             var foundKey = objectTransformsDict.ContainsKey(id);
                             if (foundKey || extractUnreferencedMapData)
                             {
-                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile));
+                                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, Path.GetExtension(modelFile), Path.GetFileNameWithoutExtension(modelFile).ToLower(), foundKey, File.ReadAllBytes(modelFile), new Dictionary<string, MATBIN>(), false, null);
                             }
                         }
                         foreach (var bhd in texBhds)
@@ -246,14 +246,14 @@ namespace AquaModelLibrary.Core.FromSoft
                     case SoulsGame.DarkSouls3:
                     case SoulsGame.Sekiro:
                     case SoulsGame.EldenRing:
-
+                    case SoulsGame.ArmoredCore6:
                         rootPath = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
                         if (Path.GetFileName(rootPath).ToLower() != "map")
                         {
                             rootPath = Path.GetDirectoryName(rootPath);
                         }
                         var gameRootPath = Path.GetDirectoryName(rootPath);
-                        List<BND4Reader> matBnds = new List<BND4Reader>();
+                        Dictionary<string, MATBIN> matBnds = new();
                         switch (game)
                         {
                             case SoulsGame.DarkSouls3:
@@ -270,29 +270,57 @@ namespace AquaModelLibrary.Core.FromSoft
                                 string allMatSpeedTreePath = Path.Combine(gameRootPath, "material", "speedtree.matbinbnd.dcx");
                                 if(File.Exists(allMatPath))
                                 {
-                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatPath)));
-                                    var a = MATBIN.Read(matBnds[0].ReadFile(0));
-
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatPath));
+                                    foreach(var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
                                 }
                                 if (File.Exists(allMatDLC01Path))
                                 {
-                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatDLC01Path)));
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatDLC01Path));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
                                 }
                                 if (File.Exists(allMatDLC02Path))
                                 {
-                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatDLC02Path)));
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatDLC02Path));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
                                 }
                                 if (File.Exists(allMatSpeedTreePath))
                                 {
-                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMatSpeedTreePath)));
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatSpeedTreePath));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
                                 }
                                 break;
                             case SoulsGame.ArmoredCore6:
-                                //msb = SoulsFormats.SoulsFile<SoulsFormats.MSBE>.Read(bndFile.Bytes);
+                                msb = SoulsFormats.SoulsFile<SoulsFormats.MSBVI>.Read(bndFile.Bytes);
                                 string allMtPath = Path.Combine(gameRootPath, "material", "allmaterial.matbinbnd.dcx");
                                 if (File.Exists(allMtPath))
                                 {
-                                    matBnds.Add(new BND4Reader(File.ReadAllBytes(allMtPath)));
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMtPath));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
                                 }
                                 break;
                         }
@@ -300,8 +328,8 @@ namespace AquaModelLibrary.Core.FromSoft
                         List<string> aegModelPaths = new List<string>();
                         foreach (var p in msb.Parts.GetEntries())
                         {
-                            if (p is SoulsFormats.MSB3.Part.MapPiece || p is SoulsFormats.MSBS.Part.MapPiece || p is SoulsFormats.MSBE.Part.MapPiece || p is SoulsFormats.MSBE.Part.Asset)
-                            {/*
+                            if (p is SoulsFormats.MSB3.Part.MapPiece || p is SoulsFormats.MSBS.Part.MapPiece || p is SoulsFormats.MSBE.Part.MapPiece || p is SoulsFormats.MSBE.Part.Asset || p is SoulsFormats.MSBVI.Part.MapPiece || p is SoulsFormats.MSBVI.Part.Asset)
+                            {
                                 if(p is SoulsFormats.MSBE.Part.Asset)
                                 {
                                     string aegFolder = p.ModelName.Substring(0, 6);
@@ -310,7 +338,14 @@ namespace AquaModelLibrary.Core.FromSoft
                                     {
                                         aegModelPaths.Add(aeg);
                                     }
-                                }*/
+                                } else if(p is SoulsFormats.MSBVI.Part.Asset)
+                                {
+                                    var aeg = $@"asset\environment\geometry\{p.ModelName}.geombnd.dcx";
+                                    if (!aegModelPaths.Contains(aeg))
+                                    {
+                                        aegModelPaths.Add(aeg);
+                                    }
+                                }
                                 AddToTFMDict(objectTransformsDict, p, msbMapId);
                             }
                         }
@@ -323,19 +358,25 @@ namespace AquaModelLibrary.Core.FromSoft
                                 texPath = Path.Combine(rootPath, $"{worldString}\\");
                                 break;
                             case SoulsGame.EldenRing:
+                            case SoulsGame.ArmoredCore6:
                                 modelPath = Path.Combine(rootPath, $"{worldString}\\{msbMapId}\\");
                                 texPath = modelPath;
                                 break;
                         }
 
-                        var modelFilesList = Directory.GetFiles(modelPath, "*.mapbnd.dcx").ToList();
+                        List<string> modelFilesList = new List<string>();
+                        if(Directory.Exists(modelPath))
+                        {
+                            modelFilesList = Directory.GetFiles(modelPath, "*.mapbnd.dcx").ToList();
+                        }
+                        List<string> fullAegPathList = new List<string>();
                         List<string> fullAetPathList = new List<string>();
                         foreach (var aegPath in aegModelPaths)
                         {
                             var fullPath = Path.Combine(gameRootPath, aegPath);
-                            if(File.Exists(fullPath))
+                            if(File.Exists(fullPath) && !fullAegPathList.Contains(fullPath))
                             {
-                                modelFilesList.Add(fullPath);
+                                fullAegPathList.Add(fullPath);
                             }
                         }
 
@@ -351,13 +392,49 @@ namespace AquaModelLibrary.Core.FromSoft
                                 }
                                 using (var mapBnd = new BND4Reader(fileBytes))
                                 {
-                                    GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, mapBnd, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames);
+                                    GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, mapBnd, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, matBnds, false, null);
                                 }
                             }
                         }
-                        if (game == SoulsGame.EldenRing)
+                        foreach (var modelFile in fullAegPathList)
                         {
-                            texBhds = Directory.GetFiles(texPath, "*.tpfbnd*");
+                            var id = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(modelFile)).ToLower();
+                            if (objectTransformsDict.ContainsKey(id) || extractUnreferencedMapData)
+                            {
+                                var fileBytes = File.ReadAllBytes(modelFile);
+                                if (SoulsFormats.DCX.Is(fileBytes))
+                                {
+                                    fileBytes = DCX.Decompress(fileBytes);
+                                }
+                                using (var mapBnd = new BND4Reader(fileBytes))
+                                {
+                                    GatherModelsFromBinder(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, mapBnd, texNames, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexNames, matBnds, true, fullAetPathList);
+                                }
+                            }
+                        }
+                        foreach (var path in fullAetPathList)
+                        {
+                            string fullPath = null;
+                            switch(game)
+                            {
+                                case SoulsGame.EldenRing:
+                                    fullPath = Path.Combine(gameRootPath, $@"asset\aet\{path}.tpf.dcx");
+                                    break;
+                                case SoulsGame.ArmoredCore6:
+                                    fullPath = Path.Combine(gameRootPath, $@"asset\environment\texture\{path}.tpf.dcx");
+                                    break;
+                            }
+                            if(File.Exists(fullPath))
+                            {
+                                GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(fullPath), Path.GetFileNameWithoutExtension(fullPath), File.ReadAllBytes(fullPath));
+                            }
+                        }
+                        if (game == SoulsGame.EldenRing || game == SoulsGame.ArmoredCore6)
+                        {
+                            if(Directory.Exists(texPath))
+                            {
+                                texBhds = Directory.GetFiles(texPath, "*.tpfbnd*");
+                            }
                             foreach (var bnd in texBhds)
                             {
                                 //Avoid LOD textures
@@ -423,15 +500,19 @@ namespace AquaModelLibrary.Core.FromSoft
 
         private static void ProcessModelsForExport(List<AquaObject> aqpList)
         {
-            foreach(var aqp in aqpList)
+            for(int i = 0; i < aqpList.Count; i++)
             {
-                aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true, false);
-                aqp.ConvertToLegacyTypes();
-                aqp.CreateTrueVertWeights();
+                if(aqpList[i] == null)
+                {
+                    aqpList[i] = AquaObject.GetEmptyAquaObjectUnprocessed();
+                }
+                aqpList[i].ConvertToPSO2Model(true, false, false, true, false, false, false, true, false);
+                aqpList[i].ConvertToLegacyTypes();
+                aqpList[i].CreateTrueVertWeights();
             }
         }
 
-        private static void GatherModelsFromBinder(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, BinderReader bxf, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList)
+        private static void GatherModelsFromBinder(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, BinderReader bxf, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList, Dictionary<string, MATBIN> matBnds, bool isAEG, List<string> aetReferences)
         {
             foreach (var bxfFile in bxf.Files)
             {
@@ -445,12 +526,14 @@ namespace AquaModelLibrary.Core.FromSoft
                 bool foundKey = objectTransformsDict.ContainsKey(bFNameSansExt);
                 var fileBytes = bxf.ReadFile(bxfFile);
 
-                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texFilenameList, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexFilenameList, ext, bFNameSansExt, foundKey, fileBytes);
+                GatherModel(useMetaData, aqpList, aqnList, modelNames, instanceTransformList, objectTransformsDict, texFilenameList, unrefAqpList, unrefAqnList, unrefModelNames, unrefTexFilenameList, ext, bFNameSansExt, foundKey, fileBytes, matBnds, isAEG, aetReferences);
             }
         }
 
-        private static void GatherModel(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList, string ext, string bFNameSansExt, bool foundKey, byte[] fileBytes)
+        private static void GatherModel(bool useMetaData, List<AquaObject> aqpList, List<AquaNode> aqnList, List<string> modelNames, List<List<Matrix4x4>> instanceTransformList, Dictionary<string, List<Matrix4x4>> objectTransformsDict, List<string> texFilenameList, List<AquaObject> unrefAqpList, List<AquaNode> unrefAqnList, List<string> unrefModelNames, List<string> unrefTexFilenameList, string ext, string bFNameSansExt, bool foundKey, byte[] fileBytes, Dictionary<string, MATBIN> matBnds, bool isAEG, List<string> aetReferences)
         {
+            string speedtreeAddition = "";
+
             if (ext == ".dcx")
             {
                 if (SoulsFormats.DCX.Is(fileBytes))
@@ -472,13 +555,30 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     flver = SoulsFile<FLVER0>.Read(fileBytes);
                 }
+                speedtreeAddition += flver.IsSpeedtree() ? "_Speedtree" : "";
 
                 //Gather textures that are actually referenced by the model
                 if (foundKey || extractUnreferencedMapData)
                 {
-                    foreach (var mesh in flver.Meshes)
+                    for(int m = 0; m < flver.Meshes.Count; m++)
                     {
+                        var mesh = flver.Meshes[m];
                         var mat = flver.Materials[mesh.MaterialIndex];
+                        var matBinName = Path.GetFileNameWithoutExtension(mat.MTD);
+                        if (matBnds.ContainsKey(matBinName))
+                        {
+                            //We'll never have FLVER0 here
+                            FLVER2 flv = (FLVER2)flver;
+                            var matbin = matBnds[matBinName];
+                            for(int i = 0; i < mat.Textures.Count; i++)
+                            {
+                                if (mat.Textures[i].Path == "" && matbin.Samplers.Count > i)
+                                {
+                                    flv.Materials[mesh.MaterialIndex].Textures[i].Path = matbin.Samplers[i].Path;
+                                }
+                            }
+                        }
+
                         foreach (var tex in mat.Textures)
                         {
                             var texName = Path.GetFileNameWithoutExtension(tex.Path).ToLower();
@@ -494,6 +594,31 @@ namespace AquaModelLibrary.Core.FromSoft
                                 if (!unrefTexFilenameList.Contains(texName))
                                 {
                                     unrefTexFilenameList.Add(texName);
+                                }
+                            }
+                            if(isAEG && tex.Path != "")
+                            {
+                                var aetName = Path.GetFileNameWithoutExtension(texName);
+                                if (aetName.Length > 10)
+                                {
+                                    aetName = aetName.Substring(0, 10);
+                                }
+                                switch (game)
+                                {
+                                    case SoulsGame.EldenRing:
+                                        var aetDir = Path.GetFileName(Path.GetDirectoryName(tex.Path.ToLower()));
+                                        var aetPath = $@"{aetDir}\{aetName}";
+                                        if (!aetReferences.Contains(aetPath))
+                                        {
+                                            aetReferences.Add(aetPath);
+                                        }
+                                        break;
+                                    case SoulsGame.ArmoredCore6:
+                                        if (!aetReferences.Contains(aetName))
+                                        {
+                                            aetReferences.Add(aetName);
+                                        }
+                                        break;
                                 }
                             }
                         }
@@ -526,14 +651,14 @@ namespace AquaModelLibrary.Core.FromSoft
                     }
                     aqpList.Add(aqp);
                     aqnList.Add(aqn);
-                    modelNames.Add(bFNameSansExt);
+                    modelNames.Add(bFNameSansExt + speedtreeAddition);
                     instanceTransformList.Add(objectTransformsDict[bFNameSansExt]);
                 }
                 else
                 {
                     unrefAqpList.Add(aqp);
                     unrefAqnList.Add(aqn);
-                    unrefModelNames.Add(bFNameSansExt);
+                    unrefModelNames.Add(bFNameSansExt + speedtreeAddition);
                 }
             }
         }
@@ -621,10 +746,8 @@ namespace AquaModelLibrary.Core.FromSoft
                 case SoulsGame.DarkSouls2:
                     break;
                 case SoulsGame.EldenRing:
-                    if(p is MSBE.Part.Asset)
-                    {
-                        mdlName = mdlName;
-                    } else
+                case SoulsGame.ArmoredCore6:
+                    if (!(p is MSBE.Part.Asset || p is MSBVI.Part.Asset))
                     {
                         mdlName = $@"{mapId}_{mdlName.Substring(1)}";
                     }

@@ -195,6 +195,22 @@ namespace AquaModelLibrary.Helpers.MathHelpers
             return (float)Math.Sqrt(Math.Pow(point2.X - point1.X, 2) + Math.Pow(point2.Y - point1.Y, 2) + Math.Pow(point2.Z - point1.Z, 2));
         }
 
+        public static void DecomposeWorldMatrix(Matrix4x4 world, out Vector3 position, out Vector3 forward, out Vector3 up)
+        {
+            // Extract the position from the translation part of the matrix
+            position = new Vector3(world.M41, world.M42, world.M43);
+
+            // zaxis is the third row of the rotation matrix
+            Vector3 zaxis = new Vector3(world.M31, world.M32, world.M33);
+            forward = -Vector3.Normalize(zaxis); // Undo the negation and normalization
+
+            // xaxis is the first row
+            Vector3 xaxis = new Vector3(world.M11, world.M12, world.M13);
+
+            // yaxis = cross(zaxis, xaxis)
+            up = Vector3.Normalize(Vector3.Cross(zaxis, xaxis));
+        }
+
         //Adapted from Threejs https://github.com/mrdoob/three.js/blob/4d6d52aca6fd714fbf0aedb16ce0b8da5701e681/src/math/Matrix4.js
         public static Matrix4x4 Compose(Vector3 position, Quaternion quaternion, Vector3 scale)
         {

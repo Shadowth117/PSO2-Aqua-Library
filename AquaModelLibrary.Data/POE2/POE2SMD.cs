@@ -151,7 +151,7 @@ namespace AquaModelLibrary.Data.POE2
                     {
                         meshStartIndex.Add(sr.ReadBE<int>());
                         meshIndexCount.Add(sr.ReadBE<int>());
-                        if (meshStartIndex[i] > ushort.MaxValue || meshIndexCount[i] > ushort.MaxValue)
+                        if (info.vertexCount > ushort.MaxValue && (meshStartIndex[i] > ushort.MaxValue || meshIndexCount[i] > ushort.MaxValue))
                         {
                             meshUsesIntIndices[i] = true;
                             intIndices = true;
@@ -284,7 +284,7 @@ namespace AquaModelLibrary.Data.POE2
                         tris.matIdList = new List<int>(new int[tris.triList.Count]);
                         aqo.vtxlList.Add(vtxl);
                         aqo.tempTris.Add(tris);
-                        aqo.tempMats.Add(new GenericMaterial() { matName = "ColMat" });
+                        aqo.tempMats.Add(new GenericMaterial() { matName = "ColMat", texNames = new List<string>() { "temp.dds" } });
                     }
 
                     aqo.ConvertToPSO2Model(true, true, false, true, false, false, false, true);

@@ -123,7 +123,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
             //0x70
             innerWearIdLinkAddress = streamReader.Read<int>(); //BCLN innerwear ids for recolors
 
-            if (headerOffset >= CMXConstants.oct21TableAddressInt)
+            if (headerOffset >= CMXConstants.oct_21TableAddressInt)
             {
                 oct21UnkAddress = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
             }
@@ -172,7 +172,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
             baseWearIdLinkCount = streamReader.Read<int>();
 
             innerWearIdLinkCount = streamReader.Read<int>();
-            if (headerOffset >= CMXConstants.oct21TableAddressInt)
+            if (headerOffset >= CMXConstants.oct_21TableAddressInt)
             {
                 oct21UnkCount = streamReader.Read<int>(); //Only in October 12, 2021 builds and forward
             }

@@ -274,7 +274,7 @@ namespace VrSharp.Xvr
             }
             //Map to DXGIFormat based on XVRFormats list, recovered from a PSO1 executable. Redundancies prevent this from being an enum
             DXGIFormat fmt = GetFormat();
-            var meta = GenerateMataData(TextureWidth, TextureHeight, mipCount, fmt, false);
+            var meta = GenerateMetaData(TextureWidth, TextureHeight, mipCount, fmt, false);
             if (UseAlpha)
             {
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;

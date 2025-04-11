@@ -1870,6 +1870,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 bool hadUnicodeNames = matUnicodeNames.Count > 0; 
                 for (int mat = 0; mat < tempMats.Count; mat++)
                 {
+                    for(int i = 0; i < tempMats[mat].texNames.Count; i++)
+                    {
+                        tempMats[mat].texNames[i] = Path.GetFileName(tempMats[mat].texNames[i]);
+                    }
                     GenerateMaterial(tempMats[mat], true, hadUnicodeNames);
                 }
             }
@@ -1946,7 +1950,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 mesh.unkByte0 = 0x80;
                 mesh.unkByte1 = 0x64;
                 mesh.unkShort1 = 0;
-                mesh.mateIndex = tempTris[i].matIdList[0];
+                mesh.mateIndex = tempTris[i].matIdList.Count > 0 ? tempTris[i].matIdList[0] : 0;
                 mesh.rendIndex = mesh.mateIndex;
                 mesh.shadIndex = mesh.mateIndex;
                 mesh.tsetIndex = mesh.mateIndex;

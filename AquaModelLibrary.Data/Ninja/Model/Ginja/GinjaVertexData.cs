@@ -17,6 +17,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         public List<Vector2>[] uvsArray = new List<Vector2>[8];
 
         public List<GinjaVertexDataElement> elements = new List<GinjaVertexDataElement>();
+        public GinjaVertexData() { }
         public GinjaVertexData(BufferedStreamReaderBE<MemoryStream> sr, bool be = true, int offset = 0)
         {
             var element = new GinjaVertexDataElement(sr, be, offset);

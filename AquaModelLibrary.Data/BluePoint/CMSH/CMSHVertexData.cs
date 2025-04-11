@@ -32,8 +32,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
     public class CMSHVertexData
     {
-        public int flags;
-        public int int_04;
+        public int unkData0Count;
         public int int_08;
         public int vertexBufferSize; //Size of VertexData section after this point
 
@@ -54,6 +53,10 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public List<byte[]> color3s = new List<byte[]>();
         public List<int[]> vertWeightIndices = new List<int[]>();
         public List<Vector4> vertWeights = new List<Vector4>();
+        /// <summary>
+        /// Increments varying amounts from some amount to 1.0f
+        /// </summary>
+        public List<float> satValues = new List<float>();
         public Dictionary<VertexMagic, List<Vector2>> uvDict = new Dictionary<VertexMagic, List<Vector2>>(); //Access by magic, ex 0XET or 3XET (TEX0 and TEX3) as ints. UVs seem stored as half floats
         public Dictionary<VertexMagic, byte[]> unkDict = new Dictionary<VertexMagic, byte[]>();
 
@@ -66,19 +69,14 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         }
 
-        public CMSHVertexData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header, bool hasExtraFlags)
+        public CMSHVertexData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header, bool hasSizeFloat)
         {
-            //SOTC doesn't do this
-            if (hasExtraFlags)
-            {
-                flags = sr.Read<int>();
-            }
-            int_04 = sr.Read<int>();
+            unkData0Count = sr.Read<int>();
 
             //Read special SOTC stuff, if it's there
-            if(int_04 != 0)
+            if(unkData0Count != 0)
             {
-                for(int i = 0; i < int_04; i++)
+                for(int i = 0; i < unkData0Count; i++)
                 {
                     sotcUnk0List.Add(sr.Read<CMSHSOTCUnkData0>());
                 }
@@ -133,18 +131,62 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 case VertexMagic.QUT0:
                     for (int v = 0; v < vertCount; v++)
                     {
+                        var uarr = sr.Peek<uint>();
+                        var iarr = sr.Peek<int>();
                         var byteArr = sr.Read4Bytes();
+                        sr.Seek(-0x4, SeekOrigin.Current);
                         //Quaternion quat = new Quaternion(ConvertBPSbyte(byteArr[0]), ConvertBPSbyte(byteArr[1]), ConvertBPSbyte(byteArr[2]), ConvertBPSbyte(byteArr[3]));
                         normalTemp.Add(byteArr);
 
+                        int x = (int)(uarr & 0x3FF);          
+                        int y = (int)((uarr >> 10) & 0x3FF);
+                        int z = (int)((uarr >> 20) & 0x3FF); 
+                        x = (x >= 512) ? x - 1024 : x;
+                        y = (y >= 512) ? y - 1024 : y;
+                        z = (z >= 512) ? z - 1024 : z;
+
+                        // Normalize to [-1,1] range
+                        Vector3 normal10s = new Vector3(x, y, z) / 511.0f;
+                        Vector3 normal10s2 = Vector3.Normalize(normal10s);
+
+
                         //Debug.WriteLine($"Byte represntation {byteArr[0]:X2} {byteArr[1]:X2} {byteArr[2]:X2} {byteArr[3]:X2} - {((float)byteArr[0]) / 255} {((float)byteArr[1]) / 255} {((float)byteArr[2]) / 255} {((float)byteArr[3]) / 255} \nSByte representation {sbyteArr[0]:X2} {sbyteArr[1]:X2} {sbyteArr[2]:X2} {sbyteArr[3]:X2} - {((float)sbyteArr[0]) / 127} {((float)sbyteArr[1]) / 127} {((float)sbyteArr[2]) / 127} {((float)sbyteArr[3]) / 127} ");
                         Quaternion quat = new Quaternion( (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127), (float)(((double)sr.Read<sbyte>()) / 127));
+                        Vector4 quat2 = new Vector4((float)(((double)byteArr[0]) / 255), (float)(((double)byteArr[1]) / 255), (float)(((double)byteArr[2]) / 255), (float)(((double)byteArr[3]) / 255));
+                        var quat2Mult = (quat2 * 2);
+                        var quat2Minus = quat2Mult + new Vector4(-1,-1,-1,-1);
+                        var quat2Quat = quat2Minus.ToQuat();
+                        var quat2QuatNormalized = Quaternion.Normalize(quat2Quat);
+                        var originalQuat = quat;
                         var testQuat = new Quaternion(quat.Z, quat.Y, quat.X, quat.W);
-                        quat = testQuat;
-                        var vq4Quat = quat.ToVec4() * 2;
-                        vq4Quat -= new Vector4(1,1,1,1);
+                        var testQuat2 = new Quaternion(quat.Z, quat.Y, quat.X, quat.W);
+                        testQuat2 = Quaternion.Normalize(testQuat2);
+                        quat = quat2QuatNormalized;
+
+                        //Method 1
+                        var vq4Quat = quat.ToVec4() * 2 + new Vector4(-1,-1,-1,-1);
+                        var t = new Vector3(1, 0, 0) + new Vector3(-2, 2, 2) * vq4Quat.Y * new Vector3(vq4Quat.Y, vq4Quat.X, vq4Quat.W) + new Vector3(-2, -2, 2) * vq4Quat.Z * new Vector3(vq4Quat.Z, vq4Quat.W, vq4Quat.X);
+                        var b = new Vector3(0, 1, 0) + new Vector3(2, -2, 2) * vq4Quat.Z * new Vector3(vq4Quat.W, vq4Quat.Z, vq4Quat.Y) + new Vector3(2, -2, -2) * vq4Quat.X * new Vector3(vq4Quat.Y, vq4Quat.X, vq4Quat.W);
                         var n = new Vector3(0, 0, 1) + new Vector3(2, 2, -2) * vq4Quat.X * new Vector3(vq4Quat.Z, vq4Quat.W, vq4Quat.X) + new Vector3(-2, 2, -2) * vq4Quat.Y * new Vector3(vq4Quat.W, vq4Quat.Z, vq4Quat.Y);
-                        normals.Add(n);
+
+                        //Method 2
+                        var vq4Quat2 = quat2 * (float)(2 * Math.PI) - new Vector4((float)Math.PI, (float)Math.PI, (float)Math.PI, (float)Math.PI);
+                        Vector4 sc0, sc1;
+                        sc0.X = (float)Math.Sin(vq4Quat2.X);
+                        sc0.Y = (float)Math.Cos(vq4Quat2.X);
+                        sc0.Z = (float)Math.Sin(vq4Quat2.Y);
+                        sc0.W = (float)Math.Cos(vq4Quat2.Y);
+                        sc1.X = (float)Math.Sin(vq4Quat2.Z);
+                        sc1.Y = (float)Math.Cos(vq4Quat2.Z);
+                        sc1.Z = (float)Math.Sin(vq4Quat2.W);
+                        sc1.W = (float)Math.Cos(vq4Quat2.W);
+                        var tan = new Vector3(sc0.Y * Math.Abs(sc0.Z), sc0.X * Math.Abs(sc0.Z), sc0.W);
+                        var bitan = new Vector3(sc1.Y * Math.Abs(sc1.Z), sc1.X * Math.Abs(sc1.Z), sc1.W);
+                        var normal = Vector3.Cross(tan, bitan);
+                        normal = vq4Quat2.W > 0 ? normal : -normal;
+                        var testnrm = Vector3.Normalize(normal);
+
+                        normals.Add(SphereDecode(uarr));
                     }
                     break;
                 case VertexMagic.COL0:
@@ -212,7 +254,10 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     }
                     break;
                 case VertexMagic.SAT_:
-                    unkDict.Add(dataMagic, sr.ReadBytes(sr.Position,(int)dataSize));
+                    for(int f = 0; f < dataSize / 4; f++)
+                    {
+                        satValues.Add(sr.Read<float>());
+                    }
                     break;
                 default:
                     Debug.WriteLine($"Unknown data type {dataMagic.ToString("X")} {dataMagic} {UTF8Encoding.UTF8.GetString(BitConverter.GetBytes((int)dataMagic))}");
@@ -221,17 +266,23 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             }
         }
 
-        public float ConvertBPSbyte(byte b)
+        public byte[] GetBytes(bool hasSizeFloat)
         {
-            if (b < 128)
-            {
-                return (float)((double)b / 127.0);
-            }
-            else
-            {
-                b -= 127;
-                return (float)((double)b / 127.0);
-            }
+            List<byte> outBytes = new();
+
+            return outBytes.ToArray();
+        }
+
+        public Vector3 SphereDecode(uint value)
+        {
+            float x = ((value & 0xFFFF) - 32767.0f) / 32767.0f;
+            float y = (((value >> 16) & 0xFFFF) - 32767.0f) / 32767.0f;
+            
+            float z = (float)Math.Pow(2, (2.0f * Math.Sqrt(x * x + y * y))) - 1.0f;
+            var vec3 =  new Vector3(x, y, z);
+            var vec3n = Vector3.Normalize(vec3);
+
+            return vec3n;
         }
     }
 }

@@ -2,7 +2,6 @@
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
-using System.Text.Unicode;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -84,12 +83,14 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 outBytes.FillInt($"BGMNamePointer{i}", outBytes.Count);
                 outBytes.AddValue(Encoding.ASCII.GetBytes(bgmFiles[i]));
+                outBytes.Add(0);
             }
             outBytes.AlignWriter(0x10);
 
             List<byte> header = new List<byte>();
             var size = outBytes.Count;
             header.AddRange(new byte[] { 0x4D, 0x53, 0x4D, 0x50});
+            ByteListExtension.AddAsBigEndian = false;
             header.AddValue((int)size);
             outBytes.InsertRange(0, header);
             ByteListExtension.Reset();

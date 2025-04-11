@@ -59,6 +59,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="AM2\AfterBurnerClimax\" />
     <Folder Include="Ninja\Model\Basic\" />
     <Folder Include="Ninja\Model\Chunk\" />
   </ItemGroup>

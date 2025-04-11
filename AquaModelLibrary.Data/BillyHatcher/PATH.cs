@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
-using static AquaModelLibrary.Data.BillyHatcher.MC2;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -12,12 +12,14 @@ namespace AquaModelLibrary.Data.BillyHatcher
     {
         public NinjaHeader header;
         public PATHHeader pathHeader;
-        public List<List<float>> lengthsListList = new List<List<float>>();
+        /// <summary>
+        /// List of PathInfos, main path definitions.
+        /// Paths that use normals are stored first regardless of id
+        /// </summary>
         public List<PathInfo> pathInfoList = new List<PathInfo>();
-        public List<VertDefinition> vertDefinitions = new List<VertDefinition>();
         public List<PathSector> pathSectors = new List<PathSector>();
-        public List<RawPathDefinition> rawPathDefinitions = new List<RawPathDefinition>();
-
+        public PathSector rootSector = null;
+        public Dictionary<int, PathSegments> pathSegmentDict = new Dictionary<int, PathSegments>();
         public PATH() { }
 
         public PATH(BufferedStreamReaderBE<MemoryStream> sr)
@@ -37,10 +39,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 PathInfo pathInfo = new PathInfo();
                 pathInfo.doesNotUseNormals = sr.Read<byte>();
-                pathInfo.unkByte1 = sr.Read<byte>();
+                pathInfo.isObjectPath = sr.Read<byte>();
                 pathInfo.lengthsCount = sr.ReadBE<ushort>();
                 pathInfo.id = sr.ReadBE<int>();
-                pathInfo.unkInt = sr.ReadBE<int>();
+                pathInfo.isLiquidCurrent = sr.ReadBE<int>();
                 pathInfo.totalLength = sr.ReadBE<float>();
                 pathInfo.definitionOffset = sr.ReadBE<int>();
                 pathInfo.lengthsOffset = sr.ReadBE<int>();
@@ -59,7 +61,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     {
                         vertDef.vertNormalsOffset = sr.ReadBE<int>();
                     }
-                    vertDefinitions.Add(vertDef);
+                    pathInfo.vertDef = vertDef;
 
                     sr.Seek(vertDef.vertPositionsOffset + 0x8, SeekOrigin.Begin);
                     List<Vector3> positions = new List<Vector3>();
@@ -91,7 +93,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     {
                         lengths.Add(sr.ReadBE<float>());
                     }
-                    lengthsListList.Add(lengths);
+                    pathInfo.lengthsList = lengths;
                     sr.Seek(bookmark, SeekOrigin.Begin);
                 }
 
@@ -102,10 +104,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 PathSector pathDef = new PathSector();
                 pathDef.isFinalSubdivision = sr.ReadBE<ushort>();
-                pathDef.usesRawPathOffset = sr.ReadBE<ushort>();
+                pathDef.rawPathCount = sr.ReadBE<ushort>();
                 pathDef.rawPathOffset = sr.ReadBE<int>();
-                pathDef.xRange = sr.ReadBEV2();
-                pathDef.zRange = sr.ReadBEV2();
+                pathDef.xzMin = sr.ReadBEV2();
+                pathDef.xzMax = sr.ReadBEV2();
                 pathDef.childId0 = sr.ReadBE<ushort>();
                 pathDef.childId1 = sr.ReadBE<ushort>();
                 pathDef.childId2 = sr.ReadBE<ushort>();
@@ -114,14 +116,209 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
 
             sr.Seek(pathHeader.rawPathOffset + 0x8, SeekOrigin.Begin);
-            for (int i = 0; i < pathHeader.rawPathCount / 8; i++)
+            while (sr.Position < pathHeader.rawPathCount + pathHeader.rawPathOffset + 0x8)
             {
-                RawPathDefinition pathDef = new RawPathDefinition();
-                pathDef.unkShort0 = sr.ReadBE<ushort>();
-                pathDef.vertSet = sr.ReadBE<ushort>();
-                pathDef.startVert = sr.ReadBE<ushort>();
-                pathDef.endVert = sr.ReadBE<ushort>();
-                rawPathDefinitions.Add(pathDef);
+                PathSegments pathSeg = new PathSegments();
+                pathSeg.relativeOffset = (int)(sr.Position - 0x8 - pathHeader.rawPathOffset);
+                pathSeg.defCount = sr.ReadBE<ushort>();
+                for (int j = 0; j < pathSeg.defCount; j++)
+                {
+                    var def = new PathSegment();
+
+                    def.vertSet = sr.ReadBE<ushort>();
+                    def.startVert = sr.ReadBE<ushort>();
+                    def.endVert = sr.ReadBE<ushort>();
+
+                    def.pathInfo = pathInfoList[def.vertSet];
+                    pathSeg.defs.Add(def);
+                }
+                pathSegmentDict.Add((int)(pathSeg.relativeOffset), pathSeg);
+            }
+
+            foreach (var sector in pathSectors)
+            {
+                if (sector.childId0 != 0)
+                {
+                    sector.childSector0 = pathSectors[sector.childId0];
+                }
+                if (sector.childId1 != 0)
+                {
+                    sector.childSector1 = pathSectors[sector.childId1];
+                }
+                if (sector.childId2 != 0)
+                {
+                    sector.childSector2 = pathSectors[sector.childId2];
+                }
+                if (sector.childId3 != 0)
+                {
+                    sector.childSector3 = pathSectors[sector.childId3];
+                }
+
+                if(sector.rawPathCount != 0)
+                {
+                    sector.pathSegments = pathSegmentDict[sector.rawPathOffset];
+                }
+            }
+            rootSector = pathSectors[0];
+
+            IterateSector(rootSector, 0);
+        }
+
+        private int GetPathSegmentListSize()
+        {
+            int size = 0;
+            foreach(var pathSegment in pathSegmentDict)
+            {
+                size += 2 + pathSegment.Value.defs.Count * 6; 
+            }
+
+            return size;
+        }
+
+        public byte[] GetBytes()
+        {
+            List<int> offsets = new List<int>();
+            ByteListExtension.AddAsBigEndian = true;
+            List<byte> outBytes = new List<byte>();
+
+            outBytes.AddValue((int)pathInfoList.Count);
+            offsets.Add(outBytes.Count);
+            outBytes.ReserveInt("PathInfoListOffset");
+            outBytes.AddValue((int)pathSectors.Count);
+            offsets.Add(outBytes.Count);
+            outBytes.ReserveInt("SectorsOffset");
+            outBytes.AddValue(GetPathSegmentListSize());
+            offsets.Add(outBytes.Count);
+            outBytes.ReserveInt("PathSegmentOffset");
+
+            outBytes.FillInt("PathInfoListOffset", outBytes.Count);
+            for(int i = 0; i < pathInfoList.Count; i++)
+            {
+                var pathInfo = pathInfoList[i];
+                byte doesNotUseVertNormals = pathInfo.vertDef.vertNormals.Count > 0 ? (byte)0 : (byte)1;
+                outBytes.Add(doesNotUseVertNormals);
+                outBytes.Add(pathInfo.isObjectPath);
+                outBytes.AddValue(pathInfo.lengthsCount);
+                outBytes.AddValue(pathInfo.id);
+                outBytes.AddValue(pathInfo.isLiquidCurrent);
+                outBytes.AddValue(pathInfo.totalLength);
+                offsets.Add(outBytes.Count);
+                outBytes.ReserveInt($"PathInfoDefs{i}Offset");
+                offsets.Add(outBytes.Count);
+                outBytes.ReserveInt($"PathInfoLengths{i}Offset");
+            }
+
+            for (int i = 0; i < pathInfoList.Count; i++)
+            {
+                outBytes.FillInt($"PathInfoDefs{i}Offset", outBytes.Count);
+                var pathInfo = pathInfoList[i];
+                var def = pathInfo.vertDef;
+                var lenList = pathInfo.lengthsList;
+                byte doesNotUseVertNormals = pathInfo.vertDef.vertNormals.Count > 0 ? (byte)0 : (byte)1;
+
+                outBytes.Add(def.unkByte0);
+                outBytes.Add(def.unkByte1);
+                outBytes.AddValue((ushort)def.vertPositions.Count);
+                offsets.Add(outBytes.Count);
+                outBytes.ReserveInt($"VertDefsPos{i}Offset");
+                if(doesNotUseVertNormals == 0)
+                {
+                    offsets.Add(outBytes.Count);
+                    outBytes.ReserveInt($"VertDefsNrm{i}Offset");
+                }
+
+                outBytes.FillInt($"VertDefsPos{i}Offset", outBytes.Count);
+                for(int j = 0; j < def.vertPositions.Count; j++)
+                {
+                    outBytes.AddValue(def.vertPositions[j]);
+                }
+                if (doesNotUseVertNormals == 0)
+                {
+                    outBytes.FillInt($"VertDefsNrm{i}Offset", outBytes.Count);
+                    for (int j = 0; j < def.vertNormals.Count; j++)
+                    {
+                        outBytes.AddValue(def.vertNormals[j]);
+                    }
+                }
+
+                outBytes.FillInt($"PathInfoLengths{i}Offset", outBytes.Count);
+                for(int j = 0; j < lenList.Count; j++)
+                {
+                    outBytes.AddValue(lenList[j]);
+                }
+            }
+
+            outBytes.FillInt("SectorsOffset", outBytes.Count);
+
+            //In case for whatever reason we altered the rawPath here, we track with the original id, but use this counter to track the rawOffset sequentially, as the original tools did
+            int rawPathCounter = 0;
+            for (int i = 0; i < pathSectors.Count; i++)
+            {
+                PathSector pathDef = pathSectors[i];
+
+                outBytes.AddValue(pathDef.isFinalSubdivision);
+                outBytes.AddValue((ushort)(pathDef.rawPathCount > 0 ? pathSegmentDict[pathDef.rawPathOffset].defs.Count : 0));
+                outBytes.AddValue((int)(pathDef.rawPathCount > 0 ? rawPathCounter : 0));
+                outBytes.AddValue(pathDef.xzMin);
+                outBytes.AddValue(pathDef.xzMax);
+                outBytes.AddValue(pathDef.childId0);
+                outBytes.AddValue(pathDef.childId1);
+                outBytes.AddValue(pathDef.childId2);
+                outBytes.AddValue(pathDef.childId3);
+
+                if(pathDef.rawPathCount > 0)
+                {
+                    rawPathCounter += 2 + pathSegmentDict[pathDef.rawPathOffset].defs.Count * 6;
+                }
+            }
+
+            outBytes.FillInt("PathSegmentOffset", outBytes.Count);
+            var rawPathDefKeys = pathSegmentDict.Keys.ToList();
+            rawPathDefKeys.Sort();
+            for(int i = 0; i < rawPathDefKeys.Count; i++)
+            {
+                var rawPath = pathSegmentDict[rawPathDefKeys[i]];
+                outBytes.AddValue((ushort)rawPath.defs.Count);
+                for(int j = 0; j < rawPath.defs.Count; j++)
+                {
+                    var def = rawPath.defs[j];
+                    outBytes.AddValue(def.vertSet);
+                    outBytes.AddValue(def.startVert);
+                    outBytes.AddValue(def.endVert);
+                }
+            }
+            outBytes.AlignWriter(0x4, 0);
+
+            //Ninja header
+            List<byte> ninjaBytes = new List<byte>() { 0x50, 0x41, 0x54, 0x48 };
+            ninjaBytes.AddRange(BitConverter.GetBytes(outBytes.Count));
+
+            outBytes.InsertRange(0, ninjaBytes);
+            outBytes.AddRange(POF0.GeneratePOF0(offsets));
+
+            ByteListExtension.Reset();
+            return outBytes.ToArray();
+        }
+
+        private static void IterateSector(PathSector sector, int depth)
+        {
+            sector.depth = depth;
+
+            if (sector.childSector0 != null)
+            {
+                IterateSector(sector.childSector0, depth + 1);
+            }
+            if (sector.childSector1 != null)
+            {
+                IterateSector(sector.childSector1, depth + 1);
+            }
+            if (sector.childSector2 != null)
+            {
+                IterateSector(sector.childSector2, depth + 1);
+            }
+            if (sector.childSector3 != null)
+            {
+                IterateSector(sector.childSector3, depth + 1);
             }
         }
 
@@ -135,16 +332,28 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public int rawPathOffset;
         }
 
-        public struct PathInfo
+        public class PathInfo
         {
             public byte doesNotUseNormals;
-            public byte unkByte1;
+            /// <summary>
+            /// Used for Pirates Island sharks, Sand Ruin tornadoes, and the title screen chick/crow
+            /// </summary>
+            public byte isObjectPath;
             public ushort lengthsCount;
             public int id;
-            public int unkInt;
+            /// <summary>
+            /// Only used for the Forest Village river in retail.
+            /// </summary>
+            public int isLiquidCurrent;
             public float totalLength;
             public int definitionOffset;
             public int lengthsOffset;
+
+            public VertDefinition vertDef = null;
+            /// <summary>
+            /// Lengths between each point
+            /// </summary>
+            public List<float> lengthsList = new List<float>();
         }
 
         public class VertDefinition
@@ -159,12 +368,24 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public List<Vector3> vertNormals = new List<Vector3>();
         }
 
-        public struct RawPathDefinition
+        public class PathSegments
         {
-            public ushort unkShort0;
+            /// <summary>
+            /// This is the offset by which sectors will reference the path
+            /// </summary>
+            public int relativeOffset; 
+
+            public ushort defCount;
+            public List<PathSegment> defs = new List<PathSegment>();
+        }
+
+        public class PathSegment
+        {
             public ushort vertSet;
             public ushort startVert;
             public ushort endVert;
+
+            public PathInfo pathInfo = null;
         }
 
         /// <summary>
@@ -198,10 +419,20 @@ namespace AquaModelLibrary.Data.BillyHatcher
             /// If true, sector does not subdivide further
             /// </summary>
             public ushort isFinalSubdivision;
-            public ushort usesRawPathOffset;
-            public int rawPathOffset; // Divide by 0x8 for index
-            public Vector2 xRange;
-            public Vector2 zRange;
+            /// <summary>
+            /// The count is in the underlying object, but we need this to to function
+            /// </summary>
+            public ushort rawPathCount;
+            public int rawPathOffset;
+
+            /// <summary>
+            /// The x and z minimum corner, as oppposed to the MC2's x range.
+            /// </summary>
+            public Vector2 xzMin;
+            /// <summary>
+            /// The x and Z maximum corner, as opposed to the MC2's z range.
+            /// </summary>
+            public Vector2 xzMax;
 
             //If usesOffset is 0, indices are here
             public ushort childId0;
@@ -212,7 +443,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public PathSector? childSector1;
             public PathSector? childSector2;
             public PathSector? childSector3;
+            
             public int depth = -1;
+            public PathSegments pathSegments = null;
         }
     }
 }

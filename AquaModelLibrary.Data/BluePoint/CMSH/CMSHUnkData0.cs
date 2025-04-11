@@ -4,6 +4,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHUnkData0
     {
+        public long position;
+
         public int unk0;
         public int flags;
         public int unk1;
@@ -23,6 +25,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public CMSHUnkData0(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            position = sr.Position;
+
             unk0 = sr.Read<int>();
             flags = sr.Read<int>();
             unk1 = sr.Read<int>();

@@ -11,6 +11,7 @@ namespace AquaModelLibrary.Data.POE2
     public class POE2Action
     {
         public List<Bone> bones = new List<Bone>();
+        public List<Light> lightList = new List<Light>();
         public List<Anim> animList = new List<Anim>();
         public POE2Action() { }
 
@@ -37,11 +38,18 @@ namespace AquaModelLibrary.Data.POE2
             var boneCount = sr.ReadBE<byte>();
             var bt_1 = sr.ReadBE<byte>();
             var animCount = sr.ReadBE<byte>();
-            var int_04 = sr.ReadBE<int>();
+            var bt_04 = sr.ReadBE<byte>();
+            var bt_05 = sr.ReadBE<byte>();
+            var bt_06 = sr.ReadBE<byte>();
+            var lightCount = sr.ReadBE<byte>();
 
             for (int i = 0; i < boneCount; i++)
             {
                 bones.Add(new Bone(sr));
+            }
+            for (int i = 0; i < lightCount; i++)
+            {
+                lightList.Add(new Light(sr));
             }
             for (int i = 0; i < animCount; i++)
             {
@@ -140,6 +148,7 @@ namespace AquaModelLibrary.Data.POE2
             public byte nextSiblingId;
             public byte childId;
             public Matrix4x4 boneMatrix;
+            public byte unkByte;
             public string boneName;
 
             public Bone() { }
@@ -166,8 +175,55 @@ namespace AquaModelLibrary.Data.POE2
                 nextSiblingId = sr.ReadBE<byte>();
                 childId = sr.ReadBE<byte>();
                 boneMatrix = sr.Read<Matrix4x4>();
-                var nameLength = sr.ReadBE<ushort>();
+                var nameLength = sr.ReadBE<byte>();
+                unkByte = sr.ReadBE<byte>();
                 boneName = Encoding.UTF8.GetString(sr.ReadBytesSeek(nameLength));
+            }
+        }
+
+        public class Light
+        {
+            public byte unkByte;
+            public Vector3 vec3_0;
+            public Vector3 vec3_1;
+            public Vector3 vec3_2;
+            public Vector3 vec3_3;
+            public int int_3A;
+            public int int_3E;
+            public int int_40;
+            public string lightName;
+
+            public Light() { }
+
+            public Light(byte[] file)
+            {
+                Read(file);
+            }
+
+            public Light(BufferedStreamReaderBE<MemoryStream> sr)
+            {
+                Read(sr);
+            }
+            public void Read(byte[] file)
+            {
+                using (MemoryStream ms = new MemoryStream(file))
+                using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+                {
+                    Read(sr);
+                }
+            }
+            public void Read(BufferedStreamReaderBE<MemoryStream> sr)
+            {
+                var nameLength = sr.ReadBE<byte>();
+                unkByte = sr.ReadBE<byte>();
+                vec3_0 = sr.ReadBEV3();
+                vec3_1 = sr.ReadBEV3();
+                vec3_2 = sr.ReadBEV3();
+                vec3_3 = sr.ReadBEV3();
+                int_3A = sr.ReadBE<int>();
+                int_3E = sr.ReadBE<int>();
+                int_40 = sr.ReadBE<ushort>();
+                lightName = Encoding.UTF8.GetString(sr.ReadBytesSeek(nameLength));
             }
         }
 

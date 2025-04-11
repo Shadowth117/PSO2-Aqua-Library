@@ -78,8 +78,16 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             mat.matName += $"#S_{blendAlpha.SourceAlpha}";
             mat.matName += $"#D_{blendAlpha.DestAlpha}";
 
-            //Check for existing equivalent materials
-            int matIndex = -1;
+            if(meshSet == "transparent")
+            {
+                mat.matName += "{blendalpha}";
+            } else
+            {
+                mat.matName += "{opaque}";
+            }
+
+                //Check for existing equivalent materials
+                int matIndex = -1;
             for (int i = 0; i < aqo.tempMats.Count; i++)
             {
                 var genMat = aqo.tempMats[i];
@@ -208,7 +216,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                                 vtxl.rawVertWeightIds[vId].Add(nodeId);
                             }
                             break;
-                        case GCSkinAttribute.WeightEnd: //More of a marker than anything; No data here.
+                        case GCSkinAttribute.WeightStructEndMarker: //More of a marker than anything; No data here.
                             break;
                         default:
                             throw new Exception($"Unexpected GCSkinAttribute {element.elementType}");

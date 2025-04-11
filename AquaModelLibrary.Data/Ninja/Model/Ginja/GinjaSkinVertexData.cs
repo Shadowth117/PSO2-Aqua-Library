@@ -7,11 +7,12 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
     public class GinjaSkinVertexData
     {
         public List<GinjaSkinVertexDataElement> elements = new List<GinjaSkinVertexDataElement>();
+        public GinjaSkinVertexData() { }
         public GinjaSkinVertexData(BufferedStreamReaderBE<MemoryStream> sr, bool be = true, int offset = 0)
         {
             sr._BEReadActive = be;
             var element = new GinjaSkinVertexDataElement(sr, be, offset);
-            while (element.elementType < GCSkinAttribute.WeightEnd)
+            while (element.elementType < GCSkinAttribute.WeightStructEndMarker)
             {
                 elements.Add(element);
                 element = new GinjaSkinVertexDataElement(sr, be, offset);
@@ -33,9 +34,6 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                     case GCSkinAttribute.PartialWeight:
                         outBytes.AddValue((ushort)(element.posNrms.Count * 4));
                         break;
-                    case GCSkinAttribute.WeightEnd:
-                        outBytes.AddValue((ushort)0);
-                        break;
                 }
                 outBytes.AddValue((ushort)element.startingIndex);
                 outBytes.AddValue((ushort)element.posNrms.Count);
@@ -50,6 +48,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 }
                 outBytes.ReserveInt($"weights{i}Offset");
             }
+
+            //Write the End Marker. This will always be at the end and we don't store it as a result
             outBytes.AddValue((ushort)3);
             outBytes.AddValue((ushort)0);
             outBytes.AddValue((int)0);

@@ -20,7 +20,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         public int positionNormalsOffset;
         public int weightsOffset;
 
-        public GinjaSkinVertexDataElement() { }
+        public GinjaSkinVertexDataElement(GCSkinAttribute skinAttribute) { elementType = skinAttribute; }
         public GinjaSkinVertexDataElement(BufferedStreamReaderBE<MemoryStream> sr, bool be = true, int offset = 0)
         {
             sr._BEReadActive = be;
@@ -98,7 +98,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                         });
                     }
                     break;
-                case GCSkinAttribute.WeightEnd:
+                case GCSkinAttribute.WeightStructEndMarker:
                     break;
                 default:
                     throw new System.Exception($"Bad GCSkinVertexSetElement type {elementType:X}");
