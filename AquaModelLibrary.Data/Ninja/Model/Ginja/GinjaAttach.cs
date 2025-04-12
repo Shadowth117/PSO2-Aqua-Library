@@ -64,6 +64,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             var textureSetting = gcParams.ContainsKey(ParameterType.Texture) ? ((TextureParameter)gcParams[ParameterType.Texture]) : new TextureParameter();
             var blendAlpha = ((BlendAlphaParameter)gcParams[ParameterType.BlendAlpha]);
             var indexParam = (IndexAttributeParameter)gcParams[ParameterType.IndexAttributeFlags];
+            var texCoordGenParam = (TexCoordGenParameter)gcParams[ParameterType.TexCoordGen];
 
             mat.texNames = new List<string>() { $"{textureSetting.TextureID}" };
 
@@ -77,6 +78,10 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
             mat.matName += $"#S_{blendAlpha.SourceAlpha}";
             mat.matName += $"#D_{blendAlpha.DestAlpha}";
+            if(texCoordGenParam.TexGenSrc == GCTexGenSrc.Normal)
+            {
+                mat.matName += "#envmap";
+            }
 
             if(meshSet == "transparent")
             {
@@ -86,8 +91,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 mat.matName += "{opaque}";
             }
 
-                //Check for existing equivalent materials
-                int matIndex = -1;
+            //Check for existing equivalent materials
+            int matIndex = -1;
             for (int i = 0; i < aqo.tempMats.Count; i++)
             {
                 var genMat = aqo.tempMats[i];
