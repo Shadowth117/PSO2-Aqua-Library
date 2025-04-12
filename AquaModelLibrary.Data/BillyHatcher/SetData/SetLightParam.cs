@@ -39,8 +39,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 light.usht1 = sr.ReadBE<ushort>();
                 light.lightDirection = sr.ReadBEV3();
 
-                light.directionalLightingColor = sr.Read4Bytes();
                 light.ambientLightingColor = sr.Read4Bytes();
+                light.directionalLightingColor = sr.Read4Bytes();
                 light.unkRange0 = sr.ReadBE<float>();
                 light.flt1C = sr.ReadBE<float>();
 
@@ -68,8 +68,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(light.usht1);
                 outBytes.AddValue(light.lightDirection);
 
-                outBytes.AddValue(light.directionalLightingColor);
                 outBytes.AddValue(light.ambientLightingColor);
+                outBytes.AddValue(light.directionalLightingColor);
                 outBytes.AddValue(light.unkRange0);
                 outBytes.AddValue(light.flt1C);
 
@@ -93,8 +93,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         public ushort usht1;
         public Vector3 lightDirection;
 
-        public byte[] directionalLightingColor; //4 byte RGBA color
         public byte[] ambientLightingColor; //4 byte RGBA color
+        public byte[] directionalLightingColor; //4 byte RGBA color
         public float unkRange0; //Range of some sort
         public float flt1C;
 
