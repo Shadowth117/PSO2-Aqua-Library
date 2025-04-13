@@ -574,7 +574,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
             Snow = 0x80,
         }
 
-        public enum FlagSet2
+        [Flags]
+        public enum FlagSet2 : byte
         {
             None = 0,
             Unk2_0x1 = 0x1,
