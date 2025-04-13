@@ -60,6 +60,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
         public byte[] GetBytes()
         {
+            ByteListExtension.AddAsBigEndian = true;
             List<byte> outBytes = new List<byte>();
             for(int i = 0; i < 0x80; i++)
             {
@@ -84,6 +85,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(light.int3C);
             }
 
+            ByteListExtension.AddAsBigEndian = false;
             return outBytes.ToArray();
         }
     }
