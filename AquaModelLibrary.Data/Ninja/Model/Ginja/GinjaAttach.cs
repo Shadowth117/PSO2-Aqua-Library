@@ -62,9 +62,9 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             mat.matName = "Mat_";
 
             var textureSetting = gcParams.ContainsKey(ParameterType.Texture) ? ((TextureParameter)gcParams[ParameterType.Texture]) : new TextureParameter();
-            var blendAlpha = ((BlendAlphaParameter)gcParams[ParameterType.BlendAlpha]);
-            var indexParam = (IndexAttributeParameter)gcParams[ParameterType.IndexAttributeFlags];
-            var texCoordGenParam = (TexCoordGenParameter)gcParams[ParameterType.TexCoordGen];
+            var blendAlpha = gcParams.ContainsKey(ParameterType.BlendAlpha) ? ((BlendAlphaParameter)gcParams[ParameterType.BlendAlpha]) : new BlendAlphaParameter();
+            var indexParam = gcParams.ContainsKey(ParameterType.IndexAttributeFlags) ? (IndexAttributeParameter)gcParams[ParameterType.IndexAttributeFlags] : new IndexAttributeParameter();
+            var texCoordGenParam = gcParams.ContainsKey(ParameterType.TexCoordGen) ? (TexCoordGenParameter)gcParams[ParameterType.TexCoordGen] : new TexCoordGenParameter();
 
             mat.texNames = new List<string>() { $"{textureSetting.TextureID}" };
 
