@@ -138,7 +138,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var tris = new GenericTriangles(indices);
                 tris.matIdList = new List<int>(new int[tris.triList.Count]);
                 aqo.tempTris.Add(tris);
-                aqo.tempMats.Add(new GenericMaterial() { matName = "ColMat" });
+                aqo.tempMats.Add(new GenericMaterial() { matName = "ColMat", texNames = new List<string>() { "dummy.dds" } });
 
                 aqo.ConvertToPSO2Model(true, true, false, true, false, false, false);
                 aqoList.Add(aqo);

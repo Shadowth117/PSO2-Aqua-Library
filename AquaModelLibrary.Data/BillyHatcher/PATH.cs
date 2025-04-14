@@ -336,7 +336,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         {
             public byte doesNotUseNormals;
             /// <summary>
-            /// Used for Pirates Island sharks, Sand Ruin tornadoes, and the title screen chick/crow
+            /// Used for Sand Ruin tornadoes, and the title screen chick/crow. Pirates Island has what seem to be unused ones for sharks or something
             /// </summary>
             public byte isObjectPath;
             public ushort lengthsCount;

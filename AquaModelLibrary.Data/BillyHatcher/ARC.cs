@@ -41,7 +41,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// menu : Menu data.
     /// obj_ : Various objects and their data. Has file groups.
     /// ptcl2_ : Particle data.
-    /// stgobj_ : Stage object data. Has file groups.
+    /// stgobj_ : Stage object data. Pairs with geobj files to define object handling. Has file groups.
     /// storySeq : Story sequence data. Has file groups.
     /// superBilly : Super Billy data. Has file groups.
     /// 
