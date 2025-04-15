@@ -437,13 +437,16 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         private static void CreateMaterials(LND lnd, AquaObject aqp)
         {
-            List<string> texNames;
+            List<string> texNames = new List<string>();
             if(lnd.isArcLND)
             {
                 texNames = lnd.texnames.texNames;
             } else
             {
-                texNames = lnd.njtexList.texNames;
+                if(lnd.njtexList?.texNames != null)
+                {
+                    texNames = lnd.njtexList.texNames;
+                }
             }
             for (int i = 0; i < texNames.Count; i++)
             {
