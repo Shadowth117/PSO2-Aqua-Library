@@ -437,15 +437,23 @@ namespace AquaModelLibrary.Core.BillyHatcher
 
         private static void CreateMaterials(LND lnd, AquaObject aqp)
         {
-            for (int i = 0; i < lnd.texnames.texNames.Count; i++)
+            List<string> texNames;
+            if(lnd.isArcLND)
             {
-                var tex = lnd.texnames.texNames[i];
+                texNames = lnd.texnames.texNames;
+            } else
+            {
+                texNames = lnd.njtexList.texNames;
+            }
+            for (int i = 0; i < texNames.Count; i++)
+            {
+                var tex = texNames[i];
                 var mat = new GenericMaterial();
                 mat.matName = $"{tex}_{i}";
                 mat.texNames = new List<string>() { $"{tex}.png" };
                 aqp.tempMats.Add(mat);
             }
-            if (lnd.texnames.texNames.Count == 0)
+            if (texNames.Count == 0)
             {
                 CreateDefaultMaterial(aqp);
             }
