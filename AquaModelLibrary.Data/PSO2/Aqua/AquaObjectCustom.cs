@@ -1870,9 +1870,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 bool hadUnicodeNames = matUnicodeNames.Count > 0; 
                 for (int mat = 0; mat < tempMats.Count; mat++)
                 {
-                    for(int i = 0; i < tempMats[mat].texNames.Count; i++)
+                    if (tempMats[mat].texNames != null)
                     {
-                        tempMats[mat].texNames[i] = Path.GetFileName(tempMats[mat].texNames[i]);
+                        for (int i = 0; i < tempMats[mat].texNames.Count; i++)
+                        {
+                            tempMats[mat].texNames[i] = Path.GetFileName(tempMats[mat].texNames[i]);
+                        }
                     }
                     GenerateMaterial(tempMats[mat], true, hadUnicodeNames);
                 }
