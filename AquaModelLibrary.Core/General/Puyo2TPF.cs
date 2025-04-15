@@ -2,7 +2,7 @@
 using SoulsFormats;
 using VrSharp;
 
-namespace AquaModelLibrary.Core.Billy
+namespace AquaModelLibrary.Core.General
 {
     /// <summary>
     /// Horrible black magic to ddsize a Puyo archive and stuff it into a FromSoft TPF for DSMS
