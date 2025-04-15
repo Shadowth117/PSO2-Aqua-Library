@@ -400,7 +400,7 @@ namespace AquaModelLibrary.Core.BillyHatcher
             }
         }
 
-        public static List<ModelData> LNDHToAqua(LND lnd)
+        public static List<ModelData> LNDHToAqua(LND lnd, bool getUnreferencedModels = true)
         {
             List<ModelData> mdlList = new List<ModelData>();
             ModelData modelData = new ModelData();
@@ -421,14 +421,17 @@ namespace AquaModelLibrary.Core.BillyHatcher
             mdlList.Add(modelData);
 
             //Get unreferenced models
-            for (int i = 0; i < lnd.nodes.Count; i++)
+            if(getUnreferencedModels)
             {
-                if (!lnd.modelNodeIds.Contains((ushort)i) && lnd.meshInfo[lnd.nodes[i].objectIndex].lndMeshInfo2Offset != 0)
+                for (int i = 0; i < lnd.nodes.Count; i++)
                 {
-                    var node = lnd.nodes[i];
-                    modelData.aqp.meshNames.Add($"Model {i}");
+                    if (!lnd.modelNodeIds.Contains((ushort)i) && lnd.meshInfo[lnd.nodes[i].objectIndex].lndMeshInfo2Offset != 0)
+                    {
+                        var node = lnd.nodes[i];
+                        modelData.aqp.meshNames.Add($"Model {i}");
 
-                    AddMesh(lnd, modelData.aqp, node);
+                        AddMesh(lnd, modelData.aqp, node);
+                    }
                 }
             }
 
