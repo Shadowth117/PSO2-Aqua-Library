@@ -25,7 +25,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
             Read(sr);
         }
 
-        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
+        public override void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             Header = new CRBRPartModelHeader(sr);

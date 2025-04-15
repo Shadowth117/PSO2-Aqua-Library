@@ -16,9 +16,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// ar_ene_ : Enemy data. 
     /// ar_event_ : In-game cutscene data. Has file groups.
     /// ar_icon3d : Unknown icon data. Has file groups.
-    /// ar_ma_ : Item data. Used for when an animated item is activated? Has file groups.
+    /// ar_ma_ : Item data. Unused. Has file groups.
     /// ar_nowloading : Stub file related to the loading screen. Unclear if it does something at a glance.
-    /// ar_obj : Object data for various stages. 
+    /// ar_obj : Object data for various stages. Same format as ar_ene.
     /// ar_title : Title screen data 
     /// balloon : Unknown data : Has file groups.
     /// battlemodel_ : Battle mode model data

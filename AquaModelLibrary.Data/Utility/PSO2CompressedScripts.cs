@@ -192,7 +192,6 @@ namespace AquaModelLibrary.Data.Utility
                         }
                         catch
                         {
-                            var a = 0;
                             //File.WriteAllBytes(fileOutput, uncompressedFile);
                         }
                     }

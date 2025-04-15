@@ -10,13 +10,11 @@ namespace AquaModelLibrary.Core.Billy
         public static void ImportSplineToPath(PATH path, AquaNode aqn)
         {
             PATH.PathInfo pathInfo = new PATH.PathInfo();
+            pathInfo.vertDef = new PATH.VertDefinition();
             for(int i = 0; i < aqn.nodeList.Count; i++)
             {
-                //Check if there's an (N) child node containing the normal direction
-                if (i + 1 < aqn.nodeList.Count)
-                {
-
-                }
+                //Grab the first (N) child if it exists, grab the next non (N) node as the next point
+                //var children = aqn.GetChildren(i);
             }
 
             //If this is a path with normals, to follow the game's precedent we should insert it before the paths without normals

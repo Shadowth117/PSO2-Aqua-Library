@@ -25,7 +25,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model
             Read(sr);
         }
 
-        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
+        public virtual void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
 
         }

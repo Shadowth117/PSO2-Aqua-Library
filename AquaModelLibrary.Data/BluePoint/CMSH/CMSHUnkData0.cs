@@ -14,8 +14,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public struct CMSHUNKData0Data
         {
-            int unk0;
-            int unk1;
+            public int unk0;
+            public int unk1;
         }
 
         public CMSHUnkData0()
