@@ -18,7 +18,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         {
             Read(sr);
         }
-        public void Read(byte[] file)
+        public override void Read(byte[] file)
         {
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
@@ -27,7 +27,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             }
         }
 
-        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
+        public override void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             base.Read(sr);

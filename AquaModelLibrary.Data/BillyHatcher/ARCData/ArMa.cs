@@ -6,20 +6,24 @@ using ArchiveLib;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
-    public class GEEGG : ARC
+    /// <summary>
+    /// Shockingly, nothing to do with the military sim.
+    /// Unused archive for item egg animals
+    /// </summary>
+    public class ArMa : ARC
     {
         public PuyoFile gvm = null;
         public List<NJTextureList> texnamesList = new List<NJTextureList>();
         public Dictionary<string, NJSMotion> motions = new Dictionary<string, NJSMotion>();
         public List<NJSObject> models = new List<NJSObject>();
-        public GEEGG() { }
+        public ArMa() { }
 
-        public GEEGG(byte[] file)
+        public ArMa(byte[] file)
         {
             Read(file);
         }
 
-        public GEEGG(BufferedStreamReaderBE<MemoryStream> sr)
+        public ArMa(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
@@ -36,7 +40,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public override void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             base.Read(sr);
-            int nodeCount = 0x4B;
+            int nodeCount = 0;
             for (int i = 0; i < group1FileNames.Count; i++)
             {
                 var fileName = group1FileNames[i];
@@ -45,7 +49,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 {
                     case "models":
                         List<int> modelPtrs = new List<int>();
-                        for (int m = 0; m < 7; m++)
+                        for (int m = 0; m < 1; m++)
                         {
                             modelPtrs.Add(sr.ReadBE<int>());
                         }
@@ -73,11 +77,11 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         break;
                     case "texlists":
                         List<int> texListOffsets = new List<int>();
-                        for(int t = 0; t < 7; t++)
+                        for (int t = 0; t < 1; t++)
                         {
                             texListOffsets.Add(sr.ReadBE<int>());
                         }
-                        for(int t = 0; t < 7; t++)
+                        for (int t = 0; t < 1; t++)
                         {
                             sr.Seek(0x20 + texListOffsets[t], SeekOrigin.Begin);
                             texnamesList.Add(new NJTextureList(sr, 0x20));
