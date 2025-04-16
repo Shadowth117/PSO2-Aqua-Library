@@ -219,7 +219,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                         }
                     }
                     matName += $"#S_{mat.entry.sourceAlpha}";
-                    matName += $"#D_{mat.entry.destinationAlpha}";
+                    matName += $"#D_{mat.entry.destinationAlpha}#";
                     int matId;
                     var tex = texId < 0 ? lnd.texnames.texNames[0] : lnd.texnames.texNames[texId];
                     if (materialDict.ContainsKey(matName + $"#{tex}"))
