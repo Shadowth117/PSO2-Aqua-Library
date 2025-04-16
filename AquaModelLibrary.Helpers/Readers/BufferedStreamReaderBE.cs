@@ -380,6 +380,61 @@ namespace AquaModelLibrary.Helpers.Readers
         }
 
         /// <summary>
+        /// Attempts to read a null terminated terminated of the provided encoding from the current stream position.
+        /// </summary>
+        public string Read8bitEncodedString(Encoding encoding, int blockSize = 0x100)
+        {
+            var pos = Position;
+            var strLen = BaseStream.Length;
+            if (strLen <= pos + blockSize)
+            {
+                blockSize = (int)(strLen - pos);
+            }
+            //Past end of file
+            if (blockSize <= 0)
+            {
+                return null;
+            }
+            string str = encoding.GetString(ReadBytes(pos, blockSize));
+            var minVal = str.IndexOf(char.MinValue);
+            if (minVal == -1)
+            {
+                return str;
+            }
+            return str.Remove(minVal);
+        }
+
+        /// <summary>
+        /// Attempts to read a null terminated terminated CString and advances the stream to just after the null terminator or block end from the current stream position.
+        /// </summary>
+        public string Read8bitEncodedStringSeek(Encoding encoding, int blockSize = 0x100)
+        {
+            var pos = Position;
+            var strLen = BaseStream.Length;
+            if (strLen <= pos + blockSize)
+            {
+                blockSize = (int)(strLen - pos);
+            }
+            //Past end of file
+            if (blockSize <= 0)
+            {
+                return null;
+            }
+            string str = encoding.GetString(ReadBytes(Position, blockSize));
+            var minVal = str.IndexOf(char.MinValue);
+            if (minVal == -1)
+            {
+                Seek(blockSize, SeekOrigin.Current);
+                return str;
+            }
+            else
+            {
+                Seek(minVal + 1, SeekOrigin.Current);
+            }
+            return str.Remove(minVal);
+        }
+
+        /// <summary>
         /// Attempts to read a null terminated terminated UTF8 String from the current stream position.
         /// </summary>
         public string ReadUTF8String(int blockSize = 0x100)
