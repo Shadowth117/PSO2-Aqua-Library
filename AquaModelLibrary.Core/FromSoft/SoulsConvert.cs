@@ -6,7 +6,6 @@ using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using AquaModelLibrary.Data.Utility;
-using AquaModelLibrary.Data.Utility.Model;
 using AquaModelLibrary.Helpers.MathHelpers;
 using SoulsFormats;
 using SoulsFormats.Formats.Morpheme;
