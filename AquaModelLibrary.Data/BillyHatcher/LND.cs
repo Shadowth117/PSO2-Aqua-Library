@@ -285,7 +285,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             return arcLand;
         }
 
-        private ARCLNDModel ReadArcLndModel(BufferedStreamReaderBE<MemoryStream> sr, bool isAnimModel = false)
+        public ARCLNDModel ReadArcLndModel(BufferedStreamReaderBE<MemoryStream> sr, bool isAnimModel = false)
         {
             ARCLNDModel arcModel = new ARCLNDModel();
             arcModel.isAnimModel = isAnimModel;
@@ -529,7 +529,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             return arcModel;
         }
 
-        private static void ReadVertDataSet(BufferedStreamReaderBE<MemoryStream> sr, ARCLNDVertDataSet arcVertDataSet)
+        public static void ReadVertDataSet(BufferedStreamReaderBE<MemoryStream> sr, ARCLNDVertDataSet arcVertDataSet)
         {
             for (int j = 0; j < 6; j++)
             {
