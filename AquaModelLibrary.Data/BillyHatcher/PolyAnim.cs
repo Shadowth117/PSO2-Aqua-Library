@@ -10,6 +10,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
     public class PolyAnim
     {
         public List<short> texShortsList = new List<short>();
+        public List<DataSet0> dataSet0s = new List<DataSet0>();
         public List<DataSet1> dataSet1s = new List<DataSet1>();
         public List<DataSet2> dataSet2s = new List<DataSet2>();
         public NJTextureList texList = new NJTextureList();
@@ -55,6 +56,25 @@ namespace AquaModelLibrary.Data.BillyHatcher
             var texList_GvmOffset = sr.ReadBE<int>();
 
             var int30 = sr.ReadBE<int>();
+
+            //Offset 0
+            sr.Seek(offset + offset0, SeekOrigin.Begin);
+            for(int i = 0; i < count0; i++)
+            {
+                DataSet0 set = new DataSet0();
+                set.unkFlag = sr.ReadBE<int>();
+                set.offset = sr.ReadBE<int>();
+
+                var bookmark = sr.Position;
+
+                sr.Seek(offset + set.offset, SeekOrigin.Begin);
+                DataSet0Inner inner = new DataSet0Inner();
+                inner.flags0 = sr.ReadBE<ushort>();
+                inner.flags1 = sr.ReadBE<ushort>();
+
+                dataSet0s.Add(set);
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
 
             //Offset 1
             sr.Seek(offset + offset1, SeekOrigin.Begin);
@@ -123,22 +143,12 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 {
                     dataSet2.dataList.Add(sr.ReadBE<short>());
                 }
-
+                dataSet2s.Add(dataSet2);
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
 
             //Texlist + GVM offset
             sr.Seek(offset + texList_GvmOffset, SeekOrigin.Begin);
-            var texShortCount = sr.ReadBE<short>();
-            var unkTexShort = sr.ReadBE<short>();
-
-            var texList_GvmOffset2 = sr.ReadBE<int>();
-            for(int i = 0; i < texShortCount; i++)
-            {
-                texShortsList.Add(sr.ReadBE<short>());
-            }
-
-            sr.Seek(offset + texList_GvmOffset2, SeekOrigin.Begin);
             var texListOffset = sr.ReadBE<int>();
             var gvmOffset = sr.ReadBE<int>();
 
@@ -154,17 +164,17 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public int unkFlag;
             public int offset;
 
-            public DataSet0Inner data = new DataSet0Inner();
+            public DataSet0Inner data;
         }
 
-        public struct DataSet0Inner
+        public class DataSet0Inner
         {
             /// <summary>
-            /// Observed 0 and 3
+            /// Observed 0 ,3, 5
             /// </summary>
             public ushort flags0;
             /// <summary>
-            /// Observed 0x14 and 0x64
+            /// Observed 0x14, 0x64
             /// </summary>
             public ushort flags1;
             public int int_04;
@@ -182,7 +192,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public int usesExtraData;
             public int offset;
 
-            public DataSet1Inner data = new DataSet1Inner();
+            public DataSet1Inner data;
         }
 
         public struct DataSet1Inner
