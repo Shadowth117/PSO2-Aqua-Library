@@ -3,6 +3,9 @@ using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.Vicious
 {
+    /// <summary>
+    /// PS2 Vicious Engine PAK
+    /// </summary>
     public class PAK
     {
         public PAK() { }
