@@ -7,7 +7,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
     public class BODYObject : BaseCMXObject
     {
         public BODY body;
-        public int string8Ptr;
+        public byte byteId_0;
+        public byte byteId_1;
+        public byte byteId_2;
+        public byte byteId_3;
         public BODYMaskColorMapping bodyMaskColorMapping;
         public BODY2 body2;
         public BODY40Cap body40cap;
@@ -24,7 +27,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public string texString5 = null;
         public string texString6 = null;
         public string string7 = null;
-        public string string8 = null;
         public string nodeString0 = null;
         public string nodeString1 = null;
         public string nodeString2 = null;
@@ -125,7 +127,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public int costumeSoundId;   //0xA, 0x8
         public int headId;  //0xD, 0x8 //Contains the id for a linked head piece, such as madoka's hair or bask repca's helmet. If they exist, this will be both the head part, 
         public int int_38;         //Usually -1
-        public int int_3C;         //Usually -1
+        public int linkedOuterId;         //Usually -1
 
         public int linkedInnerId;         //Usually -1
         public int int_44;         //Usually -1

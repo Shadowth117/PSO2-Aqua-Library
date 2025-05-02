@@ -30,8 +30,8 @@ namespace AquaModelLibrary.Data.Utility
 {
     public unsafe class ReferenceGenerator
     {
-        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
-        public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
+        public static string partColumns = "Japanese Name,English Name,Id,Adjusted Id,Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Linked Outer,HQ Linked Outer,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
+        public static string hairColumns = "Japanese Name,English Name,Id,Adjusted Id,Male Icon,Female Icon,Cast Icon,Normal Quality,High Quality,Normal Quality RP,High Quality RP,Linked Inner,HQ Linked Inner,Linked Outer,HQ Linked Outer,Sounds,Cast Sounds,Material Anim,Material Anim Ex,Hand Textures,HQ Hand Textures,Hair Model,High Quality Hair Model,Face Model,High Quality Face Model";
         public static string acceColumns = "Japanese Name,English Name,Id,Icon,Normal Quality,High Quality,Bone 1,Bone 2,Bone 3,Bone 4,Bone 5,Bone 6,Bone 7,Bone 8,Bone 9,Bone 10,Bone 11,Bone 12,Bone 13,Bone 14,Bone 15,Bone 16,Effect Name";
 
         public static CharacterMakingIndex ExtractCMX(string pso2_binDir, CharacterMakingIndex aquaCMX = null)
@@ -4951,11 +4951,13 @@ namespace AquaModelLibrary.Data.Utility
                 //Get SoundID
                 int soundId = -1;
                 int linkedInnerId = -1;
+                int linkedOuterId = -1;
                 int headId = -1;
                 if (aquaCMX.baseWearDict.ContainsKey(id))
                 {
                     soundId = aquaCMX.baseWearDict[id].body2.costumeSoundId;
                     linkedInnerId = aquaCMX.baseWearDict[id].body2.linkedInnerId;
+                    linkedOuterId = aquaCMX.baseWearDict[id].body2.linkedOuterId;
                     headId = aquaCMX.baseWearDict[id].body2.headId;
                 }
 
@@ -4978,6 +4980,11 @@ namespace AquaModelLibrary.Data.Utility
                     string rebLinkedInnerEx = $"{rebootExStart}b1_{linkedInnerId}_ex.ice";
                     string rebLinkedInnerHash = GetFileHash(rebLinkedInner);
                     string rebLinkedInnerExHash = GetFileHash(rebLinkedInnerEx);
+
+                    string rebLinkedOuter = $"{rebootStart}ow_{linkedOuterId}.ice";
+                    string rebLinkedOuterEx = $"{rebootExStart}ow_{linkedOuterId}_ex.ice";
+                    string rebLinkedOuterHash = GetFileHash(rebLinkedOuter);
+                    string rebLinkedOuterExHash = GetFileHash(rebLinkedOuterEx);
 
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebHash)))
                     {
@@ -5010,7 +5017,17 @@ namespace AquaModelLibrary.Data.Utility
                     if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedInnerExHash)))
                     {
                         partData.linkedInnerExHash = rebLinkedInnerExHash;
-                        partData.linkedInnerName = rebLinkedInnerEx;
+                        partData.linkedInnerExName = rebLinkedInnerEx;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedOuterHash)))
+                    {
+                        partData.linkedOuterHash = rebLinkedOuterHash;
+                        partData.linkedOuterName = rebLinkedOuter;
+                    }
+                    if (File.Exists(Path.Combine(pso2_binDir, dataDir, rebLinkedOuterExHash)))
+                    {
+                        partData.linkedOuterExHash = rebLinkedOuterExHash;
+                        partData.linkedOuterExName = rebLinkedOuterEx;
                     }
                 }
                 else
@@ -7075,6 +7092,10 @@ namespace AquaModelLibrary.Data.Utility
             public string linkedInnerHash = "";
             public string linkedInnerExName = "";
             public string linkedInnerExHash = "";
+            public string linkedOuterName = "";
+            public string linkedOuterHash = "";
+            public string linkedOuterExName = "";
+            public string linkedOuterExHash = "";
             public string faceModelName = "";
             public string faceModelHash = "";
             public string faceExModelName = "";
@@ -7145,27 +7166,27 @@ namespace AquaModelLibrary.Data.Utility
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash},{hairModelHash},{hairExModelHash},{faceModelHash},{faceExModelHash}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringHashed()},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{linkedOuterHash},{linkedOuterExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash},{hairModelHash},{hairExModelHash},{faceModelHash},{faceExModelHash}\n";
             }
 
             private string GetLineUnhashed()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName},{hairModelName},{hairExModelName},{faceModelName},{faceExModelName}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{GetIconStringUnhashed()},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{linkedOuterName},{linkedOuterExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName},{hairModelName},{hairExModelName},{faceModelName},{faceExModelName}\n";
             }
             private string GetLineHashAllIcons()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash},{hairModelHash},{hairExModelHash},{faceModelHash},{faceExModelHash}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconHash},{iconOuterHash},{iconOuterHash},{partHash},{partExHash},{partRpHash},{partRpExHash},{linkedInnerHash},{linkedInnerExHash},{linkedOuterHash},{linkedOuterExHash},{soundHash},{castSoundHash},{matAnimHash},{matAnimExHash},{handsHash},{handsExHash},{hairModelHash},{hairExModelHash},{faceModelHash},{faceExModelHash}\n";
             }
 
             private string GetLineUnhashedAllIcons()
             {
                 string jpName = namesByLanguage.Count > 0 ? namesByLanguage[0] : "";
                 string enName = namesByLanguage.Count > 1 ? namesByLanguage[1] : "";
-                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName},{hairModelName},{hairExModelName},{faceModelName},{faceExModelName}\n";
+                return $"{Escape(jpName)},{Escape(enName)},{id},{adjustedId},{iconName},{iconOuterName},{iconOuterName},{partName},{partExName},{partRpName},{partRpExName},{linkedInnerName},{linkedInnerExName},{linkedOuterName},{linkedOuterExName},{soundName},{castSoundName},{matAnimName},{matAnimExName},{handsName},{handsExName},{hairModelName},{hairExModelName},{faceModelName},{faceExModelName}\n";
             }
 
             private string GetIconStringHashed()

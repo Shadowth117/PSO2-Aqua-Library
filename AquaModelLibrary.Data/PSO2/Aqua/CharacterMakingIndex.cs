@@ -285,7 +285,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                 if (rel0DataStart >= CMXConstants.dec4_24TableAddressInt)
                 {
-                    body.string8Ptr = streamReader.Read<int>();
+                    body.byteId_0 = streamReader.Read<byte>();
+                    body.byteId_1 = streamReader.Read<byte>();
+                    body.byteId_2 = streamReader.Read<byte>();
+                    body.byteId_3 = streamReader.Read<byte>();
                 }
 
                 if (rel0DataStart >= CMXConstants.dec14_21TableAddressInt)
@@ -360,11 +363,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     streamReader.Seek(body.body.string7Ptr + offset, SeekOrigin.Begin);
                     body.string7 = streamReader.ReadCString();
-                }
-                if (IsValidOffset(body.string8Ptr))
-                {
-                    streamReader.Seek(body.string8Ptr + offset, SeekOrigin.Begin);
-                    body.string8 = streamReader.ReadCString();
                 }
                 if (IsValidOffset(body.body2023_1.nodeStrPtr_0))
                 {
@@ -2031,7 +2029,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             if (mode >= 1)
             {
                 DataHelpers.AddNIFLText(outBytes.Count + 0x20, nof0PointerLocations, textAddressDict, textList, body.string7);
-                DataHelpers.AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, body.string8);
+                outBytes.Add(body.byteId_0);
+                outBytes.Add(body.byteId_1);
+                outBytes.Add(body.byteId_2);
+                outBytes.Add(body.byteId_3);
                 outBytes.AddValue((int)0);
                 outBytes.AddRange(DataHelpers.ConvertStruct(body.bodyMaskColorMapping));
             }
