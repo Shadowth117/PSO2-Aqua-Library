@@ -1,6 +1,9 @@
 ﻿using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
+using System.Numerics;
+using static AquaModelLibrary.Data.BillyHatcher.PolyAnim;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -62,15 +65,34 @@ namespace AquaModelLibrary.Data.BillyHatcher
             for(int i = 0; i < count0; i++)
             {
                 DataSet0 set = new DataSet0();
-                set.unkFlag = sr.ReadBE<int>();
+                set.variant = sr.ReadBE<int>();
                 set.offset = sr.ReadBE<int>();
 
                 var bookmark = sr.Position;
 
-                sr.Seek(offset + set.offset, SeekOrigin.Begin);
-                DataSet0Inner inner = new DataSet0Inner();
-                inner.flags0 = sr.ReadBE<ushort>();
-                inner.flags1 = sr.ReadBE<ushort>();
+                if(set.offset != -1 && set.variant != -1)
+                {
+                    sr.Seek(offset + set.offset, SeekOrigin.Begin);
+                    switch(set.variant)
+                    {
+                        case 0:
+                            set.data = new DS0Var0(sr, offset);
+                            break;
+                        case 1:
+                        case 2:
+                        case 5:
+                        case 6:
+                        case 7:
+                            set.data = new DS0Var1(sr, offset);
+                            break;
+                        case 3:
+                            set.data = new DS0Var3(sr, offset);
+                            break;
+                        default:
+                            throw new Exception("Unexpected DS0 type");
+
+                    }
+                }
 
                 dataSet0s.Add(set);
                 sr.Seek(bookmark, SeekOrigin.Begin);
@@ -161,27 +183,1748 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public class DataSet0
         {
-            public int unkFlag;
+            public int variant;
             public int offset;
 
-            public DataSet0Inner data;
+            public DS0Variant data = null;
         }
 
-        public class DataSet0Inner
+        public class DS0Variant
+        { 
+        }
+
+
+        public class DS0Var0 : DS0Variant
         {
             /// <summary>
-            /// Observed 0 ,3, 5
+            /// Observed 0 ,3, 4, 5
             /// </summary>
             public ushort flags0;
             /// <summary>
             /// Observed 0x14, 0x64
             /// </summary>
             public ushort flags1;
+            public ushort flags2;
+            public ushort flags3;
+            public ushort flags4;
+            public ushort flags5;
+            public int chunksOffset;
+            public int floatListThingOffset;
+
+            //Float List Thing
+            public ushort FLTFlag0;
+            public ushort FLTFlag1;
+            public int FLTInt_04;
+            public float FLTFlt_08;
+
+            public List<FLTPair> fltPairs = new List<FLTPair>();
+
+            public struct FLTPair
+            {
+                public float FLTFlt;
+                public ushort FLTusht0;
+                public ushort FLTusht1;
+            }
+
+            public DataChunks dataChunks = null;
+
+            public DS0Var0() { }
+            public DS0Var0(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+            {
+                flags0 = sr.ReadBE<ushort>();
+                flags1 = sr.ReadBE<ushort>();
+                flags2 = sr.ReadBE<ushort>();
+                flags3 = sr.ReadBE<ushort>();
+                flags4 = sr.ReadBE<ushort>();
+                flags5 = sr.ReadBE<ushort>();
+                chunksOffset = sr.ReadBE<int>();
+                floatListThingOffset = sr.ReadBE<int>();
+
+                if(chunksOffset != 0)
+                {
+                    sr.Seek(offset + chunksOffset, SeekOrigin.Begin);
+                    dataChunks = new DataChunks(sr);
+                }
+
+                if(floatListThingOffset != 0)
+                {
+                    sr.Seek(offset + floatListThingOffset, SeekOrigin.Begin);
+                    FLTFlag0 = sr.ReadBE<ushort>();
+                    FLTFlag1 = sr.ReadBE<ushort>();
+                    FLTInt_04 = sr.ReadBE<int>();
+                    FLTFlt_08 = sr.ReadBE<float>();
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        FLTPair fltPair = new FLTPair();
+                        fltPair.FLTFlt = sr.ReadBE<float>();
+                        fltPair.FLTusht0 = sr.ReadBE<ushort>();
+                        fltPair.FLTusht1 = sr.ReadBE<ushort>();
+                        fltPairs.Add(fltPair);
+
+                        //Break early if this is 0ed
+                        if (fltPair.FLTusht0 == 0 && fltPair.FLTusht1 == 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        public class DS0Var1 : DS0Variant
+        {
+            public ushort flags0;
+            public ushort flags1;
             public int int_04;
             public int int_08;
-            public int offset0;
-            public int offset1;
+            public ushort flags2;
+            public ushort flags3;
 
+            public float flt_10;
+            public float flt_14;
+            public float flt_18;
+            public float flt_1C;
+
+            public float flt_20;
+            public int int_24;
+            public int int_28;
+            public int dataChunks0Offset;
+
+            public ushort flags_30;
+            public ushort flags_32;
+            public int int_34;
+            public float flt_38;
+            public int int_3C;
+
+            public int int_40;
+            public float flt_44;
+            public float flt_48;
+            public int dataChunks1Offset;
+
+            public DataChunks dataChunks0 = null;
+            public DataChunks dataChunks1 = null;
+
+            public DS0Var1() { }
+            public DS0Var1(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+            {
+                flags0 = sr.ReadBE<ushort>();
+                flags1 = sr.ReadBE<ushort>();
+                int_04 = sr.ReadBE<int>();
+                int_08 = sr.ReadBE<int>();
+                flags2 = sr.ReadBE<ushort>();
+                flags3 = sr.ReadBE<ushort>();
+
+                flt_10 = sr.ReadBE<float>();
+                flt_14 = sr.ReadBE<float>();
+                flt_18 = sr.ReadBE<float>();
+                flt_1C = sr.ReadBE<float>();
+
+                flt_20 = sr.ReadBE<float>();
+                int_24 = sr.ReadBE<int>();
+                int_28 = sr.ReadBE<int>();
+                dataChunks0Offset = sr.ReadBE<int>();
+
+                flags_30 = sr.ReadBE<ushort>();
+                flags_32 = sr.ReadBE<ushort>();
+                int_34 = sr.ReadBE<int>();
+                flt_38 = sr.ReadBE<float>();
+                int_3C = sr.ReadBE<int>();
+
+                int_40 = sr.ReadBE<int>();
+                flt_44 = sr.ReadBE<float>();
+                flt_48 = sr.ReadBE<float>();
+                dataChunks1Offset = sr.ReadBE<int>();
+
+                if(dataChunks0Offset != 0)
+                {
+                    sr.Seek(offset + dataChunks0Offset, SeekOrigin.Begin);
+                    dataChunks0 = new DataChunks(sr);
+                }
+                if(dataChunks1Offset != 0)
+                {
+                    sr.Seek(offset + dataChunks1Offset, SeekOrigin.Begin);
+                    dataChunks1 = new DataChunks(sr);
+                }
+            }
+        }
+        public class DS0Var3 : DS0Variant
+        {
+            public ushort flags0;
+            public ushort flags1;
+            public int int_04;
+            public int dataChunksOffset;
+
+            public DataChunks dataChunks = null;
+
+            public DS0Var3() { }
+            public DS0Var3(BufferedStreamReaderBE<MemoryStream> sr, int offset)
+            {
+                flags0 = sr.ReadBE<ushort>();
+                flags1 = sr.ReadBE<ushort>();
+                int_04 = sr.ReadBE<int>();
+                dataChunksOffset = sr.ReadBE<int>();
+
+                if(dataChunksOffset != 0)
+                {
+                    sr.Seek(offset + dataChunksOffset, SeekOrigin.Begin);
+                    dataChunks = new DataChunks(sr);
+                }
+            }
+        }
+
+        //These definitely aren't entirely right, but they get read enough to be able to write them back
+        public class DataChunks
+        {
+            public List<DataChunk> chunks = new List<DataChunk>();
+            public DataChunks() { }
+            public DataChunks(BufferedStreamReaderBE<MemoryStream> sr)
+            {
+                bool keepReading = true;
+                while (keepReading && sr.Position < sr.BaseStream.Length)
+                {
+                    var chunkType = sr.Read<byte>();
+                    switch (chunkType)
+                    {
+                        case 0x00:
+                            chunks.Add(new Chunk_00());
+                            break;
+                        case 0x01:
+                            chunks.Add(new Chunk_01());
+                            break;
+                        case 0x02:
+                            chunks.Add(new Chunk_02());
+                            break;
+                        case 0x03:
+                            chunks.Add(new Chunk_03());
+                            break;
+                        case 0x04:
+                            chunks.Add(new Chunk_04());
+                            break;
+                        case 0x05:
+                            chunks.Add(new Chunk_05());
+                            break;
+                        case 0x06:
+                            chunks.Add(new Chunk_06());
+                            break;
+                        case 0x07:
+                            chunks.Add(new Chunk_07());
+                            break;
+                        case 0x08:
+                            chunks.Add(new Chunk_08());
+                            break;
+                        case 0x0A:
+                            chunks.Add(new Chunk_0A());
+                            break;
+                        case 0x0C:
+                            chunks.Add(new Chunk_0C());
+                            break;
+                        case 0x0E:
+                            chunks.Add(new Chunk_0E());
+                            break;
+                        case 0x0F:
+                            chunks.Add(new Chunk_0F());
+                            break;
+                        case 0x13:
+                            chunks.Add(new Chunk_13());
+                            break;
+                        case 0x14:
+                            chunks.Add(new Chunk_14());
+                            break;
+                        case 0x15:
+                            chunks.Add(new Chunk_15());
+                            break;
+                        case 0x16:
+                            chunks.Add(new Chunk_16());
+                            break;
+                        case 0x19:
+                            chunks.Add(new Chunk_19());
+                            break;
+                        case 0x1B:
+                            chunks.Add(new Chunk_1B());
+                            break;
+                        case 0x1E:
+                            chunks.Add(new Chunk_1E());
+                            break;
+                        case 0x20:
+                            chunks.Add(new Chunk_20(sr));
+                            break;
+                        case 0x28:
+                            chunks.Add(new Chunk_28());
+                            break;
+                        case 0x2C:
+                            chunks.Add(new Chunk_2C());
+                            break;
+                        case 0x41:
+                            chunks.Add(new Chunk_41(sr));
+                            break;
+                        case 0x42:
+                            chunks.Add(new Chunk_42(sr));
+                            break;
+                        case 0x43:
+                            chunks.Add(new Chunk_43(sr));
+                            break;
+                        case 0x44:
+                            chunks.Add(new Chunk_44(sr));
+                            break;
+                        case 0x61:
+                            chunks.Add(new Chunk_61());
+                            break;
+                        case 0x80:
+                            chunks.Add(new Chunk_80(sr));
+                            break;
+                        case 0x81:
+                            chunks.Add(new Chunk_81(sr));
+                            break;
+                        case 0x82:
+                            chunks.Add(new Chunk_82(sr));
+                            break;
+                        case 0x85:
+                            chunks.Add(new Chunk_85(sr));
+                            break;
+                        case 0x86:
+                            chunks.Add(new Chunk_86(sr));
+                            break;
+                        case 0x87:
+                            chunks.Add(new Chunk_87(sr));
+                            break;
+                        case 0x88:
+                            chunks.Add(new Chunk_88(sr));
+                            break;
+                        case 0x89:
+                            chunks.Add(new Chunk_89(sr));
+                            break;
+                        case 0x8A:
+                            chunks.Add(new Chunk_8A(sr));
+                            break;
+                        case 0x8B:
+                            chunks.Add(new Chunk_8B(sr));
+                            break;
+                        case 0x8C:
+                            chunks.Add(new Chunk_8C(sr));
+                            break;
+                        case 0x8D:
+                            chunks.Add(new Chunk_8D(sr));
+                            break;
+                        case 0x90:
+                            chunks.Add(new Chunk_90(sr));
+                            break;
+                        case 0x91:
+                            chunks.Add(new Chunk_91(sr));
+                            break;
+                        case 0x92:
+                            chunks.Add(new Chunk_92(sr));
+                            break;
+                        case 0x93:
+                            chunks.Add(new Chunk_93(sr));
+                            break;
+                        case 0x94:
+                            chunks.Add(new Chunk_94(sr));
+                            break;
+                        case 0x96:
+                            chunks.Add(new Chunk_96(sr));
+                            break;
+                        case 0x98:
+                            chunks.Add(new Chunk_98(sr));
+                            break;
+                        case 0x99:
+                            chunks.Add(new Chunk_99(sr));
+                            break;
+                        case 0x9A:
+                            chunks.Add(new Chunk_9A(sr));
+                            break;
+                        case 0xA2:
+                            chunks.Add(new Chunk_A2(sr));
+                            break;
+                        case 0xA3:
+                            chunks.Add(new Chunk_A3(sr));
+                            break;
+                        case 0xC0:
+                            chunks.Add(new Chunk_C0());
+                            break;
+                        case 0xC7:
+                            chunks.Add(new Chunk_C7(sr));
+                            break;
+                        case 0xC8:
+                            chunks.Add(new Chunk_C8());
+                            break;
+                        case 0xCF:
+                            chunks.Add(new Chunk_CF(sr));
+                            break;
+                        case 0xD0:
+                            chunks.Add(new Chunk_D0(sr));
+                            break;
+                        case 0xD1:
+                            chunks.Add(new Chunk_D1(sr));
+                            break;
+                        case 0xD3:
+                            chunks.Add(new Chunk_D3(sr));
+                            break;
+                        case 0xD4:
+                            chunks.Add(new Chunk_D4(sr));
+                            break;
+                        case 0xD5:
+                            chunks.Add(new Chunk_D5(sr));
+                            break;
+                        case 0xD6:
+                            chunks.Add(new Chunk_D6(sr));
+                            break;
+                        case 0xD7:
+                            chunks.Add(new Chunk_D7(sr));
+                            break;
+                        case 0xDF:
+                            chunks.Add(new Chunk_DF(sr));
+                            break;
+                        case 0xE0:
+                            chunks.Add(new Chunk_E0(sr));
+                            break;
+                        case 0xE1:
+                            chunks.Add(new Chunk_E1(sr));
+                            break;
+                        case 0xE2:
+                            chunks.Add(new Chunk_E2(sr));
+                            break;
+                        case 0xE7:
+                            chunks.Add(new Chunk_E7(sr));
+                            break;
+                        case 0xF0:
+                            chunks.Add(new Chunk_F0(sr));
+                            break;
+                        case 0xF1:
+                            chunks.Add(new Chunk_F1());
+                            break;
+                        case 0xF2:
+                            chunks.Add(new Chunk_F2());
+                            break;
+                        case 0xF3:
+                            chunks.Add(new Chunk_F3());
+                            break;
+                        case 0xF4:
+                            chunks.Add(new Chunk_F4(sr));
+                            break;
+                        case 0xF6:
+                            chunks.Add(new Chunk_F6(sr));
+                            break;
+                        case 0xF9:
+                            chunks.Add(new Chunk_F9(sr));
+                            break;
+                        case 0xFA:
+                            chunks.Add(new Chunk_FA(sr));
+                            break;
+                        case 0xFF:
+                            chunks.Add(new Chunk_FF());
+                            keepReading = false;
+                            break;
+                        default:
+                            throw new Exception($"Unexpected chunk type {chunkType:X} at {(sr.Position - 1):X}");
+                    }
+                }
+            }
+
+            public class DataChunk { }
+
+            public class Chunk_00 : DataChunk
+            {
+                public Chunk_00() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x00 };
+                }
+            }
+            public class Chunk_01 : DataChunk
+            {
+                public Chunk_01() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x01 };
+                }
+            }
+            public class Chunk_02 : DataChunk
+            {
+                public Chunk_02() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x02 };
+                }
+            }
+            public class Chunk_03 : DataChunk
+            {
+                public Chunk_03() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x03 };
+                }
+            }
+            public class Chunk_04 : DataChunk
+            {
+                public Chunk_04() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x04 };
+                }
+            }
+            public class Chunk_05 : DataChunk
+            {
+                public Chunk_05() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x05 };
+                }
+            }
+            public class Chunk_06 : DataChunk
+            {
+                public Chunk_06() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x06 };
+                }
+            }
+            public class Chunk_07 : DataChunk
+            {
+                public Chunk_07() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x07 };
+                }
+            }
+            public class Chunk_08 : DataChunk
+            {
+                public Chunk_08() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x08 };
+                }
+            }
+            public class Chunk_0A : DataChunk
+            {
+                public Chunk_0A() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x0A };
+                }
+            }
+            public class Chunk_0C : DataChunk
+            {
+                public Chunk_0C() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x0C };
+                }
+            }
+            public class Chunk_0E : DataChunk
+            {
+                public Chunk_0E() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x0E };
+                }
+            }
+            public class Chunk_0F : DataChunk
+            {
+                public Chunk_0F() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x0F };
+                }
+            }
+            public class Chunk_13 : DataChunk
+            {
+                public Chunk_13() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x13 };
+                }
+            }
+            public class Chunk_14 : DataChunk
+            {
+                public Chunk_14() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x14 };
+                }
+            }
+            public class Chunk_15 : DataChunk
+            {
+                public Chunk_15() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x15 };
+                }
+            }
+            public class Chunk_16 : DataChunk
+            {
+                public Chunk_16() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x16 };
+                }
+            }
+            public class Chunk_19 : DataChunk
+            {
+                public Chunk_19() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x19 };
+                }
+            }
+            public class Chunk_1B : DataChunk
+            {
+                public Chunk_1B() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x1B };
+                }
+            }
+            public class Chunk_1E : DataChunk
+            {
+                public Chunk_1E() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x1E };
+                }
+            }
+            public class Chunk_20 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_20() { }
+                public Chunk_20(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x20);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_28 : DataChunk
+            {
+                public Chunk_28() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x28 };
+                }
+            }
+            public class Chunk_2C : DataChunk
+            {
+                public Chunk_2C() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x2C };
+                }
+            }
+            public class Chunk_41 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_41() { }
+                public Chunk_41(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x41);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_42 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_42() { }
+                public Chunk_42(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x42);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_43 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_43() { }
+                public Chunk_43(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x43);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_44 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_44() { }
+                public Chunk_44(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x44);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_61 : DataChunk
+            {
+                public Chunk_61() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0x61 };
+                }
+            }
+            public class Chunk_80 : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+                public byte bt_2;
+                public byte bt_3;
+                public byte bt_4;
+
+                public Chunk_80() { }
+                public Chunk_80(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    bt_2 = sr.ReadBE<byte>();
+                    bt_3 = sr.ReadBE<byte>();
+                    bt_4 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x80);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+                    outBytes.Add(bt_2);
+                    outBytes.Add(bt_3);
+                    outBytes.Add(bt_4);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_81 : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+
+                public Chunk_81() { }
+                public Chunk_81(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x81);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_82 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_82() { }
+                public Chunk_82(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x82);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+
+            public class Chunk_85 : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+                public byte bt_2;
+                public byte bt_3;
+
+                public Chunk_85() { }
+                public Chunk_85(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    bt_2 = sr.ReadBE<byte>();
+                    bt_3 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x85);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+                    outBytes.Add(bt_2);
+                    outBytes.Add(bt_3);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_86 : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+
+                public Chunk_86() { }
+                public Chunk_86(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x86);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_87 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_87() { }
+                public Chunk_87(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x87);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_88 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_88() { }
+                public Chunk_88(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x88);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_89 : DataChunk
+            {
+                public byte bt_0;
+                public float unkFlt_0;
+                public float unkFlt_1;
+
+                public Chunk_89() { }
+                public Chunk_89(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    unkFlt_0 = sr.ReadBE<float>();
+                    unkFlt_1 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x89);
+                    outBytes.Add(bt_0);
+                    outBytes.AddValue(unkFlt_0);
+                    outBytes.AddValue(unkFlt_1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_8A : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+                public byte bt_2;
+                public byte bt_3;
+
+                public Chunk_8A() { }
+                public Chunk_8A(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    bt_2 = sr.ReadBE<byte>();
+                    bt_3 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x8A);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+                    outBytes.Add(bt_2);
+                    outBytes.Add(bt_3);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_8B : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+                public byte bt_2;
+
+                public Chunk_8B() { }
+                public Chunk_8B(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    bt_2 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x8B);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+                    outBytes.Add(bt_2);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_8C : DataChunk
+            {
+                public float unkFlt0;
+
+                public Chunk_8C() { }
+                public Chunk_8C(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x8C);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_8D : DataChunk
+            {
+                public float unkFlt0;
+
+                public Chunk_8D() { }
+                public Chunk_8D(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x8D);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_90 : DataChunk 
+            {
+                public byte counter;
+                public float unkFlt0;
+
+                public Chunk_90() { }
+                public Chunk_90(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x90);
+                    outBytes.Add(counter);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_91 : DataChunk
+            {
+                public byte counter;
+                public byte unkBt0;
+                public float unkFlt0;
+
+                public Chunk_91() { }
+                public Chunk_91(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkBt0 = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x91);
+                    outBytes.Add(counter);
+                    outBytes.Add(unkBt0);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_92 : DataChunk
+            {
+                public byte counter;
+                public byte unkBt0;
+                public float unkFlt0;
+
+                public Chunk_92() { }
+                public Chunk_92(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkBt0 = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x92);
+                    outBytes.Add(counter);
+                    outBytes.Add(unkBt0);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_93 : DataChunk 
+            {
+                public byte counter;
+                public byte unkBt0;
+                public float unkFlt0;
+                public float unkFlt1;
+
+                public Chunk_93() { }
+                public Chunk_93(BufferedStreamReaderBE<MemoryStream> sr) 
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkBt0 = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                    unkFlt1 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x93);
+                    outBytes.Add(counter);
+                    outBytes.Add(unkBt0);
+                    outBytes.AddValue(unkFlt0);
+                    outBytes.AddValue(unkFlt1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_94 : DataChunk
+            {
+                public byte counter;
+                public float unkFlt0;
+
+                public Chunk_94() { }
+                public Chunk_94(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x94);
+                    outBytes.Add(counter);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_96 : DataChunk
+            {
+                public byte bt_1;
+
+                public Chunk_96() { }
+                public Chunk_96(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_1 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x96);
+                    outBytes.Add(bt_1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_98 : DataChunk
+            {
+                public byte counter;
+                public byte bt_1;
+
+                public Chunk_98() { }
+                public Chunk_98(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x98);
+                    outBytes.Add(counter);
+                    outBytes.Add(bt_1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_99 : DataChunk
+            {
+                public byte counter;
+                public float unkFloat;
+
+                public Chunk_99() { }
+                public Chunk_99(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkFloat = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x99);
+                    outBytes.Add(counter);
+                    outBytes.AddValue(unkFloat);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_9A : DataChunk
+            {
+                public byte counter;
+                public byte bt_1;
+                public float unkFloat;
+
+                public Chunk_9A() { }
+                public Chunk_9A(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    unkFloat = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0x9A);
+                    outBytes.Add(counter);
+                    outBytes.Add(bt_1);
+                    outBytes.AddValue(unkFloat);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_A2 : DataChunk
+            {
+                public byte counter;
+                public byte unkBt0;
+                public float unkFlt0;
+
+                public Chunk_A2() { }
+                public Chunk_A2(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkBt0 = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xA2);
+                    outBytes.Add(counter);
+                    outBytes.Add(unkBt0);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_A3 : DataChunk
+            {
+                public byte counter;
+                public byte unkBt0;
+                public float unkFlt0;
+                public float unkFlt1;
+
+                public Chunk_A3() { }
+                public Chunk_A3(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkBt0 = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                    unkFlt1 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xA3);
+                    outBytes.Add(counter);
+                    outBytes.Add(unkBt0);
+                    outBytes.AddValue(unkFlt0);
+                    outBytes.AddValue(unkFlt1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_C0 : DataChunk
+            {
+                public Chunk_C0() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0xC0 };
+                }
+            }
+            public class Chunk_C7 : DataChunk
+            {
+                public Vector3 vec3_00;
+
+                public Chunk_C7() { }
+                public Chunk_C7(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    vec3_00 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xC7);
+                    outBytes.AddValue(vec3_00);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_C8 : DataChunk
+            {
+                public Chunk_C8() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0xC8 };
+                }
+            }
+            public class Chunk_CF : DataChunk
+            {
+                public Vector3 vec3_00;
+
+                public Chunk_CF() { }
+                public Chunk_CF(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    vec3_00 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xCF);
+                    outBytes.AddValue(vec3_00);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D0 : DataChunk
+            {
+                public float unkFlt0;
+
+                public Chunk_D0() { }
+                public Chunk_D0(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD0);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D1 : DataChunk
+            {
+                public byte unkByte;
+                public float unkFlt0;
+
+                public Chunk_D1() { }
+                public Chunk_D1(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkByte = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD1);
+                    outBytes.Add(unkByte);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D3 : DataChunk
+            {
+                public byte counter;
+                public float unkFlt0;
+                public float unkFlt1;
+
+                public Chunk_D3() { }
+                public Chunk_D3(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    counter = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                    unkFlt1 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD3);
+                    outBytes.Add(counter);
+                    outBytes.AddValue(unkFlt0);
+                    outBytes.AddValue(unkFlt1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D4 : DataChunk
+            {
+                public float unkFlt0;
+
+                public Chunk_D4() { }
+                public Chunk_D4(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD4);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D5 : DataChunk
+            {
+                public float unkFlt0;
+                public float unkFlt1;
+
+                public Chunk_D5() { }
+                public Chunk_D5(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkFlt0 = sr.ReadBE<float>();
+                    unkFlt1 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD5);
+                    outBytes.AddValue(unkFlt0);
+                    outBytes.AddValue(unkFlt1);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D6 : DataChunk
+            {
+                public float unkFlt0;
+
+                public Chunk_D6() { }
+                public Chunk_D6(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD6);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_D7 : DataChunk
+            {
+                public byte bt_0;
+                public Vector3 vec3_01;
+
+                public Chunk_D7() { }
+                public Chunk_D7(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    vec3_01 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xD7);
+                    outBytes.Add(bt_0);
+                    outBytes.AddValue(vec3_01);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_DF : DataChunk
+            {
+                public byte bt_0;
+                public Vector3 vec3_01;
+
+                public Chunk_DF() { }
+                public Chunk_DF(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    vec3_01 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xDF);
+                    outBytes.Add(bt_0);
+                    outBytes.AddValue(vec3_01);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_E0 : DataChunk
+            {
+                public Vector3 vec3_00;
+
+                public Chunk_E0() { }
+                public Chunk_E0(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    vec3_00 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xE0);
+                    outBytes.AddValue(vec3_00);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_E1 : DataChunk
+            {
+                public Vector3 vec3_00;
+                public Vector3 vec3_01;
+
+                public Chunk_E1() { }
+                public Chunk_E1(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    vec3_00 = sr.ReadBEV3();
+                    vec3_01 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xE1);
+                    outBytes.AddValue(vec3_00);
+                    outBytes.AddValue(vec3_01);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_E2 : DataChunk
+            {
+                public Vector4 vec4_00;
+
+                public Chunk_E2() { }
+                public Chunk_E2(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    vec4_00 = sr.ReadBEV4();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xE2);
+                    outBytes.AddValue(vec4_00);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_E7 : DataChunk
+            {
+                public byte bt_0;
+                public Vector3 vec3_01;
+
+                public Chunk_E7() { }
+                public Chunk_E7(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    vec3_01 = sr.ReadBEV3();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xE7);
+                    outBytes.Add(bt_0);
+                    outBytes.AddValue(vec3_01);
+
+                    return outBytes.ToArray();
+                }
+            }
+
+            public class Chunk_F0 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_F0() { }
+                public Chunk_F0(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xF0);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_F1 : DataChunk
+            {
+                public Chunk_F1() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0xF1 };
+                }
+            }
+            public class Chunk_F2 : DataChunk
+            {
+                public Chunk_F2() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0xF2 };
+                }
+            }
+            public class Chunk_F3 : DataChunk
+            {
+                public Chunk_F3() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0xF3 };
+                }
+            }
+            public class Chunk_F4 : DataChunk
+            {
+                public byte bt_0;
+                public float unkFlt0;
+
+                public Chunk_F4() { }
+                public Chunk_F4(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    unkFlt0 = sr.ReadBE<float>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xF4);
+                    outBytes.Add(bt_0);
+                    outBytes.AddValue(unkFlt0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_F6 : DataChunk
+            {
+                public byte bt_0;
+
+                public Chunk_F6() { }
+                public Chunk_F6(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xF6);
+                    outBytes.Add(bt_0);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_F9 : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+                public byte bt_2;
+                public byte bt_3;
+
+                public Chunk_F9() { }
+                public Chunk_F9(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    bt_2 = sr.ReadBE<byte>();
+                    bt_3 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xF9);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+                    outBytes.Add(bt_2);
+                    outBytes.Add(bt_3);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_FA : DataChunk
+            {
+                public byte bt_0;
+                public byte bt_1;
+                public byte bt_2;
+                public byte bt_3;
+
+                public Chunk_FA() { }
+                public Chunk_FA(BufferedStreamReaderBE<MemoryStream> sr)
+                {
+                    bt_0 = sr.ReadBE<byte>();
+                    bt_1 = sr.ReadBE<byte>();
+                    bt_2 = sr.ReadBE<byte>();
+                    bt_3 = sr.ReadBE<byte>();
+                }
+
+                public byte[] GetBytes()
+                {
+                    List<byte> outBytes = new List<byte>();
+                    outBytes.Add(0xFA);
+                    outBytes.Add(bt_0);
+                    outBytes.Add(bt_1);
+                    outBytes.Add(bt_2);
+                    outBytes.Add(bt_3);
+
+                    return outBytes.ToArray();
+                }
+            }
+            public class Chunk_FF : DataChunk
+            {
+                public Chunk_FF() { }
+
+                public byte[] GetBytes()
+                {
+                    return new byte[] { 0xFF };
+                }
+            }
         }
 
         public class DataSet1

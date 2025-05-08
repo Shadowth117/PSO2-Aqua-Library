@@ -12,6 +12,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public List<NJSObject> models = new List<NJSObject>();
         public NJTextureList texList = new NJTextureList();
         public PuyoFile gvm = null;
+        public PolyAnim polyAnim = null;
 
         public AniModel() { }
 
@@ -76,7 +77,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         gvm = new PuyoFile(GVMUtil.ReadGVMBytes(sr));
                         break;
                     case "polyanim":
-                        
+                        polyAnim = new PolyAnim(sr, 0x20);
                         break;
                     default:
                         Debug.WriteLine($"Ignoring {fileName}");
