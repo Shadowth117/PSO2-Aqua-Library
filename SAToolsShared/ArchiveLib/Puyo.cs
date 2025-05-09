@@ -290,6 +290,9 @@ namespace ArchiveLib
             ByteConverter.BigEndian = bigendianbk;
         }
 
+		public int byteCount = 0;
+		public int align = 0x20;
+		public int forcedPad = 0;
         public override byte[] GetBytes()
         {
             bool bigendianbk = ByteConverter.BigEndian;
@@ -351,14 +354,15 @@ namespace ArchiveLib
 					entrytable.AddRange(ByteConverter.GetBytes(gbix));
 				}
 				// Add padding if the data isn't aligned by 16
-				if ((12 + entrytable.Count) % 0x20 != 0)
+				if ((12 + entrytable.Count + byteCount) % align != 0)
 				{
 					do
 					{
 						entrytable.Add(0);
 					}
-					while ((12 + entrytable.Count) % 0x20 != 0);
+					while ((12 + entrytable.Count + byteCount) % align != 0);
 				}
+				entrytable.AddRange(new byte[forcedPad]);
 				// Write other header stuff
 				result.AddRange(BitConverter.GetBytes((uint)(firstoffset + entrytable.Count - 8))); // Offset of the first texture, Little Endian
 				result.AddRange(ByteConverter.GetBytes((ushort)0xF)); // PVM/GVM flags

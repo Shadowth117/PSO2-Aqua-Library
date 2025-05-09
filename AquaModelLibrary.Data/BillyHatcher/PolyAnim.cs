@@ -3,7 +3,6 @@ using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Numerics;
-using static AquaModelLibrary.Data.BillyHatcher.PolyAnim;
 
 namespace AquaModelLibrary.Data.BillyHatcher
 {
@@ -108,43 +107,61 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 var bookmark = sr.Position;
                 sr.Seek(offset + dataSet1.offset, SeekOrigin.Begin);
-                if(dataSet1.usesExtraData > 1)
+                if(dataSet1.offset != 0)
                 {
-                    throw new Exception();
+                    dataSet1.data = new DataSet1Inner();
+                    if (dataSet1.usesExtraData > 1)
+                    {
+                        throw new Exception();
+                    }
+                    if (dataSet1.usesExtraData == 1)
+                    {
+                        dataSet1.data.bt0 = sr.ReadBE<byte>();
+                        dataSet1.data.bt1 = sr.ReadBE<byte>();
+                        dataSet1.data.bt2 = sr.ReadBE<byte>();
+                        dataSet1.data.bt3 = sr.ReadBE<byte>();
+
+                        dataSet1.data.bt4 = sr.ReadBE<byte>();
+                        dataSet1.data.bt5 = sr.ReadBE<byte>();
+                        dataSet1.data.bt6 = sr.ReadBE<byte>();
+                        dataSet1.data.bt7 = sr.ReadBE<byte>();
+
+                        dataSet1.data.bt8 = sr.ReadBE<byte>();
+                        dataSet1.data.bt9 = sr.ReadBE<byte>();
+                        dataSet1.data.btA = sr.ReadBE<byte>();
+                        dataSet1.data.btB = sr.ReadBE<byte>();
+
+                        dataSet1.data.offset0 = sr.ReadBE<int>();
+                        dataSet1.data.offset1 = sr.ReadBE<int>();
+                        dataSet1.data.mainOffset = sr.ReadBE<int>();
+                        dataSet1.data.unkInt0 = sr.ReadBE<int>();
+
+                        sr.Seek(offset + dataSet1.data.offset0, SeekOrigin.Begin);
+                        var offset0Count = (dataSet1.data.offset1 - dataSet1.data.offset0) / 4;
+                        for (int j = 0; j < offset0Count; j++)
+                        {
+                            dataSet1.data.unkIntList0.Add(sr.ReadBE<int>());
+                        }
+
+                        sr.Seek(offset + dataSet1.data.offset1, SeekOrigin.Begin);
+                        var offset1Count = (dataSet1.data.mainOffset - dataSet1.data.offset1) / 4;
+                        for(int j = 0; j < offset1Count; j++)
+                        {
+                            dataSet1.data.unkIntList1.Add(sr.ReadBE<int>());
+                        }
+
+                        sr.Seek(offset + dataSet1.data.mainOffset, SeekOrigin.Begin);
+                        dataSet1.data.mainInts.Add(sr.ReadBE<int>());
+                        if (dataSet1.data.bt7 == 0x2)
+                        {
+                            dataSet1.data.mainInts.Add(sr.ReadBE<int>());
+                        }
+                    } else
+                    {
+                        dataSet1.data.mainInts.Add(sr.ReadBE<int>());
+                        dataSet1.data.mainInts.Add(sr.ReadBE<int>());
+                    }
                 }
-                if(dataSet1.usesExtraData == 1)
-                {
-                    dataSet1.data.bt0 = sr.ReadBE<byte>();
-                    dataSet1.data.bt1 = sr.ReadBE<byte>();
-                    dataSet1.data.bt2 = sr.ReadBE<byte>();
-                    dataSet1.data.bt3 = sr.ReadBE<byte>();
-
-                    dataSet1.data.bt4 = sr.ReadBE<byte>();
-                    dataSet1.data.bt5 = sr.ReadBE<byte>();
-                    dataSet1.data.bt6 = sr.ReadBE<byte>();
-                    dataSet1.data.bt7 = sr.ReadBE<byte>();
-
-                    dataSet1.data.bt8 = sr.ReadBE<byte>();
-                    dataSet1.data.bt9 = sr.ReadBE<byte>();
-                    dataSet1.data.btA = sr.ReadBE<byte>();
-                    dataSet1.data.btB = sr.ReadBE<byte>();
-
-                    dataSet1.data.offset0 = sr.ReadBE<int>();
-                    dataSet1.data.offset1 = sr.ReadBE<int>();
-                    dataSet1.data.mainOffset = sr.ReadBE<int>();
-                    dataSet1.data.unkInt0 = sr.ReadBE<int>();
-
-                    sr.Seek(offset + dataSet1.data.offset0, SeekOrigin.Begin);
-                    dataSet1.data.unkInt1 = sr.ReadBE<int>();
-                    dataSet1.data.unkInt2 = sr.ReadBE<int>();
-
-                    sr.Seek(offset + dataSet1.data.offset1, SeekOrigin.Begin);
-                    dataSet1.data.unkInt3 = sr.ReadBE<int>();
-
-                    sr.Seek(offset + dataSet1.data.mainOffset, SeekOrigin.Begin);
-                }
-                dataSet1.data.mainInt0 = sr.ReadBE<int>();
-                dataSet1.data.mainInt1 = sr.ReadBE<int>();
 
                 dataSet1s.Add(dataSet1);
                 sr.Seek(bookmark, SeekOrigin.Begin);
@@ -181,6 +198,149 @@ namespace AquaModelLibrary.Data.BillyHatcher
             gvm = new PuyoFile(GVMUtil.ReadGVMBytes(sr));
         }
 
+        public void Write(List<byte> outBytes, List<int> pofSets)
+        {
+            //Write PolyAnim Header
+            pofSets.Add(outBytes.Count + 0xC);
+            pofSets.Add(outBytes.Count + 0x14);
+            pofSets.Add(outBytes.Count + 0x24);
+            pofSets.Add(outBytes.Count + 0x2C);
+
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+            outBytes.AddValue(dataSet0s.Count);
+            outBytes.ReserveInt("DataSet0sOffset");
+
+            outBytes.AddValue(dataSet1s.Count);
+            outBytes.ReserveInt("DataSet1sOffset");
+            outBytes.AddValue((int)0);
+            outBytes.AddValue((int)0);
+
+            outBytes.AddValue(dataSet2s.Count);
+            outBytes.ReserveInt("DataSet2sOffset");
+            outBytes.AddValue((int)0);
+            outBytes.ReserveInt("TexListGVMOffset");
+
+            outBytes.AddValue((int)0);
+
+            //Write Data0
+            outBytes.FillInt("DataSet0sOffset", outBytes.Count);
+            for(int i = 0; i < dataSet0s.Count; i++)
+            {
+                outBytes.AddValue(dataSet0s[i].variant);
+                if (dataSet0s[i].variant != -1 && dataSet0s[i].data != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt($"DS0Offset{i}");
+            }
+            for (int i = 0; i < dataSet0s.Count; i++)
+            {
+                if (dataSet0s[i].variant != -1 && dataSet0s[i].data != null)
+                {
+                    outBytes.FillInt($"DS0Offset{i}", outBytes.Count);
+                    dataSet0s[i].data.Write(outBytes, pofSets);
+                }
+            }
+
+            //Write Data1
+            outBytes.FillInt("DataSet1sOffset", outBytes.Count);
+            for (int i = 0; i < dataSet1s.Count; i++)
+            {
+                outBytes.AddValue(dataSet1s[i].usesExtraData);
+                if (dataSet1s[i].data != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt($"DS1Offset{i}");
+            }
+            for (int i = 0; i < dataSet1s.Count; i++)
+            {
+                if (dataSet1s[i].data != null)
+                {
+                    outBytes.FillInt($"DS1Offset{i}", outBytes.Count);
+                    if (dataSet1s[i].usesExtraData == 1)
+                    {
+                        outBytes.Add(dataSet1s[i].data.bt0);
+                        outBytes.Add(dataSet1s[i].data.bt1);
+                        outBytes.Add(dataSet1s[i].data.bt2);
+                        outBytes.Add(dataSet1s[i].data.bt3);
+
+                        outBytes.Add(dataSet1s[i].data.bt4);
+                        outBytes.Add(dataSet1s[i].data.bt5);
+                        outBytes.Add(dataSet1s[i].data.bt6);
+                        outBytes.Add(dataSet1s[i].data.bt7);
+
+                        outBytes.Add(dataSet1s[i].data.bt8);
+                        outBytes.Add(dataSet1s[i].data.bt9);
+                        outBytes.Add(dataSet1s[i].data.btA);
+                        outBytes.Add(dataSet1s[i].data.btB);
+
+                        pofSets.Add(outBytes.Count);
+                        outBytes.ReserveInt($"DS1DataOffset0{i}");
+                        pofSets.Add(outBytes.Count);
+                        outBytes.ReserveInt($"DS1DataOffset1{i}");
+                        pofSets.Add(outBytes.Count);
+                        outBytes.ReserveInt($"DS1DataMainOffset{i}");
+                        outBytes.AddValue(dataSet1s[i].data.unkInt0);
+
+                        outBytes.FillInt($"DS1DataOffset0{i}", outBytes.Count);
+                        for (int j = 0; j < dataSet1s[i].data.unkIntList0.Count; j++)
+                        {
+                            outBytes.AddValue(dataSet1s[i].data.unkIntList0[j]);
+                        }
+                        outBytes.FillInt($"DS1DataOffset1{i}", outBytes.Count);
+                        for(int j = 0; j < dataSet1s[i].data.unkIntList1.Count; j++)
+                        {
+                            outBytes.AddValue(dataSet1s[i].data.unkIntList1[j]);
+                        }
+                        outBytes.FillInt($"DS1DataMainOffset{i}", outBytes.Count);
+                    }
+                    foreach(var value in dataSet1s[i].data.mainInts)
+                    {
+                        outBytes.AddValue(value);
+                    }
+                }
+            }
+
+            //Write Data2
+            outBytes.FillInt("DataSet2sOffset", outBytes.Count);
+            for (int i = 0; i < dataSet2s.Count; i++)
+            {
+                outBytes.AddValue((ushort)dataSet2s[i].dataList.Count);
+                outBytes.AddValue(dataSet2s[i].unk0);
+                if (dataSet2s[i].dataList.Count > 0)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt($"DS2Offset{i}");
+            }
+            for (int i = 0; i < dataSet2s.Count; i++)
+            {
+                outBytes.FillInt($"DS2Offset{i}", outBytes.Count);
+                for(int j = 0; j < dataSet2s[i].dataList.Count; j++)
+                {
+                    outBytes.AddValue(dataSet2s[i].dataList[j]);
+                }
+            }
+
+            //Write Texlist + GVM
+            outBytes.FillInt("TexListGVMOffset", outBytes.Count);
+
+            pofSets.Add(outBytes.Count);
+            outBytes.ReserveInt($"TexListOffset");
+            pofSets.Add(outBytes.Count);
+            outBytes.ReserveInt($"GVMOffset");
+
+            outBytes.FillInt($"TexListOffset", outBytes.Count);
+            texList.Write(outBytes, pofSets);
+            outBytes.AlignWriter(0x20);
+
+            outBytes.FillInt($"GVMOffset", outBytes.Count);
+            gvm.forcedPad = 0x10;
+            outBytes.AddRange(gvm.GetBytes());
+        }
+
         public class DataSet0
         {
             public int variant;
@@ -190,7 +350,11 @@ namespace AquaModelLibrary.Data.BillyHatcher
         }
 
         public class DS0Variant
-        { 
+        {
+            public virtual void Write(List<byte> outBytes, List<int> pofSets)
+            {
+
+            }
         }
 
 
@@ -254,21 +418,60 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     FLTInt_04 = sr.ReadBE<int>();
                     FLTFlt_08 = sr.ReadBE<float>();
 
-                    for (int j = 0; j < 4; j++)
+                    int count = (chunksOffset - floatListThingOffset - 0xC) / 8;
+                    for (int j = 0; j < count; j++)
                     {
                         FLTPair fltPair = new FLTPair();
                         fltPair.FLTFlt = sr.ReadBE<float>();
                         fltPair.FLTusht0 = sr.ReadBE<ushort>();
                         fltPair.FLTusht1 = sr.ReadBE<ushort>();
                         fltPairs.Add(fltPair);
-
-                        //Break early if this is 0ed
-                        if (fltPair.FLTusht0 == 0 && fltPair.FLTusht1 == 0)
-                        {
-                            break;
-                        }
                     }
                 }
+            }
+
+            public override void Write(List<byte> outBytes, List<int> pofSets)
+            {
+                outBytes.AddValue(flags0);
+                outBytes.AddValue(flags1);
+                outBytes.AddValue(flags2);
+                outBytes.AddValue(flags3);
+                outBytes.AddValue(flags4);
+                outBytes.AddValue(flags5);
+
+                if(dataChunks != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt("DS0ChunkOffset");
+                if (fltPairs.Count > 0)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt("DS0FloatThingOffset");
+
+                if (fltPairs.Count > 0)
+                {
+                    outBytes.FillInt("DS0FloatThingOffset", outBytes.Count);
+                    outBytes.AddValue(FLTFlag0);
+                    outBytes.AddValue(FLTFlag1);
+                    outBytes.AddValue(FLTInt_04);
+                    outBytes.AddValue(FLTFlt_08);
+
+                    for(int j = 0; j < fltPairs.Count; j++)
+                    {
+                        var fltPair = fltPairs[j];
+                        outBytes.AddValue(fltPair.FLTFlt);
+                        outBytes.AddValue(fltPair.FLTusht0);
+                        outBytes.AddValue(fltPair.FLTusht1);
+                    }
+                }
+                if (dataChunks != null)
+                {
+                    outBytes.FillInt("DS0ChunkOffset", outBytes.Count);
+                    outBytes.AddRange(dataChunks.GetBytes());
+                }
+                outBytes.AlignWriter(0x4);
             }
         }
         public class DS0Var1 : DS0Variant
@@ -346,6 +549,56 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     dataChunks1 = new DataChunks(sr);
                 }
             }
+            public override void Write(List<byte> outBytes, List<int> pofSets)
+            {
+                outBytes.AddValue(flags0);
+                outBytes.AddValue(flags1);
+                outBytes.AddValue(int_04);
+                outBytes.AddValue(int_08);
+                outBytes.AddValue(flags2);
+                outBytes.AddValue(flags3);
+
+                outBytes.AddValue(flt_10);
+                outBytes.AddValue(flt_14);
+                outBytes.AddValue(flt_18);
+                outBytes.AddValue(flt_1C);
+
+                outBytes.AddValue(flt_20);
+                outBytes.AddValue(int_24);
+                outBytes.AddValue(int_28);
+                if(dataChunks0 != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt("DSV1DataChunks0");
+
+                outBytes.AddValue(flags_30);
+                outBytes.AddValue(flags_32);
+                outBytes.AddValue(int_34);
+                outBytes.AddValue(flt_38);
+                outBytes.AddValue(int_3C);
+
+                outBytes.AddValue(int_40);
+                outBytes.AddValue(flt_44);
+                outBytes.AddValue(flt_48);
+                if (dataChunks1 != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt("DSV1DataChunks1");
+
+                if(dataChunks0 != null)
+                {
+                    outBytes.FillInt("DSV1DataChunks0", outBytes.Count);
+                    outBytes.AddRange(dataChunks0.GetBytes());
+                }
+                if (dataChunks1 != null)
+                {
+                    outBytes.FillInt("DSV1DataChunks1", outBytes.Count);
+                    outBytes.AddRange(dataChunks1.GetBytes());
+                }
+                outBytes.AlignWriter(0x4);
+            }
         }
         public class DS0Var3 : DS0Variant
         {
@@ -369,6 +622,24 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     sr.Seek(offset + dataChunksOffset, SeekOrigin.Begin);
                     dataChunks = new DataChunks(sr);
                 }
+            }
+            public override void Write(List<byte> outBytes, List<int> pofSets)
+            {
+                outBytes.AddValue(flags0);
+                outBytes.AddValue(flags1);
+                outBytes.AddValue(int_04);
+                if (dataChunks != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                }
+                outBytes.ReserveInt("DSV1DataChunks");
+
+                if (dataChunks != null)
+                {
+                    outBytes.FillInt("DSV1DataChunks", outBytes.Count);
+                    outBytes.AddRange(dataChunks.GetBytes());
+                }
+                outBytes.AlignWriter(0x4);
             }
         }
 
@@ -620,13 +891,27 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 }
             }
 
-            public class DataChunk { }
+            public byte[] GetBytes()
+            {
+                List<byte> outBytes = new List<byte>();
+                foreach(var chunk in chunks)
+                {
+                    outBytes.AddRange(chunk.GetBytes());
+                }
+
+                return outBytes.ToArray();
+            }
+
+            public abstract class DataChunk 
+            {
+                public abstract byte[] GetBytes();
+            }
 
             public class Chunk_00 : DataChunk
             {
                 public Chunk_00() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x00 };
                 }
@@ -635,7 +920,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_01() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x01 };
                 }
@@ -644,7 +929,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_02() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x02 };
                 }
@@ -653,7 +938,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_03() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x03 };
                 }
@@ -662,7 +947,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_04() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x04 };
                 }
@@ -671,7 +956,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_05() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x05 };
                 }
@@ -680,7 +965,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_06() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x06 };
                 }
@@ -689,7 +974,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_07() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x07 };
                 }
@@ -698,7 +983,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_08() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x08 };
                 }
@@ -707,7 +992,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_0A() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x0A };
                 }
@@ -716,7 +1001,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_0C() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x0C };
                 }
@@ -725,7 +1010,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_0E() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x0E };
                 }
@@ -734,7 +1019,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_0F() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x0F };
                 }
@@ -743,7 +1028,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_13() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x13 };
                 }
@@ -752,7 +1037,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_14() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x14 };
                 }
@@ -761,7 +1046,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_15() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x15 };
                 }
@@ -770,7 +1055,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_16() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x16 };
                 }
@@ -779,7 +1064,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_19() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x19 };
                 }
@@ -788,7 +1073,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_1B() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x1B };
                 }
@@ -797,7 +1082,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_1E() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x1E };
                 }
@@ -812,7 +1097,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x20);
@@ -825,7 +1110,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_28() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x28 };
                 }
@@ -834,7 +1119,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_2C() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x2C };
                 }
@@ -849,7 +1134,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x41);
@@ -868,7 +1153,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x42);
@@ -887,7 +1172,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x43);
@@ -906,7 +1191,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x44);
@@ -919,7 +1204,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_61() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0x61 };
                 }
@@ -942,7 +1227,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_4 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x80);
@@ -967,7 +1252,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_1 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x81);
@@ -987,7 +1272,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x82);
@@ -1013,7 +1298,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_3 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x85);
@@ -1037,7 +1322,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_1 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x86);
@@ -1057,7 +1342,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x87);
@@ -1076,7 +1361,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x88);
@@ -1099,7 +1384,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt_1 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x89);
@@ -1126,7 +1411,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_3 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x8A);
@@ -1152,7 +1437,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_2 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x8B);
@@ -1173,7 +1458,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x8C);
@@ -1192,7 +1477,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x8D);
@@ -1213,7 +1498,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x90);
@@ -1237,7 +1522,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x91);
@@ -1262,7 +1547,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x92);
@@ -1289,7 +1574,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt1 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x93);
@@ -1313,7 +1598,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x94);
@@ -1333,7 +1618,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_1 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x96);
@@ -1354,7 +1639,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_1 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x98);
@@ -1376,7 +1661,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFloat = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x99);
@@ -1400,7 +1685,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFloat = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0x9A);
@@ -1425,7 +1710,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xA2);
@@ -1452,7 +1737,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt1 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xA3);
@@ -1468,7 +1753,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_C0() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0xC0 };
                 }
@@ -1483,7 +1768,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_00 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xC7);
@@ -1496,7 +1781,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_C8() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0xC8 };
                 }
@@ -1511,7 +1796,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_00 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xCF);
@@ -1530,7 +1815,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD0);
@@ -1551,7 +1836,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD1);
@@ -1575,7 +1860,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt1 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD3);
@@ -1596,7 +1881,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD4);
@@ -1617,7 +1902,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt1 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD5);
@@ -1637,7 +1922,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD6);
@@ -1658,7 +1943,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_01 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xD7);
@@ -1680,7 +1965,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_01 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xDF);
@@ -1700,7 +1985,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_00 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xE0);
@@ -1721,7 +2006,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_01 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xE1);
@@ -1741,7 +2026,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec4_00 = sr.ReadBEV4();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xE2);
@@ -1762,7 +2047,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     vec3_01 = sr.ReadBEV3();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xE7);
@@ -1783,7 +2068,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xF0);
@@ -1796,7 +2081,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_F1() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0xF1 };
                 }
@@ -1805,7 +2090,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_F2() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0xF2 };
                 }
@@ -1814,7 +2099,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_F3() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0xF3 };
                 }
@@ -1831,7 +2116,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     unkFlt0 = sr.ReadBE<float>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xF4);
@@ -1851,7 +2136,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_0 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xF6);
@@ -1876,7 +2161,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_3 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xF9);
@@ -1904,7 +2189,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     bt_3 = sr.ReadBE<byte>();
                 }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     List<byte> outBytes = new List<byte>();
                     outBytes.Add(0xFA);
@@ -1920,7 +2205,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 public Chunk_FF() { }
 
-                public byte[] GetBytes()
+                public override byte[] GetBytes()
                 {
                     return new byte[] { 0xFF };
                 }
@@ -1935,10 +2220,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public int usesExtraData;
             public int offset;
 
-            public DataSet1Inner data;
+            public DataSet1Inner data = null;
         }
 
-        public struct DataSet1Inner
+        public class DataSet1Inner
         {
             public byte bt0;
             public byte bt1;
@@ -1961,15 +2246,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public int unkInt0;
 
             //Offset0
-            public int unkInt1;
-            public int unkInt2;
+            public List<int> unkIntList0 = new List<int>();
 
             //Offset1
-            public int unkInt3;
+            public List<int> unkIntList1 = new List<int>();
 
             //MainOffset - This is the only data if useExtraData for its reference is 1
-            public int mainInt0;
-            public int mainInt1;
+            public List<int> mainInts = new List<int>();
         }
 
         public class DataSet2
