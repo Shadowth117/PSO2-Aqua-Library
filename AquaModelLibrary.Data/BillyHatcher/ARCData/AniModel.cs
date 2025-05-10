@@ -1,5 +1,7 @@
-﻿using AquaModelLibrary.Data.Ninja;
+﻿using AquaModelLibrary.Data.BillyHatcher.Collision;
+using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Model;
+using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Diagnostics;
@@ -10,6 +12,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
     public class AniModel : ARC
     {
         public List<NJSObject> models = new List<NJSObject>();
+        public List<NJSMotion> motions = new List<NJSMotion>();
+        public List<float> unkFloatList = new List<float>();
+        public List<BoundsXYZ> boundsList = new List<BoundsXYZ>();
+        public List<NJSMotion> motion2s = new List<NJSMotion>();
         public NJTextureList texList = new NJTextureList();
         public PuyoFile gvm = null;
         public PolyAnim polyAnim = null;
@@ -50,6 +56,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         var animAddress = sr.ReadBE<int>();
                         var boundingAddress = sr.ReadBE<int>();
                         var anim2Address = sr.ReadBE<int>();
+
                         var unkFloatAddress = sr.ReadBE<int>();
                         var texListAddress = sr.ReadBE<int>();
                         var gvmAddress = sr.ReadBE<int>();
@@ -66,6 +73,72 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         {
                             sr.Seek(0x20 + modelAddr, SeekOrigin.Begin);
                             models.Add(new NJSObject(sr, NinjaVariant.Ginja, sr._BEReadActive, 0x20));
+                        }
+
+                        //Read Animations
+                        var animCount = (boundingAddress - animAddress) / 4;
+                        List<int> animAddresses = new List<int>();
+                        sr.Seek(0x20 + animAddress, SeekOrigin.Begin);
+                        for (int j = 0; j < animCount; j++)
+                        {
+                            animAddresses.Add(sr.ReadBE<int>());
+                        }
+                        foreach (var animAddr in animAddresses)
+                        {
+                            if(animAddr != -1)
+                            {
+                                sr.Seek(0x20 + animAddr, SeekOrigin.Begin);
+                                motions.Add(new NJSMotion(sr, true, 0x20));
+                            } else
+                            {
+                                motions.Add(null);
+                            }
+                        }
+
+                        //Read Bounding
+                        var boundCount = (anim2Address - boundingAddress) / 4;
+                        List<int> boundAddresses = new List<int>();
+                        sr.Seek(0x20 + boundingAddress, SeekOrigin.Begin);
+                        for (int j = 0; j < boundCount; j++)
+                        {
+                            boundAddresses.Add(sr.ReadBE<int>());
+                        }
+                        foreach (var boundAddr in boundAddresses)
+                        {
+                            sr.Seek(0x20 + boundAddr, SeekOrigin.Begin);
+                            boundsList.Add(new BoundsXYZ() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3()});
+                        }
+
+                        //Read Animation 2s
+                        var nextAddress = unkFloatAddress > 0 ? unkFloatAddress : texListAddress;
+                        var anim2Count = (nextAddress - anim2Address) / 4;
+                        List<int> anim2Addresses = new List<int>();
+                        sr.Seek(0x20 + anim2Address, SeekOrigin.Begin);
+                        for (int j = 0; j < anim2Count; j++)
+                        {
+                            anim2Addresses.Add(sr.ReadBE<int>());
+                        }
+                        foreach (var animAddr in anim2Addresses)
+                        {
+                            sr.Seek(0x20 + animAddr, SeekOrigin.Begin);
+                            motion2s.Add(new NJSMotion(sr, true, 0x20));
+                        }
+
+                        //Read Weird Floats
+                        if(unkFloatAddress != 0)
+                        {
+                            var floatCount = (texListAddress - unkFloatAddress) / 4;
+                            List<int> floatAddresses = new List<int>();
+                            sr.Seek(0x20 + boundingAddress, SeekOrigin.Begin);
+                            for (int j = 0; j < floatCount; j++)
+                            {
+                                floatAddresses.Add(sr.ReadBE<int>());
+                            }
+                            foreach (var floatAddr in floatAddresses)
+                            {
+                                sr.Seek(0x20 + floatAddr, SeekOrigin.Begin);
+                                unkFloatList.Add(sr.ReadBE<float>());
+                            }
                         }
 
                         //Read Texture data
@@ -89,6 +162,15 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 nodeCount = 0;
                 models[0].CountAnimated(ref nodeCount);
             }
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outBytes = new List<byte>();
+
+
+
+            return outBytes.ToArray();
         }
     }
 }
