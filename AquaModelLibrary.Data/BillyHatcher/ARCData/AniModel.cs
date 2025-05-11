@@ -2,9 +2,12 @@
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Model;
 using AquaModelLibrary.Data.Ninja.Motion;
+using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Text;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
@@ -166,9 +169,66 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetBytes()
         {
+            //AniModel, polyanim. Polyanim can be null and if so should not be inserted at all
+            Dictionary<string, int> group1StructureOffsets = new Dictionary<string, int>();
+            group1StructureOffsets.Add("AniModel", 0);
+            //If any motions are null, they should be inserted as motion{id} etc with the offset linking to the -1 null offset value
+            Dictionary<string, int> group2StructureOffsets = new Dictionary<string, int>();
             List<byte> outBytes = new List<byte>();
+            List<int> pofSets = new List<int>();
+
+            //AniModel
 
 
+            //PolyAnim
+            polyAnim.Write(outBytes, pofSets);
+
+            //Add POF0, insert header
+            outBytes.AlignWriter(0x4);
+            var pof0Offset = outBytes.Count;
+            pofSets.Sort();
+            var pof0 = POF0.GenerateRawPOF0(pofSets, true);
+            outBytes.AddRange(pof0);
+
+            //File references
+            outBytes.AddValue((int)group1StructureOffsets["AniModel"]);
+            outBytes.ReserveInt("AniModel");
+            if(group1StructureOffsets.ContainsKey("polyanim"))
+            {
+                outBytes.AddValue((int)group1StructureOffsets["polyanim"]);
+                outBytes.ReserveInt("polyanim");
+            }
+            var keys = group2StructureOffsets.Keys.ToList();
+            foreach(var key in keys)
+            {
+                outBytes.AddValue((int)group2StructureOffsets[key]);
+                outBytes.ReserveInt(key);
+            }
+
+            //Strings
+            keys.AddRange(group1StructureOffsets.Keys.ToArray());
+            keys.Sort();
+            var stringStart = 0;
+            foreach(var key in keys)
+            {
+                outBytes.FillInt(key, outBytes.Count - stringStart);
+                outBytes.AddRange(Encoding.ASCII.GetBytes(key));
+                outBytes.Add(0);
+            }
+
+            var arcBytes = new List<byte>();
+            arcBytes.AddValue(outBytes.Count + 0x20);
+            arcBytes.AddValue(pof0Offset);
+            arcBytes.AddValue(pof0.Length);
+            arcBytes.AddValue(group1StructureOffsets.Count);
+
+            arcBytes.AddValue(group2StructureOffsets.Count);
+            arcBytes.Add(0x30);
+            arcBytes.Add(0x31);
+            arcBytes.Add(0x30);
+            arcBytes.Add(0x30);
+            arcBytes.AddValue(0);
+            arcBytes.AddValue(0);
 
             return outBytes.ToArray();
         }
