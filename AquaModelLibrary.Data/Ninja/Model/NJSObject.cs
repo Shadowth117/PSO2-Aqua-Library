@@ -35,9 +35,9 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
         public NJSObject() { variant = NinjaVariant.Basic; }
 
-        public NJSObject(byte[] file, NinjaVariant ninjaVariant, bool be = true, int offset = 0)
+        public NJSObject(byte[] file, NinjaVariant ninjaVariant, bool be = true, int offset = 0, int addressToStartRead = -1)
         {
-            Read(file, ninjaVariant, be, offset);
+            Read(file, ninjaVariant, be, offset, addressToStartRead);
         }
 
         public NJSObject(BufferedStreamReaderBE<MemoryStream> sr, NinjaVariant ninjaVariant, bool be = true, int offset = 0)
@@ -83,11 +83,15 @@ namespace AquaModelLibrary.Data.Ninja.Model
             }
         }
 
-        public void Read(byte[] file, NinjaVariant ninjaVariant, bool be = true, int offset = 0)
+        public void Read(byte[] file, NinjaVariant ninjaVariant, bool be = true, int offset = 0, int addressToStartRead = -1)
         {
             using (var ms = new MemoryStream(file))
             using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
+                if(addressToStartRead != -1)
+                {
+                    sr.Seek(addressToStartRead, SeekOrigin.Begin);
+                }
                 Read(sr, ninjaVariant, be, offset);
             }
         }

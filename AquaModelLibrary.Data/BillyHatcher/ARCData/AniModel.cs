@@ -1,27 +1,35 @@
-﻿using AquaModelLibrary.Data.BillyHatcher.Collision;
-using AquaModelLibrary.Data.Ninja;
+﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Model;
 using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
-using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Numerics;
 using System.Text;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
     //Billy Hatcher ani_model_*.arc files
+    //hari - Richie. Anim 0 is hatch, anim 1 is idle, anim 2 is run, anim 3 is attack, anim 4 is jump (over obstacles), anim 5 is befriending
     public class AniModel : ARC
     {
         public List<NJSObject> models = new List<NJSObject>();
         public List<NJSMotion> motions = new List<NJSMotion>();
         public List<float> unkFloatList = new List<float>();
-        public List<BoundsXYZ> boundsList = new List<BoundsXYZ>();
+        public List<AniModelBounds> boundsList = new List<AniModelBounds>();
         public List<NJSMotion> motion2s = new List<NJSMotion>();
         public NJTextureList texList = new NJTextureList();
         public PuyoFile gvm = null;
         public PolyAnim polyAnim = null;
+
+        public struct AniModelBounds
+        {
+            public Vector3 Min;
+            public Vector3 Max;
+            public int int_18;
+            public int int_1C;
+        }
 
         public AniModel() { }
 
@@ -109,7 +117,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         foreach (var boundAddr in boundAddresses)
                         {
                             sr.Seek(0x20 + boundAddr, SeekOrigin.Begin);
-                            boundsList.Add(new BoundsXYZ() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3()});
+                            boundsList.Add(new AniModelBounds() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3(), int_18 = sr.ReadBE<int>(), int_1C = sr.ReadBE<int>()});
                         }
 
                         //Read Animation 2s
@@ -132,7 +140,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         {
                             var floatCount = (texListAddress - unkFloatAddress) / 4;
                             List<int> floatAddresses = new List<int>();
-                            sr.Seek(0x20 + boundingAddress, SeekOrigin.Begin);
+                            sr.Seek(0x20 + unkFloatAddress, SeekOrigin.Begin);
                             for (int j = 0; j < floatCount; j++)
                             {
                                 floatAddresses.Add(sr.ReadBE<int>());
@@ -160,15 +168,11 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         break;
                 }
             }
-            if (models.Count > 0)
-            {
-                nodeCount = 0;
-                models[0].CountAnimated(ref nodeCount);
-            }
         }
 
-        public byte[] GetBytes()
+        public byte[] GetBytes(bool crabSharkOrder = false)
         {
+            ByteListExtension.AddAsBigEndian = true;
             //AniModel, polyanim. Polyanim can be null and if so should not be inserted at all
             Dictionary<string, int> group1StructureOffsets = new Dictionary<string, int>();
             group1StructureOffsets.Add("AniModel", 0);
@@ -178,10 +182,181 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             List<int> pofSets = new List<int>();
 
             //AniModel
+            if (models.Count > 0)
+            {
+                pofSets.Add(0x0);
+            }
+            if (motions.Count > 0)
+            {
+                pofSets.Add(0x4);
+            }
+            if (boundsList.Count > 0)
+            {
+                pofSets.Add(0x8);
+            }
+            if (motion2s.Count > 0)
+            {
+                pofSets.Add(0xC);
+            }
 
+            if (unkFloatList.Count > 0)
+            {
+                pofSets.Add(0x10);
+            }
+            if (texList != null)
+            {
+                pofSets.Add(0x14);
+            }
+            if (gvm != null)
+            {
+                pofSets.Add(0x18);
+            }
+
+            outBytes.ReserveInt("ModelListOffset");
+            outBytes.ReserveInt("AnimListOffset");
+            outBytes.ReserveInt("BoundingListOffset");
+            outBytes.ReserveInt("Anim2ListOffset");
+
+            outBytes.ReserveInt("UnkFloatListOffset");
+            outBytes.ReserveInt("TexListOffset");
+            outBytes.ReserveInt("TexOffset");
+
+            outBytes.FillInt("ModelListOffset", outBytes.Count);
+            for(int i = 0; i < models.Count; i++)
+            {
+                pofSets.Add(outBytes.Count);
+                outBytes.ReserveInt($"Model{i}");
+            }
+            outBytes.FillInt("AnimListOffset", outBytes.Count);
+            for (int i = 0; i < motions.Count; i++)
+            {
+                if (motions[i] != null)
+                {
+                    pofSets.Add(outBytes.Count);
+                    outBytes.ReserveInt($"Anim{i}");
+                }
+                else
+                {
+                    group2StructureOffsets[$"motion{i}"] = outBytes.Count;
+                    outBytes.AddValue((int)-1);
+                }
+            }
+            if(boundsList.Count > 0)
+            {
+                outBytes.FillInt("BoundingListOffset", outBytes.Count);
+                for (int i = 0; i < boundsList.Count; i++)
+                {
+                    pofSets.Add(outBytes.Count);
+                    outBytes.ReserveInt($"Bounding{i}");
+                }
+            }
+            outBytes.FillInt("Anim2ListOffset", outBytes.Count);
+            for (int i = 0; i < motion2s.Count; i++)
+            {
+                pofSets.Add(outBytes.Count);
+                outBytes.ReserveInt($"Anim2_{i}");
+            }
+
+            if(unkFloatList.Count > 0)
+            {
+                outBytes.FillInt("UnkFloatListOffset", outBytes.Count);
+                for (int i = 0; i < unkFloatList.Count; i++)
+                {
+                    pofSets.Add(outBytes.Count);
+                    outBytes.ReserveInt($"UnkFloat{i}");
+                }
+            }
+            outBytes.FillInt("TexListOffset", outBytes.Count);
+            pofSets.Add(outBytes.Count);
+            outBytes.ReserveInt($"TexList");
+            outBytes.AlignWriter(0x20);
+            
+            if(!crabSharkOrder)
+            {
+                outBytes.FillInt("TexOffset", outBytes.Count);
+                outBytes.AddRange(gvm.GetBytes());
+
+                for (int i = 0; i < models.Count; i++)
+                {
+                    outBytes.FillInt($"Model{i}", outBytes.Count);
+                    models[i].Write(outBytes, pofSets, true);
+                    outBytes.AlignWriter(0x20);
+                }
+                for (int i = 0; i < motions.Count; i++)
+                {
+                    outBytes.FillInt($"Anim{i}", outBytes.Count);
+                    motions[i].Write(outBytes, pofSets, NJSMotion.MotionWriteMode.BillyMode);
+                }
+                for (int i = 0; i < boundsList.Count; i++)
+                {
+                    outBytes.FillInt($"Bounding{i}", outBytes.Count);
+                    outBytes.AddValue(boundsList[i].Min);
+                    outBytes.AddValue(boundsList[i].Max);
+                    outBytes.AddValue(boundsList[i].int_18);
+                    outBytes.AddValue(boundsList[i].int_1C);
+                }
+                for (int i = 0; i < motion2s.Count; i++)
+                {
+                    outBytes.FillInt($"Anim2_{i}", outBytes.Count);
+                    motion2s[i].Write(outBytes, pofSets, NJSMotion.MotionWriteMode.BillyMode);
+                }
+
+                for (int i = 0; i < unkFloatList.Count; i++)
+                {
+                    outBytes.FillInt($"UnkFloat{i}", outBytes.Count);
+                    outBytes.AddValue(unkFloatList[i]);
+                }
+                outBytes.FillInt($"TexList", outBytes.Count);
+                texList.Write(outBytes, pofSets);
+            } else if (crabSharkOrder)
+            {
+                for (int i = 0; i < models.Count; i++)
+                {
+                    outBytes.FillInt($"Model{i}", outBytes.Count);
+                    models[i].Write(outBytes, pofSets, true);
+                }
+                for (int i = 0; i < motions.Count; i++)
+                {
+                    if (motions[i] != null)
+                    {
+                        outBytes.FillInt($"Anim{i}", outBytes.Count);
+                        motions[i].Write(outBytes, pofSets, NJSMotion.MotionWriteMode.BillyMode);
+                    }
+                }
+
+                for (int i = 0; i < unkFloatList.Count; i++)
+                {
+                    outBytes.FillInt($"UnkFloat{i}", outBytes.Count);
+                    outBytes.AddValue(unkFloatList[i]);
+                }
+                outBytes.FillInt($"TexList", outBytes.Count);
+                texList.Write(outBytes, pofSets);
+                outBytes.AlignWriter(0x20);
+
+                outBytes.FillInt("TexOffset", outBytes.Count);
+                outBytes.AddRange(gvm.GetBytes());
+                for (int i = 0; i < boundsList.Count; i++)
+                {
+                    outBytes.FillInt($"Bounding{i}", outBytes.Count);
+                    outBytes.AddValue(boundsList[i].Min);
+                    outBytes.AddValue(boundsList[i].Max);
+                    outBytes.AddValue(boundsList[i].int_18);
+                    outBytes.AddValue(boundsList[i].int_1C);
+                }
+                for (int i = 0; i < motion2s.Count; i++)
+                {
+                    outBytes.FillInt($"Anim2_{i}", outBytes.Count);
+                    motion2s[i].Write(outBytes, pofSets, NJSMotion.MotionWriteMode.BillyMode);
+                }
+                outBytes.AlignWriter(0x20);
+            }
 
             //PolyAnim
-            polyAnim.Write(outBytes, pofSets);
+            if (polyAnim != null)
+            {
+                group1StructureOffsets.Add("polyanim", outBytes.Count);
+                polyAnim.Write(outBytes, pofSets);
+            }
 
             //Add POF0, insert header
             outBytes.AlignWriter(0x4);
@@ -199,6 +374,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 outBytes.ReserveInt("polyanim");
             }
             var keys = group2StructureOffsets.Keys.ToList();
+            keys.Sort();
             foreach(var key in keys)
             {
                 outBytes.AddValue((int)group2StructureOffsets[key]);
@@ -208,7 +384,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             //Strings
             keys.AddRange(group1StructureOffsets.Keys.ToArray());
             keys.Sort();
-            var stringStart = 0;
+            var stringStart = outBytes.Count;
             foreach(var key in keys)
             {
                 outBytes.FillInt(key, outBytes.Count - stringStart);
@@ -230,6 +406,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             arcBytes.AddValue(0);
             arcBytes.AddValue(0);
 
+            outBytes.InsertRange(0, arcBytes);
+
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.Gamecube;
 using AquaModelLibrary.Data.Ninja.Model.Ginja;
+using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
@@ -626,6 +627,29 @@ namespace AquaModelLibrary.Data.Ninja.Model
                 0x47,
                 0x4A,
                 0x43,
+                0x4D
+            };
+            //This should almost always be little endian, but can be be in rare cases such as skies of arcadia
+            headerMagic.AddRange(BitConverter.GetBytes(outBytes.Count));
+
+            outBytes.InsertRange(0, headerMagic);
+            outBytes.AddRange(POF0.GeneratePOF0(pofSets));
+
+            ByteListExtension.Reset();
+            return outBytes.ToArray();
+        }
+        public static byte[] GetNjmBytes(NJSMotion njsMotion, NJSMotion.MotionWriteMode mode)
+        {
+            ByteListExtension.AddAsBigEndian = true;
+            List<byte> outBytes = new List<byte>();
+            List<int> pofSets = new List<int>();
+            njsMotion.Write(outBytes, pofSets, mode);
+
+            List<byte> headerMagic = new List<byte>
+            {
+                0x4E,
+                0x4D,
+                0x44,
                 0x4D
             };
             //This should almost always be little endian, but can be be in rare cases such as skies of arcadia

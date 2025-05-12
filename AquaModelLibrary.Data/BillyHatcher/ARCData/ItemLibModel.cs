@@ -105,6 +105,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetBytes()
         {
+            ByteListExtension.AddAsBigEndian = true;
             if(boundingList == null || boundingList.Count == 0)
             {
                 boundingList = new List<ItemLibBounding>() { new ItemLibBounding() };
@@ -230,6 +231,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
             outBytes.InsertRange(0, arcBytes);
 
+            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

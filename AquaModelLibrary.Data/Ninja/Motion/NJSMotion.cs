@@ -100,10 +100,10 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         public List<AnimModelData> KeyDataList = new List<AnimModelData>();
 
         public NJSMotion() { }
-        public NJSMotion(byte[] file, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        public NJSMotion(byte[] file, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0, int addressToStartRead = -1)
         {
             BillyMode = billyMode;
-            Read(file, offset, shortRot, nodeCount);
+            Read(file, offset, shortRot, nodeCount, addressToStartRead);
         }
 
         public NJSMotion(BufferedStreamReaderBE<MemoryStream> sr, bool billyMode, int offset = 0, bool shortRot = false, int nodeCount = 0)
@@ -148,7 +148,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             List<AnimFlags> keyDataAnimFlagsList = new List<AnimFlags>();
             foreach (var data in KeyDataList)
             {
-                var dataFlags = data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode);
+                var dataFlags = data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode, animType);
                 flags |= dataFlags;
                 keyDataAnimFlagsList.Add(dataFlags);
             }
@@ -464,11 +464,15 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             outBytes.AlignWriter(0x4);
         }
 
-        public void Read(byte[] file, int offset = 0, bool shortRot = false, int nodeCount = 0)
+        public void Read(byte[] file, int offset = 0, bool shortRot = false, int nodeCount = 0, int addressToStartRead = -1)
         {
             using (var ms = new MemoryStream(file))
             using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
+                if (addressToStartRead != -1)
+                {
+                    sr.Seek(addressToStartRead, SeekOrigin.Begin);
+                }
                 Read(sr, offset, shortRot, nodeCount);
             }
         }
@@ -478,12 +482,18 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             bool shortRotCheck = true;
             nodeCount = nodeCount == 0 ? CalculateNodeCount(sr, offset) : nodeCount;
 
+            sr.Seek(4, SeekOrigin.Current);
+            var testLE = sr.Peek<int>();
+            var testBE = sr.PeekBigEndianInt32();
+            sr._BEReadActive = testLE > testBE;
+            sr.Seek(-4, SeekOrigin.Current);
+
             var initialPointer = sr.ReadBE<int>();
             frameCount = sr.ReadBE<int>();
             animType = sr.ReadBE<AnimFlags>();
 
             List<AnimFlags> animFlagList = GetAnimFlagListFromEnum(animType, BillyMode);
-            if (BillyMode)
+            if (BillyMode && !animFlagList.Contains(AnimFlags.Rotation))
             {
                 shortRot = true;
                 shortRotCheck = false;
@@ -766,6 +776,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             if (animtype.HasFlag(AnimFlags.Spot)) mdata++;
             if (animtype.HasFlag(AnimFlags.Point)) mdata++;
             if (animtype.HasFlag(AnimFlags.Roll)) mdata++;
+            if (animtype.HasFlag(AnimFlags.Angle)) mdata++;
             if (animtype.HasFlag(AnimFlags.Quaternion)) mdata++;
             int mdatasize = 0;
             bool lost = false;

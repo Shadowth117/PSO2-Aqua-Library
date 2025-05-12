@@ -23,7 +23,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         {
         }
 
-        public AnimFlags GetAnimFlags(bool billyMode)
+        public AnimFlags GetAnimFlags(bool billyMode, AnimFlags originalAnimType)
         {
             AnimFlags flags = new AnimFlags();
             if(Position.Count > 0)
@@ -32,7 +32,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             }
             if (RotationData.Count > 0)
             {
-                if(billyMode)
+                if(billyMode && (originalAnimType & AnimFlags.Rotation) == 0)
                 {
                     flags |= AnimFlags.Normal;
                 } else
