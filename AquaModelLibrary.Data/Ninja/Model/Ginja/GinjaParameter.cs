@@ -104,6 +104,11 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             writer.Write(data);
         }
 
+        public void SetData(uint _data)
+        {
+            data = _data;
+        }
+
         public virtual byte[] GetBytes()
         {
             ByteListExtension.AddAsBigEndian = true;
