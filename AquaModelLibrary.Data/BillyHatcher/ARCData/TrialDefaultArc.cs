@@ -220,6 +220,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             }
 
             //GVM
+            outBytes.AlignWriter(0x20);
             outBytes.FillInt("gvmPtr", outBytes.Count);
             outBytes.AddRange(protoLND.gvm.GetBytes());
             outBytes.AlignWriter(0x20);

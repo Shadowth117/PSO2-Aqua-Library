@@ -9,11 +9,16 @@ namespace AquaModelLibrary.Data.Ninja
         public List<string> texNames = new List<string>();
         public NJTextureList() { }
 
-        public NJTextureList(byte[] bytes, int offset = 0)
+        public NJTextureList(byte[] bytes, bool bigEndian = false, int offset = 0, int addressToStartRead = -1)
         {
             using (MemoryStream ms = new MemoryStream(bytes))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
+                sr._BEReadActive = bigEndian;
+                if(addressToStartRead != -1)
+                {
+                    sr.Seek(addressToStartRead, SeekOrigin.Begin);
+                }
                 Read(sr, offset);
             }
         }

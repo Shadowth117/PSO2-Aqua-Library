@@ -336,6 +336,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             texList.Write(outBytes, pofSets);
             outBytes.AlignWriter(0x20);
 
+            outBytes.AlignWriter(0x20);
             outBytes.FillInt($"GVMOffset", outBytes.Count);
             gvm.forcedPad = 0x10;
             outBytes.AddRange(gvm.GetBytes());

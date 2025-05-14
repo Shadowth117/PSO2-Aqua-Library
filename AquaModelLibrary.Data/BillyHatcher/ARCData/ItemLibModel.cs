@@ -61,9 +61,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             model = new NJSObject(sr, NinjaVariant.Ginja, true, 0x20);
             model.CountAnimated(ref nodeCount);
 
-            sr.Seek(0x20 + animOffsetOffset, SeekOrigin.Begin);
-            sr.Seek(0x20 + sr.ReadBE<int>(), SeekOrigin.Begin);
-            anim = new NJSMotion(sr, true, 0x20, true,  nodeCount);
+            if(animOffsetOffset != 0)
+            {
+                sr.Seek(0x20 + animOffsetOffset, SeekOrigin.Begin);
+                sr.Seek(0x20 + sr.ReadBE<int>(), SeekOrigin.Begin);
+                anim = new NJSMotion(sr, true, 0x20, true, nodeCount);
+            }
 
             sr.Seek(0x20 + texListOffset, SeekOrigin.Begin);
             texList = new NJTextureList(sr, 0x20);

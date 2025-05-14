@@ -354,13 +354,18 @@ namespace ArchiveLib
 					entrytable.AddRange(ByteConverter.GetBytes(gbix));
 				}
 				// Add padding if the data isn't aligned by 16
-				if ((12 + entrytable.Count + byteCount) % align != 0)
+				if ((12 + entrytable.Count + byteCount) % 0x10 != 0)
 				{
 					do
 					{
 						entrytable.Add(0);
 					}
-					while ((12 + entrytable.Count + byteCount) % align != 0);
+					while ((12 + entrytable.Count + byteCount) % 0x10 != 0);
+				}
+				//GVMs seemingly should not align at 0x20 in the header
+				if ((12 + entrytable.Count + byteCount) % align == 0)
+				{
+					entrytable.AddRange(new byte[0x10]);
 				}
 				entrytable.AddRange(new byte[forcedPad]);
 				// Write other header stuff
@@ -380,15 +385,20 @@ namespace ArchiveLib
             for (int i = 0; i < Entries.Count; i++)
             {
 				if (hasEntryTable)
-				{
-					// Align by 16
-					int length = Entries[i].Data.Length - 16;
-					if (length % 16 != 0)
-						do
-							length++;
-						while (length % 16 != 0);
+                {
+					//Remove length of GBIX and then add alignment
+                    int length = Entries[i].Data.Length - 16;
+					var alignment = align - length % align;
+					if(alignment != align)
+					{
+						length += alignment;
+					}
 					byte[] nogbix = new byte[length];
 					Array.Copy(Entries[i].Data, 16, nogbix, 0, Entries[i].Data.Length - 16);
+
+					//Write the new length
+					Array.Copy(BitConverter.GetBytes((int)(nogbix.Length - 8)), 0, nogbix, 4, 4);
+
 					result.AddRange(nogbix);
 				}
 				else

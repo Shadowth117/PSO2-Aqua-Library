@@ -273,6 +273,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             
             if(!crabSharkOrder)
             {
+                outBytes.AlignWriter(0x20);
                 outBytes.FillInt("TexOffset", outBytes.Count);
                 outBytes.AddRange(gvm.GetBytes());
 

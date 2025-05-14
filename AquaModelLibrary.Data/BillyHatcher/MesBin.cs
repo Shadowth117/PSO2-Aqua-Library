@@ -24,7 +24,24 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public BillyLanguage language = 0;
         public MesBin() { }
 
-        public MesBin(string fileName, BufferedStreamReaderBE<MemoryStream> sr, bool useCyrillic)
+        public MesBin(string fileName, bool useCyrillic = false)
+        {
+            if (useCyrillic)
+            {
+                language = BillyLanguage.Cyrillic;
+            }
+            Read(fileName, File.ReadAllBytes(fileName));
+        }
+        public MesBin(string fileName, byte[] file,  bool useCyrillic = false)
+        {
+            if (useCyrillic)
+            {
+                language = BillyLanguage.Cyrillic;
+            }
+            Read(fileName, file);
+        }
+
+        public MesBin(string fileName, BufferedStreamReaderBE<MemoryStream> sr, bool useCyrillic = false)
         {
             if(useCyrillic)
             {
@@ -36,6 +53,15 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public MesBin(string fileName, BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(fileName, sr);
+        }
+
+        private void Read(string fileName, byte[] fileBytes)
+        {
+            using (MemoryStream ms = new MemoryStream(fileBytes))
+            using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
+            {
+                Read(fileName, sr);
+            }
         }
 
         private void Read(string fileName, BufferedStreamReaderBE<MemoryStream> sr)

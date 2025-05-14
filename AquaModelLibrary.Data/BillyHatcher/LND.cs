@@ -1082,9 +1082,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
             outBytes.AlignWriter(0x20);
 
             //Write GVM
+            outBytes.AlignWriter(0x20);
             outBytes.FillInt("GVMOffset", outBytes.Count);
             outBytes.AddRange(gvm.GetBytes());
-            outBytes.AlignWriter(0x20);
 
             //Write models
             for (int i = 0; i < arcLndModels.Count; i++)

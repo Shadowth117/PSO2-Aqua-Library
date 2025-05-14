@@ -479,6 +479,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
         public void Read(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0, bool shortRot = false, int nodeCount = 0)
         {
+            var tempBe = sr._BEReadActive;
             bool shortRotCheck = true;
             nodeCount = nodeCount == 0 ? CalculateNodeCount(sr, offset) : nodeCount;
 
@@ -524,6 +525,8 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                 sr.Seek(dataStart, SeekOrigin.Begin);
                 ReadAnimData(sr, offset, animFlagList, nodeCount, true, false);
             }
+
+            sr._BEReadActive = tempBe;
         }
 
         /// <summary>

@@ -26,35 +26,62 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public int offset;
             public int size;
         }
-
+        
         public void LoadGVRs(List<byte[]> gvrBytesList)
         {
             entries.Clear();
             rawGVRBytesList.Clear();
             foreach (var gvr in gvrBytesList)
             {
-                //Account for Global Index
-                int offset = 0;
-                if (gvr[0] == 0x47 && gvr[1] == 0x42 && gvr[2] == 0x49 && gvr[3] == 0x58)
-                {
-                    offset = 0x10;
-                }
-                GPLEntry entry = new GPLEntry();
-                var temp = new byte[4];
-                Array.Copy(gvr, offset + 8, temp, 0, 4);
-                Array.Reverse(temp);
-                entry.GVRFlags = BitConverter.ToInt32(temp, 0);
-                Array.Copy(gvr, offset + 0xC, temp, 0, 4);
-                Array.Reverse(temp);
-                entry.GVRDimensions = BitConverter.ToInt32(temp, 0);
-                entry.offset = -1;
-                entry.size = BitConverter.ToInt32(gvr, offset + 0x4) - 0x8;
+                rawGVRBytesList.Add(GVRToGPLEntry(gvr, out var entry));
                 entries.Add(entry);
-
-                var rawGvr = new byte[entry.size];
-                Array.Copy(gvr, offset + 0x10, rawGvr, 0, entry.size);
-                rawGVRBytesList.Add(rawGvr);
             }
+        }
+        
+        public void ReplaceEntryWithGVR(int index, byte[] gvrData)
+        {
+            var gplEntry = GVRToGPLEntry(gvrData, out var entry);
+            rawGVRBytesList[index] = gplEntry;
+            entries[index] = entry;
+        }
+
+        public byte[] GVRToGPLEntry(byte[] gvr, out GPLEntry entry)
+        {
+            //Account for Global Index
+            int offset = 0;
+            if (gvr[0] == 0x47 && gvr[1] == 0x42 && gvr[2] == 0x49 && gvr[3] == 0x58)
+            {
+                offset = 0x10;
+            }
+            entry = new GPLEntry();
+            var temp = new byte[4];
+            Array.Copy(gvr, offset + 8, temp, 0, 4);
+            Array.Reverse(temp);
+            entry.GVRFlags = BitConverter.ToInt32(temp, 0);
+            Array.Copy(gvr, offset + 0xC, temp, 0, 4);
+            Array.Reverse(temp);
+            entry.GVRDimensions = BitConverter.ToInt32(temp, 0);
+            entry.offset = -1;
+            entry.size = BitConverter.ToInt32(gvr, offset + 0x4) - 0x8;
+
+            var rawGvr = new byte[entry.size];
+            Array.Copy(gvr, offset + 0x10, rawGvr, 0, entry.size);
+
+            return rawGvr;
+        }
+
+        public byte[] GetGVR(int i)
+        {
+            var entry = entries[i];
+            ByteListExtension.AddAsBigEndian = false;
+            List<byte> gvrBytes = new List<byte>() { 0x47, 0x56, 0x52, 0x54 };
+            gvrBytes.AddValue(rawGVRBytesList[i].Length + 0x8);
+            ByteListExtension.AddAsBigEndian = true;
+            gvrBytes.AddValue(entry.GVRFlags);
+            gvrBytes.AddValue(entry.GVRDimensions);
+            gvrBytes.AddRange(rawGVRBytesList[i]);
+
+            return gvrBytes.ToArray();
         }
 
         public List<byte[]> GetGVRs()
@@ -62,15 +89,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             List<byte[]> GVRBytesList = new List<byte[]>();
             for (int i = 0; i < rawGVRBytesList.Count; i++)
             {
-                var entry = entries[i];
-                ByteListExtension.AddAsBigEndian = false;
-                List<byte> gvrBytes = new List<byte>() { 0x47, 0x56, 0x52, 0x54 };
-                gvrBytes.AddValue(rawGVRBytesList[i].Length + 0x8);
-                ByteListExtension.AddAsBigEndian = true;
-                gvrBytes.AddValue(entry.GVRFlags);
-                gvrBytes.AddValue(entry.GVRDimensions);
-                gvrBytes.AddRange(rawGVRBytesList[i]);
-                GVRBytesList.Add(gvrBytes.ToArray());
+                GVRBytesList.Add(GetGVR(i));
             }
 
             return GVRBytesList;
@@ -154,6 +173,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 {
                     offsetDict.Add(hash, outBytes.Count);
                     outBytes.AddRange(rawGvr);
+                    outBytes.AlignWriter(0x20);
                 }
             }
             for (int i = 0; i < entries.Count; i++)
