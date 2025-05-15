@@ -122,7 +122,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public float unkFloat1;
 
         public float unkFloat2;
-        public float unkFloat3;
+        public float shoeAcceHeight;
         public float unkFloat4;
         public float unkFloat5;
     }
