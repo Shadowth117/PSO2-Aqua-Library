@@ -484,8 +484,8 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             nodeCount = nodeCount == 0 ? CalculateNodeCount(sr, offset) : nodeCount;
 
             sr.Seek(4, SeekOrigin.Current);
-            var testLE = sr.Peek<int>();
-            var testBE = sr.PeekBigEndianInt32();
+            var testLE = sr.Peek<uint>();
+            var testBE = sr.PeekBigEndianUInt32();
             sr._BEReadActive = testLE > testBE;
             sr.Seek(-4, SeekOrigin.Current);
 
