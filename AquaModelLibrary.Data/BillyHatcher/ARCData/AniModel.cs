@@ -17,19 +17,11 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public List<NJSObject> models = new List<NJSObject>();
         public List<NJSMotion> motions = new List<NJSMotion>();
         public List<float> unkFloatList = new List<float>();
-        public List<AniModelBounds> boundsList = new List<AniModelBounds>();
+        public List<CameraAnchor> cameraAnchorList = new List<CameraAnchor>();
         public List<NJSMotion> motion2s = new List<NJSMotion>();
         public NJTextureList texList = new NJTextureList();
         public PuyoFile gvm = null;
         public PolyAnim polyAnim = null;
-
-        public struct AniModelBounds
-        {
-            public Vector3 Min;
-            public Vector3 Max;
-            public int int_18;
-            public int int_1C;
-        }
 
         public AniModel() { }
 
@@ -117,7 +109,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         foreach (var boundAddr in boundAddresses)
                         {
                             sr.Seek(0x20 + boundAddr, SeekOrigin.Begin);
-                            boundsList.Add(new AniModelBounds() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3(), int_18 = sr.ReadBE<int>(), int_1C = sr.ReadBE<int>()});
+                            cameraAnchorList.Add(new CameraAnchor() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3(), int_18 = sr.ReadBE<int>(), int_1C = sr.ReadBE<int>()});
                         }
 
                         //Read Animation 2s
@@ -190,7 +182,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             {
                 pofSets.Add(0x4);
             }
-            if (boundsList.Count > 0)
+            if (cameraAnchorList.Count > 0)
             {
                 pofSets.Add(0x8);
             }
@@ -241,10 +233,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                     outBytes.AddValue((int)-1);
                 }
             }
-            if(boundsList.Count > 0)
+            if(cameraAnchorList.Count > 0)
             {
                 outBytes.FillInt("BoundingListOffset", outBytes.Count);
-                for (int i = 0; i < boundsList.Count; i++)
+                for (int i = 0; i < cameraAnchorList.Count; i++)
                 {
                     pofSets.Add(outBytes.Count);
                     outBytes.ReserveInt($"Bounding{i}");
@@ -288,13 +280,13 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                     outBytes.FillInt($"Anim{i}", outBytes.Count);
                     motions[i].Write(outBytes, pofSets, NJSMotion.MotionWriteMode.BillyMode);
                 }
-                for (int i = 0; i < boundsList.Count; i++)
+                for (int i = 0; i < cameraAnchorList.Count; i++)
                 {
                     outBytes.FillInt($"Bounding{i}", outBytes.Count);
-                    outBytes.AddValue(boundsList[i].Min);
-                    outBytes.AddValue(boundsList[i].Max);
-                    outBytes.AddValue(boundsList[i].int_18);
-                    outBytes.AddValue(boundsList[i].int_1C);
+                    outBytes.AddValue(cameraAnchorList[i].Min);
+                    outBytes.AddValue(cameraAnchorList[i].Max);
+                    outBytes.AddValue(cameraAnchorList[i].int_18);
+                    outBytes.AddValue(cameraAnchorList[i].int_1C);
                 }
                 for (int i = 0; i < motion2s.Count; i++)
                 {
@@ -336,13 +328,13 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
                 outBytes.FillInt("TexOffset", outBytes.Count);
                 outBytes.AddRange(gvm.GetBytes());
-                for (int i = 0; i < boundsList.Count; i++)
+                for (int i = 0; i < cameraAnchorList.Count; i++)
                 {
                     outBytes.FillInt($"Bounding{i}", outBytes.Count);
-                    outBytes.AddValue(boundsList[i].Min);
-                    outBytes.AddValue(boundsList[i].Max);
-                    outBytes.AddValue(boundsList[i].int_18);
-                    outBytes.AddValue(boundsList[i].int_1C);
+                    outBytes.AddValue(cameraAnchorList[i].Min);
+                    outBytes.AddValue(cameraAnchorList[i].Max);
+                    outBytes.AddValue(cameraAnchorList[i].int_18);
+                    outBytes.AddValue(cameraAnchorList[i].int_1C);
                 }
                 for (int i = 0; i < motion2s.Count; i++)
                 {
