@@ -3,13 +3,15 @@ using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
-    /// <summary>
-    /// For battlemodel_hiyoko.arc, main_menu_model.arc, main_battlemodel.arc, menu_landmodel.arc
-    /// </summary>
-    public class MenuModel
+    public class BattleModelPlayer
     {
         public ARCHeader header;
         public List<NJSObject> models = new();
@@ -17,14 +19,14 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public List<NJTextureList> texLists = new();
         public List<PuyoFile> gvms = new();
 
-        public MenuModel() { }
+        public BattleModelPlayer() { }
 
-        public MenuModel(byte[] file)
+        public BattleModelPlayer(byte[] file)
         {
             Read(file);
         }
 
-        public MenuModel(BufferedStreamReaderBE<MemoryStream> sr)
+        public BattleModelPlayer(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
         }
@@ -65,6 +67,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             for (int i = 0; i < animsCount; i++)
             {
                 var bookmark = sr.Position + 4;
+                var offset = sr.ReadBE<int>();
                 sr.Seek(0x20 + sr.ReadBE<int>(), SeekOrigin.Begin);
                 motions.Add(new NJSMotion(sr, true, 0x20));
                 sr.Seek(bookmark, SeekOrigin.Begin);
