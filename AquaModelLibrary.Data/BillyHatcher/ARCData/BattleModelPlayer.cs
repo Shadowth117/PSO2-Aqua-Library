@@ -1,13 +1,8 @@
-﻿using AquaModelLibrary.Data.Ninja.Model;
+﻿using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Data.Ninja.Model;
 using AquaModelLibrary.Data.Ninja.Motion;
-using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
