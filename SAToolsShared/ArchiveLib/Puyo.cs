@@ -480,6 +480,11 @@ namespace ArchiveLib
                 gvrt.SetPalette(Palette);
             return gvrt.ToBitmap();
         }
+        public bool NeedsExternalPalette()
+        {
+            GvrTexture gvrt = new GvrTexture(Data);
+            return gvrt.NeedsExternalPalette;
+        }
     }
 
 	public class XVMEntry : GenericArchiveEntry
