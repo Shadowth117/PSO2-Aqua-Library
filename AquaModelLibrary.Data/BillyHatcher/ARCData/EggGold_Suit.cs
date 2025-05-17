@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Model;
+using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 
@@ -11,9 +12,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
     public class EggGold_Suit : ARC
     {
 
-        public List<NJSObject> model = null;
+        public List<NJSObject> models = new List<NJSObject>();
         public List<NJTextureList> texLists = new List<NJTextureList>();
         public PuyoFile gvm = null;
+        public CameraAnchor? cameraAnchor = null;
+        public NJSMotion cameraMotion = null;
+        public List<NJSMotion> motions = new List<NJSMotion>();
 
         public EggGold_Suit() { }
 
@@ -41,24 +45,20 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             base.Read(sr);
             sr.Seek(0x20, SeekOrigin.Begin);
 
-            //Read Model
-            var modelOffset = sr.ReadBE<int>();
-            if (modelOffset != 0)
+            //Read Models
+            for(int i = 0; i < 2; i++)
             {
+                var modelOffset = sr.ReadBE<int>();
                 var bookmark = sr.Position;
                 sr.Seek(modelOffset + 0x20, SeekOrigin.Begin);
-                //model = new NJSObject(sr, NinjaVariant.Ginja, true, 0x20);
+                models.Add(new NJSObject(sr, NinjaVariant.Ginja, true, 0x20));
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
 
             //Read Texlists
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
                 var offset = sr.ReadBE<int>();
-                if (offset == 0)
-                {
-                    break;
-                }
                 var bookmark = sr.Position;
                 sr.Seek(offset + 0x20, SeekOrigin.Begin);
                 texLists.Add(new NJTextureList(sr, 0x20));
@@ -69,6 +69,32 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             //Read Textures
             sr.Seek(sr.ReadBE<int>() + 0x20, SeekOrigin.Begin);
             gvm = new PuyoFile(GVMUtil.ReadGVMBytes(sr));
+            
+            //Read Event, if it's there
+            if(group1FileNames.Contains("event"))
+            {
+                var eventRef = group1FileReferences[0];
+                sr.Seek(0x20 + eventRef.fileOffset, SeekOrigin.Begin);
+                var anchorOffset = sr.ReadBE<int>();
+                var cameraMotionOffset = sr.ReadBE<int>();
+                List<int> motionOffsets = new List<int>();
+                for(int i = 0; i < 9; i++)
+                {
+                    motionOffsets.Add(sr.ReadBE<int>());
+                }
+
+                sr.Seek(anchorOffset + 0x20, SeekOrigin.Begin);
+                cameraAnchor = new CameraAnchor() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3(), int_18 = sr.ReadBE<int>(), int_1C = sr.ReadBE<int>() };
+
+                sr.Seek(cameraMotionOffset + 0x20, SeekOrigin.Begin);
+                cameraMotion = new NJSMotion(sr, true, 0x20);
+
+                foreach(var offset in motionOffsets)
+                {
+                    sr.Seek(offset + 0x20, SeekOrigin.Begin);
+                    motions.Add(new NJSMotion(sr, true, 0x20));
+                }
+            }
         }
     }
 }

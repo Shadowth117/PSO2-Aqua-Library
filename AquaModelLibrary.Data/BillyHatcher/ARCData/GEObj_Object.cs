@@ -16,6 +16,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             "geobj_mg_leader.arc", "geobj_orange_cannon.arc", "geobj_ring.arc" };
 
         public Dictionary<string, NJSObject> models = new Dictionary<string, NJSObject>();
+        public Dictionary<string, CSDY> csdyModels = new Dictionary<string, CSDY>();
         public Dictionary<string, NJSMotion> motions = new Dictionary<string, NJSMotion>();
         public Dictionary<string, NJTextureList> texLists = new Dictionary<string, NJTextureList>();
         public PuyoFile gvm = null;
@@ -47,9 +48,16 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             //If any of the areas are named d + whatever type (dmodels, dmotions etc.), it signifies a null pointer
             var modelsOffset = sr.ReadBE<int>();
             int motionsOffset = -1;
+            int csdyOffset = -1;
             if (modelsOffset > 0xC)
             {
-                motionsOffset = sr.ReadBE<int>();
+                if(group1FileNames.Contains("motions"))
+                {
+                    motionsOffset = sr.ReadBE<int>();
+                } else
+                {
+                    csdyOffset = sr.ReadBE<int>();
+                }
             }
             int textureListsOffset = sr.ReadBE<int>();
             var gvmOffset = sr.ReadBE<int>();
@@ -58,7 +66,15 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
             int modelCount = 1;
             offsetQueue.RemoveAt(0);
-            int motionCount = HelperFunctions.GetCount(motionsOffset, offsetQueue);
+            int motionCount = -1;
+            int csdyCount = -1;
+            if (csdyOffset == -1)
+            {
+                motionCount = HelperFunctions.GetCount(motionsOffset, offsetQueue);
+            } else
+            {
+                csdyCount = HelperFunctions.GetCount(csdyOffset, offsetQueue);
+            }
             offsetQueue.RemoveAt(0);
             int textureListCount = HelperFunctions.GetCount(textureListsOffset, offsetQueue);
 
@@ -118,6 +134,27 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 }
             }
 
+            if(csdyOffset > 0)
+            {
+                sr.Seek(csdyOffset + 0x20, SeekOrigin.Begin);
+                for(int i = 0; i < csdyCount; i++)
+                {
+                    int offset = sr.ReadBE<int>();
+                    if (offset == -1)
+                    {
+                        continue;
+                    }
+                    if (offset == 0)
+                    {
+                        break;
+                    }
+                    sr.Seek(offset + 0x20, SeekOrigin.Begin);
+                    CSDY csdy = new CSDY();
+                    csdy.ReadModel(sr, 0x20);
+                    csdyModels.Add($"collision_{i}", csdy);
+                }
+            }
+
             if(textureListsOffset > 0)
             {
                 sr.Seek(textureListsOffset + 0x20, SeekOrigin.Begin);
@@ -129,6 +166,11 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 for (int i = 0; i < textureListsOffsets.Count; i++)
                 {
                     var offset = textureListsOffsets[i];
+                    if (offset == -1)
+                    {
+                        texLists.Add($"texList_{i}", null);
+                        continue;
+                    }
                     if (offset == 0)
                     {
                         break;
