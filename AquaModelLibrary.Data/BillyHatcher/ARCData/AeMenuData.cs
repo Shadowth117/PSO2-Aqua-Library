@@ -69,7 +69,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                         bookmark = sr.Position;
                         sr.Seek(offset + 0x24, SeekOrigin.Begin);
                         var gvpSize = sr.Read<int>();
-                        gvps.Add(gvm.Entries[i].Name, sr.ReadBytes(offset + 0x20, gvpSize));
+                        gvps.Add(gvm.Entries[i].Name, sr.ReadBytes(offset + 0x20, gvpSize + 8));
                     }
 
                 }
