@@ -8,6 +8,7 @@ namespace AquaModelLibrary.Data.Ninja
     {
         public List<string> texNames = new List<string>();
         public NJTextureList() { }
+        public NJTextureList(List<string> texList ) { texNames = texList; }
 
         public NJTextureList(byte[] bytes, bool bigEndian = false, int offset = 0, int addressToStartRead = -1)
         {
