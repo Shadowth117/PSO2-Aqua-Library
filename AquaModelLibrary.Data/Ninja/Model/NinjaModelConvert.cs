@@ -9,7 +9,6 @@ using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
 using NvTriStripDotNet;
-using System.Collections.Immutable;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model
@@ -83,6 +82,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
 
             //Check if we can treat this as an static weighted model
             //Static weighted models not only allow more mesh data, but are structured fairly differently
+            foreach(var vtxl in aqo.vtxlList)
+            {
+                vtxl.AssureSumOfOneOnWeights();
+                vtxl.SortBoneIndexWeightOrderByWeight();
+            }
             bool isStaticWeighted = CheckIfStaticWeighted(aqo);
 
             switch (variant)
@@ -96,6 +100,8 @@ namespace AquaModelLibrary.Data.Ninja.Model
                     NvStripifier stripifier = new NvStripifier() { StitchStrips = false, UseRestart = false };
                     //If this model is static weighted, we assign full mesh data per NJSObject it's attached to and do not use any weighted data. Static weighted models are also allowed to have
                     //vertex colors or normals
+                    //For this case we won't be rebuilding with vertex morphs/blend targets/shape motion in mind.
+                    //Faces with more than one bone referenced in their vertices will be ignored since there's no way to support that
                     if (isStaticWeighted)
                     {
 
@@ -122,8 +128,6 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         //Loop through combined vertex list, reorder vertices per node and track the mapping for the master ids
                         //After, the tri indices will need to have their ids remapped based on this
                         List<GinjaSkinVertexData> skinVerts = new List<GinjaSkinVertexData>();
-                        combinedVTXL.AssureSumOfOneOnWeights();
-                        combinedVTXL.SortBoneIndexWeightOrderByWeight();
 
                         int currentVertCounter = 0;
                         for(int b = 0; b < aqn.nodeList.Count; b++)
@@ -431,6 +435,33 @@ namespace AquaModelLibrary.Data.Ninja.Model
                 if (isStaticWeighted == false)
                 {
                     break;
+                }
+            }
+
+            //Break early if we know
+            if(isStaticWeighted == false)
+            {
+                return false;
+            }
+
+            //By this point, we know there are no bones with partial weights
+            //Check if we have faces with more than one bone referenced and used
+            for(int i = 0; i < aqo.meshList.Count; i++)
+            {
+                var mesh = aqo.meshList[i];
+                var tris = aqo.strips[mesh.psetIndex].GetTriangles();
+                var vtxl = aqo.vtxlList[mesh.vsetIndex];
+                for(int j = 0; j > tris.Count; j++)
+                {
+                    var vertIndices0 = vtxl.vertWeightIndices[(int)tris[j].X];
+                    var vertIndices1 = vtxl.vertWeightIndices[(int)tris[j].Y];
+                    var vertIndices2 = vtxl.vertWeightIndices[(int)tris[j].Z];
+
+                    if (vertIndices0[0] == vertIndices0[1] || vertIndices0[1] == vertIndices0[2] || vertIndices0[0] == vertIndices0[2])
+                    {
+                        isStaticWeighted = false;
+                        break;
+                    }
                 }
             }
 
