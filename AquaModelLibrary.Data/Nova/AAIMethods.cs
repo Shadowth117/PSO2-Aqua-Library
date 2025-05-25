@@ -110,10 +110,12 @@ namespace AquaModelLibrary.Data.Nova
                 var offsetTimesStart = streamReader.Position;
                 var offsetTimes = streamReader.ReadOffsetTimeSets(timeCount);
                 List<List<NodeOffsetSet>> setsList = new List<List<NodeOffsetSet>>();
-                List<Dictionary<int, RotationKey>> framesDictList = new List<Dictionary<int, RotationKey>>();
+                List<List<RotationKey>> rotFramesListList = new List<List<RotationKey>>();
+                
 
                 for (int i = 0; i < offsetTimes.Count; i++)
                 {
+                    List<RotationKey> rotFrameList = new List<RotationKey>();
                     streamReader.Seek(offsetTimes[i].offset + offsetTimesStart + i * 8, SeekOrigin.Begin);
                     var position = streamReader.Position;
                     Debug.WriteLine($"OffsetTime {i} start: {position:X}");
@@ -143,8 +145,12 @@ namespace AquaModelLibrary.Data.Nova
 
                     for (int j = 0; j < sets.Count; j++)
                     {
-
+                        rotFrameList.Add(streamReader.Read<RotationKey>());
+                        Debug.WriteLine($"U {rotFrameList[j].usht_0 / 65535.0} {rotFrameList[j].usht_1 / 65535.0} {rotFrameList[j].usht_2 / 65535.0}  {rotFrameList[j].usht_3 / 65535.0}");
+                        streamReader.Seek(-0x8, SeekOrigin.Current);
+                        Debug.WriteLine($"S {streamReader.Read<short>() / 32767.0} {streamReader.Read<short>() / 32767.0} {streamReader.Read<short>() / 32767.0}  {streamReader.Read<short>() / 32767.0}");
                     }
+                    rotFramesListList.Add(rotFrameList);
                 }
             }
             return null;

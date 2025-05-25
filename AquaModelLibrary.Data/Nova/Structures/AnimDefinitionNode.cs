@@ -2,6 +2,13 @@
 
 namespace AquaModelLibrary.Data.Nova.Structures
 {
+    /// <summary>
+    /// These probably define the keydata somehow. 
+    /// Working theory is that all defined keydata will be placed per keyframe for this node.
+    /// ex. Position keydata will be placed right next to rotation keydata if both are defined
+    /// 
+    /// Actual Keydata does NOT need alignment and can end at odd bytecounts like 0x9
+    /// </summary>
     public class AnimDefinitionNode
     {
         public ushort header0;

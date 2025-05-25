@@ -1,6 +1,9 @@
 ﻿namespace AquaModelLibrary.Data.Nova.NOD
 {
-    //Node layout format. 
+    /// <summary>
+    /// Navmesh Node layout format
+    /// field_registry files label these as 'navigation'
+    /// </summary>
     public class NOD
     {
         public NODHeader Header { get; set; }
