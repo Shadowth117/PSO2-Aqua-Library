@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
 using SoulsFormats;
-using SoulsFormats.Formats.Other.MWC;
+using SoulsFormats.Other.MWC;
 using System.Numerics;
 
 namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos

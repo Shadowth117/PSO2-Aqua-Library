@@ -1,4 +1,5 @@
 ﻿using SoulsFormats;
+using SoulsFormats.Other.MWC;
 
 namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
 {
@@ -10,7 +11,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             var outPathBase = Path.Combine(Path.GetDirectoryName(fileName), fileBase);
             if (fileName.EndsWith("_m.dat"))
             {
-                var mdat = SoulsFile<SoulsFormats.MWC.MDAT>.Read(fileName);
+                var mdat = SoulsFile<MDAT>.Read(fileName);
                 Directory.CreateDirectory(outPathBase);
 
                 var mdlPath = Path.Combine(outPathBase, Path.GetFileName(fileBase + ".mdl"));
@@ -46,7 +47,7 @@ namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
             }
             else if (fileName.EndsWith("_t.dat"))
             {
-                var tdat = SoulsFile<SoulsFormats.MWC.TDAT>.Read(fileName);
+                var tdat = SoulsFile<TDAT>.Read(fileName);
                 Directory.CreateDirectory(outPathBase);
                 foreach (var texture in tdat.Textures)
                 {

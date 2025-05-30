@@ -77,7 +77,7 @@ namespace AquaModelLibrary.Core.FromSoft
         {
             if (mesh.Vertices?[0].Tangents.Count > 0)
             {
-                var vertexIndices = mesh.Triangulate(version);
+                var vertexIndices = mesh.Triangulate(version, false, false);
 
                 int vertexCount = mesh.Vertices.Count;
 

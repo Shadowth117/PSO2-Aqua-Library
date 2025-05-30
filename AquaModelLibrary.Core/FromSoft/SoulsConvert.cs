@@ -1038,7 +1038,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         }
                         vtxl.bonePalette.Add((ushort)mesh0.BoneIndices[b]);
                     }
-                    indices = mesh0.Triangulate(((FLVER0)flver).Header.Version);
+                    indices = mesh0.Triangulate(((FLVER0)flver).Header.Version, false, false);
 
                     var material = (FLVER0.Material)flver.Materials[mesh0.MaterialIndex];
                     foreach (var layoutType in material.Layouts[0])
@@ -1046,7 +1046,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         switch (layoutType.Semantic)
                         {
                             case FLVER.LayoutSemantic.Normal:
-                                if (layoutType.Type == FLVER.LayoutType.Byte4B || layoutType.Type == FLVER.LayoutType.Byte4E)
+                                if (layoutType.Type == FLVER.LayoutType.UByte4 || layoutType.Type == FLVER.LayoutType.Byte4E)
                                 {
                                     useNormalWTransform = true;
                                 }
@@ -1071,7 +1071,7 @@ namespace AquaModelLibrary.Core.FromSoft
                             switch (layoutType.Semantic)
                             {
                                 case FLVER.LayoutSemantic.Normal:
-                                    if (layoutType.Type == FLVER.LayoutType.Byte4B || layoutType.Type == FLVER.LayoutType.Byte4E)
+                                    if (layoutType.Type == FLVER.LayoutType.UByte4 || layoutType.Type == FLVER.LayoutType.Byte4E)
                                     {
                                         useNormalWTransform = true;
                                     }
@@ -1384,7 +1384,7 @@ namespace AquaModelLibrary.Core.FromSoft
             var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var mtdDict = ReadMTDLayoutData(Path.Combine(exePath, "DeSMtdLayoutData.bin"));
             FLVER0 flver = new FLVER0();
-            flver.Header = new FLVER0Header();
+            flver.Header = new FLVER0.FLVERHeader();
             flver.Header.BigEndian = true;
             flver.Header.Unicode = true;
             flver.Header.Version = 0x15;
@@ -1537,7 +1537,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 FLVER0.Mesh flvMesh = new FLVER0.Mesh();
                 var flverMaterial = flver.Materials[matIds[i]];
                 flvMesh.MaterialIndex = (byte)matIds[i];
-                flvMesh.BackfaceCulling = false;
+                flvMesh.CullBackfaces = false;
 
                 bool normalWBoneTransform = false;
                 bool foundBoneIndices = false;
@@ -1549,7 +1549,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         switch (layoutType.Semantic)
                         {
                             case FLVER.LayoutSemantic.Normal:
-                                if (layoutType.Type == FLVER.LayoutType.Byte4B || layoutType.Type == FLVER.LayoutType.Byte4E)
+                                if (layoutType.Type == FLVER.LayoutType.UByte4 || layoutType.Type == FLVER.LayoutType.Byte4E)
                                 {
                                     normalWBoneTransform = true;
                                 }
@@ -1570,9 +1570,8 @@ namespace AquaModelLibrary.Core.FromSoft
 
                 //TODO DECIDE IF DYNAMIC BASED ON LAYOUT AND ALTER VERTEX WEIGHTS, NORMAL W, BONE INDICES APPROPRIATELY
                 flvMesh.Vertices = new List<FLVER.Vertex>();
-                flvMesh.VertexIndices = new List<int>();
-                flvMesh.DefaultBoneIndex = 0; //Maybe set properly later from the aqp version if important
-                flvMesh.BoneIndices = new short[28];
+                flvMesh.Indices = new List<int>();
+                flvMesh.NodeIndex = 0; //Maybe set properly later from the aqp version if important
                 for (int b = 0; b < 28; b++)
                 {
                     if (vtxl.bonePalette.Count > 0)
@@ -1602,10 +1601,10 @@ namespace AquaModelLibrary.Core.FromSoft
 
                 //Handle faces
                 //Possibly implement tristripping? 
-                flvMesh.UseTristrips = false;
+                flvMesh.TriangleStrip = false;
                 foreach (var ind in faces.triStrips)
                 {
-                    flvMesh.VertexIndices.Add(ind);
+                    flvMesh.Indices.Add(ind);
                 }
 
                 //Saves time so we don't have to dynamically find the greatest weight for each set, but only if the mesh needs it
@@ -1668,7 +1667,7 @@ namespace AquaModelLibrary.Core.FromSoft
                                 break;
                             case FLVER.LayoutSemantic.UV:
                                 AddUV(vert, vtxl, v);
-                                if (flvMat.Layouts[0][l].Type == FLVER.LayoutType.UVPair)
+                                if (flvMat.Layouts[0][l].Type == FLVER.LayoutType.Short4)
                                 {
                                     AddUV(vert, vtxl, v);
                                 }

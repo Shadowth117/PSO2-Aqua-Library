@@ -1,5 +1,5 @@
 ﻿using SoulsFormats;
-using SoulsFormats.Formats.Other.MWC;
+using SoulsFormats.Other.MWC;
 
 namespace AquaModelLibrary.Core.FromSoft.MetalWolfChaos
 {
