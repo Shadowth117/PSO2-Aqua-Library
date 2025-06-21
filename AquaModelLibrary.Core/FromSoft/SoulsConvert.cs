@@ -1132,6 +1132,17 @@ namespace AquaModelLibrary.Core.FromSoft
                     var vert = mesh.Vertices[v];
                     Vector3 vertPos = vert.Position;
                     Vector3 vertNorm = new Vector3(vert.Normal.X, vert.Normal.Y, vert.Normal.Z);
+                    Vector3? vertTangent = null;
+                    //Vector3? vertBinormal = null;
+                    if (vert.Tangents.Count > 0)
+                    {
+                        vertTangent = new Vector3(vert.Tangents[0].X, vert.Tangents[0].Y, vert.Tangents[0].Z);
+                        /*
+                        if (vert.Tangents.Count > 1)
+                        {
+                            vertBinormal = new Vector3(vert.Tangents[1].X, vert.Tangents[1].Y, vert.Tangents[1].Z);
+                        }*/
+                    }
                     Vector3 vertPosNorm = vertPos + vertNorm;
 
                     int boneTransformationIndex = -1;
@@ -1192,9 +1203,21 @@ namespace AquaModelLibrary.Core.FromSoft
                         if (boneTransformationIndex > -1 && BoneTransforms.Count > boneTransformationIndex)
                         {
                             var boneTfm = BoneTransforms[boneTransformationIndex];
+                            var preTransformedPos = vertPos;
 
                             vertPos = Vector3.Transform(vertPos, boneTfm);
                             vertNorm = Vector3.Normalize(Vector3.Transform(vertPosNorm, boneTfm) - vertPos);
+                            if(vertTangent != null)
+                            {
+                                var vertPosTan = preTransformedPos + (Vector3)vertTangent;
+                                vertTangent = Vector3.Normalize(Vector3.Transform(vertPosTan, boneTfm) - vertPos);
+                                /*
+                                if(vertBinormal != null)
+                                {
+                                    var vertPosBi = preTransformedPos + (Vector3)vertBinormal;
+                                    vertBinormal = Vector3.Normalize(Vector3.Transform(vertPosBi, boneTfm) - vertPos);
+                                }*/
+                            }
                             wasTransformed = true;
                         }
                     }
@@ -1218,6 +1241,15 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     vtxl.vertPositions.Add(vertPos);
                     vtxl.vertNormals.Add(vertNorm);
+                    if(vert.Tangents.Count > 0)
+                    {
+                        vtxl.vertTangentList.Add((Vector3)vertTangent);
+                        /*
+                        if(vert.Tangents.Count > 1)
+                        {
+                            vtxl.vertTangentList.Add((Vector3)vertBinormal);
+                        }*/
+                    }
 
                     if (vert.UVs.Count > 0)
                     {
