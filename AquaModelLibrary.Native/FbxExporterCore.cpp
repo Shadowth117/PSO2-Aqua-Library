@@ -85,6 +85,30 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             }
         }
 
+        if (vtxl->vertTangentList->Count > 0)
+        {
+            FbxGeometryElementTangent* lElementTangent = (FbxGeometryElementTangent*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eTangent);
+            lElementTangent->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementTangent->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each (Vector3 normal in vtxl->vertTangentList)
+            {
+                lElementTangent->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+            }
+        }
+
+        if (vtxl->vertBinormalList->Count > 0)
+        {
+            FbxGeometryElementBinormal* lElementBinormal = (FbxGeometryElementBinormal*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eBiNormal);
+            lElementBinormal->SetMappingMode(FbxLayerElement::eByControlPoint);
+            lElementBinormal->SetReferenceMode(FbxLayerElement::eDirect);
+
+            for each(Vector3 normal in vtxl->vertBinormalList)
+            {
+                lElementBinormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+            }
+        }
+
         FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
         FbxGeometryElementUV* lElementVertexColor2_1 = nullptr;
         FbxGeometryElementUV* lElementVertexColor2_2 = nullptr;
