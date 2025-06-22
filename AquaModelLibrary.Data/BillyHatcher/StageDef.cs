@@ -13,7 +13,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
 		public ushort unkSht;
 		public int defOffset;
 		public List<StageDefinition> defs = new List<StageDefinition>();
-		public Dictionary<string, StageDefinition> defsDict = new Dictionary<string, StageDefinition>();
+        public Dictionary<string, StageDefinition> GetDefsDict() { return defs.ToDictionary(def => def.missionName); }
+
 		/// <summary>
 		/// A special StageCommonData that defines the fields for the others in the file.
 		/// </summary>
@@ -204,8 +205,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
 					sr.Seek(8 + def.eventFilenameOffset, SeekOrigin.Begin);
 					def.eventFilename = sr.ReadCString();
 				}
-
-				defsDict.Add(def.missionName, def);
 			}
 
 		}

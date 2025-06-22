@@ -13,6 +13,7 @@ namespace AquaModelLibrary.Core.ToolUX
         public bool addFBXRootNode { get; set; } = false;
         public bool addFlverDummies { get; set; } = false;
         public bool parentDummiesToAttachNodes { get; set; } = true;
+        public bool addTangentData { get; set; } = false;
         public SoulsGame soulsGame { get; set; } = SoulsGame.None;
         public ExportFormat exportFormat { get; set; } = ExportFormat.Fbx;
         public MirrorType mirrorType { get; set; } = MirrorType.Z;

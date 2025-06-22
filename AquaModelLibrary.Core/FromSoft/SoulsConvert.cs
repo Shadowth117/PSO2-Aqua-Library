@@ -31,6 +31,7 @@ namespace AquaModelLibrary.Core.FromSoft
         public static bool addFBXRootNode = true;
         public static bool addFlverDummies = false;
         public static bool parentDummiesToAttachNodes = true;
+        public static bool addTangentData = false;
 
         public static SoulsGame game = SoulsGame.None;
         public static ExportFormat exportFormat = ExportFormat.Fbx;
@@ -352,7 +353,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     var outName = Path.ChangeExtension(fileName, ".aqp");
                     if (aqp != null && aqp.vtxlList.Count > 0)
                     {
-                        aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true, false, aqp.bonePalette.Count == 0);
+                        aqp.ConvertToPSO2Model(true, false, false, !addTangentData, false, false, false, true, false, aqp.bonePalette.Count == 0);
                         aqp.ConvertToLegacyTypes();
                         aqp.CreateTrueVertWeights();
 
@@ -376,7 +377,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         {
                             case ExportFormat.Fbx:
                                 finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
-                                FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)coordSystem);
+                                FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)coordSystem, !addTangentData);
                                 break;
                             case ExportFormat.Smd:
                                 finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".smd"));
@@ -1241,7 +1242,7 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     vtxl.vertPositions.Add(vertPos);
                     vtxl.vertNormals.Add(vertNorm);
-                    if(vert.Tangents.Count > 0)
+                    if(addTangentData && vert.Tangents.Count > 0)
                     {
                         vtxl.vertTangentList.Add((Vector3)vertTangent);
                         /*
