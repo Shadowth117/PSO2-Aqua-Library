@@ -198,6 +198,12 @@ namespace AquaModelLibrary.Core.General
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[4].Add(aiTextureCoordinate);
                     }
+                    else if (vtxl.uv5List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv5List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
+                        aiMesh.TextureCoordinateChannels[4].Add(aiTextureCoordinate);
+                    }
                     else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(1, 1, 1);
@@ -208,6 +214,12 @@ namespace AquaModelLibrary.Core.General
                     {
                         var textureCoordinate = vtxl.vert0x23[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
+                        aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
+                    }
+                    else if (vtxl.uv6List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv6List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
                         aiMesh.TextureCoordinateChannels[5].Add(aiTextureCoordinate);
                     }
                     else
@@ -222,6 +234,12 @@ namespace AquaModelLibrary.Core.General
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
                         aiMesh.TextureCoordinateChannels[6].Add(aiTextureCoordinate);
                     }
+                    else if (vtxl.uv7List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv7List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
+                        aiMesh.TextureCoordinateChannels[6].Add(aiTextureCoordinate);
+                    }
                     else
                     {
                         var aiTextureCoordinate = new Assimp.Vector3D(1, 1, 1);
@@ -232,6 +250,12 @@ namespace AquaModelLibrary.Core.General
                     {
                         var textureCoordinate = vtxl.vert0x25[vertId];
                         var aiTextureCoordinate = new Assimp.Vector3D(uvShortToFloat(textureCoordinate[0]), uvShortToFloat(textureCoordinate[1]), 0f);
+                        aiMesh.TextureCoordinateChannels[7].Add(aiTextureCoordinate);
+                    }
+                    else if (vtxl.uv8List.Count > 0)
+                    {
+                        var textureCoordinate = vtxl.uv8List[vertId];
+                        var aiTextureCoordinate = new Assimp.Vector3D(textureCoordinate.X, textureCoordinate.Y, 0f);
                         aiMesh.TextureCoordinateChannels[7].Add(aiTextureCoordinate);
                     }
                     else

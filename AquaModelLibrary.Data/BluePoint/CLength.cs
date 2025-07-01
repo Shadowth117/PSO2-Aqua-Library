@@ -11,6 +11,15 @@ namespace AquaModelLibrary.Data.BluePoint
         private byte lengthAddition2 = 1;
 
         public CLength() { }
+
+        public CLength(int trueLen)
+        {
+            var divCount = trueLen / 0x80;
+            var rem = trueLen % 0x80;
+            length = rem + 0x80;
+            lengthAddition0 = (byte)divCount;
+        }
+
         public CLength(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
             era = newEra;
@@ -36,6 +45,31 @@ namespace AquaModelLibrary.Data.BluePoint
                 case BPEra.SOTC:
                     length = sr.ReadBE<ushort>();
                     break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public byte[] GetBytes(BPEra era)
+        {
+            switch (era)
+            {
+                case BPEra.DemonsSouls:
+                    List<byte> outBytes = new List<byte>();
+                    var trueLen = GetTrueLength();
+                    if (trueLen >= 0x80)
+                    {
+                        var divCount = trueLen / 0x80;
+                        var rem = trueLen % 0x80;
+                        outBytes.Add((byte)(0x80 + rem));
+                        outBytes.Add((byte)divCount);
+                    } else
+                    {
+                        outBytes.Add((byte)trueLen);
+                    }
+                    return outBytes.ToArray();
+                case BPEra.SOTC:
+                    return BitConverter.GetBytes((ushort)GetTrueLength());
                 default:
                     throw new NotImplementedException();
             }

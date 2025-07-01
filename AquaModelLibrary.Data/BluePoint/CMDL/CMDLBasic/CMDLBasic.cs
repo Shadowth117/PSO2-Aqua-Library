@@ -74,25 +74,15 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL.CMDLBasic
                         }
                         break;
                     case VertexMagic.COL0:
-                        for (int v = 0; v < vertexCount; v++)
-                        {
-                            var colorTemp = new Vector4(sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>());
-                            cmeshVertData.colors.Add(new byte[] { (byte)(colorTemp.X * 255), (byte)(colorTemp.Y * 255), (byte)(colorTemp.Z * 255), (byte)(colorTemp.W * 255), });
-                        }
-                        break;
                     case VertexMagic.COL1:
-                        for (int v = 0; v < vertexCount; v++)
-                        {
-                            var colorTemp = new Vector4(sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>());
-                            cmeshVertData.color2s.Add(new byte[] { (byte)(colorTemp.X * 255), (byte)(colorTemp.Y * 255), (byte)(colorTemp.Z * 255), (byte)(colorTemp.W * 255), });
-                        }
-                        break;
                     case VertexMagic.COL2:
+                        var colors = new List<byte[]>();
                         for (int v = 0; v < vertexCount; v++)
                         {
                             var colorTemp = new Vector4(sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>(), sr.ReadBE<Half>());
-                            cmeshVertData.color3s.Add(new byte[] { (byte)(colorTemp.X * 255), (byte)(colorTemp.Y * 255), (byte)(colorTemp.Z * 255), (byte)(colorTemp.W * 255), });
+                            colors.Add(new byte[] { (byte)(colorTemp.X * 255), (byte)(colorTemp.Y * 255), (byte)(colorTemp.Z * 255), (byte)(colorTemp.W * 255), });
                         }
+                        cmeshVertData.colorDict.Add(vertDef.dataMagic, colors);
                         break;
                     case VertexMagic.TEX0:
                     case VertexMagic.TEX1:

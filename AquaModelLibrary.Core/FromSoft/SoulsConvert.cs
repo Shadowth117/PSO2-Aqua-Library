@@ -520,6 +520,43 @@ namespace AquaModelLibrary.Core.FromSoft
                 return null;
             }
 
+            //
+            /*
+            Vector4[] minMax = new Vector4[8];
+            for(int i = 0; i < minMax.Length; i++)
+            {
+                minMax[i] = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
+            }
+
+            foreach(var mesh in flver.Meshes)
+            {
+                foreach(var vert in mesh.Vertices)
+                {
+                    for(int i = 0; i < vert.UVs.Count; i++)
+                    {
+                        var minMaxUv = minMax[i];
+                        if (vert.UVs[i].X < minMaxUv.X)
+                        {
+                            minMaxUv.X = vert.UVs[i].X;
+                        }
+                        if (vert.UVs[i].X > minMaxUv.Y)
+                        {
+                            minMaxUv.Y = vert.UVs[i].X;
+                        }
+
+                        if (vert.UVs[i].Y < minMaxUv.Z)
+                        {
+                            minMaxUv.Z = vert.UVs[i].Y;
+                        }
+                        if (vert.UVs[i].Y > minMaxUv.W)
+                        {
+                            minMaxUv.W = vert.UVs[i].Y;
+                        }
+                        minMax[i] = minMaxUv;
+                    }
+                }
+            }*/
+
             return FlverToAqua(Path.GetFileNameWithoutExtension(filePath) + "_skeleton", flver, out aqn, useMetaData);
         }
         public static AquaObject MDL4ToAqua(SoulsFormats.Other.MDL4 mdl4, out AquaNode aqn, bool useMetaData = false)
@@ -688,6 +725,26 @@ namespace AquaModelLibrary.Core.FromSoft
                     {
                         var uv4 = vert.UVs[3];
                         vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
+                    }
+                    if (vert.UVs.Count > 4)
+                    {
+                        var uv5 = vert.UVs[4];
+                        vtxl.uv5List.Add(new Vector2(uv5.X, uv5.Y));
+                    }
+                    if (vert.UVs.Count > 5)
+                    {
+                        var uv6 = vert.UVs[5];
+                        vtxl.uv6List.Add(new Vector2(uv6.X, uv6.Y));
+                    }
+                    if (vert.UVs.Count > 6)
+                    {
+                        var uv7 = vert.UVs[6];
+                        vtxl.uv7List.Add(new Vector2(uv7.X, uv7.Y));
+                    }
+                    if (vert.UVs.Count > 7)
+                    {
+                        var uv8 = vert.UVs[7];
+                        vtxl.uv8List.Add(new Vector2(uv8.X, uv8.Y));
                     }
                     var color = vert.Color;
                     vtxl.vertColors.Add(new byte[] { (color.B), (color.G), (color.R), (color.A) });
@@ -1271,6 +1328,26 @@ namespace AquaModelLibrary.Core.FromSoft
                     {
                         var uv4 = vert.UVs[3];
                         vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
+                    }
+                    if (vert.UVs.Count > 4)
+                    {
+                        var uv5 = vert.UVs[4];
+                        vtxl.uv5List.Add(new Vector2(uv5.X, uv5.Y));
+                    }
+                    if (vert.UVs.Count > 5)
+                    {
+                        var uv6 = vert.UVs[5];
+                        vtxl.uv6List.Add(new Vector2(uv6.X, uv6.Y));
+                    }
+                    if (vert.UVs.Count > 6)
+                    {
+                        var uv7 = vert.UVs[6];
+                        vtxl.uv7List.Add(new Vector2(uv7.X, uv7.Y));
+                    }
+                    if (vert.UVs.Count > 7)
+                    {
+                        var uv8 = vert.UVs[7];
+                        vtxl.uv8List.Add(new Vector2(uv8.X, uv8.Y));
                     }
 
                     if (vert.Colors.Count > 0)
@@ -2014,6 +2091,56 @@ namespace AquaModelLibrary.Core.FromSoft
                     if (vtxl.uv4List.Count > vertId)
                     {
                         vert.UVs.Add(new Vector3(vtxl.uv4List[vertId], 0));
+                    }
+                    else
+                    {
+                        vert.UVs.Add(new Vector3(0, 0, 0));
+                    }
+                    break;
+                case 4:
+                    if (vtxl.uv5List.Count > vertId)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv5List[vertId], 0));
+                    }
+                    else
+                    {
+                        vert.UVs.Add(new Vector3(0, 0, 0));
+                    }
+                    break;
+                case 5:
+                    if (vtxl.uv6List.Count > vertId)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv6List[vertId], 0));
+                    }
+                    else
+                    {
+                        vert.UVs.Add(new Vector3(0, 0, 0));
+                    }
+                    break;
+                case 6:
+                    if (vtxl.uv6List.Count > vertId)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv6List[vertId], 0));
+                    }
+                    else
+                    {
+                        vert.UVs.Add(new Vector3(0, 0, 0));
+                    }
+                    break;
+                case 7:
+                    if (vtxl.uv7List.Count > vertId)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv7List[vertId], 0));
+                    }
+                    else
+                    {
+                        vert.UVs.Add(new Vector3(0, 0, 0));
+                    }
+                    break;
+                case 8:
+                    if (vtxl.uv8List.Count > vertId)
+                    {
+                        vert.UVs.Add(new Vector3(vtxl.uv8List[vertId], 0));
                     }
                     else
                     {

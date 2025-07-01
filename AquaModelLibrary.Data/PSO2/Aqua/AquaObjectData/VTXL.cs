@@ -27,6 +27,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
         public List<Vector2> uv2List = new List<Vector2>(); //For some reason 0xC33 seemingly retained vector2 data types for these, though only in some cases.
         public List<Vector2> uv3List = new List<Vector2>();
         public List<Vector2> uv4List = new List<Vector2>();
+        public List<Vector2> uv5List = new List<Vector2>();
+        public List<Vector2> uv6List = new List<Vector2>();
+        public List<Vector2> uv7List = new List<Vector2>();
+        public List<Vector2> uv8List = new List<Vector2>();
         public List<short[]> vert0x22 = new List<short[]>(); //This and the following type are 2 shorts seemingly that do... something. Only observed in 0xC33 player models at this time. 
         public List<short[]> vert0x23 = new List<short[]>(); //Possibly UV channels 5 and 6? Typically values are the same for every vertex in a mesh though.
         public List<short[]> vert0x24 = new List<short[]>();
@@ -142,6 +146,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             if (modelVtxl.uv4List.Count > 0)
             {
                 uv4List = new List<Vector2>(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv5List.Count > 0)
+            {
+                uv5List = new List<Vector2>(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv6List.Count > 0)
+            {
+                uv6List = new List<Vector2>(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv7List.Count > 0)
+            {
+                uv7List = new List<Vector2>(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv8List.Count > 0)
+            {
+                uv8List = new List<Vector2>(new Vector2[vertCount]);
             }
             if (modelVtxl.vert0x22.Count > 0)
             {
@@ -777,7 +797,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
             if (force || uv3List.Count == 0)
             {
-                //UV2List
+                //UV3List
                 uv3List.Clear();
                 for (int i = 0; i < uv3ListNGS.Count; i++)
                 {
@@ -790,7 +810,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
             if (force || uv4List.Count == 0)
             {
-                //UV2List
+                //UV4List
                 uv4List.Clear();
                 for (int i = 0; i < uv4ListNGS.Count; i++)
                 {
@@ -1410,6 +1430,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 uv4List.AddRange(new Vector2[vertCount]);
             }
+            if (modelVtxl.uv5List.Count > 0)
+            {
+                uv5List.AddRange(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv6List.Count > 0)
+            {
+                uv6List.AddRange(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv7List.Count > 0)
+            {
+                uv7List.AddRange(new Vector2[vertCount]);
+            }
+            if (modelVtxl.uv8List.Count > 0)
+            {
+                uv8List.AddRange(new Vector2[vertCount]);
+            }
             if (modelVtxl.vert0x22.Count > 0)
             {
                 vert0x22.AddRange(new short[vertCount][]);
@@ -1521,6 +1557,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             if (sourceVTXL.uv4List.Count > sourceIndex)
             {
                 destinationVTXL.uv4List[destinationIndex] = sourceVTXL.uv4List[sourceIndex];
+            }
+            if (sourceVTXL.uv5List.Count > sourceIndex)
+            {
+                destinationVTXL.uv5List[destinationIndex] = sourceVTXL.uv5List[sourceIndex];
+            }
+            if (sourceVTXL.uv6List.Count > sourceIndex)
+            {
+                destinationVTXL.uv6List[destinationIndex] = sourceVTXL.uv6List[sourceIndex];
+            }
+            if (sourceVTXL.uv7List.Count > sourceIndex)
+            {
+                destinationVTXL.uv7List[destinationIndex] = sourceVTXL.uv7List[sourceIndex];
+            }
+            if (sourceVTXL.uv8List.Count > sourceIndex)
+            {
+                destinationVTXL.uv8List[destinationIndex] = sourceVTXL.uv8List[sourceIndex];
             }
             if (sourceVTXL.vert0x22.Count > sourceIndex)
             {
@@ -1638,6 +1690,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 destinationVTXL.uv4List.Add(sourceVTXL.uv4List[sourceIndex]);
             }
+            if (sourceVTXL.uv5List.Count > sourceIndex)
+            {
+                destinationVTXL.uv5List.Add(sourceVTXL.uv5List[sourceIndex]);
+            }
+            if (sourceVTXL.uv6List.Count > sourceIndex)
+            {
+                destinationVTXL.uv6List.Add(sourceVTXL.uv6List[sourceIndex]);
+            }
+            if (sourceVTXL.uv7List.Count > sourceIndex)
+            {
+                destinationVTXL.uv7List.Add(sourceVTXL.uv7List[sourceIndex]);
+            }
+            if (sourceVTXL.uv8List.Count > sourceIndex)
+            {
+                destinationVTXL.uv8List.Add(sourceVTXL.uv8List[sourceIndex]);
+            }
             if (sourceVTXL.vert0x22.Count > sourceIndex)
             {
                 destinationVTXL.vert0x22.Add((short[])sourceVTXL.vert0x22[sourceIndex].Clone());
@@ -1710,6 +1778,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             destinationVTXL.uv2List.AddRange(sourceVTXL.uv2List);
             destinationVTXL.uv3List.AddRange(sourceVTXL.uv3List);
             destinationVTXL.uv4List.AddRange(sourceVTXL.uv4List);
+            destinationVTXL.uv5List.AddRange(sourceVTXL.uv5List);
+            destinationVTXL.uv6List.AddRange(sourceVTXL.uv6List);
+            destinationVTXL.uv7List.AddRange(sourceVTXL.uv7List);
+            destinationVTXL.uv8List.AddRange(sourceVTXL.uv8List);
             destinationVTXL.vert0x22.AddRange(sourceVTXL.vert0x22.ConvertAll(uv => (short[])uv.Clone()));
             destinationVTXL.vert0x23.AddRange(sourceVTXL.vert0x23.ConvertAll(uv => (short[])uv.Clone()));
             destinationVTXL.vert0x24.AddRange(sourceVTXL.vert0x24.ConvertAll(uv => (short[])uv.Clone()));
@@ -1779,6 +1851,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             {
                 return false;
             }
+            if (vtxl.uv5List.Count > 0 && !vtxl.uv5List[vertIndex].Equals(vtxl2.uv5List[vertIndex2]))
+            {
+                return false;
+            }
+            if (vtxl.uv6List.Count > 0 && !vtxl.uv6List[vertIndex].Equals(vtxl2.uv6List[vertIndex2]))
+            {
+                return false;
+            }
+            if (vtxl.uv7List.Count > 0 && !vtxl.uv7List[vertIndex].Equals(vtxl2.uv7List[vertIndex2]))
+            {
+                return false;
+            }
+            if (vtxl.uv8List.Count > 0 && !vtxl.uv8List[vertIndex].Equals(vtxl2.uv8List[vertIndex2]))
+            {
+                return false;
+            }
             if (vtxl.vert0x22.Count > 0 && !IsEqualShortArray(vtxl.vert0x22[vertIndex], vtxl2.vert0x22[vertIndex2]))
             {
                 return false;
@@ -1817,6 +1905,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             newVTXL.uv2List = new List<Vector2>(uv2List);
             newVTXL.uv3List = new List<Vector2>(uv3List);
             newVTXL.uv4List = new List<Vector2>(uv4List);
+            newVTXL.uv5List = new List<Vector2>(uv5List);
+            newVTXL.uv6List = new List<Vector2>(uv6List);
+            newVTXL.uv7List = new List<Vector2>(uv7List);
+            newVTXL.uv8List = new List<Vector2>(uv8List);
             newVTXL.vert0x22 = vert0x22.ConvertAll(uv => (short[])uv.Clone()).ToList();
             newVTXL.vert0x23 = vert0x23.ConvertAll(uv => (short[])uv.Clone()).ToList();
             newVTXL.vert0x24 = vert0x24.ConvertAll(uv => (short[])uv.Clone()).ToList();

@@ -108,6 +108,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                 lElementBinormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
             }
         }
+        
 
         FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
         FbxGeometryElementUV* lElementVertexColor2_1 = nullptr;
@@ -130,11 +131,35 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         SetUVChannel(lMesh, vtxl->uv2List, vtxl->vertPositions->Count, 2);
         SetUVChannel(lMesh, vtxl->uv3List, vtxl->vertPositions->Count, 3);
         SetUVChannel(lMesh, vtxl->uv4List, vtxl->vertPositions->Count, 4);
-        SetUVChannelShorts(lMesh, vtxl->vert0x22, vtxl->vertPositions->Count, 5);
-        SetUVChannelShorts(lMesh, vtxl->vert0x23, vtxl->vertPositions->Count, 6);
-        SetUVChannelShorts(lMesh, vtxl->vert0x24, vtxl->vertPositions->Count, 7);
-        SetUVChannelShorts(lMesh, vtxl->vert0x25, vtxl->vertPositions->Count, 8);
-
+        if (vtxl->uv5List->Count > 0)
+        {
+            SetUVChannel(lMesh, vtxl->uv5List, vtxl->vertPositions->Count, 5);
+        }
+        else {
+            SetUVChannelShorts(lMesh, vtxl->vert0x22, vtxl->vertPositions->Count, 5);
+        }
+        if (vtxl->uv6List->Count > 0)
+        {
+            SetUVChannel(lMesh, vtxl->uv6List, vtxl->vertPositions->Count, 6);
+        }
+        else {
+            SetUVChannelShorts(lMesh, vtxl->vert0x23, vtxl->vertPositions->Count, 6);
+        }
+        if (vtxl->uv7List->Count > 0)
+        {
+            SetUVChannel(lMesh, vtxl->uv7List, vtxl->vertPositions->Count, 7);
+        }
+        else {
+            SetUVChannelShorts(lMesh, vtxl->vert0x24, vtxl->vertPositions->Count, 7);
+        }
+        if (vtxl->uv8List->Count > 0)
+        {
+            SetUVChannel(lMesh, vtxl->uv8List, vtxl->vertPositions->Count, 8);
+        }
+        else {
+            SetUVChannelShorts(lMesh, vtxl->vert0x25, vtxl->vertPositions->Count, 8);
+        }
+        
         if (vtxl->vertColor2s->Count > 0)
         {
             lElementVertexColor2_1 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 9)->CreateLayerElementOfType(FbxLayerElement::eUV);

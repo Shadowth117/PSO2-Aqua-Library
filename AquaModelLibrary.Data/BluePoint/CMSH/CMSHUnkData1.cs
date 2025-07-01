@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
@@ -20,6 +21,16 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             size = sr.Read<int>();
             buffer.AddRange(sr.ReadBytes(sr.Position, size));
             sr.Seek(size, System.IO.SeekOrigin.Current);
+        }
+
+        public byte[] GetBytes()
+        {
+            List<byte> outBytes = new List<byte>();
+
+            outBytes.AddValue(buffer.Count);
+            outBytes.AddRange(buffer);
+
+            return outBytes.ToArray();
         }
     }
 }

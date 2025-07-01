@@ -1,7 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using Reloaded.Memory.Streams;
-using System.Collections.Generic;
 using AquaModelLibrary.Data.DataTypes;
+using AquaModelLibrary.Helpers.Extensions;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
@@ -13,10 +12,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         //If vertCount exceeds 0xFFFF, these are ints
         public List<Vector3Int.Vec3Int> faceList = new List<Vector3Int.Vec3Int>();
 
-        public CMSHFaceData()
-        {
-
-        }
+        public CMSHFaceData() {}
 
         public CMSHFaceData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header, int vertCount)
         {
@@ -36,6 +32,30 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         break;
                 }
             }
+        }
+
+        public byte[] GetBytes(int vertCount)
+        {
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddValue(flags);
+            outBytes.AddValue(faceList.Count * 3);
+            bool useInts = vertCount > ushort.MaxValue;
+
+            foreach (var face in faceList)
+            {
+                if(useInts)
+                {
+                    outBytes.AddValue(face.X);
+                    outBytes.AddValue(face.Y);
+                    outBytes.AddValue(face.Z);
+                } else
+                {
+                    outBytes.AddValue((ushort)face.X);
+                    outBytes.AddValue((ushort)face.Y);
+                    outBytes.AddValue((ushort)face.Z);
+                }
+            }
+            return outBytes.ToArray();
         }
     }
 }

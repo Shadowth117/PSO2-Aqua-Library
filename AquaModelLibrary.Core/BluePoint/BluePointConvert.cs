@@ -382,15 +382,41 @@ namespace AquaModelLibrary.Core.BluePoint
                     var uv4 = mesh.vertData.uvDict[VertexMagic.TEX3][v];
                     vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
                 }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX4))
+                {
+                    var uv5 = mesh.vertData.uvDict[VertexMagic.TEX4][v];
+                    vtxl.uv5List.Add(new Vector2(uv5.X, uv5.Y));
+                }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX5))
+                {
+                    var uv6 = mesh.vertData.uvDict[VertexMagic.TEX5][v];
+                    vtxl.uv6List.Add(new Vector2(uv6.X, uv6.Y));
+                }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX6))
+                {
+                    var uv7 = mesh.vertData.uvDict[VertexMagic.TEX6][v];
+                    vtxl.uv7List.Add(new Vector2(uv7.X, uv7.Y));
+                }
+                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX7))
+                {
+                    var uv8 = mesh.vertData.uvDict[VertexMagic.TEX7][v];
+                    vtxl.uv8List.Add(new Vector2(uv8.X, uv8.Y));
+                }
 
                 //Vert Colors
-                if (mesh.vertData.colors.Count > 0)
+                if (mesh.vertData.colorDict.ContainsKey(VertexMagic.COL0))
                 {
-                    vtxl.vertColors.Add(mesh.vertData.colors[v]);
+                    var colors = mesh.vertData.colorDict[VertexMagic.COL0];
+                    vtxl.vertColors.Add(colors[v]);
+                } else if (mesh.vertData.colorDict.ContainsKey(VertexMagic.COL1)) //IN theory we should never have COL0; observed models only use COL1 and 2. But just in case...
+                {
+                    var colors = mesh.vertData.colorDict[VertexMagic.COL1];
+                    vtxl.vertColors.Add(colors[v]);
                 }
-                if (mesh.vertData.color2s.Count > 1)
+                if (mesh.vertData.colorDict.ContainsKey(VertexMagic.COL2))
                 {
-                    vtxl.vertColor2s.Add(mesh.vertData.color2s[v]);
+                    var colors = mesh.vertData.colorDict[VertexMagic.COL2];
+                    vtxl.vertColor2s.Add(colors[v]);
                 }
 
                 if (mesh.vertData.vertWeights.Count > 0)
@@ -442,7 +468,7 @@ namespace AquaModelLibrary.Core.BluePoint
 
                 int startFace;
                 int faceCount;
-                if (mesh.header.hasSizeFloat) //DeSR
+                if (mesh.header.isDeSR) //DeSR
                 {
                     startFace = mesh.header.matList[m].startingFaceIndex / 3;
                     faceCount = mesh.header.matList[m].endingFaceIndex / 3;
@@ -459,8 +485,8 @@ namespace AquaModelLibrary.Core.BluePoint
                     continue;
                 }
 
-                if ((mesh.header.hasSizeFloat && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0)
-                    || (!mesh.header.hasSizeFloat && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
+                if ((mesh.header.isDeSR && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0)
+                    || (!mesh.header.isDeSR && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
                 {
                     startFace = currentFace;
                     faceCount = mesh.faceData.faceList.Count - currentFace;

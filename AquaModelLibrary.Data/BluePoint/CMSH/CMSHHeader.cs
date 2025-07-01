@@ -19,7 +19,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public int endInt;
 
         //Demon's Souls check
-        public bool hasSizeFloat; //Used if extra flags are detected.
+        public bool isDeSR; //Used if extra flags are detected.
+        public BPEra era { get { return isDeSR ? BPEra.DemonsSouls : BPEra.SOTC; } }
         public ulong dummyConstData = 7885087596553986582; //Certain 0x200 dummy models have 0ed extraFlags so we check this against address 0x25 to get around that.
 
         //Some cmshs have this
@@ -85,12 +86,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 }
                 matRef.matName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, matRef.matNameLength));
                 sr.Seek(matRef.matNameLength, System.IO.SeekOrigin.Current);
-                if (hasSizeFloat)
+                if (isDeSR)
                 {
                     matRef.startingFaceIndex = sr.Read<int>();
                     matRef.endingFaceIndex = sr.Read<int>();
                 }
-                else if (!hasSizeFloat) //SOTC
+                else if (!isDeSR) //SOTC
                 {
                     matRef.unkByte = sr.Read<byte>();
                     matRef.startingVertexIndex = sr.Read<int>();
@@ -119,13 +120,13 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         {
             //For certain SOTC models
             var crcCheck = sr.ReadBytes(sr.Position, 4);
-            hasSizeFloat = crcCheck[2] > 0 || crcCheck[3] > 0;
+            isDeSR = crcCheck[2] > 0 || crcCheck[3] > 0;
             if (variantFlags == 0x200 && BitConverter.ToUInt64(sr.ReadBytes(0x25, 8), 0) == dummyConstData)
             {
-                hasSizeFloat = true;
+                isDeSR = true;
             }
 
-            if (hasSizeFloat)
+            if (isDeSR)
             {
                 sizeFloat = sr.Read<float>();
             }
@@ -149,7 +150,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
                     var nameLength = OtherModelName.Length;
                     outBytes.Add((byte)OtherModelName.Length);
-                    if (nameLength >= 0x80 && !hasSizeFloat)
+                    if (nameLength >= 0x80 && !isDeSR)
                     {
                         outBytes.Add(0x1);
                     }
@@ -162,7 +163,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 case 0xAA01:
                     outBytes.Add(unk0);
                     outBytes.AddValue(unk1);
-                    if(hasSizeFloat)
+                    if(isDeSR)
                     {
                         outBytes.AddValue(sizeFloat);
                     }
@@ -184,7 +185,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 outBytes.AddValue(mat.minBounding);
                 outBytes.AddValue(mat.maxBounding);
                 outBytes.AddValue((byte)mat.matName.Length);
-                if (hasSizeFloat)
+                if (isDeSR)
                 {
                     if(mat.matName.Length >= 0x80)
                     {
@@ -192,7 +193,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     }
                 }
                 outBytes.AddValue(Encoding.UTF8.GetBytes(mat.matName));
-                if(hasSizeFloat)
+                if(isDeSR)
                 {
                     outBytes.AddValue(mat.startingFaceIndex);
                     outBytes.AddValue(mat.endingFaceIndex);

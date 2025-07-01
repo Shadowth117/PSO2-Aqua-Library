@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             header = new CMSHHeader(sr);
             if (header.variantFlag2 != 0x41)
             {
-                vertData = new CMSHVertexData(sr, header, header.hasSizeFloat);
+                vertData = new CMSHVertexData(sr, header);
                 faceData = new CMSHFaceData(sr, header, vertData.positionList.Count);
 
                 if ((header.variantFlag2 & 0x20) > 0)
@@ -54,7 +54,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     {
                         unkdata2 = new CMSHUnkData2(sr);
                     }
-                    boneData = new CMSHBoneData(sr, header);
+                    boneData = new CMSHBoneData(sr, header.era);
                 }
                 footerData = sr.Read<CFooter>();
             }
@@ -69,20 +69,20 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 case 0x41:
                     break;
                 default:
-                    //outBytes.AddRange(vertData.GetBytes());
-                    //outBytes.AddRange(faceData.GetBytes());
+                    outBytes.AddRange(vertData.GetBytes(boneData == null ? 0 : boneData.boneNames.Count));
+                    outBytes.AddRange(faceData.GetBytes(vertData.positionList.Count));
                     if((header.variantFlag2 & 0x20) > 0)
                     {
-                      //  outBytes.AddRange(unkdata0.GetBytes());
-                        //outBytes.AddRange(unkdata1.GetBytes());
+                        outBytes.AddRange(unkdata0.GetBytes());
+                        outBytes.AddRange(unkdata1.GetBytes());
                     }
                     if((header.variantFlag & 0x1) > 0)
                     {
                         if(unkdata2 != null)
                         {
-                          //  outBytes.AddRange(unkdata2.GetBytes());
+                            outBytes.AddRange(unkdata2.GetBytes());
                         }
-                        //outBytes.AddRange(boneData.GetBytes());
+                        outBytes.AddRange(boneData.GetBytes(header.era));
                     }
                     break;
             }

@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;
 
@@ -6,14 +7,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHBoneData
     {
-        public byte skelPathLength;
+        public CLength skelPathLength;
         public string skeletonPath = null;
         public int nameCount;
         public int unk0;
         public int size;
 
-        //SOTC 
-        public byte unkSOTCByte;
 
         public List<string> boneNames = new List<string>(); //CString name strings
 
@@ -25,25 +24,10 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         }
 
-        public CMSHBoneData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header)
+        public CMSHBoneData(BufferedStreamReaderBE<MemoryStream> sr, BPEra era)
         {
             var pos = sr.Position;
-            if (header.variantFlag == 0x1 && header.variantFlag2 == 0xA)
-            {
-                byte[] test = sr.ReadBytes(sr.Position + 1, 1);
-                if (test[0] == '$')
-                {
-                    ReadSkeletonPath(sr);
-                }
-                else
-                {
-                    unkSOTCByte = sr.Read<byte>();
-                }
-            }
-            else
-            {
-                ReadSkeletonPath(sr);
-            }
+            ReadSkeletonPath(sr, era);
             unk0 = sr.Read<int>();
             nameCount = sr.Read<int>();
             size = sr.Read<int>();
@@ -59,11 +43,34 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             }
         }
 
-        private void ReadSkeletonPath(BufferedStreamReaderBE<MemoryStream> sr)
+        private void ReadSkeletonPath(BufferedStreamReaderBE<MemoryStream> sr, BPEra era)
         {
-            skelPathLength = sr.Read<byte>();
-            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, skelPathLength));
-            sr.Seek(skelPathLength, System.IO.SeekOrigin.Current);
+            skelPathLength = new CLength(sr, era);
+            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, skelPathLength.GetTrueLength()));
+            sr.Seek(skelPathLength.GetTrueLength(), System.IO.SeekOrigin.Current);
+        }
+
+        public byte[] GetBytes(BPEra era)
+        {
+            List<byte> outBytes = new List<byte>();
+            outBytes.AddRange((new BPString(skeletonPath)).GetBytes(era));
+            outBytes.AddValue(unk0);
+            outBytes.AddValue(boneNames.Count);
+            outBytes.ReserveInt("BoneNamesSize");
+
+            for(int i = 0; i < boneNames.Count; i++)
+            {
+                outBytes.AddRange(Encoding.ASCII.GetBytes(boneNames[i]));
+                outBytes.Add(0);
+            }
+            outBytes.AddValue(boneVec4Array.Count);
+            foreach(var vec4 in boneVec4Array)
+            {
+                outBytes.AddValue(vec4);
+            }
+            outBytes.FillInt("BoneNamesSize", outBytes.Count);
+
+            return outBytes.ToArray();
         }
     }
 }

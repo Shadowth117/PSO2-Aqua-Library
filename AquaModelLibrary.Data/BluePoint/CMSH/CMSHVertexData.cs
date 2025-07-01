@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.MathHelpers;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Numerics;
@@ -48,15 +49,13 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public List<byte[]> normalsTesting = new List<byte[]>();
         public List<string> normalsTesting2 = new List<string>();
         public List<byte[]> normalTemp = new List<byte[]>();
-        public List<byte[]> colors = new List<byte[]>();
-        public List<byte[]> color2s = new List<byte[]>();
-        public List<byte[]> color3s = new List<byte[]>();
         public List<int[]> vertWeightIndices = new List<int[]>();
         public List<Vector4> vertWeights = new List<Vector4>();
         /// <summary>
         /// Increments varying amounts from some amount to 1.0f
         /// </summary>
         public List<float> satValues = new List<float>();
+        public Dictionary<VertexMagic, List<byte[]>> colorDict = new Dictionary<VertexMagic, List<byte[]>>(); 
         public Dictionary<VertexMagic, List<Vector2>> uvDict = new Dictionary<VertexMagic, List<Vector2>>(); //Access by magic, ex 0XET or 3XET (TEX0 and TEX3) as ints. UVs seem stored as half floats
         public Dictionary<VertexMagic, byte[]> unkDict = new Dictionary<VertexMagic, byte[]>();
 
@@ -69,7 +68,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         }
 
-        public CMSHVertexData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header, bool hasSizeFloat)
+        public CMSHVertexData(BufferedStreamReaderBE<MemoryStream> sr, CMSHHeader header)
         {
             unkData0Count = sr.Read<int>();
 
@@ -112,8 +111,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             {
                 sr.Seek(vertexDataStart + vertDefs[i].dataStart, System.IO.SeekOrigin.Begin);
                 ReadVertDefData(sr, vertCount, vertDefs[i].dataMagic, vertDefs[i].dataSize);
-                sr.Seek(vertexDataStart + vertDefs[i].dataStart + vertDefs[i].dataSize, System.IO.SeekOrigin.Begin);
             }
+            sr.Seek(vertexDataStart + vertDefs[^1].dataStart + vertDefs[^1].dataSize, System.IO.SeekOrigin.Begin);
         }
 
         public void ReadVertDefData(BufferedStreamReaderBE<MemoryStream> sr, int vertCount, VertexMagic dataMagic, long dataSize)
@@ -131,12 +130,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 case VertexMagic.QUT0:
                     for (int v = 0; v < vertCount; v++)
                     {
+                        var byteArr = sr.Read4Bytes();
+                        normalTemp.Add(byteArr);
+#if DEBUG
+                        sr.Seek(-0x4, SeekOrigin.Current);
                         var uarr = sr.Peek<uint>();
                         var iarr = sr.Peek<int>();
-                        var byteArr = sr.Read4Bytes();
-                        sr.Seek(-0x4, SeekOrigin.Current);
-                        //Quaternion quat = new Quaternion(ConvertBPSbyte(byteArr[0]), ConvertBPSbyte(byteArr[1]), ConvertBPSbyte(byteArr[2]), ConvertBPSbyte(byteArr[3]));
-                        normalTemp.Add(byteArr);
 
                         int x = (int)(uarr & 0x3FF);          
                         int y = (int)((uarr >> 10) & 0x3FF);
@@ -187,28 +186,19 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         var testnrm = Vector3.Normalize(normal);
 
                         normals.Add(SphereDecode(uarr));
+#endif
                     }
                     break;
                 case VertexMagic.COL0:
+                case VertexMagic.COL1:
+                case VertexMagic.COL2:
+                    List<byte[]> colors = new List<byte[]>();
                     for (int v = 0; v < vertCount; v++)
                     {
                         colors.Add(sr.ReadBytes(sr.Position, 4));
                         sr.Seek(4, System.IO.SeekOrigin.Current);
                     }
-                    break;
-                case VertexMagic.COL1:
-                    for (int v = 0; v < vertCount; v++)
-                    {
-                        color2s.Add(sr.ReadBytes(sr.Position, 4));
-                        sr.Seek(4, System.IO.SeekOrigin.Current);
-                    }
-                    break;
-                case VertexMagic.COL2:
-                    for (int v = 0; v < vertCount; v++)
-                    {
-                        color3s.Add(sr.ReadBytes(sr.Position, 4));
-                        sr.Seek(4, System.IO.SeekOrigin.Current);
-                    }
+                    colorDict.Add(dataMagic, colors);
                     break;
                 case VertexMagic.TEX0:
                 case VertexMagic.TEX1:
@@ -266,9 +256,157 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             }
         }
 
-        public byte[] GetBytes(bool hasSizeFloat)
+        public byte[] GetBytes(int boneCount)
         {
+            bool largeBoneCount = boneCount > 256;
             List<byte> outBytes = new();
+            outBytes.AddValue(sotcUnk0List.Count);
+            if (sotcUnk0List.Count > 0)
+            {
+                foreach (var unk0 in sotcUnk0List)
+                {
+                    outBytes.AddValue(unk0.minBounding);
+                    outBytes.AddValue(unk0.maxBounding);
+                    outBytes.AddValue(unk0.unkInt0);
+                    outBytes.AddValue(unk0.unkInt1);
+                }
+                outBytes.AddValue(sotcUnk1List.Count);
+                foreach (var unk1 in sotcUnk1List)
+                {
+                    outBytes.AddValue(unk1.id);
+                    outBytes.AddValue(unk1.startIndex);
+                    outBytes.AddValue(unk1.length);
+                }
+            }
+            outBytes.AddValue(int_08);
+            outBytes.ReserveInt("VertBufferSize");
+            var vertexDataStart = outBytes.Count;
+
+            for (int i = 0; i < vertDefs.Count; i++)
+            {
+                var vertDef = vertDefs[i];
+                outBytes.AddValue((int)vertDef.dataMagic);
+                switch (vertDef.dataMagic)
+                {
+                    case VertexMagic.POS0:
+                        outBytes.AddValue(0x2);
+                        break;
+                    case VertexMagic.NRM0:
+                    case VertexMagic.TAN0:
+                    case VertexMagic.QUT0:
+                        outBytes.AddValue(0x10);
+                        break;
+                    case VertexMagic.TEX0:
+                    case VertexMagic.TEX1:
+                    case VertexMagic.TEX2:
+                    case VertexMagic.TEX3:
+                    case VertexMagic.TEX4:
+                    case VertexMagic.TEX5:
+                    case VertexMagic.TEX6:
+                    case VertexMagic.TEX7:
+                    case VertexMagic.TEX8:
+                        outBytes.AddValue(0x6);
+                        break;
+                    case VertexMagic.BONI:
+                        outBytes.AddValue(largeBoneCount ? 0xB : 0x5);
+                        break;
+                    case VertexMagic.BONW:
+                    case VertexMagic.COL0:
+                    case VertexMagic.COL1:
+                    case VertexMagic.COL2:
+                        outBytes.AddValue(0x4);
+                        break;
+                    case VertexMagic.SAT_:
+                        outBytes.AddValue(0x0);
+                        break;
+                    default:
+                        throw new Exception("Unexpected vertex magic!");
+                }
+                outBytes.AddValue(0x2);
+                outBytes.ReserveLong($"VertDefDataStart{i}");
+                outBytes.ReserveLong($"VertDefDataSize{i}");
+            }
+
+            for (int i = 0; i < vertDefs.Count; i++)
+            {
+                var dataStart = outBytes.FillLong($"VertDefDataStart{i}", outBytes.Count - vertexDataStart);
+                switch(vertDefs[i].dataMagic)
+                {
+                    case VertexMagic.POS0:
+                        foreach(var pos in positionList)
+                        {
+                            outBytes.AddValue(pos);
+                        }
+                        break;
+                    case VertexMagic.NRM0:
+                    case VertexMagic.TAN0:
+                    case VertexMagic.QUT0:
+                        foreach (var nrm in normalTemp)
+                        {
+                            outBytes.AddValue(nrm);
+                        }
+                        break;
+                    case VertexMagic.TEX0:
+                    case VertexMagic.TEX1:
+                    case VertexMagic.TEX2:
+                    case VertexMagic.TEX3:
+                    case VertexMagic.TEX4:
+                    case VertexMagic.TEX5:
+                    case VertexMagic.TEX6:
+                    case VertexMagic.TEX7:
+                    case VertexMagic.TEX8:
+                        var uvs = uvDict[vertDefs[i].dataMagic];
+                        foreach(var uv in uvs)
+                        {
+                            outBytes.AddValue(uv);
+                        }
+                        break;
+                    case VertexMagic.BONI:
+                        foreach(var boni in vertWeightIndices)
+                        {
+                            if(largeBoneCount)
+                            {
+                                outBytes.AddValue((ushort)boni[0]);
+                                outBytes.AddValue((ushort)boni[1]);
+                                outBytes.AddValue((ushort)boni[2]);
+                                outBytes.AddValue((ushort)boni[3]);
+                            } else
+                            {
+                                outBytes.AddValue((byte)boni[0]);
+                                outBytes.AddValue((byte)boni[1]);
+                                outBytes.AddValue((byte)boni[2]);
+                                outBytes.AddValue((byte)boni[3]);
+                            }
+                        }
+                        break;
+                    case VertexMagic.BONW:
+                        foreach(var bonw in vertWeights)
+                        {
+                            outBytes.Add((byte)Math.Max(bonw.X * 255.0, 255));
+                            outBytes.Add((byte)Math.Max(bonw.Y * 255.0, 255));
+                            outBytes.Add((byte)Math.Max(bonw.Z * 255.0, 255));
+                            outBytes.Add((byte)Math.Max(bonw.W * 255.0, 255));
+                        }
+                        break;
+                    case VertexMagic.COL0:
+                    case VertexMagic.COL1:
+                    case VertexMagic.COL2:
+                        var colors = colorDict[vertDefs[i].dataMagic];
+                        foreach (var color in colors)
+                        {
+                            outBytes.AddValue(color);
+                        }
+                        break;
+                    case VertexMagic.SAT_:
+                        foreach(var sat in satValues)
+                        {
+                            outBytes.AddValue(sat);
+                        }
+                        break;
+                }
+                outBytes.FillLong($"VertDefDataSize{i}", outBytes.Count - vertexDataStart - dataStart);
+            }
+            outBytes.FillInt("VertBufferSize", outBytes.Count - vertexDataStart);
 
             return outBytes.ToArray();
         }
