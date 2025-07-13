@@ -777,16 +777,34 @@ namespace AquaModelLibrary.Data.Utility
                     {
                         var fpo = new FieldPlayerObject(files[i]);
                         List<string> fpoInfo = new List<string>();
-                        fpoInfo.Add("JP Name,Global Name,Internal Name,ID,Filename,Hash Filename");
+                        fpoInfo.Add("JP Name,Global Name,Internal Name,ID,LOD1 Filename,LOD1 Hash,LOD2 Filename,LOD2 Hash,LOD3 Filename,LOD3 Hash,Common Filename,Common Hash");
                         foreach (var entry in fpo.fpoEntries)
                         {
-                            var objFile1 = $"object/map_object/{entry.asciiName}.ice";
+                            var objFile1 = $"object/map_object/{entry.asciiName}_l1.ice";
+                            var objFile2 = $"object/map_object/{entry.asciiName}_l2.ice";
+                            var objFile3 = $"object/map_object/{entry.asciiName}_l3.ice";
+                            var objFileComm = $"object/map_object/{entry.asciiName}_com.ice";
 
                             var objFile1Hash = GetRebootHash(GetFileHash(objFile1));
+                            var objFile2Hash = GetRebootHash(GetFileHash(objFile2));
+                            var objFile3Hash = GetRebootHash(GetFileHash(objFile3));
+                            var objFileComHash = GetRebootHash(GetFileHash(objFileComm));
 
                             if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile1Hash)))
                             {
                                 objFile1Hash = "";
+                            }
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile2Hash)))
+                            {
+                                objFile2Hash = "";
+                            }
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFile3Hash)))
+                            {
+                                objFile3Hash = "";
+                            }
+                            if (!File.Exists(Path.Combine(pso2_binDir, dataReboot, objFileComHash)))
+                            {
+                                objFileComHash = "";
                             }
                             string JPobjName = "";
                             if (roomFpDict[0].ContainsKey(entry.asciiName))
@@ -799,7 +817,7 @@ namespace AquaModelLibrary.Data.Utility
                                 NAobjName = roomFpDict[1][entry.asciiName];
                             }
 
-                            string entryString = $"{JPobjName},{NAobjName},{entry.asciiName},{entry.fpoEntry.id},{objFile1},{objFile1Hash}";
+                            string entryString = $"{JPobjName},{NAobjName},{entry.asciiName},{entry.fpoEntry.id},{objFile1},{objFile1Hash},{objFile2},{objFile2Hash},{objFile3},{objFile3Hash},{objFileComm},{objFileComHash}";
 
                             fpoInfo.Add(entryString);
                         }
