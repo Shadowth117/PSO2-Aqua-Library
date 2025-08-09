@@ -166,14 +166,17 @@ namespace AquaModelLibrary.Core.BluePoint
                 var mshPath = cmshPaths[i];
                 var outName = outNames[i];
 
-                var aqp = ConvertCMSH(mshPath, materialDict, out var aqn);
-                if (aqp != null)
+                if (File.Exists(mshPath))
                 {
-                    aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true);
-                    aqp.ConvertToLegacyTypes();
-                    aqp.CreateTrueVertWeights();
+                    var aqp = ConvertCMSH(mshPath, materialDict, out var aqn);
+                    if (aqp != null)
+                    {
+                        aqp.ConvertToPSO2Model(true, false, false, true, false, false, false, true);
+                        aqp.ConvertToLegacyTypes();
+                        aqp.CreateTrueVertWeights();
 
-                    FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false, (int)CoordSystem.OpenGL);
+                        FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), Path.Combine(outPath, Path.ChangeExtension(outName, ".fbx")), new List<string>(), new List<Matrix4x4>(), false, (int)CoordSystem.OpenGL);
+                    }
                 }
             }
 
@@ -606,7 +609,6 @@ namespace AquaModelLibrary.Core.BluePoint
                 }
             }
 
-            File.WriteAllLines(@"A:\GameBackups\PS5\Demon's Souls (PS5)\DeSR PS5\PPSA01342-app0\coredata\enginesupport\models\_cmn\plane_xz_2m\plane_xz_2m.obj", objList);
             return aqp;
         }
 
