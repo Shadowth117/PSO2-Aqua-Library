@@ -1604,7 +1604,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         FLVER0.Texture tex = new FLVER0.Texture();
                         flvMat.Textures = new List<FLVER0.Texture>();
                         tex.Path = texList[0];
-                        tex.Type = "g_Diffuse";
+                        tex.ParamName = "g_Diffuse";
                         flvMat.Textures.Add(tex);
                     }
                 }
