@@ -2747,6 +2747,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             aqp.tempMats = tempMats.ConvertAll(mat => mat.Clone()).ToList();
             aqp.texFUnicodeNames = texFUnicodeNames.ConvertAll(texf => $"{texf}").ToList();
             aqp.matUnicodeNames = matUnicodeNames.ConvertAll(mat => $"{mat}").ToList();
+            aqp.meshNames = meshNames.ConvertAll(mesh => $"{mesh}").ToList();
 
             return aqp;
         }
