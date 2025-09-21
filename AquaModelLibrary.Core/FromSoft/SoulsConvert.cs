@@ -1256,7 +1256,15 @@ namespace AquaModelLibrary.Core.FromSoft
                             }
                         }
                     }
-                    if (transformMesh)
+
+                    //Disable transformMesh if flver version is greater than DS2
+                    bool isTransformingVersion = true;
+                    if(flver is FLVER2 f2flver)
+                    {
+                        isTransformingVersion = f2flver.Header.Version <= 20010;
+                    }
+
+                    if (transformMesh && isTransformingVersion)
                     {
                         if (boneTransformationIndex > -1 && BoneTransforms.Count > boneTransformationIndex)
                         {
@@ -1280,6 +1288,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         }
                     }
 
+                    /*
                     var alter = Vector3.Transform(vertPos, flver.Nodes[0].ComputeLocalTransform());
                     //Recalc model bounding
                     if (maxBounding == null)
@@ -1295,7 +1304,7 @@ namespace AquaModelLibrary.Core.FromSoft
                         minBounding = MathExtras.GetMinimumBounding(vertPos, (Vector3)minBounding);
                         maxBounding2 = MathExtras.GetMaximumBounding(alter, (Vector3)maxBounding);
                         minBounding2 = MathExtras.GetMinimumBounding(alter, (Vector3)minBounding);
-                    }
+                    }*/
 
                     vtxl.vertPositions.Add(vertPos);
                     vtxl.vertNormals.Add(vertNorm);
