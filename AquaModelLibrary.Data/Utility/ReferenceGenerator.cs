@@ -2265,7 +2265,7 @@ namespace AquaModelLibrary.Data.Utility
             genAnimList.Add("True Profound Darkness Anims," + tpdAnims + "," + GetFileHash(tpdAnims));
             genAnimList.Add("," + plLightLooks + "," + GetFileHash(plLightLooks));
             genAnimList.Add("Laconium Sword Anims," + laconiumAnims + "," + GetFileHash(laconiumAnims));
-            genAnimList.Add("Rideroid Plalyer Anims," + playerRideRoidAnims + "," + GetFileHash(playerRideRoidAnims));
+            genAnimList.Add("Rideroid Player Anims," + playerRideRoidAnims + "," + GetFileHash(playerRideRoidAnims));
             genAnimList.Add("Dash Panel Anims," + dashPanelAnims + "," + GetFileHash(dashPanelAnims));
             genAnimList.Add("Monster Hunter Anim," + monHunAnim + "," + GetFileHash(monHunAnim));
             genAnimList.Add("Monster Hunter Curve Anim," + monHunCarve + "," + GetFileHash(monHunCarve));
