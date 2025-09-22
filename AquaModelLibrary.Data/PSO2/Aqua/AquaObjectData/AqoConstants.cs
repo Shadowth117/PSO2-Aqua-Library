@@ -40,6 +40,8 @@
 
     public static class AQOConstants
     {
-        public static readonly List<string> DefaultShaderNames = new List<string>() { "0398p", "0398" };
+        public static readonly List<string> DefaultClassicRigidShaderNames = new List<string>() { "0009r", "0009" };
+        public static readonly List<string> DefaultClassicShaderNames = new List<string>() { "0398p", "0398" };
+        public static readonly List<string> DefaultNGSRigidShaderNames = new List<string>() { "1000r", "1000" };
     }
 }

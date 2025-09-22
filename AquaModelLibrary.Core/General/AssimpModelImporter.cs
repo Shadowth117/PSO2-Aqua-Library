@@ -736,8 +736,12 @@ namespace AquaModelLibrary.Core.General
         }
 
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
-        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true, bool preTransformVerts = false)
+        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true, bool preTransformVerts = false, bool rigidImport = false)
         {
+            if(rigidImport == true)
+            {
+                preTransformVerts = true;
+            }
             Assimp.AssimpContext context = new Assimp.AssimpContext();
             context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
             var postProcessSteps = GetPostProcessSteps(preTransformVerts);
@@ -792,7 +796,7 @@ namespace AquaModelLibrary.Core.General
                 }
                 genMat.texUVSets.Add(0);
 
-                aqp.GenerateMaterial(genMat, true);
+                aqp.GenerateMaterial(genMat, isNGS, false, rigidImport);
             }
 
             //Default to this so ids can be assigned by order if needed
@@ -817,7 +821,7 @@ namespace AquaModelLibrary.Core.General
             }
 
             //Assimp data is gathered, proceed to processing model data for PSO2
-            aqp.ConvertToPSO2Model(true, false, false, true, false, false, true, false, condenseMaterials);
+            aqp.ConvertToPSO2Model(true, false, false, true, false, rigidImport, true, false, condenseMaterials);
 
             //AQPs created this way will require more processing to finish.
             //-Texture lists in particular, MUST be generated as what exists is not valid without serious errors

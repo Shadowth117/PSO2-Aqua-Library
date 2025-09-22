@@ -1386,7 +1386,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
 
         //Used to generate standard materials in which the texture names are used. 
-        public void GenerateMaterial(GenericMaterial mat, bool ngsMat = false, bool modelHadUnicodeNames = false)
+        public void GenerateMaterial(GenericMaterial mat, bool ngsMat = false, bool modelHadUnicodeNames = false, bool isRigid = false)
         {
             if (mat.specialType != null)
             {
@@ -1394,7 +1394,26 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
             if (mat.shaderNames == null || mat.shaderNames.Count < 2)
             {
-                mat.shaderNames = AQOConstants.DefaultShaderNames;
+                if(ngsMat)
+                {
+                    if (isRigid)
+                    {
+                        mat.shaderNames = AQOConstants.DefaultNGSRigidShaderNames;
+                    }
+                    else
+                    {
+                        mat.shaderNames = AQOConstants.DefaultClassicShaderNames;
+                    }
+                } else
+                {
+                    if (isRigid)
+                    {
+                        mat.shaderNames = AQOConstants.DefaultClassicRigidShaderNames;
+                    } else
+                    {
+                        mat.shaderNames = AQOConstants.DefaultClassicShaderNames;
+                    }
+                }
             }
             int texArrayStartIndex = tstaList.Count;
             List<int> tempTexIds = new List<int>();
@@ -1683,6 +1702,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     break;
             }
 
+            //For whatever reason, rigid models seem to need to override these values? NGS Green boxes will just not appear without these exact values
+            if (isRigid)
+            {
+                rend.int_0C = 0;
+                rend.unk8 = 0;
+                rend.twosided = 2;
+            }
+
             tsetList.Add(tset);
             mateList.Add(mate);
             shadList.Add(shad);
@@ -1807,6 +1834,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             objc = new OBJC();
             objc.type = rebootModel ? 0xC33 : 0xC2A;
             int totalStripsShorts = 0;
+            int totalStripsShorts2 = 0;
             int totalVerts = 0;
 
             //Assemble vtxlList
@@ -1877,7 +1905,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                             tempMats[mat].texNames[i] = Path.GetFileName(tempMats[mat].texNames[i]);
                         }
                     }
-                    GenerateMaterial(tempMats[mat], true, hadUnicodeNames);
+                    GenerateMaterial(tempMats[mat], true, hadUnicodeNames, useRigid);
                 }
             }
 
@@ -1948,7 +1976,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                 //MESH
                 var mesh = new MESH();
-                mesh.flags = 0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
+                mesh.flags = useRigid ? (short)0x9 : (short)0x17; //No idea what this really does. Seems to vary a lot, but also not matter a lot.
                 mesh.unkShort0 = 0x0;
                 mesh.unkByte0 = 0x80;
                 mesh.unkByte1 = 0x64;
@@ -1960,7 +1988,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 mesh.baseMeshNodeId = tempTris[i].baseMeshNodeId;
                 mesh.vsetIndex = i;
                 mesh.psetIndex = i;
-                if (baHack)
+                if (baHack || useRigid)
                 {
                     mesh.baseMeshDummyId = 0;
                 }
@@ -2060,6 +2088,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             objc.tsetCount = tsetList.Count;
             objc.texfCount = texfList.Count;
             objc.vtxeCount = vtxeList.Count;
+            objc.mesh2Count = mesh2List.Count;
+            objc.pset2Count = pset2List.Count;
 
             if (IsNGS)
             {
@@ -2071,7 +2101,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 objc.fBlock3 = -1;
                 objc.globalStrip3LengthCount = 1;
                 objc.unkCount3 = 1;
-                objc.bonePaletteOffset = forceClassicBonePalette ? 0 : 1;
+                objc.bonePaletteOffset = forceClassicBonePalette || useRigid ? 0 : 1;
             }
             else
             {
