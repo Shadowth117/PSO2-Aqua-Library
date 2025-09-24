@@ -198,12 +198,12 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static byte[] VitaDeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
         {
-            return DrSwizzler.Deswizzler.PS4Deswizzle(swizzledData, width, height, (DrSwizzler.DDS.DXEnums.DXGIFormat)pixelFormat);
+            return DrSwizzler.Deswizzler.VitaDeswizzle(swizzledData, width, height, (DrSwizzler.DDS.DXEnums.DXGIFormat)pixelFormat);
         }
 
-        public static byte[] VitaDeSwizzle(byte[] swizzledData, int width, int height, int sourceBytesPerPixelSet, int formatbpp)
+        public static byte[] VitaDeSwizzle(byte[] swizzledData, int width, int height, int sourceBytesPerPixelSet, int pixelBlockSize, int formatbpp)
         {
-            return DrSwizzler.Deswizzler.VitaDeswizzle(swizzledData, width, height, sourceBytesPerPixelSet, formatbpp);
+            return DrSwizzler.Deswizzler.VitaDeswizzle(swizzledData, width, height, sourceBytesPerPixelSet, pixelBlockSize, formatbpp);
         }
 
         public static byte[] Xbox360DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)

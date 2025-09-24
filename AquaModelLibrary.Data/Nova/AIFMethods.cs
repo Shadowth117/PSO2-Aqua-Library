@@ -71,14 +71,12 @@ namespace AquaModelLibrary.Data.Nova
         public static byte[] GetMipImage(XgmiStruct xgmiStr, byte[] buffer)
         {
             DXGIFormat pixelFormat;
-            int deswizzleWidth = xgmiStr.width;
-            int deswizzleHeight = xgmiStr.height;
-            pixelFormat = GetDDSType(xgmiStr, ref deswizzleWidth, ref deswizzleHeight);
+            pixelFormat = GetDDSType(xgmiStr);
 
-            return DeSwizzler.VitaDeSwizzle(buffer, deswizzleWidth, deswizzleHeight, pixelFormat);
+            return DrSwizzler.Deswizzler.VitaDeswizzle(buffer, xgmiStr.width, xgmiStr.height, (DrSwizzler.DDS.DXEnums.DXGIFormat)pixelFormat);
         }
 
-        private static DXGIFormat GetDDSType(XgmiStruct xgmiStr, ref int deswizzleWidth, ref int deswizzleHeight)
+        private static DXGIFormat GetDDSType(XgmiStruct xgmiStr)
         {
             DXGIFormat pixelFormat;
             switch (xgmiStr.dxtType)
@@ -93,8 +91,6 @@ namespace AquaModelLibrary.Data.Nova
                     {
                         pixelFormat = DXGIFormat.BC1UNORM;
                     }
-                    deswizzleWidth >>= 2;
-                    deswizzleHeight >>= 2;
                     break;
                 case 0x8:
                     pixelFormat = DXGIFormat.R8G8B8A8UNORM;
@@ -109,8 +105,6 @@ namespace AquaModelLibrary.Data.Nova
                     {
                         pixelFormat = DXGIFormat.BC1UNORM;
                     }
-                    deswizzleWidth >>= 2;
-                    deswizzleHeight >>= 2;
                     break;
                 case 0x10:
                     if (xgmiStr.alphaTesting == 0x8)
@@ -121,8 +115,6 @@ namespace AquaModelLibrary.Data.Nova
                     {
                         pixelFormat = DXGIFormat.BC1UNORM;
                     }
-                    deswizzleWidth >>= 2;
-                    deswizzleHeight >>= 2;
                     break;
                 case 0x12:
                     if (xgmiStr.alphaTesting == 0x8)
@@ -133,8 +125,6 @@ namespace AquaModelLibrary.Data.Nova
                     {
                         pixelFormat = DXGIFormat.BC1UNORM;
                     }
-                    deswizzleWidth >>= 2;
-                    deswizzleHeight >>= 2;
                     break;
                 case 0x14:
                     if (xgmiStr.alphaTesting == 0x8)
@@ -145,8 +135,6 @@ namespace AquaModelLibrary.Data.Nova
                     {
                         pixelFormat = DXGIFormat.BC1UNORM;
                     }
-                    deswizzleWidth >>= 2;
-                    deswizzleHeight >>= 2;
                     break;
                 case 0x2A:
                     //Not sure actual pixel format for this, needs a fix
@@ -158,8 +146,6 @@ namespace AquaModelLibrary.Data.Nova
                     {
                         pixelFormat = DXGIFormat.BC1UNORM;
                     }
-                    deswizzleWidth >>= 2;
-                    deswizzleHeight >>= 2;
                     break;
                 default:
                     throw new Exception($"Unexpected format {xgmiStr.dxtType}");
@@ -172,7 +158,7 @@ namespace AquaModelLibrary.Data.Nova
         {
             int a = 0;
             int b = 0;
-            var meta = GenerateMetaData(width, height, mipCount, GetDDSType(headXgmiStruct, ref a, ref b), isCubeMap);
+            var meta = GenerateMetaData(width, height, mipCount, GetDDSType(headXgmiStruct), isCubeMap);
             GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, isCubeMap);
 
             List<byte> outBytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
