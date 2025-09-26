@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AquaModelLibrary.Helpers\AquaModelLibrary.Helpers.csproj" />
+    <ProjectReference Include="..\NvTriStrip.Net\NvTriStripDotNet\NvTriStripDotNet.csproj" />
     <ProjectReference Include="..\SAToolsShared\ArchiveLib\ArchiveLib.csproj" />
     <ProjectReference Include="..\SAToolsShared\VrSharp\VrSharp.csproj" />
     <ProjectReference Include="..\UnluacNET\UnluacNET.csproj" />
