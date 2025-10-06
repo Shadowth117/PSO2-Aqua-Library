@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher.ARCData;
 using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
@@ -131,8 +132,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public NJTextureList njtexList = null;
         public List<LNDTexDataEntry> texDataEntries = new List<LNDTexDataEntry>();
         public List<int> motionDataOffsets = new List<int>();
-        public List<LNDMotionDataHead> motionDataHeadList = new List<LNDMotionDataHead>();
-        public List<LNDMotionDataHead2> motionDataHead2List = new List<LNDMotionDataHead2>();
+        public List<NJSMotion> motions = new List<NJSMotion>();
         public List<List<LNDMotionData>> motionDataList = new List<List<LNDMotionData>>();
         public LND() { }
 
@@ -679,43 +679,11 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 motionDataOffsets.Add(sr.ReadBE<int>());
             }
-            foreach (var offset in motionDataOffsets)
+            foreach(var mOffset in motionDataOffsets)
             {
-                sr.Seek(offset + 0x8, SeekOrigin.Begin);
-                LNDMotionDataHead head = new LNDMotionDataHead();
-                head.lndMotionDataHead2Offset = sr.ReadBE<int>();
-                head.frameAboveFinalFrame = sr.ReadBE<int>();
-                head.keyType = sr.ReadBE<ushort>();
-                head.dataType = sr.ReadBE<ushort>();
-                motionDataHeadList.Add(head);
+                sr.Seek(0x8 + mOffset, SeekOrigin.Begin);
+                motions.Add(new NJSMotion(sr, true, 0x8));
             }
-            foreach (var motionHead in motionDataHeadList)
-            {
-                sr.Seek(motionHead.lndMotionDataHead2Offset + 0x8, SeekOrigin.Begin);
-                LNDMotionDataHead2 head = new LNDMotionDataHead2();
-                head.dataOffset = sr.ReadBE<int>();
-                head.unkInt = sr.ReadBE<int>();
-                head.dataCount = sr.ReadBE<int>();
-                motionDataHead2List.Add(head);
-            }
-
-            //TODO
-            /*
-            foreach (var motionHead in motionDataHead2List)
-            {
-                sr.Seek(motionHead.dataOffset + 0x8, System.IO.SeekOrigin.Begin);
-                var motionData = new List<LNDMotionData>();
-                for(int i = 0; i < motionHead.dataCount; i++)
-                {
-                    LNDMotionData data = new LNDMotionData();
-                    data.frame = sr.ReadBE<int>();
-                    switch()
-                    {
-
-                    }
-                }
-                motionDataList.Add(motionData);
-            }*/
 
             //Tex name list
             if (header.lndTexNameListOffset > 0)
