@@ -291,9 +291,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
                     outBytes.FillInt($"AnimatedModel{i}", outBytes.Count + offset);
                     outBytes.AddRange(arcLndAnimatedMeshDataList[i].model.GetBytes(outBytes.Count + offset, new List<ARCLNDAnimatedMeshData>(), out var animModelOffsets));
                     offsets.AddRange(animModelOffsets);
-                    outBytes.FillInt($"AnimatedMotion{i}", outBytes.Count + offset);
-                    outBytes.AddRange(arcLndAnimatedMeshDataList[i].motion.GetBytes(outBytes.Count + offset, out var animOffsets));
-                    offsets.AddRange(animOffsets);
+                    if(arcLndAnimatedMeshDataList[i].motion != null)
+                    {
+                        outBytes.FillInt($"AnimatedMotion{i}", outBytes.Count + offset);
+                        outBytes.AddRange(arcLndAnimatedMeshDataList[i].motion.GetBytes(outBytes.Count + offset, out var animOffsets));
+                        offsets.AddRange(animOffsets);
+                    }
                     outBytes.AlignWriter(0x20);
                 }
             }

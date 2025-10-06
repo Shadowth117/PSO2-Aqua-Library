@@ -21,6 +21,11 @@ namespace AquaModelLibrary.Core.Billy
 
             foreach (var file in files)
             {
+                //Skip animated models since we're not using them at the moment
+                if(file.ToLower().Contains("animmodel"))
+                {
+                    continue;
+                }
                 if (Path.GetExtension(file) == ".gvm")
                 {
                     gvmBytes = File.ReadAllBytes(file);
@@ -42,6 +47,7 @@ namespace AquaModelLibrary.Core.Billy
                         {
                             case "animation":
                                 //aqm = ModelImporter.AssimpAQMConvertNoNameSingle(file, false, true, 1);
+                                aqp = null;
                                 break;
                             case "night":
                                 nightAqp = (AquaObject)aqp;

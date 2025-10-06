@@ -293,6 +293,7 @@ namespace ArchiveLib
 		public int byteCount = 0;
 		public int align = 0x20;
 		public int forcedPad = 0;
+		public bool addEndPad = true;
         public override byte[] GetBytes()
         {
             bool bigendianbk = ByteConverter.BigEndian;
@@ -388,23 +389,34 @@ namespace ArchiveLib
                 {
 					//Remove length of GBIX and then add alignment
                     int length = Entries[i].Data.Length - 16;
-					var alignment = align - length % align;
-					if(alignment != align)
-					{
-						length += alignment;
-					}
-					byte[] nogbix = new byte[length];
-					Array.Copy(Entries[i].Data, 16, nogbix, 0, Entries[i].Data.Length - 16);
+                    int endPad = 0;
+					if(addEndPad || (Entries.Count - 1) != i)
+                    {
+                        var alignment = align - length % align;
+                        if (alignment != align)
+                        {
+                            length += alignment;
+                        }
+                    }
+                    if(addEndPad == false && (Entries.Count - 1) == i)
+                    {
+                        endPad = -0x10;
+                    }
+					byte[] nogbix = new byte[length + endPad];
+					Array.Copy(Entries[i].Data, 16, nogbix, 0, Entries[i].Data.Length - 16 + endPad);
 
 					//Write the new length
-					Array.Copy(BitConverter.GetBytes((int)(nogbix.Length - 8)), 0, nogbix, 4, 4);
+					Array.Copy(BitConverter.GetBytes((int)(nogbix.Length - 8 - endPad)), 0, nogbix, 4, 4);
 
 					result.AddRange(nogbix);
 				}
 				else
 				{
 					result.AddRange(Entries[i].Data);
-					result.AddRange(new byte[Entries[i].Data.Length % 0x10]);
+					if(addEndPad || (Entries.Count - 1) != i)
+                    {
+                        result.AddRange(new byte[Entries[i].Data.Length % 0x10]);
+                    }
 				}
             }
             ByteConverter.BigEndian = bigendianbk;

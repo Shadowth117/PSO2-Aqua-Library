@@ -59,7 +59,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public ARCLNDHeader arcLndHeader;
             public List<int> arcExtraModeloffsets = new List<int>();
 
-            public byte[] GetBytes(int offset, int extraModelCount, List<string> texNames, out List<int> offsets)
+            public byte[] GetBytes(int offset, int extraModelCount, List<string> texNames, bool hasMPB, out List<int> offsets)
             {
                 offsets = new List<int>();
                 List<byte> outBytes = new List<byte>();
@@ -68,7 +68,11 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 outBytes.AddValue(extraModelCount);
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt("ExtraModelOffsetsOffset");
-                offsets.Add(outBytes.Count + offset);
+
+                if(hasMPB)
+                {
+                    offsets.Add(outBytes.Count + offset);
+                }
                 outBytes.ReserveInt("MPBOffset");
 
                 offsets.Add(outBytes.Count + offset);
@@ -1077,14 +1081,17 @@ namespace AquaModelLibrary.Data.BillyHatcher
             uint mplOffset = 0;
 
             //Write lnd
-            outBytes.AddRange(arcLand.GetBytes(0, arcLndModels.Count - 1, texnames.texNames, out var lndOffsets));
+            outBytes.AddRange(arcLand.GetBytes(0, arcLndModels.Count - 1, texnames.texNames, arcMPL != null, out var lndOffsets));
             offsets.AddRange(lndOffsets);
             outBytes.AlignWriter(0x20);
 
             //Write GVM
             outBytes.AlignWriter(0x20);
             outBytes.FillInt("GVMOffset", outBytes.Count);
+            var gvmEndPad = gvm.addEndPad;
+            gvm.addEndPad = false;
             outBytes.AddRange(gvm.GetBytes());
+            gvm.addEndPad = gvmEndPad;
 
             //Write models
             for (int i = 0; i < arcLndModels.Count; i++)
