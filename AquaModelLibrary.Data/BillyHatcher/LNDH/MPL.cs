@@ -2,6 +2,7 @@
 using AquaModelLibrary.Helpers.Extensions;
 using System.Numerics;
 using static AquaModelLibrary.Data.BillyHatcher.LNDH.MPL;
+using AquaModelLibrary.Data.Ninja.Motion;
 
 namespace AquaModelLibrary.Data.BillyHatcher.LNDH
 {
@@ -12,8 +13,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
     {
         public MPLHeader header;
         public List<MPLMotionMapping> motionMappingList = new List<MPLMotionMapping>();
-        public Dictionary<int, MPLMotionStart> motionDict = new Dictionary<int, MPLMotionStart>();
-        public List<MPLMotionStart> motionList = new List<MPLMotionStart>();
+        public Dictionary<int, MPLMotionRootParent> motionDict = new Dictionary<int, MPLMotionRootParent>();
+        public List<MPLMotionRootParent> motionList = new List<MPLMotionRootParent>();
 
         public enum MPLMotionLayout : ushort
         {
@@ -60,7 +61,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
             sr.Seek(header.motionOffset + 0x20, SeekOrigin.Begin);
             for (int i = 0; i < header.motionCount; i++)
             {
-                MPLMotionStart motionStart = new MPLMotionStart();
+                MPLMotionRootParent motionStart = new MPLMotionRootParent();
                 motionStart.int_00 = sr.ReadBE<int>();
                 motionStart.offset = sr.ReadBE<int>();
                 motionList.Add(motionStart);
@@ -69,9 +70,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
             foreach (var motionStart in motionList)
             {
                 sr.Seek(motionStart.offset + 0x20, SeekOrigin.Begin);
-                motionStart.motionRef = new MPLMotionRef();
+                motionStart.motionRef = new MPLMotionParent();
                 motionStart.motionRef.int_00 = sr.ReadBE<int>();
                 motionStart.motionRef.offset = sr.ReadBE<int>();
+                sr.Seek(motionStart.motionRef.offset + 0x20, SeekOrigin.Begin);
+                motionStart.motionRef.motion = new NJSMotion(sr, true, 0x20);
+
                 sr.Seek(motionStart.motionRef.offset + 0x20, SeekOrigin.Begin);
                 var info0 = motionStart.motionRef.motionInfo0 = new MPLMotionInfo0();
                 info0.offset = sr.ReadBE<int>();
@@ -272,20 +276,21 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
         public float flt_04;
     }
 
-    public class MPLMotionStart
+    public class MPLMotionRootParent
     {
         public int int_00;
         public int offset;
 
-        public MPLMotionRef motionRef = null;
+        public MPLMotionParent motionRef = null;
     }
 
-    public class MPLMotionRef
+    public class MPLMotionParent
     {
         public int int_00;
         public int offset;
 
         public MPLMotionInfo0 motionInfo0 = null;
+        public NJSMotion motion = null;
     }
 
     public class MPLMotionInfo0

@@ -52,7 +52,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public ARCLNDModel model = null;
             public Motion motion = null;
             public int MPLAnimId = -1;
-            public MPLMotionStart mplMotion = null;
+            public MPLMotionRootParent mplMotion = null;
         }
 
         public class ARCLNDLand
