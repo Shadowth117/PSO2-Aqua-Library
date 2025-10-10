@@ -93,6 +93,71 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             return animFlagList;
         }
 
+        public int GetFinalFrameTime()
+        {
+            foreach(var node in this.KeyDataList)
+            {
+                if(node.Position.Count > 0)
+                {
+                    return node.Position.Keys.Last();
+                }
+                if (node.RotationData.Count > 0)
+                {
+                    return node.RotationData.Keys.Last();
+                }
+                if (node.Normal.Count > 0)
+                {
+                    return node.Normal.Keys.Last();
+                }
+                if (node.Quaternion.Count > 0)
+                {
+                    return node.Quaternion.Keys.Last();
+                }
+                if (node.Scale.Count > 0)
+                {
+                    return node.Scale.Keys.Last();
+                }
+                if (node.Vector.Count > 0)
+                {
+                    return node.Vector.Keys.Last();
+                }
+                if (node.Vertex.Count > 0)
+                {
+                    return node.Vertex.Keys.Last();
+                }
+                if (node.Target.Count > 0)
+                {
+                    return node.Target.Keys.Last();
+                }
+                if (node.Roll.Count > 0)
+                {
+                    return node.Roll.Keys.Last();
+                }
+                if (node.Angle.Count > 0)
+                {
+                    return node.Angle.Keys.Last();
+                }
+                if (node.Color.Count > 0)
+                {
+                    return node.Color.Keys.Last();
+                }
+                if (node.Intensity.Count > 0)
+                {
+                    return node.Intensity.Keys.Last();
+                }
+                if (node.Spot.Count > 0)
+                {
+                    return node.Spot.Keys.Last();
+                }
+                if (node.Point.Count > 0)
+                {
+                    return node.Point.Keys.Last();
+                }
+            }
+
+            return 0;
+        }
+
         public bool BillyMode = false;
         public int frameCount = 0;
         public AnimFlags animType = 0;
@@ -581,9 +646,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                         }
                                         // If any of the rotation frames isn't in the range from -65535 to 65535, assume it uses shorts
                                         Rotation rot = new Rotation(sr);
-                                        if (rot.X > 65535 || rot.X < -65535 ||
-                                            rot.Y > 65535 || rot.Y < -65535 ||
-                                            rot.Z > 65535 || rot.Z < -65535)
+                                        if (rot.X > 186535 || rot.X < -186535 ||
+                                            rot.Y > 186535 || rot.Y < -186535 ||
+                                            rot.Z > 186535 || rot.Z < -186535)
                                         {
                                             return false;
                                         }
@@ -818,7 +883,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     {
                         sr.Seek(mdatap + offset + mdatasize * u + 4 * mdata + 4 * m, SeekOrigin.Begin);
                         int framecount = sr.ReadBE<int>();
-                        if (framecount < 0 || framecount > 100 || pointer == 0 && framecount != 0)
+                        if (framecount < 0 || framecount > 0xFFFF || pointer == 0 && framecount != 0)
                             lost = true;
                     }
                 }
