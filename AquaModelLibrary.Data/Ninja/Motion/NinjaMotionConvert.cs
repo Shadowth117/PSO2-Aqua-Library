@@ -13,6 +13,11 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             foreach(var njm in njmlist)
             {
                 AquaMotion aqm = new AquaMotion();
+                if(njm == null)
+                {
+                    aqmList.Add(aqm);
+                    continue;
+                }
                 aqm.moHeader = new MOHeader();
                 aqm.moHeader.endFrame = (int)njm.GetFinalFrameTime();
                 aqm.moHeader.nodeCount = njm.KeyDataList.Count;
@@ -70,7 +75,8 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                         for (int k = 0; k < keySet.Quaternion.Count; k++)
                         {
                             mkey.frameTimings.Add((uint)keyTimes[k] * 0x10 + GetPSO2FrameFlag(keyTimes, k));
-                            mkey.vector4Keys.Add(new Vector4(keySet.Quaternion[keyTimes[k]][0], keySet.Quaternion[keyTimes[k]][1], keySet.Quaternion[keyTimes[k]][2], keySet.Quaternion[keyTimes[k]][3]));
+                            //Ninja stores this WXYZ order, unlike PSO2's XYZW
+                            mkey.vector4Keys.Add(new Vector4(keySet.Quaternion[keyTimes[k]][1], keySet.Quaternion[keyTimes[k]][2], keySet.Quaternion[keyTimes[k]][3], keySet.Quaternion[keyTimes[k]][0]));
                         }
                         keyData.keyData.Add(mkey);
                     }

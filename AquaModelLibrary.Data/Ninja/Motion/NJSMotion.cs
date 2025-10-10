@@ -646,9 +646,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                         }
                                         // If any of the rotation frames isn't in the range from -65535 to 65535, assume it uses shorts
                                         Rotation rot = new Rotation(sr);
-                                        if (rot.X > 186535 || rot.X < -186535 ||
-                                            rot.Y > 186535 || rot.Y < -186535 ||
-                                            rot.Z > 186535 || rot.Z < -186535)
+                                        if (rot.X > 1186535 || rot.X < -1186535 ||
+                                            rot.Y > 1186535 || rot.Y < -1186535 ||
+                                            rot.Z > 1186535 || rot.Z < -1186535)
                                         {
                                             return false;
                                         }
