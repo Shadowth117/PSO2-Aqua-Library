@@ -395,7 +395,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     var nodeScale = motionKeys[i].GetMKEYofType(3);
                     var parentNodeScale = motionKeys[node.parentId].GetMKEYofType(3);
-                    if (nodeScale == null)
+                    if (nodeScale == null || parentNodeScale == null)
                     {
                         continue;
                     }
@@ -439,7 +439,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         mode = 1;
                     }
 
-                    if (nodeScale != null)
+                    if (nodeScale != null && parentNodeScale != null)
                     {
                         //Get rid of parental influence
                         for (int t = 0; t < nodeScale.frameTimings.Count; t++)
