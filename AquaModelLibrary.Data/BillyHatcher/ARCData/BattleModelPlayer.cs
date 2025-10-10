@@ -40,11 +40,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             header = ARC.ReadArcHeader(sr);
 
             var modelsCount = sr.ReadBE<int>();
-            var animsCount = sr.ReadBE<int>();
+            sr.ReadBE<int>(); //0xC
             var modelsOffset = sr.ReadBE<int>();
             var animsOffset = sr.ReadBE<int>();
             var texListsOffset = sr.ReadBE<int>();
             var gvmsOffset = sr.ReadBE<int>();
+            var animsCount = (texListsOffset - animsOffset) / 4;
             var texLists_GvmsCount = (gvmsOffset - texListsOffset) / 4;
 
             //Read Models
@@ -62,8 +63,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             for (int i = 0; i < animsCount; i++)
             {
                 var bookmark = sr.Position + 4;
-                var offset = sr.ReadBE<int>();
                 sr.Seek(0x20 + sr.ReadBE<int>(), SeekOrigin.Begin);
+
                 motions.Add(new NJSMotion(sr, true, 0x20));
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
