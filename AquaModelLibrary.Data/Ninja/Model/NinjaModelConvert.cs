@@ -33,6 +33,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
                 return ModelConvert(sr, variant, out aqn, offset);
             }
         }
+        public static void ModelAnimConvert(byte[] ninjaModel, NinjaVariant variant, List<NJSMotion> motions, out AquaObject aqo, out List<AquaMotion> aqms, out AquaNode aqn, int offset = 0, List<string> texNames = null)
+        {
+            aqo = ModelConvert(ninjaModel, variant, out aqn, offset, texNames);
+            aqms = NinjaMotionConvert.NJMToAqm(motions);
+        }
 
         public static NJSObject ConvertToNinja(AquaObject aqo, AquaNode aqn, NinjaVariant variant, out NJTextureList njTL)
         {
