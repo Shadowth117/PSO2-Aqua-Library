@@ -394,7 +394,7 @@ namespace AquaModelLibrary.Data.POE2
 
                         for (int k = 0; k < keySet.rotFrameData.Count; k++)
                         {
-                            mkey.frameTimings.Add((uint)keySet.rotFrameTimes[k] * 0x10 + GetPSO2FrameFlag(keySet.posFrameTimes, k));
+                            mkey.frameTimings.Add((uint)keySet.rotFrameTimes[k] * 0x10 + GetPSO2FrameFlag(keySet.rotFrameData, k));
                             mkey.vector4Keys.Add(keySet.rotFrameData[k].ToVec4());
                         }
                         keyData.keyData.Add(mkey);
@@ -408,7 +408,7 @@ namespace AquaModelLibrary.Data.POE2
 
                         for (int k = 0; k < keySet.scaleFrameData.Count; k++)
                         {
-                            mkey.frameTimings.Add((uint)keySet.scaleFrameTimes[k] * 0x10 + GetPSO2FrameFlag(keySet.posFrameTimes, k));
+                            mkey.frameTimings.Add((uint)keySet.scaleFrameTimes[k] * 0x10 + GetPSO2FrameFlag(keySet.scaleFrameTimes, k));
                             mkey.vector4Keys.Add(new Vector4(keySet.scaleFrameData[k], 0));
                         }
                         keyData.keyData.Add(mkey);
