@@ -53,6 +53,12 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             get { return BAMSToDeg(Z); }
             set { Z = DegToBAMS(value); }
         }
+        [Browsable(false)]
+        public System.Numerics.Vector3 Deg
+        {
+            get { return new System.Numerics.Vector3(XDeg, YDeg, ZDeg); }
+            set { XDeg = value.X; YDeg = value.Y; ZDeg = value.Z; }
+        }
 
         [Browsable(false)]
         public static int Size
