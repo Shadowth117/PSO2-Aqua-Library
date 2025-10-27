@@ -914,6 +914,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 var tfmMat = Matrix4x4.Identity;
 
                 //Debug.WriteLine($"{i} {flverBone.Rotation.X} {flverBone.Rotation.Y} {flverBone.Rotation.Z}");
+#if DEBUG
                 if (flverBone.Rotation.X > maxTest.X)
                 {
                     maxTest.X = flverBone.Rotation.X;
@@ -938,6 +939,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 {
                     minTest.Z = flverBone.Rotation.Z;
                 }
+#endif
                 Matrix4x4 mat = flverBone.ComputeLocalTransform();
 
                 Matrix4x4.Decompose(mat, out Vector3 scale, out System.Numerics.Quaternion quatrot, out Vector3 translation);
@@ -999,7 +1001,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 for (int i = 0; i < flver.Dummies.Count; i++)
                 {
                     var dummy = flver.Dummies[i];
-                    var transform = Matrix4x4.CreateWorld(dummy.Position, dummy.Forward, dummy.Upward);
+                    var transform = Matrix4x4.CreateWorld(dummy.Position, -dummy.Forward, dummy.Upward);
 
                     var ogTransform = transform;
                     NODO nodo = new NODO();
@@ -1028,9 +1030,11 @@ namespace AquaModelLibrary.Core.FromSoft
                         aqn.nodoUnicodeNames.Add(name);
                         nodo.parentId = dummy.ParentBoneIndex;
                     }
+#if DEBUG
                     Matrix4x4.Decompose(transform, out var scale, out var rot, out var pos);
                     Matrix4x4.Decompose(ogTransform, out var ogscale, out var ogrot, out var ogpos);
-                    nodo.eulRot = MathExtras.GetFlverEulerFromQuaternion_Bone(ogrot) * (float)(180 / Math.PI);
+#endif
+                    nodo.eulRot = MathExtras.QuaternionToEulerRadiansYMinor(ogrot) * (float)(180 / Math.PI);
                     nodo.pos = pos;
                     aqn.nodoList.Add(nodo);
                 }
@@ -1982,7 +1986,7 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     Debug.WriteLine($"{i} Quat {rotation.X} {rotation.Y} {rotation.Z} {rotation.W}");
                     var eulerAngles = MathExtras.GetFlverEulerFromQuaternion_Bone(rotation);
-                    var eulerAnglesTest = MathExtras.QuaternionToEulerRadiansTest(rotation);
+                    var eulerAnglesTest = MathExtras.QuaternionToEulerRadiansYMinor(rotation);
                     var eulerAnglesMirrorMaybe = MathExtras.GetFlverEulerFromQuaternion_Bone(new Quaternion(-rotation.X, rotation.Y, rotation.Z, -rotation.W));
 
                     var eulerAnglesold = MathExtras.QuaternionToEulerRadians(rotation, RotationOrder.XZY);
