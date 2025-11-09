@@ -136,7 +136,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary
         public GenericMaterial Clone()
         {
             GenericMaterial genMat = new GenericMaterial();
-            genMat.texNames = new List<string>(texNames);
+            if(genMat.texNames != null)
+            {
+                genMat.texNames = new List<string>(texNames);
+            }
             if (texUVSets != null)
             {
                 genMat.texUVSets = new List<int>(texUVSets);
