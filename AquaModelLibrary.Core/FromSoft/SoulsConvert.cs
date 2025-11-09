@@ -371,13 +371,17 @@ namespace AquaModelLibrary.Core.FromSoft
                                 break;
                             case MirrorType.None:
                                 break;
+                            case MirrorType.HavokMaxNegativeYZ:
+                                HandednessUtility.NegativeYZSwap(aqp, aqn);
+                                break;
                         }
+                        var finalCoordSystem = mirrorType == MirrorType.HavokMaxNegativeYZ ? CoordSystem.Max : coordSystem;
 
                         switch(exportFormat)
                         {
                             case ExportFormat.Fbx:
                                 finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".fbx"));
-                                FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)coordSystem, !addTangentData);
+                                FbxExporterNative.ExportToFile(aqp, aqn, new List<AquaMotion>(), finalPath, new List<string>(), new List<Matrix4x4>(), false, (int)finalCoordSystem, !addTangentData);
                                 break;
                             case ExportFormat.Smd:
                                 finalPath = Path.Combine(outPath, Path.ChangeExtension(fileName, ".smd"));
@@ -1030,10 +1034,9 @@ namespace AquaModelLibrary.Core.FromSoft
                         aqn.nodoUnicodeNames.Add(name);
                         nodo.parentId = dummy.ParentBoneIndex;
                     }
-#if DEBUG
+
                     Matrix4x4.Decompose(transform, out var scale, out var rot, out var pos);
                     Matrix4x4.Decompose(ogTransform, out var ogscale, out var ogrot, out var ogpos);
-#endif
                     nodo.eulRot = MathExtras.QuaternionToEulerRadiansYMinor(ogrot) * (float)(180 / Math.PI);
                     nodo.pos = pos;
                     aqn.nodoList.Add(nodo);
