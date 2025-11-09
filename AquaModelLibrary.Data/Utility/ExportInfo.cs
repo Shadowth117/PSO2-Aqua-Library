@@ -15,6 +15,7 @@
         Z = 1,
         Y = 2,
         X = 3,
+        HavokMaxNegativeYZ = 4,
     }
 
     /// <summary>
