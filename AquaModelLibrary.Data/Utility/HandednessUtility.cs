@@ -27,6 +27,78 @@ namespace AquaModelLibrary.Data.Utility
             FlipHandednessAqnZ(aqn);
         }
 
+        public static void NegativeYZSwap(AquaObject aqp, AquaNode aqn)
+        {
+            NegativeYZSwapAqp(aqp);
+            NegativeYZSwapAqn(aqn);
+        }
+
+        private static Matrix4x4 NYZSwapMat = new Matrix4x4(1, 0, 0, 0,
+                                                     0, 0, 1, 0,
+                                                     0, 1, 0, 0,
+                                                     0, 0, 0, 1);
+
+        public static void NegativeYZSwapAqn(AquaNode aqn)
+        {
+            List<Matrix4x4> originalMatricesInverted = aqn.nodeList.Select(x => x.GetInverseBindPoseMatrix()).ToList();
+            List<Matrix4x4> originalMatrices = aqn.nodeList.Select(x => x.GetInverseBindPoseMatrixInverted()).ToList();
+            for (int i = 0; i < aqn.nodeList.Count; i++)
+            {
+                var bone = aqn.nodeList[i];
+                var tfm = bone.GetInverseBindPoseMatrixInverted();
+                tfm *= NYZSwapMat;
+                tfm = NYZSwapMat * tfm;
+
+                bone.SetInverseBindPoseMatrixFromUninvertedMatrix(tfm);
+
+                aqn.nodeList[i] = bone;
+            }
+
+            for (int i = 0; i < aqn.nodoList.Count; i++)
+            {
+                var bn = aqn.nodoList[i];
+                // NODOs are a bit more primitive. We need to generate the matrix for these ones.
+                var tfm = Matrix4x4.Identity;
+                var rotation = Matrix4x4.CreateRotationX(bn.eulRot.X) *
+                               Matrix4x4.CreateRotationY(bn.eulRot.Y) *
+                               Matrix4x4.CreateRotationZ(bn.eulRot.Z);
+
+                tfm *= rotation;
+                tfm *= originalMatrices[i];
+                tfm = FlipMatrixX(tfm);
+                tfm *= originalMatricesInverted[i];
+
+                Matrix4x4.Decompose(tfm, out var scale, out var rot, out var pos);
+                bn.pos = new Vector3(-bn.pos.X, bn.pos.Y, bn.pos.Z);
+                bn.eulRot = MathExtras.QuaternionToEuler(rot);
+
+                aqn.nodoList[i] = bn;
+            }
+        }
+        public static void NegativeYZSwapAqp(AquaObject aqp)
+        {
+            // Process mesh data
+            foreach (var vtxl in aqp.vtxlList)
+            {
+                for (int v = 0; v < vtxl.vertPositions.Count; v++)
+                {
+                    vtxl.vertPositions[v] = Vector3.Transform(vtxl.vertPositions[v], NYZSwapMat);
+                    if (vtxl.vertNormals.Count > v)
+                    {
+                        vtxl.vertNormals[v] = Vector3.TransformNormal(vtxl.vertNormals[v], NYZSwapMat);
+                    }
+                    if (vtxl.vertTangentList.Count > v)
+                    {
+                        vtxl.vertTangentList[v] = Vector3.TransformNormal(vtxl.vertTangentList[v], NYZSwapMat);
+                    }
+                    if (vtxl.vertBinormalList.Count > v)
+                    {
+                        vtxl.vertBinormalList[v] = Vector3.TransformNormal(vtxl.vertBinormalList[v], NYZSwapMat);
+                    }
+                }
+            }
+        }
+
         public static void FlipHandednessMotionAqmX(AquaMotion aqm)
         {
             for (int i = 0; i < aqm.motionKeys.Count; i++)
