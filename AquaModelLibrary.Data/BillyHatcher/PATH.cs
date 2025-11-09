@@ -6,7 +6,7 @@ using System.Numerics;
 namespace AquaModelLibrary.Data.BillyHatcher
 {
     /// <summary>
-    /// .pth files. Similar idae to .mc2 files with bounding boxes linked to data
+    /// .pth files. Similar idea to .mc2 files with bounding boxes linked to data
     /// </summary>
     public class PATH
     {
@@ -19,7 +19,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public List<PathInfo> pathInfoList = new List<PathInfo>();
         public List<PathSector> pathSectors = new List<PathSector>();
         public PathSector rootSector = null;
-        public Dictionary<int, PathSegments> pathSegmentDict = new Dictionary<int, PathSegments>();
+        public Dictionary<int, List<PathSegment>> pathSegmentDict = new Dictionary<int, List<PathSegment>>();
         public PATH() { }
 
         public PATH(BufferedStreamReaderBE<MemoryStream> sr)
@@ -118,10 +118,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             sr.Seek(pathHeader.rawPathOffset + 0x8, SeekOrigin.Begin);
             while (sr.Position < pathHeader.rawPathCount + pathHeader.rawPathOffset + 0x8)
             {
-                PathSegments pathSeg = new PathSegments();
-                pathSeg.relativeOffset = (int)(sr.Position - 0x8 - pathHeader.rawPathOffset);
-                pathSeg.defCount = sr.ReadBE<ushort>();
-                for (int j = 0; j < pathSeg.defCount; j++)
+                List<PathSegment> pathSegs = new List<PathSegment>();
+                var relativeOffset = (int)(sr.Position - 0x8 - pathHeader.rawPathOffset);
+                var defCount = sr.ReadBE<ushort>();
+                for (int j = 0; j < defCount; j++)
                 {
                     var def = new PathSegment();
 
@@ -130,9 +130,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     def.endVert = sr.ReadBE<ushort>();
 
                     def.pathInfo = pathInfoList[def.vertSet];
-                    pathSeg.defs.Add(def);
+                    pathSegs.Add(def);
                 }
-                pathSegmentDict.Add((int)(pathSeg.relativeOffset), pathSeg);
+                pathSegmentDict.Add((int)(relativeOffset), pathSegs);
             }
 
             foreach (var sector in pathSectors)
@@ -169,7 +169,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             int size = 0;
             foreach(var pathSegment in pathSegmentDict)
             {
-                size += 2 + pathSegment.Value.defs.Count * 6; 
+                size += 2 + pathSegment.Value.Count * 6; 
             }
 
             return size;
@@ -257,7 +257,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 PathSector pathDef = pathSectors[i];
 
                 outBytes.AddValue(pathDef.isFinalSubdivision);
-                outBytes.AddValue((ushort)(pathDef.rawPathCount > 0 ? pathSegmentDict[pathDef.rawPathOffset].defs.Count : 0));
+                outBytes.AddValue((ushort)(pathDef.rawPathCount > 0 ? pathSegmentDict[pathDef.rawPathOffset].Count : 0));
                 outBytes.AddValue((int)(pathDef.rawPathCount > 0 ? rawPathCounter : 0));
                 outBytes.AddValue(pathDef.xzMin);
                 outBytes.AddValue(pathDef.xzMax);
@@ -268,7 +268,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 if(pathDef.rawPathCount > 0)
                 {
-                    rawPathCounter += 2 + pathSegmentDict[pathDef.rawPathOffset].defs.Count * 6;
+                    rawPathCounter += 2 + pathSegmentDict[pathDef.rawPathOffset].Count * 6;
                 }
             }
 
@@ -278,10 +278,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             for(int i = 0; i < rawPathDefKeys.Count; i++)
             {
                 var rawPath = pathSegmentDict[rawPathDefKeys[i]];
-                outBytes.AddValue((ushort)rawPath.defs.Count);
-                for(int j = 0; j < rawPath.defs.Count; j++)
+                outBytes.AddValue((ushort)rawPath.Count);
+                for(int j = 0; j < rawPath.Count; j++)
                 {
-                    var def = rawPath.defs[j];
+                    var def = rawPath[j];
                     outBytes.AddValue(def.vertSet);
                     outBytes.AddValue(def.startVert);
                     outBytes.AddValue(def.endVert);
@@ -368,17 +368,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public List<Vector3> vertNormals = new List<Vector3>();
         }
 
-        public class PathSegments
-        {
-            /// <summary>
-            /// This is the offset by which sectors will reference the path
-            /// </summary>
-            public int relativeOffset; 
-
-            public ushort defCount;
-            public List<PathSegment> defs = new List<PathSegment>();
-        }
-
         public class PathSegment
         {
             public ushort vertSet;
@@ -445,7 +434,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public PathSector? childSector3;
             
             public int depth = -1;
-            public PathSegments pathSegments = null;
+            public List<PathSegment> pathSegments = null;
         }
     }
 }
