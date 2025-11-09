@@ -80,6 +80,33 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
+        public List<int> GetNODEChildren(int parentId)
+        {
+            List<int> nodes = new List<int>();
+            for(int i = 0; i < nodeList.Count; i++)
+            {
+                if (nodeList[i].parentId == parentId)
+                {
+                    nodes.Add(i);
+                }
+            }
+
+            return nodes;
+        }
+        public List<int> GetNODOChildren(int parentId)
+        {
+            List<int> nodes = new List<int>();
+            for (int i = 0; i < nodoList.Count; i++)
+            {
+                if (nodoList[i].parentId == parentId)
+                {
+                    nodes.Add(i);
+                }
+            }
+
+            return nodes;
+        }
+
         public void ParseNODE(List<Dictionary<int, object>> nodeRaw)
         {
             for (int i = 0; i < nodeRaw.Count; i++)
