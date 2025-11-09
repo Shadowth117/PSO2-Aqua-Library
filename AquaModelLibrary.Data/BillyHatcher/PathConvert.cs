@@ -13,8 +13,26 @@ namespace AquaModelLibrary.Core.Billy
             pathInfo.vertDef = new PATH.VertDefinition();
             for(int i = 0; i < aqn.nodeList.Count; i++)
             {
+                if(aqn.nodeList[i].boneName.GetString().ToLower().Contains("(n)"))
+                {
+                    continue;
+                }
+                var nodeMat = aqn.nodeList[i].GetInverseBindPoseMatrixInverted();
+                Quaternion nodeRot = Quaternion.CreateFromRotationMatrix(nodeMat);
+                var normalVector = Vector3.Transform(new Vector3(0, 1, 0), nodeRot);
                 //Grab the first (N) child if it exists, grab the next non (N) node as the next point
-                //var children = aqn.GetChildren(i);
+                var children = aqn.GetNODEChildren(i);
+                foreach (var child in children)
+                {
+                    if (aqn.nodeList[child].boneName.GetString().ToLower().Contains("(n)"))
+                    {
+                        var childMat = aqn.nodeList[i].GetInverseBindPoseMatrixInverted();
+                        normalVector = childMat.Translation - nodeMat.Translation;
+                        break;
+                    }
+                }
+
+
             }
 
             //If this is a path with normals, to follow the game's precedent we should insert it before the paths without normals
