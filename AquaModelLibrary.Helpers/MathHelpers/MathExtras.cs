@@ -662,12 +662,12 @@ namespace AquaModelLibrary.Helpers.MathHelpers
             return angles;
         }
 
-        public static Vector3 QuaternionToEulerTest(Quaternion quat)
+        public static Vector3 QuaternionToEulerTestYMinor(Quaternion quat)
         {
-            return QuaternionToEulerRadiansTest(quat) * (float)(180 / Math.PI);
+            return QuaternionToEulerRadiansYMinor(quat) * (float)(180 / Math.PI);
         }
 
-        public static Vector3 QuaternionToEulerRadiansTest(Quaternion q)
+        public static Vector3 QuaternionToEulerRadiansYMinor(Quaternion q)
         {
             Vector3 eulerAngles = new Vector3();
 
