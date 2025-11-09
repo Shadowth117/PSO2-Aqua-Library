@@ -7,6 +7,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 {
     public class NinjaMotionConvert
     {
+        /// <summary>
+        /// Does not account for node remapping required for certain animations in some Ninja games. Will need this for full compatibility
+        /// </summary>
         public static List<AquaMotion> NJMToAqm(List<NJSMotion> njmlist)
         {
             List<AquaMotion> aqmList = new List<AquaMotion>();
