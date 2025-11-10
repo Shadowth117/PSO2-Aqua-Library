@@ -219,7 +219,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         public struct PieceSet
         {
             public int namePtr;
-            public ushort variantCount; //Count of files, ex ln_0310_i0_00, ln_0310_i0_01 etc. Only a single '80' file if 0?
+            public ushort variantCount; //Count of files, ex ln_0310_i0_00, ln_0310_i0_01 etc.
             public ushort usht_06;
             public ushort usht_08;
             public ushort variant80Count;

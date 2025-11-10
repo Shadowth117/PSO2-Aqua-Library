@@ -1,5 +1,4 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.Extensions;
 using System.Text;
 using AquaModelLibrary.Helpers;
 
@@ -78,14 +77,25 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 get { return GetIdAsString(); }
             }
+            public string pieceFileIdText
+            {
+                get { return GetFileIdAsString(); }
+            }
+            public string pieceObjIdText
+            {
+                get { return GetObjIdAsString(); }
+            }
 
             public ushort pieceId;      //Correlates to pieceId
             public ushort usht_02;
-            public ushort usht_04;
+            /// <summary>
+            /// Rotation is rotationCount * -90 degrees.
+            /// </summary>
+            public ushort rotationCount;
             public ushort usht_06;
             public ushort usht_08;
-            public ushort usht_0A;
-            public ushort usht_0C;
+            public ushort variantId;
+            public ushort objVariantId;
             public ushort usht_0E;
 
             public ushort usht_10;
@@ -107,6 +117,22 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     return null;
                 }
                 return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId));
+            }
+            public string GetFileIdAsString()
+            {
+                if (pieceId == 0)
+                {
+                    return null;
+                }
+                return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId)) + $"_{variantId:D2}";
+            }
+            public string GetObjIdAsString()
+            {
+                if (pieceId == 0)
+                {
+                    return null;
+                }
+                return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId)) + $"_{variantId:D2}_ob{objVariantId:D2}";
             }
         }
 
