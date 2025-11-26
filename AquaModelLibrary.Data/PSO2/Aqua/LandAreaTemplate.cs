@@ -89,7 +89,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public ushort pieceId;      //Correlates to pieceId
             public ushort usht_02;
             /// <summary>
-            /// Rotation is rotationCount * -90 degrees.
+            /// Rotation is (rotationCount - 1) * -90 degrees.
             /// </summary>
             public ushort rotationCount;
             public ushort usht_06;
@@ -124,7 +124,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     return null;
                 }
-                return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId)) + $"_{variantId:D2}";
+                return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId)) + $"_{(variantId == ushort.MaxValue ? 0 : variantId):D2}";
             }
             public string GetObjIdAsString()
             {
@@ -132,7 +132,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     return null;
                 }
-                return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId)) + $"_{variantId:D2}_ob{objVariantId:D2}";
+                return Encoding.UTF8.GetString(BitConverter.GetBytes(pieceId)) + $"_{(variantId == ushort.MaxValue ? 0 : variantId):D2}_ob{objVariantId:D2}";
             }
         }
 

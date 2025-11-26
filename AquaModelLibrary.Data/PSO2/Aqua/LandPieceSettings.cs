@@ -226,8 +226,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             public int fullNamePtr;
 
             public int int_10;
-            public int int_14;
-            public int int_18;
+            public int gridWidth;
+            public int gridHeight;
             public int data1Ptr;
 
             public int data2Ptr;
