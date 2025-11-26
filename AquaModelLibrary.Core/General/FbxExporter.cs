@@ -10,7 +10,8 @@ namespace AquaModelLibrary.Core.General
         public static void ExportToFile(AquaObject aqo, AquaNode aqn, List<AquaMotion> aqmList, string destinationFilePath, List<string> aqmNameList, List<Matrix4x4> instanceTransforms, bool includeMetadata, int coordSystem = 0, bool excludeTangentBinormal = true)
         {
             var cloneAqo = aqo.Clone();
-            if(excludeTangentBinormal)
+            aqo.FailsafeEmptyModel();
+            if (excludeTangentBinormal)
             {
                 foreach (var vtxl in cloneAqo.vtxlList)
                 {

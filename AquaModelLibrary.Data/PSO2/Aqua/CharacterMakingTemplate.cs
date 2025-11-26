@@ -4,7 +4,6 @@ using System.Text;
 using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
-using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {

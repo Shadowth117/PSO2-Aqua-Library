@@ -2126,6 +2126,94 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 ComputeTangentSpace(false, true);
             }
         }
+
+        /// <summary>
+        /// Creates a dummy mesh if there's no mesh data to use
+        /// </summary>
+        public void FailsafeEmptyModel()
+        {
+            if(meshList.Count == 0)
+            {
+                var mesh = new MESH();
+                mesh.flags = 0x17;
+                mesh.unkShort0 = 0x0;
+                mesh.unkByte0 = 0x80;
+                mesh.unkByte1 = 0x64;
+                mesh.vsetIndex = vsetList.Count;
+                mesh.tsetIndex = tsetList.Count;
+                mesh.rendIndex = rendList.Count;
+                mesh.mateIndex = mateList.Count;
+                mesh.psetIndex = psetList.Count;
+                mesh.shadIndex = shadList.Count;
+
+                var vtxl = new VTXL();
+                vtxl.vertPositions.Add(new Vector3());
+                vtxl.vertPositions.Add(new Vector3());
+                vtxl.vertPositions.Add(new Vector3());
+                var vset = new VSET();
+                vset.vertDataSize = 0xC;
+                vset.vtxlCount = 3;
+                vset.vtxeCount = vtxeList.Count; // In case we already have a vtxe
+                var vtxe = VTXE.ConstructFromVTXL(vtxl, out int vertSize);
+                var strip = new StripData();
+                strip.format0xC31 = true;
+                strip.triStrips = new List<ushort>() { 0, 1, 2};
+                var pset = new PSET();
+                pset.psetFaceCount = 1;
+                pset.tag = 0x1000;
+                var tset = new TSET();
+                var rend = new REND();
+                rend.tag = 0x1FF;
+                rend.unk0 = 3;
+                rend.twosided = 0;
+
+                rend.sourceAlpha = 5;
+                rend.destinationAlpha = 6;
+                rend.unk3 = 1;
+                rend.unk4 = 0;
+
+                rend.unk5 = 5;
+                rend.unk6 = 6;
+                rend.unk7 = 1;
+                rend.unk8 = 1;
+
+                rend.unk9 = 5;
+                rend.alphaCutoff = 128;
+                rend.unk11 = 1;
+                rend.unk12 = 4;
+                rend.unk13 = 1;
+                var mate = new MATE();
+                //Set up material
+                mate.diffuseRGBA = new Vector4(1,1,1,1);
+                mate.unkRGBA0 = new Vector4();
+                mate._sRGBA = new Vector4();
+                mate.unkRGBA1 = new Vector4();
+                mate.reserve0 = 0;
+                mate.unkFloat0 = 0;
+                mate.unkFloat1 = 0;
+                mate.unkInt0 = 0;
+                mate.unkInt1 = 0;
+                mate.alphaType.SetString("blendalpha");
+                mate.matName.SetString("DummyMat");
+
+                //Set up SHAD
+                var shad = new SHAD();
+                shad.pixelShader.SetString("0398p");
+                shad.vertexShader.SetString("0398");
+
+                vtxlList.Add(vtxl);
+                vsetList.Add(vset);
+                vtxeList.Add(vtxe);
+                strips.Add(strip);
+                psetList.Add(pset);
+                tsetList.Add(tset);
+                mateList.Add(mate);
+                shadList.Add(shad);
+
+                meshList.Add(mesh);
+
+            }
+        }
         #endregion
 
         #region String Management

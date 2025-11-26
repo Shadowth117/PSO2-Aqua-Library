@@ -351,7 +351,7 @@ namespace AquaModelLibrary.Core.FromSoft
 
                     string finalPath;
                     var outName = Path.ChangeExtension(fileName, ".aqp");
-                    if (aqp != null && aqp.vtxlList.Count > 0)
+                    if (aqp != null)
                     {
                         aqp.ConvertToPSO2Model(true, false, false, !addTangentData, false, false, false, true, false, aqp.bonePalette.Count == 0);
                         aqp.ConvertToLegacyTypes();
