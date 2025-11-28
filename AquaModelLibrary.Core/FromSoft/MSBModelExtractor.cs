@@ -696,11 +696,13 @@ namespace AquaModelLibrary.Core.FromSoft
                     {
                         if (texFilenameList.Contains(tex.Name.ToLower()))
                         {
-                            File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
+                            var texData = tex.HeaderizeExt(out string texExtension);
+                            File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + texExtension), texData);
                         }
                         else if (extractUnreferencedMapData)
                         {
-                            File.WriteAllBytes(Path.Combine(outPath, "Unreferenced", Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
+                            var texData = tex.HeaderizeExt(out string texExtension);
+                            File.WriteAllBytes(Path.Combine(outPath, "Unreferenced", Path.GetFileName(tex.Name) + texExtension), texData);
                         }
                     }
                     break;

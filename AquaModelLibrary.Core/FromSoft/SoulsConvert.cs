@@ -396,7 +396,8 @@ namespace AquaModelLibrary.Core.FromSoft
                     var tpf = TPF.Read(bndFile.Bytes);
                     foreach (var tex in tpf.Textures)
                     {
-                        File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + ".dds"), tex.Headerize());
+                        var texData = tex.HeaderizeExt(out string texExtension);
+                        File.WriteAllBytes(Path.Combine(outPath, Path.GetFileName(tex.Name) + texExtension), texData);
                     }
                 }
 #if !DEBUG
