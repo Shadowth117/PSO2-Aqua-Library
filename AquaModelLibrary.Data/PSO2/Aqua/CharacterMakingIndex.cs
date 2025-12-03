@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+﻿using AquaModelLibrary.Data.LegacyObj;
+using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Extensions;
@@ -127,7 +128,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             ReadSticker(streamReader, offset, cmxTable.stickerAddress, cmxTable.stickerCount, stickerDict);
 
             ReadFACE(streamReader, offset, cmxTable.faceAddress, cmxTable.faceCount, faceDict, rel0.REL0DataStart);
-            ReadFCMN(streamReader, offset, cmxTable.faceMotionAddress, cmxTable.faceMotionCount, fcmnDict);
+            ReadFCMN(streamReader, offset, cmxTable.faceMotionAddress, cmxTable.faceMotionCount, fcmnDict, rel0.REL0DataStart);
             ReadFaceTextures(streamReader, offset, cmxTable.faceTextureAddress, cmxTable.faceTextureCount, faceTextureDict);
             ReadFCP(streamReader, offset, cmxTable.faceTexturesAddress, cmxTable.faceTexturesCount, fcpDict);
 
@@ -317,7 +318,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     body.body12_4_24 = streamReader.Read<BODY12_4_24>();
                 }
 
-                if(rel0DataStart >= CMXConstants.feb5_24TableAddressInt)
+                if(rel0DataStart >= CMXConstants.feb5_25TableAddressInt)
                 {
                     body.body2_5_25 = streamReader.Read<int>();
                 }
@@ -480,7 +481,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 {
                     face.unkVer2Int = streamReader.Read<int>();
                 }
-                if(rel0DataStart >= CMXConstants.feb5_24TableAddressInt)
+                if(rel0DataStart >= CMXConstants.feb5_25TableAddressInt)
                 {
                     face.face3 = streamReader.Read<FACE3>();
                 }
@@ -543,7 +544,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        private static void ReadFCMN(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int baseAddress, int count, Dictionary<int, FCMNObject> dict)
+        private static void ReadFCMN(BufferedStreamReaderBE<MemoryStream> streamReader, int offset, int baseAddress, int count, Dictionary<int, FCMNObject> dict, int rel0DataStart)
         {
             streamReader.Seek(baseAddress + offset, SeekOrigin.Begin);
             for (int i = 0; i < count; i++)
@@ -552,6 +553,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 fcmn.num = i;
                 fcmn.originalOffset = streamReader.Position;
                 fcmn.fcmn = streamReader.Read<FCMN>();
+                if (rel0DataStart >= CMXConstants.dec2_25TableAddressInt)
+                {
+                    fcmn.fcmn_12_2_25 = streamReader.Read<FCMN_12_2_25>();
+                }
                 long temp = streamReader.Position;
 
                 streamReader.Seek(fcmn.fcmn.proportionAnimPtr + offset, SeekOrigin.Begin);
@@ -586,6 +591,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                 streamReader.Seek(fcmn.fcmn.faceAnim10Ptr + offset, SeekOrigin.Begin);
                 fcmn.faceAnim10 = streamReader.ReadCString();
+                
+                if (rel0DataStart >= CMXConstants.dec2_25TableAddressInt)
+                {
+                    streamReader.Seek(fcmn.fcmn_12_2_25.faceAnim11Ptr + offset, SeekOrigin.Begin);
+                    fcmn.faceAnim11 = streamReader.ReadCString();
+                    streamReader.Seek(fcmn.fcmn_12_2_25.faceAnim12Ptr + offset, SeekOrigin.Begin);
+                    fcmn.faceAnim12 = streamReader.ReadCString();
+                }
 
                 streamReader.Seek(temp, SeekOrigin.Begin);
 

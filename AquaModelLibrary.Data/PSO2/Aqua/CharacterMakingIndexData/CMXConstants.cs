@@ -13,6 +13,7 @@
         public static int ver2TableAddressInt = 0x0039B5EC; //Version 2, June 6th 2023 update cmx
         public static int oct2_24TableAddressInt = 0x0040fb90; //October 2nd, 2024 update cmx
         public static int dec4_24TableAddressInt = 0x00457354; //December 12th, 2024 update cmx
-        public static int feb5_24TableAddressInt = 0x0046f1d0; //February 5th, 2025 update cmx
+        public static int feb5_25TableAddressInt = 0x0046f1d0; //February 5th, 2025 update cmx
+        public static int dec2_25TableAddressInt = 0x004b6370; //December 2nd, 2025 update dmx
     }
 }

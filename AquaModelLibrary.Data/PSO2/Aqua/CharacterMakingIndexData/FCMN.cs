@@ -1,11 +1,13 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Helpers.PSO2;
+using System.Runtime.InteropServices;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 {
     public class FCMNObject : BaseCMXObject
     {
         public FCMN fcmn;
+        public FCMN_12_2_25 fcmn_12_2_25;
         public string proportionAnim = null;
         public string faceAnim1 = null;
         public string faceAnim2 = null;
@@ -19,6 +21,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public string faceAnim8 = null;
         public string faceAnim9 = null;
         public string faceAnim10 = null;
+        public string faceAnim11 = null;
+        public string faceAnim12 = null;
 
         public FCMNObject() { }
 
@@ -64,4 +68,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public int faceAnim9Ptr;
         public int faceAnim10Ptr;
     }
+
+    public struct FCMN_12_2_25
+    {
+        public int faceAnim11Ptr;
+        public int faceAnim12Ptr;
+    }
+
 }
