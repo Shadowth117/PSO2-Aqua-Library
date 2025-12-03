@@ -1968,6 +1968,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             DataHelpers.AddNIFLText(outBytes.Count + 0x24, nof0PointerLocations, textAddressDict, textList, face.faceAnim8);
             DataHelpers.AddNIFLText(outBytes.Count + 0x28, nof0PointerLocations, textAddressDict, textList, face.faceAnim9);
             DataHelpers.AddNIFLText(outBytes.Count + 0x2C, nof0PointerLocations, textAddressDict, textList, face.faceAnim10);
+            if(mode >= 1)
+            {
+                DataHelpers.AddNIFLText(outBytes.Count + 0x30, nof0PointerLocations, textAddressDict, textList, face.faceAnim11);
+                DataHelpers.AddNIFLText(outBytes.Count + 0x34, nof0PointerLocations, textAddressDict, textList, face.faceAnim12);
+            }
 
             outBytes.AddRange(DataHelpers.ConvertStruct(face.fcmn));
         }
