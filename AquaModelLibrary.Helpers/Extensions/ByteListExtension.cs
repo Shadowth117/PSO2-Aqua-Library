@@ -274,22 +274,12 @@ namespace AquaModelLibrary.Helpers.Extensions
 
 		public static void AddValue(this List<byte> outBytes, byte value)
 		{
-			var newBytes = BitConverter.GetBytes(value);
-			if (AddAsBigEndian)
-			{
-				Array.Reverse(newBytes);
-			}
-			outBytes.AddRange(newBytes);
+			outBytes.Add(value);
 		}
 
 		public static void AddValue(this List<byte> outBytes, sbyte value)
 		{
-			var newBytes = BitConverter.GetBytes(value);
-			if (AddAsBigEndian)
-			{
-				Array.Reverse(newBytes);
-			}
-			outBytes.AddRange(newBytes);
+			outBytes.Add((byte)value);
 		}
 
 		/// <summary>
