@@ -1,0 +1,117 @@
+{
+  "runtimeTarget": {
+    "name": "net9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    "net9.0": {
+      "AquaModelLibrary.Native.X64/1.0.0": {
+        "dependencies": {
+          "AquaModelLibrary.Data": "1.0.0.0"
+        },
+        "runtime": {
+          "AquaModelLibrary.Native.X64.dll": {}
+        }
+      },
+      "AquaModelLibrary.Data/1.0.0.0": {
+        "runtime": {
+          "AquaModelLibrary.Data.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "AquaModelLibrary.Helpers/1.0.0.0": {
+        "runtime": {
+          "AquaModelLibrary.Helpers.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "UnluacNET/0.0.0.0": {
+        "runtime": {
+          "UnluacNET.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "ZamboniLib/1.0.3.0": {
+        "runtime": {
+          "ZamboniLib.dll": {
+            "assemblyVersion": "1.0.3.0",
+            "fileVersion": "1.0.3.0"
+          }
+        }
+      },
+      "NvTriStripDotNet/1.0.0.0": {
+        "runtime": {
+          "NvTriStripDotNet.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "ArchiveLib/1.0.0.0": {
+        "runtime": {
+          "ArchiveLib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "VrSharp/1.0.0.0": {
+        "runtime": {
+          "VrSharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AquaModelLibrary.Native.X64/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AquaModelLibrary.Data/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AquaModelLibrary.Helpers/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "UnluacNET/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ZamboniLib/1.0.3.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "NvTriStripDotNet/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ArchiveLib/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "VrSharp/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
