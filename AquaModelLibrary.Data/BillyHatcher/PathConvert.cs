@@ -1,16 +1,47 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
+using AquaModelLibrary.Helpers.MathHelpers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Core.Billy
 {
     public class PathConvert
     {
-        public static void ImportSplineToPath(PATH path, AquaNode aqn)
+        //These are path ids that shouuld never be calced in the base game. It's hardcoded there so we'll hard code it here, unless forced otherwise
+        //Known builds of the game only have 1 race to a path, but just in case we'll do these as lists
+        public static List<int> blueRacePaths = new List<int>() { 8 };
+        public static List<int> redRacePaths = new List<int>() { 1 };
+        public static List<int> purpleRacePaths = new List<int>() { 3 };
+        public static List<int> yellowRacePaths = new List<int>() { 7 };
+
+        public static bool IsRacePath(string fileName, int pathSplineId)
+        {
+            switch(fileName.ToLower())
+            {
+                case "path_blue.pth":
+                    return blueRacePaths.Contains(pathSplineId);
+                case "path_red.pth":
+                    return redRacePaths.Contains(pathSplineId);
+                case "path_purple.pth":
+                    return purpleRacePaths.Contains(pathSplineId);
+                case "path_yellow.pth":
+                    return yellowRacePaths.Contains(pathSplineId);
+            }
+
+            return false;
+        }
+
+        public static void ImportSplineToPath(PATH path, AquaNode aqn, string pathFileName, bool addNormals, bool isLiquidCurrent, bool isObjectPath, 
+            bool forceNoBSPCalc = false, int pathSplineId = -1)
         {
             PATH.PathInfo pathInfo = new PATH.PathInfo();
+            pathInfo.doesNotUseNormals = (byte)(addNormals ? 0 : 1);
+            pathInfo.isLiquidCurrent = isLiquidCurrent ? 1 : 0;
+            pathInfo.isObjectPath = (byte)(isObjectPath ? 1 : 0);
             pathInfo.vertDef = new PATH.VertDefinition();
+            double length = 0;
+            Vector3 prevTranslation = new Vector3();
             for(int i = 0; i < aqn.nodeList.Count; i++)
             {
                 if(aqn.nodeList[i].boneName.GetString().ToLower().Contains("(n)"))
@@ -18,24 +49,61 @@ namespace AquaModelLibrary.Core.Billy
                     continue;
                 }
                 var nodeMat = aqn.nodeList[i].GetInverseBindPoseMatrixInverted();
-                Quaternion nodeRot = Quaternion.CreateFromRotationMatrix(nodeMat);
-                var normalVector = Vector3.Transform(new Vector3(0, 1, 0), nodeRot);
-                //Grab the first (N) child if it exists, grab the next non (N) node as the next point
-                var children = aqn.GetNODEChildren(i);
-                foreach (var child in children)
+                pathInfo.vertDef.vertPositions.Add(nodeMat.Translation);
+                if(i == 0)
                 {
-                    if (aqn.nodeList[child].boneName.GetString().ToLower().Contains("(n)"))
+                    prevTranslation = nodeMat.Translation;
+                } else
+                {
+                    length += MathExtras.Distance(prevTranslation, nodeMat.Translation);
+                }
+                pathInfo.lengthsList.Add((float)length);
+
+                if (addNormals)
+                {
+                    Quaternion nodeRot = Quaternion.CreateFromRotationMatrix(nodeMat);
+                    var normalVector = Vector3.Transform(new Vector3(0, 1, 0), nodeRot);
+                    //Grab the first (N) child if it exists, grab the next non (N) node as the next point
+                    var children = aqn.GetNODEChildren(i);
+                    foreach (var child in children)
                     {
-                        var childMat = aqn.nodeList[i].GetInverseBindPoseMatrixInverted();
-                        normalVector = childMat.Translation - nodeMat.Translation;
-                        break;
+                        if (aqn.nodeList[child].boneName.GetString().ToLower().Contains("(n)"))
+                        {
+                            var childMat = aqn.nodeList[child].GetInverseBindPoseMatrixInverted();
+                            normalVector = childMat.Translation - nodeMat.Translation;
+                            break;
+                        }
+                    }
+
+                    pathInfo.vertDef.vertNormals.Add(normalVector);
+                }
+            }
+            pathInfo.totalLength = pathInfo.lengthsList[^1];
+
+            //Decide if this is an additional path or replacing an existing one
+            if (pathSplineId == -1 || pathSplineId > path.pathInfoList.Count - 1)
+            {
+                //If this is a path with normals, to follow the game's precedent we should insert it before the paths without normals
+                //For now we will not though
+                pathInfo.id = path.pathInfoList.Count;
+                path.pathInfoList.Add(pathInfo);
+            } else
+            {
+                pathInfo.id = pathSplineId;
+                for(int i = 0; i < path.pathInfoList.Count; i++)
+                {
+                    if (path.pathInfoList[i].id == pathSplineId)
+                    {
+                        path.pathInfoList[i] = pathInfo;
                     }
                 }
-
-
             }
 
-            //If this is a path with normals, to follow the game's precedent we should insert it before the paths without normals
+            //Decide if we recalculate the BSP quadtree for this path
+            if (!forceNoBSPCalc && !isObjectPath && !IsRacePath(pathFileName, pathSplineId))
+            {
+
+            }
         }
 
         public static List<AquaNode> ExportPathToSplines(PATH path)
