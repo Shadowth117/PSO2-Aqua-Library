@@ -817,7 +817,7 @@ namespace AquaModelLibrary.Core.Billy
 
             mc2.PopulateFaceBounds();
             mc2.rootSector = mc2.SubdivideSector(new Vector2(rootBoxMinExtents.X, rootBoxMaxExtents.X), new Vector2(rootBoxMinExtents.Z, rootBoxMaxExtents.Z), faceIndices, 0);
-            mc2.header.maxDepth = (ushort)MC2.maxDepth;
+            mc2.header.maxDepth = (ushort)mc2.deepestMC2Depth;
             mc2.header.ushort3 = 0x14;
 
             return mc2;

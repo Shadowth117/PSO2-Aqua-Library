@@ -8,7 +8,14 @@ namespace AquaModelLibrary.Data.BillyHatcher
 {
     public class MC2
     {
-        public static int maxDepth = 6;
+        /// <summary>
+        /// Max Depth MC2s will normally use
+        /// </summary>
+        public static int maxMC2Depth = 6;
+        /// <summary>
+        /// Max Depth of current MC2
+        /// </summary>
+        public int deepestMC2Depth => GetDeepestMC2Depth();
         public static Dictionary<int, int> maxDepthFaces = new Dictionary<int, int>()
         {
             { 0, 0},
@@ -53,6 +60,20 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public MC2(BufferedStreamReaderBE<MemoryStream> sr)
         {
             Read(sr);
+        }
+
+        private int GetDeepestMC2Depth()
+        {
+            int depth = 0;
+            foreach(var sector in sectors)
+            {
+                if(sector.depth > depth)
+                {
+                    depth = sector.depth;
+                }
+            }
+
+            return depth;
         }
 
         public void Read(BufferedStreamReaderBE<MemoryStream> sr)
@@ -295,10 +316,18 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var vertY = vertPositions[face.vert1];
                 var vertZ = vertPositions[face.vert2];
 
-                //Check if this vertex is within the bounds of the bounding box. If it is, we include all faces it's used in.
-                //This check should include situations where an edge of a triangle interesects the bounding or the triangle surrounds the bounding.
-                if (bounds.MinX <= XRange.Y && XRange.X <= bounds.MaxX && bounds.MaxZ >= ZRange.X && ZRange.Y >= bounds.MinZ
-                    || bounds.MinX >= XRange.Y && XRange.X >= bounds.MaxX && bounds.MaxZ <= ZRange.X && ZRange.Y <= bounds.MinZ)
+                //Check if this face intersects with the bounding box and include it if so.
+                bool lowerXinX = bounds.MinX <= XRange.Y;
+                bool upperXinX = XRange.X <= bounds.MaxX;
+                bool lowerZinZ = bounds.MinZ <= ZRange.Y;
+                bool upperZinZ = ZRange.X <= bounds.MaxZ;
+                bool lowerXunderX = bounds.MinX <= XRange.X;
+                bool upperXaboveX = XRange.Y <= bounds.MaxX;
+                bool lowerZunderZ = bounds.MinZ <= ZRange.X;
+                bool upperZaboveZ = ZRange.Y <= bounds.MaxZ;
+                if (((lowerXinX || upperXinX) && (lowerZinZ || upperZinZ)) //A face bounding corner is inbound
+                    || (lowerXunderX && upperXaboveX && lowerZunderZ && upperZaboveZ) //Face fully encompasses bounding
+                    )
                 {
                     newFaceIndices.Add(faceId);
                     newFaces.Add(face);
@@ -306,8 +335,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
 
             var maxFaceCount = maxDepthFaces[depth];
-            //We continue until we've reached the maximum depth or we hit under or equal to 64
-            if (depth >= maxDepth || newFaceIndices.Count <= maxFaceCount || newFaceIndices.Count == 0)
+            //We continue until we've reached the maximum depth, we hit under or equal to the layer's max face count, or we have no new face indices
+            if (depth >= maxMC2Depth || newFaceIndices.Count <= maxFaceCount || newFaceIndices.Count == 0)
             {
                 sector.stripData = newFaceIndices;
                 sector.indexCount = (ushort)newFaceIndices.Count;
@@ -323,9 +352,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var XDistance = Math.Abs(XRange.Y - XRange.X);
                 var ZDistance = Math.Abs(ZRange.Y - ZRange.X);
 
-                header.greatestBoundingRange.Y = Math.Max(XDistance, header.greatestBoundingRange.Y);
+                header.greatestBoundingRange.X = Math.Max(XDistance, header.greatestBoundingRange.X);
                 header.greatestBoundingRange.Y = Math.Max(ZDistance, header.greatestBoundingRange.Y);
-                header.smallestBoundingRange.Y = Math.Min(XDistance, header.smallestBoundingRange.Y);
+                header.smallestBoundingRange.X = Math.Min(XDistance, header.smallestBoundingRange.X);
                 header.smallestBoundingRange.Y = Math.Min(ZDistance, header.smallestBoundingRange.Y);
 
                 var XHalfRange = XDistance / 2;
