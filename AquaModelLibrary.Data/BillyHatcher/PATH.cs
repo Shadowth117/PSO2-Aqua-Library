@@ -382,6 +382,16 @@ namespace AquaModelLibrary.Data.BillyHatcher
         /// 
         /// This is a representation of the four boxes that can be subdivided within this one.
         /// Boxes are always separated horizontally so Y/Vertical values remain constant.
+        /// 
+        /// Subdivision appears to go until depth 4 OR 3 or less path vertices are in the sector
+        /// If they exist, the vertices connecting in to the path segment from either end are included in the segment as well.
+        /// 
+        /// Certain path splines are NOT included in this, namely Object path splines and race mission animal path splines.
+        /// While the object path splines are marked, race animal path splines are not and appear hardcoded.
+        /// Pirates Island, path_blue.pth, lists race as 8.
+        /// Dino Mountain, path_red.pth, lists race as 1.
+        /// Blizzard Castle, path_purple.pth, lists race as 3.
+        /// Sand Ruin, path_yellow.pth, lists race as 7.
         ///   
         /// ---------------------------------------
         /// |                  |                  |
