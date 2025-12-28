@@ -102,7 +102,26 @@ namespace AquaModelLibrary.Core.Billy
             //Decide if we recalculate the BSP quadtree for this path
             if (!forceNoBSPCalc && !isObjectPath && !IsRacePath(pathFileName, pathSplineId))
             {
-
+                float xMin = float.MaxValue;
+                float xMax = float.MinValue;
+                float zMin = float.MaxValue;
+                float zMax = float.MinValue;
+                for (int i = 0; i < path.pathInfoList.Count; i++)
+                {
+                    if(isObjectPath || IsRacePath(pathFileName, i))
+                    {
+                        continue;
+                    }
+                    foreach(var pos in path.pathInfoList[i].vertDef.vertPositions)
+                    {
+                        xMin = Math.Min(pos.X, xMin);
+                        xMax = Math.Max(pos.X, xMax);
+                        zMin = Math.Min(pos.Z, zMin);
+                        zMax = Math.Max(pos.Z, zMax);
+                    }
+                }
+                    
+                path.rootSector = path.SubdivideSector(new Vector2(xMin, xMax), new Vector2(zMin, zMax), new List<PATH.PathSegment>(), 0);
             }
         }
 
@@ -112,47 +131,54 @@ namespace AquaModelLibrary.Core.Billy
 
             for(int i = 0; i < path.pathInfoList.Count; i++)
             {
-                AquaNode aqn = new AquaNode();
-                for(int j = 0; j < path.pathInfoList[i].vertDef.vertPositions.Count; j++)
-                {
-                    NODE node = new NODE();
-                    var pos = path.pathInfoList[i].vertDef.vertPositions[j];
-                    node.SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4.CreateTranslation(pos));
-                    node.boneName.SetString($"Vert {j}");
-                    if(j == 0)
-                    {
-                        node.parentId = -1;
-                    } else
-                    {
-                        node.parentId = aqn.nodeList.Count;
-                        if (path.pathInfoList[i].vertDef.vertNormals.Count > 0)
-                        {
-                            node.parentId -= 1;
-                        }
-                    }
-                    node.firstChild = -1;
-                    node.nextSibling = -1;
-
-                    aqn.nodeList.Add(node);
-                    //Create child node to contain normal direction 
-                    if (path.pathInfoList[i].vertDef.vertNormals.Count > 0)
-                    {
-                        node.firstChild = aqn.nodeList.Count;
-                        NODE nrmNode = new NODE();
-                        nrmNode.parentId = aqn.nodeList.Count - 1;
-                        nrmNode.firstChild = -1;
-                        var nrm = path.pathInfoList[i].vertDef.vertNormals[j];
-                        nrmNode.SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4.CreateTranslation(nrm + pos));
-                        nrmNode.boneName.SetString($"(N) Normal {j}");
-                        aqn.nodeList[aqn.nodeList.Count - 1] = node;
-                        aqn.nodeList.Add(nrmNode);
-                    } 
-
-                }
-                aquaNodes.Add(aqn);
-            }    
+                aquaNodes.Add(ExportPathSpline(path, i));
+            }
 
             return aquaNodes;
+        }
+
+        public static AquaNode ExportPathSpline(PATH path, int splineIndex)
+        {
+            AquaNode aqn = new AquaNode();
+            for (int j = 0; j < path.pathInfoList[splineIndex].vertDef.vertPositions.Count; j++)
+            {
+                NODE node = new NODE();
+                var pos = path.pathInfoList[splineIndex].vertDef.vertPositions[j];
+                node.SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4.CreateTranslation(pos));
+                node.boneName.SetString($"Vert {j}");
+                if (j == 0)
+                {
+                    node.parentId = -1;
+                }
+                else
+                {
+                    node.parentId = aqn.nodeList.Count;
+                    if (path.pathInfoList[splineIndex].vertDef.vertNormals.Count > 0)
+                    {
+                        node.parentId -= 1;
+                    }
+                }
+                node.firstChild = -1;
+                node.nextSibling = -1;
+
+                aqn.nodeList.Add(node);
+                //Create child node to contain normal direction 
+                if (path.pathInfoList[splineIndex].vertDef.vertNormals.Count > 0)
+                {
+                    node.firstChild = aqn.nodeList.Count;
+                    NODE nrmNode = new NODE();
+                    nrmNode.parentId = aqn.nodeList.Count - 1;
+                    nrmNode.firstChild = -1;
+                    var nrm = path.pathInfoList[splineIndex].vertDef.vertNormals[j];
+                    nrmNode.SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4.CreateTranslation(nrm + pos));
+                    nrmNode.boneName.SetString($"(N) Normal {j}");
+                    aqn.nodeList[aqn.nodeList.Count - 1] = node;
+                    aqn.nodeList.Add(nrmNode);
+                }
+
+            }
+
+            return aqn;
         }
     }
 }

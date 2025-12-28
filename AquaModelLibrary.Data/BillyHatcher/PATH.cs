@@ -10,6 +10,12 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// </summary>
     public class PATH
     {
+        public static int maxDepth = 4;
+        /// <summary>
+        /// If all pathSegments in a sector are this count or lower, the sector should not subdivide further
+        /// </summary>
+        public static int minContainedVertCount = 3;
+
         public NinjaHeader header;
         public PATHHeader pathHeader;
         /// <summary>
@@ -383,8 +389,12 @@ namespace AquaModelLibrary.Data.BillyHatcher
         /// This is a representation of the four boxes that can be subdivided within this one.
         /// Boxes are always separated horizontally so Y/Vertical values remain constant.
         /// 
-        /// Subdivision appears to go until depth 4 OR 3 or less path vertices are in the sector
+        /// Subdivision appears to go until depth 4 OR, 3 or less path vertices are in the sector for all paths in a sector (so each path would be 3 or less vertices).
         /// If they exist, the vertices connecting in to the path segment from either end are included in the segment as well.
+        /// If a path exits and reenters the sector, I think all vertices get included?
+        /// 
+        /// Naturally, paths should probably have enough vertices close enough together that they don't skip across sectors though with how long rails take to go across in this, hopefully
+        /// a level designer wouldn't do that anyways.
         /// 
         /// Certain path splines are NOT included in this, namely Object path splines and race mission animal path splines.
         /// While the object path splines are marked, race animal path splines are not and appear hardcoded.
@@ -433,7 +443,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
             /// </summary>
             public Vector2 xzMax;
 
-            //If usesOffset is 0, indices are here
             public ushort childId0;
             public ushort childId1;
             public ushort childId2;
@@ -445,6 +454,119 @@ namespace AquaModelLibrary.Data.BillyHatcher
             
             public int depth = -1;
             public List<PathSegment> pathSegments = null;
+        }
+
+        public PathSector SubdivideSector(Vector2 XRange, Vector2 ZRange, List<PathSegment> pathSegments, int depth)
+        {
+            PathSector sector = new PathSector();
+            pathSectors.Add(sector);
+            sector.xzMax = new Vector2(XRange.Y, ZRange.Y);
+            sector.xzMin = new Vector2(XRange.X, ZRange.X);
+
+            //Extra
+            sector.depth = depth;
+
+            List<PathSegment> newSegments = new List<PathSegment>();
+            List<bool> newSegmentUnderOrAtMinimumContainedCount = new List<bool>();
+            if(depth == 0)
+            {
+                //Initialize pathSegments from all paths if we're at the root
+                for(int i = 0; i < pathInfoList.Count; i++)
+                {
+                    PathSegment segment = new PathSegment();
+                    segment.vertSet = (ushort)i;
+                    segment.startVert = 0;
+                    segment.endVert = (ushort)(pathInfoList[i].vertDef.vertPositions.Count - 1);
+                    newSegmentUnderOrAtMinimumContainedCount.Add((segment.endVert + 1) <= minContainedVertCount);
+                    newSegments.Add(segment);
+                }
+            } else
+            {
+                //Loop through each PathSegment to find out what's in range, add the first and last ones outside the range if needed.
+                //If segments go out, then back in, include all sections between. It's possible it could split into multiple segments, but we don't know if the game will like that
+                //If a segment is not contained within the sector, don't add it again
+                for(int j = 0; j < pathSegments.Count; j++)
+                {
+                    var segment = pathSegments[j];
+                    int? newStartVert = null;
+                    int? newEndVert = null;
+                    for(int i = segment.startVert; i <= segment.endVert; i++)
+                    {
+                        var vertPos = segment.pathInfo.vertDef.vertPositions[i];
+                        //Check if this vertex is within the bounds of the bounding box. If it is, we include it
+                        //We do not break early if after an inbounds vertex we find an out of bounds vertex in case a later one is inbounds. We want one segment per path currently
+                        if (vertPos.X <= XRange.Y && XRange.X <= vertPos.X && vertPos.Z >= ZRange.X && ZRange.Y >= vertPos.Z)
+                        {
+                            if(newStartVert == null)
+                            {
+                                newStartVert = i;
+                                newEndVert = i;
+                            }
+                            if(i > newEndVert)
+                            {
+                                newEndVert = i;
+                            }
+                        }
+                    }
+                    var newSegment = new PathSegment();
+                    newSegment.vertSet = segment.vertSet;
+                    newSegment.pathInfo = segment.pathInfo;
+                    if (newStartVert != null)
+                    {
+                        newSegmentUnderOrAtMinimumContainedCount.Add((newEndVert - newStartVert) <= minContainedVertCount);
+                        if (newStartVert != 0)
+                        {
+                            newStartVert -= 1;
+                        }
+                        if (newEndVert != segment.pathInfo.vertDef.vertPositions.Count - 1)
+                        {
+                            newEndVert += 1;
+                        }
+                        newSegments.Add(segment);
+                    }
+                }
+            }
+
+            //We continue until we've reached the maximum depth, there's no new segments, or we're under or equal to the minimum count
+            if (depth >= maxDepth || !newSegmentUnderOrAtMinimumContainedCount.Contains(false) || newSegments.Count == 0)
+            {
+                sector.isFinalSubdivision = 1;
+
+                sector.rawPathCount = (ushort)newSegments.Count;
+                sector.rawPathOffset = newSegments.Count > 0 ? pathSectors.Count : 0;
+                sector.pathSegments = newSegments;
+            }
+            else
+            {
+                var XDistance = Math.Abs(XRange.Y - XRange.X);
+                var ZDistance = Math.Abs(ZRange.Y - ZRange.X);
+
+                var XHalfRange = XDistance / 2;
+                var ZHalfRange = ZDistance / 2;
+
+                var leftRange = new Vector2(XRange.X, XRange.Y - XHalfRange);
+                var rightRange = new Vector2(XRange.X + XHalfRange, XRange.Y);
+                var upRange = new Vector2(ZRange.X + ZHalfRange, ZRange.Y);
+                var downRange = new Vector2(ZRange.X, ZRange.Y - ZHalfRange);
+
+                var child0 = SubdivideSector(leftRange, downRange, newSegments, depth + 1);
+                sector.childSector0 = child0;
+                sector.childId0 = (ushort)pathSectors.IndexOf(child0);
+
+                var child1 = SubdivideSector(leftRange, upRange, newSegments, depth + 1);
+                sector.childSector1 = child1;
+                sector.childId1 = (ushort)pathSectors.IndexOf(child1);
+
+                var child2 = SubdivideSector(rightRange, downRange, newSegments, depth + 1);
+                sector.childSector2 = child2;
+                sector.childId2 = (ushort)pathSectors.IndexOf(child2);
+
+                var child3 = SubdivideSector(rightRange, upRange, newSegments, depth + 1);
+                sector.childSector3 = child3;
+                sector.childId3 = (ushort)pathSectors.IndexOf(child3);
+            }
+            
+            return sector;
         }
     }
 }
