@@ -1269,7 +1269,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     bool isTransformingVersion = true;
                     if(flver is FLVER2 f2flver)
                     {
-                        isTransformingVersion = f2flver.Header.Version <= 20010;
+                        isTransformingVersion = f2flver.Header.Version <= 0x20014;
                     }
 
                     if (transformMesh && isTransformingVersion)

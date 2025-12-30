@@ -26,15 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\AquaViewer\PSO2-Aqua-Library\AquaModelLibrary.Native\AquaModelLibrary.Native.vcxproj" />
     <ProjectReference Include="..\AquaModelLibrary.Data\AquaModelLibrary.Data.csproj" />
     <ProjectReference Include="..\SAToolsShared\ArchiveLib\ArchiveLib.csproj" />
     <ProjectReference Include="..\SoulsFormatsNEXT\SoulsFormats\SoulsFormats.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="AquaModelLibrary.Native.X64">
-      <HintPath>..\Shared\AquaModelLibrary.Native.X64.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

@@ -736,14 +736,14 @@ namespace AquaModelLibrary.Core.General
         }
 
         //Takes in an Assimp model and generates a full PSO2 model and skeleton from it.
-        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true, bool preTransformVerts = false, bool rigidImport = false)
+        public static AquaObject AssimpAquaConvertFull(string initialFilePath, float scaleFactor, bool preAssignNodeIds, bool isNGS, out AquaNode aqn, bool condenseMaterials = true, bool preTransformVerts = false, bool rigidImport = false, bool preserveFBXPivots = true)
         {
             if(rigidImport == true)
             {
                 preTransformVerts = true;
             }
             Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
+            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(preserveFBXPivots));
             var postProcessSteps = GetPostProcessSteps(preTransformVerts);
 
             Assimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
@@ -818,6 +818,11 @@ namespace AquaModelLibrary.Core.General
             for (uint i = 0; i < aqn.nodeList.Count; i++)
             {
                 aqp.bonePalette.Add(i);
+                aqn.nodeUnicodeNames.Add(aqn.GetNodeName((int)i));
+            }
+            for(int i = 0; i < aqn.nodoList.Count; i++)
+            {
+                aqn.nodoUnicodeNames.Add(aqn.GetNodoName(i));
             }
 
             //Assimp data is gathered, proceed to processing model data for PSO2

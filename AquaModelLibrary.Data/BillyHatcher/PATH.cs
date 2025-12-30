@@ -10,6 +10,30 @@ namespace AquaModelLibrary.Data.BillyHatcher
     /// </summary>
     public class PATH
     {
+        //These are path ids that shouuld never be calced in the base game. It's hardcoded there so we'll hard code it here, unless forced otherwise
+        //Known builds of the game only have 1 race to a path, but just in case we'll do these as lists
+        public static List<int> blueRacePaths = new List<int>() { 8 };
+        public static List<int> redRacePaths = new List<int>() { 1 };
+        public static List<int> purpleRacePaths = new List<int>() { 3 };
+        public static List<int> yellowRacePaths = new List<int>() { 7 };
+
+        public static bool IsRacePath(string fileName, int pathSplineId)
+        {
+            switch (fileName.ToLower())
+            {
+                case "path_blue.pth":
+                    return blueRacePaths.Contains(pathSplineId);
+                case "path_red.pth":
+                    return redRacePaths.Contains(pathSplineId);
+                case "path_purple.pth":
+                    return purpleRacePaths.Contains(pathSplineId);
+                case "path_yellow.pth":
+                    return yellowRacePaths.Contains(pathSplineId);
+            }
+
+            return false;
+        }
+
         public static int maxDepth = 4;
         /// <summary>
         /// If all pathSegments in a sector are this count or lower, the sector should not subdivide further
@@ -27,8 +51,30 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public PathSector rootSector = null;
         public Dictionary<int, List<PathSegment>> pathSegmentDict = new Dictionary<int, List<PathSegment>>();
         public PATH() { }
+        public PATH(string filePath)
+        {
+            using (MemoryStream stream = new MemoryStream(File.ReadAllBytes(filePath)))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                Read(streamReader);
+            }
+        }
+
+        public PATH(byte[] file)
+        {
+            using (MemoryStream stream = new MemoryStream(file))
+            using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
+            {
+                Read(streamReader);
+            }
+        }
 
         public PATH(BufferedStreamReaderBE<MemoryStream> sr)
+        {
+            Read(sr);
+        }
+
+        public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
             header = sr.Read<NinjaHeader>();
@@ -456,7 +502,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public List<PathSegment> pathSegments = null;
         }
 
-        public PathSector SubdivideSector(Vector2 XRange, Vector2 ZRange, List<PathSegment> pathSegments, int depth)
+        public PathSector SubdivideSector(string pathFileName, Vector2 XRange, Vector2 ZRange, List<PathSegment> pathSegments, int depth)
         {
             PathSector sector = new PathSector();
             pathSectors.Add(sector);
@@ -473,8 +519,13 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 //Initialize pathSegments from all paths if we're at the root
                 for(int i = 0; i < pathInfoList.Count; i++)
                 {
+                    if(pathInfoList[i].isObjectPath > 0 || IsRacePath(pathFileName, i))
+                    {
+                        continue;
+                    }
                     PathSegment segment = new PathSegment();
                     segment.vertSet = (ushort)i;
+                    segment.pathInfo = pathInfoList[i];
                     segment.startVert = 0;
                     segment.endVert = (ushort)(pathInfoList[i].vertDef.vertPositions.Count - 1);
                     newSegmentUnderOrAtMinimumContainedCount.Add((segment.endVert + 1) <= minContainedVertCount);
@@ -518,23 +569,27 @@ namespace AquaModelLibrary.Data.BillyHatcher
                         {
                             newStartVert -= 1;
                         }
-                        if (newEndVert != segment.pathInfo.vertDef.vertPositions.Count - 1)
+                        if (newEndVert != newSegment.pathInfo.vertDef.vertPositions.Count - 1)
                         {
                             newEndVert += 1;
                         }
-                        newSegments.Add(segment);
+                        newSegments.Add(newSegment);
                     }
                 }
             }
 
             //We continue until we've reached the maximum depth, there's no new segments, or we're under or equal to the minimum count
-            if (depth >= maxDepth || !newSegmentUnderOrAtMinimumContainedCount.Contains(false) || newSegments.Count == 0)
+            if (depth >= maxDepth || !newSegmentUnderOrAtMinimumContainedCount.Contains(false) || (newSegments.Count == 0 && depth != 0) )
             {
                 sector.isFinalSubdivision = 1;
 
                 sector.rawPathCount = (ushort)newSegments.Count;
-                sector.rawPathOffset = newSegments.Count > 0 ? pathSectors.Count : 0;
-                sector.pathSegments = newSegments;
+                if(newSegments.Count > 0)
+                {
+                    sector.rawPathOffset = pathSectors.Count;
+                    pathSegmentDict.Add(pathSectors.Count, newSegments);
+                    sector.pathSegments = newSegments;
+                }
             }
             else
             {
@@ -549,24 +604,40 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var upRange = new Vector2(ZRange.X + ZHalfRange, ZRange.Y);
                 var downRange = new Vector2(ZRange.X, ZRange.Y - ZHalfRange);
 
-                var child0 = SubdivideSector(leftRange, downRange, newSegments, depth + 1);
+                var child0 = SubdivideSector(pathFileName, leftRange, downRange, ClonePathSegmentList(newSegments), depth + 1);
                 sector.childSector0 = child0;
                 sector.childId0 = (ushort)pathSectors.IndexOf(child0);
 
-                var child1 = SubdivideSector(leftRange, upRange, newSegments, depth + 1);
+                var child1 = SubdivideSector(pathFileName, leftRange, upRange, ClonePathSegmentList(newSegments), depth + 1);
                 sector.childSector1 = child1;
                 sector.childId1 = (ushort)pathSectors.IndexOf(child1);
 
-                var child2 = SubdivideSector(rightRange, downRange, newSegments, depth + 1);
+                var child2 = SubdivideSector(pathFileName, rightRange, downRange, ClonePathSegmentList(newSegments), depth + 1);
                 sector.childSector2 = child2;
                 sector.childId2 = (ushort)pathSectors.IndexOf(child2);
 
-                var child3 = SubdivideSector(rightRange, upRange, newSegments, depth + 1);
+                var child3 = SubdivideSector(pathFileName, rightRange, upRange, ClonePathSegmentList(newSegments), depth + 1);
                 sector.childSector3 = child3;
                 sector.childId3 = (ushort)pathSectors.IndexOf(child3);
             }
             
             return sector;
+        }
+
+        private List<PathSegment> ClonePathSegmentList(List<PathSegment> pathSegments)
+        {
+            List<PathSegment> newSegments = new();
+            foreach(var segment in pathSegments)
+            {
+                PathSegment newSegment = new();
+                newSegment.vertSet = segment.vertSet;
+                newSegment.startVert = segment.startVert;
+                newSegment.endVert = segment.endVert;
+                newSegment.pathInfo = segment.pathInfo; //We don't need to clone this since we want it to be the original object. We aren't changing it.
+                newSegments.Add(newSegment);
+            }
+
+            return newSegments;
         }
     }
 }
