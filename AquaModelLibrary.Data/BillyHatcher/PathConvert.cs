@@ -9,11 +9,11 @@ namespace AquaModelLibrary.Core.Billy
     public class PathConvert
     {
         public static void ImportSplineToPath(PATH path, AquaNode aqn, string pathFileName, bool addNormals, bool isLiquidCurrent, bool isObjectPath, 
-            bool forceNoBSPCalc = false, int pathSplineId = -1)
+            bool forceNoBSPCalc = false, int pathSplineId = -1, bool normalizeSplineNormals = true)
         {
             PATH.PathInfo pathInfo = new PATH.PathInfo();
             pathInfo.doesNotUseNormals = (byte)(addNormals ? 0 : 1);
-            pathInfo.isLiquidCurrent = isLiquidCurrent ? 1 : 0;
+            pathInfo.isLiquidCurrent = (byte)(isLiquidCurrent ? 1 : 0);
             pathInfo.isObjectPath = (byte)(isObjectPath ? 1 : 0);
             pathInfo.vertDef = new PATH.VertDefinition();
             double length = 0;
@@ -49,6 +49,10 @@ namespace AquaModelLibrary.Core.Billy
                         }
                     }
 
+                    if(normalizeSplineNormals)
+                    {
+                        normalVector = Vector3.Normalize(normalVector);
+                    }
                     pathInfo.vertDef.vertNormals.Add(normalVector);
                 }
             }
@@ -145,7 +149,7 @@ namespace AquaModelLibrary.Core.Billy
                     nrmNode.parentId = aqn.nodeList.Count - 1;
                     nrmNode.firstChild = -1;
                     var nrm = path.pathInfoList[splineIndex].vertDef.vertNormals[j];
-                    nrmNode.SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4.CreateTranslation(nrm + pos));
+                    nrmNode.SetInverseBindPoseMatrixFromUninvertedMatrix(Matrix4x4.CreateTranslation((nrm * 5) + pos));
                     nrmNode.boneName.SetString($"_n_ Normal {j}");
                     aqn.nodeList[aqn.nodeList.Count - 1] = node;
                     aqn.nodeList.Add(nrmNode);

@@ -317,17 +317,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var vertZ = vertPositions[face.vert2];
 
                 //Check if this face intersects with the bounding box and include it if so.
-                bool lowerXinX = bounds.MinX <= XRange.Y;
-                bool upperXinX = XRange.X <= bounds.MaxX;
-                bool lowerZinZ = bounds.MinZ <= ZRange.Y;
-                bool upperZinZ = ZRange.X <= bounds.MaxZ;
-                bool lowerXunderX = bounds.MinX <= XRange.X;
-                bool upperXaboveX = XRange.Y <= bounds.MaxX;
-                bool lowerZunderZ = bounds.MinZ <= ZRange.X;
-                bool upperZaboveZ = ZRange.Y <= bounds.MaxZ;
-                if (((lowerXinX || upperXinX) && (lowerZinZ || upperZinZ)) //A face bounding corner is inbound
-                    || (lowerXunderX && upperXaboveX && lowerZunderZ && upperZaboveZ) //Face fully encompasses bounding
-                    )
+                //This check should include situations where an edge of a triangle interesects the bounding or the triangle surrounds the bounding.
+                if (bounds.MinX <= XRange.Y && XRange.X <= bounds.MaxX && bounds.MaxZ >= ZRange.X && ZRange.Y >= bounds.MinZ
+                    || bounds.MinX >= XRange.Y && XRange.X >= bounds.MaxX && bounds.MaxZ <= ZRange.X && ZRange.Y <= bounds.MinZ)
                 {
                     newFaceIndices.Add(faceId);
                     newFaces.Add(face);

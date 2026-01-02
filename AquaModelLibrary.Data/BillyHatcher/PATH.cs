@@ -38,7 +38,14 @@ namespace AquaModelLibrary.Data.BillyHatcher
         /// <summary>
         /// If all pathSegments in a sector are this count or lower, the sector should not subdivide further
         /// </summary>
-        public static int minContainedVertCount = 3;
+        public static Dictionary<int, int> maxDepthVertCounts = new Dictionary<int, int>()
+        {
+            { 0, 0},
+            { 1, 6},
+            { 2, 7},
+            { 3, 7},
+            { 4, 65535},
+        };
 
         public NinjaHeader header;
         public PATHHeader pathHeader;
@@ -94,7 +101,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 pathInfo.isObjectPath = sr.Read<byte>();
                 pathInfo.lengthsCount = sr.ReadBE<ushort>();
                 pathInfo.id = sr.ReadBE<int>();
-                pathInfo.isLiquidCurrent = sr.ReadBE<int>();
+                pathInfo.isLiquidCurrent = sr.Read<byte>();
+                pathInfo.unkFlag0 = sr.Read<byte>();
+                pathInfo.unkFlag1 = sr.Read<byte>();
+                pathInfo.unkFlag2 = sr.Read<byte>();
                 pathInfo.totalLength = sr.ReadBE<float>();
                 pathInfo.definitionOffset = sr.ReadBE<int>();
                 pathInfo.lengthsOffset = sr.ReadBE<int>();
@@ -250,9 +260,12 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 byte doesNotUseVertNormals = pathInfo.vertDef.vertNormals.Count > 0 ? (byte)0 : (byte)1;
                 outBytes.Add(doesNotUseVertNormals);
                 outBytes.Add(pathInfo.isObjectPath);
-                outBytes.AddValue(pathInfo.lengthsCount);
+                outBytes.AddValue((ushort)pathInfo.lengthsList.Count);
                 outBytes.AddValue(pathInfo.id);
-                outBytes.AddValue(pathInfo.isLiquidCurrent);
+                outBytes.Add((byte)pathInfo.isLiquidCurrent);
+                outBytes.Add(pathInfo.unkFlag0);
+                outBytes.Add(pathInfo.unkFlag1);
+                outBytes.Add(pathInfo.unkFlag2);
                 outBytes.AddValue(pathInfo.totalLength);
                 offsets.Add(outBytes.Count);
                 outBytes.ReserveInt($"PathInfoDefs{i}Offset");
@@ -396,7 +409,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
             /// <summary>
             /// Only used for the Forest Village river in retail.
             /// </summary>
-            public int isLiquidCurrent;
+            public byte isLiquidCurrent;
+            public byte unkFlag0;
+            public byte unkFlag1;
+            public byte unkFlag2;
             public float totalLength;
             public int definitionOffset;
             public int lengthsOffset;
@@ -528,7 +544,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     segment.pathInfo = pathInfoList[i];
                     segment.startVert = 0;
                     segment.endVert = (ushort)(pathInfoList[i].vertDef.vertPositions.Count - 1);
-                    newSegmentUnderOrAtMinimumContainedCount.Add((segment.endVert + 1) <= minContainedVertCount);
+                    newSegmentUnderOrAtMinimumContainedCount.Add((segment.endVert + 1) <= maxDepthVertCounts[depth]);
                     newSegments.Add(segment);
                 }
             } else
@@ -564,7 +580,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     newSegment.pathInfo = segment.pathInfo;
                     if (newStartVert != null)
                     {
-                        newSegmentUnderOrAtMinimumContainedCount.Add((newEndVert - newStartVert) <= minContainedVertCount);
+                        newSegmentUnderOrAtMinimumContainedCount.Add((newEndVert - newStartVert) <= maxDepthVertCounts[depth]);
                         if (newStartVert != 0)
                         {
                             newStartVert -= 1;
@@ -573,6 +589,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
                         {
                             newEndVert += 1;
                         }
+                        newSegment.startVert = (ushort)newStartVert;
+                        newSegment.endVert = (ushort)newEndVert;
                         newSegments.Add(newSegment);
                     }
                 }
@@ -633,6 +651,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 newSegment.vertSet = segment.vertSet;
                 newSegment.startVert = segment.startVert;
                 newSegment.endVert = segment.endVert;
+                if(newSegment.endVert == 0)
+                {
+                    var a = 0;
+                }
                 newSegment.pathInfo = segment.pathInfo; //We don't need to clone this since we want it to be the original object. We aren't changing it.
                 newSegments.Add(newSegment);
             }
