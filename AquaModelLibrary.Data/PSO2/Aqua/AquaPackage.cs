@@ -206,7 +206,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     //Header info
                     int size = outBytes.Count;
 
-                    if (FileName.Length > 0x20)
+                    if (FileName.Length > 0x1A)
                     {
                         FileName = FileName.Substring(0, 0x19) + Path.GetExtension(FileName);
                     }
