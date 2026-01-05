@@ -651,10 +651,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 newSegment.vertSet = segment.vertSet;
                 newSegment.startVert = segment.startVert;
                 newSegment.endVert = segment.endVert;
-                if(newSegment.endVert == 0)
-                {
-                    var a = 0;
-                }
                 newSegment.pathInfo = segment.pathInfo; //We don't need to clone this since we want it to be the original object. We aren't changing it.
                 newSegments.Add(newSegment);
             }
