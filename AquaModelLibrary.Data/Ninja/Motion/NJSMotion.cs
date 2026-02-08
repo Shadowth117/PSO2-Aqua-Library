@@ -1,5 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
+using System.Diagnostics;
 using System.Numerics;
 
 //Addapted from SA Tools
@@ -870,12 +871,21 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             if (lost) return 0;
             // Check MKEY pointers
             int mdatas = 0;
+            List<uint> pointerList = new List<uint>();
             for (int u = 0; u < 255; u++)
             {
                 for (int m = 0; m < mdata; m++)
                 {
                     if (lost) continue;
                     sr.Seek(mdatap + offset + mdatasize * u + 4 * m, SeekOrigin.Begin);
+                    //Check if we're getting into data territory and exit if we are
+                    var test = sr.Position - offset;
+                    Debug.WriteLine($"{test:X}");
+                    if (pointerList.Contains((uint)(sr.Position - offset)))
+                    {
+                        lost = true;
+                        break;
+                    }
                     uint pointer = sr.ReadBE<uint>();
                     if (pointer != 0 && pointer + offset >= sr.BaseStream.Length - 36)
                         lost = true;
@@ -884,11 +894,20 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                         sr.Seek(mdatap + offset + mdatasize * u + 4 * mdata + 4 * m, SeekOrigin.Begin);
                         int framecount = sr.ReadBE<int>();
                         if (framecount < 0 || framecount > 0xFFFF || pointer == 0 && framecount != 0)
+                        {
                             lost = true;
+                        }
+                        pointerList.Add(pointer);
                     }
                 }
                 if (!lost)
+                {
                     mdatas++;
+                }
+                else
+                {
+                    break;
+                }
             }
             sr.Seek(bookmark, SeekOrigin.Begin);
             return mdatas;
