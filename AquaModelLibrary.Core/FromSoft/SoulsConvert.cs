@@ -1012,14 +1012,19 @@ namespace AquaModelLibrary.Core.FromSoft
                     NODO nodo = new NODO();
                     if (dummy.AttachBoneIndex > -1)
                     {
-                        var realParent = flver.Nodes[dummy.AttachBoneIndex];
+                        int attachIndex = dummy.AttachBoneIndex;
+                        if (addFBXRootNode)
+                        {
+                            attachIndex += 1;
+                        }
+                        var realParent = flver.Nodes[attachIndex];
                         if (parentDummiesToAttachNodes)
                         {
-                            var realParentAqn = aqn.nodeList[dummy.AttachBoneIndex];
+                            var realParentAqn = aqn.nodeList[attachIndex];
                             var pseudoParentAqn = aqn.nodeList[dummy.ParentBoneIndex];
                             transform *= pseudoParentAqn.GetInverseBindPoseMatrixInverted();
                             transform *= realParentAqn.GetInverseBindPoseMatrix();
-                            nodo.parentId = dummy.AttachBoneIndex;
+                            nodo.parentId = attachIndex;
                         } else
                         {
                             nodo.parentId = dummy.ParentBoneIndex;
