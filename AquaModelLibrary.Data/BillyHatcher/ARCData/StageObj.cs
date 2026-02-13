@@ -29,9 +29,17 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public override void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
+            var magic = sr.ReadUTF8String(0, 4);
             sr._BEReadActive = true;
-            base.Read(sr);
-            sr.Seek(0x20, SeekOrigin.Begin);
+
+            if(magic != "GEOS")
+            {
+                base.Read(sr);
+                sr.Seek(0x20, SeekOrigin.Begin);
+            } else
+            {
+                sr.Seek(0x8, SeekOrigin.Begin);
+            }
 
             int offsetsOffset = sr.ReadBE<int>();
             int offsetsCount = sr.ReadBE<int>();
