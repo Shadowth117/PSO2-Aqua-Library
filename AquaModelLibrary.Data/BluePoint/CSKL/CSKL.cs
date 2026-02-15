@@ -52,9 +52,9 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                         if(!familyDict.ContainsKey(nodeId))
                         {
                             familyDict.Add(nodeId, newFamilyIds);
-                        }
+                        } 
 
-                        if(nodeId == header.boneCount - 1)
+                        if (nodeId == header.boneCount - 1)
                         {
                             break;
                         }

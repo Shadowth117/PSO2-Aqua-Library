@@ -45,9 +45,18 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         private void ReadSkeletonPath(BufferedStreamReaderBE<MemoryStream> sr, BPEra era)
         {
-            skelPathLength = new CLength(sr, era);
-            skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, skelPathLength.GetTrueLength()));
-            sr.Seek(skelPathLength.GetTrueLength(), System.IO.SeekOrigin.Current);
+            if(era == BPEra.SOTC)
+            {
+                var sotcLength = sr.Read<byte>();
+                var unkByte = sr.Read<byte>();
+                skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, sotcLength - 1));
+                sr.Seek(sotcLength - 1, System.IO.SeekOrigin.Current);
+            } else
+            {
+                skelPathLength = new CLength(sr, era);
+                skeletonPath = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, skelPathLength.GetTrueLength()));
+                sr.Seek(skelPathLength.GetTrueLength(), System.IO.SeekOrigin.Current);
+            }
         }
 
         public byte[] GetBytes(BPEra era)
