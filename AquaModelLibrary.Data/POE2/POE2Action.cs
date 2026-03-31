@@ -273,11 +273,26 @@ namespace AquaModelLibrary.Data.POE2
             }
         }
 
+        private void AddParent(Dictionary<int, int> parentDict, int boneId,  int parentId)
+        {
+            if(boneId != 0xFF)
+            {
+                parentDict.Add(boneId, parentId);
+                var siblingBone = bones[boneId];
+                AddParent(parentDict, siblingBone.nextSiblingId, parentId);
+            }
+        }
+
         public AquaNode ToAqn()
         {
             AquaNode aqn = new AquaNode();
 
             Dictionary<int, int> parentDict = new Dictionary<int, int>();
+            for(int i = 0; i < bones.Count; i++)
+            {
+                var bone = bones[i];
+                AddParent(parentDict, bone.childId, i);
+            }
             for (int i = 0; i < bones.Count; i++)
             {
                 var parentId = 0xFF;
@@ -285,14 +300,6 @@ namespace AquaModelLibrary.Data.POE2
                 if (parentDict.ContainsKey(i))
                 {
                     parentId = parentDict[i];
-                }
-                if (bone.childId != 0xFF)
-                {
-                    parentDict.Add(bone.childId, i);
-                }
-                if (bone.nextSiblingId != 0xFF && parentId != 0xFF)
-                {
-                    parentDict.Add(bone.nextSiblingId, parentId);
                 }
                 var tfmMat = Matrix4x4.Identity;
 
