@@ -42,12 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="NvTriStripDotNet">
-      <HintPath>Libraries\NvTriStripDotNet.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="BillyHatcher\SetData\SetObjDefinitions\45.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
