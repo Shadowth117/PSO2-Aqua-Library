@@ -197,14 +197,14 @@ namespace AquaModelLibrary.Data.POE2
                         {
                             vertex.uv2 = new Vector2(sr.ReadBE<Half>(), sr.ReadBE<Half>());
                         }
-                        if ((vertexFormat & VertexData.Color) > 0)
-                        {
-                            vertex.color = sr.Read4Bytes();
-                        }
                         if ((vertexFormat & VertexData.Weights) > 0)
                         {
                             vertex.weightIndices = sr.Read4Bytes();
                             vertex.weights = new Vector4(sr.ReadBE<byte>() / (float)byte.MaxValue, sr.ReadBE<byte>() / (float)byte.MaxValue, sr.ReadBE<byte>() / (float)byte.MaxValue, sr.ReadBE<byte>() / (float)byte.MaxValue);
+                        }
+                        if ((vertexFormat & VertexData.Color) > 0)
+                        {
+                            vertex.color = sr.Read4Bytes();
                         }
 
                         lod.vertices.Add(vertex);
