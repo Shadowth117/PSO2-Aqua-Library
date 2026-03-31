@@ -880,7 +880,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                     sr.Seek(mdatap + offset + mdatasize * u + 4 * m, SeekOrigin.Begin);
                     //Check if we're getting into data territory and exit if we are
                     var test = sr.Position - offset;
-                    Debug.WriteLine($"{test:X}");
+
                     if (pointerList.Contains((uint)(sr.Position - offset)))
                     {
                         lost = true;

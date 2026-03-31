@@ -380,7 +380,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             for (int i = 0; i < arcModel.arcMainOffsetTable.landEntryCount; i++)
             {
                 ARCLNDMaterialEntryRef lndRef = new ARCLNDMaterialEntryRef();
-                lndRef.extraDataEnabled = sr.ReadBE<int>();
+                lndRef.textureEnabled = sr.ReadBE<int>();
                 lndRef.offset = sr.ReadBE<int>();
                 arcModel.arcMatEntryList.Add(lndRef);
             }
@@ -401,7 +401,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     matEntry.unkInt6 = sr.ReadBE<int>();
                     matEntry.unkFlags1 = sr.ReadBE<int>();
 
-                    if (matRef.extraDataEnabled > 0)
+                    if (matRef.textureEnabled > 0)
                     {
                         matEntry.textureFlags = (ARCLNDTextureFlags)sr.ReadBE<ushort>();
                         matEntry.ushort0 = sr.ReadBE<ushort>();

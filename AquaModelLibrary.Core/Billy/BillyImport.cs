@@ -366,7 +366,7 @@ namespace AquaModelLibrary.Core.Billy
                     matEntry.TextureId = 0;
                 }
                 ARCLNDMaterialEntryRef matRef = new ARCLNDMaterialEntryRef();
-                matRef.extraDataEnabled = 1;
+                matRef.textureEnabled = 1;
 
                 var flagsSplit = matName.Split('#');
                 matEntry.RenderFlags = 0;

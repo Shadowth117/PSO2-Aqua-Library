@@ -84,7 +84,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
                 var landRef = arcMatEntryList[i];
 
                 //This value seems like it's sometimes 0 for the first land entry in the model, but is 1 otherwise. For some models, it is always 1.
-                outBytes.AddValue(landRef.extraDataEnabled);
+                outBytes.AddValue(landRef.textureEnabled);
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt($"LandEntry{i}");
             }
@@ -101,7 +101,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
                 outBytes.AddValue(landRef.entry.unkInt6);
                 outBytes.AddValue(landRef.entry.unkFlags1);
 
-                if (landRef.extraDataEnabled > 0)
+                if (landRef.textureEnabled > 0)
                 {
                     outBytes.AddValue((ushort)landRef.entry.textureFlags);
                     outBytes.AddValue(landRef.entry.ushort0);
@@ -365,7 +365,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
 
     public class ARCLNDMaterialEntryRef
     {
-        public int extraDataEnabled;
+        public int textureEnabled;
         public int offset;
 
         public ARCLNDMaterialEntry entry = null;
