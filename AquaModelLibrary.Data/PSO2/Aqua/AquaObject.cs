@@ -2709,21 +2709,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             AquaObject aqp = new AquaObject();
             aqp.objc = objc;
             aqp.vsetList = new List<VSET>(vsetList);
-            aqp.vtxeList = vtxeList.ConvertAll(vtxe => vtxe.Clone()).ToList();
-            aqp.vtxlList = vtxlList.ConvertAll(vtxl => vtxl.Clone()).ToList();
+            aqp.vtxeList = vtxeList.ConvertAll(vtxe => vtxe == null ? new VTXE() : vtxe.Clone()).ToList();
+            aqp.vtxlList = vtxlList.ConvertAll(vtxl => vtxl == null ? new VTXL() : vtxl.Clone()).ToList();
             aqp.psetList = new List<PSET>(psetList);
             aqp.meshList = new List<MESH>(meshList);
             aqp.mateList = new List<MATE>(mateList);
             aqp.rendList = new List<REND>(rendList);
-            aqp.shadList = shadList.ConvertAll(shad => shad.Clone()).ToList();
+            aqp.shadList = shadList.ConvertAll(shad => shad == null ? new SHAD() : shad.Clone()).ToList();
             aqp.tstaList = new List<TSTA>(tstaList);
-            aqp.tsetList = tsetList.ConvertAll(tset => tset.Clone()).ToList();
+            aqp.tsetList = tsetList.ConvertAll(tset => tset == null ? new TSET() : tset.Clone()).ToList();
             aqp.texfList = new List<TEXF>(texfList);
             if (aqp.unrms != null)
             {
                 aqp.unrms = unrms.Clone();
             }
-            aqp.strips = strips.ConvertAll(stp => stp.Clone()).ToList();
+            aqp.strips = strips.ConvertAll(stp => stp == null ? new StripData() : stp.Clone()).ToList();
 
             //*** 0xC33 only
             aqp.bonePalette = new List<uint>(bonePalette);
@@ -2732,10 +2732,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             aqp.unkStruct1List = new List<UnkStruct1>(unkStruct1List);
             aqp.mesh2List = new List<MESH>(mesh2List);
             aqp.pset2List = new List<PSET>(pset2List);
-            aqp.strips2 = strips2.ConvertAll(stp => stp.Clone()).ToList();
+            aqp.strips2 = strips2.ConvertAll(stp => stp == null ? new StripData() : stp.Clone()).ToList();
 
             aqp.strips3Lengths = new List<int>(strips3Lengths);
-            aqp.strips3 = strips3.ConvertAll(stp => stp.Clone()).ToList();
+            aqp.strips3 = strips3.ConvertAll(stp => stp == null ? new StripData() : stp.Clone()).ToList();
             aqp.unkPointArray1 = new List<Vector3>(unkPointArray1); //Noooooooo idea what these are. Count matches the strips3Lengths count
             aqp.unkPointArray2 = new List<Vector3>(unkPointArray2);
             //***
@@ -2743,8 +2743,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             aqp.applyNormalAveraging = applyNormalAveraging;
 
             //Custom model related data
-            aqp.tempTris = tempTris.ConvertAll(tri => tri.Clone()).ToList();
-            aqp.tempMats = tempMats.ConvertAll(mat => mat.Clone()).ToList();
+            aqp.tempTris = tempTris.ConvertAll(tri => tri == null ? new GenericTriangles() : tri.Clone()).ToList();
+            aqp.tempMats = tempMats.ConvertAll(mat => mat == null ? new GenericMaterial() : mat.Clone()).ToList();
             aqp.texFUnicodeNames = texFUnicodeNames.ConvertAll(texf => $"{texf}").ToList();
             aqp.matUnicodeNames = matUnicodeNames.ConvertAll(mat => $"{mat}").ToList();
             aqp.meshNames = meshNames.ConvertAll(mesh => $"{mesh}").ToList();
