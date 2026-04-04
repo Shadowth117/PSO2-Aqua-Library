@@ -2743,8 +2743,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             aqp.applyNormalAveraging = applyNormalAveraging;
 
             //Custom model related data
-            aqp.tempTris = tempTris.ConvertAll(tri => tri == null ? new GenericTriangles() : tri.Clone()).ToList();
-            aqp.tempMats = tempMats.ConvertAll(mat => mat == null ? new GenericMaterial() : mat.Clone()).ToList();
+            aqp.tempTris = tempTris.ConvertAll(tri => tri.Clone()).ToList();
+            aqp.tempMats = tempMats.ConvertAll(mat => mat.Clone()).ToList();
             aqp.texFUnicodeNames = texFUnicodeNames.ConvertAll(texf => $"{texf}").ToList();
             aqp.matUnicodeNames = matUnicodeNames.ConvertAll(mat => $"{mat}").ToList();
             aqp.meshNames = meshNames.ConvertAll(mesh => $"{mesh}").ToList();
