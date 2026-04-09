@@ -23,9 +23,44 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public List<string> seMap2ListJ { get; set; } = new List<string>();
 
         [JsonIgnore]
+        /// <summary>
+        /// Master sound mapping list.
+        /// Maps sounds from list 2 and list 3 for use by the game
+        /// </summary>
         public List<SEMap1> seMap1List { get; set; } = new List<SEMap1>();
         [JsonIgnore]
+        /// <summary>
+        /// MPB Map list
+        /// 0 - Half of Egg01.mlt
+        /// 1 - Second Half of Egg01.mlt 
+        /// 2 - Egg02.mlt
+        /// 8 - Player Bank, voice1p.mpb/voice2p.mpb/voice3p.mpb/voice4p.mpb
+        /// 4 - Boss Level Bank
+        ///   0-51 bank_04.mpb
+        ///   0-10 bank_04_boss_blue.mpb
+        ///   0-16 bank_04_boss_red.mpb
+        ///   0-15 bank_04_boss_purple.mpb
+        ///   0-18 bank_04_boss_orange.mpb
+        ///   0-28 bank_04_boss_yellow.mpb
+        ///   0-20 bank_04_boss_green.mpb
+        ///   0-16 bank_04_boss_last.mpb
+        ///   0-16 bank_04_boss_last2.mpb
+        /// 6 - Animal Buddy Bank - bank_06.mpb
+        /// 7 - Level Object Banks
+        ///   0-20 bank_07_blue.mpb
+        ///   0-18 bank_07_red.mpb
+        ///   0-11 bank_07_purple.mpb
+        ///   0-13 bank_07_orange.mpb
+        ///   0-11 bank_07_yellow.mpb
+        ///   0-8 bank_07_palece.mpb
+        ///   0-10 bank_07_green.mpb
+        /// 
+        /// Credit to Dat. H A for the list
+        /// </summary>
         public List<SEMap2> seMap2List { get; set; } = new List<SEMap2>();
+        /// <summary>
+        /// AFS adx sound map?
+        /// </summary>
         public List<byte> seMap3List { get; set; } = new List<byte>();
 
 
