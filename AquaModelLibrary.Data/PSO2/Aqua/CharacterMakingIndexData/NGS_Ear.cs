@@ -25,9 +25,14 @@
         public int texString5Ptr;
         public int unkInt0;
 
-        public int unkInt1;
-        public int unkInt2;
-        public int unkInt3;
-        public int unkInt4;
+        public NGS_EarColorMapping maskColorMapping;
+    }
+
+    public struct NGS_EarColorMapping
+    {
+        public CharColorMapping redIndex;
+        public CharColorMapping greenIndex;
+        public CharColorMapping blueIndex;
+        public CharColorMapping alphaIndex;
     }
 }
