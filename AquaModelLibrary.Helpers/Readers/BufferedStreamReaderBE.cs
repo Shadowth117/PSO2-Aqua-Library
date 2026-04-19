@@ -459,6 +459,8 @@ namespace AquaModelLibrary.Helpers.Readers
             return str.Remove(minVal);
         }
 
+        public const int initialUTF16BlockSize = 0x100;
+        public const int initialUTF16BlockSizeHalved = initialUTF16BlockSize / 2;
         /// <summary>
         /// Attempts to read a null terminated terminated UTF16 String from the current stream position.
         /// </summary>
@@ -470,6 +472,29 @@ namespace AquaModelLibrary.Helpers.Readers
                 return null;
             }
 
+            var bookmark = Position;
+
+            if(blockSize <= initialUTF16BlockSize)
+            {
+                return ReadUTF16StringInternal(blockSize);
+            } else
+            {
+                //Try initially for a MUCH shorter read, if possible
+                var str = ReadUTF16StringInternal(initialUTF16BlockSize);
+
+                //If we're not less than this, we definitely need to try to read more
+                if(str.Length < initialUTF16BlockSizeHalved)
+                {
+                    return str;
+                } else
+                {
+                    return ReadUTF16StringInternal(blockSize);
+                }
+            }
+        }
+
+        private string ReadUTF16StringInternal(int blockSize = 0x100)
+        {
             var sb = new StringBuilder();
             var decoder = Encoding.Unicode.GetDecoder();
             unsafe
