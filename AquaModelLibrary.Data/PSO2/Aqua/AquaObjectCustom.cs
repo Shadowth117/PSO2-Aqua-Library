@@ -2013,6 +2013,24 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 }
             }
 
+            //If non NGS mat and rigid, remove binormal + tangent data
+            if(useRigid)
+            {
+                for (int i = 0; i < meshList.Count; i++)
+                {
+                    var mesh = meshList[i];
+                    var shad = shadList[mesh.shadIndex];
+                    if (Int32.Parse(shad.pixelShader.GetString().Substring(0, 4)) < 1000)
+                    {
+                        var vtxl = vtxlList[mesh.vsetIndex];
+                        vtxl.vertBinormalList.Clear();
+                        vtxl.vertBinormalListNGS.Clear();
+                        vtxl.vertTangentList.Clear();
+                        vtxl.vertTangentListNGS.Clear();
+                    }
+                }
+            }
+
             //Generate VTXEs and VSETs
             int largestVertSize = 0;
             int vertCounter = 0;
