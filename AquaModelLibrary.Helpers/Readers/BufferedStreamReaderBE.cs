@@ -491,7 +491,7 @@ namespace AquaModelLibrary.Helpers.Readers
                     }
 
                     decoder.Convert(source.AsBytes(), dest, foundEnd, out var bytesUsed, out var charsUsed, out var completed);
-                    sb.Append(new string(dest, 0, charsUsed));
+                    sb.Append(dest.AsSpan()[0..charsUsed]);
                 } while (!foundEnd);
             }
             return sb.ToString();
