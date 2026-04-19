@@ -1,5 +1,4 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using System.IO;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
