@@ -338,7 +338,7 @@ namespace AquaModelLibrary.Core.General
                 }
 
                 //Faces
-                foreach (var face in aqp.strips[msh.vsetIndex].GetTriangles(true))
+                foreach (var face in aqp.strips[msh.psetIndex].GetTriangles(true))
                 {
                     aiMesh.Faces.Add(new SharpAssimp.Face(new int[] { (int)face.X, (int)face.Y, (int)face.Z }));
                 }
