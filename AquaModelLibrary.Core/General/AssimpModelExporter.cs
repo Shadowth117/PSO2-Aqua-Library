@@ -278,39 +278,44 @@ namespace AquaModelLibrary.Core.General
                     //Iterate through vertices
                     for (int vertId = 0; vertId < vtxl.vertWeightIndices.Count; vertId++)
                     {
-                        var boneIndices = vtxl.vertWeightIndices[vertId];
+                        var weightIndices = vtxl.vertWeightIndices[vertId];
                         var boneWeights = Vector4ToFloatArray(vtxl.vertWeights[vertId]);
 
                         //Iterate through weights
                         for (int wt = 0; wt < 4; wt++)
                         {
-                            var boneIndex = boneIndices[wt];
+                            var weightIndex = weightIndices[wt];
                             var boneWeight = boneWeights[wt];
 
                             if (boneWeight == 0.0f)
                                 continue;
 
-                            if (!aiBoneMap.Keys.Contains(boneIndex))
+                            var boneIndex = (int)bonePalette[weightIndex];
+                            if (boneIndex >= aqn.nodeList.Count)
                             {
-                                var aiBone = new SharpAssimp.Bone();
-                                var aqnBone = boneArray[bonePalette[boneIndex]];
-                                var rawBone = aqn.nodeList[(int)bonePalette[boneIndex]];
+                                boneIndex = 0;
+                            }
 
-                                aiBone.Name = $"({bonePalette[boneIndex]})" + rawBone.boneName.GetString();
+                            if (!aiBoneMap.TryGetValue(boneIndex, out var aiBone))
+                            {
+                                aiBone = new SharpAssimp.Bone();
+                                var aqnBone = boneArray[boneIndex];
+                                var rawBone = aqn.nodeList[boneIndex];
+
+                                aiBone.Name = $"({boneIndex})" + rawBone.boneName.GetString();
                                 aiBone.VertexWeights.Add(new SharpAssimp.VertexWeight(vertId, boneWeight));
 
                                 var invTransform = new Matrix4x4(rawBone.m1.X, rawBone.m2.X, rawBone.m3.X, rawBone.m4.X,
-                                                                     rawBone.m1.Y, rawBone.m2.Y, rawBone.m3.Y, rawBone.m4.Y,
-                                                                     rawBone.m1.Z, rawBone.m2.Z, rawBone.m3.Z, rawBone.m4.Z,
-                                                                     rawBone.m1.W, rawBone.m2.W, rawBone.m3.W, rawBone.m4.W);
+                                                                 rawBone.m1.Y, rawBone.m2.Y, rawBone.m3.Y, rawBone.m4.Y,
+                                                                 rawBone.m1.Z, rawBone.m2.Z, rawBone.m3.Z, rawBone.m4.Z,
+                                                                 rawBone.m1.W, rawBone.m2.W, rawBone.m3.W, rawBone.m4.W);
 
                                 aiBone.OffsetMatrix = invTransform;
-
                                 aiBoneMap[boneIndex] = aiBone;
                             }
 
-                            if (!aiBoneMap[boneIndex].VertexWeights.Any(x => x.VertexID == vertId))
-                                aiBoneMap[boneIndex].VertexWeights.Add(new SharpAssimp.VertexWeight(vertId, boneWeight));
+                            if (!aiBone.VertexWeights.Any(x => x.VertexID == vertId))
+                                aiBone.VertexWeights.Add(new SharpAssimp.VertexWeight(vertId, boneWeight));
                         }
                     }
 
