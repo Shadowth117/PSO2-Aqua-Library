@@ -60,8 +60,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 
         public int texString4Ptr;
         public int texString5Ptr;
-        public int unkInt0;       //This value forward may just be junk or new functionality in this version. Old BBLY only had the id and texture strings. Seems to correlate to BODY stuff though.
-        public int unkInt1;
+        public BBLYMaskColorMapping maskColorMapping; //This value forward may just be junk or new functionality in this version. Old BBLY only had the id and texture strings. Seems to correlate to BODY stuff though.
 
         public int unkInt2;
         public int unkInt3;
@@ -75,5 +74,11 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
 
         public float unkFloat4;
         public float unkFloat5;
+    }
+
+    public struct BBLYMaskColorMapping
+    {
+        public CharColorMapping redIndex;
+        public CharColorMapping greenIndex;
     }
 }

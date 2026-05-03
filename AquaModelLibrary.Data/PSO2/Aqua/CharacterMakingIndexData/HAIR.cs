@@ -78,9 +78,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public float unkFloat8;
         public float unkFloat9;
         public int unkInt15;
-        public int unkInt16;
+        public HAIRMaskColorMapping maskColorMapping; //Color mappings for NGS hairs. Always seems to be 0x64 followed by 0s for classic hairs.
 
-        public int unkInt17;
         public int unkInt18;
         public int unkInt19;
         public int unkInt20;
@@ -89,5 +88,18 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData
         public short unkShortB2; //0xB2, 0x6
         public short unkShortB3; //0xB3, 0x6
         public short unkShort0;
+    }
+
+    public struct HAIRMaskColorMapping
+    {
+        public short redIndex;
+        public short greenIndex;
+        public short blueIndex;
+        public short alphaIndex;
+
+        public readonly CharColorMapping RedIndex => (CharColorMapping)redIndex;
+        public readonly CharColorMapping GreenIndex => (CharColorMapping)greenIndex;
+        public readonly CharColorMapping BlueIndex => (CharColorMapping)blueIndex;
+        public readonly CharColorMapping AlphaIndex => (CharColorMapping)alphaIndex;
     }
 }
