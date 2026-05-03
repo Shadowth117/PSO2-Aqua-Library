@@ -21,28 +21,28 @@ namespace AquaModelLibrary.Core.General
         public static ScaleHandling scaleHandling = ScaleHandling.NoScaling;
         public static double customScale = 1;
 
-        public static Assimp.PostProcessSteps GetPostProcessSteps(bool preTransformVertices = false)
+        public static SharpAssimp.PostProcessSteps GetPostProcessSteps(bool preTransformVertices = false)
         {
-            Assimp.PostProcessSteps steps = Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.FlipUVs;
+            SharpAssimp.PostProcessSteps steps = SharpAssimp.PostProcessSteps.Triangulate | SharpAssimp.PostProcessSteps.JoinIdenticalVertices | SharpAssimp.PostProcessSteps.FlipUVs;
 
             if(preTransformVertices)
             {
-                steps |=  Assimp.PostProcessSteps.PreTransformVertices;
+                steps |=  SharpAssimp.PostProcessSteps.PreTransformVertices;
             }
 
             if(scaleHandling == ScaleHandling.FileScaling)
             {
-                steps |= Assimp.PostProcessSteps.GlobalScale;
+                steps |= SharpAssimp.PostProcessSteps.GlobalScale;
             }
 
             return steps;
         }
 
-        public static Assimp.Scene GetAssimpScene(string path, Assimp.PostProcessSteps pps)
+        public static SharpAssimp.Scene GetAssimpScene(string path, SharpAssimp.PostProcessSteps pps)
         {
-            Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
-            Assimp.Scene aiScene = context.ImportFile(path, pps);
+            SharpAssimp.AssimpContext context = new SharpAssimp.AssimpContext();
+            context.SetConfig(new SharpAssimp.Configs.FBXPreservePivotsConfig(true));
+            SharpAssimp.Scene aiScene = context.ImportFile(path, pps);
 
             return aiScene;
         }
@@ -67,10 +67,10 @@ namespace AquaModelLibrary.Core.General
 
         public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames)
         {
-            Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
+            SharpAssimp.AssimpContext context = new SharpAssimp.AssimpContext();
+            context.SetConfig(new SharpAssimp.Configs.FBXPreservePivotsConfig(false));
             
-            Assimp.Scene aiScene = context.ImportFile(initialFilePath, GetPostProcessSteps(false));
+            SharpAssimp.Scene aiScene = context.ImportFile(initialFilePath, GetPostProcessSteps(false));
 
             double baseScale = SetAssimpScale(aiScene);
 
@@ -82,7 +82,7 @@ namespace AquaModelLibrary.Core.General
             string inputFilename = Path.GetFileNameWithoutExtension(initialFilePath);
             List<string> aqmNames = new List<string>(); //Leave off extensions in case we want this to be .trm later
             List<(string fileName, AquaMotion aqm)> aqmList = new List<(string fileName, AquaMotion aqm)>();
-            Dictionary<int, Assimp.Node> aiNodes = GetAnimatedNodes(aiScene);
+            Dictionary<int, SharpAssimp.Node> aiNodes = GetAnimatedNodes(aiScene);
             var nodeKeys = aiNodes.Keys.ToList();
             nodeKeys.Sort();
             if(nodeKeys.Count == 0)
@@ -497,7 +497,7 @@ namespace AquaModelLibrary.Core.General
             WriteMotions(initialFilePath, AssimpAQMConvert(initialFilePath, forceNoPlayerExport, useScaleFrames));
         }
 
-        private static void AddOneScaleFrame(bool useScaleFrames, KeyData node, bool add0x80 = false, Assimp.Node aiNode = null)
+        private static void AddOneScaleFrame(bool useScaleFrames, KeyData node, bool add0x80 = false, SharpAssimp.Node aiNode = null)
         {
             if (useScaleFrames)
             {
@@ -511,7 +511,7 @@ namespace AquaModelLibrary.Core.General
                 }
                 else
                 {
-                    Matrix4x4.Invert(GetMat4FromAssimpMat4(aiNode.Transform), out Matrix4x4 mat4);
+                    Matrix4x4.Invert(aiNode.Transform, out Matrix4x4 mat4);
                     if (float.IsNaN(mat4.M11))
                     {
                         mat4.M11 = 1.0f;
@@ -530,25 +530,25 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void AddOneRotFrame(KeyData node, Assimp.Node aiNode, bool add0x80 = false)
+        private static void AddOneRotFrame(KeyData node, SharpAssimp.Node aiNode, bool add0x80 = false)
         {
             MKEY rotKeys = new MKEY();
             rotKeys.keyType = 2;
             rotKeys.dataType = 3;
             rotKeys.keyCount = 1;
-            Matrix4x4.Invert(GetMat4FromAssimpMat4(aiNode.Transform), out Matrix4x4 mat4);
+            Matrix4x4.Invert(aiNode.Transform, out Matrix4x4 mat4);
             var quat = Quaternion.CreateFromRotationMatrix(mat4);
             rotKeys.vector4Keys = new List<Vector4>() { new Vector4(quat.X, quat.Y, quat.Z, quat.W) };
             node.keyData.Add(rotKeys);
         }
 
-        private static void AddOnePosFrame(KeyData node, Assimp.Node aiNode, double baseScale, bool add0x80 = false)
+        private static void AddOnePosFrame(KeyData node, SharpAssimp.Node aiNode, double baseScale, bool add0x80 = false)
         {
             MKEY posKeys = new MKEY();
             posKeys.keyType = 1;
             posKeys.dataType = 1;
             posKeys.keyCount = 1;
-            var mat4 = GetMat4FromAssimpMat4(aiNode.Transform);
+            var mat4 = aiNode.Transform;
             posKeys.vector4Keys = new List<Vector4>() { new Vector4((float)(mat4.M14 * baseScale), (float)(mat4.M24 * baseScale), (float)(mat4.M34 * baseScale), 0) };
             node.keyData.Add(posKeys);
         }
@@ -577,9 +577,9 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static Dictionary<int, Assimp.Node> GetAnimatedNodes(Assimp.Scene aiScene)
+        private static Dictionary<int, SharpAssimp.Node> GetAnimatedNodes(SharpAssimp.Scene aiScene)
         {
-            Dictionary<int, Assimp.Node> nodes = new Dictionary<int, Assimp.Node>();
+            Dictionary<int, SharpAssimp.Node> nodes = new Dictionary<int, SharpAssimp.Node>();
 
             foreach (var node in aiScene.RootNode.Children)
             {
@@ -589,7 +589,7 @@ namespace AquaModelLibrary.Core.General
             return nodes;
         }
 
-        private static void CollectAnimated(Assimp.Node node, Dictionary<int, Assimp.Node> nodes)
+        private static void CollectAnimated(SharpAssimp.Node node, Dictionary<int, SharpAssimp.Node> nodes)
         {
             //Be extra sure that this isn't an effect node
             if (IsAnimatedNode(node, out string name, out int num))
@@ -605,14 +605,14 @@ namespace AquaModelLibrary.Core.General
         }
 
         //Check if a node is an animated by node by checking if it has the numbering formatting and is NOT marked as an effect node. Output name 
-        private static bool IsAnimatedNode(Assimp.Node node, out string name, out int num)
+        private static bool IsAnimatedNode(SharpAssimp.Node node, out string name, out int num)
         {
             bool isNumbered = IsNumberedAnimated(node, out name, out num);
             return isNumbered && !node.Name.Contains("#Eff");
         }
 
         //Check if node is numbered as an animated node. Output name
-        private static bool IsNumberedAnimated(Assimp.Node node, out string name, out int num)
+        private static bool IsNumberedAnimated(SharpAssimp.Node node, out string name, out int num)
         {
             name = node.Name;
             num = -1;
@@ -631,11 +631,11 @@ namespace AquaModelLibrary.Core.General
 
         public static void AssimpPRMConvert(string initialFilePath, string finalFilePath)
         {
-            Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(true));
+            SharpAssimp.AssimpContext context = new SharpAssimp.AssimpContext();
+            context.SetConfig(new SharpAssimp.Configs.FBXPreservePivotsConfig(true));
             var postProcessSteps = GetPostProcessSteps(true);
 
-            Assimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
+            SharpAssimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
             double baseScale = SetAssimpScale(aiScene);
 
             PRM prm = new PRM();
@@ -643,7 +643,7 @@ namespace AquaModelLibrary.Core.General
             int totalVerts = 0;
 
             //Iterate through and combine meshes. PRMs can only have a single mesh
-            var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
+            var parentMatrix = Matrix4x4.Transpose(aiScene.RootNode.Transform);
             parentMatrix.M41 = (float)(parentMatrix.M41 * baseScale);
             parentMatrix.M42 = (float)(parentMatrix.M42 * baseScale);
             parentMatrix.M43 = (float)(parentMatrix.M43 * baseScale);
@@ -651,9 +651,9 @@ namespace AquaModelLibrary.Core.General
             File.WriteAllBytes(finalFilePath, prm.GetBytes(4));
         }
 
-        private static void IterateAiNodesPRM(PRM prm, ref int totalVerts, Assimp.Scene aiScene, Assimp.Node node, Matrix4x4 parentTfm, double baseScale)
+        private static void IterateAiNodesPRM(PRM prm, ref int totalVerts, SharpAssimp.Scene aiScene, SharpAssimp.Node node, Matrix4x4 parentTfm, double baseScale)
         {
-            Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(node.Transform));
+            Matrix4x4 nodeMat = Matrix4x4.Transpose(node.Transform);
             nodeMat.M41 = (float)(nodeMat.M41 * baseScale);
             nodeMat.M42 = (float)(nodeMat.M42 * baseScale);
             nodeMat.M43 = (float)(nodeMat.M43 * baseScale);
@@ -671,7 +671,7 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void AddAiMeshToPRM(PRM prm, ref int totalVerts, Assimp.Mesh aiMesh, Matrix4x4 nodeMat, double baseScale)
+        private static void AddAiMeshToPRM(PRM prm, ref int totalVerts, SharpAssimp.Mesh aiMesh, Matrix4x4 nodeMat, double baseScale)
         {
             //Convert vertices
             for (int vertId = 0; vertId < aiMesh.VertexCount; vertId++)
@@ -684,7 +684,7 @@ namespace AquaModelLibrary.Core.General
                 if (aiMesh.HasVertexColors(0))
                 {
                     var aiColor = aiMesh.VertexColorChannels[0][vertId];
-                    vert.color = new byte[] { (byte)(aiColor.B * 255), (byte)(aiColor.G * 255), (byte)(aiColor.R * 255), (byte)(aiColor.A * 255) };
+                    vert.color = new byte[] { (byte)(aiColor.Z * 255), (byte)(aiColor.Y * 255), (byte)(aiColor.X * 255), (byte)(aiColor.W * 255) };
                 }
                 else
                 {
@@ -742,11 +742,11 @@ namespace AquaModelLibrary.Core.General
             {
                 preTransformVerts = true;
             }
-            Assimp.AssimpContext context = new Assimp.AssimpContext();
-            context.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(preserveFBXPivots));
+            SharpAssimp.AssimpContext context = new SharpAssimp.AssimpContext();
+            context.SetConfig(new SharpAssimp.Configs.FBXPreservePivotsConfig(preserveFBXPivots));
             var postProcessSteps = GetPostProcessSteps(preTransformVerts);
 
-            Assimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
+            SharpAssimp.Scene aiScene = context.ImportFile(initialFilePath, postProcessSteps);
             double baseScale = SetAssimpScale(aiScene);
 
             AquaObject aqp = new AquaObject();
@@ -807,7 +807,7 @@ namespace AquaModelLibrary.Core.General
             CheckForNameNodeNumbers(aiScene.RootNode, ref useNameNodeNum);
             BuildAiNodeDictionary(aiScene.RootNode, ref nodeCounter, boneDict, useNameNodeNum);
 
-            var parentMatrix = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiScene.RootNode.Transform));
+            var parentMatrix = Matrix4x4.Transpose(aiScene.RootNode.Transform);
             parentMatrix.M41 = (float)(parentMatrix.M41 * baseScale);
             parentMatrix.M42 = (float)(parentMatrix.M42 * baseScale);
             parentMatrix.M43 = (float)(parentMatrix.M43 * baseScale);
@@ -833,7 +833,7 @@ namespace AquaModelLibrary.Core.General
             return aqp;
         }
 
-        public static double SetAssimpScale(Assimp.Scene aiScene)
+        public static double SetAssimpScale(SharpAssimp.Scene aiScene)
         { 
             double baseScale = 1;
             switch (scaleHandling)
@@ -852,7 +852,7 @@ namespace AquaModelLibrary.Core.General
             return baseScale;
         }
 
-        private static Assimp.Node GetRootNode(Assimp.Node aiNode)
+        private static SharpAssimp.Node GetRootNode(SharpAssimp.Node aiNode)
         {
             var nodeCountName = GetNodeNumber(aiNode.Name);
             if (nodeCountName == 0)
@@ -870,7 +870,7 @@ namespace AquaModelLibrary.Core.General
             return null;
         }
 
-        private static void BuildAiNodeDictionary(Assimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum)
+        private static void BuildAiNodeDictionary(SharpAssimp.Node aiNode, ref int nodeCounter, Dictionary<string, int> boneDict, bool useNameNodeNum)
         {
             var nodeCountName = GetNodeNumber(aiNode.Name);
             if (nodeCountName != -1)
@@ -895,7 +895,7 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void CheckForNameNodeNumbers(Assimp.Node aiNode, ref bool useNameNodeNum)
+        private static void CheckForNameNodeNumbers(SharpAssimp.Node aiNode, ref bool useNameNodeNum)
         {
             var nodeCountName = GetNodeNumber(aiNode.Name);
             if (nodeCountName != -1)
@@ -914,7 +914,7 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, Assimp.Scene aiScene, Assimp.Node aiNode, Matrix4x4 parentTfm, double baseScale, Dictionary<string, int> boneDict)
+        private static void IterateAiNodesAQP(AquaObject aqp, AquaNode aqn, SharpAssimp.Scene aiScene, SharpAssimp.Node aiNode, Matrix4x4 parentTfm, double baseScale, Dictionary<string, int> boneDict)
         {
             //Decide if this is an effect node or not
             string nodeName = aiNode.Name;
@@ -981,7 +981,7 @@ namespace AquaModelLibrary.Core.General
 
                 //Assign transform data
                 Matrix4x4 worldMat;
-                var localMat = SwapRow4Column4Mat4(GetMat4FromAssimpMat4(aiNode.Transform));
+                var localMat = SwapRow4Column4Mat4(aiNode.Transform);
                 Matrix4x4.Decompose(localMat, out var scale, out var rot, out var pos);
 
                 worldMat = localMat;
@@ -1032,7 +1032,7 @@ namespace AquaModelLibrary.Core.General
                     ParseShorts(nodeName, out nodo.boneShort1, out nodo.boneShort2);
 
                     //Assign transform data
-                    var localMat = SwapRow4Column4Mat4(GetMat4FromAssimpMat4(aiNode.Transform));
+                    var localMat = SwapRow4Column4Mat4(aiNode.Transform);
                     nodo.pos = localMat.Translation;
 
                     nodo.eulRot = MathExtras.QuaternionToEuler(Quaternion.CreateFromRotationMatrix(localMat));
@@ -1045,7 +1045,7 @@ namespace AquaModelLibrary.Core.General
                 }
             }
 
-            Matrix4x4 nodeMat = Matrix4x4.Transpose(GetMat4FromAssimpMat4(aiNode.Transform));
+            Matrix4x4 nodeMat = Matrix4x4.Transpose(aiNode.Transform);
             nodeMat.M41 *= (float)(nodeMat.M41 * baseScale);
             nodeMat.M42 *= (float)(nodeMat.M42 * baseScale);
             nodeMat.M43 *= (float)(nodeMat.M43 * baseScale);
@@ -1063,7 +1063,7 @@ namespace AquaModelLibrary.Core.General
             }
         }
 
-        private static void AddAiMeshToAQP(AquaObject aqp, Assimp.Mesh mesh, Matrix4x4 nodeMat, double baseScale, Dictionary<string, int> boneDict)
+        private static void AddAiMeshToAQP(AquaObject aqp, SharpAssimp.Mesh mesh, Matrix4x4 nodeMat, double baseScale, Dictionary<string, int> boneDict)
         {
             GenericTriangles genTris = new GenericTriangles();
             genTris.name = mesh.Name;
@@ -1104,7 +1104,7 @@ namespace AquaModelLibrary.Core.General
                     if (mesh.HasVertexColors(0))
                     {
                         var color = mesh.VertexColorChannels[0][v];
-                        faceVtxl.vertColors.Add(new byte[] { floatToColor(color.B), floatToColor(color.G), floatToColor(color.R), floatToColor(color.A) });
+                        faceVtxl.vertColors.Add(new byte[] { floatToColor(color.Z), floatToColor(color.Y), floatToColor(color.X), floatToColor(color.W) });
                     }
                     if (mesh.HasTextureCoords(0))
                     {
@@ -1268,33 +1268,17 @@ namespace AquaModelLibrary.Core.General
                 return false;
             }
         }
-        private static Matrix4x4 GetWorldTransform(Assimp.Node aiNode)
+        private static Matrix4x4 GetWorldTransform(SharpAssimp.Node aiNode)
         {
             var transform = aiNode.Transform;
 
             while ((aiNode = aiNode.Parent) != null)
                 transform *= aiNode.Transform;
 
-            return ToNumericsTransposed(transform);
-        }
-
-        private static Matrix4x4 ToNumericsTransposed(Assimp.Matrix4x4 value)
-        {
-            return new Matrix4x4(
-                value.A1, value.B1, value.C1, value.D1,
-                value.A2, value.B2, value.C2, value.D2,
-                value.A3, value.B3, value.C3, value.D3,
-                value.A4, value.B4, value.C4, value.D4);
+            return Matrix4x4.Transpose(transform);
         }
 
 
-        private static Matrix4x4 GetMat4FromAssimpMat4(Assimp.Matrix4x4 mat4)
-        {
-            return new Matrix4x4(mat4.A1, mat4.A2, mat4.A3, mat4.A4,
-                                 mat4.B1, mat4.B2, mat4.B3, mat4.B4,
-                                 mat4.C1, mat4.C2, mat4.C3, mat4.C4,
-                                 mat4.D1, mat4.D2, mat4.D3, mat4.D4);
-        }
         private static Matrix4x4 SwapRow4Column4Mat4(Matrix4x4 mat4)
         {
             return new Matrix4x4(mat4.M11, mat4.M12, mat4.M13, mat4.M41,
