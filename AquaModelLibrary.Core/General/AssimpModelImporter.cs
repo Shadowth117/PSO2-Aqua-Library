@@ -1273,7 +1273,7 @@ namespace AquaModelLibrary.Core.General
             var transform = aiNode.Transform;
 
             while ((aiNode = aiNode.Parent) != null)
-                transform *= aiNode.Transform;
+                transform = aiNode.Transform * transform;
 
             return Matrix4x4.Transpose(transform);
         }
