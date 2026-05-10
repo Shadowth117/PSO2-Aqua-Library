@@ -3,6 +3,7 @@
     //Credit to dummyCount and Dillen for these values
     public enum CharColorMapping : int
     {
+        None = 0,
         PrimaryOuterWear = 1,
         SecondaryOuterWear = 2,
         PrimaryBaseWear = 3,
@@ -19,6 +20,7 @@
         LeftEye = 14,
         EyebrowColor = 15,
         EyelashColor = 16,
-        HairColor = 17,
+        HairColor1 = 17,
+        HairColor2 = 18,
     }
 }
