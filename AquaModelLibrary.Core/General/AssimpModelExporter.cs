@@ -71,12 +71,12 @@ namespace AquaModelLibrary.Core.General
 
                 //NODOs are a bit more primitive. We need to generate the matrix for these ones.
                 var matrix = Matrix4x4.Identity;
-                var rotation = MatrixFromRotationX(bn.eulRot.X) *
-                   MatrixFromRotationY(bn.eulRot.Y) *
-                   MatrixFromRotationZ(bn.eulRot.Z);
+                var rotation = Matrix4x4.CreateRotationX(bn.eulRot.X) *
+                   Matrix4x4.CreateRotationY(bn.eulRot.Y) *
+                   Matrix4x4.CreateRotationZ(bn.eulRot.Z);
 
                 matrix *= rotation;
-                matrix *= MatrixFromTranslation(new Vector3(bn.pos.X, bn.pos.Y, bn.pos.Z));
+                matrix *= Matrix4x4.CreateTranslation(new Vector3(bn.pos.X, bn.pos.Y, bn.pos.Z));
                 aiNode.Transform = matrix;
 
                 parentNodo.Children.Add(aiNode);
@@ -579,60 +579,6 @@ namespace AquaModelLibrary.Core.General
         {
             float flt = sht;
             return flt / 32767;
-        }
-
-        public static Matrix4x4 MatrixFromRotationX(float radians)
-        {
-            /*
-                 |  1  0       0       0 |
-             M = |  0  cos(A) -sin(A)  0 |
-                 |  0  sin(A)  cos(A)  0 |
-                 |  0  0       0       1 |	
-            */
-            Matrix4x4 m = Matrix4x4.Identity;
-            m.M22 = m.M33 = (float)Math.Cos(radians);
-            m.M32 = (float)Math.Sin(radians);
-            m.M23 = -m.M32;
-            return m;
-        }
-
-        public static Matrix4x4 MatrixFromRotationY(float radians)
-        {
-            /*
-                 |  cos(A)  0   sin(A)  0 |
-             M = |  0       1   0       0 |
-                 | -sin(A)  0   cos(A)  0 |
-                 |  0       0   0       1 |
-            */
-            Matrix4x4 m = Matrix4x4.Identity;
-            m.M11 = m.M33 = (float)Math.Cos(radians);
-            m.M13 = (float)Math.Sin(radians);
-            m.M31 = -m.M13;
-            return m;
-        }
-
-        public static Matrix4x4 MatrixFromRotationZ(float radians)
-        {
-            /*
-                 |  cos(A)  -sin(A)   0   0 |
-             M = |  sin(A)   cos(A)   0   0 |
-                 |  0        0        1   0 |
-                 |  0        0        0   1 |	
-            */
-            Matrix4x4 m = Matrix4x4.Identity;
-            m.M11 = m.M22 = (float)Math.Cos(radians);
-            m.M21 = (float)Math.Sin(radians);
-            m.M12 = -m.M21;
-            return m;
-        }
-
-        public static Matrix4x4 MatrixFromTranslation(Vector3 translation)
-        {
-            Matrix4x4 m = Matrix4x4.Identity;
-            m.M14 = translation.X;
-            m.M24 = translation.Y;
-            m.M34 = translation.Z;
-            return m;
         }
     }
 }
