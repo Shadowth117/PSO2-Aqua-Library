@@ -2229,6 +2229,56 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         }
 
         /// <summary>
+        /// Expects vsets and vtxls to be fixed as the same id
+        /// </summary>
+        public void AssignStaticWeights()
+        {
+            int highestBone = 0;
+            for (int i = 0; i < meshList.Count; i++)
+            {
+                var mesh = meshList[i];
+                var vtxl = vtxlList[mesh.vsetIndex];
+                highestBone = Math.Max(highestBone, mesh.baseMeshNodeId);
+                if(vtxl.vertWeights.Count == 0 && vtxl.vertWeightsNGS.Count == 0 && vtxl.trueVertWeights.Count == 0)
+                {
+                    vtxl.rawVertWeightIds.Clear();
+                    vtxl.vertWeightIndices.Clear();
+                    vtxl.trueVertWeightIndices.Clear();
+                    for(int j = 0; j < vtxl.vertPositions.Count; j++)
+                    {
+                        vtxl.trueVertWeightIndices.Add(new int[] { mesh.baseMeshNodeId });
+                        vtxl.trueVertWeights.Add(new Vector4(1, 0, 0, 0));
+                    }
+                }
+            }
+
+            if (objc.bonePaletteOffset == 0)
+            {
+                for(int i = 0; i < vtxlList.Count; i++)
+                {
+                    var vtxl = vtxlList[i];
+                    if (vtxl.bonePalette.Count == 0)
+                    {
+                        for(int j = 0; j <= highestBone; j++)
+                        {
+                            vtxl.bonePalette.Add((ushort)j);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (bonePalette.Count == 0)
+                {
+                    for (int j = 0; j <= highestBone; j++)
+                    {
+                        bonePalette.Add((ushort)j);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// PSO2 has a distinct rendering it does for hollow vs blendalpha materials, but sometimes the render data is changed in post to reflect something different.
         /// This method checks all instances of this and fixes them, making a new REND instance as needed.
         /// </summary>
