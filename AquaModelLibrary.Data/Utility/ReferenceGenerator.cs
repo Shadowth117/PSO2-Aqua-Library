@@ -2699,6 +2699,7 @@ namespace AquaModelLibrary.Data.Utility
             StringBuilder outputFemaleVoices = new StringBuilder();
             StringBuilder outputCastVoices = new StringBuilder();
             StringBuilder outputCasealVoices = new StringBuilder();
+            StringBuilder outputOtherVoices = new StringBuilder();
 
             masterIdList.Clear();
             nameDicts.Clear();
@@ -2739,6 +2740,10 @@ namespace AquaModelLibrary.Data.Utility
                     id = 3;
                     voiceNumStr = str.Replace(voiceWoman, "");
 
+                } else if (str.Contains(voiceGeneric))
+                {
+                    id = 4;
+                    voiceNumStr = str.Replace(voiceGeneric, "");
                 }
                 voiceNum = int.Parse(voiceNumStr);
 
@@ -2759,7 +2764,15 @@ namespace AquaModelLibrary.Data.Utility
                     semiFinalName = semiFinalName.Replace(voiceNumStr, newVoiceNumStr);
                 }
 
-                var finalName = semiFinalName.Replace("11_voice_", conversion);
+                string finalName;
+                
+                if(id == 4)
+                {
+                    finalName = semiFinalName.Replace("11_voice_", conversion + "player_");
+                } else
+                {
+                    finalName = semiFinalName.Replace("11_voice_", conversion);
+                }
 
                 string classic = $"{playerVoiceStart}{finalName}.ice";
 
@@ -2787,12 +2800,16 @@ namespace AquaModelLibrary.Data.Utility
                     case 1:
                         outputCasealVoices.Append(output);
                         break;
+                    case 4:
+                        outputOtherVoices.Append(output);
+                        break;
                 }
             }
             WriteCSV(playerDirOut, "MaleVoices.csv", outputMaleVoices);
             WriteCSV(playerDirOut, "FemaleVoices.csv", outputFemaleVoices);
             WriteCSV(playerDirOut, "CastVoices.csv", outputCastVoices);
             WriteCSV(playerDirOut, "CasealVoices.csv", outputCasealVoices);
+            WriteCSV(playerDirOut, "OtherVoices.csv", outputOtherVoices);
 
             //--------------------------NPC Battle Voices Classic
             StringBuilder outputBattleVoices = new StringBuilder();

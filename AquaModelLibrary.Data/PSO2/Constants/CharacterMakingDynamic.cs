@@ -40,6 +40,7 @@
         public static string iconMale = "man_";
         public static string iconFemale = "woman_";
 
+        public static string voiceGeneric = "11_voice_";
         public static string voiceCman = "11_voice_cman";
         public static string voiceCwoman = "11_voice_cwoman";
         public static string voiceMan = "11_voice_man";
