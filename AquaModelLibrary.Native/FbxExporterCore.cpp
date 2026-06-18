@@ -41,282 +41,327 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         return lLayer;
     }
     
-    FbxNode* CreateFbxNodeFromMesh( AquaObject^ aqo, int meshId, FbxScene* lScene, List<IntPtr>^ materials, List<int>^ meshMatMappings, List<IntPtr>^ convertedBones, AquaNode^ aqn, bool includeMetadata)
+    void CreateFbxNodeFromMesh( AquaObject^ aqo, int meshId, FbxScene* lScene, List<IntPtr>^ materials, List<int>^ meshMatMappings, List<IntPtr>^ convertedBones, AquaNode^ aqn, bool includeMetadata, FbxNode* parentNode, FbxPose* lBindPose)
     {
         List<uint>^ bonePalette;
         MESH msh = aqo->meshList[meshId];
         VTXL^ vtxl = aqo->vtxlList[msh.vsetIndex];
-        String^ meshName = aqo->GetMeshName(meshId, includeMetadata);
-        FbxNode* lNode = FbxNode::Create( lScene, Utf8String(meshName).ToCStr() );
-        FbxMesh* lMesh = FbxMesh::Create( lScene, Utf8String(meshName + "_mesh" ).ToCStr() );
-        bool hasVertexWeights = vtxl->vertWeightIndices->Count > 0;
 
-        lMesh->InitControlPoints( vtxl->vertPositions->Count );
-
-        if (aqo->objc.bonePaletteOffset > 0)
+        //We assume there will be facegroups to go through. Failsafes on the .NET side should solve this in theory
+        for (int faceGroup = 0; faceGroup < aqo->strips[msh.psetIndex]->faceGroups->Count; faceGroup++)
         {
-            bonePalette = aqo->bonePalette;
-        }
-        else {
-            bonePalette = gcnew List<uint>();
-            for (int bn = 0; bn < vtxl->bonePalette->Count; bn++)
+            //Do not build a mesh for a null face group
+            if (aqo->strips[msh.psetIndex]->faceGroups[faceGroup] == 0)
             {
-                bonePalette->Add(vtxl->bonePalette[bn]);
+                continue;
             }
-        }
-
-        for ( int i = 0; i < vtxl->vertPositions->Count; i++ )
-        {
-            Vector3 position = vtxl->vertPositions[ i ];
-            lMesh->SetControlPointAt( FbxVector4( position.X, position.Y, position.Z ), i );
-        }
-
-        // Elements need to be created in this exact order for 3DS Max to read it properly.
-
-        if (vtxl->vertNormals->Count > 0 )
-        {
-            FbxGeometryElementNormal* lElementNormal = ( FbxGeometryElementNormal* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eNormal );
-            lElementNormal->SetMappingMode( FbxLayerElement::eByControlPoint );
-            lElementNormal->SetReferenceMode( FbxLayerElement::eDirect );
-
-            for each (Vector3 normal in vtxl->vertNormals)
+            StripData::FaceGroupData^ faceGroupData = aqo->strips[msh.psetIndex]->GetTrianglesFaceGroup(faceGroup, true);
+            String^ meshName = aqo->GetMeshName(meshId, includeMetadata, faceGroup);
+            FbxNode* lNode = FbxNode::Create( lScene, Utf8String(meshName).ToCStr() );
+            FbxMesh* lMesh = FbxMesh::Create( lScene, Utf8String(meshName + "_mesh" ).ToCStr() );
+            bool hasVertexWeights = vtxl->vertWeightIndices->Count > 0;
+            int vertCount = 0;
+            if (faceGroupData->vertexMappingList != nullptr)
             {
-                lElementNormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+                vertCount = faceGroupData->vertexMappingList->Count;
             }
-        }
+            else {
+                vertCount = vtxl->vertPositions->Count;
+            }
 
-        if (vtxl->vertTangentList->Count > 0)
-        {
-            FbxGeometryElementTangent* lElementTangent = (FbxGeometryElementTangent*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eTangent);
-            lElementTangent->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementTangent->SetReferenceMode(FbxLayerElement::eDirect);
+            lMesh->InitControlPoints(vertCount);
 
-            for each (Vector3 normal in vtxl->vertTangentList)
+            if (aqo->objc.bonePaletteOffset > 0)
             {
-                lElementTangent->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+                bonePalette = aqo->bonePalette;
             }
-        }
+            else {
+                bonePalette = gcnew List<uint>();
+                for (int bn = 0; bn < vtxl->bonePalette->Count; bn++)
+                {
+                    bonePalette->Add(vtxl->bonePalette[bn]);
+                }
+            }
 
-        if (vtxl->vertBinormalList->Count > 0)
-        {
-            FbxGeometryElementBinormal* lElementBinormal = (FbxGeometryElementBinormal*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eBiNormal);
-            lElementBinormal->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementBinormal->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each(Vector3 normal in vtxl->vertBinormalList)
+            if (vtxl->vertPositions->Count > 0) //Surely positions exist...
             {
-                lElementBinormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+                for (int i = 0; i < vertCount; i++)
+                {
+                    Vector3 position = vtxl->vertPositions[faceGroupData->GetVertexMapping(i)];
+                    lMesh->SetControlPointAt(FbxVector4(position.X, position.Y, position.Z), i);
+                }
             }
-        }
+
+            // Elements need to be created in this exact order for 3DS Max to read it properly.
+
+            if (vtxl->vertNormals->Count > 0 )
+            {
+                FbxGeometryElementNormal* lElementNormal = ( FbxGeometryElementNormal* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eNormal );
+                lElementNormal->SetMappingMode( FbxLayerElement::eByControlPoint );
+                lElementNormal->SetReferenceMode( FbxLayerElement::eDirect );
+
+                for (int i = 0; i < vertCount; i++)
+                {
+                    Vector3 normal = vtxl->vertNormals[faceGroupData->GetVertexMapping(i)];
+                    lElementNormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+                }
+            }
+
+            if (vtxl->vertTangentList->Count > 0)
+            {
+                FbxGeometryElementTangent* lElementTangent = (FbxGeometryElementTangent*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eTangent);
+                lElementTangent->SetMappingMode(FbxLayerElement::eByControlPoint);
+                lElementTangent->SetReferenceMode(FbxLayerElement::eDirect);
+
+                for (int i = 0; i < vertCount; i++)
+                {
+                    Vector3 normal = vtxl->vertTangentList[faceGroupData->GetVertexMapping(i)];
+                    lElementTangent->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+                }
+            }
+
+            if (vtxl->vertBinormalList->Count > 0)
+            {
+                FbxGeometryElementBinormal* lElementBinormal = (FbxGeometryElementBinormal*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eBiNormal);
+                lElementBinormal->SetMappingMode(FbxLayerElement::eByControlPoint);
+                lElementBinormal->SetReferenceMode(FbxLayerElement::eDirect);
+   
+                for (int i = 0; i < vertCount; i++)
+                {
+                    Vector3 normal = vtxl->vertBinormalList[faceGroupData->GetVertexMapping(i)];
+                    lElementBinormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
+                }
+            }
         
 
-        FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
-        FbxGeometryElementUV* lElementVertexColor2_1 = nullptr;
-        FbxGeometryElementUV* lElementVertexColor2_2 = nullptr;
+            FbxGeometryElementVertexColor* lElementVertexColor = nullptr;
+            //FbxGeometryElementUV* lElementVertexColor2_1 = nullptr;
+            //FbxGeometryElementUV* lElementVertexColor2_2 = nullptr;
 
-        if (vtxl->vertColors->Count > 0)
-        {
-            lElementVertexColor = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
-
-            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            //lElementVertexColor2->SetName("VCChannel_0"); //Remove this if the name breaks it
-            lElementVertexColor->SetMappingMode(FbxLayerElement::eByPolygonVertex);
-            lElementVertexColor->SetReferenceMode(FbxLayerElement::eIndexToDirect);
-
-            for each (array<unsigned char>^ color in vtxl->vertColors)
-                lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
-        }
-
-        SetUVChannel(lMesh, vtxl->uv1List, vtxl->vertPositions->Count, 1);
-        SetUVChannel(lMesh, vtxl->uv2List, vtxl->vertPositions->Count, 2);
-        SetUVChannel(lMesh, vtxl->uv3List, vtxl->vertPositions->Count, 3);
-        SetUVChannel(lMesh, vtxl->uv4List, vtxl->vertPositions->Count, 4);
-        if (vtxl->uv5List->Count > 0)
-        {
-            SetUVChannel(lMesh, vtxl->uv5List, vtxl->vertPositions->Count, 5);
-        }
-        else {
-            SetUVChannelShorts(lMesh, vtxl->vert0x22, vtxl->vertPositions->Count, 5);
-        }
-        if (vtxl->uv6List->Count > 0)
-        {
-            SetUVChannel(lMesh, vtxl->uv6List, vtxl->vertPositions->Count, 6);
-        }
-        else {
-            SetUVChannelShorts(lMesh, vtxl->vert0x23, vtxl->vertPositions->Count, 6);
-        }
-        if (vtxl->uv7List->Count > 0)
-        {
-            SetUVChannel(lMesh, vtxl->uv7List, vtxl->vertPositions->Count, 7);
-        }
-        else {
-            SetUVChannelShorts(lMesh, vtxl->vert0x24, vtxl->vertPositions->Count, 7);
-        }
-        if (vtxl->uv8List->Count > 0)
-        {
-            SetUVChannel(lMesh, vtxl->uv8List, vtxl->vertPositions->Count, 8);
-        }
-        else {
-            SetUVChannelShorts(lMesh, vtxl->vert0x25, vtxl->vertPositions->Count, 8);
-        }
-        
-        if (vtxl->vertColor2s->Count > 0)
-        {
-            lElementVertexColor2_1 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 9)->CreateLayerElementOfType(FbxLayerElement::eUV);
-
-            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            lElementVertexColor2_1->SetName(Utf8String(String::Format("UVChannel_9")).ToCStr());
-            lElementVertexColor2_1->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementVertexColor2_1->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (array<unsigned char> ^ color in vtxl->vertColor2s)
-                lElementVertexColor2_1->GetDirectArray().Add(FbxVector2(((float)color[2]) / 255, ((float)color[1]) / 255));
-
-            lElementVertexColor2_2 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 10)->CreateLayerElementOfType(FbxLayerElement::eUV);
-
-            // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
-            lElementVertexColor2_2->SetName(Utf8String(String::Format("UVChannel_10")).ToCStr());
-            lElementVertexColor2_2->SetMappingMode(FbxLayerElement::eByControlPoint);
-            lElementVertexColor2_2->SetReferenceMode(FbxLayerElement::eDirect);
-
-            for each (array<unsigned char> ^ color in vtxl->vertColor2s)
-                lElementVertexColor2_2->GetDirectArray().Add(FbxVector2(((float)color[0]) / 255, ((float)color[3]) / 255));
-        }
-
-        FbxGeometryElementMaterial* lElementMaterial = ( FbxGeometryElementMaterial* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eMaterial );
-        lElementMaterial->SetMappingMode( FbxLayerElement::eByPolygon );
-        lElementMaterial->SetReferenceMode( FbxLayerElement::eIndexToDirect );
-
-        HashSet<unsigned int>^ vertexIndices = gcnew HashSet<unsigned int>( vtxl->vertPositions->Count );
-
-        FbxSkin* lSkin = nullptr;
-        Dictionary<int, IntPtr>^ clusterMap = nullptr;
-
-        if ( vtxl->trueVertWeights->Count > 0 )
-        {
-            lSkin = FbxSkin::Create( lScene, Utf8String(meshName + "_skin" ).ToCStr() );
-            clusterMap = gcnew Dictionary<int, IntPtr>( bonePalette->Count );
-        }
-
-        List<Vector3>^ triangles = aqo->strips[msh.psetIndex]->GetTriangles(true);
-
-        int materialIndex = lNode->AddMaterial( ( FbxSurfacePhong* ) materials[meshMatMappings[meshId]].ToPointer() );
-
-        for each ( Vector3 triangle in triangles )
-        {
-            vertexIndices->Add( triangle.X );
-            vertexIndices->Add( triangle.Y );
-            vertexIndices->Add( triangle.Z );
-
-            lMesh->BeginPolygon( materialIndex, -1, -1, false );
-            lMesh->AddPolygon( triangle.X );
-            lMesh->AddPolygon( triangle.Y );
-            lMesh->AddPolygon( triangle.Z );
-            lMesh->EndPolygon();
-
-            if ( lElementVertexColor )
+            if (vtxl->vertColors->Count > 0)
             {
-                lElementVertexColor->GetIndexArray().Add( triangle.X ); 
-                lElementVertexColor->GetIndexArray().Add( triangle.Y ); 
-                lElementVertexColor->GetIndexArray().Add( triangle.Z ); 
+                lElementVertexColor = (FbxGeometryElementVertexColor*)GetFbxLayer(lMesh, 0)->CreateLayerElementOfType(FbxLayerElement::eVertexColor);
+
+                // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+                //lElementVertexColor2->SetName("VCChannel_0"); //Remove this if the name breaks it
+                lElementVertexColor->SetMappingMode(FbxLayerElement::eByPolygonVertex);
+                lElementVertexColor->SetReferenceMode(FbxLayerElement::eIndexToDirect);
+
+                for (int i = 0; i < vertCount; i++)
+                {
+                    array<unsigned char>^ color = vtxl->vertColors[faceGroupData->GetVertexMapping(i)];
+                    lElementVertexColor->GetDirectArray().Add(FbxColor(((float)color[2]) / 255, ((float)color[1]) / 255, ((float)color[0]) / 255, ((float)color[3]) / 255));
+                }
             }
-        }
 
-        if ( lSkin != nullptr )
-        {
-            for ( int j = 0; j < bonePalette->Count; j++ )
+            if(vtxl->uv1List->Count > 0)
             {
-                ushort boneIndex = bonePalette[ j ];
-                NODE node;
-                if (aqn->nodeList->Count > boneIndex)
-                {
-                    node = aqn->nodeList[boneIndex];
-                }
-                else {
-                    node = aqn->nodeList[0];
-                    boneIndex = 0;
-                }
-                FbxNode* lBoneNode = ( FbxNode* ) convertedBones[ boneIndex ].ToPointer();
+                SetUVChannel(lMesh, vtxl->uv1List, vertCount, 1, faceGroupData);
+            }
+            if (vtxl->uv2List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv2List, vertCount, 2, faceGroupData);
+            }
+            if (vtxl->uv3List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv3List, vertCount, 3, faceGroupData);
+            }
+            if (vtxl->uv4List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv4List, vertCount, 4, faceGroupData);
+            }
+            if (vtxl->uv5List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv5List, vertCount, 5, faceGroupData);
+            }
+            else {
+                SetUVChannelShorts(lMesh, vtxl->vert0x22, vertCount, 5, faceGroupData);
+            }
+            if (vtxl->uv6List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv6List, vertCount, 6, faceGroupData);
+            }
+            else {
+                SetUVChannelShorts(lMesh, vtxl->vert0x23, vertCount, 6, faceGroupData);
+            }
+            if (vtxl->uv7List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv7List, vertCount, 7, faceGroupData);
+            }
+            else {
+                SetUVChannelShorts(lMesh, vtxl->vert0x24, vertCount, 7, faceGroupData);
+            }
+            if (vtxl->uv8List->Count > 0)
+            {
+                SetUVChannel(lMesh, vtxl->uv8List, vertCount, 8, faceGroupData);
+            }
+            else {
+                SetUVChannelShorts(lMesh, vtxl->vert0x25, vertCount, 8, faceGroupData);
+            }
+        
+            /*
+            if (vtxl->vertColor2s->Count > 0)
+            {
+                lElementVertexColor2_1 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 9)->CreateLayerElementOfType(FbxLayerElement::eUV);
 
-                IntPtr clusterPtr;
-                FbxCluster* lCluster;
+                // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+                lElementVertexColor2_1->SetName(Utf8String(String::Format("UVChannel_9")).ToCStr());
+                lElementVertexColor2_1->SetMappingMode(FbxLayerElement::eByControlPoint);
+                lElementVertexColor2_1->SetReferenceMode(FbxLayerElement::eDirect);
 
-                if ( !clusterMap->TryGetValue( boneIndex, clusterPtr ) )
+                for each (array<unsigned char> ^ color in vtxl->vertColor2s)
+                    lElementVertexColor2_1->GetDirectArray().Add(FbxVector2(((float)color[2]) / 255, ((float)color[1]) / 255));
+
+                lElementVertexColor2_2 = (FbxGeometryElementUV*)GetFbxLayer(lMesh, 10)->CreateLayerElementOfType(FbxLayerElement::eUV);
+
+                // Vertex color elements need to use these modes for 3DS Max to read them properly. Anything else is not going to work.
+                lElementVertexColor2_2->SetName(Utf8String(String::Format("UVChannel_10")).ToCStr());
+                lElementVertexColor2_2->SetMappingMode(FbxLayerElement::eByControlPoint);
+                lElementVertexColor2_2->SetReferenceMode(FbxLayerElement::eDirect);
+
+                for each (array<unsigned char> ^ color in vtxl->vertColor2s)
+                    lElementVertexColor2_2->GetDirectArray().Add(FbxVector2(((float)color[0]) / 255, ((float)color[3]) / 255));
+            }
+            */
+
+            FbxGeometryElementMaterial* lElementMaterial = ( FbxGeometryElementMaterial* ) GetFbxLayer( lMesh, 0 )->CreateLayerElementOfType( FbxLayerElement::eMaterial );
+            lElementMaterial->SetMappingMode( FbxLayerElement::eByPolygon );
+            lElementMaterial->SetReferenceMode( FbxLayerElement::eIndexToDirect );
+
+            HashSet<unsigned int>^ vertexIndices = gcnew HashSet<unsigned int>( vertCount );
+
+            FbxSkin* lSkin = nullptr;
+            Dictionary<int, IntPtr>^ clusterMap = nullptr;
+
+            if ( vtxl->trueVertWeights->Count > 0 )
+            {
+                lSkin = FbxSkin::Create( lScene, Utf8String(meshName + "_skin" ).ToCStr() );
+                clusterMap = gcnew Dictionary<int, IntPtr>( bonePalette->Count );
+            }
+
+            int materialIndex = lNode->AddMaterial( ( FbxSurfacePhong* ) materials[meshMatMappings[meshId]].ToPointer() );
+
+            for each ( Vector3 triangle in faceGroupData->triangles)
+            {
+                vertexIndices->Add( triangle.X );
+                vertexIndices->Add( triangle.Y );
+                vertexIndices->Add( triangle.Z );
+
+                lMesh->BeginPolygon( materialIndex, -1, -1, false );
+                lMesh->AddPolygon( triangle.X );
+                lMesh->AddPolygon( triangle.Y );
+                lMesh->AddPolygon( triangle.Z );
+                lMesh->EndPolygon();
+
+                if ( lElementVertexColor )
                 {
-                    System::String^ boneName = node.boneName.GetString();
-                    if (aqn->nodeUnicodeNames->Count > boneIndex)
+                    lElementVertexColor->GetIndexArray().Add( triangle.X ); 
+                    lElementVertexColor->GetIndexArray().Add( triangle.Y ); 
+                    lElementVertexColor->GetIndexArray().Add( triangle.Z ); 
+                }
+            }
+
+            if ( lSkin != nullptr )
+            {
+                for ( int j = 0; j < bonePalette->Count; j++ )
+                {
+                    ushort boneIndex = bonePalette[ j ];
+                    NODE node;
+                    if (aqn->nodeList->Count > boneIndex)
                     {
-                        boneName = aqn->nodeUnicodeNames[boneIndex];
+                        node = aqn->nodeList[boneIndex];
                     }
-                    boneName = aqn->GetNodeName(boneIndex);
-                    lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, String::Format("({0}){1}", boneIndex, boneName) ) ).ToCStr() );
-                    lCluster->SetLink( lBoneNode );
-                    lCluster->SetLinkMode( FbxCluster::eTotalOne );
+                    else {
+                        node = aqn->nodeList[0];
+                        boneIndex = 0;
+                    }
+                    FbxNode* lBoneNode = ( FbxNode* ) convertedBones[ boneIndex ].ToPointer();
 
-                    Matrix4x4 worldTransformation;
-                    Matrix4x4::Invert( node.GetInverseBindPoseMatrix(), worldTransformation );
+                    IntPtr clusterPtr;
+                    FbxCluster* lCluster;
 
-                    lCluster->SetTransformLinkMatrix( CreateFbxAMatrixFromNumerics( worldTransformation ) );
-
-                    clusterMap->Add( boneIndex, IntPtr( lCluster ) );
-                }
-                else
-                {
-                    lCluster = ( FbxCluster* ) clusterPtr.ToPointer();
-                }
-
-                for each ( unsigned int index in vertexIndices )
-                {
-                    array<int>^ weightIndices = vtxl->trueVertWeightIndices[index];
-                    Vector4 weights = vtxl->trueVertWeights[index];
-
-                    for (int wt = 0; wt < weightIndices->Length; wt++)
+                    if ( !clusterMap->TryGetValue( boneIndex, clusterPtr ) )
                     {
-                        switch (wt)
+                        System::String^ boneName = node.boneName.GetString();
+                        if (aqn->nodeUnicodeNames->Count > boneIndex)
                         {
-                            case 0:
-                                if (weightIndices[0] == j)
-                                    lCluster->AddControlPointIndex(index, weights.X);
-                                break;
-                            case 1:
-                                if (weightIndices[1] == j)
-                                    lCluster->AddControlPointIndex(index, weights.Y);
-                                break;
-                            case 2:
-                                if (weightIndices[2] == j)
-                                    lCluster->AddControlPointIndex(index, weights.Z);
-                                break;
-                            case 3:
-                                if (weightIndices[3] == j)
-                                    lCluster->AddControlPointIndex(index, weights.W);
-                                break;
+                            boneName = aqn->nodeUnicodeNames[boneIndex];
+                        }
+                        boneName = aqn->GetNodeName(boneIndex);
+                        lCluster = FbxCluster::Create( lScene, Utf8String( String::Format( "{0}_{1}_{2}_cluster", meshName, 0, String::Format("({0}){1}", boneIndex, boneName) ) ).ToCStr() );
+                        lCluster->SetLink( lBoneNode );
+                        lCluster->SetLinkMode( FbxCluster::eTotalOne );
+
+                        Matrix4x4 worldTransformation;
+                        Matrix4x4::Invert( node.GetInverseBindPoseMatrix(), worldTransformation );
+
+                        lCluster->SetTransformLinkMatrix( CreateFbxAMatrixFromNumerics( worldTransformation ) );
+
+                        clusterMap->Add( boneIndex, IntPtr( lCluster ) );
+                    }
+                    else
+                    {
+                        lCluster = ( FbxCluster* ) clusterPtr.ToPointer();
+                    }
+
+                    for each ( unsigned int index in vertexIndices )
+                    {
+                        array<int>^ weightIndices = vtxl->trueVertWeightIndices[faceGroupData->GetVertexMapping(index)];
+                        Vector4 weights = vtxl->trueVertWeights[faceGroupData->GetVertexMapping(index)];
+
+                        for (int wt = 0; wt < weightIndices->Length; wt++)
+                        {
+                            switch (wt)
+                            {
+                                case 0:
+                                    if (weightIndices[0] == j)
+                                        lCluster->AddControlPointIndex(index, weights.X);
+                                    break;
+                                case 1:
+                                    if (weightIndices[1] == j)
+                                        lCluster->AddControlPointIndex(index, weights.Y);
+                                    break;
+                                case 2:
+                                    if (weightIndices[2] == j)
+                                        lCluster->AddControlPointIndex(index, weights.Z);
+                                    break;
+                                case 3:
+                                    if (weightIndices[3] == j)
+                                        lCluster->AddControlPointIndex(index, weights.W);
+                                    break;
+                            }
                         }
                     }
+
+                    lSkin->AddCluster( lCluster );
                 }
-
-                lSkin->AddCluster( lCluster );
             }
-        }
 
-        vertexIndices->Clear();
+            vertexIndices->Clear();
         
 
-        if ( lSkin != nullptr )
-        {
-            if ( lSkin->GetClusterCount() > 0 )
-                lMesh->AddDeformer( lSkin );
+            if ( lSkin != nullptr )
+            {
+                if ( lSkin->GetClusterCount() > 0 )
+                    lMesh->AddDeformer( lSkin );
 
-            else
-                lSkin->Destroy();
+                else
+                    lSkin->Destroy();
+            }
+
+            lNode->SetNodeAttribute( lMesh );
+            lNode->SetShadingMode( FbxNode::eTextureShading );
+
+
+            parentNode->AddChild(lNode);
+            lBindPose->Add(lNode, FbxAMatrix());
+
         }
 
-        lNode->SetNodeAttribute( lMesh );
-        lNode->SetShadingMode( FbxNode::eTextureShading );
-
-        return lNode;
+        return;
     }
 
-    void SetUVChannel(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<System::Numerics::Vector2>^ uvList, int count, int uvNum)
+    void SetUVChannel(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<System::Numerics::Vector2>^ uvList, int count, int uvNum, StripData::FaceGroupData^ faceGroupData)
     {
         FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, uvNum - 1)->CreateLayerElementOfType(FbxLayerElement::eUV);
         lElementUV->SetName(Utf8String(String::Format("UVChannel_" + uvNum.ToString())).ToCStr());
@@ -326,7 +371,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         {
             for (int i = 0; i < count; i++)
             {
-                System::Numerics::Vector2 texCoord = uvList[i];
+                System::Numerics::Vector2 texCoord = uvList[faceGroupData->GetVertexMapping(i)];
                 lElementUV->GetDirectArray().Add(FbxVector2(texCoord.X, 1 - texCoord.Y));
             }
         }
@@ -338,7 +383,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         }
     }
 
-    void SetUVChannelShorts(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<array<short>^ >^ uvList, int count, int uvNum)
+    void SetUVChannelShorts(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<array<short>^ >^ uvList, int count, int uvNum, StripData::FaceGroupData^ faceGroupData)
     {
         FbxGeometryElementUV* lElementUV = (FbxGeometryElementUV*)GetFbxLayer(lMesh, uvNum - 1)->CreateLayerElementOfType(FbxLayerElement::eUV);
         lElementUV->SetName(Utf8String(String::Format("UVChannel_" + uvNum.ToString())).ToCStr());
@@ -348,7 +393,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         {
             for (int i = 0; i < count; i++)
             {
-                array<short>^ texCoord = uvList[i];
+                array<short>^ texCoord = uvList[faceGroupData->GetVertexMapping(i)];
                 lElementUV->GetDirectArray().Add(FbxVector2((float)texCoord[0] / 32767, 1.0 - (float)texCoord[1] / 32767));
             }
         }
@@ -425,9 +470,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         
         for (int i = 0; i < aqo->meshList->Count; i++ )
         {
-            FbxNode* lMeshNode = CreateFbxNodeFromMesh( aqo, i, lScene, materials, meshMatMappings, convertedBones, aqn, includeMetadata);
-            lNode->AddChild( lMeshNode );
-            lBindPose->Add( lMeshNode, FbxAMatrix() );
+            CreateFbxNodeFromMesh( aqo, i, lScene, materials, meshMatMappings, convertedBones, aqn, includeMetadata, lNode, lBindPose);
         }
 
         //If we have instance transforms, we want to actualize those

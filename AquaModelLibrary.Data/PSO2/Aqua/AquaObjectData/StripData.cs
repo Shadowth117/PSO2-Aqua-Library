@@ -107,6 +107,125 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             return tris;
         }
 
+        public class FaceGroupData
+        {
+            public List<Vector3> triangles = new List<Vector3>();
+            public List<int> vertexMappingList = null;
+
+            public FaceGroupData() { }
+
+            public FaceGroupData(List<Vector3> triangles_, List<int> vertexMappingList_)
+            {
+                triangles = triangles_;
+                vertexMappingList = vertexMappingList_;
+            }
+
+            public int GetVertexMapping(int vertId)
+            {
+                return vertexMappingList == null ? vertId : vertexMappingList[vertId];
+            }
+        }
+
+        public FaceGroupData GetTrianglesFaceGroup(int faceGroupId, bool removeDegenFaces = true)
+        {
+            bool multipleUsedFaceGroups = false;
+            var prevfgCount = 0;
+            foreach(var fgCount in faceGroups)
+            {
+                if(prevfgCount > 0)
+                {
+                    multipleUsedFaceGroups = true;
+                    break;
+                }
+                prevfgCount = fgCount;
+            }
+
+            //Get the sum of previous face groups to skip to the current one
+            int priorGroupFaceSum = 0;
+            for(int i = 0; i < faceGroupId; i++)
+            {
+                priorGroupFaceSum += faceGroups[i];
+            }
+            int faceGroupCount = faceGroups[faceGroupId];
+            
+            List<Vector3> tris = new List<Vector3>();
+            if (largeTriSet.Count > 0)
+            {
+                for (int triIndex = priorGroupFaceSum / 3; triIndex < ((priorGroupFaceSum / 3) + (faceGroupCount / 3)); triIndex++)
+                {
+                    tris.Add(largeTriSet[triIndex]);
+                }
+            } else if (format0xC31 == false)
+            {
+                for (int vertIndex = priorGroupFaceSum; vertIndex < (priorGroupFaceSum + faceGroupCount - 2); vertIndex++)
+                {
+                    //A degenerate triangle is a triangle with two references to the same vertex index. 
+                    if (removeDegenFaces)
+                    {
+                        if (triStrips[vertIndex] == triStrips[vertIndex + 1] || triStrips[vertIndex] == triStrips[vertIndex + 2]
+                            || triStrips[vertIndex + 1] == triStrips[vertIndex + 2])
+                        {
+                            continue;
+                        }
+                    }
+
+                    //When index is odd, flip
+                    if ((vertIndex & 1) > 0)
+                    {
+                        tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 2], triStrips[vertIndex + 1]));
+                    }
+                    else
+                    {
+                        tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 1], triStrips[vertIndex + 2]));
+                    }
+                }
+            }
+            else
+            {
+                //0xC33 really just uses normal triangles. Yup.
+                for (int vertIndex = priorGroupFaceSum; vertIndex < (priorGroupFaceSum + faceGroupCount - 2); vertIndex += 3)
+                {
+                    tris.Add(new Vector3(triStrips[vertIndex], triStrips[vertIndex + 1], triStrips[vertIndex + 2]));
+                }
+            }
+
+            //Generate vertex mappings if we're splitting a facegroup so we can treat it as a separate mesh on export
+            //Adjust faces as well to match new mapping
+            List<int> vertexMappingList = null;
+            if (multipleUsedFaceGroups)
+            {
+                vertexMappingList = new List<int>();
+                Dictionary<int, int> vertexMapping = new Dictionary<int, int>();
+                int vertCounter = 0;
+                for(int i = 0; i < tris.Count; i++)
+                {
+                    Vector3 newTri = new Vector3();
+                    if (!vertexMapping.ContainsKey((int)tris[i].X))
+                    {
+                        vertexMapping.Add((int)tris[i].X, vertCounter++);
+                        vertexMappingList.Add((int)tris[i].X);
+                    }
+                    newTri.X = vertexMapping[(int)tris[i].X];
+                    if (!vertexMapping.ContainsKey((int)tris[i].Y))
+                    {
+                        vertexMapping.Add((int)tris[i].Y, vertCounter++);
+                        vertexMappingList.Add((int)tris[i].Y);
+                    }
+                    newTri.Y = vertexMapping[(int)tris[i].Y];
+                    if (!vertexMapping.ContainsKey((int)tris[i].Z))
+                    {
+                        vertexMapping.Add((int)tris[i].Z, vertCounter++);
+                        vertexMappingList.Add((int)tris[i].Z);
+                    }
+                    newTri.Z = vertexMapping[(int)tris[i].Z];
+
+                    tris[i] = newTri;
+                }
+            }
+
+            return new FaceGroupData(tris, vertexMappingList);
+        }
+
         public StripData Clone()
         {
             StripData newStrip = new StripData();

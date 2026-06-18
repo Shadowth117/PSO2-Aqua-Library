@@ -2145,6 +2145,21 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
+        public void FailsafeFaceGroups()
+        {
+            foreach(var strip in strips)
+            {
+                if((strip.triStrips.Count > 0 || strip.largeTriSet.Count > 0) && strip.faceGroups.Count == 0) //Handle lack of face groups
+                {
+                    strip.faceGroups.Add(Math.Max(strip.triStrips.Count, strip.largeTriSet.Count));
+                }
+                else if ((strip.triStrips.Count > 0 || strip.largeTriSet.Count > 0) && strip.faceGroups.Count > 0 && strip.faceGroups.Sum() == 0 ) //Handle face groups with no value
+                {
+                    strip.faceGroups[0] = (Math.Max(strip.triStrips.Count, strip.largeTriSet.Count));
+                }
+            }
+        }
+
         /// <summary>
         /// Creates a dummy mesh if there's no mesh data to use
         /// </summary>
@@ -2235,7 +2250,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         #endregion
 
         #region String Management
-        public string GetMeshName(int id, bool includeMetadata)
+        public string GetMeshName(int id, bool includeMetadata, int faceGroupId)
         {
             var msh = meshList[id];
             string meshName = null;
@@ -2245,7 +2260,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
             else if (includeMetadata)
             {
-                meshName = String.Format("mesh[{4}]_{0}_{1}_{2}_{3}#{5}#{6}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, id, msh.baseMeshNodeId, msh.baseMeshDummyId);
+                meshName = String.Format("mesh[{4}]_{0}_{1}_{2}_{3}#{5}#{6}#{7}", msh.mateIndex, msh.rendIndex, msh.shadIndex, msh.tsetIndex, id, msh.baseMeshNodeId, msh.baseMeshDummyId, faceGroupId);
             }
             else
             {

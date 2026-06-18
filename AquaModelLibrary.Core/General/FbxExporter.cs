@@ -11,6 +11,7 @@ namespace AquaModelLibrary.Core.General
         {
             var cloneAqo = aqo.Clone();
             aqo.FailsafeEmptyModel();
+            aqo.FailsafeFaceGroups();
             if (excludeTangentBinormal)
             {
                 foreach (var vtxl in cloneAqo.vtxlList)
@@ -24,6 +25,11 @@ namespace AquaModelLibrary.Core.General
         public static void ExportToFileSets(List<AquaObject> aqoList, List<AquaNode> aqnList, List<string> modelNames, string destinationFilePath, List<List<Matrix4x4>> instanceTransformsList, bool includeMetadata, int coordSystem = 0, bool excludeTangentBinormal = true)
         {
             List<AquaObject> cloneAqoList = aqoList.Select(aqo => aqo.Clone()).ToList();
+            foreach(var aqo in aqoList)
+            {
+                aqo.FailsafeEmptyModel();
+                aqo.FailsafeFaceGroups();
+            }
             if(excludeTangentBinormal)
             {
                 foreach(var aqo in cloneAqoList)

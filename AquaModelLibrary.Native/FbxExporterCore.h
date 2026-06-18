@@ -19,6 +19,6 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         virtual void ExportToFileSets(List<AquaObject^>^ aqoList, List<AquaNode^>^ aqnList, List<String^>^ modelNames, String^ destinationFilePath, List<List<Matrix4x4>^>^ instanceTransformsList, bool includeMetadata, int coordSystem);
     };
     
-    void SetUVChannel(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<System::Numerics::Vector2>^ uvList, int count, int uvNum);
-    void SetUVChannelShorts(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<array<short>^ >^ uvList, int count, int uvNum);
+    void SetUVChannel(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<System::Numerics::Vector2>^ uvList, int count, int uvNum, AquaModelLibrary::Data::PSO2::Aqua::AquaObjectData::StripData::FaceGroupData^ faceGroupData);
+    void SetUVChannelShorts(fbxsdk::FbxMesh* lMesh, System::Collections::Generic::List<array<short>^ >^ uvList, int count, int uvNum, AquaModelLibrary::Data::PSO2::Aqua::AquaObjectData::StripData::FaceGroupData^ faceGroupData);
 }
