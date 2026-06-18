@@ -356,13 +356,13 @@ namespace AquaModelLibrary.Core.BluePoint
             for (int v = 0; v < vertCount; v++)
             {
                 vtxl.vertPositions.Add(mesh.vertData.positionList[v]);
-                objList.Add($"v {mesh.vertData.positionList[v].X} {mesh.vertData.positionList[v].Y} {mesh.vertData.positionList[v].Z}");
-                if (mesh.vertData.normals.Count > 0)
+                //objList.Add($"v {mesh.vertData.positionList[v].X} {mesh.vertData.positionList[v].Y} {mesh.vertData.positionList[v].Z}");
+                /*if (mesh.vertData.normals.Count > 0)
                 {
                     objList.Add($"# {mesh.vertData.normalTemp[v][0].ToString("X")} {mesh.vertData.normalTemp[v][1].ToString("X")} {mesh.vertData.normalTemp[v][2].ToString("X")} {mesh.vertData.normalTemp[v][3].ToString("X")}");
                     vtxl.vertNormals.Add(mesh.vertData.normals[v]);
-                    //var quat = mesh.vertData.normals[v];
-                }
+                    var quat = mesh.vertData.normals[v];
+                }*/
 
                 //UVs
                 if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
