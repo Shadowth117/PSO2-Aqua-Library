@@ -1065,28 +1065,96 @@ namespace AquaModelLibrary.Core.General
 
         private static void AddAiMeshToAQP(AquaObject aqp, SharpAssimp.Mesh mesh, Matrix4x4 nodeMat, double baseScale, Dictionary<string, int> boneDict)
         {
-            GenericTriangles genTris = new GenericTriangles();
-            genTris.name = mesh.Name;
-            genTris.baseMeshNodeId = 0;
-            genTris.baseMeshDummyId = -1;
-            var ids = GetMeshIds(mesh.Name);
-            if (ids.Count > 0)
+            var ids = GetMeshIds(mesh.Name, out string sanetizedName);
+            GenericTriangles genTris = null;
+            bool isNewMesh = true;
+
+            foreach (var tris in aqp.tempTris)
             {
-                genTris.baseMeshNodeId = ids[0];
-                if (ids.Count > 1)
+                if(tris.name == sanetizedName)
                 {
-                    genTris.baseMeshDummyId = ids[1];
+                    //We hit a mesh with a duplicate reference, for simplicity's sake we ignore it
+                    if (ids.Count < 2 || (tris.faceGroups.Count > ids[2] && tris.faceGroups[ids[2]] != 0))
+                    {
+                        return;
+                    }
+                    genTris = tris;
+                    isNewMesh = false;
+                    break;
                 }
             }
 
+            //Set faceGroupId
+            int faceGroupId = 0;
+            if (ids.Count > 2)
+            {
+                faceGroupId = ids[2];
+            }
+
+            //Create a new GenericTriangles instance if needed
+            if (genTris == null)
+            {
+                genTris = new() { name = sanetizedName, baseMeshNodeId = 0, baseMeshDummyId = -1};
+
+                if (ids.Count > 0)
+                {
+                    genTris.baseMeshNodeId = ids[0];
+                    if (ids.Count > 1)
+                    {
+                        genTris.baseMeshDummyId = ids[1];
+
+                        if(ids.Count > 2)
+                        {
+                            //Set up face groups
+                            for (int i = 0; i < ids[2]; i++)
+                            {
+                                genTris.faceGroups.Add(0);
+                            }
+                            genTris.faceGroups.Add(mesh.FaceCount);
+                        }
+                    }
+                }
+                
+            } else
+            {
+                //Add new face group. ids should be proven to be at least a count of 3 at this point
+                if(genTris.faceGroups.Count <= ids[2])
+                {
+                    var countToAdd = ids[2] - genTris.faceGroups.Count;
+                    for (int i = 0; i < countToAdd; i++)
+                    {
+                        genTris.faceGroups.Add(0);
+                    }
+                    genTris.faceGroups.Add(mesh.FaceCount);
+                }
+                else
+                {
+                    genTris.faceGroups[ids[2]] = mesh.FaceCount;
+                }
+            }
+
+            //Figure out where to insert new faceGroup data
+            int faceGroupFaceStart = 0;
+            if (ids.Count > 2)
+            {
+                for (int i = 0; i < ids[2]; i++)
+                {
+                    faceGroupFaceStart += genTris.faceGroups[i];
+                }
+            }
+
+
             //Iterate through faces to get face and vertex data
+            genTris.vertCount += mesh.Vertices.Count;
+            List<Vector3> triList = new List<Vector3>();
+            List<VTXL> faceVtxlList = new List<VTXL>();
+            List<int> matIdList = new List<int>();
             for (int faceId = 0; faceId < mesh.FaceCount; faceId++)
             {
                 var face = mesh.Faces[faceId];
                 var faceVerts = face.Indices;
-                genTris.triList.Add(new Vector3(faceVerts[0], faceVerts[1], faceVerts[2]));
-                genTris.matIdList.Add(mesh.MaterialIndex);
-                genTris.vertCount = mesh.Vertices.Count;
+                triList.Add(new Vector3(faceVerts[0], faceVerts[1], faceVerts[2]));
+                matIdList.Add(mesh.MaterialIndex);
                 VTXL faceVtxl = new VTXL();
 
                 foreach (var v in faceVerts) //Expects triangles, not quads or polygons
@@ -1182,25 +1250,35 @@ namespace AquaModelLibrary.Core.General
                         faceVtxl.rawVertWeights.Add(vertWeights);
                     }
                 }
-                genTris.faceVerts.Add(faceVtxl);
+                faceVtxlList.Add(faceVtxl);
             }
+            genTris.triList.InsertRange(faceGroupFaceStart, triList);
+            genTris.matIdList.InsertRange(faceGroupFaceStart, matIdList);
+            genTris.faceVerts.InsertRange(faceGroupFaceStart, faceVtxlList);
 
-            aqp.tempTris.Add(genTris);
+            if(isNewMesh)
+            {
+                aqp.tempTris.Add(genTris);
+            }
         }
 
-        private static List<int> GetMeshIds(string name)
+        /// <summary>
+        /// baseMeshNodeId, baseMeshDummyId, faceGroupId
+        /// </summary>
+        private static List<int> GetMeshIds(string name, out string sanitizedName)
         {
+            sanitizedName = name;
             if (name.Length < 6)
             {
                 return new List<int>();
             }
             if (name[name.Length - 4] == '.')
             {
-                name = name.Substring(0, name.Length - 4);
+                sanitizedName = name = name.Substring(0, name.Length - 4);
             }
             if (name.Length > 5 && name.Substring(name.Length - 5, 5) == "_mesh")
             {
-                name = name.Substring(0, name.Length - 5);
+                sanitizedName = name = name.Substring(0, name.Length - 5);
             }
             List<int> ids = new List<int>();
             var split = name.Split('#');
@@ -1210,7 +1288,12 @@ namespace AquaModelLibrary.Core.General
                 if (split.Length > 2)
                 {
                     ids.Add(Int32.Parse(split[2]));
+                    if(split.Length > 3)
+                    {
+                        ids.Add(Int32.Parse(split[3]));
+                    }
                 }
+                sanitizedName = split[0];
             }
 
             return ids;

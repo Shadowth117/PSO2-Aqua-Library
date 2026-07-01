@@ -29,8 +29,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     List<int> faceVertIds = new List<int>();
                     List<int> boneIds = new List<int>();
                     List<ushort> tempFaces = new List<ushort>();
+                    List<int> faceGroups = new List<int>() { 0 }; //Assumes faces to clone are sequential
 
                     int vertIndex = 0;
+                    int currentFaceGroupIndex = 0;
+                    int currentFaceGroupStartingFace = 0;
+
+                    //Set currentFaceGroupIndex to the first faceGroup. Some meshes will have multiple face groups, but only use a later face group so we have to check this.
+                    for (int i = 0; i < tempTris[meshId].faceGroups.Count; i++)
+                    {
+                        if (tempTris[meshId].faceGroups[i] != 0)
+                        {
+                            break;
+                        }
+                        currentFaceGroupIndex = i;
+                        faceGroups.Add(0);
+                    }
+
                     if (facesToClone[f].Count > 0)
                     {
                         //Get vert ids
@@ -87,6 +102,18 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                             tempFaces.Add((ushort)face.X);
                             tempFaces.Add((ushort)face.Y);
                             tempFaces.Add((ushort)face.Z);
+
+                            //Check if this face exceeds the current faceGroup threshold and so belongs to the next facegroup instead
+                            if (facesToClone[f][i] >= (currentFaceGroupStartingFace + tempTris[meshId].faceGroups[currentFaceGroupIndex]))
+                            {
+                                currentFaceGroupStartingFace = faceGroups.Sum();
+                                currentFaceGroupIndex++;
+                                faceGroups.Add(3);
+                            }
+                            else
+                            {
+                                faceGroups[currentFaceGroupIndex] = faceGroups[currentFaceGroupIndex] + 3;
+                            }
                         }
 
                         //Remap Ids based based on the indices of the values in faceVertIds and add to outModel
@@ -110,6 +137,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                             newTris = new StripData(tempFaces.ToArray());
                             newTris.format0xC31 = false;
                         }
+                        newTris.faceGroups = faceGroups;
                         localFaceList.Add(newTris);
 
                         //PSET
@@ -230,6 +258,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 List<VTXL> localVtxlList = new List<VTXL>();
                 List<GenericTriangles> localTrisList = new List<GenericTriangles>();
 
+                //Set a default in case there's no facegroups in the temptris
+                if (tempTris[meshId].faceGroups.Count == 0)
+                {
+                    tempTris[meshId].faceGroups.Add(tempTris[meshId].triList.Count);
+                }
+
                 for (int f = 0; f < facesToClone.Count; f++)
                 {
                     var referenceVTXL = vtxlList[meshId];
@@ -238,8 +272,23 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     List<int> tempFaceMatIds = new List<int>();
                     List<int> boneIds = new List<int>();
                     List<Vector3> tempFaces = new List<Vector3>();
+                    List<int> faceGroups = new List<int>() { 0 }; //Assumes faces to clone are sequential
 
                     int vertIndex = 0;
+                    int currentFaceGroupIndex = 0;
+                    int currentFaceGroupStartingFace = 0;
+
+                    //Set currentFaceGroupIndex to the first faceGroup. Some meshes will have multiple face groups, but only use a later face group so we have to check this.
+                    for (int i = 0; i < tempTris[meshId].faceGroups.Count; i++)
+                    {
+                        if (tempTris[meshId].faceGroups[i] != 0)
+                        {
+                            break;
+                        }
+                        currentFaceGroupIndex = i;
+                        faceGroups.Add(0);
+                    }
+
                     if (facesToClone[f].Count > 0)
                     {
                         //Get vert ids
@@ -295,6 +344,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                             tempFaceMatIds.Add(tempTris[meshId].matIdList[facesToClone[f][i]]);
                             tempFaces.Add(face);
+
+                            //Check if this face exceeds the current faceGroup threshold and so belongs to the next facegroup instead
+                            if (facesToClone[f][i] >= (currentFaceGroupStartingFace + tempTris[meshId].faceGroups[currentFaceGroupIndex]))
+                            {
+                                currentFaceGroupStartingFace = faceGroups.Sum();
+                                currentFaceGroupIndex++;
+                                faceGroups.Add(1);
+                            } else
+                            {
+                                faceGroups[currentFaceGroupIndex] = faceGroups[currentFaceGroupIndex] + 1;
+                            }
                         }
 
                         //Remap Ids based based on the indices of the values in faceVertIds and add to outModel
@@ -304,7 +364,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         }
 
                         //Assign new tempTris
-                        var newTris = new GenericTriangles(tempFaces, tempFaceMatIds);
+                        var newTris = new GenericTriangles(tempFaces, tempFaceMatIds, faceGroups);
                         newTris.baseMeshDummyId = tempTris[meshId].baseMeshDummyId;
                         newTris.baseMeshNodeId = tempTris[meshId].baseMeshNodeId;
                         newTris.name = tempTris[meshId].name;
@@ -1945,6 +2005,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 //strips
                 var newStrips = new StripData();
                 newStrips.format0xC31 = IsNGS;
+
+                //Add face groups if existent
+                foreach(int group in tempTris[i].faceGroups)
+                {
+                    newStrips.faceGroups.Add(group * 3);
+                }
                 if (newStrips.format0xC31)
                 {
                     newStrips.triStrips = tempTris[i].toUshortArray().ToList();
@@ -1954,7 +2020,12 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         newStrips.largeTriSet = tempTris[i].triList;
                     }
                     newStrips.triIdCount = newStrips.triStrips.Count;
-                    newStrips.faceGroups.Add(newStrips.triStrips.Count);
+
+                    //Backup for if facegroups were just unused
+                    if(newStrips.faceGroups.Count == 0)
+                    {
+                        newStrips.faceGroups.Add(newStrips.triStrips.Count);
+                    }
                 }
                 else
                 {
@@ -1965,14 +2036,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 //PSET
                 var pset = new PSET();
                 pset.tag = 0x1000;
-                pset.faceGroupCount = 0x1;
-                pset.psetFaceCount = newStrips.triIdCount;
+                pset.faceGroupCount = newStrips.faceGroups.Count;
+                pset.psetFaceCount = newStrips.faceGroups.Sum();
                 if (newStrips.format0xC31)
                 {
                     pset.stripStartCount = totalStripsShorts;
                 }
                 psetList.Add(pset);
-                totalStripsShorts += newStrips.triIdCount;   //Update this *after* setting the strip start count so that we don't direct to bad data.
+                totalStripsShorts += pset.psetFaceCount;   //Update this *after* setting the strip start count so that we don't direct to bad data.
 
                 //MESH
                 var mesh = new MESH();

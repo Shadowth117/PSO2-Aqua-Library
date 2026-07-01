@@ -237,6 +237,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
             newStrip.triStrips = new List<ushort>(triStrips);
             newStrip.faceGroups = new List<int>(faceGroups);
             newStrip.largeTriSet = new List<Vector3>(largeTriSet);
+            newStrip.faceGroups = new List<int>(faceGroups);
 
             return newStrip;
         }

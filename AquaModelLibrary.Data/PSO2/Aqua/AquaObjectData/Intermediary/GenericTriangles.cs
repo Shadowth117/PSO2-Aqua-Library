@@ -16,6 +16,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary
         /// </summary>
         public Dictionary<int, int> matIdDict = new Dictionary<int, int>();
         public List<uint> bonePalette = new List<uint>();
+        /// <summary>
+        /// Equiv to PSO2 StripData FaceGroups. Should be multiplied by 3 to match the number of triangle indices, like the original
+        /// </summary>
+        public List<int> faceGroups = new List<int>();
         public int baseMeshNodeId;
         public int baseMeshDummyId;
         public int vertCount;
@@ -24,22 +28,25 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary
         {
         }
 
-        public GenericTriangles(ushort[] tris, int[] matIds = null)
+        public GenericTriangles(ushort[] tris, int[] matIds = null, List<int> faceGroupList = null)
         {
             setUpVector3List(tris);
             matIdList = matIds.ToList();
+            faceGroups = faceGroupList ?? new List<int>();
         }
 
-        public GenericTriangles(List<ushort> tris, List<int> matIds = null)
+        public GenericTriangles(List<ushort> tris, List<int> matIds = null, List<int> faceGroupList = null)
         {
             setUpVector3List(tris.ToArray());
             matIdList = matIds;
+            faceGroups = faceGroupList ?? new List<int>();
         }
 
-        public GenericTriangles(List<Vector3> vec3s, List<int> matIds = null)
+        public GenericTriangles(List<Vector3> vec3s, List<int> matIds = null, List<int> faceGroupList = null)
         {
             triList = vec3s;
             matIdList = matIds;
+            faceGroups = faceGroupList ?? new List<int>();
         }
 
         public List<ushort> toUshortList()
@@ -107,6 +114,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary
             genTri.baseMeshDummyId = baseMeshDummyId;
             genTri.vertCount = vertCount;
             genTri.name = name;
+            genTri.faceGroups = new List<int>(faceGroups);
 
             return genTri;
         }
