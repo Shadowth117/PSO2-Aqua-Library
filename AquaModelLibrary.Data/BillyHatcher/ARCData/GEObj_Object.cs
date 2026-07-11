@@ -51,7 +51,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             int csdyOffset = -1;
             if (modelsOffset > 0xC)
             {
-                if(group1FileNames.Contains("motions"))
+                if (GroupContainsName(group1FileReferences, "motions"))
                 {
                     motionsOffset = sr.ReadBE<int>();
                 } else
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"model_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"model_{i}";
                     models.Add(name, new NJSObject(sr, NinjaVariant.Ginja, true, 0x20));
                 }
             }
@@ -129,7 +129,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"motion_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"motion_{i}";
                     motions.Add(name, new NJSMotion(sr, true, 0x20));
                 }
             }
@@ -186,7 +186,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"texList_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"texList_{i}";
                     texLists.Add(name, new NJTextureList(sr, 0x20));
                 }
             }

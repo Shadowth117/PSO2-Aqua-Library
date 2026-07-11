@@ -71,7 +71,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             gvm = new PuyoFile(GVMUtil.ReadGVMBytes(sr));
             
             //Read Event, if it's there
-            if(group1FileNames.Contains("event"))
+            if(GroupContainsName(group1FileReferences, "event"))
             {
                 var eventRef = group1FileReferences[0];
                 sr.Seek(0x20 + eventRef.fileOffset, SeekOrigin.Begin);

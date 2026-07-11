@@ -44,9 +44,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         {
             base.Read(sr);
             int nodeCount = 0x4B;
-            for (int i = 0; i < group1FileNames.Count; i++)
+            for (int i = 0; i < group1FileReferences.Count; i++)
             {
-                var fileName = group1FileNames[i];
+                var fileName = group1FileReferences[i].name;
                 sr.Seek(0x20 + group1FileReferences[i].fileOffset, SeekOrigin.Begin);
                 switch (fileName)
                 {
@@ -133,9 +133,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             var group2Sort = group2FileReferences.Select(x => x.fileOffset).ToList();
             group2Sort.Sort();
 
-            for (int i = 0; i < group2FileNames.Count; i++)
+            for (int i = 0; i < group2FileReferences.Count; i++)
             {
-                var fileName = group2FileNames[i];
+                var fileName = group2FileReferences[i].name;
                 sr.Seek(0x20 + group2FileReferences[i].fileOffset, SeekOrigin.Begin);
                 var motionOffset = sr.ReadBE<int>();
                 if (motionOffset != -1)

@@ -57,8 +57,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public List<uint> pof0Offsets = new List<uint>();
         public List<ARCFileRef> group1FileReferences = new List<ARCFileRef>();
         public List<ARCFileRef> group2FileReferences = new List<ARCFileRef>();
-        public List<string> group1FileNames = new List<string>();
-        public List<string> group2FileNames = new List<string>();
         public List<byte[]> files = new List<byte[]>();
         public ARC() { }
 
@@ -112,13 +110,25 @@ namespace AquaModelLibrary.Data.BillyHatcher
             foreach (var modelRef in group1FileReferences)
             {
                 sr.Seek(nameStart + modelRef.relativeNameOffset, SeekOrigin.Begin);
-                group1FileNames.Add(sr.ReadCString());
+                modelRef.name = sr.ReadCString();
             }
             foreach (var modelRef in group2FileReferences)
             {
                 sr.Seek(nameStart + modelRef.relativeNameOffset, SeekOrigin.Begin);
-                group2FileNames.Add(sr.ReadCString());
+                modelRef.name = sr.ReadCString();
             }
+        }
+
+        public static bool GroupContainsName(List<ARCFileRef> arcList, string str)
+        {
+            foreach(var reference in arcList)
+            {
+                if(reference.name == str)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static ARCHeader ReadArcHeader(BufferedStreamReaderBE<MemoryStream> sr)

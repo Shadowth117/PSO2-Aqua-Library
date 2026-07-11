@@ -37,9 +37,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         {
             base.Read(sr);
             int nodeCount = 0x4B;
-            for (int i = 0; i < group1FileNames.Count; i++)
+            for (int i = 0; i < group1FileReferences.Count; i++)
             {
-                var fileName = group1FileNames[i];
+                var fileName = group1FileReferences[i].name;
                 sr.Seek(0x20 + group1FileReferences[i].fileOffset, SeekOrigin.Begin);
                 switch (fileName)
                 {

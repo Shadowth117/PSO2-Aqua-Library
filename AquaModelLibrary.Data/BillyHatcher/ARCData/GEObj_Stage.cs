@@ -92,7 +92,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"model_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"model_{i}";
                     models.Add(name, new NJSObject(sr, NinjaVariant.Ginja, true, 0x20));
                 }
             }
@@ -118,7 +118,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"motion_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"motion_{i}";
                     motions.Add(name, new NJSMotion(sr, true, 0x20));
                 }
             }
@@ -144,7 +144,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"texList_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"texList_{i}";
                     texLists.Add(name, new NJTextureList(sr, 0x20));
                 }
             }
@@ -170,7 +170,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"collision_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"collision_{i}";
                     colModels.Add(name, new CSDY(sr, false, 0x20));
                 }
             }
@@ -196,7 +196,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"model2_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"model2_{i}";
                     model2s.Add(name, new NJSObject(sr, NinjaVariant.Ginja, true, 0x20));
                 }
             }
@@ -222,7 +222,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"motion2_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"motion2_{i}";
                     motion2s.Add(name, new NJSMotion(sr, true, 0x20));
                 }
             }
@@ -248,7 +248,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"texList2_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"texList2_{i}";
                     texList2s.Add(name, new NJTextureList(sr, 0x20));
                 }
             }
@@ -274,7 +274,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                             break;
                         }
                     }
-                    string name = nameId > -1 ? $"{group1FileNames[nameId]}" : $"collision2_{i}";
+                    string name = nameId > -1 ? $"{group1FileReferences[nameId].name}" : $"collision2_{i}";
                     colModel2s.Add(name, new CSDY(sr, false, 0x20));
                 }
             }
