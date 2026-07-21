@@ -42,7 +42,8 @@
             {0x1E, "0x1E Unk Floats" }, //Alternate Material
             {0x1F, "0x1F Unk Floats" }, //Alternate Material
             {0x20, "0x20 Unk Floats" }, //Alternate Material
-            {0x21, "0x21 NGS Emissive Intensity" } //Alternate Material
+            {0x21, "0x21 NGS Emissive Intensity" }, //Alternate Material
+            {0xC4, "0xC4 Unk Floats" } //Material?
         };
         public static readonly List<int> standardTypes = new List<int>()
         {
