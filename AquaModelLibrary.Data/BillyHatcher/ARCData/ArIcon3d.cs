@@ -6,7 +6,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
     /// <summary>
     /// Just a texture list and a gvm with one texture.
-    /// For ar_icon.arc, staff_logo.arc
+    /// For ar_icon3d.arc, staff_logo.arc
     /// </summary>
     public class ARIcon3d : ARC
     {
