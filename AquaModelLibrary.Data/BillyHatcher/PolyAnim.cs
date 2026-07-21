@@ -11,7 +11,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
     //Maybe the index before anim offsets is the model index?
     public class PolyAnim
     {
-        public List<short> texShortsList = new List<short>();
         public List<DataSet0> dataSet0s = new List<DataSet0>();
         public List<DataSet1> dataSet1s = new List<DataSet1>();
         public List<DataSet2> dataSet2s = new List<DataSet2>();
