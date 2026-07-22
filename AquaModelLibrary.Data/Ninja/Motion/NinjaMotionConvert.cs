@@ -40,7 +40,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                 for (int k = 0; k < aqm.motionKeys[i].keyData[j].vector4Keys.Count; k++)
                                 {
                                     var key = aqm.motionKeys[i].keyData[j].vector4Keys[k];
-                                    var timing = aqm.motionKeys[i].keyData[j].frameTimings[k];
+                                    var timing = aqm.motionKeys[i].keyData[j].frameTimings[k] / 0x10;
                                     newKeyData.Position.Add((int)timing, new Vector3(key.X, key.Y, key.Z));
                                 }
                             }
@@ -60,7 +60,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                     for (int k = 0; k < aqm.motionKeys[i].keyData[j].vector4Keys.Count; k++)
                                     {
                                         var key = aqm.motionKeys[i].keyData[j].vector4Keys[k];
-                                        var timing = aqm.motionKeys[i].keyData[j].frameTimings[k];
+                                        var timing = aqm.motionKeys[i].keyData[j].frameTimings[k] / 0x10;
                                         newKeyData.Quaternion.Add((int)timing, new float[] { key.W, key.X, key.Y, key.Z });
                                     }
                                 }
@@ -78,7 +78,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                     for (int k = 0; k < aqm.motionKeys[i].keyData[j].vector4Keys.Count; k++)
                                     {
                                         var key = aqm.motionKeys[i].keyData[j].vector4Keys[k];
-                                        var timing = aqm.motionKeys[i].keyData[j].frameTimings[k];
+                                        var timing = aqm.motionKeys[i].keyData[j].frameTimings[k] / 0x10;
                                         newKeyData.RotationData.Add((int)timing, new Rotation(MathExtras.QuaternionToEuler(key.ToQuat())));
                                     }
                                 }
@@ -97,7 +97,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                                 for (int k = 0; k < aqm.motionKeys[i].keyData[j].vector4Keys.Count; k++)
                                 {
                                     var key = aqm.motionKeys[i].keyData[j].vector4Keys[k];
-                                    var timing = aqm.motionKeys[i].keyData[j].frameTimings[k];
+                                    var timing = aqm.motionKeys[i].keyData[j].frameTimings[k] / 0x10;
                                     newKeyData.Scale.Add((int)timing, new Vector3(key.X, key.Y, key.Z));
                                 }
                             }
