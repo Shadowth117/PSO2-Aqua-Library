@@ -206,7 +206,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
             for (int i = 0; i < arcBoundingList.Count; i++)
             {
                 var bounds = arcBoundingList[i];
-                outBytes.AddValue(bounds.unkFlt_00);
+                outBytes.AddValue(bounds.flags);
                 outBytes.AddValue(bounds.usht_04);
                 outBytes.AddValue(bounds.usht_06);
                 outBytes.AddValue(bounds.usht_08);
@@ -656,9 +656,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
     public class ARCLNDNodeBounding
     {
         /// <summary>
-        /// Some kind of epsilon or maybe a struct magic? Really unsure. Always the same.
+        /// 0x3F for static geo, 0x24 or 0x26 for animated
         /// </summary>
-        public float unkFlt_00 = 8.82818E-44f;
+        public int flags = 0x3F;
         /// <summary>
         /// Always 0
         /// </summary>

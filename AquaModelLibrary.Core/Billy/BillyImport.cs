@@ -47,6 +47,8 @@ namespace AquaModelLibrary.Core.Billy
                                 var splitKey = splitName[0].Split('-');
                                 mplKey = Int32.Parse(splitKey[2]);
                                 aqm = AssimpModelImporter.AssimpAQMConvertNoNameSingle(file, false, true);
+                                //mplKey = -1;
+                                //aqm = null;
                                 aqp = null;
                                 break;
                             case "night":
@@ -143,6 +145,7 @@ namespace AquaModelLibrary.Core.Billy
                 else
                 {
                     var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true, lnd.texnames.texNames), MPLAnimKey = mdl.mplKey };
+
                     animModel.altVertColors = new Motion(animModel.model.arcAltVertColorList[0].VertColorData);
                     animModel.model.arcAltVertColorList.Clear();
 
@@ -206,6 +209,33 @@ namespace AquaModelLibrary.Core.Billy
             lndMdl.arcVertDataSetList.Add(vertSet);
             ushort boundCount = 1;
             List<int> badMeshIndices = new List<int>();
+
+            //Set up a bounding to use for all mesh data if this is an animated Model
+            if (isAnimatedModel)
+            {
+                ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
+                bnd.flags = 0x24;
+                var node = mdl.placementAqn.nodeList[mdl.placementAqn.nodeList.Count - 1];
+                Matrix4x4.Decompose(node.GetInverseBindPoseMatrixInverted(), out var scale, out var rot, out var pos);
+                rot = new Quaternion(-rot.X, -rot.Y, rot.Z, rot.W); //Mirror back rotation for ingame
+                bnd.Position = pos;
+                bnd.Scale = scale;
+                bnd.SetRotation(MathExtras.QuaternionToEulerRadians(rot, RotationOrder.XYZ));
+
+                List<Vector3> vertPosTemp = new List<Vector3>();
+                foreach(var vtxl in mdl.aqp.vtxlList)
+                {
+                    vertPosTemp.AddRange(vtxl.vertPositions);
+                }
+                MathExtras.CalculateBoundingSphere(vertPosTemp, out var center, out var rad);
+                vertPosTemp.Clear();
+                bnd.center = center;
+                bnd.radius = rad;
+
+                bnd.index = ushort.MaxValue;
+                lndMdl.arcBoundingList.Add(bnd);
+            }
+
             for (int msh = 0; msh < mdl.aqp.meshList.Count; msh++)
             {
                 var mesh = mdl.aqp.meshList[msh];
@@ -373,30 +403,21 @@ namespace AquaModelLibrary.Core.Billy
                 lndMdl.arcFaceDataList.Add(faceData);
 
                 //Bounding
-                ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
-                if (isAnimatedModel)
+                if (!isAnimatedModel)
                 {
-                    var node = mdl.placementAqn.nodeList[mdl.placementAqn.nodeList.Count - 1];
-                    Matrix4x4.Decompose(node.GetInverseBindPoseMatrixInverted(), out var scale, out var rot, out var pos);
-                    bnd.Position = pos;
-                    bnd.Scale = scale;
-                    bnd.SetRotation(MathExtras.QuaternionToEulerRadians(rot));
+                    ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
+                    bnd.flags = 0x24;
                     MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
                     bnd.center = center;
                     bnd.radius = rad;
+
+                    if (boundCount != mdl.aqp.meshList.Count)
+                    {
+                        bnd.index = boundCount;
+                    }
+                    boundCount++;
+                    lndMdl.arcBoundingList.Add(bnd);
                 }
-                else
-                {
-                    MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
-                    bnd.center = center;
-                    bnd.radius = rad;
-                }
-                if (boundCount != mdl.aqp.meshList.Count)
-                {
-                    bnd.index = boundCount;
-                }
-                boundCount++;
-                lndMdl.arcBoundingList.Add(bnd);
 
                 //Material
                 ARCLNDMaterialEntry matEntry = new ARCLNDMaterialEntry();

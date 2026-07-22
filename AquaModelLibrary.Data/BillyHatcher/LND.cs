@@ -488,7 +488,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             for (int i = 0; i < arcModel.arcMainOffsetTable.nodeBoundingCount; i++)
             {
                 ARCLNDNodeBounding bounding = new ARCLNDNodeBounding();
-                bounding.unkFlt_00 = sr.ReadBE<float>();
+                bounding.flags = sr.ReadBE<int>();
                 bounding.usht_04 = sr.ReadBE<ushort>();
                 bounding.usht_06 = sr.ReadBE<ushort>();
                 bounding.usht_08 = sr.ReadBE<ushort>();
