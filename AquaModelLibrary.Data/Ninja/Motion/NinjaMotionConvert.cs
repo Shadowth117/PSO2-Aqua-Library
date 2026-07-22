@@ -14,7 +14,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         public static NJSMotion AQMToNJM(AquaMotion aqm, bool useQuaternion = true)
         {
             NJSMotion njm = new NJSMotion();
-            njm.interpoMode = InterpolationMode.Linear;
+            njm.interpoMode = NJD_MTYPE_FN.NJD_MTYPE_LINER;
             njm.frameCount = aqm.moHeader.endFrame + 1;
 
             njm.KeyDataList = new List<AnimModelData>();

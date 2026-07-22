@@ -1086,9 +1086,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 outBytes.FillInt("MPBOffset", outBytes.Count);
                 mplOffset = (uint)outBytes.Count;
-                outBytes.AddRange(arcMPL.GetBytes(outBytes.Count, out var mplOffsets));
+                arcMPL.Write(outBytes, offsets);
                 outBytes.AlignWriter(0x4);
-                offsets.AddRange(mplOffsets);
             }
 
             //Add offsets to list

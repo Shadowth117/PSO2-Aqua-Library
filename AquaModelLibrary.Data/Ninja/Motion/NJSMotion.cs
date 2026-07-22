@@ -161,7 +161,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
         public bool BillyMode = false;
         public int frameCount = 0;
         public AnimFlags animType = 0;
-        public InterpolationMode interpoMode = 0;
+        public NJD_MTYPE_FN interpoMode = 0;
         public List<AnimModelData> KeyDataList = new List<AnimModelData>();
 
         public NJSMotion() { }
@@ -210,14 +210,20 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             outBytes.AddValue(frameCount);
 
             AnimFlags flags = new AnimFlags();
-            List<AnimFlags> keyDataAnimFlagsList = new List<AnimFlags>();
-            foreach (var data in KeyDataList)
+            if(animType == 0)
             {
-                var dataFlags = data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode, animType);
-                flags |= dataFlags;
-                keyDataAnimFlagsList.Add(dataFlags);
-            }
+                List<AnimFlags> keyDataAnimFlagsList = new List<AnimFlags>();
+                foreach (var data in KeyDataList)
+                {
+                    var dataFlags = data.GetAnimFlags(writeMode == MotionWriteMode.BillyMode, animType);
+                    flags |= dataFlags;
+                    keyDataAnimFlagsList.Add(dataFlags);
+                }
 
+            } else
+            {
+                flags = animType;
+            }
             ushort dataCount = 0;
             foreach (AnimFlags flag in Enum.GetValues(typeof(AnimFlags)))
             {
@@ -566,18 +572,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             }
 
             var interpolationFrameSizeCombo = sr.ReadBE<ushort>();
-            switch ((NJD_MTYPE_FN)interpolationFrameSizeCombo & NJD_MTYPE_FN.NJD_MTYPE_MASK)
-            {
-                case NJD_MTYPE_FN.NJD_MTYPE_LINER:
-                    interpoMode = InterpolationMode.Linear;
-                    break;
-                case NJD_MTYPE_FN.NJD_MTYPE_SPLINE:
-                    interpoMode = InterpolationMode.Spline;
-                    break;
-                case NJD_MTYPE_FN.NJD_MTYPE_USER:
-                    interpoMode = InterpolationMode.User;
-                    break;
-            }
+            interpoMode = (NJD_MTYPE_FN)interpolationFrameSizeCombo & NJD_MTYPE_FN.NJD_MTYPE_MASK;
             int frameSize = (interpolationFrameSizeCombo & 0xF) * 8;
 
             sr.Seek(initialPointer + offset, SeekOrigin.Begin);

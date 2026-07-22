@@ -70,24 +70,21 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
             }
         }
 
-        public byte[] GetBytes(int offset, out List<int> offsets)
+        public void Write(List<byte> outBytes, List<int> offsets)
         {
-            offsets = new List<int>();
-
             ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
             outBytes.AddValue(header.int_00);
             outBytes.AddValue(header.lowestKey);
             outBytes.AddValue(motionMappingList.Count);
 
-            offsets.Add(offset + outBytes.Count);
+            offsets.Add(outBytes.Count);
             outBytes.ReserveInt("MPLMotionMapping");
             outBytes.AddValue(motionList.Count);
-            offsets.Add(offset + outBytes.Count);
+            offsets.Add(outBytes.Count);
             outBytes.ReserveInt("MotionStartOffset");
 
             //Write MotionMapping
-            outBytes.FillInt("MPLMotionMapping", outBytes.Count + offset);
+            outBytes.FillInt("MPLMotionMapping", outBytes.Count);
             for (int i = 0; i < motionMappingList.Count; i++)
             {
                 var unkData0 = motionMappingList[i];
@@ -97,27 +94,28 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
             }
 
             //Write Motion
-            outBytes.FillInt("MotionStartOffset", outBytes.Count + offset);
+            outBytes.FillInt("MotionStartOffset", outBytes.Count);
             for (int i = 0; i < motionList.Count; i++)
             {
                 var motionStart = motionList[i];
                 outBytes.AddValue(motionStart.int_00);
-                offsets.Add(offset + outBytes.Count);
+                offsets.Add(outBytes.Count);
                 outBytes.ReserveInt($"MotionRefOffset{i}");
             }
 
             for (int i = 0; i < motionList.Count; i++)
             {
                 var refRef = motionList[i].motionRef;
-                outBytes.FillInt($"MotionRefOffset{i}", outBytes.Count + offset);
+                outBytes.FillInt($"MotionRefOffset{i}", outBytes.Count);
                 outBytes.AddValue(refRef.int_00);
-                offsets.Add(offset + outBytes.Count);
-                outBytes.ReserveInt($"MotionInfo0{i}");
+
+                offsets.Add(outBytes.Count);
+                outBytes.AddValue(outBytes.Count + 4); //Pointer to the motion directly after
 
                 refRef.motion.Write(outBytes, offsets, NJSMotion.MotionWriteMode.BillyMode);
             }
 
-            return outBytes.ToArray();
+            return;
         }
     }
 
