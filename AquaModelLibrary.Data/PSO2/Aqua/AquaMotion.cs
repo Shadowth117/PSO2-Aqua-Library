@@ -154,16 +154,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     case "ROOT":
                         //We don't do anything with this right now.
                         break;
-                    case "NDMO":
-                        //Signifies a 3d motion
-                        moHeader = new MOHeader(data);
-                        break;
-                    case "SPMO":
-                        //Signifies a material animation
-                        moHeader = new MOHeader(data);
-                        break;
-                    case "CAMO":
-                        //Signifies a camera motion
+                    case "NDMO": //Signifies a 3d motion
+                    case "SPMO": //Signifies a material animation
+                    case "CAMO": //Signifies a camera motion
                         moHeader = new MOHeader(data);
                         break;
                     case "MSEG":
