@@ -1,6 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
-using System.Diagnostics;
 using System.Numerics;
 
 //Addapted from SA Tools

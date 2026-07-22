@@ -2,6 +2,7 @@
 using AquaModelLibrary.Helpers.Readers;
 using System.ComponentModel;
 using System.Globalization;
+using System.Numerics;
 
 //From SA Tools
 namespace AquaModelLibrary.Data.Ninja.Motion
@@ -68,6 +69,13 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
         public Rotation()
         {
+        }
+
+        public Rotation(Vector3 vec3)
+        {
+            XDeg = vec3.X;
+            YDeg = vec3.Y;
+            ZDeg = vec3.Z;
         }
 
         public Rotation(BufferedStreamReaderBE<MemoryStream> sr)

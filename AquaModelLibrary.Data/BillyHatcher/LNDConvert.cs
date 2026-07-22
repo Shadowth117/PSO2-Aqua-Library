@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
+using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.PSO2.Aqua;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
@@ -26,6 +26,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public class ModelData
         {
             public string name = "";
+            public int mplKey = -1;
             public AquaObject aqp = new AquaObject();
             /// <summary>
             /// FBX doesn't support multiple vert color sets. Yeah I hate doing this.
@@ -93,20 +94,20 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 var mat = MathExtras.Compose(boundData.Position, rot, boundData.Scale);
                 Matrix4x4.Invert(mat, out var invMat);
 
-                mdlData.name = $"animModel-{i}-{modelRef.MPLAnimId}";
+                mdlData.name = $"animModel-{i}-{modelRef.MPLAnimKey}";
                 addWeight = modelRef.mplMotion != null;
                 mdlData.aqp = AddModelData(lnd, modelRef.model);
                 mdlData.placementAqp = AddModelData(lnd, modelRef.model);
-                if (modelRef.motion != null)
+                if (modelRef.altVertColors != null)
                 {
-                    modelRef.model.arcVertDataSetList[0].VertColorData = modelRef.motion.colorAnimations[0];
+                    modelRef.model.arcVertDataSetList[0].VertColorData = modelRef.altVertColors.colorAnimations[0];
                     mdlData.nightAqp = AddModelData(lnd, modelRef.model);
                 }
 
                 //Set up transformed Animated Model. We do it this way to keep the animation clean
                 mdlData.placementAqn = AquaNode.GenerateBasicAQN();
                 NODE node = new NODE();
-                node.boneName = new PSO2String($"Animated_{i}_Root");
+                node.boneName = new PSO2String($"(0)Transform_{i}_Root");
                 node.SetInverseBindPoseMatrix(invMat);
                 mdlData.placementAqn.nodeList.Add(node);
 
@@ -143,37 +144,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                         mdlData.nightAqp.objc.bonePaletteOffset = 1;
                         mdlData.nightAqp.bonePalette = new List<uint> { 0 };
                     }
-                    mdlData.aqm = new AquaMotion();
-                    mdlData.aqm.moHeader = new MOHeader();
-                    mdlData.aqm.moHeader.endFrame = modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motCount - 1;
-
-                    mdlData.aqm.motionKeys = new List<KeyData>();
-
-                    KeyData keyData = new KeyData();
-                    keyData.keyData = new List<MKEY>();
-                    MKEY mkey = new MKEY();
-                    mkey.keyType = 2;
-
-                    for (int key = 0; key < modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData.Count; key++)
-                    {
-                        mkey.frameTimings.Add((uint)modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].frame * 0x10);
-                        switch (modelRef.mplMotion.motionRef.motionInfo0.motionLayout)
-                        {
-                            case MPL.MPLMotionLayout.Quaternion:
-                                mkey.vector4Keys.Add(modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].quatFrame.ToVec4());
-                                break;
-                            case MPL.MPLMotionLayout.ShortBAMSEuler:
-                            case MPL.MPLMotionLayout.ShortBAMSEulerAndExtra:
-                                mkey.vector4Keys.Add(MathExtras.EulerToQuaternion(modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].BAMSToDegShorts()).ToVec4());
-                                break;
-                            case MPL.MPLMotionLayout.IntBAMSEuler:
-                            case MPL.MPLMotionLayout.IntBAMSEuler2:
-                                mkey.vector4Keys.Add(MathExtras.EulerToQuaternion(modelRef.mplMotion.motionRef.motionInfo0.motionInfo1.motionData[key].BAMSToDegInts()).ToVec4());
-                                break;
-                        }
-                    }
-                    keyData.keyData.Add(mkey);
-                    mdlData.aqm.motionKeys.Add(keyData);
+                    mdlData.aqm = NinjaMotionConvert.NJMToAQM(modelRef.mplMotion.motionRef.motion);
                 }
                 addWeight = false;
                 mdlList.Add(mdlData);

@@ -100,6 +100,14 @@ namespace AquaModelLibrary.Data.BillyHatcher
             colorAnimations.Add(colorAnimation);
         }
 
+        public Motion(List<byte[]> colors)
+        {
+            motStart = new MotionStart() { int_00 = 1};
+            motRef = new MotionRef();
+            motHeader = new MotionHeader() { usht_00 = 1, usht_08 = 3, animationType = AnimFlags.Color, count = (ushort)colors.Count, animationTypeAgain = AnimFlags.Color, usht_20 = 1, usht_28 = 1};
+            colorAnimations.Add(colors);
+        }
+
         public byte[] GetBytes(int offset, out List<int> offsets)
         {
             offsets = new List<int>();

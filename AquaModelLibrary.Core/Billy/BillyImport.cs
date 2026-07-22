@@ -2,6 +2,7 @@
 using AquaModelLibrary.Data.BillyHatcher;
 using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Data.Ninja;
+using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Helpers.MathHelpers;
@@ -22,20 +23,17 @@ namespace AquaModelLibrary.Core.Billy
             foreach (var file in files)
             {
                 //Skip animated models since we're not using them at the moment
-                if(file.ToLower().Contains("animmodel"))
-                {
-                    continue;
-                }
                 if (Path.GetExtension(file) == ".gvm")
                 {
                     gvmBytes = File.ReadAllBytes(file);
                 }
                 else if (Path.GetExtension(file) == ".fbx")
                 {
-                    var aqp = AssimpModelImporter.AssimpAquaConvertFull(file, 1, true, true, out var aqn, false, true);
+                    var aqp = AssimpModelImporter.AssimpAquaConvertFull(file, 1, true, true, out var aqn, false, false, false, false);
                     AquaObject nightAqp = null;
                     AquaMotion aqm = null;
                     AquaNode placementAqn = null;
+                    int mplKey = -1;
 
                     var name = Path.GetFileNameWithoutExtension(file);
                     var splitName = name.Split('+');
@@ -46,7 +44,9 @@ namespace AquaModelLibrary.Core.Billy
                         switch (splitName[1].ToLower())
                         {
                             case "animation":
-                                //aqm = ModelImporter.AssimpAQMConvertNoNameSingle(file, false, true, 1);
+                                var splitKey = splitName[0].Split('-');
+                                mplKey = Int32.Parse(splitKey[2]);
+                                aqm = AssimpModelImporter.AssimpAQMConvertNoNameSingle(file, false, true);
                                 aqp = null;
                                 break;
                             case "night":
@@ -55,6 +55,10 @@ namespace AquaModelLibrary.Core.Billy
                                 break;
                             case "transform":
                                 placementAqn = aqn;
+                                aqp = null;
+                                break;
+                            case "basemodel":
+                            default:
                                 break;
                         }
                     }
@@ -88,6 +92,10 @@ namespace AquaModelLibrary.Core.Billy
                     if (nightAqp != null)
                     {
                         mdl.nightAqp = nightAqp;
+                    }
+                    if(mplKey != -1)
+                    {
+                        mdl.mplKey = mplKey;
                     }
                 }
             }
@@ -134,12 +142,44 @@ namespace AquaModelLibrary.Core.Billy
                 }
                 else
                 {
-                    /*
-                    var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true, lnd.texnames) };
-                    //animModel.motion = GetAnimatedNightColors(mdl.nightAqp);
-                    //animModel.mplMotion = GetMPLMotion(mdl.aqm);
+                    var animModel = new LND.ARCLNDAnimatedMeshData() { model = AquaToLND(lnd, mdl, true, lnd.texnames.texNames), MPLAnimKey = mdl.mplKey };
+                    animModel.altVertColors = new Motion(animModel.model.arcAltVertColorList[0].VertColorData);
+                    animModel.model.arcAltVertColorList.Clear();
+
+                    if(lnd.arcMPL == null)
+                    {
+                        lnd.arcMPL = new MPL();
+                        var header = new MPLHeader();
+                        header.lowestKey = mdl.mplKey;
+                        lnd.arcMPL.header = header;
+
+                        lnd.arcMPL.motionList = new List<MPLMotionRootParent>();
+                        MPLMotionRootParent motionParent = new MPLMotionRootParent();
+                        motionParent.motionRef = new MPLMotionParent();
+                        motionParent.motionRef.motion = NinjaMotionConvert.AQMToNJM(mdl.aqm);
+                        lnd.arcMPL.motionList.Add(motionParent);
+                        lnd.arcMPL.motionDict.Add(mdl.mplKey, motionParent);
+
+                        lnd.arcMPL.motionMappingList = new List<MPLMotionMapping>();
+                        lnd.arcMPL.motionMappingList.Add(new MPLMotionMapping() { mplMotionId = 0, mplMotionKey = (short)mdl.mplKey, entryIsUsed = 1 });
+                    } else
+                    {
+                        var header = lnd.arcMPL.header;
+                        header.lowestKey = Math.Min(header.lowestKey, mdl.mplKey);
+                        lnd.arcMPL.header = header;
+
+                        if(!lnd.arcMPL.motionDict.ContainsKey(mdl.mplKey))
+                        {
+                            MPLMotionRootParent motionParent = new MPLMotionRootParent();
+                            motionParent.motionRef = new MPLMotionParent();
+                            motionParent.motionRef.motion = NinjaMotionConvert.AQMToNJM(mdl.aqm);
+                            lnd.arcMPL.motionList.Add(motionParent);
+                            lnd.arcMPL.motionDict.Add(mdl.mplKey, motionParent);
+
+                            lnd.arcMPL.motionMappingList.Add(new MPLMotionMapping() { mplMotionId = (short)lnd.arcMPL.motionMappingList.Count, mplMotionKey = (short)mdl.mplKey, entryIsUsed = 1 });
+                        }
+                    }
                     lnd.arcLndAnimatedMeshDataList.Add(animModel);
-                    */
                 }
             }
             lnd.fileNames.Add("land");
@@ -157,6 +197,7 @@ namespace AquaModelLibrary.Core.Billy
             //Unfortunately normals disable vert colors, but they can be auto calculated by the game.
             assignNormalsOnExport = false;
             ARCLNDModel lndMdl = new ARCLNDModel();
+            lndMdl.isAnimModel = isAnimatedModel;
 
             //While the original format has an array of arrays of these, used to separate rendering mesh types. However this doesn't seem to matter for performance? 
             List<ARCLNDMeshData> meshData = new List<ARCLNDMeshData>();
@@ -335,11 +376,11 @@ namespace AquaModelLibrary.Core.Billy
                 ARCLNDNodeBounding bnd = new ARCLNDNodeBounding();
                 if (isAnimatedModel)
                 {
-                    var node = mdl.aqn.nodeList[mdl.placementAqn.nodeList.Count - 1];
+                    var node = mdl.placementAqn.nodeList[mdl.placementAqn.nodeList.Count - 1];
                     Matrix4x4.Decompose(node.GetInverseBindPoseMatrixInverted(), out var scale, out var rot, out var pos);
                     bnd.Position = pos;
                     bnd.Scale = scale;
-                    bnd.SetRotation(MathExtras.QuaternionToEuler(rot));
+                    bnd.SetRotation(MathExtras.QuaternionToEulerRadians(rot));
                     MathExtras.CalculateBoundingSphere(vtxl.vertPositions, out var center, out var rad);
                     bnd.center = center;
                     bnd.radius = rad;

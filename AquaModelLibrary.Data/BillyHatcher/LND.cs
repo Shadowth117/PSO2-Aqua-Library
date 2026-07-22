@@ -50,8 +50,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public class ARCLNDAnimatedMeshData
         {
             public ARCLNDModel model = null;
-            public Motion motion = null;
-            public int MPLAnimId = -1;
+            public Motion altVertColors = null;
+            public int MPLAnimKey = -1;
             public MPLMotionRootParent mplMotion = null;
         }
 
@@ -249,7 +249,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             {
                 for (int i = 0; i < arcLndAnimatedModelRefs.Count; i++)
                 {
-                    var id = arcLndAnimatedModelRefs[i].MPLAnimId;
+                    var id = arcLndAnimatedModelRefs[i].MPLAnimKey;
                     if (arcMPL.motionDict.ContainsKey(id))
                     {
                         arcLndAnimatedMeshDataList[i].mplMotion = arcMPL.motionDict[id];
@@ -331,20 +331,20 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 {
                     ARCLNDAnimatedMeshRefSet set = new ARCLNDAnimatedMeshRefSet();
                     set.modelOffset = sr.ReadBE<int>();
-                    set.motionOffset = sr.ReadBE<int>();
-                    set.MPLAnimId = sr.ReadBE<int>();
+                    set.altVertColorsOffset = sr.ReadBE<int>();
+                    set.MPLAnimKey = sr.ReadBE<int>();
                     arcLndAnimatedModelRefs.Add(set);
                 }
                 foreach (var set in arcLndAnimatedModelRefs)
                 {
                     ARCLNDAnimatedMeshData meshData = new ARCLNDAnimatedMeshData();
-                    meshData.MPLAnimId = set.MPLAnimId;
+                    meshData.MPLAnimKey = set.MPLAnimKey;
                     sr.Seek(0x20 + set.modelOffset, SeekOrigin.Begin);
                     meshData.model = ReadArcLndModel(sr, true);
-                    if (set.motionOffset != 0)
+                    if (set.altVertColorsOffset != 0)
                     {
-                        sr.Seek(0x20 + set.motionOffset, SeekOrigin.Begin);
-                        meshData.motion = new Motion(sr, 0x20);
+                        sr.Seek(0x20 + set.altVertColorsOffset, SeekOrigin.Begin);
+                        meshData.altVertColors = new Motion(sr, 0x20);
                     }
                     arcLndAnimatedMeshDataList.Add(meshData);
                 }

@@ -65,6 +65,17 @@ namespace AquaModelLibrary.Core.General
             return animList;
         }
 
+        public static void GetNodeIds(ref int currentId, SharpAssimp.Node node, Dictionary<string, int> idMapping)
+        {
+            for(int i = 0; i < node.Children.Count; i++)
+            {
+                var childNode = node.Children[i];
+                idMapping.Add(childNode.Name, currentId++);
+
+                GetNodeIds(ref currentId, childNode, idMapping);
+            }
+        }
+
         public static List<(string fileName, AquaMotion aqm)> AssimpAQMConvert(string initialFilePath, bool forceNoPlayerExport, bool useScaleFrames)
         {
             SharpAssimp.AssimpContext context = new SharpAssimp.AssimpContext();
@@ -85,11 +96,25 @@ namespace AquaModelLibrary.Core.General
             Dictionary<int, SharpAssimp.Node> aiNodes = GetAnimatedNodes(aiScene);
             var nodeKeys = aiNodes.Keys.ToList();
             nodeKeys.Sort();
-            if(nodeKeys.Count == 0)
+            if(aiScene.Animations.Count == 0)
             {
                 return aqmList;
             }
-            int animatedNodeCount = nodeKeys.Last() + 1;
+
+            int animatedNodeCount = 0;
+            Dictionary<string, int> backupNodeIdMapping = new Dictionary<string, int>();
+            if(nodeKeys.Count == 0)
+            {
+                int currentId = 0;
+                GetNodeIds(ref currentId, aiScene.RootNode, backupNodeIdMapping);
+                var values = backupNodeIdMapping.Values.ToList();
+                values.Sort();
+                animatedNodeCount = values.Last() + 1; 
+            }
+            else
+            {
+                animatedNodeCount = nodeKeys.Last() + 1;
+            }
 
             for (int i = 0; i < aiScene.Animations.Count; i++)
             {
@@ -169,9 +194,12 @@ namespace AquaModelLibrary.Core.General
 
                     int id;
                     ParseNodeId(animNode.NodeName, out string finalName, out id);
-                    if (id < 0)
+                    if (id < 0 && backupNodeIdMapping.Count == 0)
                     {
                         continue;
+                    } else if(id < 0 && backupNodeIdMapping.Count > 0)
+                    {
+                        id = backupNodeIdMapping[animNode.NodeName];
                     }
                     var node = aqm.motionKeys[id] = new KeyData();
 
@@ -478,6 +506,19 @@ namespace AquaModelLibrary.Core.General
                     }
                 }
 
+                List<int> toRemove = new();
+                for(int mk = aqm.motionKeys.Count - 1; mk >= 0; mk--)
+                {
+                    if (aqm.motionKeys[mk] == null)
+                    {
+                        toRemove.Add(mk);
+                    }
+                }
+                foreach(var mk in toRemove)
+                {
+                    aqm.motionKeys.RemoveAt(mk);
+                }
+                aqm.moHeader.nodeCount = aqm.motionKeys.Count;
                 aqmList.Add((aqmNames[i], aqm));
             }
 
@@ -583,7 +624,7 @@ namespace AquaModelLibrary.Core.General
 
             foreach (var node in aiScene.RootNode.Children)
             {
-                CollectAnimated(node, nodes);
+                CollectAnimated(aiScene.RootNode, nodes);
             }
 
             return nodes;
@@ -1065,18 +1106,18 @@ namespace AquaModelLibrary.Core.General
 
         private static void AddAiMeshToAQP(AquaObject aqp, SharpAssimp.Mesh mesh, Matrix4x4 nodeMat, double baseScale, Dictionary<string, int> boneDict)
         {
-            var ids = GetMeshIds(mesh.Name, out string sanetizedName);
+            var ids = GetMeshIds(mesh.Name, out string sanitizedName);
             GenericTriangles genTris = null;
             bool isNewMesh = true;
 
             foreach (var tris in aqp.tempTris)
             {
-                if(tris.name == sanetizedName)
+                if(tris.name == sanitizedName)
                 {
-                    //We hit a mesh with a duplicate reference, for simplicity's sake we ignore it
+                    //We hit a mesh with a duplicate reference, this will then become a distinct mesh
                     if (ids.Count < 2 || (tris.faceGroups.Count > ids[2] && tris.faceGroups[ids[2]] != 0))
                     {
-                        return;
+                        break;
                     }
                     genTris = tris;
                     isNewMesh = false;
@@ -1094,7 +1135,7 @@ namespace AquaModelLibrary.Core.General
             //Create a new GenericTriangles instance if needed
             if (genTris == null)
             {
-                genTris = new() { name = sanetizedName, baseMeshNodeId = 0, baseMeshDummyId = -1};
+                genTris = new() { name = sanitizedName, baseMeshNodeId = 0, baseMeshDummyId = -1};
 
                 if (ids.Count > 0)
                 {

@@ -283,7 +283,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
                     outBytes.ReserveInt($"AnimatedModel{i}");
                     offsets.Add(outBytes.Count + offset);
                     outBytes.ReserveInt($"AnimatedMotion{i}");
-                    outBytes.AddValue(arcLndAnimatedMeshDataList[i].MPLAnimId);
+                    outBytes.AddValue(arcLndAnimatedMeshDataList[i].MPLAnimKey);
                 }
                 outBytes.AlignWriter(0x20);
                 for (int i = 0; i < arcLndAnimatedMeshDataList.Count; i++)
@@ -291,10 +291,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
                     outBytes.FillInt($"AnimatedModel{i}", outBytes.Count + offset);
                     outBytes.AddRange(arcLndAnimatedMeshDataList[i].model.GetBytes(outBytes.Count + offset, new List<ARCLNDAnimatedMeshData>(), out var animModelOffsets));
                     offsets.AddRange(animModelOffsets);
-                    if(arcLndAnimatedMeshDataList[i].motion != null)
+                    if(arcLndAnimatedMeshDataList[i].altVertColors != null)
                     {
                         outBytes.FillInt($"AnimatedMotion{i}", outBytes.Count + offset);
-                        outBytes.AddRange(arcLndAnimatedMeshDataList[i].motion.GetBytes(outBytes.Count + offset, out var animOffsets));
+                        outBytes.AddRange(arcLndAnimatedMeshDataList[i].altVertColors.GetBytes(outBytes.Count + offset, out var animOffsets));
                         offsets.AddRange(animOffsets);
                     }
                     outBytes.AlignWriter(0x20);
@@ -737,7 +737,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
     public class ARCLNDAnimatedMeshRefSet
     {
         public int modelOffset;
-        public int motionOffset;
-        public int MPLAnimId;
+        public int altVertColorsOffset;
+        public int MPLAnimKey;
     }
 }
