@@ -736,13 +736,25 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             case AnimFlags.Roll:
                                 for (int j = 0; j < counts[f]; j++)
                                 {
-                                    data.Roll.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
+                                    if(BillyMode)
+                                    {
+                                        data.Roll.Add(sr.ReadBE<ushort>(), sr.ReadBE<short>());
+                                    } else
+                                    {
+                                        data.Roll.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
+                                    }
                                 }
                                 break;
                             case AnimFlags.Angle:
                                 for (int j = 0; j < counts[f]; j++)
                                 {
-                                    data.Angle.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
+                                    if(BillyMode)
+                                    {
+                                        data.Angle.Add(sr.ReadBE<ushort>(), sr.ReadBE<short>());
+                                    } else
+                                    {
+                                        data.Angle.Add(sr.ReadBE<int>(), sr.ReadBE<int>());
+                                    }
                                 }
                                 break;
                             case AnimFlags.Color:
