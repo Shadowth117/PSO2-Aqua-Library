@@ -30,7 +30,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
-            while (sr.Position + 0x50 < sr.BaseStream.Length)
+            while (sr.Position + 0x50 <= sr.BaseStream.Length)
             {
                 SetEnemy setEnemy = new SetEnemy();
                 setEnemy.enemyId = sr.ReadBE<int>();

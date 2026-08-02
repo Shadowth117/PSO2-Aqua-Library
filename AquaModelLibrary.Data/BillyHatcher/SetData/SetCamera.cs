@@ -25,7 +25,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
-            while (sr.Position + 0x80 < sr.BaseStream.Length)
+            while (sr.Position + 0x80 <= sr.BaseStream.Length)
             {
                 SetCamera setCamera = new SetCamera();
                 setCamera.type0 = sr.ReadBE<ushort>();

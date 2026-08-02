@@ -26,7 +26,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         public void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr._BEReadActive = true;
-            while(sr.Position + 0x40 < sr.BaseStream.Length)
+            while(sr.Position + 0x40 <= sr.BaseStream.Length)
             {
                 SetObj setObj = new SetObj();
                 setObj.objectId = sr.ReadBE<int>();

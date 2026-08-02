@@ -9,7 +9,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         /// <summary>
         /// 0x80 of these, always
         /// </summary>
-        public LightParam[] lightParams;
+        public List<LightParam> lightParams = new();
 
         public SetLightParam() { }
 
@@ -29,10 +29,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
         private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            lightParams = new LightParam[0x80];
-
             sr._BEReadActive = true;
-            for (int i = 0; i < 0x80; i++)
+            while (sr.Position + 0x80 <= sr.BaseStream.Length)
             {
                 var light = new LightParam();
                 light.usht0 = sr.ReadBE<ushort>();
@@ -54,7 +52,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 light.int38 = sr.ReadBE<int>();
                 light.int3C = sr.ReadBE<int>();
 
-                lightParams[i] = light;
+                lightParams.Add(light);
             }
         }
 
