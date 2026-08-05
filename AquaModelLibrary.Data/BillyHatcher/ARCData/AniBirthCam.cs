@@ -61,6 +61,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 var bounds = new BoundsXYZ();
                 bounds.Min = sr.ReadBEV3();
                 bounds.Max = sr.ReadBEV3();
+                bounds.int_18 = sr.ReadBE<int>();
+                bounds.int_1C = sr.ReadBE<int>();
                 boundsXYZs.Add(bounds);
             }
             for (int i = 0; i < startMotionOffsets.Count; i++)

@@ -10,7 +10,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
     /// </summary>
     public class ObjMsFwBall : ARC
     {
-
         public NJSObject model = null;
         public NJTextureList texList = null;
         public PuyoFile gvm = null;
