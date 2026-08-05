@@ -3,9 +3,32 @@ using AquaModelLibrary.Data.Ninja.Motion;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Data.BillyHatcher.Collision;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 {
+    /// <summary>
+    /// ONLY in ar_obj_red_event_magam.arc. The game parses these, but they're likely unused as changing them doesn't appear to affect anything.
+    /// </summary>
+    public class NJSObjectUnk()
+    {
+        public int reserve_0;
+        public int reserve_4;
+        public int reserve_8;
+        public int int_C;
+
+        public int int_10;
+        public int int_14;
+        public int int_18;
+        public int reserve_1C;
+
+        public Vector3 bounds;
+        public int reserve_2C;
+
+        public int reserve_30;
+        public int reserve_34;
+    }
+
     /// <summary>
     /// ar_ene_*.arc - These contain data for enemy models, motions, and a texture list. The GVM is stored externally with the same name, but no preceding ar_ and the .gvm extension
     /// ene_am04 is unused in final, but present on PC
@@ -81,6 +104,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public List<List<NJSMotion>> anims = new List<List<NJSMotion>>();
         public List<NJTextureList> texList = new List<NJTextureList>();
         public List<BoundsXYZ> boundsXYZList = new List<BoundsXYZ>();
+        public List<List<NJSObjectUnk>> modelUnkList = new();
 
         public ArEnemy() { }
 
@@ -110,19 +134,61 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             sr.Seek(0x20, SeekOrigin.Begin);
 
             var modelOffset = sr.ReadBE<int>();
-            var animOffset = sr.ReadBE<int>();
-            var texListOffset = sr.ReadBE<int>();
-            var boundingOffset = sr.ReadBE<int>();
-            var firstOffset = sr.PeekBigEndianInt32();
-            List<int> offsetQueue = new List<int>() { animOffset, texListOffset, boundingOffset, firstOffset };
+            int animOffset = 0;
+            int texListOffset = 0;
+            int boundingOffset = 0;
 
-            int modelCount = HelperFunctions.GetCount(modelOffset, offsetQueue);
-            offsetQueue.RemoveAt(0);
-            int animCount = HelperFunctions.GetCount(animOffset, offsetQueue);
-            offsetQueue.RemoveAt(0);
-            int texListCount = HelperFunctions.GetCount(texListOffset, offsetQueue);
-            offsetQueue.RemoveAt(0);
-            int boundingCount = HelperFunctions.GetCount(boundingOffset, offsetQueue);
+            int modelUnkOffset = 0; //Only used in ar_obj_red_event_magma.arc
+            int modelUnkCount = 0;
+
+            int firstOffset = int.MaxValue;
+            int modelCount = 0;
+            int animCount = 0;
+            int texListCount = 0;
+            int boundingCount = 0;
+
+            int animeSetStopperOffset = 0;
+
+            //ar_obj_red_event_magam.arc check. For some reason this sole ar_obj/ar_ene other than the totally divorced param breaks the pattern
+            //For whatever reason it does NOT have a texList offset
+            if(modelOffset == 0xC)
+            {
+                boundingOffset = modelOffset;
+                animOffset = sr.ReadBE<int>();
+                modelUnkOffset = sr.ReadBE<int>();
+
+                boundingCount = 3;
+                animCount = 3;
+                modelUnkCount = 3;
+            } else
+            {
+                animOffset = sr.ReadBE<int>();
+                texListOffset = sr.ReadBE<int>();
+                boundingOffset = sr.ReadBE<int>();
+                firstOffset = sr.PeekBigEndianInt32();
+                List<int> offsetQueue = new List<int>() { animOffset, texListOffset, boundingOffset, firstOffset };
+
+                modelCount = HelperFunctions.GetCount(modelOffset, offsetQueue);
+                offsetQueue.RemoveAt(0);
+                animCount = HelperFunctions.GetCount(animOffset, offsetQueue);
+                offsetQueue.RemoveAt(0);
+                texListCount = HelperFunctions.GetCount(texListOffset, offsetQueue);
+                offsetQueue.RemoveAt(0);
+                boundingCount = HelperFunctions.GetCount(boundingOffset, offsetQueue);
+
+                if (texListOffset != 0)
+                {
+                    animeSetStopperOffset = texListOffset;
+                }
+                else if (boundingOffset != 0)
+                {
+                    animeSetStopperOffset = boundingOffset;
+                }
+                else
+                {
+                    animeSetStopperOffset = firstOffset;
+                }
+            }
 
             //Read Models
             sr.Seek(0x20 + modelOffset, SeekOrigin.Begin);
@@ -166,18 +232,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 }
 
                 var animSetOffsetsArr = animSetOffsets.ToArray();
-                animSetOffsets.RemoveAt(0);
-                if (texListOffset != 0)
+                if(modelUnkOffset == 0)
                 {
-                    animSetOffsets.Add((int)texListOffset);
-                }
-                else if (boundingOffset != 0)
-                {
-                    animSetOffsets.Add((int)boundingOffset);
-                }
-                else
-                {
-                    animSetOffsets.Add(firstOffset);
+                    animSetOffsets.RemoveAt(0);
+                    animSetOffsets.Add(animeSetStopperOffset);
                 }
                 for (int i = 0; i < animSetOffsetsArr.Length; i++)
                 {
@@ -230,8 +288,43 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 }
                 var bookmark = sr.Position;
                 sr.Seek(offset + 0x20, SeekOrigin.Begin);
-                boundsXYZList.Add(new BoundsXYZ() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3()});
+                boundsXYZList.Add(new BoundsXYZ() { Min = sr.ReadBEV3(), Max = sr.ReadBEV3(), int_18 = sr.ReadBE<int>(), int_1C = sr.ReadBE<int>()});
 
+                sr.Seek(bookmark, SeekOrigin.Begin);
+            }
+
+            //Read ModelUnks
+            sr.Seek(0x20 + modelUnkOffset, SeekOrigin.Begin);
+            for (int i = 0; i < modelUnkCount; i++)
+            {
+                var offset = sr.ReadBE<int>();
+                if (offset == 0)
+                {
+                    break;
+                }
+                var bookmark = sr.Position;
+                sr.Seek(offset + 0x20, SeekOrigin.Begin);
+                var count = sr.ReadBE<int>();
+                List<NJSObjectUnk> newList = new();
+                for(int j = 0; j < count; j++)
+                {
+                    newList.Add(new NJSObjectUnk()
+                    {
+                        reserve_0 = sr.ReadBE<int>(),
+                        reserve_4 = sr.ReadBE<int>(),
+                        reserve_8 = sr.ReadBE<int>(),
+                        int_C = sr.ReadBE<int>(),
+                        int_10 = sr.ReadBE<int>(),
+                        int_14 = sr.ReadBE<int>(),
+                        int_18 = sr.ReadBE<int>(),
+                        reserve_1C = sr.ReadBE<int>(),
+                        bounds = sr.ReadBEV3(),
+                        reserve_2C = sr.ReadBE<int>(),
+                        reserve_30 = sr.ReadBE<int>(),
+                        reserve_34 = sr.ReadBE<int>()
+                    });
+                }
+                modelUnkList.Add(newList);
                 sr.Seek(bookmark, SeekOrigin.Begin);
             }
         }
