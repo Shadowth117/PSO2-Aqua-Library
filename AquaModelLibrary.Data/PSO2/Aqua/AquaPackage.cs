@@ -208,7 +208,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
                     if (FileName.Length > 0x1A)
                     {
-                        FileName = FileName.Substring(0, 0x19) + Path.GetExtension(FileName);
+                        FileName = FileName.Substring(0, 0x19).Split('.')[0] + Path.GetExtension(FileName);
                     }
                     WriteAFPBase(Path.ChangeExtension(FileName.Replace(".", $"_l{i + 1}."), ReturnModelTypeString(FileName)), package, bonusPadding, outBytes, size);
 
