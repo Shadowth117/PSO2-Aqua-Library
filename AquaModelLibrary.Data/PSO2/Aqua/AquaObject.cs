@@ -1975,7 +1975,9 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        //0xC33 variations of the format can recycle vtxl lists for multiple meshes. Neat, but not helpful for conversion purposes.
+        /// <summary>
+        /// 0xC33 variations of the format can recycle vtxl lists for multiple meshes. Neat, but not helpful for conversion purposes.
+        /// </summary>
         public int splitVSETPerMesh()
         {
             if(meshList.Count < 2 || objc.type < 0xC32)
