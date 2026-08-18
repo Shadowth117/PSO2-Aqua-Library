@@ -238,7 +238,7 @@ namespace AquaModelLibrary.Data.POE2
             public Vector4 weights;
         }
 
-        public List<List<AquaObject>> ConvertToAquaObject(AquaNode aqn = null)
+        public List<List<AquaObject>> ConvertToAquaObject(AquaNode aqn = null, bool flip = false)
         {
             List<List<AquaObject>> aqoListList = new List<List<AquaObject>>();
 
@@ -276,7 +276,14 @@ namespace AquaModelLibrary.Data.POE2
                             AddVertex(lodMdl, vtxl, vertexMapping, vert1, aqn != null);
                             AddVertex(lodMdl, vtxl, vertexMapping, vert2, aqn != null);
 
-                            indices.Add(new Vector3(vertexMapping[vert0], vertexMapping[vert1], vertexMapping[vert2]));
+                            if (flip)
+                            {
+                                indices.Add(new Vector3(vertexMapping[vert2], vertexMapping[vert1], vertexMapping[vert0]));
+                            }
+                            else
+                            {
+                                indices.Add(new Vector3(vertexMapping[vert0], vertexMapping[vert1], vertexMapping[vert2]));
+                            }
                         }
                         vertMappingList.Add(vertexMapping);
                         var tris = new GenericTriangles(indices);
