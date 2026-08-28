@@ -388,7 +388,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         parameters.Add(new LightingParameter(0xC611, 1));
                         if (transparentMeshes.Count == 0)
                         {
-                            parameters.Add(new AmbientColorParameter());
+                            parameters.Add(new DiffuseColorParameter());
                         }
                         if (finalTexParam != null)
                         {
@@ -396,7 +396,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         }
                         if (transparentMeshes.Count == 0)
                         {
-                            parameters.Add(new Unknown9Parameter());
+                            parameters.Add(new TextureTEVParameter());
                         }
                         parameters.Add(new TexCoordGenParameter(GCTexCoordID.TexCoord0, GCTexGenType.Matrix3x4, GCTexGenSrc.Tex0, GCTexGenMatrix.Matrix4));
 
@@ -424,7 +424,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         parameters.Add(new LightingParameter(0xC611, 1));
                         if (opaqueMeshes.Count == 0)
                         {
-                            parameters.Add(new AmbientColorParameter());
+                            parameters.Add(new DiffuseColorParameter());
                         }
                         if (finalTexParam != null)
                         {
@@ -432,7 +432,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         }
                         if (opaqueMeshes.Count == 0)
                         {
-                            parameters.Add(new Unknown9Parameter());
+                            parameters.Add(new TextureTEVParameter());
                         }
                         parameters.Add(new TexCoordGenParameter(GCTexCoordID.TexCoord0, GCTexGenType.Matrix3x4, GCTexGenSrc.Tex0, GCTexGenMatrix.Matrix4));
 
@@ -673,7 +673,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         parameters.Add(new LightingParameter(0xC611, 1));
                         if (transparentMeshes.Count == 0)
                         {
-                            parameters.Add(new AmbientColorParameter());
+                            parameters.Add(new DiffuseColorParameter());
                         }
                         if (newTexAttr != null)
                         {
@@ -681,7 +681,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         }
                         if (transparentMeshes.Count == 0)
                         {
-                            parameters.Add(new Unknown9Parameter());
+                            parameters.Add(new TextureTEVParameter());
                         }
                         parameters.Add(new TexCoordGenParameter(GCTexCoordID.TexCoord0, GCTexGenType.Matrix3x4, GCTexGenSrc.Tex0, GCTexGenMatrix.Matrix4));
 
@@ -707,7 +707,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         parameters.Add(new LightingParameter(0xC611, 1));
                         if (opaqueMeshes.Count == 0)
                         {
-                            parameters.Add(new AmbientColorParameter());
+                            parameters.Add(new DiffuseColorParameter());
                         }
                         if (newTexAttr != null)
                         {
@@ -715,7 +715,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
                         }
                         if (opaqueMeshes.Count == 0)
                         {
-                            parameters.Add(new Unknown9Parameter());
+                            parameters.Add(new TextureTEVParameter());
                         }
                         parameters.Add(new TexCoordGenParameter(GCTexCoordID.TexCoord0, GCTexGenType.Matrix3x4, GCTexGenSrc.Tex0, GCTexGenMatrix.Matrix4));
 

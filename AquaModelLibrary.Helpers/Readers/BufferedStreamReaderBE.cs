@@ -10,6 +10,7 @@ namespace AquaModelLibrary.Helpers.Readers
     public class BufferedStreamReaderBE<TStream> : BufferedStreamReader<TStream> where TStream : Stream
     {
         public bool _BEReadActive = false;
+        public Dictionary<string, bool> streamChecks = new Dictionary<string, bool>();
 
         public BufferedStreamReaderBE(TStream stream, int bufferSize = 65536) : base(stream, bufferSize) { }
 

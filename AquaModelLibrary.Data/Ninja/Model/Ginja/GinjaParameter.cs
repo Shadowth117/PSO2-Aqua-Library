@@ -8,15 +8,18 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
     /// <summary>
     /// The types of parameter that exist
     /// </summary>
-    public enum ParameterType : uint
+	public enum ParameterType : uint
     {
         VtxAttrFmt = 0,
         IndexAttributeFlags = 1,
-        Lighting = 2,
+        StripFlags1 = 2,
+        StripFlags2 = 3,
         BlendAlpha = 4,
-        AmbientColor = 5,
+        DiffuseColor = 5,
+        AmbientColor = 6,
+        SpecularColor = 7,
         Texture = 8,
-        Unknown_9 = 9,
+        TextureTEVMode = 9,
         TexCoordGen = 10,
     }
 
@@ -69,7 +72,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 case ParameterType.IndexAttributeFlags:
                     result = new IndexAttributeParameter();
                     break;
-                case ParameterType.Lighting:
+                case ParameterType.StripFlags1:
                     result = new LightingParameter();
                     break;
                 case ParameterType.BlendAlpha:
@@ -78,11 +81,17 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
                 case ParameterType.AmbientColor:
                     result = new AmbientColorParameter();
                     break;
+                case ParameterType.DiffuseColor:
+                    result = new DiffuseColorParameter();
+                    break;
+                case ParameterType.SpecularColor:
+                    result = new SpecularColorParameter();
+                    break;
                 case ParameterType.Texture:
                     result = new TextureParameter();
                     break;
-                case ParameterType.Unknown_9:
-                    result = new Unknown9Parameter();
+                case ParameterType.TextureTEVMode:
+                    result = new TextureTEVParameter();
                     break;
                 case ParameterType.TexCoordGen:
                     result = new TexCoordGenParameter();
@@ -310,14 +319,14 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
         /// <summary>
         /// Creates a lighting parameter with the default data
         /// </summary>
-        public LightingParameter() : base(ParameterType.Lighting)
+        public LightingParameter() : base(ParameterType.StripFlags1)
         {
             //default value
             LightingFlags = 0xB11;
             ShadowStencil = 1;
         }
 
-        public LightingParameter(ushort lightingFlags, byte shadowStencil) : base(ParameterType.Lighting)
+        public LightingParameter(ushort lightingFlags, byte shadowStencil) : base(ParameterType.StripFlags1)
         {
             LightingFlags = lightingFlags;
             ShadowStencil = shadowStencil;
@@ -405,24 +414,166 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
     }
 
     /// <summary>
+    /// Color struct for the gamecube vertex data
+    /// </summary>
+    [Serializable]
+    public class Color
+    {
+        /// <summary>
+        /// Red value
+        /// </summary>
+        public byte Red;
+        /// <summary>
+        /// Green value
+        /// </summary>
+        public byte Green;
+        /// <summary>
+        /// Blue value
+        /// </summary>
+        public byte Blue;
+        /// <summary>
+        /// Alpha value
+        /// </summary>
+        public byte Alpha;
+
+        /// <summary>
+        /// Red float value. Ranges from 0 - 1
+        /// </summary>
+        public float RedF
+        {
+            get => Red / 255.0f;
+            set => Red = (byte)Math.Round(value * 255);
+        }
+
+        /// <summary>
+        /// Green float value. Ranges from 0 - 1
+        /// </summary>
+        public float GreenF
+        {
+            get => Green / 255.0f;
+            set => Green = (byte)Math.Round(value * 255);
+        }
+
+        /// <summary>
+        /// Blue float value. Ranges from 0 - 1
+        /// </summary>
+        public float BlueF
+        {
+            get => Blue / 255.0f;
+            set => Blue = (byte)Math.Round(value * 255);
+        }
+
+        /// <summary>
+        /// Alpha float value. Ranges from 0 - 1
+        /// </summary>
+        public float AlphaF
+        {
+            get => Alpha / 255.0f;
+            set => Alpha = (byte)Math.Round(value * 255);
+        }
+
+        /// <summary>
+        /// Returns the color as an RGBA integer
+        /// </summary>
+        public uint RGBA
+        {
+            get => (uint)(Red | (Green << 8) | (Blue << 16) | (Alpha << 24));
+            set
+            {
+                Red = (byte)(value & 0xFF);
+                Green = (byte)((value >> 8) & 0xFF);
+                Blue = (byte)((value >> 16) & 0xFF);
+                Alpha = (byte)(value >> 24);
+            }
+        }
+
+        /// <summary>
+        /// Returns the color as an ARGB integer
+        /// </summary>
+        public uint ARGB
+        {
+            get => (uint)(Alpha | (Red << 8) | (Green << 16) | (Blue << 24));
+            set
+            {
+                Alpha = (byte)(value & 0xFF);
+                Red = (byte)((value >> 8) & 0xFF);
+                Green = (byte)((value >> 16) & 0xFF);
+                Blue = (byte)(value >> 24);
+            }
+        }
+
+        /// <summary>
+        /// Returns the color as <see cref="System.Drawing.Color"/> object
+        /// </summary>
+        public System.Drawing.Color SystemCol
+        {
+            get => System.Drawing.Color.FromArgb(Alpha, Red, Green, Blue);
+            set
+            {
+                Alpha = value.A;
+                Red = value.R;
+                Green = value.G;
+                Blue = value.B;
+            }
+        }
+
+        public Color()
+        {
+            RGBA = uint.MaxValue;
+        }
+
+        /// <summary>
+        /// Create a new Color object from byte values
+        /// </summary>
+        /// <param name="red">Red color value</param>
+        /// <param name="green">Green color value</param>
+        /// <param name="blue">Blue color value</param>
+        /// <param name="alpha">Alpha color value</param>
+        public Color(byte red, byte green, byte blue, byte alpha)
+        {
+            Red = red;
+            Green = green;
+            Blue = blue;
+            Alpha = alpha;
+        }
+
+        /// <summary>
+        /// Create a new Color object from float values
+        /// </summary>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        /// <param name="alpha"></param>
+        public Color(float red, float green, float blue, float alpha) : this(0, 0, 0, 0)
+        {
+            RedF = red;
+            GreenF = green;
+            BlueF = blue;
+            AlphaF = alpha;
+        }
+    }
+
+    /// <summary>
     /// Ambient color of the geometry
     /// </summary>
     [Serializable]
     public class AmbientColorParameter : GCParameter
     {
         /// <summary>
-        /// The Color of the gemoetry
+        /// The Color of the geometry
         /// </summary>
-        public uint AmbientColor
+        public Color AmbientColor
         {
             get
             {
-                return data;
+                var col = new Color
+                {
+                    ARGB = data
+                };
+
+                return col;
             }
-            set
-            {
-                data = value;
-            }
+            set => data = value.ARGB;
         }
 
         public AmbientColorParameter() : base(ParameterType.AmbientColor)
@@ -430,6 +581,65 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             data = uint.MaxValue;
         }
     }
+
+    /// <summary>
+    /// Diffuse color of the geometry
+    /// </summary>
+    [Serializable]
+    public class DiffuseColorParameter : GCParameter
+    {
+        /// <summary>
+        /// The Color of the geometry
+        /// </summary>
+        public Color AmbientColor
+        {
+            get
+            {
+                var col = new Color
+                {
+                    ARGB = data
+                };
+
+                return col;
+            }
+            set => data = value.ARGB;
+        }
+
+        public DiffuseColorParameter() : base(ParameterType.DiffuseColor)
+        {
+            data = uint.MaxValue;
+        }
+    }
+
+    /// <summary>
+    /// Specular color of the geometry
+    /// </summary>
+    [Serializable]
+    public class SpecularColorParameter : GCParameter
+    {
+        /// <summary>
+        /// The Color of the geometry
+        /// </summary>
+        public Color AmbientColor
+        {
+            get
+            {
+                var col = new Color
+                {
+                    ARGB = data
+                };
+
+                return col;
+            }
+            set => data = value.ARGB;
+        }
+
+        public SpecularColorParameter() : base(ParameterType.SpecularColor)
+        {
+            data = uint.MaxValue;
+        }
+    }
+
 
     /// <summary>
     /// Texture information for the geometry
@@ -486,7 +696,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
     /// No idea what this is for, but its needed
     /// </summary>
     [Serializable]
-    public class Unknown9Parameter : GCParameter
+    public class TextureTEVParameter : GCParameter
     {
         /// <summary>
         /// No idea what this does. Default is 4
@@ -520,7 +730,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             }
         }
 
-        public Unknown9Parameter() : base(ParameterType.Unknown_9)
+        public TextureTEVParameter() : base(ParameterType.TextureTEVMode)
         {
             // default values
             Unknown1 = 4;

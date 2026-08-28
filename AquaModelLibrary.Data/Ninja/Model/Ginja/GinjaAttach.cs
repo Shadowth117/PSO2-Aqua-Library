@@ -8,6 +8,9 @@ using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 {
+    /// <summary>
+    /// Handling based on SA Tools implementation https://github.com/X-Hax/sa_tools
+    /// </summary>
     public class GinjaAttach : Attach
     {
         public GinjaVertexData vertData = null;
@@ -292,7 +295,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             using (var ms = new MemoryStream(file))
             using (var sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
-                Read(sr, be);
+                Read(sr, be, offset);
             }
         }
 
