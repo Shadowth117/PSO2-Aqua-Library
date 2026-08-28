@@ -47,6 +47,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             {
                 DXValue = sr.ReadBE<int>();
             }
+            var bookmark = sr.Position;
 
             int indexTotal = 0;
             if(polyAddress != 0)
@@ -95,6 +96,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                     polyUvList.Add(sr.ReadBEV2());
                 }
             }
+            sr.Seek(bookmark, SeekOrigin.Begin);
         }
 
         private Color ReadColor(bool bigEndian, bool GCColorReverse, byte[] colorBytes)
@@ -120,55 +122,62 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             }
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        public static void Write(List<byte> outBytes, List<NJSMeshSet> meshList, List<int> POF0Offsets)
         {
-            outBytes.AddValue(polyInfo);
-            outBytes.AddValue((ushort)faceList.Count);
-            outBytes.ReserveInt("polyAddress");
-            outBytes.AddValue(polyAttribute);
-            outBytes.ReserveInt("polyNrmAddress");
-            outBytes.ReserveInt("polyClrAddress");
-            outBytes.ReserveInt("polyUvAddress");
-            if (DXValue != null)
+            for(int j = 0; j < meshList.Count; j++)
             {
-                outBytes.AddValue(DXValue.Value);
-            }
-
-            if(faceList.Count > 0)
-            {
-                outBytes.FillInt("polyAddress", outBytes.Count);
-                for(int i = 0; i < faceList.Count; i++)
+                var mesh = meshList[j];
+                outBytes.AddValue(mesh.polyInfo);
+                outBytes.AddValue((ushort)mesh.faceList.Count);
+                POF0Offsets.Add(outBytes.ReserveInt($"polyAddress{j}"));
+                outBytes.AddValue(mesh.polyAttribute);
+                POF0Offsets.Add(outBytes.ReserveInt($"polyNrmAddress{j}"));
+                POF0Offsets.Add(outBytes.ReserveInt($"polyClrAddress{j}"));
+                POF0Offsets.Add(outBytes.ReserveInt($"polyUvAddress{j}"));
+                if (mesh.DXValue != null)
                 {
-                    outBytes.AddRange(faceList[i].GetBytes());
+                    outBytes.AddValue(mesh.DXValue.Value);
                 }
-                outBytes.AlignWriter(0x4, 0);
             }
-            if(polyNrmList.Count > 0)
+            for (int j = 0; j < meshList.Count; j++)
             {
-                outBytes.FillInt("polyNrmAddress", outBytes.Count);
-                for (int i = 0; i < polyNrmList.Count; i++)
+                var mesh = meshList[j];
+                if (mesh.faceList.Count > 0)
                 {
-                    outBytes.AddValue(polyNrmList[i]);
+                    outBytes.FillInt($"polyAddress{j}", outBytes.Count);
+                    for (int i = 0; i < mesh.faceList.Count; i++)
+                    {
+                        outBytes.AddRange(mesh.faceList[i].GetBytes());
+                    }
+                    outBytes.AlignWriter(0x4, 0);
                 }
-                outBytes.AlignWriter(0x4, 0);
-            }
-            if(polyClrList.Count > 0)
-            {
-                outBytes.FillInt("polyClrAddress", outBytes.Count);
-                for (int i = 0; i < polyClrList.Count; i++)
+                if (mesh.polyNrmList.Count > 0)
                 {
-                    outBytes.AddValue(polyClrList[i].ToArgb());
+                    outBytes.FillInt($"polyNrmAddress{j}", outBytes.Count);
+                    for (int i = 0; i < mesh.polyNrmList.Count; i++)
+                    {
+                        outBytes.AddValue(mesh.polyNrmList[i]);
+                    }
+                    outBytes.AlignWriter(0x4, 0);
                 }
-                outBytes.AlignWriter(0x4, 0);
-            }
-            if(polyUvList.Count > 0)
-            {
-                outBytes.FillInt("polyUvAddress", outBytes.Count);
-                for (int i = 0; i < polyUvList.Count; i++)
+                if (mesh.polyClrList.Count > 0)
                 {
-                    outBytes.AddValue(polyUvList[i]);
+                    outBytes.FillInt($"polyClrAddress{j}", outBytes.Count);
+                    for (int i = 0; i < mesh.polyClrList.Count; i++)
+                    {
+                        outBytes.AddValue(mesh.polyClrList[i].ToArgb());
+                    }
+                    outBytes.AlignWriter(0x4, 0);
                 }
-                outBytes.AlignWriter(0x4, 0);
+                if (mesh.polyUvList.Count > 0)
+                {
+                    outBytes.FillInt($"polyUvAddress{j}", outBytes.Count);
+                    for (int i = 0; i < mesh.polyUvList.Count; i++)
+                    {
+                        outBytes.AddValue(mesh.polyUvList[i]);
+                    }
+                    outBytes.AlignWriter(0x4, 0);
+                }
             }
         }
     }

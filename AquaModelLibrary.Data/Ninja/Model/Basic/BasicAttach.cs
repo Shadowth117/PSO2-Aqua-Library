@@ -67,18 +67,34 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             if(vertPosAddress > 0)
             {
                 sr.Seek(vertPosAddress + offset, SeekOrigin.Begin);
+                for (int i = 0; i < vertCount; i++)
+                {
+                    vertPositions.Add(sr.ReadBEV3());
+                }
             }
             if (vertNrmAddress > 0)
             {
                 sr.Seek(vertNrmAddress + offset, SeekOrigin.Begin);
+                for(int i = 0; i < vertCount; i++)
+                {
+                    vertNormals.Add(sr.ReadBEV3());
+                }
             }
             if (meshAddress > 0)
             {
                 sr.Seek(meshAddress + offset, SeekOrigin.Begin);
+                for(int i = 0; i < meshCount; i++)
+                {
+                    meshSetList.Add(new NJSMeshSet(sr, be, offset, DX));
+                }
             }
             if (matAddress > 0)
             {
                 sr.Seek(matAddress + offset, SeekOrigin.Begin);
+                for (int i = 0; i < matCount; i++)
+                {
+                    matList.Add(new NJSMaterial(sr, be, offset, DX));
+                }
             }
         }
 
@@ -102,26 +118,58 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             string attachAddress = outBytes.Count.ToString();
             if(vertPositions.Count > 0)
             {
-                outBytes.ReserveInt($"{attachAddress}_vertPositions");
+                POF0Offsets.Add(outBytes.ReserveInt($"{attachAddress}_vertPositions"));
             }
             if (vertNormals.Count > 0)
             {
-                outBytes.ReserveInt($"{attachAddress}_vertNormals");
+                POF0Offsets.Add(outBytes.ReserveInt($"{attachAddress}_vertNormals"));
             }
             outBytes.AddValue(vertPositions.Count);
             if (meshSetList.Count > 0)
             {
-                outBytes.ReserveInt($"{attachAddress}_meshSetList");
+                POF0Offsets.Add(outBytes.ReserveInt($"{attachAddress}_meshSetList"));
             }
             if (matList.Count > 0)
             {
-                outBytes.ReserveInt($"{attachAddress}_matList");
+                POF0Offsets.Add(outBytes.ReserveInt($"{attachAddress}_matList"));
             }
             outBytes.AddValue(bounding.center);
             outBytes.AddValue(bounding.radius);
             if(DXValue != null)
             {
                 outBytes.AddValue(DXValue.Value);
+            }
+            if(vertPositions.Count > 0)
+            {
+                outBytes.FillInt($"{attachAddress}_vertPositions", outBytes.Count);
+                for (int i = 0; i < vertPositions.Count; i++)
+                {
+                    outBytes.AddValue(vertPositions[i]);
+                }
+            }
+            if (vertNormals.Count > 0)
+            {
+                outBytes.FillInt($"{attachAddress}_vertNormals", outBytes.Count);
+                for (int i = 0; i < vertNormals.Count; i++)
+                {
+                    outBytes.AddValue(vertNormals[i]);
+                }
+            }
+            if (meshSetList.Count > 0)
+            {
+                outBytes.FillInt($"{attachAddress}_meshSetList", outBytes.Count);
+                for (int i = 0; i < meshSetList.Count; i++)
+                {
+                    NJSMeshSet.Write(outBytes, meshSetList, POF0Offsets);
+                }
+            }
+            if (matList.Count > 0)
+            {
+                outBytes.FillInt($"{attachAddress}_matList", outBytes.Count);
+                for (int i = 0; i < matList.Count; i++)
+                {
+                    outBytes.AddRange(matList[i].GetBytes());
+                }
             }
         }
     }
