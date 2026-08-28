@@ -1,6 +1,5 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Helpers.MathHelpers;
-using System;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
