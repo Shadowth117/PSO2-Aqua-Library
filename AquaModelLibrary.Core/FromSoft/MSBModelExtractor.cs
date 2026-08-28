@@ -247,6 +247,7 @@ namespace AquaModelLibrary.Core.FromSoft
                     case SoulsGame.Sekiro:
                     case SoulsGame.EldenRing:
                     case SoulsGame.ArmoredCore6:
+                    case SoulsGame.EldenRingNightreign:
                         rootPath = Path.GetDirectoryName(Path.GetDirectoryName(filePath));
                         if (Path.GetFileName(rootPath).ToLower() != "map")
                         {
@@ -309,6 +310,42 @@ namespace AquaModelLibrary.Core.FromSoft
                                     }
                                 }
                                 break;
+                            case SoulsGame.EldenRingNightreign:
+                                msb = SoulsFormats.SoulsFile<SoulsFormats.MSBE>.Read(bndFile.Bytes);
+                                string allMatNRPath = Path.Combine(gameRootPath, "material", "allmaterial.matbinbnd.dcx");
+                                string allMatNRDLC01Path = Path.Combine(gameRootPath, "material", "allmaterial_dlc01.matbinbnd.dcx");
+                                string allMatNRSpeedTreePath = Path.Combine(gameRootPath, "material", "speedtree.matbinbnd.dcx");
+                                if (File.Exists(allMatNRPath))
+                                {
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatNRPath));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
+                                }
+                                if (File.Exists(allMatNRDLC01Path))
+                                {
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatNRDLC01Path));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
+                                }
+                                if (File.Exists(allMatNRSpeedTreePath))
+                                {
+                                    var matBnd = new BND4Reader(File.ReadAllBytes(allMatNRSpeedTreePath));
+                                    foreach (var matFile in matBnd.Files)
+                                    {
+                                        var matBinBinary = matBnd.ReadFile(matFile);
+                                        var matBin = MATBIN.Read(matBinBinary);
+                                        matBnds[Path.GetFileNameWithoutExtension(matFile.Name)] = matBin;
+                                    }
+                                }
+                                break;
                             case SoulsGame.ArmoredCore6:
                                 msb = SoulsFormats.SoulsFile<SoulsFormats.MSBVI>.Read(bndFile.Bytes);
                                 string allMtPath = Path.Combine(gameRootPath, "material", "allmaterial.matbinbnd.dcx");
@@ -358,6 +395,7 @@ namespace AquaModelLibrary.Core.FromSoft
                                 texPath = Path.Combine(rootPath, $"{worldString}\\");
                                 break;
                             case SoulsGame.EldenRing:
+                            case SoulsGame.EldenRingNightreign:
                             case SoulsGame.ArmoredCore6:
                                 modelPath = Path.Combine(rootPath, $"{worldString}\\{msbMapId}\\");
                                 texPath = modelPath;
@@ -418,6 +456,7 @@ namespace AquaModelLibrary.Core.FromSoft
                             switch(game)
                             {
                                 case SoulsGame.EldenRing:
+                                case SoulsGame.EldenRingNightreign:
                                     fullPath = Path.Combine(gameRootPath, $@"asset\aet\{path}.tpf.dcx");
                                     break;
                                 case SoulsGame.ArmoredCore6:
@@ -429,7 +468,7 @@ namespace AquaModelLibrary.Core.FromSoft
                                 GatherTexturesFromTPF(texNames, outPathDirectory, Path.GetExtension(fullPath), Path.GetFileNameWithoutExtension(fullPath), File.ReadAllBytes(fullPath));
                             }
                         }
-                        if (game == SoulsGame.EldenRing || game == SoulsGame.ArmoredCore6)
+                        if (game == SoulsGame.EldenRing || game == SoulsGame.EldenRingNightreign || game == SoulsGame.ArmoredCore6)
                         {
                             if(Directory.Exists(texPath))
                             {
@@ -606,6 +645,7 @@ namespace AquaModelLibrary.Core.FromSoft
                                 switch (game)
                                 {
                                     case SoulsGame.EldenRing:
+                                    case SoulsGame.EldenRingNightreign:
                                         var aetDir = Path.GetFileName(Path.GetDirectoryName(tex.Path.ToLower()));
                                         var aetPath = $@"{aetDir}\{aetName}";
                                         if (!aetReferences.Contains(aetPath))
@@ -748,6 +788,7 @@ namespace AquaModelLibrary.Core.FromSoft
                 case SoulsGame.DarkSouls2:
                     break;
                 case SoulsGame.EldenRing:
+                case SoulsGame.EldenRingNightreign:
                 case SoulsGame.ArmoredCore6:
                     if (!(p is MSBE.Part.Asset || p is MSBVI.Part.Asset))
                     {

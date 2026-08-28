@@ -75,6 +75,9 @@ namespace AquaModelLibrary.Core.FromSoft
                     return SoulsGame.EldenRing;
                 case "armoredcore6.exe":
                     return SoulsGame.ArmoredCore6;
+                case "nightreign.exe":
+                    //return SoulsGame.EldenRingNightreign;
+                    break;
             }
 
             return SoulsGame.None;
@@ -1029,13 +1032,13 @@ namespace AquaModelLibrary.Core.FromSoft
                         {
                             nodo.parentId = dummy.ParentBoneIndex;
                         }
-                        var name = string.Format("Dummy#{0}#{1}#{2}#{3}#{4}#{5}#{6}", dummy.ReferenceID, realParent.Name, flver.Nodes[dummy.ParentBoneIndex].Name, dummy.Flag1, dummy.Unk30, dummy.Unk34, $"{dummy.Color.R:X}{dummy.Color.G:X}{dummy.Color.B:X}{dummy.Color.A:X}");
+                        var name = string.Format("Dummy#{0}#{1}#{2}#{3}#{4}#{5}#{6}", dummy.ReferenceID, realParent.Name, flver.Nodes[dummy.ParentBoneIndex].Name, dummy.UsesAttachBoneIndex, dummy.Unk30, dummy.NameHash, $"{dummy.Color.R:X}{dummy.Color.G:X}{dummy.Color.B:X}{dummy.Color.A:X}");
                         nodo.boneName.SetString(name);
                         aqn.nodoUnicodeNames.Add(name);
                     }
                     else
                     {
-                        var name = string.Format("Dummy#{0}#None#{1}#{2}#{3}#{4}#{5}", dummy.ReferenceID, flver.Nodes[dummy.ParentBoneIndex].Name, dummy.Flag1, dummy.Unk30, dummy.Unk34, $"{dummy.Color.R:X}{dummy.Color.G:X}{dummy.Color.B:X}{dummy.Color.A:X}");
+                        var name = string.Format("Dummy#{0}#None#{1}#{2}#{3}#{4}#{5}", dummy.ReferenceID, flver.Nodes[dummy.ParentBoneIndex].Name, dummy.UsesAttachBoneIndex, dummy.Unk30, dummy.NameHash, $"{dummy.Color.R:X}{dummy.Color.G:X}{dummy.Color.B:X}{dummy.Color.A:X}");
                         nodo.boneName.SetString(name);
                         aqn.nodoUnicodeNames.Add(name);
                         nodo.parentId = dummy.ParentBoneIndex;
