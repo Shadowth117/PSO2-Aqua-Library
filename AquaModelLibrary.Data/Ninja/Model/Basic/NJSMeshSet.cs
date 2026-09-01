@@ -85,7 +85,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                 sr.Seek(polyClrAddress + offset, SeekOrigin.Begin);
                 for (int i = 0; i < indexTotal; i++)
                 {
-                    polyClrList.Add(ReadColor(bigEndian, GCColorReverse, sr.Read4Bytes()));
+                    polyClrList.Add(NinjaModelCommon.ReadColor(bigEndian, GCColorReverse, sr.Read4Bytes()));
                 }
             }
             if (polyUvAddress != 0)
@@ -97,29 +97,6 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                 }
             }
             sr.Seek(bookmark, SeekOrigin.Begin);
-        }
-
-        private Color ReadColor(bool bigEndian, bool GCColorReverse, byte[] colorBytes)
-        {
-            switch (bigEndian)
-            {
-                case true:
-                    switch(GCColorReverse)
-                    {
-                        case true:
-                            return Color.FromArgb(colorBytes[3], colorBytes[0], colorBytes[1], colorBytes[2]);
-                        case false:
-                            return Color.FromArgb(colorBytes[0], colorBytes[1], colorBytes[2], colorBytes[3]);
-                    }
-                case false:
-                    switch (GCColorReverse)
-                    {
-                        case true:
-                            return Color.FromArgb(colorBytes[0], colorBytes[3], colorBytes[2], colorBytes[1]);
-                        case false:
-                            return Color.FromArgb(colorBytes[3], colorBytes[2], colorBytes[1], colorBytes[0]);
-                    }
-            }
         }
 
         public static void Write(List<byte> outBytes, List<NJSMeshSet> meshList, List<int> POF0Offsets)

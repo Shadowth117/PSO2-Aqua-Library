@@ -55,7 +55,6 @@
 
   <ItemGroup>
     <Folder Include="AM2\AfterBurnerClimax\" />
-    <Folder Include="Ninja\Model\Chunk\" />
   </ItemGroup>
 
 </Project>
