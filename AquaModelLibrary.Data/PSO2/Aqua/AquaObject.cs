@@ -2121,7 +2121,6 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                 if (meshMatMapping.Count - 1 != i)
                 {
                     var curMate = mateList[curMesh.mateIndex];
-                    var curRend = rendList[curMesh.rendIndex];
                     var shadNames = GetShaderNames(curMesh.shadIndex);
                     var texNames = GetTexListNamesUnicode(curMesh.tsetIndex);
                     var texUvSets = GetTexListUVChannels(curMesh.tsetIndex);
@@ -2139,10 +2138,14 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     {
                         mat.matName = curMate.matName.GetString();
                     }
-                    mat.twoSided = curRend.twosided;
-                    mat.alphaCutoff = curRend.alphaCutoff;
-                    mat.srcAlpha = curRend.sourceAlpha;
-                    mat.destAlpha = curRend.destinationAlpha;
+                    if(rendList.Count > curMesh.rendIndex)
+                    {
+                        var curRend = rendList[curMesh.rendIndex];
+                        mat.twoSided = curRend.twosided;
+                        mat.alphaCutoff = curRend.alphaCutoff;
+                        mat.srcAlpha = curRend.sourceAlpha;
+                        mat.destAlpha = curRend.destinationAlpha;
+                    }
 
                     mat.diffuseRGBA = curMate.diffuseRGBA;
                     mat.unkRGBA0 = curMate.unkRGBA0;
