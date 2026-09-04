@@ -405,7 +405,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 
         public CGPRShort_SubObject(BufferedStreamReaderBE<MemoryStream> sr, BPEra newEra)
         {
-            mainHeader = new CGPRCommonHeader(sr, era);
+            mainHeader = new CGPRCommonHeader(sr, newEra);
             sht_00 = sr.Read<short>();
         }
     }
