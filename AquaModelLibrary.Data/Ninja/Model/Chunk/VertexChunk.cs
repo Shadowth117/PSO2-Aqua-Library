@@ -1,11 +1,8 @@
-﻿using AquaModelLibrary.Helpers.Readers;
-using System;
-using System.Collections.Generic;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Chunk
 {
@@ -100,12 +97,12 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
 
         public VertexChunk(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0)
         {
-            //Read(sr, offset);
+            Read(sr, offset);
         }
-        /*
+        
         private void Read(BufferedStreamReaderBE<MemoryStream> sr, int offset = 0)
         {
-            bool GCColorReverse = sr.streamChecks.ContainsKey("GCColorReverse") ? sr.streamChecks["GCColorReverse"] : false;
+            bool SADXColorReverse = sr.streamChecks.ContainsKey("SADXColorReverse") ? sr.streamChecks["SADXColorReverse"] : false;
             Header1 = sr.ReadBE<uint>();
             Header2 = sr.ReadBE<uint>();
 
@@ -129,91 +126,72 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
                         break;
                     case ChunkType.Vertex_VertexDiffuse8:
                         Vertices.Add(sr.ReadBEV3());
-                        Diffuse.Add(NinjaModelCommon.ReadColor(sr._BEReadActive, GCColorReverse, sr.Read4Bytes()));
+                        Diffuse.Add(NinjaModelCommon.ReadColorARGB8888_32(sr._BEReadActive, SADXColorReverse, sr.Read4Bytes()));
                         break;
                     case ChunkType.Vertex_VertexUserFlags:
                         Vertices.Add(sr.ReadBEV3());
                         UserFlags.Add(sr.ReadBE<uint>());
                         break;
                     case ChunkType.Vertex_VertexNinjaFlags:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        NinjaFlags.Add(ByteConverter.ToUInt32(file, address));
-                        address += sizeof(uint);
+                        Vertices.Add(sr.ReadBEV3());
+                        NinjaFlags.Add(sr.ReadBE<uint>());
                         break;
                     case ChunkType.Vertex_VertexDiffuseSpecular5:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        uint tmpcolor = ByteConverter.ToUInt32(file, address);
-                        address += sizeof(uint);
-                        Diffuse.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor & 0xFFFF)), 0, ColorType.RGB565));
-                        Specular.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor >> 16)), 0, ColorType.RGB565));
+                        Vertices.Add(sr.ReadBEV3());
+                        //Color is stored as a 32 bit integer so read order is dependent on endianness
+                        uint tmpcolor5 = sr.ReadBE<uint>();
+                        Diffuse.Add(NinjaModelCommon.ReadColorRGB565(sr._BEReadActive, (ushort)(tmpcolor5 & 0xFFFF)));
+                        Specular.Add(NinjaModelCommon.ReadColorRGB565(sr._BEReadActive, (ushort)(tmpcolor5 >> 16)));
                         break;
                     case ChunkType.Vertex_VertexDiffuseSpecular4:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        tmpcolor = ByteConverter.ToUInt32(file, address);
-                        address += sizeof(uint);
-                        Diffuse.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor & 0xFFFF)), 0, ColorType.ARGB4444));
-                        Specular.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor >> 16)), 0, ColorType.RGB565));
+                        Vertices.Add(sr.ReadBEV3());
+                        //Color is stored as a 32 bit integer so read order is dependent on endianness
+                        uint tmpcolor4 = sr.ReadBE<uint>();
+                        Diffuse.Add(NinjaModelCommon.ReadColorARGB4444(sr._BEReadActive, (ushort)(tmpcolor4 & 0xFFFF)));
+                        Specular.Add(NinjaModelCommon.ReadColorRGB565(sr._BEReadActive, (ushort)(tmpcolor4 >> 16)));
                         break;
                     case ChunkType.Vertex_VertexNormal:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Normals.Add(new Vertex(file, address));
-                        address += Vertex.Size;
+                        Vertices.Add(sr.ReadBEV3());
+                        Normals.Add(sr.ReadBEV3());
                         break;
                     case ChunkType.Vertex_VertexNormalDiffuse8:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Normals.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Diffuse.Add(VColor.FromBytes(file, address, ColorType.ARGB8888_32));
-                        address += VColor.Size(ColorType.ARGB8888_32);
+                        Vertices.Add(sr.ReadBEV3());
+                        Normals.Add(sr.ReadBEV3());
+                        Diffuse.Add(NinjaModelCommon.ReadColorARGB8888_32(sr._BEReadActive, SADXColorReverse, sr.Read4Bytes()));
                         break;
                     case ChunkType.Vertex_VertexNormalUserFlags:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Normals.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        UserFlags.Add(ByteConverter.ToUInt32(file, address));
-                        address += sizeof(uint);
+                        Vertices.Add(sr.ReadBEV3());
+                        Normals.Add(sr.ReadBEV3());
+                        UserFlags.Add(sr.ReadBE<uint>());
                         break;
                     case ChunkType.Vertex_VertexNormalNinjaFlags:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Normals.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        NinjaFlags.Add(ByteConverter.ToUInt32(file, address));
-                        address += sizeof(uint);
+                        Vertices.Add(sr.ReadBEV3());
+                        Normals.Add(sr.ReadBEV3());
+                        NinjaFlags.Add(sr.ReadBE<uint>());
                         break;
                     case ChunkType.Vertex_VertexNormalDiffuseSpecular5:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Normals.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        tmpcolor = ByteConverter.ToUInt32(file, address);
-                        address += sizeof(uint);
-                        Diffuse.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor & 0xFFFF)), 0, ColorType.RGB565));
-                        Specular.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor >> 16)), 0, ColorType.RGB565));
+                        Vertices.Add(sr.ReadBEV3());
+                        Normals.Add(sr.ReadBEV3());
+                        //Color is stored as a 32 bit integer so read order is dependent on endianness
+                        uint tmpcolorn5 = sr.ReadBE<uint>();
+                        Diffuse.Add(NinjaModelCommon.ReadColorRGB565(sr._BEReadActive, (ushort)(tmpcolorn5 & 0xFFFF)));
+                        Specular.Add(NinjaModelCommon.ReadColorRGB565(sr._BEReadActive, (ushort)(tmpcolorn5 >> 16)));
                         break;
                     case ChunkType.Vertex_VertexNormalDiffuseSpecular4:
-                        Vertices.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        Normals.Add(new Vertex(file, address));
-                        address += Vertex.Size;
-                        tmpcolor = ByteConverter.ToUInt32(file, address);
-                        address += sizeof(uint);
-                        Diffuse.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor & 0xFFFF)), 0, ColorType.ARGB4444));
-                        Specular.Add(VColor.FromBytes(ByteConverter.GetBytes((ushort)(tmpcolor >> 16)), 0, ColorType.RGB565));
+                        Vertices.Add(sr.ReadBEV3());
+                        Normals.Add(sr.ReadBEV3());
+                        //Color is stored as a 32 bit integer so read order is dependent on endianness
+                        uint tmpcolorn4 = sr.ReadBE<uint>();
+                        Diffuse.Add(NinjaModelCommon.ReadColorARGB4444(sr._BEReadActive, (ushort)(tmpcolorn4 & 0xFFFF)));
+                        Specular.Add(NinjaModelCommon.ReadColorRGB565(sr._BEReadActive, (ushort)(tmpcolorn4 >> 16)));
                         break;
                     default:
-                        throw new NotSupportedException("Unsupported chunk type " + Type + " at " + address.ToString("X8") + ".");
+                        throw new NotSupportedException("Unsupported chunk type " + Type + " at " + sr.Position.ToString("X8") + ".");
                 }
             }
         }
 
-        public byte[] GetBytes()
+        public byte[] GetBytes(bool bigEndian, bool SADXColorReverse)
         {
             VertexChunk next = null;
             int vertlimit;
@@ -378,88 +356,89 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
                     break;
             }
             List<byte> result = new List<byte>((Size * 4) + 4);
-            result.AddRange(ByteConverter.GetBytes(Header1));
-            result.AddRange(ByteConverter.GetBytes(Header2));
+            ByteListExtension.AddAsBigEndian = bigEndian;
+            result.AddValue(Header1);
+            result.AddValue(Header2);
             for (int i = 0; i < vertcount; i++)
             {
                 switch (Type)
                 {
                     case ChunkType.Vertex_VertexSH:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(1.0f));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(1.0f);
                         break;
                     case ChunkType.Vertex_VertexNormalSH:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(1.0f));
-                        result.AddRange(Normals[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(1.0f));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue (1.0f);
+                        result.AddValue(Normals[i]);
+                        result.AddValue(1.0f);
                         break;
                     case ChunkType.Vertex_Vertex:
-                        result.AddRange(Vertices[i].GetBytes());
+                        result.AddValue(Vertices[i]);
                         break;
                     case ChunkType.Vertex_VertexDiffuse8:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(VColor.GetBytes(Diffuse[i], ColorType.ARGB8888_32));
+                        result.AddValue(Vertices[i]);
+                        result.AddRange(NinjaModelCommon.GetBytesColorARGB8888_32(bigEndian, SADXColorReverse, Diffuse[i]));
                         break;
                     case ChunkType.Vertex_VertexUserFlags:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(UserFlags[i]));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(UserFlags[i]);
                         break;
                     case ChunkType.Vertex_VertexNinjaFlags:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(NinjaFlags[i]));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(NinjaFlags[i]);
                         break;
                     case ChunkType.Vertex_VertexDiffuseSpecular5:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(
-                            ByteConverter.ToUInt16(VColor.GetBytes(Diffuse[i], ColorType.RGB565), 0)
-                            | (ByteConverter.ToUInt16(VColor.GetBytes(Specular[i], ColorType.RGB565), 0) << 16)));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(
+                            NinjaModelCommon.GetUshortColorRGB565(Diffuse[i])
+                            | (NinjaModelCommon.GetUshortColorRGB565(Specular[i]) << 16));
                         break;
                     case ChunkType.Vertex_VertexDiffuseSpecular4:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(
-                            ByteConverter.ToUInt16(VColor.GetBytes(Diffuse[i], ColorType.ARGB4444), 0)
-                            | (ByteConverter.ToUInt16(VColor.GetBytes(Specular[i], ColorType.RGB565), 0) << 16)));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(
+                            NinjaModelCommon.GetUshortColorARGB4444(Diffuse[i])
+                            | (NinjaModelCommon.GetUshortColorRGB565(Specular[i]) << 16));
                         break;
                     case ChunkType.Vertex_VertexNormal:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(Normals[i].GetBytes());
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(Normals[i]);
                         break;
                     case ChunkType.Vertex_VertexNormalDiffuse8:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(Normals[i].GetBytes());
-                        result.AddRange(VColor.GetBytes(Diffuse[i], ColorType.ARGB8888_32));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(Normals[i]);
+                        result.AddRange(NinjaModelCommon.GetBytesColorARGB8888_32(bigEndian, SADXColorReverse, Diffuse[i]));
                         break;
                     case ChunkType.Vertex_VertexNormalUserFlags:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(Normals[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(UserFlags[i]));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(Normals[i]);
+                        result.AddValue(UserFlags[i]);
                         break;
                     case ChunkType.Vertex_VertexNormalNinjaFlags:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(Normals[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(NinjaFlags[i]));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(Normals[i]);
+                        result.AddValue(NinjaFlags[i]);
                         break;
                     case ChunkType.Vertex_VertexNormalDiffuseSpecular5:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(Normals[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(
-                            ByteConverter.ToUInt16(VColor.GetBytes(Diffuse[i], ColorType.RGB565), 0)
-                            | (ByteConverter.ToUInt16(VColor.GetBytes(Specular[i], ColorType.RGB565), 0) << 16)));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(Normals[i]);
+                        result.AddValue(
+                            NinjaModelCommon.GetUshortColorRGB565(Diffuse[i])
+                            | (NinjaModelCommon.GetUshortColorRGB565(Specular[i]) << 16));
                         break;
                     case ChunkType.Vertex_VertexNormalDiffuseSpecular4:
-                        result.AddRange(Vertices[i].GetBytes());
-                        result.AddRange(Normals[i].GetBytes());
-                        result.AddRange(ByteConverter.GetBytes(
-                            ByteConverter.ToUInt16(VColor.GetBytes(Diffuse[i], ColorType.ARGB4444), 0)
-                            | (ByteConverter.ToUInt16(VColor.GetBytes(Specular[i], ColorType.RGB565), 0) << 16)));
+                        result.AddValue(Vertices[i]);
+                        result.AddValue(Normals[i]);
+                        result.AddValue(
+                            NinjaModelCommon.GetUshortColorARGB4444(Diffuse[i])
+                            | (NinjaModelCommon.GetUshortColorRGB565(Specular[i]) << 16));
                         break;
                 }
             }
             if (next != null)
-                result.AddRange(next.GetBytes());
+                result.AddRange(next.GetBytes(bigEndian, SADXColorReverse));
             return result.ToArray();
         }
-        */
+        
     }
 }

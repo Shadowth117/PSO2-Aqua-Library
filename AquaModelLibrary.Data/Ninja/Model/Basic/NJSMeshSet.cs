@@ -35,7 +35,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
         public NJSMeshSet() { }
         public NJSMeshSet(BufferedStreamReaderBE<MemoryStream> sr, bool bigEndian = false, int offset = 0, bool DX = false)
         {
-            bool GCColorReverse = sr.streamChecks.ContainsKey("GCColorReverse") ? sr.streamChecks["GCColorReverse"] : false;
+            bool SADXColorReverse = sr.streamChecks.ContainsKey("SADXColorReverse") ? sr.streamChecks["SADXColorReverse"] : false;
             polyInfo = sr.ReadBE<ushort>();
             var faceCount = sr.ReadBE<ushort>();
             var polyAddress = sr.ReadBE<int>();
@@ -85,7 +85,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                 sr.Seek(polyClrAddress + offset, SeekOrigin.Begin);
                 for (int i = 0; i < indexTotal; i++)
                 {
-                    polyClrList.Add(NinjaModelCommon.ReadColor(bigEndian, GCColorReverse, sr.Read4Bytes()));
+                    polyClrList.Add(NinjaModelCommon.ReadColorARGB8888_32(bigEndian, SADXColorReverse, sr.Read4Bytes()));
                 }
             }
             if (polyUvAddress != 0)

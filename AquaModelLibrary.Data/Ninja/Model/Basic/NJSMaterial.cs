@@ -173,10 +173,10 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
         {
             var temp = sr._BEReadActive;
             sr._BEReadActive = bigEndian;
-            bool GCColorReverse = sr.streamChecks.ContainsKey("GCColorReverse") ? sr.streamChecks["GCColorReverse"] : false;
+            bool SADXColorReverse = sr.streamChecks.ContainsKey("SADXColorReverse") ? sr.streamChecks["SADXColorReverse"] : false;
 
             var colorBytes = sr.ReadBytesSeek(8);
-            ReadMatColors(bigEndian, GCColorReverse, colorBytes);
+            ReadMatColors(bigEndian, SADXColorReverse, colorBytes);
             Exponent = sr.ReadBE<float>();
             TextureID = sr.ReadBE<int>();
             Flags = sr.ReadBE<uint>();
@@ -184,12 +184,12 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             sr._BEReadActive = temp;
         }
 
-        private void ReadMatColors(bool bigEndian, bool GCColorReverse, byte[] colorBytes)
+        private void ReadMatColors(bool bigEndian, bool SADXColorReverse, byte[] colorBytes)
         {
             switch (bigEndian)
             {
                 case true:
-                    switch (GCColorReverse)
+                    switch (SADXColorReverse)
                     {
                         case true:
                             DiffuseColor = Color.FromArgb(colorBytes[3], colorBytes[0], colorBytes[1], colorBytes[2]);
@@ -201,7 +201,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                             return;
                     }
                 case false:
-                    switch (GCColorReverse)
+                    switch (SADXColorReverse)
                     {
                         case true:
                             DiffuseColor = Color.FromArgb(colorBytes[0], colorBytes[3], colorBytes[2], colorBytes[1]);
