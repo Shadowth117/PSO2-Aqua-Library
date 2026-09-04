@@ -624,7 +624,7 @@ namespace AquaModelLibrary.Core.General
 
             foreach (var node in aiScene.RootNode.Children)
             {
-                CollectAnimated(aiScene.RootNode, nodes);
+                CollectAnimated(node, nodes);
             }
 
             return nodes;
