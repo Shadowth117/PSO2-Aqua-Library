@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.XJ
             }
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets)
         {
             var vdataAddress = outBytes.Count;
             foreach (var vdata in vertexData)

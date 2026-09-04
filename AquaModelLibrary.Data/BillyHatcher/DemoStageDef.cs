@@ -1,5 +1,5 @@
 using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;
@@ -258,9 +258,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
 		public byte[] GetBytes()
 		{
 			List<int> offsets = new List<int>();
-			var outBytes = new List<byte>();
-			ByteListExtension.AddAsBigEndian = true;
-			outBytes.AddValue((ushort)defs.Count);
+			var outBytes = new ByteListWriter() { AddAsBigEndian = true };
+            outBytes.AddValue((ushort)defs.Count);
 			outBytes.AddValue((ushort)0);
 			offsets.Add(outBytes.Count);
 			outBytes.AddValue((int)8);
@@ -427,7 +426,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
 			outBytes.InsertRange(0, njBytes);
 			outBytes.AddRange(POF0.GeneratePOF0(offsets));
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
 		}
 

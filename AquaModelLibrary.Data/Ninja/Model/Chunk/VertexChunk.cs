@@ -1,9 +1,7 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Drawing;
 using System.Numerics;
-using System.Text;
-
 namespace AquaModelLibrary.Data.Ninja.Model.Chunk
 {
     public class VertexChunk
@@ -355,8 +353,9 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
                     Size = (ushort)(vertcount * 8 + 1);
                     break;
             }
-            List<byte> result = new List<byte>((Size * 4) + 4);
-            ByteListExtension.AddAsBigEndian = bigEndian;
+            var result = new ByteListWriter();
+            result.Capacity = (Size * 4) + 4;
+            result.AddAsBigEndian = bigEndian;
             result.AddValue(Header1);
             result.AddValue(Header2);
             for (int i = 0; i < vertcount; i++)

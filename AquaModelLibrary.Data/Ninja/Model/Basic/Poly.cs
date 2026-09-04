@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Basic
@@ -102,12 +102,10 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             get { return BasicPolyType.Strips; }
         }
 
-        public override byte[] GetBytes()
+        public override void Write(ByteListWriter outBytes)
         {
-            List<byte> result = new List<byte>();
-            result.AddValue((ushort)(Indexes.Length | (Reversed ? 0x8000 : 0)));
-            result.AddRange(base.GetBytes());
-            return result.ToArray();
+            outBytes.AddValue((ushort)(Indexes.Length | (Reversed ? 0x8000 : 0)));
+            base.Write(outBytes);
         }
     }
 
@@ -127,12 +125,10 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
 
         public abstract BasicPolyType PolyType { get; }
 
-        public virtual byte[] GetBytes()
+        public virtual void Write(ByteListWriter outBytes)
         {
-            List<byte> result = new List<byte>();
             foreach (ushort item in Indexes)
-                result.AddValue(item);
-            return result.ToArray();
+                outBytes.AddValue(item);
         }
 
         public static Poly CreatePoly(BasicPolyType type)

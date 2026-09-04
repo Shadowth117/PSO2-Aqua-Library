@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
@@ -121,8 +121,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public unsafe byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             outBytes.AddValue(1);
             outBytes.ReserveInt("totalBufferSize");
             outBytes.ReserveInt("totalBufferDifferenceFromCompressed");
@@ -152,8 +151,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public List<byte> NRCGetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> innerBytes = new List<byte>()
+            var innerBytes = new ByteListWriter()
             {
                 0x55,
                 0xAA,
@@ -164,6 +162,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 0x0,
                 0x20,
             };
+            innerBytes.AddAsBigEndian = true;
             innerBytes.ReserveInt("fileEntriesSize");
             innerBytes.ReserveInt("fullSize");
 

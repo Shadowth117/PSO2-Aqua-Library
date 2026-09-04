@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Chunk
@@ -58,7 +59,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
             throw new NotImplementedException();
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets)
         {
             throw new NotImplementedException();
         }

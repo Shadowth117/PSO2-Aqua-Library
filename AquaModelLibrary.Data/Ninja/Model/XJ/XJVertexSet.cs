@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -67,7 +67,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.XJ
             }
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets, int offset = 0)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets, int offset = 0)
         {
             bool hasUV = (VertexType & 0x1) > 0;
             bool hasNormal = (VertexType & 0x2) > 0;

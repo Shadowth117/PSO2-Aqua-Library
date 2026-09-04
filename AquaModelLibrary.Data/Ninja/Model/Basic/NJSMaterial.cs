@@ -1,7 +1,6 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Drawing;
-using System.Net;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Basic
 {
@@ -215,15 +214,13 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             }
         }
 
-        public byte[] GetBytes()
+        public void Write(ByteListWriter outBytes)
         {
-            List<byte> result = new List<byte>();
-            result.AddValue(DiffuseColor.ToArgb());
-            result.AddValue(SpecularColor.ToArgb());
-            result.AddValue(Exponent);
-            result.AddValue(TextureID);
-            result.AddValue(Flags);
-            return result.ToArray();
+            outBytes.AddValue(DiffuseColor.ToArgb());
+            outBytes.AddValue(SpecularColor.ToArgb());
+            outBytes.AddValue(Exponent);
+            outBytes.AddValue(TextureID);
+            outBytes.AddValue(Flags);
         }
     }
 }

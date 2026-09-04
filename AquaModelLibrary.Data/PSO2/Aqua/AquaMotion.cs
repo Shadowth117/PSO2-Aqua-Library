@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.PSO2;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
@@ -186,7 +186,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
             List<int> boneOffAddresses = new List<int>();
 
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
 
             //REL0

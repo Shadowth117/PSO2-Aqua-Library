@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.DataTypes;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -50,8 +50,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
         public byte[] GetBytes()
         {
-            List<byte> outBytes = new List<byte>();
-            ByteListExtension.AddAsBigEndian = true;
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             foreach(var setObj in setObjs)
             {
                 outBytes.AddValue(setObj.objectId);
@@ -73,7 +72,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.Add(setObj.btProperty4);
             }
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

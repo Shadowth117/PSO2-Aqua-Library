@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Ice;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
@@ -172,7 +172,7 @@ namespace AquaModelLibrary
 
         public byte[] GetBytes(int version)
         {
-            List<byte> finalOutBytes = new List<byte>();
+            var finalOutBytes = new ByteListWriter();
             finalOutBytes.AddRange(Encoding.UTF8.GetBytes("prm\0"));
             finalOutBytes.AddRange(BitConverter.GetBytes(vertices.Count));
             switch (version)

@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 using System.Text;
@@ -61,7 +61,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public byte[] GetBytes(BPEra era)
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             outBytes.AddRange((new BPString(skeletonPath)).GetBytes(era));
             outBytes.AddValue(unk0);
             outBytes.AddValue(boneNames.Count);

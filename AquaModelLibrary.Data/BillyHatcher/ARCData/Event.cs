@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -194,12 +194,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetBytes()
         {
-            List<byte> outBytes = new List<byte>();
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = true };
             List<int> pofSets = new List<int>();
             List<string> arcStringList = new List<string>();
             Dictionary<string, List<string>> arcStrings = new Dictionary<string, List<string>>();
-            var tempBE = ByteListExtension.AddAsBigEndian;
-            ByteListExtension.AddAsBigEndian = true;
 
             outBytes.AddValue((int)eventScriptContainers.Count);
             pofSets.Add(outBytes.Count);
@@ -250,7 +248,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                     outBytes.AddValue(evt.scripts[j].scriptInt_04);
                     outBytes.ReserveInt($"ContainerScripts{i}{j}Data");
 
-                    var dataBytes = evt.scripts[j].GetDataBytes(ByteListExtension.AddAsBigEndian);
+                    var dataBytes = evt.scripts[j].GetDataBytes(outBytes.AddAsBigEndian);
                     if (dataBytes.Length > 0)
                     {
                         pofSets.Add(outBytes.Count - 4);
@@ -279,7 +277,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             var pof0 = POF0.GenerateRawPOF0(pofSets, true);
             outBytes.AddRange(pof0);
 
-            var arcBytes = new List<byte>();
+            var arcBytes = new ByteListWriter() { AddAsBigEndian = true };
             arcBytes.AddValue(outBytes.Count + 0x20);
             arcBytes.AddValue(pof0Offset);
             arcBytes.AddValue(pof0.Length);
@@ -295,7 +293,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
             outBytes.InsertRange(0, arcBytes);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }
@@ -339,9 +336,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetDataBytes(bool getBigEndian)
         {
-            List<byte> outBytes = new List<byte>();
-            var temp = ByteListExtension.AddAsBigEndian;
-            ByteListExtension.AddAsBigEndian = getBigEndian;
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = getBigEndian };
             switch (name)
             {
                 //1 int16
@@ -449,10 +444,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 case "se_pos":
                     break;
                 default:
-                    ByteListExtension.AddAsBigEndian = temp;
                     throw new NotImplementedException();
             }
-            ByteListExtension.AddAsBigEndian = temp;
             return outBytes.ToArray();
         }
     }

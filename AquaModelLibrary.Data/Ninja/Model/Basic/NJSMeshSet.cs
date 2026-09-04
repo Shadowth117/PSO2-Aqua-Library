@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Drawing;
 using System.Numerics;
@@ -99,7 +99,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             sr.Seek(bookmark, SeekOrigin.Begin);
         }
 
-        public static void Write(List<byte> outBytes, List<NJSMeshSet> meshList, List<int> POF0Offsets)
+        public static void Write(ByteListWriter outBytes, List<NJSMeshSet> meshList, List<int> POF0Offsets)
         {
             for(int j = 0; j < meshList.Count; j++)
             {
@@ -124,7 +124,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                     outBytes.FillInt($"polyAddress{j}", outBytes.Count);
                     for (int i = 0; i < mesh.faceList.Count; i++)
                     {
-                        outBytes.AddRange(mesh.faceList[i].GetBytes());
+                        mesh.faceList[i].Write(outBytes);
                     }
                     outBytes.AlignWriter(0x4, 0);
                 }

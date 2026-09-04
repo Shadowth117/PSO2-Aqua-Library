@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.DataTypes;
-using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.BillyHatcher.SetData
@@ -55,8 +55,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
         public byte[] GetBytes()
         {
-            List<byte> outBytes = new List<byte>();
-            ByteListExtension.AddAsBigEndian = true;
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             foreach (var setEne in setEnemies)
             {
                 outBytes.AddValue(setEne.enemyId);
@@ -79,7 +78,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(setEne.flt_4C);
             }
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

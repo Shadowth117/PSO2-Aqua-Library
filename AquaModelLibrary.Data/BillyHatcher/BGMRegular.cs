@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
@@ -58,9 +58,8 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
             List<int> offsets = new List<int>();
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             outBytes.AddValue((int)0);
             outBytes.AddValue((int)0);
             outBytes.AddValue(bgmFiles.Count);
@@ -87,13 +86,11 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
             outBytes.AlignWriter(0x10);
 
-            List<byte> header = new List<byte>();
+            var header = new ByteListWriter() { AddAsBigEndian = false };
             var size = outBytes.Count;
             header.AddRange(new byte[] { 0x4D, 0x53, 0x4D, 0x50});
-            ByteListExtension.AddAsBigEndian = false;
             header.AddValue((int)size);
             outBytes.InsertRange(0, header);
-            ByteListExtension.Reset();
 
             outBytes.AddRange(POF0.GeneratePOF0(offsets));
 

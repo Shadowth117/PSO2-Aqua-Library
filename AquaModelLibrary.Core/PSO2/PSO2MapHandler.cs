@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Constants;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Ice;
 using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Core.General;
@@ -536,7 +536,7 @@ namespace AquaModelLibrary.Core.PSO2
 
         public static byte[] WriteMatrixData(DetailInfoObject info)
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             outBytes.AddRange(BitConverter.GetBytes(info.matrices.Count));
             outBytes.AddRange(DataHelpers.ConvertStruct(info.diStruct.BoundingMin));
             outBytes.AddRange(DataHelpers.ConvertStruct(info.diStruct.BoundingMax));

@@ -1,5 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
-using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using System.Diagnostics;
 using System.Text;
 
@@ -134,7 +134,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public byte[] GetBytes()
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             outBytes.AddValue(variantFlags);
             outBytes.Add(variantFlag);
             outBytes.Add(variantFlag2);
@@ -177,7 +177,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             return outBytes.ToArray();
         }
 
-        private void WriteMaterialList(List<byte> outBytes)
+        private void WriteMaterialList(ByteListWriter outBytes)
         {
             for (int i = 0; i < matList.Count; i++)
             {

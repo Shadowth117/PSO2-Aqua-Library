@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Gamecube;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 //Sourced from SA Tools
@@ -117,9 +117,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
         public byte[] GetBytes(uint parameterAddress, uint primitiveAddress, GCIndexAttributeFlags indexFlags)
         {
-            ByteListExtension.AddAsBigEndian = true;
             uint primsize = Convert.ToUInt32(Math.Ceiling((decimal)primitiveSize / 32) * 32);
-            List<byte> result = new List<byte>();
+            var result = new ByteListWriter() { AddAsBigEndian = true };
             result.AddValue(parameterAddress);
             result.AddValue((uint)parameters.Count);
             result.AddValue(primitiveAddress);

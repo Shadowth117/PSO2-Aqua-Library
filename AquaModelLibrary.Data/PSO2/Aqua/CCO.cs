@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Text;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -12,7 +12,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         /// </summary>
         public static byte[] GenerateAccessoryCCO(CharacterMakingIndex cmx)
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
 
             int rel0SizeOffset = 0;

@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BillyHatcher
@@ -111,7 +111,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public byte[] GetBytes(int offset, out List<int> offsets)
         {
             offsets = new List<int>();
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
 
             outBytes.AddValue(1);
             offsets.Add(outBytes.Count + offset);

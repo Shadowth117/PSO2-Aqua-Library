@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 using AquaModelLibrary.Data.Ninja.Motion;
 
@@ -70,9 +70,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
             }
         }
 
-        public void Write(List<byte> outBytes, List<int> offsets)
+        public void Write(ByteListWriter outBytes, List<int> offsets)
         {
-            ByteListExtension.AddAsBigEndian = true;
             outBytes.AddValue(header.int_00);
             outBytes.AddValue(header.lowestKey);
             outBytes.AddValue(motionMappingList.Count);

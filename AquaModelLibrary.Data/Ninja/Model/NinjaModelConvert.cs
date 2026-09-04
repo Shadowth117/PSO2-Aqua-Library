@@ -5,13 +5,11 @@ using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData.Intermediary;
-using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using NvTriStripDotNet;
 using System.Numerics;
-using System.Reflection.Metadata;
-using System.Transactions;
 
 namespace AquaModelLibrary.Data.Ninja.Model
 {
@@ -1085,10 +1083,9 @@ namespace AquaModelLibrary.Data.Ninja.Model
             aqn.nodeList[currentNodeId] = aqNode;
         }
 
-        public static byte[] GetGjBytes(NJSObject njsObject)
+        public static byte[] GetGjBytes(NJSObject njsObject, bool bigEndian)
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = bigEndian };
             List<int> pofSets = new List<int>();
             njsObject.Write(outBytes, pofSets, true);
 
@@ -1105,13 +1102,11 @@ namespace AquaModelLibrary.Data.Ninja.Model
             outBytes.InsertRange(0, headerMagic);
             outBytes.AddRange(POF0.GeneratePOF0(pofSets));
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
-        public static byte[] GetNjmBytes(NJSMotion njsMotion, NJSMotion.MotionWriteMode mode)
+        public static byte[] GetNjmBytes(NJSMotion njsMotion, NJSMotion.MotionWriteMode mode, bool bigEndian)
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = bigEndian };
             List<int> pofSets = new List<int>();
             njsMotion.Write(outBytes, pofSets, mode);
 
@@ -1128,7 +1123,6 @@ namespace AquaModelLibrary.Data.Ninja.Model
             outBytes.InsertRange(0, headerMagic);
             outBytes.AddRange(POF0.GeneratePOF0(pofSets));
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

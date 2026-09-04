@@ -1,5 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
-using AquaModelLibrary.Helpers.MathHelpers;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Numerics;
@@ -259,7 +258,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public byte[] GetBytes(int boneCount)
         {
             bool largeBoneCount = boneCount > 256;
-            List<byte> outBytes = new();
+            var outBytes = new ByteListWriter();
             outBytes.AddValue(sotcUnk0List.Count);
             if (sotcUnk0List.Count > 0)
             {

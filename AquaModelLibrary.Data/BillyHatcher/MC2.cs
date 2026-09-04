@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.BillyHatcher.Collision;
@@ -385,8 +385,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public byte[] GetBytes()
         {
             List<int> offsets = new List<int>();
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             bool doUnkData = header.unkCount > 0 && header.unkCount < 0xFFFF;
 
             offsets.Add(outBytes.Count);
@@ -504,7 +503,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
             outBytes.InsertRange(0, ninjaBytes);
             outBytes.AddRange(POF0.GeneratePOF0(offsets));
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
 

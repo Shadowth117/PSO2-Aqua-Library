@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Security.Cryptography;
 
@@ -73,10 +73,10 @@ namespace AquaModelLibrary.Data.BillyHatcher
         public byte[] GetGVR(int i)
         {
             var entry = entries[i];
-            ByteListExtension.AddAsBigEndian = false;
-            List<byte> gvrBytes = new List<byte>() { 0x47, 0x56, 0x52, 0x54 };
+            var gvrBytes = new ByteListWriter() { 0x47, 0x56, 0x52, 0x54 };
+            gvrBytes.AddAsBigEndian = false;
             gvrBytes.AddValue(rawGVRBytesList[i].Length + 0x8);
-            ByteListExtension.AddAsBigEndian = true;
+            gvrBytes.AddAsBigEndian = true;
             gvrBytes.AddValue(entry.GVRFlags);
             gvrBytes.AddValue(entry.GVRDimensions);
             gvrBytes.AddRange(rawGVRBytesList[i]);
@@ -143,8 +143,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             outBytes.ReserveInt("totalBufferSize");
             outBytes.AddValue(rawGVRBytesList.Count);
             outBytes.AddValue(0xC);
@@ -183,7 +182,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
             outBytes.FillInt("totalBufferSize", outBytes.Count);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

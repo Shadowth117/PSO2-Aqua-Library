@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Model;
 using AquaModelLibrary.Data.Ninja.Motion;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Diagnostics;
@@ -183,13 +183,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetBytes(bool crabSharkOrder = false)
         {
-            ByteListExtension.AddAsBigEndian = true;
             //AniModel, polyanim. Polyanim can be null and if so should not be inserted at all
             Dictionary<string, int> group1StructureOffsets = new Dictionary<string, int>();
             group1StructureOffsets.Add("AniModel", 0);
             //If any motions are null, they should be inserted as motion{id} etc with the offset linking to the -1 null offset value
             Dictionary<string, int> group2StructureOffsets = new Dictionary<string, int>();
-            List<byte> outBytes = new List<byte>();
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = true };
             List<int> pofSets = new List<int>();
 
             //AniModel
@@ -404,7 +403,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
                 outBytes.Add(0);
             }
 
-            var arcBytes = new List<byte>();
+            var arcBytes = new ByteListWriter() { AddAsBigEndian = true };
             arcBytes.AddValue(outBytes.Count + 0x20);
             arcBytes.AddValue(pof0Offset);
             arcBytes.AddValue(pof0.Length);
@@ -420,7 +419,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
             outBytes.InsertRange(0, arcBytes);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

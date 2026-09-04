@@ -2,12 +2,12 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaNodeData;
 using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
-using static AquaModelLibrary.Helpers.Extensions.ByteListExtension;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -265,7 +265,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public override byte[] GetBytesNIFL()
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
             int rel0SizeOffset;
             int nodeOffset = DataHelpers.NOF0Append(nof0PointerLocations, outBytes.Count + 0x14, nodeList.Count);

@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaEffectData.Reboot;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.PSO2;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
@@ -232,7 +232,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
         public byte[] GetBytesClassicNIFL()
         {
-            List<byte> finalOutBytes = new List<byte>();
+            var finalOutBytes = new ByteListWriter();
 
             int rel0SizeOffset = 0;
             int efctCurvOffset = 0;
@@ -241,7 +241,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             List<int> emitCurvOffsets = new List<int>();
             List<int> emitPtclOffsets = new List<int>();
 
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
 
             //REL0
@@ -368,7 +368,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             return finalOutBytes.ToArray();
         }
 
-        private void WriteAQEAnim(List<byte> outBytes, AnimObject anim, List<int> nof0PointerLocations)
+        private void WriteAQEAnim(ByteListWriter outBytes, AnimObject anim, List<int> nof0PointerLocations)
         {
             List<int> keysOffsets = new List<int>();
             List<int> timeOffsets = new List<int>();

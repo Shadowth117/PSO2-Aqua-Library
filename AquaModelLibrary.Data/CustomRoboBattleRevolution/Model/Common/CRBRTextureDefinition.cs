@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using static AquaModelLibrary.Data.Gamecube.GCTextureInfo;
 
@@ -37,8 +37,7 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
         {
             if (textureBuffer != null)
             {
-                List<byte> tpl = new List<byte>();
-                ByteListExtension.AddAsBigEndian = true;
+                var tpl = new ByteListWriter() { AddAsBigEndian = true };
                 tpl.Add(0x0);
                 tpl.Add(0x20);
                 tpl.Add(0xAF);
@@ -63,8 +62,6 @@ namespace AquaModelLibrary.Data.CustomRoboBattleRevolution.Model.Common
                 tpl.AddValue((int)0x0);
                 tpl.AddValue((int)0x0);
                 tpl.AddRange(textureBuffer);
-
-                ByteListExtension.Reset();
 
                 return tpl.ToArray();
             }

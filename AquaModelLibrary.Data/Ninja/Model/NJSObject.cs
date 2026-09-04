@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.Ninja.Model.XJ;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -140,7 +140,7 @@ namespace AquaModelLibrary.Data.Ninja.Model
             siblingObject = siblingOffset > 0 ? new NJSObject(sr, ninjaVariant, be, offset) : null;
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets, bool ginjaWrite)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets, bool ginjaWrite)
         {
             int njsObjAddress = outBytes.Count;
             outBytes.AddValue((int)flags);

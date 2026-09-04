@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.Ninja
@@ -35,7 +35,7 @@ namespace AquaModelLibrary.Data.Ninja
         /// </summary>
         public static byte[] ReadGVMBytes(BufferedStreamReaderBE<MemoryStream> sr, bool isArcGVM = false)
         {
-            List<byte> gvmBytes = new List<byte>();
+            var gvmBytes = new ByteListWriter() { AddAsBigEndian = true };
             var magic = sr.Read<int>();
             var gvmFirstEntryOffset = sr.Read<int>();
             var flags = sr.ReadBE<ushort>();

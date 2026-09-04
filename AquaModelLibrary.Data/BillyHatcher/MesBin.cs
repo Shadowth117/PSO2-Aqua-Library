@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
@@ -193,10 +193,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         public byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
-            List<byte> refs = new List<byte>();
-            List<byte> strBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
+            var refs = new ByteListWriter() { AddAsBigEndian = true }; ;
+            var strBytes = new ByteListWriter() { AddAsBigEndian = true };
             Encoding encoding = Encoding.GetEncoding("Windows-1252");
             if (language == BillyLanguage.Cyrillic)
             {
@@ -317,7 +316,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
             outBytes.AddRange(refs);
             outBytes.AddRange(strBytes);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
@@ -33,7 +33,7 @@ namespace AquaModelLibrary.Data.BluePoint
 
         public byte[] GetBytes(BPEra era)
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
 
             var strBytes = Encoding.ASCII.GetBytes(str);
             outBytes.AddValue(length.GetBytes(era));

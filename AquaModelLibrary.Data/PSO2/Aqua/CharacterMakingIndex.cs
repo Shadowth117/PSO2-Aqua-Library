@@ -1,8 +1,7 @@
-﻿using AquaModelLibrary.Data.LegacyObj;
-using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
+﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.Aqua.CharacterMakingIndexData;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.PSO2;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
@@ -1261,7 +1260,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
         #region WriteMethods
         public override byte[] GetBytesNIFL()
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
             Dictionary<string, List<int>> textAddressDict = new Dictionary<string, List<int>>();
             List<string> textList = new List<string>();
@@ -2034,7 +2033,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             outBytes.AddRange(DataHelpers.ConvertStruct(bbly.bbly));
         }
 
-        private static void AddBodyBytes(BODYObject body, int mode, List<byte> outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
+        private static void AddBodyBytes(BODYObject body, int mode, ByteListWriter outBytes, List<int> nof0PointerLocations, Dictionary<string, List<int>> textAddressDict, List<string> textList)
         {
             DataHelpers.AddNIFLText(outBytes.Count + 0x4, nof0PointerLocations, textAddressDict, textList, body.dataString);
             DataHelpers.AddNIFLText(outBytes.Count + 0x8, nof0PointerLocations, textAddressDict, textList, body.texString1);

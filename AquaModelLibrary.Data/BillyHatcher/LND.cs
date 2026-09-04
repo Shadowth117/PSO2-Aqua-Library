@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.BillyHatcher.LNDH;
 using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Motion;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Numerics;
@@ -63,7 +63,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public byte[] GetBytes(int offset, int extraModelCount, List<string> texNames, bool hasMPB, out List<int> offsets)
             {
                 offsets = new List<int>();
-                List<byte> outBytes = new List<byte>();
+                var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt("MainModelOffset");
                 outBytes.AddValue(extraModelCount);
@@ -1041,8 +1041,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
         private byte[] GetBytesARCLND()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             List<int> offsets = new List<int>();
             List<uint> fileOffsets = new List<uint>();
             uint lndOffset = 0;
@@ -1121,7 +1120,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             }
 
             //ARC Header (insert at the end to make less messy)
-            List<byte> arcHead = new List<byte>();
+            var arcHead = new ByteListWriter() { AddAsBigEndian = true };
             arcHead.AddValue(outBytes.Count + 0x20);
             arcHead.AddValue(pof0Offset);
             arcHead.AddValue(pof0Size);
@@ -1136,7 +1135,6 @@ namespace AquaModelLibrary.Data.BillyHatcher
             arcHead.AddValue(0);
             outBytes.InsertRange(0, arcHead);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
     }

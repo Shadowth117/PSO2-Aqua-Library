@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
@@ -39,7 +39,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public byte[] GetBytes()
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             outBytes.AddValue(flags);
             outBytes.AddValue(buffer.Count);
             outBytes.AddValue(unk0);

@@ -1,6 +1,6 @@
-﻿using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Data.DataTypes;
-using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Data.DataTypes;
+using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
@@ -36,7 +36,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public byte[] GetBytes(int vertCount)
         {
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             outBytes.AddValue(flags);
             outBytes.AddValue(faceList.Count * 3);
             bool useInts = vertCount > ushort.MaxValue;

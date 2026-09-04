@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Text;
 
 namespace AquaModelLibrary.Data.Ninja
@@ -49,7 +49,7 @@ namespace AquaModelLibrary.Data.Ninja
             }
         }
 
-        public void Write(List<byte> outBytes, List<int> offsets, int offset = 0)
+        public void Write(ByteListWriter outBytes, List<int> offsets, int offset = 0)
         {
             offsets.Add(outBytes.Count + offset);
             outBytes.ReserveInt("TexListReferencesOffset");

@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 using static AquaModelLibrary.Data.BillyHatcher.LND;
 using static AquaModelLibrary.Data.Ninja.NinjaConstants;
@@ -32,7 +32,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
         public byte[] GetBytes(int offset, List<ARCLNDAnimatedMeshData> arcLndAnimatedMeshDataList, out List<int> offsets)
         {
             offsets = new List<int>();
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
 
             if (isAnimModel == false)
             {
@@ -504,7 +504,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.LNDH
         public byte[] GetVertDataBytes(int offset, out List<int> offsets)
         {
             offsets = new List<int>();
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             outBytes.AddValue((ushort)1);
             outBytes.AddValue((ushort)PositionData.Count);
 

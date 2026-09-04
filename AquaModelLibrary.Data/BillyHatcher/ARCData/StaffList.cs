@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
 
@@ -80,9 +80,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
         public byte[] GetBytes()
         {
             Dictionary<string, int> textTracker = new Dictionary<string, int>();
-            ByteListExtension.AddAsBigEndian = true;
             List<int> pofSets = new List<int>();
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             outBytes.AddValue(credits.Count);
             pofSets.Add(outBytes.Count);
             outBytes.AddValue((int)0x8);
@@ -123,7 +122,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             var pof0 = POF0.GenerateRawPOF0(pofSets, true);
             outBytes.AddRange(pof0);
 
-            var arcBytes = new List<byte>();
+            var arcBytes = new ByteListWriter() { AddAsBigEndian = true };
             arcBytes.AddValue(outBytes.Count + 0x20);
             arcBytes.AddValue(pof0Offset);
             arcBytes.AddValue(pof0.Length);
@@ -138,7 +137,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             arcBytes.AddValue(0);
             outBytes.InsertRange(0, arcBytes);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
         public List<string> GetTextLines()

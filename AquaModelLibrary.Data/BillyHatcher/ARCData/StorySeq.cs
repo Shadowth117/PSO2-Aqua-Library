@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 
@@ -78,8 +78,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             List<int> offsets = new List<int>();
 
             outBytes.AddValue((int)0x1000000);
@@ -125,7 +124,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             outBytes.Add(0x0);
 
             //ARC Header (insert at the end to make less messy)
-            List<byte> arcHead = new List<byte>();
+            var arcHead = new ByteListWriter() { AddAsBigEndian = true };
             arcHead.AddValue(outBytes.Count + 0x20);
             arcHead.AddValue(pof0Offset);
             arcHead.AddValue(pof0Size);
@@ -139,8 +138,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             arcHead.AddValue(0);
             arcHead.AddValue(0);
             outBytes.InsertRange(0, arcHead);
-
-            ByteListExtension.Reset();
 
             return outBytes.ToArray();
         }
@@ -167,7 +164,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
             public byte[] GetBytes()
             {
-                List<byte> outBytes = new List<byte>();
+                var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                 outBytes.AddValue(start);
                 outBytes.AddValue(value);
                 outBytes.AddValue(shouldContinue);

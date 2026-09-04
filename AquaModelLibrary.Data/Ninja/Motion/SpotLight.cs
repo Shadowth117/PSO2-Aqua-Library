@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.Ninja.Motion
@@ -22,8 +22,9 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
         public byte[] GetBytes(bool bigEndian)
         {
-            List<byte> result = new List<byte>(16);
-            ByteListExtension.AddAsBigEndian = bigEndian;
+            var result = new ByteListWriter();
+            result.Capacity = 0x10;
+            result.AddAsBigEndian = bigEndian;
             result.AddValue(Near);
             result.AddValue(Far);
             result.AddValue(InsideAngle);

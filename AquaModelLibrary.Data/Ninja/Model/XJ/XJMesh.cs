@@ -1,6 +1,6 @@
 ﻿using AquaModelLibrary.Data.DataTypes;
 using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Diagnostics;
 
 namespace AquaModelLibrary.Data.Ninja.Model.XJ
@@ -40,7 +40,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.XJ
             stripIndices = sr.ReadBytes(indexListOffset + offset, (int)indexCount * 2);
         }
 
-		public static void Write(List<byte> outBytes, List<int> POF0Offsets, List<XJMesh> xjMeshes, int offset = 0)
+		public static void Write(ByteListWriter outBytes, List<int> POF0Offsets, List<XJMesh> xjMeshes, int offset = 0)
 		{
 			List<int> matOffsetList = new List<int>();
 			List<int> stripOffsetList = new List<int>();

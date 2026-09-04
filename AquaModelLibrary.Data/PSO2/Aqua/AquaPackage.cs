@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Data.PSO2.MiscPSO2Structs;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Ice;
 using AquaModelLibrary.Helpers.Readers;
 using System.Text;
@@ -158,7 +158,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             files.AddRange(models);
             files.AddRange(motions);
             int fileCount = files.Count;
-            List<byte> finalOutBytes = new List<byte>();
+            var finalOutBytes = new ByteListWriter();
             if (package)
             {
                 finalOutBytes.AddRange(new byte[] { 0x61, 0x66, 0x70, 0 });
@@ -246,7 +246,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        private void WriteTPN(bool package, List<byte> finalOutBytes, string fileName)
+        private void WriteTPN(bool package, ByteListWriter finalOutBytes, string fileName)
         {
 
             //Write texture patterns
@@ -254,10 +254,10 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
                 for (int i = 0; i < tpns.Count; i++)
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter();
                     outBytes.AddRange(tpns[i].GetBytes());
                     WriteAFPBase(fileName, true, 0, outBytes, outBytes.Count);
-                    ByteListExtension.AlignFileEndWriter(outBytes, 0x10);
+                    outBytes.AlignFileEndWriter(0x10);
                     finalOutBytes.AddRange(outBytes);
                 }
             }

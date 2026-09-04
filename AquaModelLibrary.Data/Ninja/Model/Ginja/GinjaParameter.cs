@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Gamecube;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 //Sourced from SA Tools
@@ -120,8 +120,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
 
         public virtual byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> result = new List<byte>();
+            var result = new ByteListWriter() { AddAsBigEndian = true };
             result.Add((byte)type);
             result.AddRange(new byte[3]);
             result.AddValue(data);

@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -58,9 +58,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
         public byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
-            List<byte> outBytes = new List<byte>();
-            for(int i = 0; i < 0x80; i++)
+            var outBytes = new ByteListWriter() { AddAsBigEndian = true };
+            for (int i = 0; i < 0x80; i++)
             {
                 var light = lightParams[i];
                 outBytes.AddValue(light.usht0);
@@ -83,7 +82,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(light.int3C);
             }
 
-            ByteListExtension.AddAsBigEndian = false;
             return outBytes.ToArray();
         }
     }

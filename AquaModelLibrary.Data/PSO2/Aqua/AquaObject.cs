@@ -6,7 +6,7 @@ using AquaModelLibrary.Helpers.PSO2;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
@@ -580,7 +580,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
 
             List<int> vtxeOffsets = new List<int>();
 
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<int> nof0PointerLocations = new List<int>(); //Used for the NOF0 section
 
             //REL0

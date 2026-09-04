@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Ninja;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 using System.Numerics;
@@ -197,7 +197,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             gvm = new PuyoFile(GVMUtil.ReadGVMBytes(sr));
         }
 
-        public void Write(List<byte> outBytes, List<int> pofSets)
+        public void Write(ByteListWriter outBytes, List<int> pofSets)
         {
             //Write PolyAnim Header
             pofSets.Add(outBytes.Count + 0xC);
@@ -349,9 +349,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public DS0Variant data = null;
         }
 
-        public class DS0Variant
+        public abstract class DS0Variant
         {
-            public virtual void Write(List<byte> outBytes, List<int> pofSets)
+            public virtual void Write(ByteListWriter outBytes, List<int> pofSets)
             {
 
             }
@@ -430,7 +430,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                 }
             }
 
-            public override void Write(List<byte> outBytes, List<int> pofSets)
+            public override void Write(ByteListWriter outBytes, List<int> pofSets)
             {
                 outBytes.AddValue(flags0);
                 outBytes.AddValue(flags1);
@@ -549,7 +549,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     dataChunks1 = new DataChunks(sr);
                 }
             }
-            public override void Write(List<byte> outBytes, List<int> pofSets)
+            public override void Write(ByteListWriter outBytes, List<int> pofSets)
             {
                 outBytes.AddValue(flags0);
                 outBytes.AddValue(flags1);
@@ -623,7 +623,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
                     dataChunks = new DataChunks(sr);
                 }
             }
-            public override void Write(List<byte> outBytes, List<int> pofSets)
+            public override void Write(ByteListWriter outBytes, List<int> pofSets)
             {
                 outBytes.AddValue(flags0);
                 outBytes.AddValue(flags1);
@@ -1386,7 +1386,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x89);
                     outBytes.Add(bt_0);
                     outBytes.AddValue(unkFlt_0);
@@ -1413,7 +1413,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x8A);
                     outBytes.Add(bt_0);
                     outBytes.Add(bt_1);
@@ -1439,7 +1439,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x8B);
                     outBytes.Add(bt_0);
                     outBytes.Add(bt_1);
@@ -1460,7 +1460,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x8C);
                     outBytes.AddValue(unkFlt0);
 
@@ -1479,7 +1479,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x8D);
                     outBytes.AddValue(unkFlt0);
 
@@ -1500,7 +1500,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x90);
                     outBytes.Add(counter);
                     outBytes.AddValue(unkFlt0);
@@ -1524,7 +1524,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x91);
                     outBytes.Add(counter);
                     outBytes.Add(unkBt0);
@@ -1549,7 +1549,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x92);
                     outBytes.Add(counter);
                     outBytes.Add(unkBt0);
@@ -1576,7 +1576,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x93);
                     outBytes.Add(counter);
                     outBytes.Add(unkBt0);
@@ -1600,7 +1600,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x94);
                     outBytes.Add(counter);
                     outBytes.AddValue(unkFlt0);
@@ -1641,7 +1641,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x98);
                     outBytes.Add(counter);
                     outBytes.Add(bt_1);
@@ -1663,7 +1663,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x99);
                     outBytes.Add(counter);
                     outBytes.AddValue(unkFloat);
@@ -1687,7 +1687,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0x9A);
                     outBytes.Add(counter);
                     outBytes.Add(bt_1);
@@ -1712,7 +1712,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xA2);
                     outBytes.Add(counter);
                     outBytes.Add(unkBt0);
@@ -1739,7 +1739,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xA3);
                     outBytes.Add(counter);
                     outBytes.Add(unkBt0);
@@ -1770,7 +1770,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xC7);
                     outBytes.AddValue(vec3_00);
 
@@ -1798,7 +1798,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xCF);
                     outBytes.AddValue(vec3_00);
 
@@ -1817,7 +1817,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD0);
                     outBytes.AddValue(unkFlt0);
 
@@ -1838,7 +1838,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD1);
                     outBytes.Add(unkByte);
                     outBytes.AddValue(unkFlt0);
@@ -1862,7 +1862,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD3);
                     outBytes.Add(counter);
                     outBytes.AddValue(unkFlt0);
@@ -1883,7 +1883,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD4);
                     outBytes.AddValue(unkFlt0);
 
@@ -1904,7 +1904,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD5);
                     outBytes.AddValue(unkFlt0);
                     outBytes.AddValue(unkFlt1);
@@ -1924,7 +1924,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD6);
                     outBytes.AddValue(unkFlt0);
 
@@ -1945,7 +1945,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xD7);
                     outBytes.Add(bt_0);
                     outBytes.AddValue(vec3_01);
@@ -1967,7 +1967,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xDF);
                     outBytes.Add(bt_0);
                     outBytes.AddValue(vec3_01);
@@ -1987,7 +1987,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xE0);
                     outBytes.AddValue(vec3_00);
 
@@ -2008,7 +2008,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xE1);
                     outBytes.AddValue(vec3_00);
                     outBytes.AddValue(vec3_01);
@@ -2028,7 +2028,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xE2);
                     outBytes.AddValue(vec4_00);
 
@@ -2049,7 +2049,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xE7);
                     outBytes.Add(bt_0);
                     outBytes.AddValue(vec3_01);
@@ -2070,7 +2070,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xF0);
                     outBytes.Add(bt_0);
 
@@ -2118,7 +2118,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
 
                 public override byte[] GetBytes()
                 {
-                    List<byte> outBytes = new List<byte>();
+                    var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                     outBytes.Add(0xF4);
                     outBytes.Add(bt_0);
                     outBytes.AddValue(unkFlt0);

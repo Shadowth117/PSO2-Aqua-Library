@@ -2,7 +2,7 @@
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Basic
 {
@@ -113,7 +113,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
             throw new NotImplementedException();
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets)
         {
             string attachAddress = outBytes.Count.ToString();
             if(vertPositions.Count > 0)
@@ -168,7 +168,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                 outBytes.FillInt($"{attachAddress}_matList", outBytes.Count);
                 for (int i = 0; i < matList.Count; i++)
                 {
-                    outBytes.AddRange(matList[i].GetBytes());
+                    matList[i].Write(outBytes);
                 }
             }
         }

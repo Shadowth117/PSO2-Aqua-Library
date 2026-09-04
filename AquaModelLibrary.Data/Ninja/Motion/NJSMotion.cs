@@ -1,4 +1,4 @@
-﻿using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
 
@@ -189,8 +189,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
 
         public byte[] GetBytesNJM(bool writeBE, MotionWriteMode writeMode)
         {
-            ByteListExtension.AddAsBigEndian = writeBE;
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter() { AddAsBigEndian = writeBE };
             List<int> pofSets = new List<int>();
 
             Write(outBytes, pofSets, writeMode);
@@ -203,7 +202,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
             return outBytes.ToArray();
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets, MotionWriteMode writeMode)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets, MotionWriteMode writeMode)
         {
             POF0Offsets.Add(outBytes.Count);
             outBytes.ReserveInt("MotionStart");
@@ -500,7 +499,7 @@ namespace AquaModelLibrary.Data.Ninja.Motion
                             foreach (var set in data.Spot)
                             {
                                 outBytes.AddValue(set.Key);
-                                outBytes.AddRange(set.Value.GetBytes(ByteListExtension.AddAsBigEndian));
+                                outBytes.AddRange(set.Value.GetBytes(outBytes.AddAsBigEndian));
                             }
                             break;
                         case AnimFlags.Point:

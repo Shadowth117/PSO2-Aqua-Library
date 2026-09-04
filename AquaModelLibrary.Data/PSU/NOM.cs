@@ -1,12 +1,12 @@
 ﻿using AquaModelLibrary.Data.DataTypes.SetLengthStrings;
 using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaMotionData;
-using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers.MathHelpers;
+using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using Marathon.Formats.Mesh.Ninja;
 using System.Diagnostics;
 using System.Numerics;
-using static AquaModelLibrary.Helpers.Extensions.ByteListExtension;
 using static Marathon.Formats.Mesh.Ninja.NinjaKeyframe;
 
 namespace AquaModelLibrary.Data.PSU
@@ -396,9 +396,9 @@ namespace AquaModelLibrary.Data.PSU
             return (short)(resultValue);
         }
 
-        public byte[] GetBytes()
+        public byte[] GetBytes(bool bigEndian = false)
         {
-            List<byte> outbytes = new List<byte>();
+            var outbytes = new ByteListWriter() { AddAsBigEndian = bigEndian };
             List<int> pointerListOffsets = new List<int>();
             outbytes.Add(0x1);
             outbytes.Add(0x0);
@@ -489,7 +489,7 @@ namespace AquaModelLibrary.Data.PSU
             return outbytes.ToArray();
         }
 
-        public void WriteNOMList(List<byte> outbytes, List<List<NomFrame>> nomList, int pointerListOffset, bool isRotValue = false)
+        public void WriteNOMList(ByteListWriter outbytes, List<List<NomFrame>> nomList, int pointerListOffset, bool isRotValue = false)
         {
             for (int i = 0; i < nomList.Count; i++)
             {

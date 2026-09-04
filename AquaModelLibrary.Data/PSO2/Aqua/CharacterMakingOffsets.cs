@@ -1,10 +1,5 @@
-﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
-using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+﻿using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
-using System.Text;
-using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {

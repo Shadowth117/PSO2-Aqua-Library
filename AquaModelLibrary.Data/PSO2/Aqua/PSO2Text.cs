@@ -1,10 +1,9 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua.AquaCommonData;
 using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using System.Text;
 using Zamboni;
-using System.IO;
 
 namespace AquaModelLibrary.Data.PSO2.Aqua
 {
@@ -188,7 +187,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             int rel0SizeOffset = 0;
             int categoryOffset = 0;
 
-            List<byte> outBytes = new List<byte>();
+            var outBytes = new ByteListWriter();
             List<TextPairLocation> textPairs = new List<TextPairLocation>();
             List<TextLocation> texts = new List<TextLocation>();
             List<Dictionary<string, int>> namePointers = new List<Dictionary<string, int>>();

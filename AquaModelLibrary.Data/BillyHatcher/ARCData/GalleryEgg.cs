@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Data.Ninja;
 using AquaModelLibrary.Data.Ninja.Model;
 using AquaModelLibrary.Data.Ninja.Motion;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 using ArchiveLib;
 
@@ -84,11 +84,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
         public byte[] GetBytes()
         {
-            ByteListExtension.AddAsBigEndian = true;
             List<int> pofSets = new List<int>();
-            List<byte> outBytes = new List<byte>();
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = true };
 
-            if(model != null)
+            if (model != null)
             {
                 pofSets.Add(0x4);
             }
@@ -151,7 +150,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
             var pof0 = POF0.GenerateRawPOF0(pofSets, true);
             outBytes.AddRange(pof0);
 
-            var arcBytes = new List<byte>();
+            var arcBytes = new ByteListWriter() { AddAsBigEndian = true };
             arcBytes.AddValue(outBytes.Count + 0x20);
             arcBytes.AddValue(pof0Offset);
             arcBytes.AddValue(pof0.Length);
@@ -167,7 +166,6 @@ namespace AquaModelLibrary.Data.BillyHatcher.ARCData
 
             outBytes.InsertRange(0, arcBytes);
 
-            ByteListExtension.Reset();
             return outBytes.ToArray();
         }
 

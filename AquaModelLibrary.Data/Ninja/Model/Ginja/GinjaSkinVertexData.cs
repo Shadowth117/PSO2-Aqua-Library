@@ -1,5 +1,5 @@
 ﻿using AquaModelLibrary.Data.Gamecube;
-using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Writers;
 using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Ginja
@@ -19,7 +19,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Ginja
             }
         }
 
-        public void Write(List<byte> outBytes, List<int> POF0Offsets)
+        public void Write(ByteListWriter outBytes, List<int> POF0Offsets)
         {
             for (int i = 0; i < elements.Count; i++)
             {
