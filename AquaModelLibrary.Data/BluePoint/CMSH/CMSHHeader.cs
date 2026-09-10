@@ -135,7 +135,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public byte[] GetBytes()
         {
             var outBytes = new ByteListWriter();
-            outBytes.AddValue(variantFlags);
             outBytes.Add(variantFlag);
             outBytes.Add(variantFlag2);
             switch (variantFlags)

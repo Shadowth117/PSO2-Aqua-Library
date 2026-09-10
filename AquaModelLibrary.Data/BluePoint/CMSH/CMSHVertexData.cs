@@ -1,6 +1,6 @@
-﻿using AquaModelLibrary.Helpers.Writers;
+﻿using AquaModelLibrary.Helpers.MathHelpers;
 using AquaModelLibrary.Helpers.Readers;
-using AquaModelLibrary.Helpers.MathHelpers;
+using AquaModelLibrary.Helpers.Writers;
 using System.Diagnostics;
 using System.Numerics;
 using System.Text;
@@ -281,6 +281,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             outBytes.AddValue(int_08);
             outBytes.ReserveInt("VertBufferSize");
             var vertexDataStart = outBytes.Count;
+            outBytes.AddValue(vertDefs.Count);
+            outBytes.AddValue(int_14);
 
             for (int i = 0; i < vertDefs.Count; i++)
             {
@@ -289,12 +291,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 switch (vertDef.dataMagic)
                 {
                     case VertexMagic.POS0:
-                        outBytes.AddValue(0x2);
+                        outBytes.AddValue((ushort)0x2);
                         break;
                     case VertexMagic.NRM0:
                     case VertexMagic.TAN0:
                     case VertexMagic.QUT0:
-                        outBytes.AddValue(0x10);
+                        outBytes.AddValue((ushort)0x10);
                         break;
                     case VertexMagic.TEX0:
                     case VertexMagic.TEX1:
@@ -305,31 +307,36 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     case VertexMagic.TEX6:
                     case VertexMagic.TEX7:
                     case VertexMagic.TEX8:
-                        outBytes.AddValue(0x6);
+                        outBytes.AddValue((ushort)0x6);
                         break;
                     case VertexMagic.BONI:
-                        outBytes.AddValue(largeBoneCount ? 0xB : 0x5);
+                        outBytes.AddValue((ushort)(largeBoneCount ? 0xB : 0x5));
                         break;
                     case VertexMagic.BONW:
                     case VertexMagic.COL0:
                     case VertexMagic.COL1:
                     case VertexMagic.COL2:
-                        outBytes.AddValue(0x4);
+                        outBytes.AddValue((ushort)0x4);
                         break;
                     case VertexMagic.SAT_:
-                        outBytes.AddValue(0x0);
+                        outBytes.AddValue((ushort)0x0);
                         break;
                     default:
                         throw new Exception("Unexpected vertex magic!");
                 }
-                outBytes.AddValue(0x2);
+                outBytes.AddValue((ushort)0x2);
                 outBytes.ReserveLong($"VertDefDataStart{i}");
                 outBytes.ReserveLong($"VertDefDataSize{i}");
             }
 
             for (int i = 0; i < vertDefs.Count; i++)
             {
+                if(i != 0)
+                {
+                    outBytes.AddRange([0xFF, 0xFF, 0xFF, 0xFF,  0xFF, 0xFF, 0xFF, 0xFF]);
+                }
                 var dataStart = outBytes.FillLong($"VertDefDataStart{i}", outBytes.Count - vertexDataStart);
+                var dataStartAbsolute = outBytes.Count;
                 switch(vertDefs[i].dataMagic)
                 {
                     case VertexMagic.POS0:
@@ -358,7 +365,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         var uvs = uvDict[vertDefs[i].dataMagic];
                         foreach(var uv in uvs)
                         {
-                            outBytes.AddValue(uv);
+                            outBytes.AddValue(Half.GetBits((Half)uv.X));
+                            outBytes.AddValue(Half.GetBits((Half)uv.Y));
                         }
                         break;
                     case VertexMagic.BONI:
@@ -404,7 +412,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         }
                         break;
                 }
-                outBytes.FillLong($"VertDefDataSize{i}", outBytes.Count - vertexDataStart - dataStart);
+                outBytes.FillLong($"VertDefDataSize{i}", outBytes.Count - dataStartAbsolute);
             }
             outBytes.FillInt("VertBufferSize", outBytes.Count - vertexDataStart);
 

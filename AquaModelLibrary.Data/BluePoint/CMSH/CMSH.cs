@@ -1,4 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Extensions;
+using AquaModelLibrary.Helpers.Readers;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
@@ -85,6 +86,19 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         outBytes.AddRange(boneData.GetBytes(header.era));
                     }
                     break;
+            }
+
+            //Footer
+            var fileSize = outBytes.Count;
+            outBytes.AddRange([0x48, 0x53, 0x45, 0x4D]);
+            switch (header.era)
+            {
+                case BPEra.DemonsSouls:
+                    outBytes.AddRange([0x5B, 0, 0, 0]);
+                    outBytes.AddValue(fileSize);
+                    break;
+                default:
+                    throw new NotImplementedException($"Unexpected cmsh era {header.era}");
             }
             return outBytes.ToArray();
         }
