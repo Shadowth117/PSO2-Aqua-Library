@@ -71,12 +71,13 @@ namespace AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData
 
         public VTXL(List<Dictionary<int, object>> vtxlRaw, VTXE vtxe)
         {
-            int vertCount = ((byte[])vtxlRaw[0][0xBA]).Length / vtxe.GetVTXESize();
+            int vtxeSize = vtxe.GetVTXESize();
+            int vertCount = ((byte[])vtxlRaw[0][0xBA]).Length / vtxeSize;
 
             using (MemoryStream stream = new MemoryStream((byte[])vtxlRaw[0][0xBA]))
             using (var streamReader = new BufferedStreamReaderBE<MemoryStream>(stream))
             {
-                Read(streamReader, vtxe, vertCount, vtxe.vertDataTypes.Count);
+                Read(streamReader, vtxe, vertCount, vtxeSize);
             }
         }
 

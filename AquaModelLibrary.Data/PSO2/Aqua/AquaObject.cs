@@ -1278,7 +1278,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                         objc.ReadVTBF(data);
                         break;
                     case "VSET":
-                        vsetList = ParseVSET(data, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists);
+                        ParseVSET(data, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists);
                         bp = bonePalettes;
                         ev = edgeVertsLists;
                         break;
@@ -1349,10 +1349,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public static unsafe List<TEXF> ParseTEXF(List<Dictionary<int, object>> texfRaw)
+        public void ParseTEXF(List<Dictionary<int, object>> texfRaw)
         {
-            List<TEXF> texfList = new List<TEXF>();
-
             //Make sure there are texture refs to get
             if (texfRaw[0].Keys.Count > 1)
             {
@@ -1361,16 +1359,15 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
                     texfList.Add(new TEXF((byte[])texfRaw[i][0x80]));
                 }
             }
-            return texfList;
         }
 
         //Technically, this data is written out as a list, but should only ever have one entry.
-        public unsafe void ParseUNRM(List<Dictionary<int, object>> unrmRaw)
+        public void ParseUNRM(List<Dictionary<int, object>> unrmRaw)
         {
             unrms = new UNRM(unrmRaw);
         }
 
-        public unsafe void ParseTSET(List<Dictionary<int, object>> tsetRaw)
+        public void ParseTSET(List<Dictionary<int, object>> tsetRaw)
         {
             for (int i = 0; i < tsetRaw.Count; i++)
             {
@@ -1378,7 +1375,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public unsafe void ParseTSTA(List<Dictionary<int, object>> tstaRaw)
+        public void ParseTSTA(List<Dictionary<int, object>> tstaRaw)
         {
             //Make sure there are actually textures
             if (tstaRaw[0].Keys.Count > 1)
@@ -1390,39 +1387,29 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public static unsafe List<SHAD> ParseSHAD(List<Dictionary<int, object>> shadRaw)
+        public void ParseSHAD(List<Dictionary<int, object>> shadRaw)
         {
-            List<SHAD> shadList = new List<SHAD>();
-
             for (int i = 0; i < shadRaw.Count; i++)
             {
                 shadList.Add(new SHAD(shadRaw[i]));
             }
-
-            return shadList;
         }
 
-        public static unsafe List<REND> ParseREND(List<Dictionary<int, object>> rendRaw)
+        public void ParseREND(List<Dictionary<int, object>> rendRaw)
         {
-            List<REND> rendList = new List<REND>();
 
             for (int i = 0; i < rendRaw.Count; i++)
             {
                 rendList.Add(new REND(rendRaw[i]));
             }
-
-            return rendList;
         }
 
-        public static unsafe List<MATE> ParseMATE(List<Dictionary<int, object>> mateRaw)
+        public void ParseMATE(List<Dictionary<int, object>> mateRaw)
         {
-            List<MATE> mateList = new List<MATE>();
             for (int i = 0; i < mateRaw.Count; i++)
             {
                 mateList.Add(new MATE(mateRaw[i]));
             }
-
-            return mateList;
         }
 
 
@@ -1447,9 +1434,8 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             }
         }
 
-        public static List<VSET> ParseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists)
+        public void ParseVSET(List<Dictionary<int, object>> vsetRaw, out List<List<ushort>> bonePalettes, out List<List<ushort>> edgeVertsLists)
         {
-            List<VSET> vsetList = new List<VSET>();
             bonePalettes = new List<List<ushort>>();
             edgeVertsLists = new List<List<ushort>>();
 
@@ -1457,11 +1443,17 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
             {
 
                 vsetList.Add(VSET.ParseVSET(vsetRaw[i], out var bonePalette, out var edgeVertsList));
+                if(bonePalette == null)
+                {
+                    bonePalette = new List<ushort>();
+                }
+                if(edgeVertsList == null)
+                {
+                    edgeVertsList = new List<ushort>();
+                }
                 bonePalettes.Add(bonePalette);
                 edgeVertsLists.Add(edgeVertsList);
             }
-
-            return vsetList;
         }
         #endregion
 
