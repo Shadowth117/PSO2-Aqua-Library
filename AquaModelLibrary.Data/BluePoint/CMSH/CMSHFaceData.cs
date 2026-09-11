@@ -6,7 +6,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHFaceData
     {
-        public int flags;
+        public int flags = 1;
         public int indexCount;
 
         //If vertCount exceeds 0xFFFF, these are ints

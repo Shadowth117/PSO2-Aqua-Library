@@ -8,14 +8,26 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
     public class CMSHHeader
     {
         //These define a lot of what's going to be in a particular model variant, but currently it's difficult to guess what each bit means.
-        public ushort variantFlags;
+        public ushort variantFlags 
+        {
+            get 
+            {
+                return (ushort)(variantFlag | (variantFlag2 << 8) );
+            }
+        }
         public byte variantFlag; //& 1 for skinned stuff typically, 0 for more basic things
         public byte variantFlag2; //Sections being things such as vertexData, FaceData, etc.
         public byte unk0;
         public ushort unk1;
-        public float sizeFloat;          //Bounding value?
-        public int matCount;     //Material reference count
-        public List<CMSHMatReference> matList = new List<CMSHMatReference>();
+        /// <summary>
+        /// Combined surface area of all faces in the model
+        /// </summary>
+        public float sizeFloat;
+        /// <summary>
+        /// Mesh count. 
+        /// </summary>
+        public int meshCount; 
+        public List<CMSHMeshReference> meshList = new List<CMSHMeshReference>();
         public int endInt;
 
         //Demon's Souls check
@@ -35,7 +47,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         public CMSHHeader(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            variantFlags = sr.Peek<ushort>();
             variantFlag = sr.Read<byte>();
             variantFlag2 = sr.Read<byte>();
 
@@ -62,9 +73,9 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 case 0xAA01:
                     unk0 = sr.Read<byte>();
                     unk1 = sr.Read<ushort>();
-                    CheckForExtraFlags(sr);
-                    matCount = sr.Read<int>();
-                    ReadMaterialList(sr);
+                    CheckForSizeFloat(sr);
+                    meshCount = sr.Read<int>();
+                    ReadMeshList(sr);
                     break;
                 default:
                     Debug.WriteLine($"Unknown variant flags: {variantFlags:X}");
@@ -72,11 +83,11 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             }
         }
 
-        private void ReadMaterialList(BufferedStreamReaderBE<MemoryStream> sr)
+        private void ReadMeshList(BufferedStreamReaderBE<MemoryStream> sr)
         {
-            for (int i = 0; i < matCount; i++)
+            for (int i = 0; i < meshCount; i++)
             {
-                CMSHMatReference matRef = new CMSHMatReference();
+                CMSHMeshReference matRef = new CMSHMeshReference();
                 matRef.minBounding = sr.ReadBEV3();
                 matRef.maxBounding = sr.ReadBEV3();
                 matRef.matNameLength = sr.Read<byte>();
@@ -89,7 +100,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 if (isDeSR)
                 {
                     matRef.startingFaceIndex = sr.Read<int>();
-                    matRef.endingFaceIndex = sr.Read<int>();
+                    matRef.faceIndexCount = sr.Read<int>();
                 }
                 else if (!isDeSR) //SOTC
                 {
@@ -99,7 +110,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     matRef.startingFaceVertIndex = sr.Read<int>();
                     matRef.faceVertIndicesUsed = sr.Read<int>();
                 }
-                matList.Add(matRef);
+                meshList.Add(matRef);
             }
         }
 
@@ -116,7 +127,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             OtherModelName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, mdlLen));
         }
 
-        private void CheckForExtraFlags(BufferedStreamReaderBE<MemoryStream> sr)
+        private void CheckForSizeFloat(BufferedStreamReaderBE<MemoryStream> sr)
         {
             //For certain SOTC models
             var crcCheck = sr.ReadBytes(sr.Position, 4);
@@ -166,7 +177,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     {
                         outBytes.AddValue(sizeFloat);
                     }
-                    outBytes.AddValue(matList.Count);
+                    outBytes.AddValue(meshList.Count);
                     WriteMaterialList(outBytes);
                     break;
                 default:
@@ -178,9 +189,9 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         private void WriteMaterialList(ByteListWriter outBytes)
         {
-            for (int i = 0; i < matList.Count; i++)
+            for (int i = 0; i < meshList.Count; i++)
             {
-                var mat = matList[i];
+                var mat = meshList[i];
                 outBytes.AddValue(mat.minBounding);
                 outBytes.AddValue(mat.maxBounding);
                 outBytes.AddValue((byte)mat.matName.Length);
@@ -195,7 +206,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 if(isDeSR)
                 {
                     outBytes.AddValue(mat.startingFaceIndex);
-                    outBytes.AddValue(mat.endingFaceIndex);
+                    outBytes.AddValue(mat.faceIndexCount);
                 } else
                 {
                     outBytes.Add(mat.unkByte);

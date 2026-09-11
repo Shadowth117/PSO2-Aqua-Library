@@ -203,7 +203,297 @@ namespace AquaModelLibrary.Core.BluePoint
             {
                 cmtlPath = Path.Combine(aboveModelPath, "materials", "_cmn");
             }
-            return CMDLToAqua(new CMSH(File.ReadAllBytes(filePath)), materialDict, cmtlPath, modelPath, out aqn);
+            var cmshBytes = File.ReadAllBytes(filePath);
+            var cmsh = new CMSH(cmshBytes);
+            //cmsh.vertData.vertDefs.RemoveAt(1);
+            //cmsh.vertData.normalTemp.Clear();
+            /*
+            for (int i = 0; i < cmsh.vertData.qut0List.Count; i++)
+            {
+                uint qut0, newQut0;
+                qut0 = cmsh.vertData.qut0List[i];
+                CMSHVertexData.UnpackQUT0(qut0, out var nrm, out var tan, out var bit);
+                cmsh.vertData.qut0List[i] = newQut0 = CMSHVertexData.PackQUT0(nrm, tan);
+            }
+            var cmshOut = cmsh.GetBytes();*/
+            //File.WriteAllBytes(filePath, cmshOut);
+            return CMDLToAqua(cmsh, materialDict, cmtlPath, modelPath, out aqn);
+        }
+
+        /// <summary>
+        /// Converts an AquaObject to a CMSH
+        /// </summary>
+        public static CMSH ConvertToDeSRCMSH(AquaObject aqo, AquaNode aqn, bool isRigid, bool isCloth)
+        {
+            CMSH cmsh = new();
+            cmsh.header = new CMSHHeader();
+            cmsh.header.isDeSR = true;
+            cmsh.header.meshCount = aqo.meshList.Count;
+            cmsh.header.variantFlag2 = 0x2;
+
+            CMSHVertexData vertData = new();
+            CMSHFaceData faceData = new();
+
+            cmsh.vertData = vertData;
+            cmsh.faceData = faceData;
+
+            List<VertexMagic> magics = new();
+            for (int i = 0; i < aqo.vtxlList.Count; i++)
+            {
+                var vtxl = aqo.vtxlList[i];
+                if (vtxl.vertPositions.Count > 0 && !magics.Contains(VertexMagic.POS0))
+                {
+                    magics.Add(VertexMagic.POS0);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.POS0});
+                }
+                if (vtxl.vertNormals.Count > 0 && !magics.Contains(VertexMagic.QUT0))
+                {
+                    magics.Add(VertexMagic.QUT0);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.QUT0 });
+                }
+                if (vtxl.uv1List.Count > 0 && !magics.Contains(VertexMagic.TEX0))
+                {
+                    magics.Add(VertexMagic.TEX0);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.TEX0 });
+                }
+                if (vtxl.uv2List.Count > 0 && !magics.Contains(VertexMagic.TEX1))
+                {
+                    magics.Add(VertexMagic.TEX1);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.TEX1 });
+                }
+                if (vtxl.uv3List.Count > 0 && !magics.Contains(VertexMagic.TEX2))
+                {
+                    magics.Add(VertexMagic.TEX2);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.TEX2 });
+                }
+                if (vtxl.uv4List.Count > 0 && !magics.Contains(VertexMagic.TEX3))
+                {
+                    magics.Add(VertexMagic.TEX3);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.TEX3 });
+                }
+                if (vtxl.vertColors.Count > 0 && !magics.Contains(VertexMagic.COL0))
+                {
+                    magics.Add(VertexMagic.COL0);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.COL0 });
+                }
+                if (vtxl.vertColor2s.Count > 0 && !magics.Contains(VertexMagic.COL1))
+                {
+                    magics.Add(VertexMagic.COL1);
+                    vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.COL1 });
+                }
+                /*
+                if (vtxl.vertColor3s.Count > 0 && !magics.Contains(VertexMagic.COL2))
+                {
+                    magics.Add(VertexMagic.COL2);
+                }
+                */
+
+                if (!isRigid)
+                {
+                    if (vtxl.vertWeightIndices.Count > 0 && !magics.Contains(VertexMagic.BONI))
+                    {
+                        magics.Add(VertexMagic.BONI);
+                    }
+                    if (vtxl.vertWeights.Count > 0 && !magics.Contains(VertexMagic.BONW))
+                    {
+                        magics.Add(VertexMagic.BONW);
+                    }
+                }
+            }
+
+            int nextStartingFaceIndex = 0;
+            int nextVertIndex = 0;
+            for(int i = 0; i < aqo.meshList.Count; i++)
+            {
+                var aqoMesh = aqo.meshList[i];
+                var vtxl = aqo.vtxlList[aqoMesh.vsetIndex];
+                var strips = aqo.strips[aqoMesh.psetIndex];
+                var mat = aqo.mateList[aqoMesh.mateIndex];
+
+                var meshRef = new CMSHMeshReference();
+                cmsh.header.meshList.Add(meshRef);
+                meshRef.matName = mat.matName.GetString();
+                meshRef.startingFaceIndex = nextStartingFaceIndex;
+
+                //Get bounding data and face indices
+                var triangles = strips.GetTriangles();
+                int faceIndexCount = 0;
+                for(int j = 0; j < triangles.Count; j++)
+                {
+                    var face = triangles[j];
+                    faceData.faceList.Add(new Data.DataTypes.Vector3Int.Vec3Int((int)face.X + nextVertIndex, (int)face.Y + nextVertIndex, (int)face.Z + nextVertIndex));
+                    faceIndexCount += 3;
+
+                    List<Vector3> vertices = new List<Vector3>();
+                    vertices.Add(vtxl.vertPositions[(int)face.X]);
+                    vertices.Add(vtxl.vertPositions[(int)face.Y]);
+                    vertices.Add(vtxl.vertPositions[(int)face.Z]);
+
+                    foreach(var vertex in vertices)
+                    {
+                        meshRef.minBounding = Vector3.Min(vertex, meshRef.minBounding);
+                        meshRef.maxBounding = Vector3.Max(vertex, meshRef.maxBounding);
+                    }
+                }
+
+                //Get vertex data
+                foreach(var magic in magics)
+                {
+                    switch(magic)
+                    {
+                        case VertexMagic.POS0:
+                            vertData.positionList.AddRange(vtxl.vertPositions);
+                            break;
+                        case VertexMagic.TEX0:
+                            AddUvList(vertData, vtxl, 0);
+                            break;
+                        case VertexMagic.TEX1:
+                            AddUvList(vertData, vtxl, 1);
+                            break;
+                        case VertexMagic.TEX2:
+                            AddUvList(vertData, vtxl, 2);
+                            break;
+                        case VertexMagic.TEX3:
+                            AddUvList(vertData, vtxl, 3);
+                            break;
+                        case VertexMagic.COL0:
+                            AddColList(vertData, vtxl, 0);
+                            break;
+                        case VertexMagic.COL1:
+                            AddColList(vertData, vtxl, 1);
+                            break;
+                        case VertexMagic.BONI:
+                            vertData.vertWeightIndices.AddRange(vtxl.vertWeightIndices.ConvertAll(wt => (int[])wt.Clone()));
+                            break;
+                        case VertexMagic.BONW:
+                            vertData.vertWeights.AddRange(vtxl.vertWeights);
+                            break;
+                    }
+                }
+                nextVertIndex = vertData.positionList.Count;
+                nextStartingFaceIndex += faceIndexCount;
+                meshRef.faceIndexCount = faceIndexCount;
+            }
+
+            //Generate QUT0
+            CMSHVertexData.GenerateNormalsAndTangents(vertData.positionList, faceData.faceList, vertData.uvDict[VertexMagic.TEX0], out var normals, out var tangents);
+            vertData.CreateQUT0List(normals, tangents);
+
+            //Get sizefloat and Surface Area Table data
+            cmsh.header.sizeFloat = cmsh.vertData.GetSizeFloat(cmsh.faceData.faceList, out var satValues);
+
+            if(isCloth)
+            {
+                vertData.satValues = satValues;
+                vertData.vertDefs.Add(new CMSHVertexDataDefinition() { dataMagic = VertexMagic.SAT_ });
+            }
+
+            cmsh.vertData.uvDict.Remove(VertexMagic.TEX1);
+            cmsh.vertData.uvDict.Remove(VertexMagic.TEX2);
+            cmsh.vertData.uvDict.Remove(VertexMagic.TEX3);
+            cmsh.vertData.colorDict.Remove(VertexMagic.COL0);
+            cmsh.vertData.vertDefs.RemoveAt(5);
+            cmsh.vertData.vertDefs.RemoveAt(4);
+            cmsh.vertData.vertDefs.RemoveAt(3);
+            return cmsh;
+        }
+
+        private static void AddUvList(CMSHVertexData vertData, VTXL vtxl, int listNum)
+        {
+            List<Vector2> uvList;
+            VertexMagic uvMagic;
+            switch(listNum)
+            {
+                case 0:
+                    uvList = vtxl.uv1List;
+                    uvMagic = VertexMagic.TEX0;
+                    break;
+                case 1:
+                    uvList = vtxl.uv2List;
+                    uvMagic = VertexMagic.TEX1;
+                    break;
+                case 2:
+                    uvList = vtxl.uv3List;
+                    uvMagic = VertexMagic.TEX2;
+                    break;
+                case 3:
+                    uvList = vtxl.uv4List;
+                    uvMagic = VertexMagic.TEX3;
+                    break;
+                default:
+                    throw new Exception("Unexpected uv list!");
+            }
+            List<Vector2> listData;
+            if (uvList.Count > 0)
+            {
+                listData = uvList.ToArray().ToList();
+            }
+            else
+            {
+                List<Vector2> newUvList = new();
+                for (int v = 0; v < vtxl.vertPositions.Count; v++)
+                {
+                    newUvList.Add(new Vector2());
+                }
+                listData = newUvList;
+            }
+
+            if(vertData.uvDict.ContainsKey(uvMagic))
+            {
+                vertData.uvDict[uvMagic].AddRange(listData);
+            } else
+            {
+                vertData.uvDict[uvMagic] = listData;
+            }
+        }
+
+        private static void AddColList(CMSHVertexData vertData, VTXL vtxl, int listNum)
+        {
+            List<byte[]> colList;
+            VertexMagic colMagic;
+            switch (listNum)
+            {
+                case 0:
+                    colList = vtxl.vertColors;
+                    colMagic = VertexMagic.COL0;
+                    break;
+                case 1:
+                    colList = vtxl.vertColor2s;
+                    colMagic = VertexMagic.COL1;
+                    break;
+                    /*
+                case 2:
+                    colList = vtxl.uv2List;
+                    uvMagic = VertexMagic.COL2;
+                    break;
+                    */
+                default:
+                    throw new Exception("Unexpected color list!");
+            }
+
+            List<byte[]> listData;
+            if (colList.Count > 0)
+            {
+                listData = colList.ConvertAll(clr => (byte[])clr.Clone()).ToList();
+            }
+            else
+            {
+                List<byte[]> newColList = new();
+                for (int v = 0; v < vtxl.vertPositions.Count; v++)
+                {
+                    newColList.Add([0xFF, 0xFF, 0xFF, 0xFF]);
+                }
+                listData = newColList;
+            }
+
+            if (vertData.colorDict.ContainsKey(colMagic))
+            {
+                vertData.colorDict[colMagic].AddRange(listData);
+            }
+            else
+            {
+                vertData.colorDict[colMagic] = listData;
+            }
         }
 
         public static CANI ConvertCANI(string filePath)
@@ -352,17 +642,17 @@ namespace AquaModelLibrary.Core.BluePoint
             //Vert data
             var vertCount = mesh.vertData.positionList.Count;
             VTXL vtxl = new VTXL();
+            if (mesh.vertData.qut0List.Count > 0)
+            {
+                mesh.vertData.GetQut0Data(out var nrmList, out var tanList, out var bitList);
+                vtxl.vertNormals.AddRange(nrmList);
+                //vtxl.vertTangentList.AddRange(tanList);
+                //vtxl.vertBinormalList.AddRange(bitList);
+            }
 
             for (int v = 0; v < vertCount; v++)
             {
                 vtxl.vertPositions.Add(mesh.vertData.positionList[v]);
-                //objList.Add($"v {mesh.vertData.positionList[v].X} {mesh.vertData.positionList[v].Y} {mesh.vertData.positionList[v].Z}");
-                /*if (mesh.vertData.normals.Count > 0)
-                {
-                    objList.Add($"# {mesh.vertData.normalTemp[v][0].ToString("X")} {mesh.vertData.normalTemp[v][1].ToString("X")} {mesh.vertData.normalTemp[v][2].ToString("X")} {mesh.vertData.normalTemp[v][3].ToString("X")}");
-                    vtxl.vertNormals.Add(mesh.vertData.normals[v]);
-                    var quat = mesh.vertData.normals[v];
-                }*/
 
                 //UVs
                 if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX0))
@@ -385,27 +675,6 @@ namespace AquaModelLibrary.Core.BluePoint
                     var uv4 = mesh.vertData.uvDict[VertexMagic.TEX3][v];
                     vtxl.uv4List.Add(new Vector2(uv4.X, uv4.Y));
                 }
-                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX4))
-                {
-                    var uv5 = mesh.vertData.uvDict[VertexMagic.TEX4][v];
-                    vtxl.uv5List.Add(new Vector2(uv5.X, uv5.Y));
-                }
-                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX5))
-                {
-                    var uv6 = mesh.vertData.uvDict[VertexMagic.TEX5][v];
-                    vtxl.uv6List.Add(new Vector2(uv6.X, uv6.Y));
-                }
-                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX6))
-                {
-                    var uv7 = mesh.vertData.uvDict[VertexMagic.TEX6][v];
-                    vtxl.uv7List.Add(new Vector2(uv7.X, uv7.Y));
-                }
-                if (mesh.vertData.uvDict.ContainsKey(VertexMagic.TEX7))
-                {
-                    var uv8 = mesh.vertData.uvDict[VertexMagic.TEX7][v];
-                    vtxl.uv8List.Add(new Vector2(uv8.X, uv8.Y));
-                }
-
                 //Vert Colors
                 if (mesh.vertData.colorDict.ContainsKey(VertexMagic.COL0))
                 {
@@ -449,23 +718,23 @@ namespace AquaModelLibrary.Core.BluePoint
                 }
 
                 //Assume mat face stuff is bad
-                mesh.header.matList[0].startingFaceIndex = 0;
-                mesh.header.matList[0].startingFaceVertIndex = 0;
-                mesh.header.matList[0].endingFaceIndex = mesh.faceData.faceList.Count * 6;
-                mesh.header.matList[0].faceVertIndicesUsed = mesh.faceData.faceList.Count * 3;
+                mesh.header.meshList[0].startingFaceIndex = 0;
+                mesh.header.meshList[0].startingFaceVertIndex = 0;
+                mesh.header.meshList[0].faceIndexCount = mesh.faceData.faceList.Count * 6;
+                mesh.header.meshList[0].faceVertIndicesUsed = mesh.faceData.faceList.Count * 3;
 
-                for (int i = 1; i < mesh.header.matList.Count; i++)
+                for (int i = 1; i < mesh.header.meshList.Count; i++)
                 {
-                    mesh.header.matList[i].startingFaceIndex = 0;
-                    mesh.header.matList[i].startingFaceVertIndex = 0;
-                    mesh.header.matList[i].endingFaceIndex = 0;
-                    mesh.header.matList[i].faceVertIndicesUsed = 0;
+                    mesh.header.meshList[i].startingFaceIndex = 0;
+                    mesh.header.meshList[i].startingFaceVertIndex = 0;
+                    mesh.header.meshList[i].faceIndexCount = 0;
+                    mesh.header.meshList[i].faceVertIndicesUsed = 0;
                 }
             }
 
             //Split CMSH by materials. Materials seem to contain a face count after which they split
             int currentFace = 0;
-            for (int m = 0; m < mesh.header.matList.Count; m++)
+            for (int m = 0; m < mesh.header.meshList.Count; m++)
             {
                 objList.Add($"g Mesh_{m}");
 
@@ -473,23 +742,23 @@ namespace AquaModelLibrary.Core.BluePoint
                 int faceCount;
                 if (mesh.header.isDeSR) //DeSR
                 {
-                    startFace = mesh.header.matList[m].startingFaceIndex / 3;
-                    faceCount = mesh.header.matList[m].endingFaceIndex / 3;
+                    startFace = mesh.header.meshList[m].startingFaceIndex / 3;
+                    faceCount = mesh.header.meshList[m].faceIndexCount / 3;
                 }
                 else //SOTC
                 {
-                    startFace = mesh.header.matList[m].startingFaceVertIndex / 3;
-                    faceCount = mesh.header.matList[m].faceVertIndicesUsed / 3;
+                    startFace = mesh.header.meshList[m].startingFaceVertIndex / 3;
+                    faceCount = mesh.header.meshList[m].faceVertIndicesUsed / 3;
                 }
 
                 //Sometimes BluePoint's optimization led to degenerate faces, so we skip
-                if (faceCount == 0 && mesh.header.matList[m].endingFaceIndex > 1)
+                if (faceCount == 0 && mesh.header.meshList[m].faceIndexCount > 1)
                 {
                     continue;
                 }
 
-                if ((mesh.header.isDeSR && mesh.header.matList[m].startingFaceIndex <= 0 && mesh.header.matList[m].endingFaceIndex <= 0)
-                    || (!mesh.header.isDeSR && mesh.header.matList[m].startingFaceVertIndex <= 0 && mesh.header.matList[m].faceVertIndicesUsed <= 0))
+                if ((mesh.header.isDeSR && mesh.header.meshList[m].startingFaceIndex <= 0 && mesh.header.meshList[m].faceIndexCount <= 0)
+                    || (!mesh.header.isDeSR && mesh.header.meshList[m].startingFaceVertIndex <= 0 && mesh.header.meshList[m].faceVertIndicesUsed <= 0))
                 {
                     startFace = currentFace;
                     faceCount = mesh.faceData.faceList.Count - currentFace;
@@ -497,7 +766,7 @@ namespace AquaModelLibrary.Core.BluePoint
                 currentFace = startFace + faceCount;
 
 
-                var baseMatName = mesh.header.matList[m];
+                var baseMatName = mesh.header.meshList[m];
 
                 string texName = "test_d.dds";
 
@@ -535,7 +804,7 @@ namespace AquaModelLibrary.Core.BluePoint
 
                 //Material
                 var mat = new GenericMaterial();
-                mat.matName = $"{mesh.header.matList[m].matName}";
+                mat.matName = $"{mesh.header.meshList[m].matName}";
                 mat.texNames = new List<string>
                 {
                     texName

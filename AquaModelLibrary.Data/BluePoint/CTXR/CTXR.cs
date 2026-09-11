@@ -643,6 +643,37 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             return refList;
         }
 
+        public byte[] GetCTXR()
+        {
+            throw new NotImplementedException();
+            switch (footerData.version)
+            {
+                case 0x1:
+                    throw new NotImplementedException();
+                case 0x25: //SOTC
+                    throw new NotImplementedException();
+                case 0x6E: //DeSR
+                    return GetDeSRCTXR();
+                default:
+                    throw new Exception("Unexpected CTXR type!");
+            }
+        }
+
+        public byte[] GetDeSRCTXR()
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] GetCTXC()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void WriteDeSRTextureFromDDS(string ddsPath, string outPath)
+        {
+            throw new NotImplementedException();
+        }
+
         public void WriteToDDS(string ctxrPath, string outPath)
         {
             var rootPath = PSUtility.GetPSRootPath(ctxrPath);

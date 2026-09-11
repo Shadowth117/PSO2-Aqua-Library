@@ -2,14 +2,14 @@
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
-    public class CMSHMatReference
+    public class CMSHMeshReference
     {
         public Vector3 minBounding;
         public Vector3 maxBounding;
         public byte matNameLength;
         public string matName = null;
         public int startingFaceIndex = -1;
-        public int endingFaceIndex = -1; //start of next mesh? Idk
+        public int faceIndexCount = -1; //start of next mesh? Idk
 
         //SOTC stuff
         public byte unkByte;

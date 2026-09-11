@@ -88,11 +88,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL.CMDLBasic
                     case VertexMagic.TEX1:
                     case VertexMagic.TEX2:
                     case VertexMagic.TEX3:
-                    case VertexMagic.TEX4:
-                    case VertexMagic.TEX5:
-                    case VertexMagic.TEX6:
-                    case VertexMagic.TEX7:
-                    case VertexMagic.TEX8:
                         var uvList = new List<Vector2>();
                         for (int v = 0; v < vertexCount; v++)
                         {
