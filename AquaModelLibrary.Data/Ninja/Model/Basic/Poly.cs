@@ -15,23 +15,23 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
     {
         public Triangle()
         {
-            Indexes = new ushort[3];
+            Indices = new ushort[3];
         }
 
         public Triangle(ushort a, ushort b, ushort c)
         {
-            Indexes = new ushort[3];
-            Indexes[0] = a;
-            Indexes[1] = b;
-            Indexes[2] = c;
+            Indices = new ushort[3];
+            Indices[0] = a;
+            Indices[1] = b;
+            Indices[2] = c;
         }
 
         public Triangle(BufferedStreamReaderBE<MemoryStream> sr)
             : this()
         {
-            Indexes[0] = sr.ReadBE<ushort>();
-            Indexes[1] = sr.ReadBE<ushort>();
-            Indexes[2] = sr.ReadBE<ushort>();
+            Indices[0] = sr.ReadBE<ushort>();
+            Indices[1] = sr.ReadBE<ushort>();
+            Indices[2] = sr.ReadBE<ushort>();
         }
 
         public override BasicPolyType PolyType
@@ -45,16 +45,16 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
     {
         public Quad()
         {
-            Indexes = new ushort[4];
+            Indices = new ushort[4];
         }
 
         public Quad(BufferedStreamReaderBE<MemoryStream> sr)
             : this()
         {
-            Indexes[0] = sr.ReadBE<ushort>();
-            Indexes[1] = sr.ReadBE<ushort>();
-            Indexes[2] = sr.ReadBE<ushort>();
-            Indexes[3] = sr.ReadBE<ushort>();
+            Indices[0] = sr.ReadBE<ushort>();
+            Indices[1] = sr.ReadBE<ushort>();
+            Indices[2] = sr.ReadBE<ushort>();
+            Indices[3] = sr.ReadBE<ushort>();
         }
 
         public override BasicPolyType PolyType
@@ -70,25 +70,25 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
 
         public Strip(int NumVerts, bool Reverse)
         {
-            Indexes = new ushort[NumVerts];
+            Indices = new ushort[NumVerts];
             Reversed = Reverse;
         }
 
         public Strip(ushort[] Verts, bool Reverse)
         {
-            Indexes = Verts;
+            Indices = Verts;
             Reversed = Reverse;
         }
 
         public Strip(BufferedStreamReaderBE<MemoryStream> sr)
         {
             var temp = sr.ReadBE<ushort>();
-            Indexes = new ushort[temp & 0x7FFF];
+            Indices = new ushort[temp & 0x7FFF];
             Reversed = (temp & 0x8000) == 0x8000;
 
-            for (int i = 0; i < Indexes.Length; i++)
+            for (int i = 0; i < Indices.Length; i++)
             {
-                Indexes[i] = sr.ReadBE<ushort>();
+                Indices[i] = sr.ReadBE<ushort>();
             }
         }
 
@@ -104,7 +104,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
 
         public override void Write(ByteListWriter outBytes)
         {
-            outBytes.AddValue((ushort)(Indexes.Length | (Reversed ? 0x8000 : 0)));
+            outBytes.AddValue((ushort)(Indices.Length | (Reversed ? 0x8000 : 0)));
             base.Write(outBytes);
         }
     }
@@ -112,7 +112,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
     [Serializable]
     public abstract class Poly : ICloneable
     {
-        public ushort[] Indexes { get; protected set; }
+        public ushort[] Indices { get; protected set; }
 
         internal Poly()
         {
@@ -120,14 +120,14 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
 
         public virtual int Size
         {
-            get { return Indexes.Length * 2; }
+            get { return Indices.Length * 2; }
         }
 
         public abstract BasicPolyType PolyType { get; }
 
         public virtual void Write(ByteListWriter outBytes)
         {
-            foreach (ushort item in Indexes)
+            foreach (ushort item in Indices)
                 outBytes.AddValue(item);
         }
 
@@ -168,7 +168,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
         public Poly Clone()
         {
             Poly result = (Poly)MemberwiseClone();
-            Indexes = (ushort[])Indexes.Clone();
+            Indices = (ushort[])Indices.Clone();
             return result;
         }
     }

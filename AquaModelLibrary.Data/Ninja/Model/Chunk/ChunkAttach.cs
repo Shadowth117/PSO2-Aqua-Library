@@ -9,6 +9,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
     public class ChunkAttach : Attach
     {
         public NinjaBoundingVolume bounding = new NinjaBoundingVolume();
+        public List<VertexChunk> vertChunks = new List<VertexChunk>();
+        public List<PolyChunk> polyChunks = new List<PolyChunk>();
 
         public ChunkAttach() { }
 
@@ -41,6 +43,26 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
                 center = sr.ReadBEV3(),
                 radius = sr.ReadBE<float>()
             };
+            if(vertChunkPointer != 0)
+            {
+                sr.Seek(vertChunkPointer + offset, SeekOrigin.Begin);
+                var chunkType = (ChunkType)(sr.ReadBE<uint>() & 0xFF);
+                while(chunkType != ChunkType.End)
+                {
+                    vertChunks.Add(new VertexChunk(sr, offset));
+                    chunkType = (ChunkType)(sr.ReadBE<uint>() & 0xFF);
+                }
+            }
+            if (polyChunkPointer != 0)
+            {
+                sr.Seek(polyChunkPointer + offset, SeekOrigin.Begin);
+                PolyChunk chunk = PolyChunk.Load(sr);
+                while (chunk.Type != ChunkType.End)
+                {
+                    polyChunks.Add(chunk);
+                    chunk = PolyChunk.Load(sr);
+                }
+            }
         }
 
 
@@ -56,7 +78,9 @@ namespace AquaModelLibrary.Data.Ninja.Model.Chunk
 
         public bool HasWeights()
         {
-            throw new NotImplementedException();
+            if (vertChunks.Count == 0)
+                return false;
+            return vertChunks[0].HasWeight;
         }
 
         public void Write(ByteListWriter outBytes, List<int> POF0Offsets)

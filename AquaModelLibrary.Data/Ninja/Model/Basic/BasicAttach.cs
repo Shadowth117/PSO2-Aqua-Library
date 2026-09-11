@@ -1,8 +1,8 @@
 ﻿using AquaModelLibrary.Data.PSO2.Aqua;
 using AquaModelLibrary.Data.PSO2.Aqua.AquaObjectData;
 using AquaModelLibrary.Helpers.Readers;
-using System.Numerics;
 using AquaModelLibrary.Helpers.Writers;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model.Basic
 {
@@ -105,7 +105,11 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
 
         public void GetVertexData(int nodeId, VTXL vtxl, Matrix4x4 transform)
         {
-            throw new NotImplementedException();
+            for(int i = 0; i < meshSetList.Count; i++)
+            {
+                var mesh = meshSetList[i];
+
+            }
         }
 
         public void GetFaceData(int nodeId, VTXL vtxl, AquaObject aqo)

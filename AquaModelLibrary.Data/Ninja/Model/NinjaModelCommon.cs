@@ -1,10 +1,68 @@
-﻿using System.Drawing;
-using System.Net;
+﻿using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
+using System.Drawing;
+using System.Numerics;
 
 namespace AquaModelLibrary.Data.Ninja.Model
 {
+    /// <summary>
+    /// Color functions refactored from SA Tools
+    /// </summary>
     public class NinjaModelCommon
     {
+        public static Vector2 ReadUV(BufferedStreamReaderBE<MemoryStream> sr, bool UVH, bool chunk, bool SADXReverse)
+        {
+            double U;
+            double V;
+            short data0 = sr.ReadBE<short>();
+            short data1 = sr.ReadBE<short>();
+            
+            if (chunk)
+            {
+                U = data0 / (UVH ? 1024.0 : 256.0);
+                V = data1 / (UVH ? 1024.0 : 256.0);
+            }
+            //"Reverse" is for the order used in SADX Gamecube
+            else if (SADXReverse || !sr._BEReadActive)
+            {
+                U = data0 / (UVH ? 1023.0 : 255.0);
+                V = data1 / (UVH ? 1023.0 : 255.0);
+            }
+            else
+            {
+                V = data0 / (UVH ? 1023.0 : 255.0);
+                U = data1 / (UVH ? 1023.0 : 255.0);
+            }
+
+            return new Vector2((float)U, (float)V);
+        }
+
+        public static void GetUVBytes(ByteListWriter outBytes, Vector2 uv, bool UVH, bool chunk, bool SADXReverse)
+        {
+            short data0;
+            short data1;
+            if (chunk)
+            {
+                data0 = (short)(uv.X * (UVH ? 1024.0 : 256.0));
+                data1 = (short)(uv.Y * (UVH ? 1024.0 : 256.0));
+            }
+            //"Reverse" is for the order used in SADX Gamecube
+            else if (SADXReverse || !outBytes.AddAsBigEndian)
+            {
+                data0 = (short)(uv.X * (UVH ? 1023.0 : 255.0));
+                data1 = (short)(uv.Y * (UVH ? 1023.0 : 255.0));
+            }
+            else
+            {
+                data0 = (short)(uv.Y * (UVH ? 1023.0 : 255.0));
+                data1 = (short)(uv.X * (UVH ? 1023.0 : 255.0));
+            }
+
+            outBytes.AddValue(data0);
+            outBytes.AddValue(data1);
+        }
+
+        #region Color Read/Write
         /// <summary>
         /// For ARGB8888_32
         /// </summary>
@@ -89,5 +147,30 @@ namespace AquaModelLibrary.Data.Ninja.Model
         {
             return (ushort)(((color.A >> 4) << 12) | ((color.R >> 4) << 8) | ((color.G >> 4) << 4) | (color.B >> 4));
         }
+
+        public static Color ReadColorARGB8888_16(bool bigEndian, ushort data0, ushort data1)
+        {
+            return Color.FromArgb((data1 << 16) | data0);
+        }
+
+        public static byte[] GetBytesColorARGB8888_16(Color color)
+        {
+            ByteListWriter result = new();
+            int i = color.ToArgb();
+            result.AddValue((ushort)(i & 0xFFFF));
+            result.AddValue((ushort)((i >> 16) & 0xFFFF));
+            return result.ToArray();
+        }
+
+        public static Color ReadColorXRGB8888_16(bool bigEndian, ushort data0, ushort data1)
+        {
+            return Color.FromArgb(unchecked((int)((uint)((data1 << 16) | data0) | 0xFF000000u)));
+        }
+
+        public static byte[] GetbytesColorXRGB8888_16(Color color)
+        {
+            return GetBytesColorARGB8888_16(Color.FromArgb(0, color));
+        }
+        #endregion
     }
 }

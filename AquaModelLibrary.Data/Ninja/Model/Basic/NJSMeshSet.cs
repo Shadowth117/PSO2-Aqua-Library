@@ -68,7 +68,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                             faceList.Add(new Strip(sr));
                             break;
                     }
-                    indexTotal += faceList[i].Indexes.Length;
+                    indexTotal += faceList[i].Indices.Length;
                 }
             }
 
@@ -93,7 +93,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                 sr.Seek(polyUvAddress + offset, SeekOrigin.Begin);
                 for (int i = 0; i < indexTotal; i++)
                 {
-                    polyUvList.Add(sr.ReadBEV2());
+                    polyUvList.Add(NinjaModelCommon.ReadUV(sr, false, false, SADXColorReverse));
                 }
             }
             sr.Seek(bookmark, SeekOrigin.Begin);
@@ -116,6 +116,8 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                     outBytes.AddValue(mesh.DXValue.Value);
                 }
             }
+
+            bool SADXColorReverse = outBytes.writeChecks.ContainsKey("SADXColorReverse") ? outBytes.writeChecks["SADXColorReverse"] : false;
             for (int j = 0; j < meshList.Count; j++)
             {
                 var mesh = meshList[j];
@@ -142,7 +144,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                     outBytes.FillInt($"polyClrAddress{j}", outBytes.Count);
                     for (int i = 0; i < mesh.polyClrList.Count; i++)
                     {
-                        outBytes.AddValue(mesh.polyClrList[i].ToArgb());
+                        outBytes.AddValue(NinjaModelCommon.GetBytesColorARGB8888_32(outBytes.AddAsBigEndian, SADXColorReverse, mesh.polyClrList[i]));
                     }
                     outBytes.AlignWriter(0x4, 0);
                 }
@@ -151,7 +153,7 @@ namespace AquaModelLibrary.Data.Ninja.Model.Basic
                     outBytes.FillInt($"polyUvAddress{j}", outBytes.Count);
                     for (int i = 0; i < mesh.polyUvList.Count; i++)
                     {
-                        outBytes.AddValue(mesh.polyUvList[i]);
+                        NinjaModelCommon.GetUVBytes(outBytes, mesh.polyUvList[i], false, false, SADXColorReverse);
                     }
                     outBytes.AlignWriter(0x4, 0);
                 }

@@ -1083,6 +1083,28 @@ namespace AquaModelLibrary.Data.Ninja.Model
             aqn.nodeList[currentNodeId] = aqNode;
         }
 
+        public static byte[] GetNjBytes(NJSObject njsObject, bool bigEndian, bool SADXColorReverse)
+        {
+            ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = bigEndian };
+            outBytes.writeChecks.Add("SADXColorReverse", SADXColorReverse);
+            List<int> pofSets = new List<int>();
+            njsObject.Write(outBytes, pofSets, true);
+
+            List<byte> headerMagic = new List<byte>
+            {
+                0x4E,
+                0x4A,
+                0x43,
+                0x4D
+            };
+            //This should almost always be little endian, but can be be in rare cases such as skies of arcadia
+            headerMagic.AddRange(BitConverter.GetBytes(outBytes.Count));
+
+            outBytes.InsertRange(0, headerMagic);
+            outBytes.AddRange(POF0.GeneratePOF0(pofSets));
+
+            return outBytes.ToArray();
+        }
         public static byte[] GetGjBytes(NJSObject njsObject, bool bigEndian)
         {
             ByteListWriter outBytes = new ByteListWriter() { AddAsBigEndian = bigEndian };
