@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using System.Text;
 using VrSharp.Gvr;
 using VrSharp.Pvr;
