@@ -1,4 +1,6 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
+using System.Text;
 
 namespace AquaModelLibrary.Data.BluePoint.CTXR
 {
@@ -7,9 +9,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         public short mipLevel;
         public short unkSht0;
         public int bufferSize;
-        public short unkSht1;
-        public short unkSht2;
-        public byte unkBt0;
+        public int lowerMipBufferSize;
         public string externalMipReference;
 
         public CTXRExternalReference() { }
@@ -18,9 +18,21 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             mipLevel = sr.ReadBE<short>();
             unkSht0 = sr.ReadBE<short>();
             bufferSize = sr.ReadBE<int>();
-            unkSht1 = sr.ReadBE<short>();
-            unkSht2 = sr.ReadBE<short>();
+            lowerMipBufferSize = sr.ReadBE<int>();
             externalMipReference = sr.ReadCStringSeek();
+        }
+
+        public byte[] GetBytes()
+        {
+            ByteListWriter outBytes = new();
+            outBytes.AddValue(mipLevel);
+            outBytes.AddValue(unkSht0);
+            outBytes.AddValue(bufferSize);
+            outBytes.AddValue(lowerMipBufferSize);
+            outBytes.AddValue(Encoding.ASCII.GetBytes(externalMipReference));
+            outBytes.Add(0);
+
+            return outBytes.ToArray();
         }
     }
 }

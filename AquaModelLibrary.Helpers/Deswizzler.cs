@@ -1,5 +1,5 @@
 ﻿using DrSwizzler;
-using static DirectXTex.DirectXTexUtility;
+using static AquaModelLibrary.Helpers.DDS.DirectXTexUtility;
 
 namespace AquaModelLibrary.Helpers
 {

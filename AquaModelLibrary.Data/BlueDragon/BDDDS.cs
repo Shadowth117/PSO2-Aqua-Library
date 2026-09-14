@@ -2,7 +2,7 @@
 using AquaModelLibrary.Helpers;
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
-using static DirectXTex.DirectXTexUtility;
+using static AquaModelLibrary.Helpers.DDS.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.BlueDragon
 {
@@ -110,7 +110,7 @@ namespace AquaModelLibrary.Data.BlueDragon
             //{
                 meta.MiscFlags2 = TexMiscFlags2.TEXMISC2ALPHAMODEMASK;
             //}
-            DirectXTex.DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, false);
+            AquaModelLibrary.Helpers.DDS.DirectXTexUtility.GenerateDDSHeader(meta, DDSFlags.NONE, out var ddsHeader, out var dx10Header, false);
 
             List<byte> outbytes = new List<byte>(DataHelpers.ConvertStruct(ddsHeader));
             /*

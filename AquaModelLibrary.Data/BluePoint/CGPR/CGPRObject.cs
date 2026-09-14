@@ -70,36 +70,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 var objStart = sr.Position;
                 try
                 {
-                    switch (type0)
-                    {
-                        case CGPRMagic.x00000000:
-                            var a = sr.Read<int>();
-                            return null;
-                        //DeSR
-                        case CGPRMagic.x2C146841:
-                            return new _2C146841_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.x2FBDFD9B:
-                            return new _2FBDFD9B_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.x427AC0E6:
-                            return new _427AC0E6_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.x58D3EEDC:
-                            return new _58D3EEDC_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.x6ACFBD6C:
-                            return new _6ACFBD6C_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.x7FB9F5F0:
-                            return new _7FB9F5F0_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.xC1A69458:
-                            return new _C1A69458_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        case CGPRMagic.xFAE88582:
-                            return new _FAE88582_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                        //SOTC
-                        case CGPRMagic.x2DE7F55C:
-                            return new _2DE7F55C_Object(sr, DecideEra(currentEra, BPEra.SOTC));
-                        case CGPRMagic.xFBAD9897:
-                            return new _FBAD9897_Object(sr, DecideEra(currentEra, BPEra.SOTC));
-                        default:
-                            return new CGPRGeneric_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    }
+                    return ReadObject(sr, currentEra, type0);
                 }
                 catch
                 {
@@ -108,38 +79,44 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
                 }
             } else
             {
-                switch (type0)
-                {
-                    case CGPRMagic.x00000000:
-                        sr.Read<int>();
-                        return null;
-                    //DeSR
-                    case CGPRMagic.x2C146841:
-                        return new _2C146841_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.x2FBDFD9B:
-                        return new _2FBDFD9B_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.x427AC0E6:
-                        return new _427AC0E6_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.x58D3EEDC:
-                        return new _58D3EEDC_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.x6ACFBD6C:
-                        return new _6ACFBD6C_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.x7FB9F5F0:
-                        return new _7FB9F5F0_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.xC1A69458:
-                        return new _C1A69458_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    case CGPRMagic.xFAE88582:
-                        return new _FAE88582_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                    //SOTC
-                    case CGPRMagic.x2DE7F55C:
-                        return new _2DE7F55C_Object(sr, DecideEra(currentEra, BPEra.SOTC));
-                    case CGPRMagic.xFBAD9897:
-                        return new _FBAD9897_Object(sr, DecideEra(currentEra, BPEra.SOTC));
-                    default:
-                        return new CGPRGeneric_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
-                }
+                return ReadObject(sr, currentEra, type0);
             }
         }
+
+        private static CGPRObject ReadObject(BufferedStreamReaderBE<MemoryStream> sr, BPEra currentEra, CGPRMagic type0)
+        {
+            switch (type0)
+            {
+                case CGPRMagic.x00000000:
+                    var a = sr.Read<int>();
+                    return null;
+                //DeSR
+                case CGPRMagic.x2C146841:
+                    return new _2C146841_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x2FBDFD9B:
+                    return new _2FBDFD9B_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x427AC0E6:
+                    return new _427AC0E6_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x58D3EEDC:
+                    return new _58D3EEDC_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x6ACFBD6C:
+                    return new _6ACFBD6C_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.x7FB9F5F0:
+                    return new _7FB9F5F0_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.xC1A69458:
+                    return new _C1A69458_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                case CGPRMagic.xFAE88582:
+                    return new _FAE88582_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+                //SOTC
+                case CGPRMagic.x2DE7F55C:
+                    return new _2DE7F55C_Object(sr, DecideEra(currentEra, BPEra.SOTC));
+                case CGPRMagic.xFBAD9897:
+                    return new _FBAD9897_Object(sr, DecideEra(currentEra, BPEra.SOTC));
+                default:
+                    return new CGPRGeneric_Object(sr, DecideEra(currentEra, BPEra.DemonsSouls));
+            }
+        }
+
         public static BPEra DecideEra(BPEra currentEra, BPEra newestEra)
         {
             if(currentEra == BPEra.None)

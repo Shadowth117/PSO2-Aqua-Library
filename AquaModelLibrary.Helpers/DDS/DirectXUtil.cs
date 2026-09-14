@@ -24,7 +24,7 @@
 // Description: DirectXTex DDS Header Utilities
 using System.Runtime.InteropServices;
 
-namespace DirectXTex
+namespace AquaModelLibrary.Helpers.DDS
 {
     public class DirectXTexUtility
     {

@@ -102,12 +102,12 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             for (int i = 0; i < vertDefinitionsCount; i++)
             {
                 sr.Seek(vertexDataStart + vertDefs[i].dataStart, System.IO.SeekOrigin.Begin);
-                ReadVertDefData(sr, vertCount, vertDefs[i].dataMagic, vertDefs[i].dataSize);
+                ReadVertDefData(sr, vertCount, vertDefs[i].dataMagic, vertDefs[i].dataSize, vertDefs[i].dataFormat);
             }
             sr.Seek(vertexDataStart + vertDefs[^1].dataStart + vertDefs[^1].dataSize, System.IO.SeekOrigin.Begin);
         }
 
-        public void ReadVertDefData(BufferedStreamReaderBE<MemoryStream> sr, int vertCount, VertexMagic dataMagic, long dataSize)
+        public void ReadVertDefData(BufferedStreamReaderBE<MemoryStream> sr, int vertCount, VertexMagic dataMagic, long dataSize, ushort dataFormat)
         {
             switch (dataMagic)
             {
@@ -137,8 +137,18 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     List<byte[]> colors = new List<byte[]>();
                     for (int v = 0; v < vertCount; v++)
                     {
-                        colors.Add(sr.ReadBytes(sr.Position, 4));
-                        sr.Seek(4, System.IO.SeekOrigin.Current);
+                        switch (dataFormat)
+                        {
+                            case 4:
+                                colors.Add(sr.ReadBytes(sr.Position, 4));
+                                sr.Seek(4, System.IO.SeekOrigin.Current);
+                                break;
+                            case 7: //Hack until 16 bit vert colors are actually handled
+                                colors.Add([(byte)(sr.Read<ushort>() / 0x100), (byte)(sr.Read<ushort>() / 0x100), (byte)(sr.Read<ushort>() / 0x100), (byte)(sr.Read<ushort>() / 0x100)]); 
+                                sr.Seek(8, System.IO.SeekOrigin.Current);
+                                break;
+                        }
+
                     }
                     colorDict.Add(dataMagic, colors);
                     break;
@@ -248,7 +258,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     case VertexMagic.COL0:
                     case VertexMagic.COL1:
                     case VertexMagic.COL2:
-                        outBytes.AddValue((ushort)0x4);
+                        outBytes.AddValue(vertDef.dataFormat == 7 ? (ushort)7 : (ushort)0x4);
                         break;
                     case VertexMagic.SAT_:
                         outBytes.AddValue((ushort)0x0);
@@ -335,7 +345,19 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                         var colors = colorDict[vertDefs[i].dataMagic];
                         foreach (var color in colors)
                         {
-                            outBytes.AddValue(color);
+                            switch(vertDefs[i].dataFormat)
+                            {
+                                case 7: //Hack until 16 bit vert colors are actually handled
+                                    outBytes.AddValue((ushort)(color[0] * 0x100));
+                                    outBytes.AddValue((ushort)(color[1] * 0x100));
+                                    outBytes.AddValue((ushort)(color[2] * 0x100));
+                                    outBytes.AddValue((ushort)(color[3] * 0x100));
+                                    break;
+                                case 4:
+                                default:
+                                    outBytes.AddValue(color);
+                                    break;
+                            }
                         }
                         break;
                     case VertexMagic.SAT_:

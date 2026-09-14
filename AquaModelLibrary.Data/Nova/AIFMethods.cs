@@ -1,8 +1,7 @@
 ﻿using AquaModelLibrary.Data.Nova.Structures;
 using AquaModelLibrary.Helpers;
-using DirectXTex;
 using Reloaded.Memory.Streams;
-using static DirectXTex.DirectXTexUtility;
+using static AquaModelLibrary.Helpers.DDS.DirectXTexUtility;
 
 namespace AquaModelLibrary.Data.Nova
 {

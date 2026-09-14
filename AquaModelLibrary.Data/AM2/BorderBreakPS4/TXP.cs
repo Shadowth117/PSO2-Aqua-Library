@@ -1,7 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
 using AquaModelLibrary.Helpers;
-using static DirectXTex.DirectXTexUtility;
-using DirectXTex;
+using static AquaModelLibrary.Helpers.DDS.DirectXTexUtility;
+using AquaModelLibrary.Helpers.DDS;
 
 namespace AquaModelLibrary.Data.AM2.BorderBreakPS4
 {
