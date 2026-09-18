@@ -15,6 +15,32 @@
                 Z = z;
             }
 
+            public int this[int index]
+            {
+                get
+                {
+                    switch(index)
+                    {
+                        case 0: return X;
+                        case 1: return Y;
+                        case 2: return Z;
+                        default:
+                            throw new IndexOutOfRangeException();
+                    }
+                }
+                set
+                {
+                    switch(index)
+                    {
+                        case 0: X = value; return;
+                        case 1: X = value; return;
+                        case 2: X = value; return;
+                        default:
+                            throw new IndexOutOfRangeException();
+                    }
+                }
+            }
+
             public int[] GetAsArray()
             {
                 return new int[] { X, Y, Z };
