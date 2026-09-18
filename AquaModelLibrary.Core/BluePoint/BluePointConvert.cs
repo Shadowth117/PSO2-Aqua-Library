@@ -553,8 +553,6 @@ namespace AquaModelLibrary.Core.BluePoint
 
                     var matrix = Matrix4x4.Identity;
                     matrix *= Matrix4x4.CreateScale(1, 1, 1);
-                    var rotation = Matrix4x4.CreateFromQuaternion(quat);
-                    matrix *= rotation;
                     matrix *= Matrix4x4.CreateTranslation(new Vector3());
                     Matrix4x4.Invert(matrix, out var invMat);
 
