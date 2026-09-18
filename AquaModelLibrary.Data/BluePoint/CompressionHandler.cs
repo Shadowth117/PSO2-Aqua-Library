@@ -4,8 +4,9 @@ namespace AquaModelLibrary.Data.BluePoint
 {
     public static class CompressionHandler
     {
-        public static byte[] CheckCompression(byte[] file)
+        public static byte[] CheckCompression(byte[] file, out bool wasCompressed)
         {
+            wasCompressed = false;
             var compCheck = BitConverter.ToInt16(file, 0);
             long decompLength = -1;
             if((compCheck == 0xA8C) || (compCheck == 0xACC))
@@ -21,6 +22,8 @@ namespace AquaModelLibrary.Data.BluePoint
             {
                 return file;
             }
+
+            wasCompressed = true;
             var tempFile = Oodle.OodleDecompress(file, decompLength);
             var newFile = new byte[decompLength + 0xC];
             Array.Copy(file, file.Length - 0xC, newFile, decompLength, 0xC);

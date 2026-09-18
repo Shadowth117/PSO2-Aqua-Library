@@ -12,6 +12,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMAT
 
     public class CMAT
     {
+        public bool wasCompressed = false;
         public int hash;
         public int unk0;
         public int cmatFlags;
@@ -30,7 +31,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMAT
 
         public CMAT(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {

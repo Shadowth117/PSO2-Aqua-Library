@@ -10,6 +10,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 {
     public class CTXR
     {
+        public bool wasCompressed = false;
         public bool isPng = false;
         public int textureFormat = -1;
         public short texFlags;
@@ -42,7 +43,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         public CTXR(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
 
             //Apparently these can just be actual .png files? Well, gotta check for that.
             var magicCheck = BitConverter.ToUInt32(file, 0);
@@ -60,7 +61,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         public CTXR(byte[] file, bool readTexBuffers)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
 
             //Apparently these can just be actual .png files? Well, gotta check for that.
             var magicCheck = BitConverter.ToUInt32(file, 0);
@@ -197,7 +198,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             outBytes.AddValue(GetFormatInfo1());
 
             var minMipLevel = GetMinMipLevel();
-            outBytes.AddValue(GetTypeMipFlags(minMipLevel));
+            outBytes.AddValue(GenerateTypeMipFlags(minMipLevel));
             outBytes.AddValue((short)(mipMapsList.Count - 1));
             outBytes.AddValue((short)0);
             outBytes.AddValue(0x10 * minMipLevel);
@@ -245,10 +246,10 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
         }
 
-        public ushort GetTypeMipFlags(int minMipLevel)
+        public ushort GenerateTypeMipFlags(int minMipLevel)
         {
             int flags = 0;
-            switch(textureType)
+            switch (textureType)
             {
                 case CTextureType.Standard:
                     flags = 0x9000;
@@ -264,16 +265,21 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     break;
             }
 
-            switch(textureFormat)
+            switch (textureFormat)
             {
-                case 3:
+                case 3:   //No swizzling, no flag
                     break;
                 default:
-                    flags |= 0x90;
+                    flags |= (byte)CTileMode.Tile64KB * 0x10;
                     break;
             }
 
             return (ushort)(flags | minMipLevel);
+        }
+
+        public CTileMode GetTypeMipFlagTiling(ushort typeAndMipFlags)
+        {
+            return (CTileMode)((typeAndMipFlags >> 4) & (byte)CTileMode.Tile64KB);
         }
 
         public int GetMinMipLevel()
@@ -482,7 +488,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     HeightBaseByte = sr.ReadBE<byte>();
                     HeightMultiplierByte = sr.ReadBE<byte>();
                     var formatInfo1 = sr.ReadBE<short>();
-                    var typeMipFlags = sr.ReadBE<short>();
+                    var typeMipFlags = sr.ReadBE<ushort>();
 
                     sliceCount = sr.ReadBE<short>() + 1; //Usually has a value except for the very large textures
                     var sht4 = sr.ReadBE<short>();
@@ -503,7 +509,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
                     if (readTexBuffers)
                     {
-                        ReadDeSRTexBuffers(sr, pixelFormat, headerLength, sliceBufferLength, finalWidth, finalHeight, sourceBytesPerPixelSet, formatBpp);
+                        ReadDeSRTexBuffers(sr, pixelFormat, headerLength, sliceBufferLength, finalWidth, finalHeight, sourceBytesPerPixelSet, formatBpp, GetTypeMipFlagTiling(typeMipFlags));
                     }
                     break;
                 default:
@@ -756,6 +762,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             switch(textureType)
             {
                 case CTextureType.LargeUI:
+                case CTextureType.Volume:
                     gapBufferLength = 0;
                     break;
                 default:
@@ -771,7 +778,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
         /// All mipmap buffers after this will be 0x100 regardless of true size.
         /// While the buffers are larger than the actual texture size, the swizzling happens at the BUFFER level and thus reading the full buffer for deswizzling is paramount
         /// </summary>
-        private void ReadDeSRTexBuffers(BufferedStreamReaderBE<MemoryStream> sr, DXGIFormat pixelFormat, long headerLength, long sliceBufferLength, int finalWidth, int finalHeight, int sourceBytesPerPixelSet, int formatBpp)
+        private void ReadDeSRTexBuffers(BufferedStreamReaderBE<MemoryStream> sr, DXGIFormat pixelFormat, long headerLength, long sliceBufferLength, int finalWidth, int finalHeight, int sourceBytesPerPixelSet, int formatBpp, CTileMode tileMode)
         {
             for (int s = 0; s < sliceCount; s++)
             {
@@ -827,7 +834,12 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     }
                     else
                     {
-                        mipFull = DeSwizzler.PS5DeSwizzle(mipFull, swizzleBlockWidth, swizzleBlockHeight, pixelFormat);
+                        switch(tileMode)
+                        {
+                            case CTileMode.Tile64KB:
+                                mipFull = DeSwizzler.PS5DeSwizzle(mipFull, swizzleBlockWidth, swizzleBlockHeight, pixelFormat);
+                                break;
+                        }
 
                         //Extract as a tile from the pixels if we haven't done that at the deswizzle step
                         if (swizzleBlockWidth != mipWidth || swizzleBlockHeight != mipHeight)
@@ -963,6 +975,34 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     break;
             }
             return ((SOTCBaseByte + 1) * 4) * (resByte + 1);
+        }
+
+        public int GetWidth()
+        {
+            switch(footerData.version)
+            {
+                case 0x25:
+                    return GetSOTCWidthComponent(WidthBaseByte, WidthMultiplierByte);
+                case 0x6E:
+                    return GetDesResolutionComponent(WidthBaseByte, WidthMultiplierByte, 0xC0);
+                default:
+                case 0:
+                    return explicitWidth;
+            }
+        }
+
+        public int GetHeight()
+        {
+            switch (footerData.version)
+            {
+                case 0x25:
+                    return GetSOTCHeightComponent(HeightBaseByte, HeightMultiplierByte);
+                case 0x6E:
+                    return GetDesResolutionComponent(HeightBaseByte, HeightMultiplierByte, 0x80);
+                default:
+                case 0:
+                    return explicitWidth;
+            }
         }
 
         /// <summary>
@@ -1227,8 +1267,9 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         private void ReadAndDeSwizzleCTexChunk(DXGIFormat pixelFormat, int chunkWidth, int chunkHeight, List<byte> externalMipsData, string chunkPath)
         {
+            bool wasCompressed = false;
             var chunk = File.ReadAllBytes(chunkPath);
-            chunk = CompressionHandler.CheckCompression(chunk);
+            chunk = CompressionHandler.CheckCompression(chunk, out wasCompressed);
 
             var deSwizzChunkSize = GetDeSwizzleSize(chunk.Length - 0xC, pixelFormat, chunkWidth, chunkHeight, out int deSwizzWidth, out int deSwizzHeight);
             byte[] data = null;
@@ -1273,7 +1314,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
         }
 
-        private List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount, int depth = 1)
+        public List<byte> GenerateDDSHeader(DXGIFormat pixelFormat, int texWidth, int texHeight, int mipCount, int depth = 1)
         {
             var meta = GenerateMetaData(texWidth, texHeight, mipCount, pixelFormat, textureType == CTextureType.CubeMap, depth);
             if (alphaSetting > 0)
@@ -1303,9 +1344,9 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 case 0x0:
                     return DXGIFormat.R8G8B8A8UNORM;
                 case 0x1:
-                    return DXGIFormat.R16G16B16A16UNORM; //Incorrect type. Used in Demon's Souls only for HDR comparison textures. Unsure what this should be.
+                    return DXGIFormat.R16G16B16A16FLOAT;
                 case 0x3:
-                    return DXGIFormat.BC1UNORM; //Incorrect type. Used in Demon's Souls for shadow maps. Unsure what this should be.
+                    return DXGIFormat.R32FLOAT; 
                 case 0xB:
                     return DXGIFormat.BC1UNORM;
                 case 0xC:
@@ -1333,8 +1374,10 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             {
                 case DXGIFormat.R8G8B8A8UNORM:
                     return 0x0;
-                case DXGIFormat.R16G16B16A16UNORM:
+                case DXGIFormat.R16G16B16A16FLOAT:
                     return 0x1;
+                case DXGIFormat.R32FLOAT:
+                    return 0x3;
                 case DXGIFormat.BC1UNORM:
                     return 0xB;
                 case DXGIFormat.BC2UNORM:
@@ -1369,8 +1412,8 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                 case 0x0:
                     return false;
                 case 0x1:
-                    return true;
                 case 0x3:
+                    return true;
                 case 0xB:
                 case 0xC:
                 case 0xD:

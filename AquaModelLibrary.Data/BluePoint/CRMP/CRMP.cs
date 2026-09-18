@@ -7,6 +7,7 @@ namespace AquaModelLibrary.Data.BluePoint.CRMP
     /// </summary>
     public class CRMP
     {
+        public bool wasCompressed = false;
         public List<CRMPEntry> entries = new List<CRMPEntry>();
         public CFooter footer;
 
@@ -14,7 +15,7 @@ namespace AquaModelLibrary.Data.BluePoint.CRMP
 
         public CRMP(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {

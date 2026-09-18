@@ -538,7 +538,7 @@ namespace AquaModelLibrary.Core.BluePoint
             else if (cskl == null && msh.boneData != null)
             {
                 aqn.nodeList.Clear();
-                for (int i = 0; i < msh.boneData.nameCount; i++)
+                for (int i = 0; i < msh.boneData.boneNames.Count; i++)
                 {
                     aqp.bonePalette.Add((uint)i);
 
@@ -549,8 +549,6 @@ namespace AquaModelLibrary.Core.BluePoint
                     aqNode.parentId = i - 1;
                     aqNode.unkNode = -1;
 
-                    var quat = msh.boneData.boneVec4Array[i].ToQuat();
-                    aqNode.eulRot = MathExtras.QuaternionToEuler(quat);
                     aqNode.scale = new Vector3(1, 1, 1);
 
                     var matrix = Matrix4x4.Identity;
@@ -582,9 +580,9 @@ namespace AquaModelLibrary.Core.BluePoint
 
                     Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
                     Matrix4x4 invMatReal;
-                    if (cskl.invTransforms.Count > 0)
+                    if (cskl.invWorldTransforms.Count > 0)
                     {
-                        invMatReal = cskl.invTransforms[i];
+                        invMatReal = cskl.invWorldTransforms[i];
                     }
                     else
                     {

@@ -4,6 +4,7 @@ namespace AquaModelLibrary.Data.BluePoint.CANI
 {
     public class CANI
     {
+        public bool wasCompressed = false;
         public CANIHeader header = null;
         public List<List<CANIFrameData>> caniFrameDataList = new List<List<CANIFrameData>>();
         //public List<CANIMainData> caniMainData = new List<CANIMainData>();
@@ -12,7 +13,7 @@ namespace AquaModelLibrary.Data.BluePoint.CANI
 
         public CANI(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {

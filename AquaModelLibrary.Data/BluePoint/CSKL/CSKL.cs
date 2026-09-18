@@ -5,9 +5,10 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 {
     public class CSKL
     {
+        public bool wasCompressed = false;
         public CSKLHeader header = null;
         public List<CSKLTransform> transforms = new List<CSKLTransform>();
-        public List<Matrix4x4> invTransforms = new List<Matrix4x4>();
+        public List<Matrix4x4> invWorldTransforms = new List<Matrix4x4>();
         public CSKLMetaData metadata = null;
         public CSKLNames names = null;
         public CFooter footerData;
@@ -19,7 +20,7 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
 
         public CSKL(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
@@ -105,7 +106,10 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                     sr.Seek(header.inverseBoneMatricesOffset, System.IO.SeekOrigin.Begin);
                     for (int i = 0; i < header.boneCount; i++)
                     {
-                        invTransforms.Add(sr.Read<Matrix4x4>());
+                        invWorldTransforms.Add(Matrix4x4.Transpose(new Matrix4x4(sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), sr.Read<float>(),
+                                                                            sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), sr.Read<float>(),
+                                                                            sr.Read<float>(), sr.Read<float>(), sr.Read<float>(), sr.Read<float>(),
+                                                                            0, 0, 0, 1)));
                     }
                     sr.Seek(header.boneMetadataOffset, System.IO.SeekOrigin.Begin);
                     metadata = new CSKLMetaData(sr, header.boneCount);

@@ -4,6 +4,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
 {
     public class CGPR
     {
+        public bool wasCompressed = false;
         public BPEra era;
         public List<CGPRObject> objects = new List<CGPRObject>();
         public List<CGPRMetadata> metadataList = new List<CGPRMetadata>();
@@ -17,7 +18,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
         }
         public CGPR(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {
@@ -34,6 +35,7 @@ namespace AquaModelLibrary.Data.BluePoint.CGPR
             {
                 int_04 = sr.Read<int>();
                 cfooter = sr.Read<CFooter>();
+                return; 
             }
 
             era = BPEra.None;

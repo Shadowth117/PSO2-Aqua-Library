@@ -7,6 +7,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
     public class CMSHHeader
     {
+        public uint hash;
         //These define a lot of what's going to be in a particular model variant, but currently it's difficult to guess what each bit means.
         public ushort variantFlags 
         {
@@ -45,8 +46,9 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
         }
 
-        public CMSHHeader(BufferedStreamReaderBE<MemoryStream> sr)
+        public CMSHHeader(BufferedStreamReaderBE<MemoryStream> sr, int version)
         {
+            isDeSR = version == 0x5B;
             variantFlag = sr.Read<byte>();
             variantFlag2 = sr.Read<byte>();
 
@@ -66,14 +68,16 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     unk1 = sr.Read<ushort>();
                     ReadReferenceModelPath(sr);
                     break;
-
                 case 0x200:
                 case 0xA01:
                 case 0x2A01:
                 case 0xAA01:
                     unk0 = sr.Read<byte>();
-                    unk1 = sr.Read<ushort>();
-                    CheckForSizeFloat(sr);
+                    unk1 = sr.Read<ushort>(); 
+                    if (isDeSR)
+                    {
+                        sizeFloat = sr.Read<float>();
+                    }
                     meshCount = sr.Read<int>();
                     ReadMeshList(sr);
                     break;
@@ -125,22 +129,6 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 sr.Seek(1, System.IO.SeekOrigin.Current);
             }
             OtherModelName = Encoding.UTF8.GetString(sr.ReadBytes(sr.Position, mdlLen));
-        }
-
-        private void CheckForSizeFloat(BufferedStreamReaderBE<MemoryStream> sr)
-        {
-            //For certain SOTC models
-            var crcCheck = sr.ReadBytes(sr.Position, 4);
-            isDeSR = crcCheck[2] > 0 || crcCheck[3] > 0;
-            if (variantFlags == 0x200 && BitConverter.ToUInt64(sr.ReadBytes(0x25, 8), 0) == dummyConstData)
-            {
-                isDeSR = true;
-            }
-
-            if (isDeSR)
-            {
-                sizeFloat = sr.Read<float>();
-            }
         }
 
         public byte[] GetBytes()

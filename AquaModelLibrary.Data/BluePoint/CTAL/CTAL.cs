@@ -8,6 +8,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTAL
     /// </summary>
     public class CTAL
     {
+        public bool wasCompressed = false;
         public string ctxrReference;
         public List<CTALEntry> entries = new List<CTALEntry>();
         public CFooter footer;
@@ -16,7 +17,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTAL
 
         public CTAL(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))
             {

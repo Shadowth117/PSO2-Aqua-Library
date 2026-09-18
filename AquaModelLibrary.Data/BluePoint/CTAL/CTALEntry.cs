@@ -4,11 +4,11 @@ namespace AquaModelLibrary.Data.BluePoint.CTAL
 {
     public struct CTALEntry
     {
-        public int hash;
+        public uint hash;
         public Vector2 upperLeftPoint;
         public Vector2 lowerLeftPoint;
         public Vector2 lowerRightPoint;
         public Vector2 upperRightPoint;
-        public int unk0;
+        public int sliceNumber;
     }
 }

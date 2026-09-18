@@ -6,6 +6,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
 {
     public class CMDL
     {
+        public bool wasCompressed = false;
         public CMDLMagic magic;
         public CGPRObject mainObject = null;
         public CGPRObject secondObject = null;
@@ -18,7 +19,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMDL
 
         public CMDL(byte[] file)
         {
-            file = CompressionHandler.CheckCompression(file);
+            file = CompressionHandler.CheckCompression(file, out wasCompressed);
 
             using (MemoryStream ms = new MemoryStream(file))
             using (BufferedStreamReaderBE<MemoryStream> sr = new BufferedStreamReaderBE<MemoryStream>(ms))

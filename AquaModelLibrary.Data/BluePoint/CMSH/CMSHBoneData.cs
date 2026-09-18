@@ -1,5 +1,5 @@
-﻿using AquaModelLibrary.Helpers.Writers;
-using AquaModelLibrary.Helpers.Readers;
+﻿using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 using System.Text;
 
@@ -9,15 +9,19 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
     {
         public CLength skelPathLength;
         public string skeletonPath = null;
-        public int nameCount;
-        public int unk0;
+        public int skeletonHash;
         public int size;
 
 
         public List<string> boneNames = new List<string>(); //CString name strings
 
-        public int boneVec4Count;
-        public List<Vector4> boneVec4Array = new List<Vector4>(); //Some entries are 0ed out. 0ed entries may be bones unused in current mesh.
+        /// <summary>
+        /// Bounding spheres which encompass all vertices affected by the influence of a particular bone in the mesh.
+        /// These are calculated by averaging all vertex positions per face which are influenced at all by a bone 
+        /// and then making the radius from the furthest vertex from the center.
+        /// The center lastly has the bone's transformation removed by transforming it by the bone's inverse world transform. 
+        /// </summary>
+        public List<Vector4> boneBoundingSpheres = new List<Vector4>(); 
 
         public CMSHBoneData()
         {
@@ -28,18 +32,18 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         {
             var pos = sr.Position;
             ReadSkeletonPath(sr, era);
-            unk0 = sr.Read<int>();
-            nameCount = sr.Read<int>();
+            skeletonHash = sr.Read<int>();
+            var nameCount = sr.Read<int>();
             size = sr.Read<int>();
 
             for (int i = 0; i < nameCount; i++)
             {
                 boneNames.Add(sr.ReadCStringSeek());
             }
-            boneVec4Count = sr.Read<int>(); //Should be the same as before, but in case it's not
+            var boneVec4Count = sr.Read<int>(); //Should be the same as before, but in case it's not
             for (int i = 0; i < boneVec4Count; i++)
             {
-                boneVec4Array.Add(sr.Read<Vector4>());
+                boneBoundingSpheres.Add(sr.Read<Vector4>());
             }
         }
 
@@ -63,7 +67,7 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         {
             var outBytes = new ByteListWriter();
             outBytes.AddRange((new BPString(skeletonPath)).GetBytes(era));
-            outBytes.AddValue(unk0);
+            outBytes.AddValue(skeletonHash);
             outBytes.AddValue(boneNames.Count);
             outBytes.ReserveInt("BoneNamesSize");
 
@@ -72,8 +76,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                 outBytes.AddRange(Encoding.ASCII.GetBytes(boneNames[i]));
                 outBytes.Add(0);
             }
-            outBytes.AddValue(boneVec4Array.Count);
-            foreach(var vec4 in boneVec4Array)
+            outBytes.AddValue(boneBoundingSpheres.Count);
+            foreach(var vec4 in boneBoundingSpheres)
             {
                 outBytes.AddValue(vec4);
             }
