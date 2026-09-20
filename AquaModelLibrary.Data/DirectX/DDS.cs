@@ -323,16 +323,18 @@ namespace AquaModelLibrary.Data.DirectX
             if (dwCaps2.HasFlag(DDS.DDSCAPS2.VOLUME))
             {
                 int depth = dwDepth;
+                for(int d = 0; d < depth; d++)
+                {
+                    mipData.Add(new Image());
+                }
                 for (int m = 0; m < dwMipMapCount; m++)
                 {
-                    Image img = new Image();
                     var imageSize = fullImageSize;
                     for (int i = 0; i < depth; i++)
                     {
                         if (sr.Position + imageSize <= sr.BaseStream.Length)
                         {
-                            img.subImages.Add(sr.ReadBytesSeek((int)imageSize));
-                            imageSize /= 4;
+                            mipData[i].subImages.Add(sr.ReadBytesSeek((int)imageSize));
                             if (imageSize < sourceBytesPerPixelSet)
                             {
                                 imageSize = sourceBytesPerPixelSet;
@@ -349,8 +351,8 @@ namespace AquaModelLibrary.Data.DirectX
                     if (depth != 1)
                     {
                         depth /= 2;
+                        imageSize /= 4;
                     }
-                    mipData.Add(img);
                 }
             }
             else //We can read CubeMaps and standard textures together
