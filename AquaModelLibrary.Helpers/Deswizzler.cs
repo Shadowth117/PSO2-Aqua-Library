@@ -242,19 +242,16 @@ namespace AquaModelLibrary.Helpers
             return DrSwizzler.Deswizzler.PS4Deswizzle(swizzledData, width, height, sourceBytesPerPixelSet, pixelBlockSize, formatbpp);
         }
 
-        /// <summary>
-        /// RawTex Implementation
-        /// </summary>
-        public static byte[] PS5DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat)
+        
+        public static byte[] PS5DeSwizzle(byte[] swizzledData, int width, int height, DXGIFormat pixelFormat, int volumeTexDepth = 1, int tileMode = 9)
         {
-            return DrSwizzler.Deswizzler.PS5Deswizzle(swizzledData, width, height, (DrSwizzler.DDS.DXEnums.DXGIFormat)pixelFormat);
+            return DrSwizzler.Deswizzler.PS5Deswizzle(swizzledData, width, height, (DrSwizzler.DDS.DXEnums.DXGIFormat)pixelFormat, volumeTexDepth, tileMode);
         }
-
-        public static byte[] PS5DeSwizzle(byte[] swizzledData, int width, int height, int sourceBytesPerPixelSet, int pixelBlockSize, int formatbpp)
+        
+        public static byte[] PS5DeSwizzle(byte[] swizzledData, int width, int height, int sourceBytesPerPixelSet, int pixelBlockSize, int volumeTexDepth = 1, int tileMode = 9)
         {
-            return DrSwizzler.Deswizzler.PS5Deswizzle(swizzledData, width, height, sourceBytesPerPixelSet, pixelBlockSize, formatbpp);
+            return DrSwizzler.Deswizzler.PS5Deswizzle(swizzledData, width, height, sourceBytesPerPixelSet, pixelBlockSize, volumeTexDepth, tileMode);
         }
-
 
         /// <summary>
         /// RawTex Implementation
