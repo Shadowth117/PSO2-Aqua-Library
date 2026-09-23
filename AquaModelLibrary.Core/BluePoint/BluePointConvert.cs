@@ -574,40 +574,8 @@ namespace AquaModelLibrary.Core.BluePoint
                     var metadata = cskl.metadata.familyIds[i];
                     var parentId = metadata.parentId;
 
-                    var tfmMat = Matrix4x4.Identity;
-
-                    Matrix4x4 mat = cskl.transforms[i].ComputeLocalTransform();
-                    Matrix4x4 invMatReal;
-                    if (cskl.invWorldTransforms.Count > 0)
-                    {
-                        invMatReal = cskl.invWorldTransforms[i];
-                    }
-                    else
-                    {
-                        Matrix4x4.Invert(mat, out invMatReal);
-                    }
-                    //invMatReal = Matrix4x4.Transpose(invMatReal);
-                    Matrix4x4.Invert(invMatReal, out var invInvMat);
-                    mat *= tfmMat;
-
-                    Matrix4x4.Decompose(mat, out var scale, out var quatRot, out var translation);
-
-                    //If there's a parent, multiply by it
-                    if (parentId != -1)
-                    {
-                        var pn = aqn.nodeList[parentId];
-                        var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
-                                                      pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
-                                                      pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
-                                                      pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
-
-                        Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
-                        mat = mat * invParentInvTfm;
-                    }
-                    if (parentId == -1 && i != 0)
-                    {
-                        parentId = 0;
-                    }
+                    var invMat = cskl.invWorldTransforms[i];
+                    var tfm = cskl.transforms[i];
 
                     //Create AQN node
                     NODE aqNode = new NODE();
@@ -616,17 +584,15 @@ namespace AquaModelLibrary.Core.BluePoint
                     aqNode.parentId = parentId;
                     aqNode.unkNode = -1;
 
-                    aqNode.pos = translation;
-                    aqNode.eulRot = MathExtras.QuaternionToEuler(quatRot);
+                    aqNode.pos = tfm.position;
+                    aqNode.eulRot = MathExtras.QuaternionToEuler(tfm.rotation);
                     aqNode.scale = new Vector3(1, 1, 1);
 
-                    Matrix4x4.Invert(mat, out var invMat);
                     aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                     aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
                     aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
                     aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
                     aqNode.boneName.SetString(cskl.names.primaryNames.names[i].Split('|').Last());
-                    //Debug.WriteLine($"{i} " + aqNode.boneName.GetString());
                     aqn.nodeList.Add(aqNode);
                 }
             }
