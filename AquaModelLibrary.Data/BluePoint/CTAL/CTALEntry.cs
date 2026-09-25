@@ -4,7 +4,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTAL
 {
     public struct CTALEntry
     {
-        public uint hash;
+        public CTALEntryHash hash;
         public Vector2 upperLeftPoint;
         public Vector2 lowerLeftPoint;
         public Vector2 lowerRightPoint;
