@@ -1194,13 +1194,49 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
 
         public void WriteToDDS(string ctxrPath, string outPath)
         {
-            var rootPath = PSUtility.GetPSRootPath(ctxrPath);
-
-            //If this is a png, just write it out directly
+            //If it's a png, just write it immediately
             if (textureFormat == -1)
             {
                 File.WriteAllBytes(outPath.Replace(".dds", ".png"), mipMapsList[0][0]);
                 return;
+            }
+            var ddsBytesList = GetDDSBytes(ctxrPath);
+            switch (textureType)
+            {
+                case CTextureType.Standard:
+                case CTextureType.LargeUI:
+                    bool first = true;
+                    //Mip sets are written in reverse since we read the texture in backwards for Demon's Souls
+                    for (int i = 0; i < ddsBytesList.Count; i++)
+                    {
+                        string texPath = outPath;
+                        if (ddsBytesList.Count > 1)
+                        {
+                            texPath = texPath.Replace(".dds", $"_{ddsBytesList.Count - 1 - i}.dds");
+                        }
+
+                        File.WriteAllBytes(texPath, ddsBytesList[i].ToArray());
+                    }
+                    break;
+                case CTextureType.CubeMap:
+                case CTextureType.Volume:
+                    File.WriteAllBytes(outPath, ddsBytesList[0].ToArray());
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Returns CTXR data as DDS texture(s)
+        /// PS5 textures with multiple images are returned in 'normal' order, they'll have to be reversed again to be reimported
+        /// </summary>
+        public List<byte[]> GetDDSBytes(string ctxrPath)
+        {
+            var rootPath = PSUtility.GetPSRootPath(ctxrPath);
+
+            //If this is a png, just return it
+            if (textureFormat == -1)
+            {
+                return new List<byte[]>() { mipMapsList[0][0] };
             }
 
             //Assume external mips come first
@@ -1258,45 +1294,27 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
             }
 
             //Handle separately based on if this is a cubemap/volume texture vs a standard texture
+            List<byte[]> ddsBytesList = new();
             switch (textureType)
             {
                 case CTextureType.Standard:
                 case CTextureType.LargeUI:
                     bool first = true;
-                    for (int i = mipMapsList.Count - 1; i >= 0; i--)
+                    switch (footerData.version)
                     {
-                        int mipCount = mipMapsList[i].Count;
-
-                        //Should only be possible to have external mips with one set of texture data. In theory, there won't be other texture slices in a texture with externals, but let's be safe
-                        if (first)
-                        {
-                            mipCount += refList.Length;
-                        }
-
-                        List<byte> outbytes = GenerateDDSHeader(pixelFormat, texWidth, texHeight, mipCount);
-
-                        if (first)
-                        {
-                            first = false;
-                            outbytes.AddRange(externalMipsData);
-                        }
-                        foreach (var mip in mipMapsList[i])
-                        {
-                            outbytes.AddRange(mip);
-                        }
-
-                        string texPath = outPath;
-                        if (mipMapsList.Count > 1)
-                        {
-                            texPath = texPath.Replace(".dds", $"_{mipMapsList.Count - 1 - i}.dds");
-                        }
-
-                        //Add for safety since some PS5 writes aren't perfect
-                        if(footerData.version == 0x6E)
-                        {
-                            outbytes.AddRange(new byte[0x100]);
-                        }
-                        File.WriteAllBytes(texPath, outbytes.ToArray());
+                        case 0x6E:
+                            //Mip sets are written in reverse since we read the texture in backwards for Demon's Souls
+                            for (int i = mipMapsList.Count - 1; i >= 0; i--)
+                            {
+                                AddStandardDDSBytes(refList, pixelFormat, texWidth, texHeight, externalMipsData, ddsBytesList, ref first, i);
+                            }
+                            break;
+                        default:
+                            for (int i = 0; i < mipMapsList.Count; i++)
+                            {
+                                AddStandardDDSBytes(refList, pixelFormat, texWidth, texHeight, externalMipsData, ddsBytesList, ref first, i);
+                            }
+                            break;
                     }
                     break;
                 case CTextureType.CubeMap:
@@ -1314,7 +1332,7 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     {
                         cubeOut.AddRange(new byte[0x100]);
                     }
-                    File.WriteAllBytes(outPath, cubeOut.ToArray());
+                    ddsBytesList.Add(cubeOut.ToArray());
                     break;
                 case CTextureType.Volume:
                     //Volume maps in Demon's Souls do not use mipmaps, but the pattern is to divide the count of mipmaps alongside their resolution. See: https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dds-file-layout-for-volume-textures
@@ -1330,11 +1348,42 @@ namespace AquaModelLibrary.Data.BluePoint.CTXR
                     {
                         volumeOut.AddRange(new byte[0x100]);
                     }
-                    File.WriteAllBytes(outPath, volumeOut.ToArray());
+                    ddsBytesList.Add(volumeOut.ToArray());
                     break;
             }
 
+            return ddsBytesList;
+        }
 
+        private bool AddStandardDDSBytes(CTXRExternalReference[] refList, DXGIFormat pixelFormat, int texWidth, int texHeight, List<byte> externalMipsData, List<byte[]> ddsBytesList, ref bool first, int i)
+        {
+            int mipCount = mipMapsList[i].Count;
+
+            //Should only be possible to have external mips with one set of texture data. In theory, there won't be other texture slices in a texture with externals, but let's be safe
+            if (first)
+            {
+                mipCount += refList.Length;
+            }
+
+            List<byte> outbytes = GenerateDDSHeader(pixelFormat, texWidth, texHeight, mipCount);
+
+            if (first)
+            {
+                first = false;
+                outbytes.AddRange(externalMipsData);
+            }
+            foreach (var mip in mipMapsList[i])
+            {
+                outbytes.AddRange(mip);
+            }
+
+            //Add for safety since some PS5 writes aren't perfect
+            if (footerData.version == 0x6E)
+            {
+                outbytes.AddRange(new byte[0x100]);
+            }
+            ddsBytesList.Add(outbytes.ToArray());
+            return first;
         }
 
         private byte[] WriteAndSwizzleCTexChunk(DXGIFormat pixelFormat, int chunkWidth, int chunkHeight, byte[] externalMipData, out int finalBufferSize)
