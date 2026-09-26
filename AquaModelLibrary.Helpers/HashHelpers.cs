@@ -109,17 +109,32 @@ namespace AquaModelLibrary.Helpers
         /// </summary>
         public static unsafe ulong FNV1a64Hash(string str)
         {
-            byte[] b;
-            if (str.EndsWith('/'))
-                b = Encoding.UTF8.GetBytes(str, 0, str.Length - 1);
-            else
-                b = Encoding.UTF8.GetBytes(str.ToLowerInvariant());
+            byte[] b = Encoding.UTF8.GetBytes(str);
 
             // Equals to: b.Aggregate(0xCBF29CE484222325UL, (current, by) => (current ^ by) * 0x100000001B3UL);
-            var hash = 0xCBF29CE484222325UL;
+            ulong fnv64Prime = 0xCBF29CE484222325UL;
+            var hash = fnv64Prime;
             foreach (var by in b)
                 hash = (hash ^ by) * 0x100000001B3UL;
             return (((hash ^ 43) * 0x100000001B3UL) ^ 43) * 0x100000001B3UL; // "++"  -->  '+'==43
+        }
+
+        /// <summary>
+        /// Standard FNV-1a 32 bit, used in BluePoint games. 
+        /// </summary>
+        public static uint FNV1a32Hash(string name)
+        {
+            unchecked
+            {
+                uint fnv32Prime = 0x811C9DC5;
+                uint hash = fnv32Prime;
+                foreach (byte b in Encoding.UTF8.GetBytes(name))
+                {
+                    hash ^= b;
+                    hash *= 0x01000193;
+                }
+                return hash;
+            }
         }
     }
 }

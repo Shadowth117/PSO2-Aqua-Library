@@ -2,6 +2,7 @@
 using AquaModelLibrary.Helpers.Readers;
 using System.Diagnostics;
 using System.Text;
+using UnluacNET;
 
 namespace AquaModelLibrary.Data.POE2
 {
@@ -113,12 +114,23 @@ namespace AquaModelLibrary.Data.POE2
         /// </summary>
         public unsafe ulong GetNameHash(string name)
         {
-            return textBlockInfoList[0].hash switch
+            switch(textBlockInfoList[0].hash)
             {
-                0xF42A94E69CFF42FE => HashHelpers.MurmurHash64A(Encoding.UTF8.GetBytes(name.ToLowerInvariant())),
-                0x07E47507B4A92E53 => HashHelpers.FNV1a64Hash(name),
-                _ => throw new($"Unexpected Index hash variant {textBlockInfoList[0].hash} !")
-            };
+                case 0xF42A94E69CFF42FE:
+                    return HashHelpers.MurmurHash64A(Encoding.UTF8.GetBytes(name.ToLowerInvariant()));
+                case 0x07E47507B4A92E53:
+                    if (name.EndsWith('/'))
+                    {
+                        name = name.Substring(0, name.Length - 1);
+                    }
+                    else
+                    {
+                        name = name.ToLowerInvariant();
+                    }
+                    return HashHelpers.FNV1a64Hash(name);
+                default:
+                    throw new($"Unexpected Index hash variant {textBlockInfoList[0].hash} !");
+            }
         }
 
         public class FileHeader
