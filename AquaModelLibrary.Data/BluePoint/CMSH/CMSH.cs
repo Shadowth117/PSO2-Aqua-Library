@@ -1,6 +1,7 @@
 ﻿using AquaModelLibrary.Helpers.Extensions;
 using AquaModelLibrary.Helpers.Readers;
 using System.Numerics;
+using static AquaModelLibrary.Data.BluePoint.CMSH.CMSHDeltas;
 
 namespace AquaModelLibrary.Data.BluePoint.CMSH
 {
@@ -10,8 +11,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
         public CMSHHeader header = null;
         public CMSHVertexData vertData = null;
         public CMSHFaceData faceData = null;
-        public CMSHUnkData0 unkdata0 = null;
-        public CMSHUnkData1 unkdata1 = null;
+        public CMSHMorphMapping morphMapping = null;
+        public CMSHDeltas morphDeltas = null;
         public CMSHUnkData2 unkdata2 = null;
         public CMSHBoneData boneData = null;
         public CFooter footerData;
@@ -113,6 +114,11 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
             }
         }
 
+        public Dictionary<int, MorphDelta> GetMorphDelta()
+        {
+            return morphDeltas.DecodeChannels(morphMapping.GetProcessedMorphMapping());
+        }
+
         private void Read(BufferedStreamReaderBE<MemoryStream> sr)
         {
             sr.Seek(sr.BaseStream.Length - 0xC, SeekOrigin.Begin);
@@ -127,13 +133,13 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
 
                 if ((header.variantFlag2 & 0x20) > 0)
                 {
-                    unkdata0 = new CMSHUnkData0(sr);
-                    unkdata1 = new CMSHUnkData1(sr);
+                    morphMapping = new CMSHMorphMapping(sr, vertData.positionList.Count);
+                    morphDeltas = new CMSHDeltas(sr);
                 }
                 if ((header.variantFlag & 0x1) > 0)
                 {
                     byte[] test = sr.ReadBytes(sr.Position + 1, 1);
-                    if (test[0] != '$' && !(header.variantFlag == 0x1 && header.variantFlag2 == 0xA))
+                    if (test[0] != '$' && !(header.variantFlag == 0x1 && (header.variantFlag2 & 0x80) != 0))
                     {
                         unkdata2 = new CMSHUnkData2(sr);
                     }
@@ -155,8 +161,8 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
                     outBytes.AddRange(faceData.GetBytes(vertData.positionList.Count));
                     if((header.variantFlag2 & 0x20) > 0)
                     {
-                        outBytes.AddRange(unkdata0.GetBytes());
-                        outBytes.AddRange(unkdata1.GetBytes());
+                        outBytes.AddRange(morphMapping.GetBytes());
+                        outBytes.AddRange(morphDeltas.GetBytes());
                     }
                     if((header.variantFlag & 0x1) > 0)
                     {

@@ -9,6 +9,11 @@ namespace AquaModelLibrary.Data.BluePoint.CMSH
     {
         public CLength skelPathLength;
         public string skeletonPath = null;
+        /// <summary>
+        /// Different skeleton hash than what cskl and cani use.
+        /// Same per skeleton in all meshes that use the same skeleton, but only used when checking LODs in the same mesh, so it can be anything as long as that's consistent.
+        /// CMSHUnkData0's skeletonhash is this same value. 
+        /// </summary>
         public int skeletonHash;
         public int size;
 
