@@ -59,6 +59,11 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             String^ meshName = aqo->GetMeshName(meshId, includeMetadata, faceGroup);
             FbxNode* lNode = FbxNode::Create( lScene, Utf8String(meshName).ToCStr() );
             FbxMesh* lMesh = FbxMesh::Create( lScene, Utf8String(meshName + "_mesh" ).ToCStr() );
+
+            //Track the original mesh id. This is needed for handling morph animations
+            FbxProperty meshNum = FbxProperty::Create(lMesh, FbxIntDT, "MeshNumber");
+            meshNum.Set(meshId);
+
             bool hasVertexWeights = vtxl->vertWeightIndices->Count > 0;
             int vertCount = 0;
             if (faceGroupData->vertexMappingList != nullptr)
@@ -338,7 +343,32 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
             }
 
             vertexIndices->Clear();
-        
+            
+            //Set up BlendShape targets
+            if (vtxl->blendTargetDeltas->Count > 0)
+            {
+                FbxBlendShape* lBlendShape = FbxBlendShape::Create(lScene, Utf8String(meshName + "_blendShape").ToCStr());
+                for (int channel = 0; channel < vtxl->blendTargetDeltas->Count; channel++)
+                {
+                    auto channelName = vtxl->blendTargetChannelNames[channel] != nullptr ? Utf8String(vtxl->blendTargetChannelNames[channel]).ToCStr() : Utf8String("morph_" + channel.ToString()).ToCStr();
+                    auto channelData = vtxl->blendTargetDeltas[channel];
+                    FbxBlendShapeChannel* lChannel = FbxBlendShapeChannel::Create(lScene, channelName);
+                    FbxShape* lShape = FbxShape::Create(lScene, channelName);
+                    lShape->InitControlPoints(vertCount);
+
+                    for (int v = 0; v < vertCount; v++)
+                    {
+                        lShape->SetControlPointAt(lMesh->GetControlPointAt(v), v);
+                        int destIndex = faceGroupData->GetVertexMapping(v);
+                        System::Numerics::Vector3 delta = channelData[destIndex];
+                        FbxVector4 ctrl = lMesh->GetControlPointAt(destIndex);
+                        lShape->SetControlPointAt(FbxVector4(ctrl[0] + delta.X, ctrl[1] + delta.Y, ctrl[2] + delta.Z), destIndex);
+                    }
+                    lChannel->AddTargetShape(lShape);
+                    lBlendShape->AddBlendShapeChannel(lChannel);
+                }
+                lMesh->AddDeformer(lBlendShape);
+            }
 
             if ( lSkin != nullptr )
             {
@@ -629,6 +659,7 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
         lEnd.SetFrame(header.endFrame);
         animStack->SetLocalTimeSpan(FbxTimeSpan(lStart, lEnd));
 
+        //Set skeletal keyframes
         int boneCount = System::Math::Min(aqm->motionKeys->Count, convertedBones->Count);
         for (int i = 0; i < boneCount; i++)
         {
@@ -759,6 +790,62 @@ namespace AquaModelLibrary::Objects::Processing::Fbx
                         curveSY->KeyModifyEnd();
                         curveSZ->KeyModifyEnd();
                         break;
+                }
+            }
+        }
+
+        //Set Blendshape keyframes
+        for (int i = 0; i < lScene->GetGeometryCount(); i++)
+        {
+            FbxGeometry* lMesh = lScene->GetGeometry(i);
+            
+            //Get the original mesh number since meshes are separated by facegroup
+            FbxProperty lMeshNum = lMesh->FindProperty("MeshNumber");
+            int meshNum = i;
+            if (lMeshNum.IsValid())
+            {
+                meshNum = lMeshNum.Get<int>();
+            }
+
+            for (int j = 0; j < lMesh->GetDeformerCount(); j++)
+            {
+                FbxDeformer* def = lMesh->GetDeformer(j);
+                if (def->GetDeformerType() == FbxDeformer::eBlendShape)
+                {
+                    FbxBlendShape* blendDef = (FbxBlendShape*)def;
+                    for (int k = 0; k < blendDef->GetBlendShapeChannelCount(); k++)
+                    {
+                        FbxBlendShapeChannel* lChannel = blendDef->GetBlendShapeChannel(k);
+                        System::String^ channelName = gcnew System::String(lChannel->GetInitialName());
+                        System::Collections::Generic::List<AquaMotion::MorphKeyData^> morphChannelsList = aqm->morphKeyDataListList[meshNum];
+                        for (int l = 0; l < morphChannelsList.Count; l++)
+                        {
+                            AquaMotion::MorphKeyData^ morphData = morphChannelsList[l];
+                            if (morphData->channelName->Equals(channelName))
+                            {
+                                if (morphData->weightKeyFrames->Count > 0)
+                                {
+                                    FbxAnimCurve* lCurve = lChannel->DeformPercent.GetCurve(animBaseLayer, true);
+                                    if (lCurve != nullptr)
+                                    {
+                                        lCurve->KeyModifyBegin();
+                                        for (int m = 0; m < morphData->weightKeyFrames->Count; m++)
+                                        {
+                                            FbxTime keyTime;
+                                            keyTime.SetSecondDouble(morphData->weightTimes[m]);
+                                            int keyIndex = lCurve->KeyAdd(keyTime);
+                                            lCurve->KeySet(keyIndex, keyTime,
+                                                morphData->weightKeyFrames[m] * 100.0f,
+                                                FbxAnimCurveDef::eInterpolationLinear);
+                                        }
+                                        lCurve->KeyModifyEnd();
+                                    }
+                                }
+                                break;
+                            }
+                        }
+
+                    }
                 }
             }
         }

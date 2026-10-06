@@ -13,7 +13,7 @@ namespace AquaModelLibrary.Data.PSO2.Aqua
     //Though the NIFL format is used for storage, VTBF format tag references for data will be commented where appropriate. Some offset/reserve related things are NIFL only, however.
 
     //Cameras, UV, and standard motions are essentially the same format.
-    public unsafe class AquaMotion : AquaCommon
+    public partial class AquaMotion : AquaCommon
     {
         public MOHeader moHeader;
         public List<KeyData> motionKeys = new List<KeyData>();
