@@ -60,10 +60,9 @@ namespace AquaModelLibrary.Data.BillyHatcher
             public ARCLNDHeader arcLndHeader;
             public List<int> arcExtraModeloffsets = new List<int>();
 
-            public byte[] GetBytes(int offset, int extraModelCount, List<string> texNames, bool hasMPB, out List<int> offsets)
+            public byte[] GetBytes(ByteListWriter outBytes, int offset, int extraModelCount, List<string> texNames, bool hasMPB, out List<int> offsets)
             {
                 offsets = new List<int>();
-                var outBytes = new ByteListWriter() { AddAsBigEndian = true };
                 offsets.Add(outBytes.Count + offset);
                 outBytes.ReserveInt("MainModelOffset");
                 outBytes.AddValue(extraModelCount);
@@ -1048,7 +1047,7 @@ namespace AquaModelLibrary.Data.BillyHatcher
             uint mplOffset = 0;
 
             //Write lnd
-            outBytes.AddRange(arcLand.GetBytes(0, arcLndModels.Count - 1, texnames.texNames, arcMPL != null, out var lndOffsets));
+            outBytes.AddRange(arcLand.GetBytes(outBytes, 0, arcLndModels.Count - 1, texnames.texNames, arcMPL != null, out var lndOffsets));
             offsets.AddRange(lndOffsets);
             outBytes.AlignWriter(0x20);
 
