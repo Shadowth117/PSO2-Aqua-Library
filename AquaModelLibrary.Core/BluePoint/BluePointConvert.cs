@@ -205,18 +205,6 @@ namespace AquaModelLibrary.Core.BluePoint
             }
             var cmshBytes = File.ReadAllBytes(filePath);
             var cmsh = new CMSH(cmshBytes);
-            //cmsh.vertData.vertDefs.RemoveAt(1);
-            //cmsh.vertData.normalTemp.Clear();
-            /*
-            for (int i = 0; i < cmsh.vertData.qut0List.Count; i++)
-            {
-                uint qut0, newQut0;
-                qut0 = cmsh.vertData.qut0List[i];
-                CMSHVertexData.UnpackQUT0(qut0, out var nrm, out var tan, out var bit);
-                cmsh.vertData.qut0List[i] = newQut0 = CMSHVertexData.PackQUT0(nrm, tan);
-            }
-            var cmshOut = cmsh.GetBytes();*/
-            //File.WriteAllBytes(filePath, cmshOut);
             return CMDLToAqua(cmsh, materialDict, cmtlPath, modelPath, out aqn);
         }
 
@@ -574,7 +562,6 @@ namespace AquaModelLibrary.Core.BluePoint
                     var metadata = cskl.metadata.familyIds[i];
                     var parentId = metadata.parentId;
 
-                    var invMat = cskl.invWorldTransforms[i];
                     var tfm = cskl.transforms[i];
 
                     //Create AQN node
@@ -588,6 +575,29 @@ namespace AquaModelLibrary.Core.BluePoint
                     aqNode.eulRot = MathExtras.QuaternionToEuler(tfm.rotation);
                     aqNode.scale = new Vector3(1, 1, 1);
 
+                    Matrix4x4 invMat = Matrix4x4.Identity;
+                    switch (cskl.footerData.version)
+                    {
+                        case 0x9:
+                            var mat = tfm.ComputeLocalTransform();
+                            if (parentId != -1)
+                            {
+                                var pn = aqn.nodeList[parentId];
+                                var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
+                                                              pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
+                                                              pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
+                                                              pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
+
+                                Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
+                                mat = mat * invParentInvTfm;
+                            }
+                            Matrix4x4.Invert(mat, out invMat);
+
+                            break;
+                        case 0x19:
+                            invMat = cskl.invWorldTransforms[i];
+                            break;
+                    }
                     aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
                     aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
                     aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
