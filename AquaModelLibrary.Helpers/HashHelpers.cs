@@ -122,11 +122,10 @@ namespace AquaModelLibrary.Helpers
         /// <summary>
         /// Standard FNV-1a 32 bit, used in BluePoint games. 
         /// </summary>
-        public static uint FNV1a32Hash(string name)
+        public static uint FNV1a32Hash(string name, uint fnv32Prime = 0x811C9DC5)
         {
             unchecked
             {
-                uint fnv32Prime = 0x811C9DC5;
                 uint hash = fnv32Prime;
                 foreach (byte b in Encoding.UTF8.GetBytes(name))
                 {
