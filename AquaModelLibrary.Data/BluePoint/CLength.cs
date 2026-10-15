@@ -33,7 +33,6 @@ namespace AquaModelLibrary.Data.BluePoint
                         if (lengthAddition0 >= 0x80)
                         {
                             lengthAddition1 = sr.Read<byte>();
-                            throw new NotImplementedException("Discovered CLength with unexpected length addition! Please review!");
                             if (lengthAddition1 >= 0x80)
                             {
                                 lengthAddition2 = sr.Read<byte>();
@@ -62,7 +61,27 @@ namespace AquaModelLibrary.Data.BluePoint
                         var divCount = trueLen / 0x80;
                         var rem = trueLen % 0x80;
                         outBytes.Add((byte)(0x80 + rem));
-                        outBytes.Add((byte)divCount);
+                        if(divCount >= 0x80)
+                        {
+                            var divCount2 = divCount / 0x80;
+                            var rem2 = divCount % 0x80;
+                            outBytes.Add((byte)(0x80 + rem2));
+                            
+                            if(divCount2 >= 0x80)
+                            {
+                                var divCount3 = divCount2 / 0x80;
+                                var rem3 = divCount2 % 0x80;
+                                outBytes.Add((byte)(0x80 + rem3));
+                                outBytes.Add((byte)divCount3);
+                            }
+                            else
+                            {
+                                outBytes.Add((byte)divCount2);
+                            }
+                        } else
+                        {
+                            outBytes.Add((byte)divCount);
+                        }
                     } else
                     {
                         outBytes.Add((byte)trueLen);
@@ -75,6 +94,11 @@ namespace AquaModelLibrary.Data.BluePoint
             }
         }
 
+        public int GetTrueLengthPlusStructSize()
+        {
+            return GetTrueLength() + GetCLengthStructSize();
+        }
+
         /// <summary>
         /// Get full calculated variable length
         /// </summary>
@@ -83,7 +107,7 @@ namespace AquaModelLibrary.Data.BluePoint
             switch (era)
             {
                 case BPEra.DemonsSouls:
-                    return length + (lengthAddition0 - 1) * 0x80;
+                    return length + (lengthAddition0 - 1) * 0x80 + (lengthAddition1 - 1) * 0x80 * 0x80;
                 case BPEra.SOTC:
                     return length;
                 default:
@@ -99,7 +123,16 @@ namespace AquaModelLibrary.Data.BluePoint
             switch (era)
             {
                 case BPEra.DemonsSouls:
-                    return length >= 0x80 ? 2 : 1;
+                    if(length < 0x80)
+                    {
+                        return 1;
+                    } else if (lengthAddition0 < 0x80)
+                    {
+                        return 2;
+                    } else
+                    {
+                        return 3;
+                    }
                 case BPEra.SOTC:
                     return 2;
                 default:

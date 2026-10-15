@@ -1,4 +1,5 @@
 ﻿using AquaModelLibrary.Helpers.Readers;
+using AquaModelLibrary.Helpers.Writers;
 using System.Numerics;
 
 namespace AquaModelLibrary.Data.BluePoint.CSKL
@@ -33,6 +34,28 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                     sr.Seek(4, System.IO.SeekOrigin.Current);
                     break;
             }
+        }
+
+        public byte[] GetBytes(int csklVersion)
+        {
+            ByteListWriter outBytes = new();
+            switch (csklVersion)
+            {
+                case 0x9:
+                    outBytes.AddValue(rotation.X); outBytes.AddValue(rotation.Y); outBytes.AddValue(rotation.Z); outBytes.AddValue(rotation.W);
+                    outBytes.AddValue(position.X); outBytes.AddValue(position.Y); outBytes.AddValue(position.Z); outBytes.AddValue(0f);
+                    outBytes.AddValue(scale.X); outBytes.AddValue(scale.Y); outBytes.AddValue(scale.Z); outBytes.AddValue(0f);
+                    break;
+                case 0x19:
+                    outBytes.AddValue(scale.X); outBytes.AddValue(scale.Y); outBytes.AddValue(scale.Z); outBytes.AddValue(0f);
+                    outBytes.AddValue(rotation.X); outBytes.AddValue(rotation.Y); outBytes.AddValue(rotation.Z); outBytes.AddValue(rotation.W);
+                    outBytes.AddValue(position.X); outBytes.AddValue(position.Y); outBytes.AddValue(position.Z); outBytes.AddValue(0f);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return outBytes.ToArray();
         }
 
         /// <summary>

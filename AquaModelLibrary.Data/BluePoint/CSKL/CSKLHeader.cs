@@ -5,42 +5,56 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
     public class CSKLHeader
     {
         public int magic;
-        public int crc;
-        public int crc2; //Always the same as first crc??
+        /// <summary>
+        /// Hash probably generated at export, probably unused
+        /// </summary>
+        public uint hash; 
+        /// <summary>
+        /// Same as the first one, again, seems unused
+        /// </summary>
+        public uint hash2; 
         public int fileSize;
 
         public ushort boneCount;
         public ushort boneCount2; //Same as first
-        public ushort secondaryBoneCount;
-        public ushort flags;
-        public ushort usht_18; //Variant or some count maybe?
-        public ushort usht_1A; //Some kind of count
+        public ushort morphTargetCount;
+        public byte partitionRecordCount;
+        /// <summary>
+        /// Related to bonecount, seemingly unused?
+        /// </summary>
+        public byte bt_17;
+        /// <summary>
+        /// Total number of bone partition entries.
+        /// Game seems to only need a correct count for these between the partition records
+        /// </summary>
+        public ushort partitionEntryCount;
+        /// <summary>
+        /// 0x40 * The amount of parents of bones from different partition records.
+        /// The game uses a table of blocks for handling these since there's bone limits per partitionRecord and allocates based on this.
+        /// </summary>
+        public ushort interPartitionParentBlocksSize; 
+        /// <summary>
+        /// Always observed 0
+        /// </summary>
         public int int_1C;
 
         public int transformListOffset; //Counts from beginning of file
-        public int size1;
+        /// <summary>
+        /// Unused?
+        /// </summary>
+        public int transformEndOffset;
         public int inverseBoneMatricesOffset;
-        public int int_3C;
+        public int partitionRecordOffset;
 
-        public int int_40; //int_40-int_48 might always be 0
-        public int int_44;
+        public int partitionEntryOffset; 
+        public int animOpCodeEntryOffset;
         public int int_48;
         public int boneMetadataOffset; //Data including parent ids, child ids, sibling ids, etc.
-
-        public ushort boneCount3; //Same numbers again
-        public ushort boneCount4;
-        public ushort secondaryBoneCount2;
-        public ushort secondaryBoneCount3;
-        public int int_58;
-        public int int_5C;
 
         //SOTC
         public int boneNamesOffset;
 
-        public CSKLHeader()
-        {
-
-        }
+        public CSKLHeader() { }
 
         public CSKLHeader(BufferedStreamReaderBE<MemoryStream> sr, int csklVersion)
         {
@@ -70,35 +84,28 @@ namespace AquaModelLibrary.Data.BluePoint.CSKL
                     var unkInt2 = sr.Read<int>();
                     break;
                 case 0x19:
-                    crc = sr.Read<int>();
-                    crc2 = sr.Read<int>();
+                    hash = sr.Read<uint>();
+                    hash2 = sr.Read<uint>();
                     fileSize = sr.Read<int>();
 
                     boneCount = sr.Read<ushort>();
                     boneCount2 = sr.Read<ushort>();
-                    secondaryBoneCount = sr.Read<ushort>();
-                    flags = sr.Read<ushort>();
-                    usht_18 = sr.Read<ushort>();
-                    usht_1A = sr.Read<ushort>();
+                    morphTargetCount = sr.Read<ushort>();
+                    partitionRecordCount = sr.Read<byte>();
+                    bt_17 = sr.Read<byte>();
+                    partitionEntryCount = sr.Read<ushort>();
+                    interPartitionParentBlocksSize = sr.Read<ushort>();
                     int_1C = sr.Read<int>();
 
                     transformListOffset = sr.Read<int>();
-                    size1 = sr.Read<int>();
+                    transformEndOffset = sr.Read<int>();
                     inverseBoneMatricesOffset = sr.Read<int>();
-                    int_3C = sr.Read<int>();
+                    partitionRecordOffset = sr.Read<int>();
 
-                    int_40 = sr.Read<int>();
-                    int_44 = sr.Read<int>();
+                    partitionEntryOffset = sr.Read<int>();
+                    animOpCodeEntryOffset = sr.Read<int>();
                     int_48 = sr.Read<int>();
                     boneMetadataOffset = sr.Read<int>();
-
-                    boneCount3 = sr.Read<ushort>();
-                    boneCount4 = sr.Read<ushort>();
-                    secondaryBoneCount2 = sr.Read<ushort>();
-                    secondaryBoneCount3 = sr.Read<ushort>();
-                    int_58 = sr.Read<int>();
-                    int_5C = sr.Read<int>();
-                    int_5C = sr.Read<int>();
                     break;
             }
         }

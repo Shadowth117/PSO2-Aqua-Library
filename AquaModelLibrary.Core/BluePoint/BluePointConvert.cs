@@ -555,56 +555,7 @@ namespace AquaModelLibrary.Core.BluePoint
                 {
                     aqp.bonePalette.Add((uint)i);
                 }
-                aqn = new AquaNode();
-
-                for (int i = 0; i < cskl.header.boneCount; i++)
-                {
-                    var metadata = cskl.metadata.familyIds[i];
-                    var parentId = metadata.parentId;
-
-                    var tfm = cskl.transforms[i];
-
-                    //Create AQN node
-                    NODE aqNode = new NODE();
-                    aqNode.boneShort1 = 0x1C0;
-                    aqNode.animatedFlag = 1;
-                    aqNode.parentId = parentId;
-                    aqNode.unkNode = -1;
-
-                    aqNode.pos = tfm.position;
-                    aqNode.eulRot = MathExtras.QuaternionToEuler(tfm.rotation);
-                    aqNode.scale = new Vector3(1, 1, 1);
-
-                    Matrix4x4 invMat = Matrix4x4.Identity;
-                    switch (cskl.footerData.version)
-                    {
-                        case 0x9:
-                            var mat = tfm.ComputeLocalTransform();
-                            if (parentId != -1)
-                            {
-                                var pn = aqn.nodeList[parentId];
-                                var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
-                                                              pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
-                                                              pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
-                                                              pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
-
-                                Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
-                                mat = mat * invParentInvTfm;
-                            }
-                            Matrix4x4.Invert(mat, out invMat);
-
-                            break;
-                        case 0x19:
-                            invMat = cskl.invWorldTransforms[i];
-                            break;
-                    }
-                    aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
-                    aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
-                    aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
-                    aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
-                    aqNode.boneName.SetString(cskl.names.primaryNames.names[i].Split('|').Last());
-                    aqn.nodeList.Add(aqNode);
-                }
+                aqn = CSKLToAquaNode(cskl, out List<string> morphTargetNames);
             }
 
             var mesh = msh;
@@ -852,6 +803,186 @@ namespace AquaModelLibrary.Core.BluePoint
 
             return aqp;
         }
+
+        public static AquaNode CSKLToAquaNode(CSKL cskl, out List<string> morphTargetNames)
+        {
+            AquaNode aqn = new AquaNode();
+            for (int i = 0; i < cskl.header.boneCount; i++)
+            {
+                var metadata = cskl.metadata.familyIds[i];
+                var parentId = metadata.parentId;
+
+                var tfm = cskl.transforms[i];
+
+                //Create AQN node
+                NODE aqNode = new NODE();
+                aqNode.boneShort1 = 0x1C0;
+                aqNode.animatedFlag = 1;
+                aqNode.parentId = parentId;
+                aqNode.unkNode = -1;
+
+                aqNode.pos = tfm.position;
+                aqNode.eulRot = MathExtras.QuaternionToEuler(tfm.rotation);
+                aqNode.scale = new Vector3(1, 1, 1);
+
+                Matrix4x4 invMat = Matrix4x4.Identity;
+                switch (cskl.footerData.version)
+                {
+                    case 0x9:
+                        var mat = tfm.ComputeLocalTransform();
+                        if (parentId != -1)
+                        {
+                            var pn = aqn.nodeList[parentId];
+                            var parentInvTfm = new Matrix4x4(pn.m1.X, pn.m1.Y, pn.m1.Z, pn.m1.W,
+                                                          pn.m2.X, pn.m2.Y, pn.m2.Z, pn.m2.W,
+                                                          pn.m3.X, pn.m3.Y, pn.m3.Z, pn.m3.W,
+                                                          pn.m4.X, pn.m4.Y, pn.m4.Z, pn.m4.W);
+
+                            Matrix4x4.Invert(parentInvTfm, out var invParentInvTfm);
+                            mat = mat * invParentInvTfm;
+                        }
+                        Matrix4x4.Invert(mat, out invMat);
+
+                        break;
+                    case 0x19:
+                        invMat = cskl.invWorldTransforms[i];
+                        break;
+                }
+                aqNode.m1 = new Vector4(invMat.M11, invMat.M12, invMat.M13, invMat.M14);
+                aqNode.m2 = new Vector4(invMat.M21, invMat.M22, invMat.M23, invMat.M24);
+                aqNode.m3 = new Vector4(invMat.M31, invMat.M32, invMat.M33, invMat.M34);
+                aqNode.m4 = new Vector4(invMat.M41, invMat.M42, invMat.M43, invMat.M44);
+                aqNode.boneName.SetString(cskl.names.skeletonNames.names[i].Split('|').Last());
+                aqn.nodeUnicodeNames.Add(cskl.names.skeletonNames.names[i].Split('|').Last() + $"#{cskl.metadata.familyIds[i].boneFlags}");
+                aqn.nodeList.Add(aqNode);
+            }
+
+            //This number MUST be consistent between the game's cskl and cani files or there'll be problems
+            aqn.nodeUnicodeNames[0] += $"#{cskl.header.hash.ToString("X")}";
+
+            morphTargetNames = cskl.names.morphTargetNames == null ? null : cskl.names.morphTargetNames.names.ToList();
+            return aqn;
+        }
+
+        public static CSKL AquaNodeToDeSRCSKL(AquaNode aqn, List<string> morphTargetNames, List<float> morphTargetDefaults = null)
+        {
+            CSKL cskl = new();
+
+            var hashNum = uint.Parse(aqn.GetNodeName(0).Split('#')[^1], System.Globalization.NumberStyles.HexNumber);
+            cskl.header = new CSKLHeader()
+            {
+                hash = hashNum,
+                hash2 = hashNum,
+                boneCount = (ushort)aqn.nodeList.Count,
+                boneCount2 = (ushort)aqn.nodeList.Count,
+                morphTargetCount = (ushort)(morphTargetNames == null ? 0 : morphTargetNames.Count),
+                magic = 0x41480106,
+            };
+            cskl.footerData = new Data.BluePoint.CFooter()
+            {
+                magic = 0x534B454C,
+                version = 0x19,
+            };
+
+            cskl.metadata = new CSKLMetaData();
+            cskl.names = new CSKLNames();
+            cskl.names.skeletonNames = new CSKLNames.CSKLNameList();
+            cskl.names.morphTargetNames = new CSKLNames.CSKLNameList();
+            if(morphTargetNames != null)
+            {
+                cskl.names.morphTargetNames.names = morphTargetNames.ToList();
+            }
+            
+            byte currentMorphFlag = 0x1F;
+            for (int i = 0; i < cskl.names.morphTargetNames.names.Count; i++)
+            {
+                if(morphTargetDefaults != null && morphTargetDefaults.Count > i)
+                {
+                    cskl.morphTargetChannelWeightDefaults.Add(morphTargetDefaults[i]);
+                } else
+                {
+                    //Special handling for player character bones
+                    if (i >= 482 && cskl.names.morphTargetNames.names.Count > 482 && cskl.names.morphTargetNames.names[482] == "root_fitting_fade" && i != 489)
+                    {
+                        cskl.morphTargetChannelWeightDefaults.Add(1);
+                    } else
+                    {
+                        cskl.morphTargetChannelWeightDefaults.Add(0);
+                    }
+                }
+                //Hack for player flags
+                if (cskl.names.morphTargetNames.names.Count > 457)
+                {
+                    if (CSKLNameDefaults.PlayerMorphTargetFlagDefaults.ContainsKey(i))
+                    {
+                        currentMorphFlag = CSKLNameDefaults.PlayerMorphTargetFlagDefaults[i];
+                    }
+                }
+                cskl.names.morphTargetFlags.Add(currentMorphFlag);
+            }
+
+            var pathCache = new string[aqn.nodeList.Count];
+            for (int i = 0; i < aqn.nodeList.Count; i++)
+            {
+                var name = aqn.GetNodeName(i);
+                var familyIdSet = new CSKLFamilyIds();
+                if (i == 0)
+                {
+                    familyIdSet.boneFlags = ushort.Parse(name.Split('#')[^2]); //This should be filled from the hash
+                }
+                else
+                {
+                    familyIdSet.boneFlags = ushort.Parse(name.Split('#')[^1]);
+                }
+                familyIdSet.parentId = aqn.nodeList[i].parentId;
+                if (familyIdSet.parentId != -1)
+                {
+                    if (cskl.metadata.familyIds[familyIdSet.parentId].firstChildId == -1)
+                    {
+                        cskl.metadata.familyIds[familyIdSet.parentId].firstChildId = i;
+                    }
+                    else
+                    {
+                        int siblingId = cskl.metadata.familyIds[familyIdSet.parentId].firstChildId;
+                        while (cskl.metadata.familyIds[siblingId].nextSiblingId != -1)
+                        {
+                            siblingId = cskl.metadata.familyIds[siblingId].nextSiblingId;
+                        }
+                        cskl.metadata.familyIds[siblingId].nextSiblingId = i;
+                    }
+                }
+                cskl.metadata.familyIds.Add(familyIdSet);
+                cskl.names.skeletonNames.names.Add(BuildPipePath(aqn, i, pathCache));
+
+                var invMat = aqn.nodeList[i].GetInverseBindPoseMatrix();
+                var parInvMat = aqn.nodeList[i].parentId == -1 ? Matrix4x4.Identity : aqn.nodeList[aqn.nodeList[i].parentId].GetInverseBindPoseMatrix();
+                var mat = aqn.nodeList[i].GetInverseBindPoseMatrixInverted() * parInvMat;
+                Matrix4x4.Decompose(mat, out var scale, out var rot, out var pos);
+                var tfm = new CSKLTransform()
+                {
+                    position = pos,
+                    rotation = rot,
+                    scale = scale
+                };
+                cskl.transforms.Add(tfm);
+                cskl.invWorldTransforms.Add(invMat);
+            }
+
+            return cskl;
+        }
+
+        public static string BuildPipePath(AquaNode aqn, int boneIndex, string[] pathCache)
+        {
+            string ancestorPath = "";
+            if (aqn.nodeList[boneIndex].parentId != -1)
+            {
+                ancestorPath = pathCache[aqn.nodeList[boneIndex].parentId];
+            }
+            pathCache[boneIndex] = ancestorPath + "|" + aqn.GetNodeName(boneIndex).Split('#')[0];
+
+            return pathCache[boneIndex];
+        }
+
 
         private static string GetTexNameFromCMAT(string texName, CMAT cmat)
         {
