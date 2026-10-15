@@ -40,7 +40,7 @@ namespace AquaModelLibrary.Helpers.Writers
             {
                 Array.Reverse(newBytes);
             }
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < newBytes.Length; i++)
             {
                 this[ptrLocation + i] = newBytes[i];
             }
