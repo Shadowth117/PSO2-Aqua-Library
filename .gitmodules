@@ -1,9 +1,6 @@
 [submodule "ZamboniLib"]
 	path = ZamboniLib
 	url = https://github.com/Shadowth117/ZamboniLib
-[submodule "SoulsFormatsNEXT"]
-	path = SoulsFormatsNEXT
-	url = https://github.com/soulsmods/SoulsFormatsNEXT.git
 [submodule "NvTriStrip.Net"]
 	path = NvTriStrip.Net
 	url = https://github.com/Shadowth117/NvTriStrip.Net.git
