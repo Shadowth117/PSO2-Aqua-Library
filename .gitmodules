@@ -4,3 +4,6 @@
 [submodule "NvTriStrip.Net"]
 	path = NvTriStrip.Net
 	url = https://github.com/Shadowth117/NvTriStrip.Net.git
+[submodule "SoulsFormatsNEXT"]
+	path = SoulsFormatsNEXT
+	url = https://github.com/soulsmods/SoulsFormatsNEXT.git
