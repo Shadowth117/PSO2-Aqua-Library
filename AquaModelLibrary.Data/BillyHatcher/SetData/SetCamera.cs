@@ -28,35 +28,39 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
             while (sr.Position + 0x80 <= sr.BaseStream.Length)
             {
                 SetCamera setCamera = new SetCamera();
-                setCamera.type0 = sr.ReadBE<ushort>();
-                setCamera.type1 = sr.ReadBE<ushort>();
-                setCamera.flt_04 = sr.ReadBE<float>();
-                setCamera.flt_08 = sr.ReadBE<float>();
-                setCamera.flt_0C = sr.ReadBE<float>();
-                setCamera.Position = sr.ReadBEV3();
-                setCamera.flt_1C = sr.ReadBE<float>();
+                setCamera.camtype = sr.ReadBE<ushort>();
+                setCamera.campriority = sr.ReadBE<ushort>();
+                setCamera.interpIN = sr.ReadBE<float>();
+                setCamera.interpOUT = sr.ReadBE<float>();
 
-                setCamera.flt_1C = sr.ReadBE<float>();
-                setCamera.flt_1C = sr.ReadBE<float>();
-                setCamera.flt_1C = sr.ReadBE<float>();
-                setCamera.flt_1C = sr.ReadBE<float>();
+                setCamera.camTargX = sr.ReadBE<float>();
+                setCamera.camPosX_camTargY_camSwivelTargX = sr.ReadBEV<float>();
+                setCamera.camPosY_camTargZ_camSwivelTargYZ = sr.ReadBE<float>();
+                setCamera.camPosZ_camPosBX_camOffsetY = sr.ReadBE<float>();
+                setCamera.camPosBY_camOffsetZ = sr.ReadBE<float>();
+                setCamera.camPosBZ = sr.ReadBE<float>();
 
-                setCamera.flt_20 = sr.ReadBE<float>();
-                setCamera.flt_24 = sr.ReadBE<float>();
-                setCamera.flt_28 = sr.ReadBE<float>();
-                setCamera.int_2C = sr.ReadBE<int>();
+                setCamera.flt_paddingA = sr.ReadBE<float>();
+                setCamera.flt_paddingB = sr.ReadBE<float>();
 
-                setCamera.vec3_30 = sr.ReadBEV3();
-                setCamera.flt_3C = sr.ReadBE<float>();
+                setCamera.c_stickpadding = sr.ReadBE<ushort>();
+                setCamera.c_stickflag = sr.ReadBE<ushort>();
 
-                setCamera.int_40 = sr.ReadBE<int>();
-                setCamera.vec3_44 = sr.ReadBEV3();
+                setCamera.TriggerPosition = sr.ReadBEV3();
+                setCamera.TriggerBAMS_RotX = sr.ReadBE<ushort>();
+                setCamera.TriggerBAMS_RotY = sr.ReadBE<ushort>();
 
-                setCamera.int_50 = sr.ReadBE<int>();
-                setCamera.vec2_54 = sr.ReadBEV2();
-                setCamera.vec2_5C = sr.ReadBEV2();
+                setCamera.TriggerShapepadding = sr.ReadBE<ushort>();
+                setCamera.TriggerShapeFlag = sr.ReadBE<ushort>();
+                setCamera.TriggerRadiusXYZ = sr.ReadBEV3();
 
-                setCamera.int_60 = sr.ReadBE<int>();
+                setCamera.angslicepadding = sr.ReadBE<ushort>();
+                setCamera.angsliceflag = sr.ReadBE<ushort>();
+                setCamera.angsliceYrange = sr.ReadBE<float>();
+
+                setCamera.unknownA = sr.ReadBE<float>();
+                setCamera.unknownB = sr.ReadBE<float>();
+                setCamera.unknownC = sr.ReadBE<float>();
                 setCamera.int_64 = sr.ReadBE<int>();
                 setCamera.int_68 = sr.ReadBE<int>();
                 setCamera.int_6C = sr.ReadBE<int>();
@@ -75,25 +79,32 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
             var outBytes = new ByteListWriter() { AddAsBigEndian = true };
             foreach (var setCam in setCameras)
             {
-                outBytes.AddValue(setCam.type0);
-                outBytes.AddValue(setCam.type1);
-                outBytes.AddValue(setCam.flt_04);
-                outBytes.AddValue(setCam.flt_08);
-                outBytes.AddValue(setCam.flt_0C);
-                outBytes.AddValue(setCam.Position);
-                outBytes.AddValue(setCam.flt_1C);
-                outBytes.AddValue(setCam.flt_20);
-                outBytes.AddValue(setCam.flt_24);
-                outBytes.AddValue(setCam.flt_28);
-                outBytes.AddValue(setCam.int_2C);
-                outBytes.AddValue(setCam.vec3_30);
-                outBytes.AddValue(setCam.flt_3C);
-                outBytes.AddValue(setCam.int_40);
-                outBytes.AddValue(setCam.vec3_44);
-                outBytes.AddValue(setCam.int_50);
-                outBytes.AddValue(setCam.vec2_54);
-                outBytes.AddValue(setCam.vec2_5C);
-                outBytes.AddValue(setCam.int_60);
+                outBytes.AddValue(setCam.camtype);
+                outBytes.AddValue(setCam.campriority);
+                outBytes.AddValue(setCam.interpIN);
+                outBytes.AddValue(setCam.interpOUT);
+                outBytes.AddValue(setCam.camTargX);
+                outBytes.AddValue(setCam.camPosX_camTargY_camSwivelTargX);
+                outBytes.AddValue(setCam.camPosY_camTargZ_camSwivelTargYZ);
+                outBytes.AddValue(setCam.camPosZ_camPosBX_camOffsetY);
+                outBytes.AddValue(setCam.camPosBY_camOffsetZ);
+                outBytes.AddValue(setCam.camPosBZ);
+                outBytes.AddValue(setCam.flt_paddingA);
+                outBytes.AddValue(setCam.flt_paddingB);
+                outBytes.AddValue(setCam.c_stickpadding);
+                outBytes.AddValue(setCam.c_stickflag);
+                outBytes.AddValue(setCam.TriggerPosition);
+                outBytes.AddValue(setCam.TriggerBAMS_RotX);
+                outBytes.AddValue(setCam.TriggerBAMS_RotY);
+                outBytes.AddValue(setCam.TriggerShapepadding);
+                outBytes.AddValue(setCam.TriggerShapeFlag);
+                outBytes.AddValue(setCam.TriggerRadiusXYZ);
+                outBytes.AddValue(setCam.angslicepadding);
+                outBytes.AddValue(setCam.angsliceflag);
+                outBytes.AddValue(setCam.angsliceYrange);
+                outBytes.AddValue(setCam.unknownA);
+                outBytes.AddValue(setCam.unknownB);
+                outBytes.AddValue(setCam.unknownC);
                 outBytes.AddValue(setCam.int_64);
                 outBytes.AddValue(setCam.int_68);
                 outBytes.AddValue(setCam.int_6C);
@@ -109,40 +120,85 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
     public struct SetCamera
     {
-        public ushort type0;
-        public ushort type1;
+        public ushort camtype;
         /// <summary>
-        /// Usually 1. Defaults to 1.
+        /// Type 0 nulls the volume and later entries. 1-5 are specialized types with unique properites, and 6 is a variant of default camera seen outside of cam volumes
         /// </summary>
-        public float flt_04;
+        public ushort campriority;
         /// <summary>
-        /// Usually less than 1 or 1. Defaults to 1.
+        /// Usually 1, else it crashes. Controls priority if overlapping another Cam volume.
         /// </summary>
-        public float flt_08; 
-        public float flt_0C;
-
-        public Vector3 Position;
-        public float flt_1C;
-
-        public float flt_20;
-        public float flt_24;
-        public float flt_28;
+        public float interpIN;
         /// <summary>
-        /// Defaults to 0xC
+        /// Controls how fast the camera updates to incoming volume position/rotation properties.
         /// </summary>
-        public int int_2C; 
+        public float interpOUT;
+        /// <summary>
+        /// Controls how fast the camera updates to default cam when exiting volumes. Overrided by other interpIN if entering another volume.
+        /// </summary>
 
-        public Vector3 vec3_30;
-        public float flt_3C;
+        public float camTargX;
+        /// <summary>
+        /// Controls camera lookat target world X position for cam type 5.
+        /// </summary>
+        public float CamPosX_CamTargY_CamSwivelTargX;
+        /// <summary>
+        /// Controls camera world X position for type 4, camera lookat target world Y position for type 5, and camera lookat target world X position for cam types 2 and 3.
+        /// </summary>
+        public float CamPosY_CamTargZ_CamSwivelTargYZ;
+        /// <summary>
+        /// Controls camera world Y position for type 4, camera lookat target world Z position for type 5, camera lookat target world Y position for cam type 2, and camera lookat target world Z position for cam type 3.
+        /// </summary>
+        public float CamPosZ_CamPosBX_CamOffsetY;
+        /// <summary>
+        /// Controls camera world Z position for type 4, camera world X position for cam type 5, and camera local Y offset for cam type 3.
+        /// </summary>
+        public float CamPosBY_CamOffsetZ;
+        /// <summary>
+        /// Controls camera world Y position for cam type 5, and camera local Z offset for cam types 1, 2, and 3.
+        /// </summary>
+        public float CamPosBZ;
+        /// <summary>
+        /// Controls camera world Z position for cam type 5.
+        /// </summary>
 
-        public int int_40;
-        public Vector3 vec3_44;
+        public float flt_paddingA;
+        public float flt_paddingB;
 
-        public int int_50;
-        public Vector2 vec2_54;
-        public Vector2 vec2_5C;
+        public ushort c_stickpadding;
+        public ushort c_stickflag;
+        /// <summary>
+        /// Controls if you can use the C-Stick or L Trigger to override the camera, 0 has enables overridding, 1 prevents it. Oddly impacted by cam type where even numbered values prevent overriding for cam types 1+.
+        /// </summary>
 
-        public int int_60;
+        public Vector3 TriggerPosition;
+        public ushort TriggerBAMS_RotX;
+        public ushort TriggerBAMS_RotY;
+        /// <summary>
+        /// To calculate angle, take the int16 value, divide by 65536, then multiply by 360.
+        /// </summary>
+
+        public ushort TriggerShapepadding;
+        public ushort TriggerShapeFlag;
+        /// <summary>
+        /// Determines camera volume shape. 0 is Sphere, 1 is a cylinder, 2 is a box.
+        /// </summary>
+        public Vector3 TriggerRadiusXYZ;
+
+        public ushort angslicepadding;
+        public ushort angsliceflag;
+        /// <summary>
+        /// Can enable hemisphering a camera volume. 0 disables this, 1 hemispheres 180 degrees, and 2 can allow one to specify Y axis angle slice with the following float.
+        /// </summary>
+        public float angsliceYrange;
+
+
+        public float unknownA;
+        public float unknownB;
+        public float unknownC;
+        /// <summary>
+        /// Typically set to 1.
+        /// </summary>
         public int int_64;
         public int int_68;
         public int int_6C;
