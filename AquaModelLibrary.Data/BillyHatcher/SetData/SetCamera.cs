@@ -143,15 +143,15 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         /// </summary>
         public float CamPosX_CamTargY_CamSwivelTargX;
         /// <summary>
-        /// Controls camera world X position for type 4, camera lookat target world Y position for type 5, and camera lookat target world X position for cam types 2 and 3.
+        /// Controls camera world X position for type 4, camera lookat target world Y position for type 5, and camera lookat target world X position for cam types 2 and 3. For cam type 1 it controls X angle, Billy used as pivot point
         /// </summary>
         public float CamPosY_CamTargZ_CamSwivelTargYZ;
         /// <summary>
-        /// Controls camera world Y position for type 4, camera lookat target world Z position for type 5, camera lookat target world Y position for cam type 2, and camera lookat target world Z position for cam type 3.
+        /// Controls camera world Y position for type 4, camera lookat target world Z position for type 5, camera lookat target world Y position for cam type 2, and camera lookat target world Z position for cam type 3. For cam type 1 it controls Z offset to Billy.
         /// </summary>
         public float CamPosZ_CamPosBX_CamOffsetY;
         /// <summary>
-        /// Controls camera world Z position for type 4, camera world X position for cam type 5, and camera local Y offset for cam type 3.
+        /// Controls camera world Z position for type 4, camera world X position for cam type 5, and camera local Y offset for cam type 3. For type 1 it controls camera rotation strength for left/right movement.
         /// </summary>
         public float CamPosBY_CamOffsetZ;
         /// <summary>
