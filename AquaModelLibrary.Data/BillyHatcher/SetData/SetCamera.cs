@@ -54,13 +54,15 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 setCamera.TriggerShapeFlag = sr.ReadBE<ushort>();
                 setCamera.TriggerRadiusXYZ = sr.ReadBEV3();
 
-                setCamera.angslicepadding = sr.ReadBE<ushort>();
-                setCamera.angsliceflag = sr.ReadBE<ushort>();
-                setCamera.angsliceYrange = sr.ReadBE<float>();
-
-                setCamera.unknownA = sr.ReadBE<float>();
-                setCamera.unknownB = sr.ReadBE<float>();
-                setCamera.unknownC = sr.ReadBE<float>();
+                setCamera.backonlypadding = sr.ReadBE<ushort>();
+                setCamera.backonlyflag = sr.ReadBE<ushort>();
+                
+                setCamera.outerboundsradiusX = sr.ReadBE<float>();
+                setCamera.outerboundsradiusY = sr.ReadBE<float>();
+                
+                setCamera.sineforovershoot = sr.ReadBE<float>();
+                setCamera.cosineforovershoot = sr.ReadBE<float>();
+               
                 setCamera.int_64 = sr.ReadBE<int>();
                 setCamera.int_68 = sr.ReadBE<int>();
                 setCamera.int_6C = sr.ReadBE<int>();
@@ -99,12 +101,12 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(setCam.TriggerShapepadding);
                 outBytes.AddValue(setCam.TriggerShapeFlag);
                 outBytes.AddValue(setCam.TriggerRadiusXYZ);
-                outBytes.AddValue(setCam.angslicepadding);
-                outBytes.AddValue(setCam.angsliceflag);
-                outBytes.AddValue(setCam.angsliceYrange);
-                outBytes.AddValue(setCam.unknownA);
-                outBytes.AddValue(setCam.unknownB);
-                outBytes.AddValue(setCam.unknownC);
+                outBytes.AddValue(setCam.backonlypadding);
+                outBytes.AddValue(setCam.backonlyflag);
+                outBytes.AddValue(setCam.outerboundsradiusX);
+                outBytes.AddValue(setCam.outerboundsradiusY);
+                outBytes.AddValue(setCam.sineforovershoot);
+                outBytes.AddValue(setCam.cosineforovershoot);
                 outBytes.AddValue(setCam.int_64);
                 outBytes.AddValue(setCam.int_68);
                 outBytes.AddValue(setCam.int_6C);
@@ -122,7 +124,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
     {
         public ushort camtype;
         /// <summary>
-        /// Type 0 nulls the volume and later entries. 1-5 are specialized types with unique properites, and 6 is a variant of default camera seen outside of cam volumes
+        /// Type 0 nulls the volume and later entries. 1-5 are specialized types with unique properites, and 6 is a variant of default camera seen outside of cam volumes.
         /// </summary>
         public ushort campriority;
         /// <summary>
@@ -130,7 +132,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         /// </summary>
         public float interpIN;
         /// <summary>
-        /// Controls how fast the camera updates to incoming volume position/rotation properties.
+        /// Controls how fast the camera updates to incoming volume position/rotation properties. Recommended to do between 0.002-0.01.
         /// </summary>
         public float interpOUT;
         /// <summary>
@@ -168,14 +170,14 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         public ushort c_stickpadding;
         public ushort c_stickflag;
         /// <summary>
-        /// Controls if you can use the C-Stick or L Trigger to override the camera, 0 has enables overridding, 1 prevents it. Oddly impacted by cam type where even numbered values prevent overriding for cam types 1+.
+        /// Controls if you can use the C-Stick or L Trigger to override the camera, 0 enables overridding, 1 prevents it. Oddly impacted by cam type where even numbered values prevent overriding for cam types 1+.
         /// </summary>
 
         public Vector3 TriggerPosition;
         public ushort TriggerBAMS_RotX;
         public ushort TriggerBAMS_RotY;
         /// <summary>
-        /// To calculate angle, take the int16 value, divide by 65536, then multiply by 360.
+        /// To calculate angle, take the uint16 value, divide by 65536, then multiply by 360.
         /// </summary>
 
         public ushort TriggerShapepadding;
@@ -185,27 +187,36 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         /// </summary>
         public Vector3 TriggerRadiusXYZ;
 
-        public ushort angslicepadding;
-        public ushort angsliceflag;
+        public ushort backonlypadding;
+        public ushort backonlyflag;
         /// <summary>
-        /// Can enable hemisphering a camera volume. 0 disables this, 1 hemispheres 180 degrees, and 2 can allow one to specify Y axis angle slice with the following float.
+        /// Can enable a camera volume to be triggered only from behind. 0 disables this, 1 has it so it's only triggered from behind.
         /// </summary>
-        public float angsliceYrange;
-
-
-        public float unknownA;
-        public float unknownB;
-        public float unknownC;
+       
+        public float outerboundsradiusX;
+        public float outerboundsradiusY;
         /// <summary>
-        /// Typically set to 1.
+        /// For these two, typically add 50 to the trigger radius (ex. 700 radius so 750 outerbounds). Z oddly is not here.
         /// </summary>
+        
+        public float sineforovershoot;
+        /// <summary>
+        /// Typically set to 0. For interpolation overshoot.
+        /// </summary>
+        public float cosineforovershoot;
+        /// <summary>
+        /// Typically set to 1. For interpolation overshoot.
+        /// </summary>
+
         public int int_64;
         public int int_68;
         public int int_6C;
-
         public int int_70;
         public int int_74;
         public int int_78;
         public int int_7C;
+        /// <summary>
+        /// These are just for padding.
+        /// </summary>        
     }
 }
