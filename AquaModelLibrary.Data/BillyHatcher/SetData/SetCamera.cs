@@ -166,6 +166,9 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
 
         public float flt_paddingA;
         public float flt_paddingB;
+        /// <summary>
+        /// Not really padding, it relates to spline movement for cam, but ultimately unused. Likely vestigal from SA2.
+        /// </summary>
 
         public ushort c_stickpadding;
         public ushort c_stickflag;
