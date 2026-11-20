@@ -40,8 +40,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 setCamera.camPosBY_camOffsetZ = sr.ReadBE<float>();
                 setCamera.camPosBZ = sr.ReadBE<float>();
 
-                setCamera.flt_paddingA = sr.ReadBE<float>();
-                setCamera.flt_paddingB = sr.ReadBE<float>();
+                setCamera.unusedSplineParam = sr.ReadBE<float>();
+                setCamera.unusedSplineList = sr.ReadBE<float>();
 
                 setCamera.c_stickpadding = sr.ReadBE<ushort>();
                 setCamera.c_stickflag = sr.ReadBE<ushort>();
@@ -91,8 +91,8 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 outBytes.AddValue(setCam.camPosZ_camPosBX_camOffsetY);
                 outBytes.AddValue(setCam.camPosBY_camOffsetZ);
                 outBytes.AddValue(setCam.camPosBZ);
-                outBytes.AddValue(setCam.flt_paddingA);
-                outBytes.AddValue(setCam.flt_paddingB);
+                outBytes.AddValue(setCam.unusedSplineParam);
+                outBytes.AddValue(setCam.unusedSplineList);
                 outBytes.AddValue(setCam.c_stickpadding);
                 outBytes.AddValue(setCam.c_stickflag);
                 outBytes.AddValue(setCam.TriggerPosition);
@@ -164,10 +164,10 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         /// Controls camera world Z position for cam type 5.
         /// </summary>
 
-        public float flt_paddingA;
-        public float flt_paddingB;
+        public float unusedSplineParam;
+        public float unusedSplineList;
         /// <summary>
-        /// Not really padding, it relates to spline movement for cam, but ultimately unused. Likely vestigal from SA2.
+        /// Relates to spline movement for cam, but ultimately unused. Likely vestigal from SA2.
         /// </summary>
 
         public ushort c_stickpadding;
