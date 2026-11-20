@@ -34,7 +34,7 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
                 setCamera.interpOUT = sr.ReadBE<float>();
 
                 setCamera.camTargX = sr.ReadBE<float>();
-                setCamera.camPosX_camTargY_camSwivelTargX = sr.ReadBEV<float>();
+                setCamera.camPosX_camTargY_camSwivelTargX = sr.ReadBE<float>();
                 setCamera.camPosY_camTargZ_camSwivelTargYZ = sr.ReadBE<float>();
                 setCamera.camPosZ_camPosBX_camOffsetY = sr.ReadBE<float>();
                 setCamera.camPosBY_camOffsetZ = sr.ReadBE<float>();
@@ -143,23 +143,23 @@ namespace AquaModelLibrary.Data.BillyHatcher.SetData
         /// <summary>
         /// Controls camera lookat target world X position for cam type 5.
         /// </summary>
-        public float CamPosX_CamTargY_CamSwivelTargX;
+        public float camPosX_camTargY_camSwivelTargX;
         /// <summary>
         /// Controls camera world X position for type 4, camera lookat target world Y position for type 5, and camera lookat target world X position for cam types 2 and 3. For cam type 1 it controls X angle, Billy used as pivot point
         /// </summary>
-        public float CamPosY_CamTargZ_CamSwivelTargYZ;
+        public float camPosY_camTargZ_camSwivelTargYZ;
         /// <summary>
         /// Controls camera world Y position for type 4, camera lookat target world Z position for type 5, camera lookat target world Y position for cam type 2, and camera lookat target world Z position for cam type 3. For cam type 1 it controls Z offset to Billy.
         /// </summary>
-        public float CamPosZ_CamPosBX_CamOffsetY;
+        public float camPosZ_camPosBX_camOffsetY;
         /// <summary>
         /// Controls camera world Z position for type 4, camera world X position for cam type 5, and camera local Y offset for cam type 3. For type 1 it controls camera rotation strength for left/right movement.
         /// </summary>
-        public float CamPosBY_CamOffsetZ;
+        public float camPosBY_camOffsetZ;
         /// <summary>
         /// Controls camera world Y position for cam type 5, and camera local Z offset for cam types 1, 2, and 3.
         /// </summary>
-        public float CamPosBZ;
+        public float camPosBZ;
         /// <summary>
         /// Controls camera world Z position for cam type 5.
         /// </summary>
