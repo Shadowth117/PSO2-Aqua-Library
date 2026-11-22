@@ -1,8 +1,5 @@
 ﻿using BCnEncoder.Encoder;
-using BCnEncoder.ImageSharp;
 using BCnEncoder.Shared;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -247,16 +244,6 @@ namespace VrSharp.Xvr
 
 		private byte[] GetDdsData(Bitmap bmap, byte[] bp, int width, int height, out int type)
 		{
-			Image<Rgba32> image;
-			if (bmap != null)
-			{
-				MemoryStream ms = new MemoryStream();
-				bmap.Save(ms, ImageFormat.Png);
-				image = SixLabors.ImageSharp.Image.Load<Rgba32>(ms.ToArray());
-				ms.Dispose();
-			} else {
-				image = SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(bp, width, height);
-			}
 			BcEncoder encoder = new BcEncoder();
 
 			encoder.OutputOptions.GenerateMipMaps = useMipmaps;
@@ -275,14 +262,33 @@ namespace VrSharp.Xvr
 			}
 			encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
 
-			MemoryStream ddsData = new MemoryStream();
-			encoder.EncodeToStream(image, ddsData);
+			using MemoryStream ddsData = new MemoryStream();
 
-			byte[] xvr = new byte[(ddsData.Length - 0x80)];
-			Array.Copy(ddsData.ToArray(), 0x80, xvr, 0, ddsData.Length - 0x80);
-			ddsData.Dispose();
+			if (bmap != null)
+			{
+				var rect = new Rectangle(0, 0, bmap.Width, bmap.Height);
 
-			return xvr;
+				if (bmap.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+				{
+					bmap = bmap.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+				}
+
+				var data = bmap.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+				unsafe
+				{
+					var span = new ReadOnlySpan<byte>((byte*)data.Scan0, data.Stride * data.Height);
+					encoder.EncodeToStream(span, data.Width, data.Height, BCnEncoder.Encoder.PixelFormat.Bgra32, ddsData);
+				}
+
+				bmap.UnlockBits(data);
+			}
+			else
+			{
+				encoder.EncodeToStream(bp, width, height, BCnEncoder.Encoder.PixelFormat.Rgba32, ddsData);
+			}
+
+			return ddsData.GetBuffer().AsSpan(0x80).ToArray();
 		}
 
 		private byte[] GenerateXvrHeader(int length, int type)

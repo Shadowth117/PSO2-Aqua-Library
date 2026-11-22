@@ -7,6 +7,7 @@
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<DebugType>embedded</DebugType>
 		<Platforms>x64;x86</Platforms>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 	  <NoWarn>1701;1702;CA1416</NoWarn>
@@ -25,7 +26,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Pfim" Version="0.11.3" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
 		<PackageReference Include="System.Drawing.Common" Version="8.0.11" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />

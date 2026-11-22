@@ -1,8 +1,7 @@
 ﻿using BCnEncoder.Encoder;
-using BCnEncoder.ImageSharp;
 using BCnEncoder.Shared;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using VrSharp.Gvr;
@@ -65,20 +64,30 @@ namespace ArchiveLib
             return EncodeDDS(texImage);
         }
 
-        public static byte[] EncodeDDS(System.Drawing.Bitmap texImage)
+        public static byte[] EncodeDDS(Bitmap texImage)
         {
-            Image<Rgba32> image;
-            MemoryStream ms = new MemoryStream();
-            texImage.Save(ms, ImageFormat.Png);
-            image = SixLabors.ImageSharp.Image.Load<Rgba32>(ms.ToArray());
-            ms.Dispose();
+            var rect = new Rectangle(0, 0, texImage.Width, texImage.Height);
+
+            if (texImage.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+            {
+                texImage = texImage.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            }
+
+            var data = texImage.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
             BcEncoder encoder = new BcEncoder();
             encoder.OutputOptions.GenerateMipMaps = true;
             encoder.OutputOptions.Quality = CompressionQuality.BestQuality;
             encoder.OutputOptions.Format = (TextureFunctions.GetAlphaLevelFromBitmap(texImage) != 0) ? CompressionFormat.Bc3 : CompressionFormat.Bc1;
             encoder.OutputOptions.FileFormat = OutputFileFormat.Dds;
-            MemoryStream ddsData = new MemoryStream();
-            encoder.EncodeToStream(image, ddsData);
+            using var ddsData = new MemoryStream();
+
+            unsafe
+            {
+                var span = new ReadOnlySpan<byte>((byte*)data.Scan0, data.Stride * data.Height);
+                encoder.EncodeToStream(span, data.Width, data.Height, BCnEncoder.Encoder.PixelFormat.Bgra32, ddsData);
+            }
+
             return ddsData.ToArray();
         }
 
